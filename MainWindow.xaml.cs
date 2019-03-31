@@ -83,6 +83,51 @@ namespace SMLLoader {
             AddNewModLoaderVersion();
         }
 
+        private void GithubButton_Click(object sender, RoutedEventArgs e) {
+            Process.Start(@"https://github.com/satisfactorymodding/SatisfactoryModLoader");
+        }
+
+        private void DiscordButton_Click(object sender, RoutedEventArgs e) {
+            Process.Start(@"https://discord.gg/surVAY9");
+        }
+
+        private void ModLoaderVersionDropdown_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+            if (_handle) {
+                HandleVersionDropdown();
+            }
+            _handle = true;
+        }
+
+        private void ModItemChecked(object sender, RoutedEventArgs e) {
+            var inline = _mods[(CheckBox)sender].Inlines.ElementAt(0);
+            string mod = new TextRange(inline.ContentStart, inline.ContentEnd).Text.Replace(" ", string.Empty);
+            // move into mods directory
+            string path = $"{_disabledModsLocation}\\{mod}";
+
+            if (!Directory.Exists(path)) {
+                return;
+            }
+
+            Directory.Move(path, $"{_config.ModsLocation}\\{mod}");
+
+            ReloadMods();
+        }
+
+        private void ModItemUnchecked(object sender, RoutedEventArgs e) {
+            var inline = _mods[(CheckBox)sender].Inlines.ElementAt(0);
+            string mod = new TextRange(inline.ContentStart, inline.ContentEnd).Text.Replace(" ", string.Empty);
+            // move into disabled mods directory
+            string path = $"{_config.ModsLocation}\\{mod}";
+
+            if (!Directory.Exists(path)) {
+                return;
+            }
+
+            Directory.Move(path, $"{_disabledModsLocation}\\{mod}");
+
+            ReloadMods();
+        }
+
         private void LaunchGame() {
             if (!File.Exists($"{_config.BaseLocation}\\{_modLoaderDll}") || string.IsNullOrEmpty(_config.Version) || ModLoaderVersionDropdown.Items.Count == 0) {
                 MessageBox.Show("A ModLoader version has not been assigned");
@@ -188,6 +233,99 @@ namespace SMLLoader {
                 System.ComponentModel.ListSortDirection.Ascending));
         }
 
+        private void ReloadVersions() {
+            var files = Directory.GetFiles(_disabledModLoaderVersionsLocation).Where(f => System.IO.Path.GetExtension(f) == ".dll");
+            foreach (string path in files) {
+                ModLoaderVersionDropdown.Items.Add(System.IO.Path.GetFileNameWithoutExtension(path));
+            }
+
+            ModLoaderVersionDropdown.SelectedIndex = 0;
+
+            for (int i = 0; i < ModLoaderVersionDropdown.Items.Count; i++) {
+                if ((string)ModLoaderVersionDropdown.Items[i] == _config.Version) {
+                    ModLoaderVersionDropdown.SelectedItem = ModLoaderVersionDropdown.Items[i];
+                    break;
+                }
+            }
+
+            HandleVersionDropdown();
+        }
+
+        private void SaveConfig() {
+            using (StreamWriter writer = new StreamWriter(_configLocation)) {
+                writer.Write(JsonConvert.SerializeObject(_config, Formatting.Indented));
+            }
+        }
+
+        private void LoadConfig() {
+            if (!File.Exists(_configLocation)) {
+                SaveConfig();
+            }
+
+            using (StreamReader reader = new StreamReader(_configLocation)) {
+                _config = JsonConvert.DeserializeObject<Config>(reader.ReadToEnd());
+            }
+
+            ExeLocationTextBox.Text = _config.ExeLocation;
+
+            // load in all mod versions
+            if (!Directory.Exists(_disabledModLoaderVersionsLocation)) {
+                Directory.CreateDirectory(_disabledModLoaderVersionsLocation);
+            }
+
+            ReloadVersions();
+            ReloadMods();
+        }
+
+        private void HandleVersionDropdown() {
+            if (ModLoaderVersionDropdown.Items.Count > 0) {
+                string name = ModLoaderVersionDropdown.SelectedItem.ToString() + ".dll";
+                string newName = "xinput1_3.dll";
+                // copy over
+                if (File.Exists($"{_disabledModLoaderVersionsLocation}\\{name}")) {
+                    File.Copy($"{_disabledModLoaderVersionsLocation}\\{name}", $"{_config.BaseLocation}\\{newName}", true);
+                }
+                _config.Version = ModLoaderVersionDropdown.SelectedItem.ToString();
+            } else {
+                _config.Version = string.Empty;
+            }
+            SaveConfig();
+            ReloadMods();
+
+            Title = $"Satisfactory Mod Loader - {_config.Version}";
+        }
+
+        private void LoadMods(string directory, bool enabled) {
+            string[] files = Directory.GetFiles(directory);
+
+            JObject json = null;
+
+            foreach (string path in files) {
+                if (path.EndsWith(".cfg")) {
+                    using (StreamReader reader = new StreamReader(path)) {
+                        json = JObject.Parse(reader.ReadToEnd());
+                    }
+                    continue;
+                } 
+
+                if(!path.EndsWith(".dll")) {
+                    continue;
+                }
+
+                Grid item = CreateModItem(json, directory, enabled, json["LauncherVersion"].Value<string>() == (_config.Version.Length == 0 ? string.Empty : _config.Version.Substring(1)));
+                ModListComboBox.Items.Add(item);
+            }
+        }
+
+        private static ImageSource BitmapFromUri(Uri source) {
+            var bitmap = new BitmapImage();
+            bitmap.BeginInit();
+            bitmap.UriSource = source;
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.EndInit();
+            return bitmap;
+        }
+
         private Grid CreateModItem(JObject json, string path, bool enabled, bool validMod) {
             // <Grid Height="55" Width="240" Background="White">
             Grid grid = new Grid() {
@@ -209,7 +347,7 @@ namespace SMLLoader {
             ImageSource img = null;
             try {
                 img = BitmapFromUri(new Uri($"{path}\\{json["Icon"].Value<string>()}"));
-            } catch(Exception exception) {
+            } catch (Exception exception) {
                 img = BitmapFromUri(new Uri("pack://application:,,,/SMLLoader;component/Images/oee.png"));
             }
 
@@ -286,144 +424,6 @@ namespace SMLLoader {
             _mods.Add(checkBox, label);
 
             return grid;
-        }
-
-        private void ModItemChecked(object sender, RoutedEventArgs e) {
-            var inline = _mods[(CheckBox)sender].Inlines.ElementAt(0);
-            string mod = new TextRange(inline.ContentStart, inline.ContentEnd).Text.Replace(" ", string.Empty);
-            // move into mods directory
-            string path = $"{_disabledModsLocation}\\{mod}";
-
-            if (!Directory.Exists(path)) {
-                return;
-            }
-
-            Directory.Move(path, $"{_config.ModsLocation}\\{mod}");
-
-            ReloadMods();
-        }
-
-        private void ModItemUnchecked(object sender, RoutedEventArgs e) {
-            var inline = _mods[(CheckBox)sender].Inlines.ElementAt(0);
-            string mod = new TextRange(inline.ContentStart, inline.ContentEnd).Text.Replace(" ", string.Empty);
-            // move into disabled mods directory
-            string path = $"{_config.ModsLocation}\\{mod}";
-
-            if (!Directory.Exists(path)) {
-                return;
-            }
-
-            Directory.Move(path, $"{_disabledModsLocation}\\{mod}");
-
-            ReloadMods();
-        }
-
-        private void ReloadVersions() {
-            var files = Directory.GetFiles(_disabledModLoaderVersionsLocation).Where(f => System.IO.Path.GetExtension(f) == ".dll");
-            foreach (string path in files) {
-                ModLoaderVersionDropdown.Items.Add(System.IO.Path.GetFileNameWithoutExtension(path));
-            }
-
-            ModLoaderVersionDropdown.SelectedIndex = 0;
-
-            for (int i = 0; i < ModLoaderVersionDropdown.Items.Count; i++) {
-                if ((string)ModLoaderVersionDropdown.Items[i] == _config.Version) {
-                    ModLoaderVersionDropdown.SelectedItem = ModLoaderVersionDropdown.Items[i];
-                    break;
-                }
-            }
-
-            HandleVersionDropdown();
-        }
-
-        private void SaveConfig() {
-            using (StreamWriter writer = new StreamWriter(_configLocation)) {
-                writer.Write(JsonConvert.SerializeObject(_config, Formatting.Indented));
-            }
-        }
-
-        private void LoadConfig() {
-            if (!File.Exists(_configLocation)) {
-                SaveConfig();
-            }
-
-            using (StreamReader reader = new StreamReader(_configLocation)) {
-                _config = JsonConvert.DeserializeObject<Config>(reader.ReadToEnd());
-            }
-
-            ExeLocationTextBox.Text = _config.ExeLocation;
-
-            // load in all mod versions
-            if (!Directory.Exists(_disabledModLoaderVersionsLocation)) {
-                Directory.CreateDirectory(_disabledModLoaderVersionsLocation);
-            }
-
-            ReloadVersions();
-            ReloadMods();
-        }
-
-        private void GithubButton_Click(object sender, RoutedEventArgs e) {
-            Process.Start(@"https://github.com/satisfactorymodding/SatisfactoryModLoader");
-        }
-
-        private void DiscordButton_Click(object sender, RoutedEventArgs e) {
-            Process.Start(@"https://discord.gg/surVAY9");
-        }
-
-        private void ModLoaderVersionDropdown_SelectionChanged(object sender, SelectionChangedEventArgs e) {
-            if (_handle) {
-                HandleVersionDropdown();
-            }
-            _handle = true;
-        }
-
-        private void HandleVersionDropdown() {
-            if (ModLoaderVersionDropdown.Items.Count > 0) {
-                string name = ModLoaderVersionDropdown.SelectedItem.ToString() + ".dll";
-                string newName = "xinput1_3.dll";
-                // copy over
-                if (File.Exists($"{_disabledModLoaderVersionsLocation}\\{name}")) {
-                    File.Copy($"{_disabledModLoaderVersionsLocation}\\{name}", $"{_config.BaseLocation}\\{newName}", true);
-                }
-                _config.Version = ModLoaderVersionDropdown.SelectedItem.ToString();
-            } else {
-                _config.Version = string.Empty;
-            }
-            SaveConfig();
-            ReloadMods();
-
-            Title = $"Satisfactory Mod Loader - {_config.Version}";
-        }
-
-        private void LoadMods(string directory, bool enabled) {
-            string[] files = Directory.GetFiles(directory);
-
-            JObject json = null;
-
-            foreach (string path in files) {
-                if (path.EndsWith(".cfg")) {
-                    using (StreamReader reader = new StreamReader(path)) {
-                        json = JObject.Parse(reader.ReadToEnd());
-                    }
-                    continue;
-                } 
-
-                if(!path.EndsWith(".dll")) {
-                    continue;
-                }
-
-                Grid item = CreateModItem(json, directory, enabled, json["LauncherVersion"].Value<string>() == (_config.Version.Length == 0 ? string.Empty : _config.Version.Substring(1)));
-                ModListComboBox.Items.Add(item);
-            }
-        }
-
-        private static ImageSource BitmapFromUri(Uri source) {
-            var bitmap = new BitmapImage();
-            bitmap.BeginInit();
-            bitmap.UriSource = source;
-            bitmap.CacheOption = BitmapCacheOption.OnLoad;
-            bitmap.EndInit();
-            return bitmap;
         }
     }
 }
