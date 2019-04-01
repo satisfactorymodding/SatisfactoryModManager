@@ -213,7 +213,7 @@ namespace SMLLoader {
         private void ReloadMods() {
             _mods.Clear();
             ModListComboBox.Items.Clear();
-            if(_config.ModsLocation == string.Empty) {
+            if(string.IsNullOrEmpty(_config.ModsLocation)) {
                 return;
             }
 
