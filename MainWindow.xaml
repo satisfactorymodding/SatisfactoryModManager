@@ -286,9 +286,9 @@
         <SolidColorBrush x:Key="Button.MouseOver.Border" Color="#FF3C7FB1"/>
         <SolidColorBrush x:Key="Button.Pressed.Background" Color="#FF252525"/>
         <SolidColorBrush x:Key="Button.Pressed.Border" Color="#FF2C628B"/>
-        <SolidColorBrush x:Key="Button.Disabled.Background" Color="#FFF4F4F4"/>
-        <SolidColorBrush x:Key="Button.Disabled.Border" Color="#FFADB2B5"/>
-        <SolidColorBrush x:Key="Button.Disabled.Foreground" Color="#FF838383"/>
+        <SolidColorBrush x:Key="Button.Disabled.Background" Color="#66252525"/>
+        <SolidColorBrush x:Key="Button.Disabled.Border" Color="#66252525"/>
+        <SolidColorBrush x:Key="Button.Disabled.Foreground" Color="#66252525"/>
         <Style x:Key="ButtonStyle1" TargetType="{x:Type Button}">
             <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}"/>
             <Setter Property="Background" Value="{StaticResource Button.Static.Background}"/>
@@ -333,7 +333,7 @@
             <Button.Effect>
                 <DropShadowEffect Opacity="0.5"/>
             </Button.Effect>
-            <TextBlock Text="Launch" FontSize="30" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" FontFamily="Microsoft YaHei UI" FontWeight="Bold" Foreground="#FFFFFBFB"/>
+            <TextBlock x:Name="LaunchTitle" Text="Launch" FontSize="30" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" FontFamily="Microsoft YaHei UI" FontWeight="Bold" Foreground="#FFFFFBFB"/>
         </Button>
         <Button x:Name="AddNewModButton" Width="50" Height="50" Margin="315,0,0,120" VerticalAlignment="Bottom" HorizontalAlignment="Left" BorderThickness="0" Background="#FF252525" Style="{DynamicResource ButtonStyle1}" Click="AddNewModButton_Click">
             <Button.Effect>

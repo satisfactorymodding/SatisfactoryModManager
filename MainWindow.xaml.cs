@@ -21,62 +21,73 @@ using System.Runtime.InteropServices;
 using System.Reflection;
 using Newtonsoft.Json.Linq;
 using Ionic.Zip;
+using System.ComponentModel;
+using System.Timers;
+using System.Windows.Threading;
+
+/*
+ * #66252525
+ */
 
 namespace SMLLoader {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window {
-        private readonly string _configLocation = Environment.CurrentDirectory + "\\config.cfg";
-        private readonly string _disabledModLoaderVersionsLocation = Environment.CurrentDirectory + "\\versions";
-        private readonly string _disabledModsLocation = Environment.CurrentDirectory + "\\mods";
+        private static readonly string _appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Satisfactory Mod Launcher";
+        private readonly string _configLocation = _appData + "\\config.cfg";
+        private readonly string _disabledModLoaderVersionsLocation = _appData + "\\versions";
+        private readonly string _disabledModsLocation = _appData + "\\mods";
         private readonly string _modLoaderDll = "xinput1_3.dll";
 
         private Dictionary<CheckBox, TextBlock> _mods;
         private Config _config;
         private bool _handle = true;
+        private DispatcherTimer _timer;
 
         public MainWindow() {
             InitializeComponent();
 
             _config = new Config();
             _mods = new Dictionary<CheckBox, TextBlock>();
+
+            ExeLocationTextBox.Text = string.Empty;
+
+            DirectoryCheck();
+
             LoadConfig();
+            ReloadVersions();
+
+            _timer = new DispatcherTimer();
+            _timer.Tick += Tick;
+            _timer.Interval = new TimeSpan(0, 0, 1);
+            _timer.Start();
         }
 
-        /// <summary>
-        /// Launch the game
-        /// </summary>
+        private void Tick(object sender, EventArgs e) {
+            ReloadMods();
+        }
+
+        // ui events
+
         private void LaunchButton_Click(object sender, RoutedEventArgs e) {
             LaunchGame();
         }
 
-        /// <summary>
-        /// Open the mods folder
-        /// </summary>
         private void OpenModsFolderButton_Click(object sender, RoutedEventArgs e) {
             OpenModsFolder();
         }
 
-        /// <summary>
-        /// Opens a dialog menu to add a new mod
-        /// </summary>
         private void AddNewModButton_Click(object sender, RoutedEventArgs e) {
             AddNewMod();
         }
 
-        /// <summary>
-        /// Locate the game
-        /// </summary>
         private void OpenGameLocationButton_Click(object sender, RoutedEventArgs e) {
             OpenGameLocation();
         }
 
-        /// <summary>
-        /// Relist all available mods
-        /// </summary>
         private void ReloadModsButton_Click(object sender, RoutedEventArgs e) {
-            ReloadMods();
+            ReloadMods(true);
         }
 
         private void AddNewModLoaderVersionButton_Click(object sender, RoutedEventArgs e) {
@@ -99,37 +110,45 @@ namespace SMLLoader {
         }
 
         private void ModItemChecked(object sender, RoutedEventArgs e) {
+            DirectoryCheck();
             var inline = _mods[(CheckBox)sender].Inlines.ElementAt(0);
             string mod = new TextRange(inline.ContentStart, inline.ContentEnd).Text.Replace(" ", string.Empty);
             // move into mods directory
             string path = $"{_disabledModsLocation}\\{mod}";
+            string modPath = $"{_config.ModsLocation}\\{mod}";
 
             if (!Directory.Exists(path)) {
                 return;
             }
 
-            Directory.Move(path, $"{_config.ModsLocation}\\{mod}");
+            Files.DirectoryCopy(path, modPath, true);
+            Directory.Delete(path, true);
 
             ReloadMods();
         }
 
         private void ModItemUnchecked(object sender, RoutedEventArgs e) {
+            DirectoryCheck();
             var inline = _mods[(CheckBox)sender].Inlines.ElementAt(0);
             string mod = new TextRange(inline.ContentStart, inline.ContentEnd).Text.Replace(" ", string.Empty);
             // move into disabled mods directory
             string path = $"{_config.ModsLocation}\\{mod}";
+            string modPath = $"{_disabledModsLocation}\\{mod}";
 
             if (!Directory.Exists(path)) {
                 return;
             }
 
-            Directory.Move(path, $"{_disabledModsLocation}\\{mod}");
+            Files.DirectoryCopy(path, modPath, true);
+            Directory.Delete(path, true);
 
             ReloadMods();
         }
 
+        // ui event calls
+
         private void LaunchGame() {
-            if (!File.Exists($"{_config.BaseLocation}\\{_modLoaderDll}") || string.IsNullOrEmpty(_config.Version) || ModLoaderVersionDropdown.Items.Count == 0) {
+            if (string.IsNullOrEmpty(_config.BaseLocation) || string.IsNullOrEmpty(_config.ExeLocation) || !File.Exists($"{_config.BaseLocation}\\{_modLoaderDll}") || string.IsNullOrEmpty(_config.Version) || ModLoaderVersionDropdown.Items.Count == 0) {
                 MessageBox.Show("A ModLoader version has not been assigned");
                 return;
             }
@@ -143,6 +162,11 @@ namespace SMLLoader {
         }
 
         private void OpenModsFolder() {
+            if (string.IsNullOrEmpty(_config.BaseLocation) || string.IsNullOrEmpty(_config.ModsLocation)) {
+                MessageBox.Show("Game directory not set.");
+                return;
+            }
+
             if (!Directory.Exists(_config.ModsLocation)) {
                 Directory.CreateDirectory(_config.ModsLocation);
             }
@@ -150,73 +174,71 @@ namespace SMLLoader {
         }
 
         private void AddNewMod() {
-            OpenFileDialog openFileDialog = new OpenFileDialog() {
-                Multiselect = true,
-                Filter = "(Zip Files)|*.zip"
-            };
-
-            try {
-                if (openFileDialog.ShowDialog() != null) {
-                    if (openFileDialog.FileNames.Length > 0) {
-                        foreach (string name in openFileDialog.FileNames) {
-                           // move over
-                           // File.Move(name, _config.ModsLocation + System.IO.Path.GetFileName(name));
-                           // extract zip
-                           using(ZipFile zip = ZipFile.Read(name)) {
-                                // extract the folder
-                                zip.ExtractAll(_config.ModsLocation + System.IO.Path.GetFileNameWithoutExtension(name));
-                            }
-                        }
-                        ReloadMods();
-                    }
-                }
-            } catch (Exception exception) {
-                MessageBox.Show(exception.Message);
+            if(string.IsNullOrEmpty(_config.BaseLocation) || string.IsNullOrEmpty(_config.ModsLocation)) {
+                MessageBox.Show("Game directory not set.");
+                return;
             }
+
+            DirectoryCheck();
+
+            Files.OpenFile("(Zip Files)|*.zip", (string fileName) => {
+                using (ZipFile zip = ZipFile.Read(fileName)) {
+                    // extract the folder
+                    zip.ExtractAll(_config.ModsLocation + System.IO.Path.GetFileNameWithoutExtension(fileName));
+                }
+                ReloadMods();
+            });
         }
 
+        // add new version from directory
         private void AddNewModLoaderVersion() {
-            OpenFileDialog openFileDialog = new OpenFileDialog() {
-                Filter = "(Dll Files)|*.dll"
-            };
-
-            try {
-                if (openFileDialog.ShowDialog() != null) {
-                    // move over
-                    File.Move(openFileDialog.FileName, $"{_disabledModLoaderVersionsLocation}\\{System.IO.Path.GetFileName(openFileDialog.FileName)}");
-                }
-            } catch (Exception exception) {
-                MessageBox.Show(exception.Message);
+            if (string.IsNullOrEmpty(_config.BaseLocation) || string.IsNullOrEmpty(_config.ModsLocation)) {
+                MessageBox.Show("Game directory not set.");
+                return;
             }
 
-            ReloadVersions();
-            ReloadMods();
+            DirectoryCheck();
+
+            Files.OpenFile("(Dll Files)|*.dll", (string fileName) => {
+                string file = $"{_disabledModLoaderVersionsLocation}\\{System.IO.Path.GetFileName(fileName)}";
+                if (File.Exists(fileName)) {
+                    File.Move(fileName, file);
+                    ReloadVersions();
+                }
+            });
         }
 
+        // add game location from directory
         private void OpenGameLocation() {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-
-            try {
-                if (openFileDialog.ShowDialog() != null) {
-                    string fileName = openFileDialog.FileName;
+            Files.OpenFile("(Exe files)|*.exe", (string fileName) => {
+                try {
                     _config.BaseLocation = System.IO.Path.GetDirectoryName(fileName);
                     _config.ExeLocation = _config.BaseLocation + "\\FactoryGame-Win64-Shipping.exe";
                     _config.ModsLocation = _config.BaseLocation + "\\mods\\";
                     ExeLocationTextBox.Text = _config.ExeLocation;
                     SaveConfig();
+                } catch(Exception e) {
+                    MessageBox.Show(e.Message);
                 }
-            } catch (Exception exception) {
-                MessageBox.Show(exception.Message);
-            }
+            });
         }
 
-        private void ReloadMods() {
+        private void ReloadMods(bool manual = false) {
+            DirectoryCheck();
+
+            // reset
             _mods.Clear();
             ModListComboBox.Items.Clear();
-            if(string.IsNullOrEmpty(_config.ModsLocation)) {
+
+            // error catch
+            if (string.IsNullOrEmpty(_config.ModsLocation)) {
+                if (manual) {
+                    MessageBox.Show("Game directory not set.");
+                }
                 return;
             }
 
+            // get mods
             var directories = Directory.GetDirectories(_config.ModsLocation);
 
             foreach (string directory in directories) {
@@ -228,28 +250,40 @@ namespace SMLLoader {
                 LoadMods(directory, false);
             }
 
+            // sort by title
             ModListComboBox.Items.SortDescriptions.Add(
                 new System.ComponentModel.SortDescription("Title",
                 System.ComponentModel.ListSortDirection.Ascending));
         }
 
         private void ReloadVersions() {
-            var files = Directory.GetFiles(_disabledModLoaderVersionsLocation).Where(f => System.IO.Path.GetExtension(f) == ".dll");
-            foreach (string path in files) {
-                ModLoaderVersionDropdown.Items.Add(System.IO.Path.GetFileNameWithoutExtension(path));
-            }
+            DirectoryCheck();
 
-            ModLoaderVersionDropdown.SelectedIndex = 0;
-
-            for (int i = 0; i < ModLoaderVersionDropdown.Items.Count; i++) {
-                if ((string)ModLoaderVersionDropdown.Items[i] == _config.Version) {
-                    ModLoaderVersionDropdown.SelectedItem = ModLoaderVersionDropdown.Items[i];
-                    break;
+            try {
+                var files = Directory.GetFiles(_disabledModLoaderVersionsLocation).Where(f => System.IO.Path.GetExtension(f) == ".dll");
+                foreach (string path in files) {
+                    ModLoaderVersionDropdown.Items.Add(System.IO.Path.GetFileNameWithoutExtension(path));
                 }
-            }
 
-            HandleVersionDropdown();
+                for (int i = 0; i < ModLoaderVersionDropdown.Items.Count; i++) {
+                    if ((string)ModLoaderVersionDropdown.Items[i] == _config.Version) {
+                        ModLoaderVersionDropdown.SelectedIndex = i;
+                        ModLoaderVersionDropdown.SelectedItem = ModLoaderVersionDropdown.Items[i];
+                        break;
+                    }
+                }
+
+                if (ModLoaderVersionDropdown.Items.Count > 0 && ModLoaderVersionDropdown.SelectedItem == null) {
+                    ModLoaderVersionDropdown.SelectedIndex = 0;
+                }
+
+                HandleVersionDropdown();
+            } catch(Exception e) {
+                MessageBox.Show(e.Message);
+            }
         }
+
+        // utility
 
         private void SaveConfig() {
             using (StreamWriter writer = new StreamWriter(_configLocation)) {
@@ -260,6 +294,7 @@ namespace SMLLoader {
         private void LoadConfig() {
             if (!File.Exists(_configLocation)) {
                 SaveConfig();
+                return;
             }
 
             using (StreamReader reader = new StreamReader(_configLocation)) {
@@ -267,23 +302,16 @@ namespace SMLLoader {
             }
 
             ExeLocationTextBox.Text = _config.ExeLocation;
-
-            // load in all mod versions
-            if (!Directory.Exists(_disabledModLoaderVersionsLocation)) {
-                Directory.CreateDirectory(_disabledModLoaderVersionsLocation);
-            }
-
-            ReloadVersions();
-            ReloadMods();
         }
 
         private void HandleVersionDropdown() {
             if (ModLoaderVersionDropdown.Items.Count > 0) {
                 string name = ModLoaderVersionDropdown.SelectedItem.ToString() + ".dll";
                 string newName = "xinput1_3.dll";
+                string disabledPath = $"{_disabledModLoaderVersionsLocation}\\{name}";
                 // copy over
-                if (File.Exists($"{_disabledModLoaderVersionsLocation}\\{name}")) {
-                    File.Copy($"{_disabledModLoaderVersionsLocation}\\{name}", $"{_config.BaseLocation}\\{newName}", true);
+                if (File.Exists(disabledPath)) {
+                    File.Copy(disabledPath, $"{_config.BaseLocation}\\{newName}", true);
                 }
                 _config.Version = ModLoaderVersionDropdown.SelectedItem.ToString();
             } else {
@@ -296,6 +324,11 @@ namespace SMLLoader {
         }
 
         private void LoadMods(string directory, bool enabled) {
+            if(!Directory.Exists(directory)) {
+                MessageBox.Show("Invalid Directory");
+                return;
+            }
+
             string[] files = Directory.GetFiles(directory);
 
             JObject json = null;
@@ -424,6 +457,29 @@ namespace SMLLoader {
             _mods.Add(checkBox, label);
 
             return grid;
+        }
+
+        private void DirectoryCheck() {
+            CreateDirectory(_appData);
+
+            CreateDirectory(_disabledModLoaderVersionsLocation);
+            CreateDirectory(_disabledModsLocation);
+
+            if (!string.IsNullOrEmpty(_config.ModsLocation)) {
+                CreateDirectory(_config.ModsLocation);
+            }
+        }
+
+        private void CreateDirectory(string path) {
+            if (!Directory.Exists(path)) {
+                Directory.CreateDirectory(path);
+            }
+        }
+
+        private void CreateFile(string path) {
+            if (!File.Exists(path)) {
+                File.Create(path);
+            }
         }
     }
 }
