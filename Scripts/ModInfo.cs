@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -71,6 +71,11 @@ namespace SMLLoader.Scripts
                 Description = LoadStringFromSymbol(library, "ModDescription");
                 Authors = LoadStringFromSymbol(library, "ModAuthors");
 
+                if (string.IsNullOrWhiteSpace(Name))
+                {
+                    Name = System.IO.Path.GetFileNameWithoutExtension(Path);
+                }
+
                 if (!FreeLibrary(library))
                 {
                     throw new Exception($"Cannot free \"{Path}\"", new Win32Exception(Marshal.GetLastWin32Error()));
@@ -93,9 +98,20 @@ namespace SMLLoader.Scripts
             }
 
             var addr = Marshal.ReadIntPtr(ptr);
-            var value = Marshal.PtrToStringAnsi(addr);
+
+            if (symbol == "ModAuthors")
+            {
+                ptr = Marshal.ReadIntPtr(ptr);
+            }
+
+            var value = Marshal.PtrToStringAnsi(ptr);
 
             return value;
+        }
+
+        public override string ToString()
+        {
+            return $"{Name}-{Version}";
         }
 
         #endregion Methods
