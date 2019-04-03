@@ -4,6 +4,6 @@
              xmlns:local="clr-namespace:SMLLoader"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+
     </Application.Resources>
 </Application>
