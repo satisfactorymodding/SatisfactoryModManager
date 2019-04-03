@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -63,7 +63,7 @@ namespace SMLLoader.Scripts
                 var library = LoadLibrary(Path);
                 if (library == IntPtr.Zero)
                 {
-                    throw new Win32Exception(Marshal.GetLastWin32Error());
+                    throw new Exception($"Cannot load \"{Path}\"", new Win32Exception(Marshal.GetLastWin32Error()));
                 }
 
                 Name = LoadStringFromSymbol(library, "ModName");
@@ -73,7 +73,7 @@ namespace SMLLoader.Scripts
 
                 if (!FreeLibrary(library))
                 {
-                    throw new Win32Exception(Marshal.GetLastWin32Error());
+                    throw new Exception($"Cannot free \"{Path}\"", new Win32Exception(Marshal.GetLastWin32Error()));
                 }
 
                 IsValidMod = true;
@@ -89,7 +89,7 @@ namespace SMLLoader.Scripts
             var ptr = GetProcAddress(library, symbol);
             if (ptr == IntPtr.Zero)
             {
-                throw new Win32Exception(Marshal.GetLastWin32Error());
+                throw new Exception($"Cannot find symbol \"{symbol}\" in \"{Path}\"", new Win32Exception(Marshal.GetLastWin32Error()));
             }
 
             var addr = Marshal.ReadIntPtr(ptr);
