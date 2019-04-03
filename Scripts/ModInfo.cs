@@ -97,8 +97,6 @@ namespace SMLLoader.Scripts
                 throw new Exception($"Cannot find symbol \"{symbol}\" in \"{Path}\"", new Win32Exception(Marshal.GetLastWin32Error()));
             }
 
-            var addr = Marshal.ReadIntPtr(ptr);
-
             if (symbol == "ModAuthors")
             {
                 ptr = Marshal.ReadIntPtr(ptr);
