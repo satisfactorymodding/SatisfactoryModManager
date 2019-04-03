@@ -68,6 +68,7 @@
     </ApplicationDefinition>
     <Compile Include="Scripts\Config.cs" />
     <Compile Include="Scripts\Files.cs" />
+    <Compile Include="Scripts\ModInfo.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

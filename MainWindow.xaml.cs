@@ -331,21 +331,22 @@ namespace SMLLoader {
 
             string[] files = Directory.GetFiles(directory);
 
-            JObject json = null;
-
-            foreach (string path in files) {
-                if (path.EndsWith(".cfg")) {
-                    using (StreamReader reader = new StreamReader(path)) {
-                        json = JObject.Parse(reader.ReadToEnd());
-                    }
+            foreach (var path in files)
+            {
+                if (!path.EndsWith(".dll"))
+                {
                     continue;
                 } 
 
-                if(!path.EndsWith(".dll")) {
+                var modInfo = new ModInfo(path);
+                modInfo.Load();
+
+                if (!modInfo.IsValidMod)
+                {
                     continue;
                 }
 
-                Grid item = CreateModItem(json, directory, enabled, json["LauncherVersion"].Value<string>() == (_config.Version.Length == 0 ? string.Empty : _config.Version.Substring(1)));
+                var item = CreateModItem(modInfo, directory, enabled, modInfo.IsValidMod);
                 ModListComboBox.Items.Add(item);
             }
         }
@@ -359,7 +360,8 @@ namespace SMLLoader {
             return bitmap;
         }
 
-        private Grid CreateModItem(JObject json, string path, bool enabled, bool validMod) {
+        private Grid CreateModItem(ModInfo modInfo, string path, bool enabled, bool validMod)
+        {
             // <Grid Height="55" Width="240" Background="White">
             Grid grid = new Grid() {
                 Background = Brushes.Transparent,
@@ -378,9 +380,12 @@ namespace SMLLoader {
             checkBox.Unchecked += ModItemUnchecked;
             // <Image HorizontalAlignment="Left" Height="55" VerticalAlignment="Top" Width="55"/>
             ImageSource img = null;
-            try {
-                img = BitmapFromUri(new Uri($"{path}\\{json["Icon"].Value<string>()}"));
-            } catch (Exception exception) {
+            try
+            {
+                img = BitmapFromUri(new Uri($"{path}\\{modInfo.Icon}"));
+            }
+            catch (Exception exception)
+            {
                 img = BitmapFromUri(new Uri("pack://application:,,,/SMLLoader;component/Images/oee.png"));
             }
 
@@ -406,45 +411,48 @@ namespace SMLLoader {
                 Width = 170,
                 Height = 50
             };
-            label.Inlines.Add(new Bold(new Run(json["Name"].Value<string>())));
-            TextBlock versionLabel = new TextBlock() {
-                Text = json["Version"].Value<string>(),
-                Name = "Version",
-                FontSize = 12,
-                Foreground = Brushes.White,
-                HorizontalAlignment = HorizontalAlignment.Right,
-                VerticalAlignment = VerticalAlignment.Top,
-                TextAlignment = TextAlignment.Right,
-                TextWrapping = TextWrapping.Wrap,
-                Margin = new Thickness(0, 25, 0, 0),
-                Width = 170,
-                Height = 50
+            label.Inlines.Add(new Bold(new Run(modInfo.Name)));
+            var versionLabel = new TextBlock
+            {
+                    Text = modInfo.Version,
+                    Name = "Version",
+                    FontSize = 12,
+                    Foreground = Brushes.White,
+                    HorizontalAlignment = HorizontalAlignment.Right,
+                    VerticalAlignment = VerticalAlignment.Top,
+                    TextAlignment = TextAlignment.Right,
+                    TextWrapping = TextWrapping.Wrap,
+                    Margin = new Thickness(0, 25, 0, 0),
+                    Width = 170,
+                    Height = 50
             };
-            TextBlock loaderVersionLabel = new TextBlock() {
-                Text = json["LauncherVersion"].Value<string>(),
-                Name = "Version",
-                FontSize = 12,
-                Foreground = validMod ? Brushes.White : Brushes.Red,
-                HorizontalAlignment = HorizontalAlignment.Right,
-                VerticalAlignment = VerticalAlignment.Top,
-                TextAlignment = TextAlignment.Right,
-                TextWrapping = TextWrapping.Wrap,
-                Margin = new Thickness(0, 0, 0, 0),
-                Width = 170,
-                Height = 50
+            var loaderVersionLabel = new TextBlock
+            {
+                    Text = modInfo.LauncherVersion,
+                    Name = "Version",
+                    FontSize = 12,
+                    Foreground = validMod ? Brushes.White : Brushes.Red,
+                    HorizontalAlignment = HorizontalAlignment.Right,
+                    VerticalAlignment = VerticalAlignment.Top,
+                    TextAlignment = TextAlignment.Right,
+                    TextWrapping = TextWrapping.Wrap,
+                    Margin = new Thickness(0, 0, 0, 0),
+                    Width = 170,
+                    Height = 50
             };
-            TextBlock authorLabel = new TextBlock() {
-                Text = json["Authors"].Value<string>(),
-                Name = "Author",
-                FontSize = 12,
-                Foreground = Brushes.White,
-                HorizontalAlignment = HorizontalAlignment.Left,
-                VerticalAlignment = VerticalAlignment.Top,
-                TextAlignment = TextAlignment.Left,
-                TextWrapping = TextWrapping.Wrap,
-                Margin = new Thickness(70, 25, 0, 0),
-                Width = 300,
-                Height = 50
+            var authorLabel = new TextBlock
+            {
+                    Text = modInfo.Authors,
+                    Name = "Author",
+                    FontSize = 12,
+                    Foreground = Brushes.White,
+                    HorizontalAlignment = HorizontalAlignment.Left,
+                    VerticalAlignment = VerticalAlignment.Top,
+                    TextAlignment = TextAlignment.Left,
+                    TextWrapping = TextWrapping.Wrap,
+                    Margin = new Thickness(70, 25, 0, 0),
+                    Width = 300,
+                    Height = 50
             };
 
             grid.Children.Add(checkBox);
