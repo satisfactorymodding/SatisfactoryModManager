@@ -1,0 +1,15 @@
+[SML::Info]    Attached SatisfactoryModLoader v1.0.2 to Satisfactory
+[SML::Info]    Finding config file...
+[SML::Info]    Validating system files...
+[SML::Info]    C:\Program Files\Games\EpicGames\SatisfactoryEarlyAccess\FactoryGame\Content\Paks
+[SML::Info]    Sig file in place!
+[SML::Warning] If satisfactory crashes after this message, please relaunch it to fix it.
+[SML::Info]    Version check passed!
+[SML::Info]    Initialized SDK
+[SML::Info]    Looking for mods in: C:\Program Files\Games\EpicGames\SatisfactoryEarlyAccess\FactoryGame\Binaries\Win64\mods
+[SML::Error]   Mod DLL C:\Program Files\Games\EpicGames\SatisfactoryEarlyAccess\FactoryGame\Binaries\Win64\mods\AreaActions.dll is missing modCreate()!
+[SML::Info]    Looking for mods in: C:\Program Files\Games\EpicGames\SatisfactoryEarlyAccess\FactoryGame\Binaries\Win64\hiddenmods
+[SML::Info]    Registered hooks!
+[SML::Info]    Loaded 0 mods
+[SML::Info]    SatisfactoryModLoader initialization complete. Launching Satisfactory...
+[SML::Info]    SML shutting down...
