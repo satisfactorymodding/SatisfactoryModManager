@@ -18,7 +18,14 @@ export default {
     return {
     }
   },
-  components: {
+  watch: {
+    objects: function () {
+      if (this.objects.length > 0) {
+        this.clicked(this.objects[0])
+      } else {
+        this.clicked(null)
+      }
+    }
   },
   methods: {
     clicked (item) {

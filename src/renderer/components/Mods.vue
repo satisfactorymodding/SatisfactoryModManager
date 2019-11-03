@@ -1,5 +1,5 @@
 <template>
-  <div class="container-fluid">
+  <div class="container-fluid my-2">
     <div class="row selection-row" style="height: 50%">
       <div class="col-7" style="display: flex; flex-direction: column;">
         <input
@@ -28,7 +28,7 @@
         </list>
       </div>
       <div class="col-5">
-        <list :objects="selectedMod.versions.models" :canSelect="false">
+        <list v-if="selectedMod != null" :objects="selectedMod.versions.models" :canSelect="false">
           <template slot-scope="{item}">
             <div class="col-4" style="min-width: 150px">
               <button
@@ -49,7 +49,7 @@
         </list>
       </div>
     </div>
-    <div class="row" style="overflow: auto; margin: 10px">
+    <div class="row" style="overflow: auto; margin: 10px" v-if="selectedMod != null">
       <vue-markdown :source="selectedMod.full_description"></vue-markdown>
     </div>
   </div>
@@ -111,11 +111,13 @@ export default {
       })
     },
     refreshDownloaded () {
-      this.selectedMod.versions.models.forEach((version) => {
-        this.isModVersionDownloaded(version).then((downloaded) => {
-          version.isDownloaded = downloaded
+      if (this.selectedMod.version != null) {
+        this.selectedMod.versions.models.forEach((version) => {
+          this.isModVersionDownloaded(version).then((downloaded) => {
+            version.isDownloaded = downloaded
+          })
         })
-      })
+      }
     },
     refreshSearch () {
       this.searchMods = this.mods.filter((mod) => mod.name.toLowerCase().includes(this.search))

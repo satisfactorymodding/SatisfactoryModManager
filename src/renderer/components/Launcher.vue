@@ -1,6 +1,6 @@
 <template>
-  <div class="container-fluid" style="display: flex; flex-direction: column;">
-    <div class="row row-fixed my-2" style="flex: 0 0 auto;">
+  <div class="container-fluid my-2" style="display: flex; flex-direction: column;">
+    <div class="row row-fixed" style="flex: 0 0 auto;">
       <div class="col-5">
         <select class="form-control" v-model="selectedSatisfactoryInstall">
           <option
