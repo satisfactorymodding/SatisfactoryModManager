@@ -18,6 +18,10 @@ class SMLRelease extends Model {
   }
 }
 
+const cache = {
+  smlVersions: []
+}
+
 const getInstalledSMLVersion = function (satisfactory) {
   return new Promise((resolve, reject) => {
     cliInterface.RunCommand('sml_version', `-p "${satisfactory.binariesDir}"`).then((output) => {
@@ -44,6 +48,18 @@ const updateSML = function (satisfactory) {
 
 const getAvailableSMLVersions = function () {
   return new Promise((resolve, reject) => {
+    if (cache.smlVersions.length === 0) {
+      rebuildCache().then(() => {
+        resolve(cache.smlVersions)
+      })
+    } else {
+      resolve(cache.smlVersions)
+    }
+  })
+}
+
+const rebuildCache = function () {
+  return new Promise((resolve, reject) => {
     request({
       url: smlGitHubReleasesAPIurl, headers: { 'User-Agent': 'SatisfactoryModLauncher' }
     }, function (error, response, body) {
@@ -56,9 +72,14 @@ const getAvailableSMLVersions = function () {
       finalVersions.sort((a, b) => {
         return semver.gt(a.tag_name, b.tag_name)
       })
-      resolve(finalVersions)
+      cache.smlVersions = finalVersions
+      resolve(cache)
     })
   })
+}
+
+const checkForUpdates = function () {
+  rebuildCache()
 }
 
 const getLatestSMLVersion = function () {
@@ -74,5 +95,7 @@ export default {
   uninstallSML,
   updateSML,
   getAvailableSMLVersions,
-  getLatestSMLVersion
+  getLatestSMLVersion,
+  checkForUpdates,
+  cache
 }
