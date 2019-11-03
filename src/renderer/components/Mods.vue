@@ -1,19 +1,21 @@
 <template>
   <div class="container-fluid">
-    <div class="row selection-row">
-      <div class="col-7">
+    <div class="row selection-row" style="height: 50%">
+      <div class="col-7" style="display: flex; flex-direction: column;">
         <input
           class="form-control"
           v-model="search"
           type="text"
           placeholder="Search"
           aria-label="Search"
+          style="flex: 0 0 auto;"
         />
         <br />
         <list
           :objects="searchMods.models"
           :canSelect="true"
-          v-on:selectionChanged="selectedModChanged"
+          v-model="selectedMod"
+          style="flex: 1 1 auto"
         >
           <template slot-scope="{item}">
             <div class="col-2">
@@ -73,20 +75,25 @@ export default {
   watch: {
     search: function () {
       this.refreshSearch()
+    },
+    selectedMod: function () {
+      this.refreshDownloaded()
     }
   },
   methods: {
-    selectedModChanged (newMod) {
-      this.selectedMod = newMod
-      this.refreshDownloaded()
-    },
     toggleModDownloaded (version) {
       this.isModVersionDownloaded(version).then((downloaded) => {
         version.inProgress = true
         if (downloaded) {
-          ModHandler.removeModVersion(version).then(() => { this.refreshDownloaded() })
+          ModHandler.removeModVersion(version).then(() => {
+            version.inProgress = false
+            this.refreshDownloaded()
+          })
         } else {
-          ModHandler.downloadModVersion(version).then(() => { this.refreshDownloaded() })
+          ModHandler.downloadModVersion(version).then(() => {
+            version.inProgress = false
+            this.refreshDownloaded()
+          })
         }
       })
     },
@@ -106,7 +113,6 @@ export default {
     refreshDownloaded () {
       this.selectedMod.versions.models.forEach((version) => {
         this.isModVersionDownloaded(version).then((downloaded) => {
-          version.inProgress = false
           version.isDownloaded = downloaded
         })
       })
@@ -130,13 +136,4 @@ export default {
 </script>
 
 <style>
-.container-fluid {
-  height: 100%;
-  padding-left: 0px;
-  padding-right: 0px;
-}
-.selection-row {
-  height: 50%;
-  overflow: hidden;
-}
 </style>

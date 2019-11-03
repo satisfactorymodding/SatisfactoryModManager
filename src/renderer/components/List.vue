@@ -4,7 +4,7 @@
       v-for="item in objects"
       :key="item.id"
       v-on:click="clicked(item)"
-      :class="'row ' + (item == selected ? 'selected' : '')"
+      :class="'row ' + (item == value ? 'selected' : '')"
     >
       <slot :item="item"></slot>
     </div>
@@ -16,7 +16,6 @@ export default {
   name: 'list',
   data () {
     return {
-      selected: null
     }
   },
   components: {
@@ -24,12 +23,11 @@ export default {
   methods: {
     clicked (item) {
       if (this.canSelect) {
-        this.selected = item
-        this.$emit('selectionChanged', this.selected)
+        this.$emit('input', item)
       }
     }
   },
-  props: ['objects', 'canSelect'],
+  props: ['objects', 'value', 'canSelect'],
   created () {
   }
 }

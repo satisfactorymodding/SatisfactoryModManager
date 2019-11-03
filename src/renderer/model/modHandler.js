@@ -56,7 +56,10 @@ const getModData = function (modZipPath) {
       file: modZipPath,
       storeEntries: true
     })
-    zip.on('error', err => { reject(new Error(`${modZipPath}: ${err}`)); zip.close() })
+    zip.on('error', () => {
+      zip.close()
+      resolve(null)
+    })
     zip.on('ready', () => {
       const data = zip.entryDataSync('data.json')
       const dataJSON = JSON.parse(data.toString())
@@ -82,7 +85,7 @@ const getDownloadedMods = function () {
         })
       })
       Promise.all(modPaths.map(mod => getModData(mod))).then((modsData) => {
-        modsData.forEach(modData => mods.add(modData))
+        modsData.forEach(modData => { if (modData) mods.add(modData) })
         mods.sort(['name'])
         resolve(mods)
       })
