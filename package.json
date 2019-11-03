@@ -60,6 +60,8 @@
     "jquery": "^3.4.1",
     "node-stream-zip": "^1.8.2",
     "platform-folders": "^0.4.1",
+    "request": "^2.88.0",
+    "semver": "^6.3.0",
     "vue": "^2.5.16",
     "vue-electron": "^1.0.6",
     "vue-markdown": "^2.2.4",

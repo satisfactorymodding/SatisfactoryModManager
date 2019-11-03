@@ -3,7 +3,7 @@
     <main>
       <div class="container-fluid">
         <div class="row my-2">
-          <div class="col">
+          <div class="col-7">
             <select class="form-control" v-model="selectedSatisfactoryInstall">
               <option
                 v-for="install in satisfactoryInstalls.models"
@@ -11,6 +11,22 @@
                 v-bind:value="install"
               >{{ install.displayName }}</option>
             </select>
+          </div>
+          <div class="col-auto" style="display: inline-flex; align-items: center;">
+            <strong>SML: {{ installedSMLVersion }}</strong>
+          </div>
+          <div class="col-auto">
+            <button
+              class="btn btn-primary"
+              v-if="hasSMLUpdates"
+              @click="updateSML"
+            >{{ latestSMLVersion.tag_name }} available</button>
+            <button class="btn btn-secondary" v-if="isSMLInstalled" @click="uninstallSML">Uninstall</button>
+          </div>
+          <div class="col-auto">
+            <div class="spinner-border" role="status" v-if="SMLInProgress">
+              <span class="sr-only">Loading...</span>
+            </div>
           </div>
         </div>
         <div class="row my-2">
@@ -41,7 +57,7 @@
             </select>
           </div>
         </div>
-        <div class="row justify-content-end m-2">
+        <div class="row justify-content-end my-2 mx-1">
           <div class="column">
             <button @click="launchSatisfactory" class="btn btn-primary">Launch Satisfactory</button>
           </div>
@@ -55,6 +71,8 @@
 import { Collection } from 'vue-mc'
 import SatisfactoryInstall from '../model/satisfactoryInstall'
 import ModHandler from '../model/modHandler'
+import SMLHandler from '../model/smlHandler'
+import semver from 'semver'
 
 export default {
   name: 'launcher',
@@ -67,7 +85,10 @@ export default {
       selectedInstalledMod: null,
       satisfactoryInstalls: new Collection(),
       downloadedMods: new Collection(),
-      installedMods: new Collection()
+      installedMods: new Collection(),
+      installedSMLVersion: '',
+      latestSMLVersion: new SMLHandler.SMLRelease(),
+      SMLInProgress: false
     }
   },
   methods: {
@@ -107,14 +128,40 @@ export default {
       if (this.selectedSatisfactoryInstall) {
         this.selectedSatisfactoryInstall.launch()
       }
+    },
+    refreshSMLVersion () {
+      SMLHandler.getInstalledSMLVersion(this.selectedSatisfactoryInstall).then((version) => {
+        this.installedSMLVersion = version
+      })
+    },
+    updateSML () {
+      this.SMLInProgress = true
+      SMLHandler.updateSML(this.selectedSatisfactoryInstall).then(() => {
+        this.SMLInProgress = false
+        this.refreshSMLVersion()
+      })
+    },
+    uninstallSML () {
+      this.SMLInProgress = true
+      SMLHandler.uninstallSML(this.selectedSatisfactoryInstall).then(() => {
+        this.SMLInProgress = false
+        this.refreshSMLVersion()
+      })
     }
   },
   computed: {
+    hasSMLUpdates () {
+      return !semver.valid(this.installedSMLVersion) || (semver.valid(this.latestSMLVersion.tag_name) && semver.lt(this.installedSMLVersion, this.latestSMLVersion.tag_name))
+    },
+    isSMLInstalled () {
+      return !!semver.valid(this.installedSMLVersion)
+    }
   },
   watch: {
     selectedSatisfactoryInstall: {
       handler: function (newVal, oldVal) {
         this.refreshInstalledMods()
+        this.refreshSMLVersion()
       },
       deep: true
     }
@@ -122,6 +169,9 @@ export default {
   created () {
     this.refreshSatisfactoryInstalls()
     this.refreshDownloadedMods()
+    SMLHandler.getLatestSMLVersion().then((version) => {
+      this.latestSMLVersion = version
+    })
   }
 }
 </script>
