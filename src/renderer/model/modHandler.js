@@ -1,4 +1,7 @@
 import cliInterface from './cliInterface'
+import FicsitApp from './ficsitApp'
+import semver from 'semver'
+import tryFixSemver from './tryFixSemver'
 const path = require('path')
 const fs = require('fs')
 const { Model, Collection } = require('vue-mc')
@@ -127,6 +130,10 @@ const removeModVersion = function (mod) {
   return cliInterface.RunCommand('remove', `-m "${mod.mod_id}"`, `-v "${mod.version}"`)
 }
 
+const updateMod = function (mod) {
+  return cliInterface.RunCommand('update', `-m "${mod.mod_id}"`)
+}
+
 const isModVersionDownloaded = function (mod, version) {
   return new Promise((resolve, reject) => {
     getDownloadedMods().then((mods) => {
@@ -135,4 +142,38 @@ const isModVersionDownloaded = function (mod, version) {
   })
 }
 
-export default { ModData, getDownloadedMods, getInstalledMods, installModVersion, uninstallModVersion, downloadModVersion, removeModVersion, isModVersionDownloaded }
+const getModDownloadedVersions = function (modID) {
+  return new Promise((resolve, reject) => {
+    getDownloadedMods().then((mods) => {
+      resolve(mods.filter({ mod_id: modID }))
+    })
+  })
+}
+
+const getLatestDownloadedModVersion = function (modID) {
+  return new Promise((resolve, reject) => {
+    getModDownloadedVersions(modID).then((mods) => {
+      let latest = '0.0.0'
+      let latestMod = null
+      mods.models.forEach((mod) => {
+        if (semver.gt(tryFixSemver(mod.version), latest)) {
+          latest = tryFixSemver(mod.version)
+          latestMod = mod
+        }
+      })
+      resolve(latestMod)
+    })
+  })
+}
+
+const hasModUpdate = function (mod) {
+  return new Promise((resolve, reject) => {
+    FicsitApp.getLatestModVersion(mod).then((latestVersion) => {
+      getLatestDownloadedModVersion(mod).then((modVersion) => {
+        resolve(semver.lt(tryFixSemver(modVersion.version), tryFixSemver(latestVersion.version)))
+      })
+    })
+  })
+}
+
+export default { ModData, getDownloadedMods, getInstalledMods, installModVersion, uninstallModVersion, downloadModVersion, removeModVersion, updateMod, isModVersionDownloaded, hasModUpdate }

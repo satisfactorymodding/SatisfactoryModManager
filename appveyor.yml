@@ -1,29 +1,24 @@
-version: 0.1.{build}
-
-branches:
-  only:
-    - master
-
 image: Visual Studio 2017
+
 platform:
   - x64
 
 cache:
   - node_modules
-  - '%APPDATA%\npm-cache'
   - '%USERPROFILE%\.electron'
-  - '%USERPROFILE%\AppData\Local\Yarn\cache'
 
 init:
   - git config --global core.autocrlf input
 
 install:
-  - ps: Install-Product node 8 x64
-  - git reset --hard HEAD
-  - yarn
-  - node --version
+  - ps: Install-Product node 10 x64
+  - npm i
 
 build_script:
-  - yarn build
+  - npm run release:win
+
+artifacts:
+  - path: 'build\*.exe'
+    name: SatisfactoryModLauncher
 
 test: off

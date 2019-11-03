@@ -24,14 +24,17 @@ body,
 #app {
   height: 100%;
 }
-#app {
-  display: flex;
-  flex-flow: column;
+#app,
+main {
+  display: flex !important;
+  flex-flow: column !important;
 }
-#app .header {
+#app .header,
+main .header {
   flex: 0 0 auto;
 }
-#app .content {
+#app .content,
+main .content {
   flex: 1 1 auto;
 }
 .container-fluid {

@@ -1,81 +1,102 @@
 <template>
-  <div class="container-fluid my-2" style="display: flex; flex-direction: column;">
-    <div class="row row-fixed" style="flex: 0 0 auto;">
-      <div class="col-5">
-        <select class="form-control" v-model="selectedSatisfactoryInstall">
-          <option
-            v-for="install in satisfactoryInstalls.models"
-            v-bind:key="install.id"
-            v-bind:value="install"
-          >{{ install.displayName }}</option>
-        </select>
+  <main>
+    <div class="container-fluid my-2 content d-flex flex-column">
+      <div class="row flex-grow-0 flex-shrink-0">
+        <div class="col-5">
+          <select class="form-control" v-model="selectedSatisfactoryInstall">
+            <option
+              v-for="install in satisfactoryInstalls.models"
+              v-bind:key="install.id"
+              v-bind:value="install"
+            >{{ install.displayName }}</option>
+          </select>
+        </div>
+        <div class="col-auto d-inline-flex align-items-center">
+          <strong>SML: {{ installedSMLVersion }}</strong>
+        </div>
+        <div class="col-auto">
+          <button
+            class="btn btn-primary"
+            v-if="hasSMLUpdates"
+            @click="updateSML"
+          >{{ latestSMLVersion.tag_name }} available</button>
+          <button class="btn btn-secondary" v-if="isSMLInstalled" @click="uninstallSML">Uninstall</button>
+        </div>
+        <div class="col-auto">
+          <div class="spinner-border" role="status" v-if="SMLInProgress">
+            <span class="sr-only">Loading...</span>
+          </div>
+        </div>
       </div>
-      <div class="col-auto" style="display: inline-flex; align-items: center;">
-        <strong>SML: {{ installedSMLVersion }}</strong>
+      <div class="row my-2 flex-fill">
+        <div class="col">
+          <list
+            :objects="downloadedMods.models.filter(mod => !installedMods.has({mod_id: mod.mod_id, version: mod.version}))"
+            :canSelect="true"
+            v-model="selectedDownloadedMod"
+          >
+            <template slot-scope="{item}">
+              <div
+                class="col-auto d-inline-flex align-items-center"
+                @contextmenu.prevent="$refs.modContextMenu.open($event, {mod: item, hasModUpdate: false})"
+              >
+                <strong>{{item.displayName}}</strong>
+              </div>
+            </template>
+          </list>
+        </div>
+        <div class="col-auto align-self-center">
+          <button class="btn btn-primary m-2 w-100" @click="installSelectedMod">Install &gt;&gt;</button>
+          <br />
+          <button class="btn btn-primary m-2 w-100" @click="uninstallSelectedMod">&lt;&lt; Uninstall</button>
+        </div>
+        <div class="col">
+          <list :objects="installedMods.models" :canSelect="true" v-model="selectedInstalledMod">
+            <template slot-scope="{item}">
+              <div class="col-auto d-inline-flex align-items-center">
+                <strong>{{item.displayName}}</strong>
+              </div>
+            </template>
+          </list>
+        </div>
       </div>
-      <div class="col-auto">
-        <button
-          class="btn btn-primary"
-          v-if="hasSMLUpdates"
-          @click="updateSML"
-        >{{ latestSMLVersion.tag_name }} available</button>
-        <button class="btn btn-secondary" v-if="isSMLInstalled" @click="uninstallSML">Uninstall</button>
-      </div>
-      <div class="col-auto">
-        <div class="spinner-border" role="status" v-if="SMLInProgress">
-          <span class="sr-only">Loading...</span>
+      <div class="row justify-content-end my-3 mx-1 flex-grow-0 flex-shrink-0">
+        <div class="column">
+          <button @click="launchSatisfactory" class="btn btn-primary">Launch Satisfactory</button>
         </div>
       </div>
     </div>
-    <div class="row my-2 selection-row" style="flex: 1 1 auto">
-      <div class="col">
-        <list
-          :objects="downloadedMods.models.filter(mod => !installedMods.has({mod_id: mod.mod_id, version: mod.version}))"
-          :canSelect="true"
-          v-model="selectedDownloadedMod"
-        >
-          <template slot-scope="{item}">
-            <div class="col-auto" style="display: inline-flex; align-items: center;">
-              <strong>{{item.displayName}}</strong>
-            </div>
-          </template>
-        </list>
-      </div>
-      <div class="col-auto align-self-center">
-        <button class="btn btn-primary m-2 w-100" @click="installSelectedMod">Install &gt;&gt;</button>
-        <br />
-        <button class="btn btn-primary m-2 w-100" @click="uninstallSelectedMod">&lt;&lt; Uninstall</button>
-      </div>
-      <div class="col">
-        <list :objects="installedMods.models" :canSelect="true" v-model="selectedInstalledMod">
-          <template slot-scope="{item}">
-            <div class="col-auto" style="display: inline-flex; align-items: center;">
-              <strong>{{item.displayName}}</strong>
-            </div>
-          </template>
-        </list>
-      </div>
-    </div>
-    <div class="row justify-content-end my-3 mx-1" style="flex: 0 0 auto">
-      <div class="column">
-        <button @click="launchSatisfactory" class="btn btn-primary">Launch Satisfactory</button>
-      </div>
-    </div>
-  </div>
+    <context-menu
+      id="context-menu"
+      ref="modContextMenu"
+      @ctx-open="onModMenuOpen"
+      @ctx-cancel="onModMenuCancel"
+      @ctx-close="onModMenuClose"
+    >
+      <li
+        v-if="modContextMenuData.hasModUpdate"
+        @click="updateMod(modContextMenuData.mod)"
+      >Update mod</li>
+      <li @click="removeMod(modContextMenuData.mod)">Remove</li>
+    </context-menu>
+  </main>
 </template>
 
 <script>
 import { Collection } from 'vue-mc'
+import contextMenu from 'vue-context-menu'
 import List from './List'
 import SatisfactoryInstall from '../model/satisfactoryInstall'
 import ModHandler from '../model/modHandler'
+// import FicsitApp from '../model/ficsitApp'
 import SMLHandler from '../model/smlHandler'
 import semver from 'semver'
 
 export default {
   name: 'launcher',
   components: {
-    List
+    List,
+    contextMenu
   },
   data () {
     return {
@@ -87,7 +108,11 @@ export default {
       installedMods: new Collection(),
       installedSMLVersion: '',
       latestSMLVersion: new SMLHandler.SMLRelease(),
-      SMLInProgress: false
+      SMLInProgress: false,
+      modContextMenuData: {
+        mod: null,
+        hasModUpdate: false
+      }
     }
   },
   methods: {
@@ -145,6 +170,30 @@ export default {
       SMLHandler.uninstallSML(this.selectedSatisfactoryInstall).then(() => {
         this.SMLInProgress = false
         this.refreshSMLVersion()
+      })
+    },
+    onModMenuOpen (locals) {
+      this.modContextMenuData = locals
+      ModHandler.hasModUpdate(this.modContextMenuData.mod.mod_id).then((hasUpdate) => {
+        this.modContextMenuData.hasModUpdate = hasUpdate
+      })
+    },
+    onModMenuClose (locals) {
+    },
+    onModMenuCancel () {
+      this.modContextMenuData = {
+        mod: null,
+        hasModUpdate: false
+      }
+    },
+    updateMod (mod) {
+      ModHandler.updateMod(mod).then(() => {
+        this.refreshDownloadedMods()
+      })
+    },
+    removeMod (mod) {
+      ModHandler.removeModVersion(mod).then(() => {
+        this.refreshDownloadedMods()
       })
     }
   },

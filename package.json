@@ -16,7 +16,12 @@
     "pack": "npm run pack:main && npm run pack:renderer",
     "pack:main": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.main.config.js",
     "pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
-    "postinstall": "npm run lint:fix"
+    "postinstall": "npm run lint:fix && electron-builder install-app-deps",
+    "release": "npm run build && electron-builder build -p onTag",
+    "release:all": "npm run build && electron-builder build -mwl -p onTag",
+    "release:win": "npm run build && electron-builder build --win -p onTag",
+    "release:mac": "npm run build && electron-builder build --mac -p onTag",
+    "release:linux": "npm run build && electron-builder build --linux -p onTag"
   },
   "build": {
     "productName": "satisfactory-mod-launcher-gui",
@@ -53,6 +58,7 @@
     }
   },
   "dependencies": {
+    "array-equal": "^1.0.0",
     "axios": "^0.18.0",
     "bootstrap": "^4.3.1",
     "bootstrap-vue": "^2.0.4",
@@ -63,6 +69,7 @@
     "request": "^2.88.0",
     "semver": "^6.3.0",
     "vue": "^2.5.16",
+    "vue-context-menu": "^2.0.6",
     "vue-electron": "^1.0.6",
     "vue-markdown": "^2.2.4",
     "vue-mc": "^0.6.0",

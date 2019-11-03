@@ -4,7 +4,7 @@
       v-for="item in objects"
       :key="item.id"
       v-on:click="clicked(item)"
-      :class="'row ' + (item == value ? 'selected' : '')"
+      :class="'row ' + (item == value && canSelect ? 'selected' : '')"
     >
       <slot :item="item"></slot>
     </div>
@@ -12,24 +12,29 @@
 </template>
 
 <script>
+import arrayEqual from 'array-equal'
 export default {
   name: 'list',
   data () {
     return {
+      selectedIndex: 0
     }
   },
   watch: {
-    objects: function () {
-      if (this.objects.length > 0) {
-        this.clicked(this.objects[0])
-      } else {
-        this.clicked(null)
+    objects: function (newObjects, oldObjects) {
+      if (this.canSelect && !arrayEqual(newObjects, oldObjects)) {
+        if (this.objects.length > 0) {
+          this.clicked(this.objects[Math.min(Math.max(this.selectedIndex, 0), this.objects.length - 1)])
+        } else {
+          this.clicked(null)
+        }
       }
     }
   },
   methods: {
     clicked (item) {
       if (this.canSelect) {
+        this.selectedIndex = this.objects.indexOf(item)
         this.$emit('input', item)
       }
     }

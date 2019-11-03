@@ -1,4 +1,6 @@
 import { Model, Collection } from 'vue-mc'
+import semver from 'semver'
+import tryFixSemver from './tryFixSemver'
 
 const API = require('graphql-client')({
   url: 'https://api.ficsit.app/v2/query'
@@ -31,6 +33,21 @@ query
         stability,
         link
       }
+    }
+  }
+}
+`
+const getModVersionsQuery = `
+query($modID: ModID!){
+  getMod(modId: $modID)
+  {
+    versions
+    {
+      mod_id,
+      version,
+      sml_version,
+      stability,
+      link
     }
   }
 }
@@ -81,11 +98,36 @@ const getMods = function () {
   })
 }
 
+const getModVersions = function (modID) {
+  return new Promise((resolve, reject) => {
+    API.query(getModVersionsQuery, { modID: modID }).then((body) => {
+      let modVersions = []
+      body.data.getMod.versions.forEach((version) => {
+        modVersions.push(new FicsitAppModVersion(version))
+      })
+      modVersions.sort((a, b) => {
+        return semver.gt(tryFixSemver(a.version), tryFixSemver(b.version))
+      })
+      resolve(modVersions)
+    })
+  })
+}
+
+const getLatestModVersion = function (modID) {
+  return new Promise((resolve, reject) => {
+    getModVersions(modID).then((versions) => {
+      resolve(versions[versions.length - 1])
+    })
+  })
+}
+
 const noImageURL = 'https://ficsit.app/static/assets/images/no_image.png'
 
 export default {
   FicsitAppMod,
   FicsitAppModVersion,
   getMods,
+  getModVersions,
+  getLatestModVersion,
   noImageURL
 }

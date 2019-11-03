@@ -1,27 +1,26 @@
 <template>
   <div class="container-fluid my-2">
     <div class="row selection-row" style="height: 50%">
-      <div class="col-7" style="display: flex; flex-direction: column;">
+      <div class="col-7 d-flex flex-column">
         <input
-          class="form-control"
+          class="form-control flex-shrink-0 flex-grow-0"
           v-model="search"
           type="text"
           placeholder="Search"
           aria-label="Search"
-          style="flex: 0 0 auto;"
         />
         <br />
         <list
           :objects="searchMods.models"
           :canSelect="true"
           v-model="selectedMod"
-          style="flex: 1 1 auto"
+          class="flex-fill"
         >
           <template slot-scope="{item}">
             <div class="col-2">
               <img :src="item.logo || noImageURL" width="100%" />
             </div>
-            <div class="col-auto" style="display: inline-flex; align-items: center;">
+            <div class="col-auto d-inline-flex align-items-center">
               <strong>{{item.name}}</strong>
             </div>
           </template>
@@ -37,7 +36,7 @@
                 style="width: 100%"
               >{{item.isDownloaded ? "Remove" : "Download"}}</button>
             </div>
-            <div class="col-auto" style="display: inline-flex; align-items: center;">
+            <div class="col-auto d-inline-flex align-items-center">
               <strong>{{item.version}}</strong>
             </div>
             <div class="col-auto">
@@ -111,7 +110,7 @@ export default {
       })
     },
     refreshDownloaded () {
-      if (this.selectedMod.version != null) {
+      if (this.selectedMod.versions != null) {
         this.selectedMod.versions.models.forEach((version) => {
           this.isModVersionDownloaded(version).then((downloaded) => {
             version.isDownloaded = downloaded
@@ -120,7 +119,7 @@ export default {
       }
     },
     refreshSearch () {
-      this.searchMods = this.mods.filter((mod) => mod.name.toLowerCase().includes(this.search))
+      this.searchMods = this.mods.filter((mod) => mod.name.toLowerCase().includes(this.search.toLowerCase()))
     }
   },
   data () {

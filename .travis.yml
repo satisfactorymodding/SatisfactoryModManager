@@ -1,36 +1,47 @@
-osx_image: xcode8.3
-sudo: required
-dist: trusty
-language: c
 matrix:
   include:
   - os: osx
+    osx_image: xcode10.2
+    language: node_js
+    node_js: '10'
+    env:
+    - ELECTRON_CACHE=$HOME/.cache/electron
+    - ELECTRON_BUILDER_CACHE=$HOME/.cache/electron-builder
   - os: linux
-    env: CC=clang CXX=clang++ npm_config_clang=1
-    compiler: clang
+    services: docker
+    language: node_js
+    node_js: '10'
 cache:
   directories:
   - node_modules
-  - "$HOME/.electron"
-  - "$HOME/.cache"
-addons:
-  apt:
-    packages:
-    - libgnome-keyring-dev
-    - icnsutils
-before_install:
-- mkdir -p /tmp/git-lfs && curl -L https://github.com/github/git-lfs/releases/download/v1.2.1/git-lfs-$([
-  "$TRAVIS_OS_NAME" == "linux" ] && echo "linux" || echo "darwin")-amd64-1.2.1.tar.gz
-  | tar -xz -C /tmp/git-lfs --strip-components 1 && /tmp/git-lfs/git-lfs pull
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install --no-install-recommends -y icnsutils graphicsmagick xz-utils; fi
-install:
-- nvm install 7
-- curl -o- -L https://yarnpkg.com/install.sh | bash
-- source ~/.bashrc
-- npm install -g xvfb-maybe
-- yarn
+  - "$HOME/.cache/electron"
+  - "$HOME/.cache/electron-builder"
 script:
-- yarn run build
+  - |
+    if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+      docker run --rm \
+        -e GH_TOKEN \
+        -v ${PWD}:/project \
+        -v ~/.cache/electron:/root/.cache/electron \
+        -v ~/.cache/electron-builder:/root/.cache/electron-builder \
+        electronuserland/builder:wine \
+        /bin/bash -c "npm run release:linux && npm run release:win"
+    else
+      npm run release:mac
+    fi
+before_cache:
+- rm -rf $HOME/.cache/electron-builder/wine
 branches:
-  only:
-  - master
+  except:
+  - "/^v\\d+\\.\\d+\\.\\d+$/"
+deploy:
+  provider: releases
+  api_key:
+    secure: pJ539qLuCGM6U0+kJui4Ohb9WTNRTtBRJU4Z9uv3OR4ltnMxjzqPhvVpncnaHZQHS+FNOP1Su6M9wkxyskWBAKc8HW7KssvnTwBl03Eliv1yBwWE32c6icYWWz4Gs/7ytftvY9gN5QNIIqBoFdceWEu6PmOF6d2He/cWv2BGV0ZgzNyKp/6WVeFY1kN9xotA/XxYqJVTMcCZ02h0wyKYLQchrI6tLqdIymX5awHuPNsc1OzXZ7iATBiYGJ2cDbGhQtTWO1yqTP70IHETV19125XBwdLydQv6c4TDkOLXZZUaUUMvxAwUlP86s5bh4F0vKlG5WxH6H3OHNmCIim2e7sB7TWBXMWdsIi0IQJvuHi7GnJh0SeFr3ny/BGCMnQetkWRlQ7I94SUbl1x/Jw09F1gmdMYaDZW3Ws6zmz+qb+0cvxwnpNAdiC7HnXcO48n4DZmBpu9QUpQB0vwoMLRZUCUJWIThv600mcadf+3KgD0Rb94CZm5TCauDLnmcjHVMt5MTL/3m2xQhd9P4iKgdzIBmI5wC6keylquSH8aosFKqmxwcO1oExFTrx4RnAit3hXh/gSPJix10FagUskGGr8M/L/L1nf0qLALvrgXpUnA60ljsAwJ5xj2MWuRsjleEVZqiPgGyM9BjXUgKWsU35M9TiiE4U6D8soUMZ2thssQ=
+  file_glob: true
+  file: build\*.exe
+  skip_cleanup: true
+  draft: true
+  on:
+    repo: mircearoata/SatisfactoryModLauncherGUI
+    tags: true
