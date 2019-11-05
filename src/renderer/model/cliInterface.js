@@ -1,7 +1,6 @@
 import { exec } from 'child_process'
 
-// TODO: SMLauncher CLI will be installed locally
-const CLI_PATH = '..\\CLI\\SatisfactoryModLauncherCLI.exe'
+const CLI_PATH = '.\\SatisfactoryModLauncherCLI.exe'
 
 const RunCommand = function (command, ...args) {
   return new Promise((resolve, reject) => {
