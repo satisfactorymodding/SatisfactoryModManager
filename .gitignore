@@ -1,3 +1,4 @@
+# electron
 .DS_Store
 dist/electron/*
 dist/web/*
@@ -8,3 +9,11 @@ npm-debug.log
 npm-debug.log.*
 thumbs.db
 !.gitkeep
+
+# vscode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
