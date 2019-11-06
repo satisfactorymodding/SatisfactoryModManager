@@ -17,11 +17,11 @@
     "pack:main": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.main.config.js",
     "pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
     "postinstall": "npm run lint:fix && electron-builder install-app-deps",
-    "release": "npm run build && electron-builder build -p onTag",
-    "release:all": "npm run build && electron-builder build -mwl -p onTag",
-    "release:win": "npm run build && electron-builder build --win -p onTag",
-    "release:mac": "npm run build && electron-builder build --mac -p onTag",
-    "release:linux": "npm run build && electron-builder build --linux -p onTag"
+    "release": "npm run build && electron-builder build",
+    "release:all": "npm run build && electron-builder build -mwl",
+    "release:win": "npm run build && electron-builder build --win",
+    "release:mac": "npm run build && electron-builder build --mac",
+    "release:linux": "npm run build && electron-builder build --linux"
   },
   "build": {
     "productName": "satisfactory-mod-launcher-gui",
@@ -98,7 +98,6 @@
     "electron-builder": "^20.19.2",
     "electron-debug": "^1.5.0",
     "electron-devtools-installer": "^2.2.4",
-    "electron-rebuild": "^1.8.6",
     "eslint": "^4.19.1",
     "eslint-config-standard": "^11.0.0",
     "eslint-friendly-formatter": "^4.0.1",

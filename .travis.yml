@@ -8,7 +8,6 @@ matrix:
     - ELECTRON_CACHE=$HOME/.cache/electron
     - ELECTRON_BUILDER_CACHE=$HOME/.cache/electron-builder
   - os: linux
-    services: docker
     language: node_js
     node_js: '10'
 cache:
@@ -19,15 +18,12 @@ cache:
 script:
   - |
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-      docker run --rm \
-        -e GH_TOKEN \
-        -v ${PWD}:/project \
-        -v ~/.cache/electron:/root/.cache/electron \
-        -v ~/.cache/electron-builder:/root/.cache/electron-builder \
-        electronuserland/builder:wine \
-        /bin/bash -c "npm run release:linux && npm run release:win"
+      npm run release:linux
     else
       npm run release:mac
     fi
+branches:
+  except:
+    - "/^v\\d+\\.\\d+\\.\\d+$/"
 before_cache:
 - rm -rf $HOME/.cache/electron-builder/wine
