@@ -31,17 +31,3 @@ script:
     fi
 before_cache:
 - rm -rf $HOME/.cache/electron-builder/wine
-branches:
-  except:
-  - "/^v\\d+\\.\\d+\\.\\d+$/"
-deploy:
-  provider: releases
-  api_key:
-    secure: pJ539qLuCGM6U0+kJui4Ohb9WTNRTtBRJU4Z9uv3OR4ltnMxjzqPhvVpncnaHZQHS+FNOP1Su6M9wkxyskWBAKc8HW7KssvnTwBl03Eliv1yBwWE32c6icYWWz4Gs/7ytftvY9gN5QNIIqBoFdceWEu6PmOF6d2He/cWv2BGV0ZgzNyKp/6WVeFY1kN9xotA/XxYqJVTMcCZ02h0wyKYLQchrI6tLqdIymX5awHuPNsc1OzXZ7iATBiYGJ2cDbGhQtTWO1yqTP70IHETV19125XBwdLydQv6c4TDkOLXZZUaUUMvxAwUlP86s5bh4F0vKlG5WxH6H3OHNmCIim2e7sB7TWBXMWdsIi0IQJvuHi7GnJh0SeFr3ny/BGCMnQetkWRlQ7I94SUbl1x/Jw09F1gmdMYaDZW3Ws6zmz+qb+0cvxwnpNAdiC7HnXcO48n4DZmBpu9QUpQB0vwoMLRZUCUJWIThv600mcadf+3KgD0Rb94CZm5TCauDLnmcjHVMt5MTL/3m2xQhd9P4iKgdzIBmI5wC6keylquSH8aosFKqmxwcO1oExFTrx4RnAit3hXh/gSPJix10FagUskGGr8M/L/L1nf0qLALvrgXpUnA60ljsAwJ5xj2MWuRsjleEVZqiPgGyM9BjXUgKWsU35M9TiiE4U6D8soUMZ2thssQ=
-  file_glob: true
-  file: build\*.exe
-  skip_cleanup: true
-  draft: true
-  on:
-    repo: mircearoata/SatisfactoryModLauncherGUI
-    tags: true
