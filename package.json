@@ -1,6 +1,6 @@
 {
   "name": "satisfactory-mod-launcher-gui",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "mircearoata <mircearoatapalade@yahoo.ro>",
   "description": "Handles Satisfactory mods and mod loader",
   "license": "GPL-3.0",
@@ -31,6 +31,19 @@
     },
     "files": [
       "dist/electron/**/*"
+    ],
+    "beforeBuild": "./external-dependencies/download.js",
+    "afterAllArtifactBuild": "./external-dependencies/cleanup.js",
+    "extraFiles": [
+      {
+        "from": "./external-dependencies/CLI",
+        "to": "",
+        "filter": [
+          "**/*",
+          "!**/*.js",
+          "!**/*.json"
+        ]
+      }
     ],
     "dmg": {
       "contents": [
