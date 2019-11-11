@@ -19,6 +19,8 @@ script:
   - |
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
       npm run release:linux
+    elif [ "$TRAVIS_OS_NAME" = 'windows' ]; then
+      npm run release:win
     else
       npm run release:mac
     fi
