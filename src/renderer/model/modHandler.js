@@ -67,6 +67,9 @@ const getModData = function (modZipPath) {
       const data = zip.entryDataSync('data.json')
       const dataJSON = JSON.parse(data.toString())
       zip.close()
+      if (dataJSON.version.startsWith('v')) {
+        dataJSON.version = dataJSON.version.substring(1)
+      }
       resolve(new ModData(dataJSON))
     })
   })

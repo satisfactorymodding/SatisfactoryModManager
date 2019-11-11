@@ -45,10 +45,28 @@
             </template>
           </list>
         </div>
-        <div class="col-auto align-self-center">
-          <button class="btn btn-primary m-2 w-100" @click="installSelectedMod">Install &gt;&gt;</button>
+        <div class="col-3 align-self-center align-items-center">
+          <button
+            class="btn btn-primary m-2 w-100 d-inline-flex align-items-center justify-content-center"
+            style="min-height: 48px"
+            @click="installSelectedMod"
+          >
+            Install &gt;&gt;&nbsp;
+            <div class="spinner-border" role="status" v-if="installInProgress">
+              <span class="sr-only">Loading...</span>
+            </div>
+          </button>
           <br />
-          <button class="btn btn-primary m-2 w-100" @click="uninstallSelectedMod">&lt;&lt; Uninstall</button>
+          <button
+            class="btn btn-primary m-2 w-100 d-inline-flex align-items-center justify-content-center"
+            style="min-height: 48px"
+            @click="uninstallSelectedMod"
+          >
+            &lt;&lt; Uninstall&nbsp;
+            <div class="spinner-border" role="status" v-if="uninstallInProgress">
+              <span class="sr-only">Loading...</span>
+            </div>
+          </button>
         </div>
         <div class="col">
           <list :objects="installedMods.models" :canSelect="true" v-model="selectedInstalledMod">
@@ -109,6 +127,8 @@ export default {
       installedSMLVersion: '',
       latestSMLVersion: new SMLHandler.SMLRelease(),
       SMLInProgress: false,
+      installInProgress: false,
+      uninstallInProgress: false,
       modContextMenuData: {
         mod: null,
         hasModUpdate: false
@@ -118,15 +138,21 @@ export default {
   methods: {
     installSelectedMod () {
       if (this.selectedSatisfactoryInstall && this.selectedDownloadedMod) {
+        this.installInProgress = true
         ModHandler.installModVersion(this.selectedDownloadedMod, this.selectedSatisfactoryInstall).then(() => {
+          this.refreshDownloadedMods()
           this.refreshInstalledMods()
+          this.installInProgress = false
         })
       }
     },
     uninstallSelectedMod () {
       if (this.selectedSatisfactoryInstall && this.selectedInstalledMod) {
+        this.uninstallInProgress = true
         ModHandler.uninstallModVersion(this.selectedInstalledMod, this.selectedSatisfactoryInstall).then(() => {
+          this.refreshDownloadedMods()
           this.refreshInstalledMods()
+          this.uninstallInProgress = false
         })
       }
     },
