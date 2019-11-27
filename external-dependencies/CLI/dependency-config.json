@@ -1,5 +1,6 @@
 {
   "version": "v1.0.0-pr1",
   "url": "https://github.com/mircearoata/SatisfactoryModLauncherCLI/releases/download/<version>/SatisfactoryModLauncherCLI<extension>",
-  "path": "./external-dependencies/CLI/SatisfactoryModLauncherCLI<extension>"
+  "path": "./external-dependencies/CLI/SatisfactoryModLauncherCLI<extension>",
+  "cacheFile": "./external-dependencies/CLI/cache.json"
 }

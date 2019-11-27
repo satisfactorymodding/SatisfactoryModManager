@@ -19,3 +19,4 @@ thumbs.db
 *.code-workspace
 
 *.exe
+external-dependencies/**/cache.json

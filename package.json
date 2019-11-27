@@ -33,7 +33,6 @@
       "dist/electron/**/*"
     ],
     "beforeBuild": "./external-dependencies/download.js",
-    "afterAllArtifactBuild": "./external-dependencies/cleanup.js",
     "extraFiles": [
       {
         "from": "./external-dependencies/CLI",
