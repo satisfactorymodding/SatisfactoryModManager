@@ -82,8 +82,8 @@ const getFiles = source => fs.readdirSync(source).map(name => path.join(source, 
 
 const getDownloadedMods = function () {
   return new Promise((resolve, reject) => {
-    let mods = new Collection()
-    let modPaths = []
+    const mods = new Collection()
+    const modPaths = []
     getModsDir().then((modsDir) => {
       getDirectories(modsDir).forEach(dir => {
         getFiles(dir).forEach((file) => {
@@ -101,8 +101,8 @@ const getDownloadedMods = function () {
 
 const getInstalledMods = function (satisfactory) {
   return new Promise((resolve, reject) => {
-    let mods = new Collection()
-    let modPaths = []
+    const mods = new Collection()
+    const modPaths = []
     if (!fs.existsSync(satisfactory.modsDir)) { return resolve(mods) }
     getFiles(satisfactory.modsDir).forEach(file => {
       if (file.endsWith('.zip')) {

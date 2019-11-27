@@ -49,7 +49,7 @@
       </div>
     </div>
     <div class="row" style="overflow: auto; margin: 10px" v-if="selectedMod != null">
-      <vue-markdown :source="selectedMod.full_description"></vue-markdown>
+      <div v-html="compiledMarkdownDescription"></div>
     </div>
   </div>
 </template>
@@ -59,16 +59,18 @@ import FicsitApp from '../model/ficsitApp'
 import ModHandler from '../model/modHandler'
 import List from './List'
 import { Collection } from 'vue-mc'
-import VueMarkdown from 'vue-markdown'
+import marked from 'marked'
 export default {
   name: 'download-mods',
   components: {
-    List,
-    VueMarkdown
+    List
   },
   computed: {
     noImageURL () {
       return FicsitApp.noImageURL
+    },
+    compiledMarkdownDescription: function () {
+      return marked(this.selectedMod.full_description, { sanitize: true })
     }
   },
   watch: {

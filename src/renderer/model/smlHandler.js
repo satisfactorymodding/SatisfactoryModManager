@@ -64,8 +64,8 @@ const rebuildCache = function () {
       url: smlGitHubReleasesAPIurl, headers: { 'User-Agent': 'SatisfactoryModLauncher' }
     }, function (error, response, body) {
       if (error) { reject(error) }
-      let smlGitHubVersions = JSON.parse(body)
-      let finalVersions = []
+      const smlGitHubVersions = JSON.parse(body)
+      const finalVersions = []
       smlGitHubVersions.forEach(version => {
         finalVersions.push(new SMLRelease(version))
       })

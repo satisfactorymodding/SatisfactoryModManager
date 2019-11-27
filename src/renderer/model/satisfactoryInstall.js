@@ -52,12 +52,12 @@ class SatisfactoryInstall extends Model {
 
 const getInstalls = function () {
   return new Promise((resolve, reject) => {
-    let foundInstalls = new Collection()
+    const foundInstalls = new Collection()
     fs.readdirSync(EpicManifestsFolder).forEach(file => {
       if (file.endsWith('.item')) {
         file = path.join(EpicManifestsFolder, file)
-        let jsonString = fs.readFileSync(file, 'utf8')
-        let manifest = JSON.parse(jsonString)
+        const jsonString = fs.readFileSync(file, 'utf8')
+        const manifest = JSON.parse(jsonString)
         if (manifest.CatalogNamespace === 'crab') {
           foundInstalls.add(new SatisfactoryInstall({ name: manifest.DisplayName, version: manifest.AppVersionString, installLocation: manifest.InstallLocation, launchExecutable: manifest.LaunchExecutable }))
         }

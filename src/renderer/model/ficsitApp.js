@@ -84,7 +84,7 @@ class FicsitAppMod extends Model {
 const getMods = function () {
   return new Promise((resolve, reject) => {
     API.query(getAllModsQuery, {}).then((body) => {
-      let mods = new Collection()
+      const mods = new Collection()
       body.data.getMods.mods.forEach((mod) => {
         var newMod = new FicsitAppMod(mod)
         newMod.authors = newMod.defaults().authors
@@ -101,7 +101,7 @@ const getMods = function () {
 const getModVersions = function (modID) {
   return new Promise((resolve, reject) => {
     API.query(getModVersionsQuery, { modID: modID }).then((body) => {
-      let modVersions = []
+      const modVersions = []
       body.data.getMod.versions.forEach((version) => {
         modVersions.push(new FicsitAppModVersion(version))
       })

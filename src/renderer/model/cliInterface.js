@@ -4,7 +4,7 @@ const CLI_PATH = '.\\SatisfactoryModLauncherCLI.exe'
 
 const RunCommand = function (command, ...args) {
   return new Promise((resolve, reject) => {
-    let process = [CLI_PATH, command]
+    const process = [CLI_PATH, command]
     args.forEach(arg => process.push(arg))
     exec(process.join(' '), {}, (error, stdout, stderr) => {
       if (error) { return reject(error) }
