@@ -110,7 +110,7 @@ export default {
       })
     },
     refreshDownloaded () {
-      if (this.selectedMod.versions != null) {
+      if (this.selectedMod != null && this.selectedMod.versions != null) {
         this.selectedMod.versions.models.forEach((version) => {
           this.isModVersionDownloaded(version).then((downloaded) => {
             version.isDownloaded = downloaded
