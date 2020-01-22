@@ -9,19 +9,34 @@ module.exports = {
     browser: true,
     node: true
   },
-  extends: 'standard',
+  extends: [
+    'airbnb-base',
+    'plugin:vue/recommended',
+    'plugin:import/errors',
+    'plugin:import/warnings'
+  ],
   globals: {
     __static: true
   },
   plugins: [
     'html'
   ],
-  'rules': {
-    // allow paren-less arrow functions
-    'arrow-parens': 0,
-    // allow async-await
-    'generator-star-spacing': 0,
-    // allow debugger during development
-    'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0
+  rules: {
+    'linebreak-style': 0,
+    'no-underscore-dangle': 0,
+    'import/no-extraneous-dependencies': ['error', {'devDependencies': true}],
+    'max-len': ['error', { 'code': 200 }],
+    'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0,
+    'import/extensions': ['error', 'always', {
+      js: 'never',
+      vue: 'never'
+    }]
+  },
+  settings: {
+    'import/resolver': {
+      node: {
+        extensions: ['.js','.jsx','.vue']
+      }
+    },
   }
 }

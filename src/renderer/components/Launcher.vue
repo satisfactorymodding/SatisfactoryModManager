@@ -3,251 +3,240 @@
     <div class="container-fluid my-2 content d-flex flex-column">
       <div class="row flex-grow-0 flex-shrink-0">
         <div class="col-5">
-          <select class="form-control" v-model="selectedSatisfactoryInstall">
+          <select
+            v-model="selectedSatisfactoryInstall"
+            class="form-control"
+          >
             <option
-              v-for="install in satisfactoryInstalls.models"
-              v-bind:key="install.id"
-              v-bind:value="install"
-            >{{ install.displayName }}</option>
+              v-for="install in satisfactoryInstalls"
+              :key="install.id"
+              :value="install"
+            >
+              {{ install.displayName }}
+            </option>
           </select>
         </div>
-        <div class="col-auto d-inline-flex align-items-center">
-          <strong>SML: {{ installedSMLVersion }}</strong>
-        </div>
-        <div class="col-auto">
-          <button
-            class="btn btn-primary"
-            v-if="hasSMLUpdates"
-            @click="updateSML"
-          >{{ latestSMLVersion.tag_name }} available</button>
-          <button class="btn btn-secondary" v-if="isSMLInstalled" @click="uninstallSML">Uninstall</button>
-        </div>
-        <div class="col-auto">
-          <div class="spinner-border" role="status" v-if="SMLInProgress">
-            <span class="sr-only">Loading...</span>
+        <div class="col-auto justify-content-end my-3 mx-1 flex-grow-0 flex-shrink-0">
+          <div class="column">
+            <button
+              class="btn btn-primary"
+              @click="launchSatisfactory"
+            >
+              Launch Satisfactory
+            </button>
           </div>
         </div>
-      </div>
-      <div class="row my-2 flex-fill">
-        <div class="col">
-          <list
-            :objects="downloadedMods.models.filter(mod => !installedMods.has({mod_id: mod.mod_id, version: mod.version}))"
-            :canSelect="true"
-            v-model="selectedDownloadedMod"
-          >
-            <template slot-scope="{item}">
-              <div
-                class="col-auto d-inline-flex align-items-center"
-                @contextmenu.prevent="$refs.modContextMenu.open($event, {mod: item, hasModUpdate: false})"
-              >
-                <strong>{{item.displayName}}</strong>
-              </div>
-            </template>
-          </list>
-        </div>
-        <div class="col-3 align-self-center align-items-center">
-          <button
-            class="btn btn-primary m-2 w-100 d-inline-flex align-items-center justify-content-center"
-            style="min-height: 48px"
-            @click="installSelectedMod"
-          >
-            Install &gt;&gt;&nbsp;
-            <div class="spinner-border" role="status" v-if="installInProgress">
-              <span class="sr-only">Loading...</span>
-            </div>
-          </button>
-          <br />
-          <button
-            class="btn btn-primary m-2 w-100 d-inline-flex align-items-center justify-content-center"
-            style="min-height: 48px"
-            @click="uninstallSelectedMod"
-          >
-            &lt;&lt; Uninstall&nbsp;
-            <div class="spinner-border" role="status" v-if="uninstallInProgress">
-              <span class="sr-only">Loading...</span>
-            </div>
-          </button>
-        </div>
-        <div class="col">
-          <list :objects="installedMods.models" :canSelect="true" v-model="selectedInstalledMod">
-            <template slot-scope="{item}">
-              <div class="col-auto d-inline-flex align-items-center">
-                <strong>{{item.displayName}}</strong>
-              </div>
-            </template>
-          </list>
+        <div class="col-auto d-inline-flex align-items-center">
+          <strong>SML: {{ selectedSatisfactoryInstall ? (selectedSatisfactoryInstall.smlVersion || 'Not installed') : 'Select a Satisfactory Install' }}</strong>
         </div>
       </div>
-      <div class="row justify-content-end my-3 mx-1 flex-grow-0 flex-shrink-0">
-        <div class="column">
-          <button @click="launchSatisfactory" class="btn btn-primary">Launch Satisfactory</button>
+      <div class="row my-2 flex-fill container-fluid my-2">
+        <div
+          class="row selection-row"
+          style="height: 50%"
+        >
+          <div
+            class="col-7 d-flex flex-column"
+            style="height: 100%"
+          >
+            <input
+              v-model="search"
+              class="form-control flex-shrink-0 flex-grow-0"
+              type="text"
+              placeholder="Search"
+              aria-label="Search"
+            >
+            <br>
+            <list
+              v-model="selectedMod"
+              :objects="searchMods"
+              :can-select="true"
+              class="flex-fill"
+            >
+              <template slot-scope="{item}">
+                <div class="col-2">
+                  <img
+                    :src="item.logo || noImageURL"
+                    width="100%"
+                  >
+                </div>
+                <div class="col-auto d-inline-flex align-items-center">
+                  <strong>{{ item.name }}</strong>
+                </div>
+              </template>
+            </list>
+          </div>
+          <div
+            class="col-5"
+            style="height: 100%"
+          >
+            <list
+              v-if="selectedMod != null"
+              :objects="selectedMod.versions"
+              :can-select="false"
+            >
+              <template slot-scope="{item}">
+                <div
+                  class="col-4"
+                  style="min-width: 150px"
+                >
+                  <button
+                    :class="'btn ' + (isModVersionInstalled(item) ? 'btn-secondary' : 'btn-primary')"
+                    style="width: 100%"
+                    @click="toggleModInstalled(item)"
+                  >
+                    {{ isModVersionInstalled(item) ? "Remove" : "Install" }}
+                  </button>
+                </div>
+                <div class="col-auto d-inline-flex align-items-center">
+                  <strong>{{ item.version }}</strong>
+                </div>
+                <div class="col-auto">
+                  <div
+                    v-if="inProgress.includes(item)"
+                    class="spinner-border"
+                    role="status"
+                  >
+                    <span class="sr-only">Loading...</span>
+                  </div>
+                </div>
+              </template>
+            </list>
+          </div>
+        </div>
+        <div
+          v-if="selectedMod != null"
+          class="row"
+          style="overflow: auto; margin: 10px"
+        >
+          <div v-html="compiledMarkdownDescription" />
         </div>
       </div>
     </div>
-    <context-menu
-      id="context-menu"
-      ref="modContextMenu"
-      @ctx-open="onModMenuOpen"
-      @ctx-cancel="onModMenuCancel"
-      @ctx-close="onModMenuClose"
-    >
-      <li
-        v-if="modContextMenuData.hasModUpdate"
-        @click="updateMod(modContextMenuData.mod)"
-      >Update mod</li>
-      <li @click="removeMod(modContextMenuData.mod)">Remove</li>
-    </context-menu>
   </main>
 </template>
 
 <script>
-import { Collection } from 'vue-mc'
-import contextMenu from 'vue-context-menu'
-import List from './List'
-import SatisfactoryInstall from '../model/satisfactoryInstall'
-import ModHandler from '../model/modHandler'
-// import FicsitApp from '../model/ficsitApp'
-import SMLHandler from '../model/smlHandler'
-import semver from 'semver'
+// TODO: display errors
+import semver from 'semver';
+import {
+  getLatestSMLVersion, getInstalls, getAvailableMods,
+} from 'satisfactory-mod-launcher-api';
+import marked from 'marked';
+import { spawn } from 'child_process';
+import List from './List';
 
 export default {
-  name: 'launcher',
+  name: 'Launcher',
   components: {
     List,
-    contextMenu
   },
-  data () {
+  data() {
     return {
       selectedSatisfactoryInstall: null,
-      selectedDownloadedMod: null,
-      selectedInstalledMod: null,
-      satisfactoryInstalls: new Collection(),
-      downloadedMods: new Collection(),
-      installedMods: new Collection(),
+      satisfactoryInstalls: [],
+      availableMods: [],
       installedSMLVersion: '',
-      latestSMLVersion: new SMLHandler.SMLRelease(),
+      latestSMLVersion: {},
       SMLInProgress: false,
-      installInProgress: false,
-      uninstallInProgress: false,
-      modContextMenuData: {
-        mod: null,
-        hasModUpdate: false
-      }
-    }
-  },
-  methods: {
-    installSelectedMod () {
-      if (this.selectedSatisfactoryInstall && this.selectedDownloadedMod) {
-        this.installInProgress = true
-        ModHandler.installModVersion(this.selectedDownloadedMod, this.selectedSatisfactoryInstall).then(() => {
-          this.refreshDownloadedMods()
-          this.refreshInstalledMods()
-          this.installInProgress = false
-        })
-      }
-    },
-    uninstallSelectedMod () {
-      if (this.selectedSatisfactoryInstall && this.selectedInstalledMod) {
-        this.uninstallInProgress = true
-        ModHandler.uninstallModVersion(this.selectedInstalledMod, this.selectedSatisfactoryInstall).then(() => {
-          this.refreshDownloadedMods()
-          this.refreshInstalledMods()
-          this.uninstallInProgress = false
-        })
-      }
-    },
-    refreshSatisfactoryInstalls () {
-      SatisfactoryInstall.getInstalls().then((installs) => {
-        this.satisfactoryInstalls = installs
-        this.selectedSatisfactoryInstall = this.satisfactoryInstalls.models[0]
-      })
-    },
-    refreshDownloadedMods () {
-      ModHandler.getDownloadedMods().then((mods) => {
-        this.downloadedMods = mods
-        this.selectedDownloadedMod = this.downloadedMods[0]
-      })
-    },
-    refreshInstalledMods () {
-      ModHandler.getInstalledMods(this.selectedSatisfactoryInstall).then((mods) => {
-        this.installedMods = mods
-        this.selectedInstalledMod = this.installedMods.models[0]
-      })
-    },
-    launchSatisfactory () {
-      if (this.selectedSatisfactoryInstall) {
-        this.selectedSatisfactoryInstall.launch()
-      }
-    },
-    refreshSMLVersion () {
-      SMLHandler.getInstalledSMLVersion(this.selectedSatisfactoryInstall).then((version) => {
-        this.installedSMLVersion = version
-      })
-    },
-    updateSML () {
-      this.SMLInProgress = true
-      SMLHandler.updateSML(this.selectedSatisfactoryInstall).then(() => {
-        this.SMLInProgress = false
-        this.refreshSMLVersion()
-      })
-    },
-    uninstallSML () {
-      this.SMLInProgress = true
-      SMLHandler.uninstallSML(this.selectedSatisfactoryInstall).then(() => {
-        this.SMLInProgress = false
-        this.refreshSMLVersion()
-      })
-    },
-    onModMenuOpen (locals) {
-      this.modContextMenuData = locals
-      ModHandler.hasModUpdate(this.modContextMenuData.mod.mod_id).then((hasUpdate) => {
-        this.modContextMenuData.hasModUpdate = hasUpdate
-      })
-    },
-    onModMenuClose (locals) {
-    },
-    onModMenuCancel () {
-      this.modContextMenuData = {
-        mod: null,
-        hasModUpdate: false
-      }
-    },
-    updateMod (mod) {
-      ModHandler.updateMod(mod).then(() => {
-        this.refreshDownloadedMods()
-      })
-    },
-    removeMod (mod) {
-      ModHandler.removeModVersion(mod).then(() => {
-        this.refreshDownloadedMods()
-      })
-    }
+      selectedMod: {},
+      searchMods: [],
+      search: '',
+      inProgress: [],
+    };
   },
   computed: {
-    hasSMLUpdates () {
-      return !semver.valid(this.installedSMLVersion) || (semver.valid(this.latestSMLVersion.tag_name) && semver.lt(this.installedSMLVersion, this.latestSMLVersion.tag_name))
+    noImageURL() {
+      return 'https://ficsit.app/static/assets/images/no_image.png';
     },
-    isSMLInstalled () {
-      return !!semver.valid(this.installedSMLVersion)
-    }
+    compiledMarkdownDescription() {
+      return marked(this.selectedMod.full_description || '', { sanitize: true });
+    },
+    hasSMLUpdates() {
+      return (
+        !semver.valid(this.installedSMLVersion)
+        || (semver.valid(this.latestSMLVersion.version)
+          && semver.lt(this.installedSMLVersion, this.latestSMLVersion.version))
+      );
+    },
+    isSMLInstalled() {
+      return !!semver.valid(this.installedSMLVersion);
+    },
   },
   watch: {
-    selectedSatisfactoryInstall: {
-      handler: function (newVal, oldVal) {
-        this.refreshInstalledMods()
-        this.refreshSMLVersion()
-      },
-      deep: true
-    }
+    search() {
+      this.refreshSearch();
+    },
   },
-  created () {
-    this.refreshSatisfactoryInstalls()
-    this.refreshDownloadedMods()
-    SMLHandler.getLatestSMLVersion().then((version) => {
-      this.latestSMLVersion = version
-    })
-  }
-}
+  created() {
+    this.refreshSatisfactoryInstalls();
+    this.refreshAvailableMods();
+    getLatestSMLVersion().then((smlVersion) => {
+      this.latestSMLVersion = smlVersion.version;
+    });
+  },
+  methods: {
+    refreshSearch() {
+      this.searchMods = this.availableMods.filter((mod) => mod.name.toLowerCase().includes(this.search.toLowerCase()));
+    },
+    refreshAvailableMods() {
+      getAvailableMods().then((mods) => {
+        this.availableMods = mods;
+        this.refreshSearch();
+      });
+    },
+    isModVersionInstalled(modVersion) {
+      return this.selectedSatisfactoryInstall.mods[modVersion.mod_id] === modVersion.version;
+    },
+    refreshCurrentMod() {
+      const currentMod = this.selectedMod;
+      this.selectedMod = null;
+      this.$nextTick().then(() => {
+        this.selectedMod = currentMod;
+      });
+    },
+    toggleModInstalled(modVersion) {
+      this.inProgress.push(modVersion);
+      if (this.isModVersionInstalled(modVersion)) {
+        this.selectedSatisfactoryInstall.uninstallMod(modVersion.mod_id).then(() => {
+          this.inProgress.splice(this.inProgress.indexOf(modVersion));
+          this.refreshCurrentMod();
+        });
+      } else {
+        this.selectedSatisfactoryInstall.installMod(modVersion.mod_id, modVersion.version).then(() => {
+          this.inProgress.splice(this.inProgress.indexOf(modVersion));
+          this.refreshCurrentMod();
+        });
+      }
+    },
+    refreshSatisfactoryInstalls() {
+      getInstalls().then((installs) => {
+        this.satisfactoryInstalls = installs;
+        if (this.satisfactoryInstalls.length > 0) {
+          const defaultInstall = this.satisfactoryInstalls[0];
+          this.selectedSatisfactoryInstall = defaultInstall;
+        }
+      });
+    },
+    launchSatisfactory() {
+      if (this.selectedSatisfactoryInstall) {
+        spawn(this.selectedSatisfactoryInstall.launchPath, { detached: true }).unref();
+      }
+    },
+    updateSML() {
+      this.SMLInProgress = true;
+      this.selectedSatisfactoryInstall.updateSML().then(() => {
+        this.SMLInProgress = false;
+      });
+    },
+    uninstallSML() {
+      this.SMLInProgress = true;
+      this.selectedSatisfactoryInstall.uninstallSML().then(() => {
+        this.SMLInProgress = false;
+      });
+    },
+  },
+};
 </script>
 
 <style>

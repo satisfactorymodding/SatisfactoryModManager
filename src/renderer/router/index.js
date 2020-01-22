@@ -1,22 +1,21 @@
-import Vue from 'vue'
-import Router from 'vue-router'
+import Vue from 'vue';
+import Router from 'vue-router';
 
-Vue.use(Router)
+// eslint-disable-next-line import/no-unresolved
+const Launcher = require('@/components/Launcher');
+
+Vue.use(Router);
 
 export default new Router({
   mode: 'hash',
   routes: [
     {
       path: '/',
-      component: require('@/components/Launcher').default
-    },
-    {
-      path: '/mods',
-      component: require('@/components/Mods').default
+      component: Launcher.default,
     },
     {
       path: '*',
-      redirect: '/'
-    }
-  ]
-})
+      redirect: '/',
+    },
+  ],
+});

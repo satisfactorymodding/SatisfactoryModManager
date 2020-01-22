@@ -11,12 +11,11 @@
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
     "build:web": "cross-env BUILD_TARGET=web node .electron-vue/build.js",
     "dev": "node .electron-vue/dev-runner.js",
-    "lint": "eslint --ext .js,.vue -f ./node_modules/eslint-friendly-formatter src",
-    "lint:fix": "eslint --ext .js,.vue -f ./node_modules/eslint-friendly-formatter --fix src",
+    "lint": "eslint --ext .js,.vue -f ./node_modules/eslint-friendly-formatter --fix src",
     "pack": "npm run pack:main && npm run pack:renderer",
     "pack:main": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.main.config.js",
     "pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
-    "postinstall": "npm run lint:fix && electron-builder install-app-deps",
+    "postinstall": "npm run lint && electron-builder install-app-deps",
     "release": "npm run build && electron-builder build",
     "release:all": "npm run build && electron-builder build -mwl",
     "release:win": "npm run build && electron-builder build --win",
@@ -31,18 +30,6 @@
     },
     "files": [
       "dist/electron/**/*"
-    ],
-    "beforeBuild": "./external-dependencies/download.js",
-    "extraFiles": [
-      {
-        "from": "./external-dependencies/CLI",
-        "to": "",
-        "filter": [
-          "**/*",
-          "!**/*.js",
-          "!**/*.json"
-        ]
-      }
     ],
     "dmg": {
       "contents": [
@@ -81,11 +68,11 @@
     "node-stream-zip": "^1.8.2",
     "platform-folders": "^0.4.1",
     "request": "^2.88.0",
+    "satisfactory-mod-launcher-api": "1.0.0-1",
     "semver": "^6.3.0",
     "vue": "^2.5.16",
     "vue-context-menu": "^2.0.6",
     "vue-electron": "^1.0.6",
-    "vue-mc": "^0.6.0",
     "vue-router": "^3.0.1",
     "vuex": "^3.1.2",
     "vuex-electron": "^1.0.0"
@@ -113,11 +100,12 @@
     "electron-debug": "^3.0.1",
     "electron-devtools-installer": "^2.2.4",
     "eslint": "^6.7.1",
+    "eslint-config-airbnb-base": "^14.0.0",
     "eslint-config-standard": "^14.1.0",
     "eslint-friendly-formatter": "^4.0.1",
     "eslint-loader": "^3.0.2",
     "eslint-plugin-html": "^6.0.0",
-    "eslint-plugin-import": "^2.12.0",
+    "eslint-plugin-import": "^2.20.0",
     "eslint-plugin-node": "^10.0.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",

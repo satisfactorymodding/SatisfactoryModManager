@@ -1,48 +1,52 @@
 <template>
-  <div class="container-fluid" style="overflow: auto">
+  <div
+    class="container-fluid"
+    style="overflow: auto"
+  >
     <div
       v-for="item in objects"
       :key="item.id"
-      v-on:click="clicked(item)"
       :class="'row ' + (item == value && canSelect ? 'selected' : '')"
+      @click="clicked(item)"
     >
-      <slot :item="item"></slot>
+      <slot :item="item" />
     </div>
   </div>
 </template>
 
 <script>
-import arrayEqual from 'array-equal'
+import arrayEqual from 'array-equal';
+
 export default {
-  name: 'list',
-  data () {
+  name: 'List',
+  props: ['objects', 'value', 'canSelect'],
+  data() {
     return {
-      selectedIndex: 0
-    }
+      selectedIndex: 0,
+    };
   },
   watch: {
-    objects: function (newObjects, oldObjects) {
+    objects(newObjects, oldObjects) {
       if (this.canSelect && !arrayEqual(newObjects, oldObjects)) {
         if (this.objects.length > 0) {
-          this.clicked(this.objects[Math.min(Math.max(this.selectedIndex, 0), this.objects.length - 1)])
+          this.clicked(this.objects[Math.min(Math.max(this.selectedIndex, 0), this.objects.length - 1)]);
         } else {
-          this.clicked(null)
+          this.clicked(null);
         }
       }
-    }
+    },
+  },
+  created() {
   },
   methods: {
-    clicked (item) {
+    clicked(item) {
       if (this.canSelect) {
-        this.selectedIndex = this.objects.indexOf(item)
-        this.$emit('input', item)
+        this.selectedIndex = this.objects.indexOf(item);
+        this.$emit('input', item);
       }
-    }
+    },
   },
-  props: ['objects', 'value', 'canSelect'],
-  created () {
-  }
-}
+};
 </script>
 
 <style>

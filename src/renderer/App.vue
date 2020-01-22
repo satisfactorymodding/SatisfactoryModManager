@@ -2,26 +2,30 @@
   <div id="app">
     <ul class="nav nav-tabs header">
       <li class="nav-item">
-        <router-link class="nav-link" exact-active-class="active" to="/">Launcher</router-link>
-      </li>
-      <li class="nav-item">
-        <router-link class="nav-link" exact-active-class="active" to="/mods">Download mods</router-link>
+        <router-link
+          class="nav-link"
+          exact-active-class="active"
+          to="/"
+        >
+          Launcher
+        </router-link>
       </li>
     </ul>
-    <router-view class="content"></router-view>
+    <router-view class="content" />
   </div>
 </template>
 
 <script>
 export default {
-  name: 'satisfactory-mod-launcher-gui'
-}
+  name: 'SatisfactoryModLauncherGui',
+};
 </script>
 
 <style>
 html,
 body,
-#app {
+#app,
+main {
   height: 100%;
 }
 #app,
