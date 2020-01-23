@@ -68,7 +68,7 @@
     "node-stream-zip": "^1.8.2",
     "platform-folders": "^0.4.1",
     "request": "^2.88.0",
-    "satisfactory-mod-launcher-api": "1.0.0-1",
+    "satisfactory-mod-launcher-api": "1.0.0-2",
     "semver": "^6.3.0",
     "vue": "^2.5.16",
     "vue-context-menu": "^2.0.6",
