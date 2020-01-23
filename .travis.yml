@@ -13,6 +13,7 @@ matrix:
   - os: windows
     language: node_js
     node_js: '12'
+    env: YARN_GPG=no
 cache:
   directories:
   - node_modules
