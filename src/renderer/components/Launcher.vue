@@ -16,7 +16,7 @@
             </option>
           </select>
         </div>
-        <div class="col-auto justify-content-end my-3 mx-1 flex-grow-0 flex-shrink-0">
+        <div class="col-auto">
           <div class="column">
             <button
               class="btn btn-primary"
@@ -48,6 +48,7 @@
             >
             <br>
             <list
+              v-if="searchMods"
               v-model="selectedMod"
               :objects="searchMods"
               :can-select="true"
@@ -71,7 +72,7 @@
             style="height: 100%"
           >
             <list
-              v-if="selectedMod != null"
+              v-if="selectedMod && selectedMod.versions"
               :objects="selectedMod.versions"
               :can-select="false"
             >
@@ -109,6 +110,7 @@
           class="row"
           style="overflow: auto; margin: 10px"
         >
+          <!-- eslint-disable-next-line vue/no-v-html -->
           <div v-html="compiledMarkdownDescription" />
         </div>
       </div>
@@ -124,7 +126,9 @@ import {
 } from 'satisfactory-mod-launcher-api';
 import marked from 'marked';
 import { spawn } from 'child_process';
+import sanitizeHtml from 'sanitize-html';
 import List from './List';
+
 
 export default {
   name: 'Launcher',
@@ -150,7 +154,7 @@ export default {
       return 'https://ficsit.app/static/assets/images/no_image.png';
     },
     compiledMarkdownDescription() {
-      return marked(this.selectedMod.full_description || '', { sanitize: true });
+      return sanitizeHtml(marked(this.selectedMod.full_description || ''));
     },
     hasSMLUpdates() {
       return (

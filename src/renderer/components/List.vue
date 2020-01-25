@@ -19,7 +19,22 @@ import arrayEqual from 'array-equal';
 
 export default {
   name: 'List',
-  props: ['objects', 'value', 'canSelect'],
+  props: {
+    objects: {
+      type: Array,
+      required: true,
+    },
+    value: {
+      type: Object,
+      default() {
+        return {};
+      },
+    },
+    canSelect: {
+      type: Boolean,
+      default: false,
+    },
+  },
   data() {
     return {
       selectedIndex: 0,
