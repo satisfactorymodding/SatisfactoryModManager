@@ -1949,13 +1949,13 @@ boolean@^3.0.0:
   integrity sha512-OElxJ1lUSinuoUnkpOgLmxp0DC4ytEhODEL6QJU0NpxE/mI4rUSh8h1P1Wkvfi3xQEBcxXR2gBIPNYNuaFcAbQ==
 
 bootstrap-vue@^2.1.0:
-  version "2.2.2"
-  resolved "https://registry.yarnpkg.com/bootstrap-vue/-/bootstrap-vue-2.2.2.tgz#750d461d18352e2fd6cd2debfe52ebeb125c191f"
-  integrity sha512-jFw9WcPX2MLCMaMNdakXke2Fwtz5o7EeByMJGhzGjiL1TNBr/nz2PolCAFW475+o2t5Tz3MZT152o6zLQXcElw==
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/bootstrap-vue/-/bootstrap-vue-2.3.0.tgz#e2be057e25ca173e4a4123239c5399ad1c355e81"
+  integrity sha512-ChfCObs1xwsALIDB52S32yMm18P2iiiJUULUbob2DFI3V6SEtx7pTi5vG7ZKagNt+SMKd3lfLUCxWGMTDjPR1g==
   dependencies:
     "@nuxt/opencollective" "^0.3.0"
     bootstrap ">=4.4.1 <5.0.0"
-    popper.js "^1.16.0"
+    popper.js "^1.16.1"
     portal-vue "^2.1.7"
     vue-functional-data-merge "^3.1.0"
 
@@ -7054,7 +7054,7 @@ platform-folders@^0.4.1:
   dependencies:
     bindings "^1.5.0"
 
-popper.js@^1.16.0:
+popper.js@^1.16.1:
   version "1.16.1"
   resolved "https://registry.yarnpkg.com/popper.js/-/popper.js-1.16.1.tgz#2a223cb3dc7b6213d740e40372be40de43e65b1b"
   integrity sha512-Wb4p1J4zyFTbM+u6WuO4XstYx4Ky9Cewe4DWrel7B0w6VVICvPwdOpotjzcf6eD8TsckVnIMNONQyPIUFOUbCQ==
@@ -7843,10 +7843,10 @@ sass-loader@^8.0.0:
     schema-utils "^2.6.1"
     semver "^6.3.0"
 
-satisfactory-mod-launcher-api@1.0.0-2:
-  version "1.0.0-2"
-  resolved "https://registry.yarnpkg.com/satisfactory-mod-launcher-api/-/satisfactory-mod-launcher-api-1.0.0-2.tgz#1a024a90d8a8a5a03eb26430dda585a03f380b5b"
-  integrity sha512-4qL3bvxvvmdc7Xvgaa8TPCFetf7iNJW/1AScvm/LwoxDJH+HoQVVxVZXuwIOksFuRW5r9NUC8KarPUvPQc8n+w==
+satisfactory-mod-launcher-api@^1.0.0-3:
+  version "1.0.0-3"
+  resolved "https://registry.yarnpkg.com/satisfactory-mod-launcher-api/-/satisfactory-mod-launcher-api-1.0.0-3.tgz#0e1b96b03e7e4eeb77ca57c5d06a2f100a2283de"
+  integrity sha512-5TSIBE23iinSo2pwPQGsCRdffuqsv4rV+H7/L2/wPW+BmeLJMmg0C0yrlIBRadz+MMyziSanJWuLgZot8vdk/w==
   dependencies:
     "@types/bindings" "^1.3.0"
     "@types/jszip" "^3.1.6"
