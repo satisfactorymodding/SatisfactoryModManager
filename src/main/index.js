@@ -1,6 +1,7 @@
 
 import { app, BrowserWindow } from 'electron';
 import path from 'path';
+import { autoUpdater } from 'electron-updater';
 
 /**
  * Set `__static` path to static files in production
@@ -51,5 +52,12 @@ app.on('activate', () => {
   }
 });
 
+autoUpdater.on('update-downloaded', () => {
+  autoUpdater.quitAndInstall();
+});
+
 app.on('ready', () => {
+  if (process.env.NODE_ENV === 'production') {
+    autoUpdater.checkForUpdates();
+  }
 });
