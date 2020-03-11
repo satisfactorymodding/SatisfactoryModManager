@@ -2,6 +2,8 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import { autoUpdater } from 'electron-updater';
+import WebSocket from 'ws';
+
 
 /**
  * Set `__static` path to static files in production
@@ -93,6 +95,13 @@ if (app.requestSingleInstanceLock()) {
     app.on('open-url', (event, url) => {
       event.preventDefault();
       openedByUrl(url);
+    });
+  });
+
+  const wss = new WebSocket.Server({ port: 33642 });
+  wss.on('connection', (ws) => {
+    ws.on('message', (message) => {
+      console.log('received: %s', message);
     });
   });
 } else {
