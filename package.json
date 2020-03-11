@@ -30,6 +30,12 @@
     "files": [
       "dist/electron/**/*"
     ],
+    "protocols": {
+      "name": "Satisfactory Mod Launcher",
+      "schemes": [
+        "smlauncher"
+      ]
+    },
     "dmg": {
       "contents": [
         {

@@ -115,6 +115,57 @@
         </div>
       </div>
     </div>
+    <b-modal
+      id="modal-install"
+      ref="modal"
+      title="Install Mod"
+      @ok="handleModalInstallOk"
+    >
+      <form
+        ref="form"
+        @submit.stop.prevent="handleModalInstallSubmit"
+      >
+        <select
+          v-model="selectedSatisfactoryInstall"
+          class="form-control"
+        >
+          <option
+            v-for="install in satisfactoryInstalls"
+            :key="install.id"
+            :value="install"
+          >
+            {{ install.displayName }}
+          </option>
+        </select>
+        <p>Mod: {{ selectedMod.name }}</p>
+        <p>Version: {{ modalInstallModVersion.version }}</p>
+      </form>
+    </b-modal>
+    <b-modal
+      id="modal-uninstall"
+      ref="modal"
+      title="Uninstall Mod"
+      @ok="handleModalUninstallOk"
+    >
+      <form
+        ref="form"
+        @submit.stop.prevent="handleModalUninstallSubmit"
+      >
+        <select
+          v-model="selectedSatisfactoryInstall"
+          class="form-control"
+        >
+          <option
+            v-for="install in satisfactoryInstalls"
+            :key="install.id"
+            :value="install"
+          >
+            {{ install.displayName }}
+          </option>
+        </select>
+        <p>Mod: {{ selectedMod.name }}</p>
+      </form>
+    </b-modal>
   </main>
 </template>
 
@@ -122,7 +173,9 @@
 // TODO: display errors
 import semver from 'semver';
 import {
-  getLatestSMLVersion, getInstalls, getAvailableMods,
+  getLatestSMLVersion,
+  getInstalls,
+  getAvailableMods,
 } from 'satisfactory-mod-launcher-api';
 import marked from 'marked';
 import { spawn } from 'child_process';
@@ -147,6 +200,7 @@ export default {
       searchMods: [],
       search: '',
       inProgress: [],
+      modalInstallModVersion: {},
     };
   },
   computed: {
@@ -172,19 +226,62 @@ export default {
       this.refreshSearch();
     },
   },
+  mounted() {
+    this.$electron.ipcRenderer.on('openedByUrl', (e, url) => {
+      const parsed = new URL(url);
+      const command = parsed.pathname.replace(/^\/+|\/+$/g, '');
+      if (command === 'install') {
+        const modID = parsed.searchParams.get('modID');
+        const version = parsed.searchParams.get('version');
+        this.selectedMod = this.availableMods.find((mod) => mod.id === modID);
+        this.modalInstallModVersion = this.selectedMod.versions.find((ver) => ver.version === version);
+        this.$bvModal.show('modal-install');
+      } else if (command === 'uninstall') {
+        const modID = parsed.searchParams.get('modID');
+        this.selectedMod = this.availableMods.find((mod) => mod.id === modID);
+        this.$bvModal.show('modal-uninstall');
+      }
+    });
+  },
   created() {
-    this.refreshSatisfactoryInstalls();
-    this.refreshAvailableMods();
-    getLatestSMLVersion().then((smlVersion) => {
-      this.latestSMLVersion = smlVersion.version;
+    Promise.all(
+      [
+        this.refreshSatisfactoryInstalls(),
+        this.refreshAvailableMods(),
+        getLatestSMLVersion().then((smlVersion) => {
+          this.latestSMLVersion = smlVersion.version;
+        }),
+      ],
+    ).then(() => {
+      this.$electron.ipcRenderer.send('vue-ready');
     });
   },
   methods: {
+    handleModalInstallOk(bvModalEvt) {
+      bvModalEvt.preventDefault();
+      this.handleModalInstallSubmit();
+    },
+    handleModalInstallSubmit() {
+      this.installMod(this.modalInstallModVersion);
+      this.$nextTick(() => {
+        this.$bvModal.hide('modal-install');
+      });
+    },
+    handleModalUninstallOk(bvModalEvt) {
+      bvModalEvt.preventDefault();
+      this.handleModalInstallSubmit();
+    },
+    handleModalUninstallSubmit() {
+      this.uninstallMod(this.selectedMod.versions.find((ver) => this.isModVersionInstalled(ver)));
+      this.$nextTick(() => {
+        this.$bvModal.hide('modal-uninstall');
+      });
+    },
     refreshSearch() {
       this.searchMods = this.availableMods.filter((mod) => mod.name.toLowerCase().includes(this.search.toLowerCase()));
     },
     refreshAvailableMods() {
-      getAvailableMods().then((mods) => {
+      return getAvailableMods().then((mods) => {
         this.availableMods = mods;
         this.refreshSearch();
       });
@@ -199,22 +296,32 @@ export default {
         this.selectedMod = currentMod;
       });
     },
+    installMod(modVersion) {
+      return this.selectedSatisfactoryInstall
+        .installMod(modVersion.mod_id, modVersion.version)
+        .then(() => {
+          this.inProgress.splice(this.inProgress.indexOf(modVersion));
+          this.refreshCurrentMod();
+        });
+    },
+    uninstallMod(modVersion) {
+      return this.selectedSatisfactoryInstall
+        .uninstallMod(modVersion.mod_id)
+        .then(() => {
+          this.inProgress.splice(this.inProgress.indexOf(modVersion));
+          this.refreshCurrentMod();
+        });
+    },
     toggleModInstalled(modVersion) {
       this.inProgress.push(modVersion);
       if (this.isModVersionInstalled(modVersion)) {
-        this.selectedSatisfactoryInstall.uninstallMod(modVersion.mod_id).then(() => {
-          this.inProgress.splice(this.inProgress.indexOf(modVersion));
-          this.refreshCurrentMod();
-        });
+        this.uninstallMod(modVersion);
       } else {
-        this.selectedSatisfactoryInstall.installMod(modVersion.mod_id, modVersion.version).then(() => {
-          this.inProgress.splice(this.inProgress.indexOf(modVersion));
-          this.refreshCurrentMod();
-        });
+        this.installMod(modVersion);
       }
     },
     refreshSatisfactoryInstalls() {
-      getInstalls().then((installs) => {
+      return getInstalls().then((installs) => {
         this.satisfactoryInstalls = installs;
         if (this.satisfactoryInstalls.length > 0) {
           const defaultInstall = this.satisfactoryInstalls[0];
@@ -229,13 +336,13 @@ export default {
     },
     updateSML() {
       this.SMLInProgress = true;
-      this.selectedSatisfactoryInstall.updateSML().then(() => {
+      return this.selectedSatisfactoryInstall.updateSML().then(() => {
         this.SMLInProgress = false;
       });
     },
     uninstallSML() {
       this.SMLInProgress = true;
-      this.selectedSatisfactoryInstall.uninstallSML().then(() => {
+      return this.selectedSatisfactoryInstall.uninstallSML().then(() => {
         this.SMLInProgress = false;
       });
     },

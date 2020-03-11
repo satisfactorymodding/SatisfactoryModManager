@@ -1,5 +1,4 @@
 {
-    "eslint.autoFixOnSave": true,
     "eslint.alwaysShowStatus": true,
     "eslint.lintTask.enable": true,
     "eslint.options": {
@@ -13,9 +12,10 @@
     "vetur.format.defaultFormatter.js": "prettier-eslint",
     "vetur.format.defaultFormatter.ts": "prettier-tslint",
     "editor.tabSize": 2,
-    "editor.formatOnPaste": true,
-    "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": true
+    },
+    "files.watcherExclude": {
+      "**/build/win-unpacked/**": true
     }
 }
