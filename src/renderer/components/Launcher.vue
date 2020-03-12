@@ -58,7 +58,9 @@
               class="flex-fill"
             >
               <template slot-scope="{item}">
-                <div class="col-1">
+                <div
+                  class="col-1 p-0"
+                >
                   <img
                     :src="item.logo || noImageURL"
                     width="100%"
@@ -170,7 +172,20 @@
           </option>
         </select>
         <p>Mod: {{ selectedMod.name }}</p>
-        <p>Version: {{ modalInstallModVersion.version }}</p>
+        <label for="modalInstallVersion">Version:</label>
+        <select
+          id="modalInstallVersion"
+          v-model="modalInstallModVersion"
+          class="form-control"
+        >
+          <option
+            v-for="version in selectedMod.versions"
+            :key="version.version"
+            :value="version"
+          >
+            {{ version.version }}
+          </option>
+        </select>
       </form>
     </b-modal>
     <b-modal
@@ -266,7 +281,7 @@ export default {
         const modID = parsed.searchParams.get('modID');
         const version = parsed.searchParams.get('version');
         this.selectedMod = this.availableMods.find((mod) => mod.id === modID);
-        this.modalInstallModVersion = this.selectedMod.versions.find((ver) => ver.version === version);
+        this.modalInstallModVersion = this.selectedMod.versions.find((ver) => ver.version === version) || this.selectedMod.versions[0];
         this.$bvModal.show('modal-install');
       } else if (command === 'uninstall') {
         const modID = parsed.searchParams.get('modID');
@@ -325,9 +340,9 @@ export default {
       return false;
     },
     refreshCurrentMod() {
-      const currentModId = this.selectedMod.mod_id;
+      const currentModId = this.selectedMod.id;
       this.refreshAvailableMods().then(() => {
-        this.selectedMod = this.searchMods.find((mod) => mod.mod_id === currentModId);
+        this.selectedMod = this.searchMods.find((mod) => mod.id === currentModId);
       });
     },
     installMod(modVersion) {
