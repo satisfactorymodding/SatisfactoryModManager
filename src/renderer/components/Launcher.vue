@@ -351,6 +351,9 @@ export default {
         .then(() => {
           this.inProgress.splice(this.inProgress.indexOf(modVersion));
           this.refreshCurrentMod();
+        }).catch((err) => {
+          this.$bvModal.msgBoxOk(err.toString());
+          this.inProgress.splice(this.inProgress.indexOf(modVersion));
         });
     },
     uninstallMod(modVersion) {
@@ -359,6 +362,9 @@ export default {
         .then(() => {
           this.inProgress.splice(this.inProgress.indexOf(modVersion));
           this.refreshCurrentMod();
+        }).catch((err) => {
+          this.$bvModal.msgBoxOk(err.toString());
+          this.inProgress.splice(this.inProgress.indexOf(modVersion));
         });
     },
     toggleModInstalled(modVersion) {

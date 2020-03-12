@@ -1,7 +1,7 @@
 {
   "name": "satisfactory-mod-launcher-gui",
   "version": "1.0.0",
-  "author": "mircearoata <mircearoatapalade@yahoo.ro>",
+  "author": "mircearoata",
   "description": "Handles Satisfactory mods and mod loader",
   "license": "GPL-3.0",
   "main": "./dist/electron/main.js",
