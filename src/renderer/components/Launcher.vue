@@ -84,7 +84,7 @@
                 <div
                   class="col-2 d-inline-flex align-items-center"
                 >
-                  <strong>{{ item.last_version_date ? item.last_version_date.toLocaleDateString() : 'N/A' }}</strong>
+                  <strong>{{ item.last_version_date ? new Date(item.last_version_date).toLocaleDateString() : 'N/A' }}</strong>
                 </div>
                 <div
                   class="col-2 d-inline-flex align-items-center"
