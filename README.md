@@ -6,8 +6,11 @@ Handles all the steps of installing mods, including download of SML and Bootstra
 
 Download the latest release from https://github.com/satisfactorymodding/SatisfactoryModLauncher/releases
 
-#### Build Setup
+#### Usage
 
+Just install it, choose an updated mod, and click install. Everything else is handled by SMLauncher
+
+#### Developmemnt
 ``` bash
 # install dependencies
 yarn install
