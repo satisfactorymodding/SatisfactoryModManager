@@ -30,13 +30,16 @@
           <strong>SML: {{ selectedSatisfactoryInstall ? (selectedSatisfactoryInstall.smlVersion || 'Not installed') : 'Select a Satisfactory Install' }}</strong>
         </div>
       </div>
-      <div class="row my-2 flex-fill container-fluid my-2">
+      <div
+        class="row my-2 flex-fill container-fluid my-2"
+        style="font-size: 14px;"
+      >
         <div
           class="row selection-row"
           style="height: 50%"
         >
           <div
-            class="col-7 d-flex flex-column"
+            class="col-8 d-flex flex-column"
             style="height: 100%"
           >
             <input
@@ -55,20 +58,49 @@
               class="flex-fill"
             >
               <template slot-scope="{item}">
-                <div class="col-2">
+                <div class="col-1">
                   <img
                     :src="item.logo || noImageURL"
                     width="100%"
                   >
                 </div>
-                <div class="col-auto d-inline-flex align-items-center">
-                  <strong>{{ item.name }}</strong>
+                <div
+                  class="col-3 d-inline-flex align-items-center text-break"
+                >
+                  <strong>{{ item.name || '' }}</strong>
+                </div>
+                <div
+                  class="col-1 d-inline-flex align-items-center"
+                >
+                  <strong>{{ item.versions[0] ? item.versions[0].version : 'N/A' }}</strong>
+                </div>
+                <div
+                  class="col-3 d-inline-flex align-items-center"
+                >
+                  <strong>{{ item.authors.map((author) => author.user.username).join(', ') }}</strong>
+                </div>
+                <div
+                  class="col-2 d-inline-flex align-items-center"
+                >
+                  <strong>{{ (item.last_version_date || new Date(0, 0, 0)).toLocaleDateString() }}</strong>
+                </div>
+                <div
+                  class="col-2 d-inline-flex align-items-center"
+                >
+                  <button
+                    :class="'my-1 btn ' + ((!item.versions[0] || isModVersionInstalled(item.versions[0])) ? 'btn-secondary' : 'btn-primary')"
+                    style="width: 100%"
+                    :disabled="!item.versions[0]"
+                    @click="toggleModInstalled(item.versions[0])"
+                  >
+                    {{ !item.versions[0] ? 'N/A' : (isModVersionInstalled(item.versions[0]) ? "Remove" : "Install") }}
+                  </button>
                 </div>
               </template>
             </list>
           </div>
           <div
-            class="col-5"
+            class="col-4"
             style="height: 100%"
           >
             <list
@@ -78,21 +110,21 @@
             >
               <template slot-scope="{item}">
                 <div
-                  class="col-4"
+                  class="col-3"
                   style="min-width: 150px"
                 >
                   <button
-                    :class="'btn ' + (isModVersionInstalled(item) ? 'btn-secondary' : 'btn-primary')"
+                    :class="'my-1 btn ' + (isModVersionInstalled(item) ? 'btn-secondary' : 'btn-primary')"
                     style="width: 100%"
                     @click="toggleModInstalled(item)"
                   >
                     {{ isModVersionInstalled(item) ? "Remove" : "Install" }}
                   </button>
                 </div>
-                <div class="col-auto d-inline-flex align-items-center">
+                <div class="col-2 d-inline-flex align-items-center">
                   <strong>{{ item.version }}</strong>
                 </div>
-                <div class="col-auto">
+                <div class="col-1">
                   <div
                     v-if="inProgress.includes(item)"
                     class="spinner-border"
@@ -287,13 +319,15 @@ export default {
       });
     },
     isModVersionInstalled(modVersion) {
-      return this.selectedSatisfactoryInstall.mods[modVersion.mod_id] === modVersion.version;
+      if (modVersion && modVersion.mod_id && modVersion.version) {
+        return this.selectedSatisfactoryInstall.mods[modVersion.mod_id] === modVersion.version;
+      }
+      return false;
     },
     refreshCurrentMod() {
-      const currentMod = this.selectedMod;
-      this.selectedMod = null;
-      this.$nextTick().then(() => {
-        this.selectedMod = currentMod;
+      const currentModId = this.selectedMod.mod_id;
+      this.refreshAvailableMods().then(() => {
+        this.selectedMod = this.searchMods.find((mod) => mod.mod_id === currentModId);
       });
     },
     installMod(modVersion) {
