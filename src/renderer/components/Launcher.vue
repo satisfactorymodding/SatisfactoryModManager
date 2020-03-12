@@ -27,7 +27,7 @@
           </div>
         </div>
         <div class="col-auto d-inline-flex align-items-center">
-          <strong>SML: {{ selectedSatisfactoryInstall ? (selectedSatisfactoryInstall.smlVersion || 'Not installed') : 'Select a Satisfactory Install' }}</strong>
+          <strong>SML: {{ selectedSatisfactoryInstall ? (selectedSatisfactoryInstall.smlVersion || 'Install a mod to install SML') : 'Select a Satisfactory Install' }}</strong>
         </div>
       </div>
       <div
