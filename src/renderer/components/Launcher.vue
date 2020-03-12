@@ -64,38 +64,44 @@
                   <img
                     :src="item.logo || noImageURL"
                     width="100%"
+                    :style="!isModUpdated(item) ? 'background-color: #837971' : ''"
                   >
                 </div>
                 <div
                   class="col-3 d-inline-flex align-items-center text-break"
+                  :style="!isModUpdated(item) ? 'background-color: #837971' : ''"
                 >
                   <strong>{{ item.name || '' }}</strong>
                 </div>
                 <div
                   class="col-1 d-inline-flex align-items-center"
+                  :style="!isModUpdated(item) ? 'background-color: #837971' : ''"
                 >
                   <strong>{{ item.versions[0] ? item.versions[0].version : 'N/A' }}</strong>
                 </div>
                 <div
                   class="col-3 d-inline-flex align-items-center"
+                  :style="!isModUpdated(item) ? 'background-color: #837971' : ''"
                 >
                   <strong>{{ item.authors.map((author) => author.user.username).join(', ') }}</strong>
                 </div>
                 <div
                   class="col-2 d-inline-flex align-items-center"
+                  :style="!isModUpdated(item) ? 'background-color: #837971' : ''"
                 >
                   <strong>{{ item.last_version_date ? new Date(item.last_version_date).toLocaleDateString() : 'N/A' }}</strong>
                 </div>
                 <div
                   class="col-2 d-inline-flex align-items-center"
+                  :style="!isModUpdated(item) ? 'background-color: #837971' : ''"
                 >
                   <button
                     :class="'my-1 btn ' + ((!item.versions[0] || isModVersionInstalled(item.versions[0])) ? 'btn-secondary' : 'btn-primary')"
                     style="width: 100%"
-                    :disabled="!item.versions[0]"
+                    :disabled="!item.versions[0] || !isModUpdated(item)"
                     @click="toggleModInstalled(item.versions[0])"
                   >
-                    {{ !item.versions[0] ? 'N/A' : (isModVersionInstalled(item.versions[0]) ? "Remove" : "Install") }}
+                    {{ (!item.versions[0] || !isModUpdated(item)) ? 'N/A' : (isModVersionInstalled(item.versions[0]) ? "Remove" : "Install") }}
                   </button>
                 </div>
               </template>
@@ -323,6 +329,9 @@ export default {
       this.$nextTick(() => {
         this.$bvModal.hide('modal-uninstall');
       });
+    },
+    isModUpdated(mod) {
+      return mod.versions.length !== 0 && semver.satisfies(mod.versions[0].sml_version, '>=2.0.0');
     },
     refreshSearch() {
       this.searchMods = this.availableMods.filter((mod) => mod.name.toLowerCase().includes(this.search.toLowerCase()));
