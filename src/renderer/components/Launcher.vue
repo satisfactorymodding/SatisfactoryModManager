@@ -97,11 +97,11 @@
                 >
                   <button
                     :class="'my-1 btn ' + ((!item.versions[0] || isModVersionInstalled(item.versions[0])) ? 'btn-secondary' : 'btn-primary')"
-                    style="width: 100%"
+                    style="font-size: 13px; width: 100%"
                     :disabled="!item.versions[0] || !isModUpdated(item)"
                     @click="toggleModInstalled(item.versions[0])"
                   >
-                    {{ (!item.versions[0] || !isModUpdated(item)) ? 'N/A' : (isModVersionInstalled(item.versions[0]) ? "Remove" : "Install") }}
+                    {{ isModUpdated(item) ? (!item.versions[0] ? 'N/A' : (isModVersionInstalled(item.versions[0]) ? "Remove" : "Install")) : 'Outdated' }}
                   </button>
                 </div>
               </template>
@@ -124,9 +124,10 @@
                   <button
                     :class="'my-1 btn ' + (isModVersionInstalled(item) ? 'btn-secondary' : 'btn-primary')"
                     style="width: 100%"
+                    :disabled="!isVersionSML20Compatible(item)"
                     @click="toggleModInstalled(item)"
                   >
-                    {{ isModVersionInstalled(item) ? "Remove" : "Install" }}
+                    {{ isVersionSML20Compatible(item) ? (isModVersionInstalled(item) ? "Remove" : "Install") : "Outdated" }}
                   </button>
                 </div>
                 <div class="col-2 d-inline-flex align-items-center">
@@ -332,6 +333,9 @@ export default {
     },
     isModUpdated(mod) {
       return mod.versions.length !== 0 && semver.satisfies(mod.versions[0].sml_version, '>=2.0.0');
+    },
+    isVersionSML20Compatible(version) {
+      return semver.satisfies(version.sml_version, '>=2.0.0');
     },
     refreshSearch() {
       this.searchMods = this.availableMods.filter((mod) => mod.name.toLowerCase().includes(this.search.toLowerCase()));
