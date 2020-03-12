@@ -1,6 +1,6 @@
 # Satisfactory Mod Launcher
 
-Handles all the steps of installing mods, including download of SML and Bootstrapper
+Handles all the steps of installing mods, including download of SML and Bootstrapper. For questions, you can ask in the [Satisfactory Modding discord](https://discordapp.com/channels/370472939054956546/455857391477587979/677170263225270333)
 
 #### Installation
 
