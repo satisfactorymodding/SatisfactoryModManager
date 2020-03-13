@@ -262,7 +262,14 @@ export default {
       return 'https://ficsit.app/static/assets/images/no_image.png';
     },
     compiledMarkdownDescription() {
-      return sanitizeHtml(marked(this.selectedMod.full_description || ''));
+      const html = sanitizeHtml(marked(this.selectedMod.full_description || ''));
+      const el = document.createElement('html');
+      el.innerHTML = html;
+      const links = el.getElementsByTagName('a');
+      for (let i = 0; i < links.length; i += 1) {
+        links[i].target = '_blank';
+      }
+      return el.innerHTML;
     },
     hasSMLUpdates() {
       return (

@@ -1,5 +1,7 @@
 
-import { app, BrowserWindow, ipcMain } from 'electron';
+import {
+  app, BrowserWindow, ipcMain, shell,
+} from 'electron';
 import path from 'path';
 import { autoUpdater } from 'electron-updater';
 import WebSocket from 'ws';
@@ -49,6 +51,11 @@ function createWindow() {
 
   mainWindow.on('closed', () => {
     mainWindow = null;
+  });
+
+  mainWindow.webContents.on('new-window', (event, url) => {
+    event.preventDefault();
+    shell.openExternal(url);
   });
 }
 
