@@ -175,6 +175,7 @@
       @ok="handleModalInstallOk"
     >
       <form
+        v-if="selectedMod"
         @submit.stop.prevent="handleModalInstallSubmit"
       >
         <select
@@ -212,6 +213,7 @@
       @ok="handleModalUninstallOk"
     >
       <form
+        v-if="selectedMod"
         @submit.stop.prevent="handleModalUninstallSubmit"
       >
         <select
@@ -242,6 +244,20 @@
         >
           Compatible with Update 3
         </b-form-checkbox>
+        <label for="sortBySelect">Show mods:</label>
+        <select
+          id="filterInstalledStatus"
+          v-model="filters.installedStatus"
+          class="form-control"
+        >
+          <option
+            v-for="installedStatusOption in installedStatusOptions"
+            :key="installedStatusOption.value"
+            :value="installedStatusOption.value"
+          >
+            {{ installedStatusOption.displayName }}
+          </option>
+        </select>
         <label for="sortBySelect">Sort by:</label>
         <select
           id="sortBySelect"
@@ -308,6 +324,7 @@ export default {
       search: '',
       filters: {
         compatibleOnly: false,
+        installedStatus: 'any',
         sortBy: 'lastVersionDate', // lastVersionDate, popularity, hotness, downloads, views
         sortOrder: 'descending', // ascending, descending
       },
@@ -347,6 +364,20 @@ export default {
         {
           value: 'descending',
           displayName: 'Descending',
+        },
+      ],
+      installedStatusOptions: [
+        {
+          value: 'installed',
+          displayName: 'Installed',
+        },
+        {
+          value: 'notInstalled',
+          displayName: 'Not installed',
+        },
+        {
+          value: 'any',
+          displayName: 'All',
         },
       ],
     };
@@ -448,7 +479,10 @@ export default {
     },
     refreshSearch() {
       this.searchMods = this.availableMods.filter((mod) => mod.name.toLowerCase().includes(this.search.toLowerCase())
-        && (!this.filters.compatibleOnly || this.isModSML20Compatible(mod)));
+        && (!this.filters.compatibleOnly || this.isModSML20Compatible(mod))
+        && (this.filters.installedStatus === 'any'
+          || (this.isModInstalled(mod) && this.filters.installedStatus === 'installed')
+          || (!this.isModInstalled(mod) && this.filters.installedStatus === 'notInstalled')));
       this.searchMods.sort((modA, modB) => {
         switch (this.filters.sortBy) {
           case 'name':
