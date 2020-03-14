@@ -101,7 +101,7 @@
                     :disabled="!item.versions[0] || !isModSML20Compatible(item)"
                     @click="toggleModInstalled(item.versions[0])"
                   >
-                    {{ isModSML20Compatible(item) ? (!item.versions[0] ? 'N/A' : (isModVersionInstalled(item.versions[0]) ? "Remove" : (isModInstalled(item) ? "Update" : "Install"))) : 'Outdated' }}
+                    {{ !item.versions[0] ? 'N/A' : (isModSML20Compatible(item) ? (isModVersionInstalled(item.versions[0]) ? "Remove" : (isModInstalled(item) ? "Update" : "Install")) : 'Outdated') }}
                   </button>
                 </div>
               </template>
@@ -230,6 +230,8 @@ import {
   getLatestSMLVersion,
   getInstalls,
   getAvailableMods,
+  toggleDebug,
+  clearCache,
 } from 'satisfactory-mod-launcher-api';
 import marked from 'marked';
 import { exec } from 'child_process';
@@ -301,6 +303,15 @@ export default {
         const modID = parsed.searchParams.get('modID');
         this.selectedMod = this.availableMods.find((mod) => mod.id === modID);
         this.$bvModal.show('modal-uninstall');
+      }
+    });
+    this.$electron.ipcRenderer.on('toggleDebug', () => {
+      toggleDebug();
+    });
+    this.$electron.ipcRenderer.on('clearCache', () => {
+      clearCache();
+      if (this.selectedSatisfactoryInstall) {
+        this.selectedSatisfactoryInstall.clearCache();
       }
     });
   },

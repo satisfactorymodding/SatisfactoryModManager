@@ -1,6 +1,6 @@
 
 import {
-  app, BrowserWindow, ipcMain, shell,
+  app, BrowserWindow, ipcMain, shell, Menu,
 } from 'electron';
 import path from 'path';
 import { autoUpdater } from 'electron-updater';
@@ -25,6 +25,74 @@ function openedByUrl(url) {
     mainWindow.webContents.send('openedByUrl', url);
   }
 }
+
+const isMac = process.platform === 'darwin';
+
+const template = [
+  // { role: 'appMenu' }
+  ...(isMac ? [{
+    label: app.name,
+    submenu: [
+      { role: 'about' },
+      { type: 'separator' },
+      { role: 'services' },
+      { type: 'separator' },
+      { role: 'hide' },
+      { role: 'hideothers' },
+      { role: 'unhide' },
+      { type: 'separator' },
+      { role: 'quit' },
+    ],
+  }] : []),
+  // { role: 'fileMenu' }
+  {
+    label: 'File',
+    submenu: [
+      isMac ? { role: 'close' } : { role: 'quit' },
+    ],
+  },
+  // { role: 'viewMenu' }
+  {
+    label: 'View',
+    submenu: [
+      { role: 'reload' },
+      { role: 'forcereload' },
+      { role: 'toggledevtools' },
+      { type: 'separator' },
+      { role: 'resetzoom' },
+      { role: 'zoomin' },
+      { role: 'zoomout' },
+      { type: 'separator' },
+      { role: 'togglefullscreen' },
+    ],
+  },
+  {
+    role: 'help',
+    submenu: [
+      {
+        label: 'Join the Satisfactory Modding Discord',
+        click: () => {
+          shell.openExternal('https://discord.gg/TShj39G');
+        },
+      },
+      {
+        label: 'Toggle Debug Mode',
+        click: () => {
+          mainWindow.webContents.send('toggleDebug');
+        },
+      },
+      {
+        label: 'Clear Cache',
+        click: () => {
+          mainWindow.webContents.send('clearCache');
+        },
+      },
+    ],
+  },
+];
+
+const menu = Menu.buildFromTemplate(template);
+Menu.setApplicationMenu(menu);
 
 function createWindow() {
   /**
