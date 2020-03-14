@@ -5,7 +5,6 @@ import BootstrapVue from 'bootstrap-vue';
 import vueElectron from 'vue-electron';
 import App from './App';
 import router from './router';
-import store from './store';
 
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -23,6 +22,5 @@ Vue.use(BootstrapVue);
 new Vue({
   components: { App },
   router,
-  store,
   template: '<App/>',
 }).$mount('#app');
