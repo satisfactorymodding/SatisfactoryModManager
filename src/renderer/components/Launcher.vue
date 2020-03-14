@@ -49,6 +49,12 @@
               placeholder="Search"
               aria-label="Search"
             >
+            <button
+              v-b-modal.filters-modal
+              class="btn btn-primary"
+            >
+              Sort/Filter
+            </button>
             <br>
             <list
               v-if="searchMods"
@@ -89,7 +95,7 @@
                   class="col-2 d-inline-flex align-items-center"
                   :style="!isModSML20Compatible(item) ? 'background-color: #837971' : ''"
                 >
-                  <strong>{{ item.last_version_date ? new Date(item.last_version_date).toLocaleDateString() : 'N/A' }}</strong>
+                  <strong>{{ item.last_version_date ? item.last_version_date.toLocaleDateString() : 'N/A' }}</strong>
                 </div>
                 <div
                   class="col-2 d-inline-flex align-items-center"
@@ -158,12 +164,10 @@
     </div>
     <b-modal
       id="modal-install"
-      ref="modal"
       title="Install Mod"
       @ok="handleModalInstallOk"
     >
       <form
-        ref="form"
         @submit.stop.prevent="handleModalInstallSubmit"
       >
         <select
@@ -197,12 +201,10 @@
     </b-modal>
     <b-modal
       id="modal-uninstall"
-      ref="modal"
       title="Uninstall Mod"
       @ok="handleModalUninstallOk"
     >
       <form
-        ref="form"
         @submit.stop.prevent="handleModalUninstallSubmit"
       >
         <select
@@ -218,6 +220,49 @@
           </option>
         </select>
         <p>Mod: {{ selectedMod.name }}</p>
+      </form>
+    </b-modal>
+    <b-modal
+      id="filters-modal"
+      title="Uninstall Mod"
+      ok-only
+    >
+      <form>
+        <b-form-checkbox
+          v-model="filters.compatibleOnly"
+          switch
+          size="lg"
+        >
+          Compatible with Update 3
+        </b-form-checkbox>
+        <label for="sortBySelect">Sort by:</label>
+        <select
+          id="sortBySelect"
+          v-model="filters.sortBy"
+          class="form-control"
+        >
+          <option
+            v-for="sortByOption in sortByOptions"
+            :key="sortByOption.value"
+            :value="sortByOption.value"
+          >
+            {{ sortByOption.displayName }}
+          </option>
+        </select>
+        <label for="sortOrderSelect">Order:</label>
+        <select
+          id="sortOrderSelect"
+          v-model="filters.sortOrder"
+          class="form-control"
+        >
+          <option
+            v-for="sortOrderOption in sortOrderOptions"
+            :key="sortOrderOption.value"
+            :value="sortOrderOption.value"
+          >
+            {{ sortOrderOption.displayName }}
+          </option>
+        </select>
       </form>
     </b-modal>
   </main>
@@ -255,8 +300,49 @@ export default {
       selectedMod: {},
       searchMods: [],
       search: '',
+      filters: {
+        compatibleOnly: false,
+        sortBy: 'lastVersionDate', // lastVersionDate, popularity, hotness, downloads, views
+        sortOrder: 'descending', // ascending, descending
+      },
       inProgress: [],
       modalInstallModVersion: {},
+      sortByOptions: [
+        {
+          value: 'name',
+          displayName: 'Name',
+        },
+        {
+          value: 'lastVersionDate',
+          displayName: 'Last Version Date',
+        },
+        {
+          value: 'popularity',
+          displayName: 'Popularity (downloads)',
+        },
+        {
+          value: 'hotness',
+          displayName: 'Hotness (views)',
+        },
+        {
+          value: 'downloads',
+          displayName: 'Downloads',
+        },
+        {
+          value: 'views',
+          displayName: 'Views',
+        },
+      ],
+      sortOrderOptions: [
+        {
+          value: 'ascending',
+          displayName: 'Ascending',
+        },
+        {
+          value: 'descending',
+          displayName: 'Descending',
+        },
+      ],
     };
   },
   computed: {
@@ -287,6 +373,12 @@ export default {
   watch: {
     search() {
       this.refreshSearch();
+    },
+    filters: {
+      handler() {
+        this.refreshSearch();
+      },
+      deep: true,
     },
   },
   mounted() {
@@ -356,7 +448,31 @@ export default {
       return semver.satisfies(version.sml_version, '>=2.0.0');
     },
     refreshSearch() {
-      this.searchMods = this.availableMods.filter((mod) => mod.name.toLowerCase().includes(this.search.toLowerCase()));
+      this.searchMods = this.availableMods.filter((mod) => mod.name.toLowerCase().includes(this.search.toLowerCase())
+        && (!this.filters.compatibleOnly || this.isModSML20Compatible(mod)));
+      this.searchMods.sort((modA, modB) => {
+        switch (this.filters.sortBy) {
+          case 'name':
+            return modB.name.localeCompare(modA.name);
+          case 'popularity':
+            return modB.popularity - modA.popularity;
+          case 'hotness':
+            return modB.hotness - modA.hotness;
+          case 'downloads':
+            return modB.downloads - modA.downloads;
+          case 'views':
+            return modB.views - modA.views;
+          case 'lastVersionDate':
+          default:
+            if (modB.last_version_date && modA.last_version_date) {
+              return modB.last_version_date.getTime() - modA.last_version_date.getTime();
+            }
+            return 0;
+        }
+      });
+      if (this.filters.sortOrder === 'ascending') {
+        this.searchMods.reverse();
+      }
     },
     refreshAvailableMods() {
       return getAvailableMods().then((mods) => {
