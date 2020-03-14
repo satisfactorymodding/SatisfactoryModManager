@@ -67,6 +67,17 @@ const template = [
     ],
   },
   {
+    label: 'For Mod Developers',
+    submenu: [
+      {
+        label: 'Toggle SML always installed',
+        click: () => {
+          mainWindow.webContents.send('toggleSMLUserInstalled');
+        },
+      },
+    ],
+  },
+  {
     role: 'help',
     submenu: [
       {

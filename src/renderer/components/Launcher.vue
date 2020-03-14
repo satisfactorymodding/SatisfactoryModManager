@@ -17,17 +17,24 @@
           </select>
         </div>
         <div class="col-auto">
-          <div class="column">
-            <button
-              class="btn btn-primary"
-              @click="launchSatisfactory"
-            >
-              Launch Satisfactory
-            </button>
-          </div>
+          <button
+            class="btn btn-primary"
+            @click="launchSatisfactory"
+          >
+            Launch Satisfactory
+          </button>
         </div>
         <div class="col-auto d-inline-flex align-items-center">
           <strong>SML: {{ selectedSatisfactoryInstall ? (selectedSatisfactoryInstall.smlVersion || 'Install a mod to install SML') : 'Select a Satisfactory Install' }}</strong>
+        </div>
+        <div class="col-1">
+          <div
+            v-if="SMLInProgress"
+            class="spinner-border"
+            role="status"
+          >
+            <span class="sr-only">Loading...</span>
+          </div>
         </div>
       </div>
       <div
@@ -294,7 +301,6 @@ export default {
       selectedSatisfactoryInstall: null,
       satisfactoryInstalls: [],
       availableMods: [],
-      installedSMLVersion: '',
       latestSMLVersion: {},
       SMLInProgress: false,
       selectedMod: {},
@@ -359,16 +365,6 @@ export default {
       }
       return el.innerHTML;
     },
-    hasSMLUpdates() {
-      return (
-        !semver.valid(this.installedSMLVersion)
-        || (semver.valid(this.latestSMLVersion.version)
-          && semver.lt(this.installedSMLVersion, this.latestSMLVersion.version))
-      );
-    },
-    isSMLInstalled() {
-      return !!semver.valid(this.installedSMLVersion);
-    },
   },
   watch: {
     search() {
@@ -405,6 +401,9 @@ export default {
       if (this.selectedSatisfactoryInstall) {
         this.selectedSatisfactoryInstall.clearCache();
       }
+    });
+    this.$electron.ipcRenderer.on('toggleSMLUserInstalled', () => {
+      this.toggleSMLUserInstalled();
     });
   },
   created() {
@@ -539,15 +538,14 @@ export default {
         exec(`start "" "${this.selectedSatisfactoryInstall.launchPath}"`).unref();
       }
     },
-    updateSML() {
+    toggleSMLUserInstalled() {
       this.SMLInProgress = true;
-      return this.selectedSatisfactoryInstall.updateSML().then(() => {
-        this.SMLInProgress = false;
-      });
-    },
-    uninstallSML() {
-      this.SMLInProgress = true;
-      return this.selectedSatisfactoryInstall.uninstallSML().then(() => {
+      if (this.selectedSatisfactoryInstall && this.selectedSatisfactoryInstall.smlVersion) {
+        return this.selectedSatisfactoryInstall.uninstallSML().then(() => {
+          this.SMLInProgress = false;
+        });
+      }
+      return this.selectedSatisfactoryInstall.installSML().then(() => {
         this.SMLInProgress = false;
       });
     },
