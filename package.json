@@ -70,6 +70,7 @@
     "electron-updater": "^4.2.2",
     "jquery": "^3.4.1",
     "marked": "^0.7.0",
+    "platform-folders": "^0.4.1",
     "sanitize-html": "^1.21.1",
     "satisfactory-mod-launcher-api": "1.0.0",
     "semver": "^6.3.0",

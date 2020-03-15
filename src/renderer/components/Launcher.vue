@@ -292,7 +292,6 @@
 </template>
 
 <script>
-// TODO: display errors
 import semver from 'semver';
 import {
   getLatestSMLVersion,
@@ -305,7 +304,9 @@ import marked from 'marked';
 import { exec } from 'child_process';
 import sanitizeHtml from 'sanitize-html';
 import List from './List';
+import { getSetting, saveSetting } from '../settings';
 
+// TODO: configs
 
 export default {
   name: 'Launcher',
@@ -404,8 +405,12 @@ export default {
     filters: {
       handler() {
         this.refreshSearch();
+        saveSetting('filters', this.filters);
       },
       deep: true,
+    },
+    selectedSatisfactoryInstall() {
+      saveSetting('selectedSFInstall', this.selectedSatisfactoryInstall.installLocation);
     },
   },
   mounted() {
@@ -438,9 +443,10 @@ export default {
     });
   },
   created() {
+    const savedSelectedSFInstall = getSetting('selectedSFInstall', undefined);
     Promise.all(
       [
-        this.refreshSatisfactoryInstalls(),
+        this.refreshSatisfactoryInstalls(savedSelectedSFInstall),
         this.refreshAvailableMods(),
         getLatestSMLVersion().then((smlVersion) => {
           this.latestSMLVersion = smlVersion.version;
@@ -448,6 +454,12 @@ export default {
       ],
     ).then(() => {
       this.$electron.ipcRenderer.send('vue-ready');
+      const savedFilters = getSetting('filters', this.filters);
+      Object.keys(this.filters).forEach((filter) => {
+        if (savedFilters[filter]) {
+          this.filters[filter] = savedFilters[filter];
+        }
+      });
     });
   },
   methods: {
@@ -558,12 +570,16 @@ export default {
         this.installMod(modVersion);
       }
     },
-    refreshSatisfactoryInstalls() {
+    refreshSatisfactoryInstalls(savedSelectedInstall) {
       return getInstalls().then((installs) => {
         this.satisfactoryInstalls = installs;
         if (this.satisfactoryInstalls.length > 0) {
-          const defaultInstall = this.satisfactoryInstalls[0];
-          this.selectedSatisfactoryInstall = defaultInstall;
+          if (savedSelectedInstall) {
+            this.selectedSatisfactoryInstall = this.satisfactoryInstalls.find((install) => install.installLocation === savedSelectedInstall) || this.satisfactoryInstalls[0];
+          } else {
+            const defaultInstall = this.satisfactoryInstalls[0];
+            this.selectedSatisfactoryInstall = defaultInstall;
+          }
         }
       });
     },
