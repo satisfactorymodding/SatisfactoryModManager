@@ -37,17 +37,57 @@
           </div>
         </div>
       </div>
+      <div class="row flex-grow-0 flex-shrink-0 my-2">
+        <div class="col-5">
+          <select
+            v-model="selectedConfig"
+            class="form-control"
+          >
+            <option
+              v-for="config in availableConfigs"
+              :key="config"
+              :value="config"
+            >
+              {{ config }}
+            </option>
+          </select>
+        </div>
+        <div class="col-auto">
+          <button
+            class="btn btn-primary"
+            @click="saveSelectedConfig"
+          >
+            Save
+          </button>
+        </div>
+        <div class="col-auto">
+          <button
+            class="btn btn-primary"
+            @click="loadSelectedConfig"
+          >
+            Load
+          </button>
+        </div>
+        <div class="col-auto">
+          <button
+            class="btn btn-primary"
+            @click="deleteSelectedConfig"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
       <div
         class="row my-2 flex-fill container-fluid my-2"
-        style="font-size: 14px;"
+        style="font-size: 14px; width: 100%"
       >
         <div
           class="row selection-row"
-          style="height: 50%"
+          style="height: 50%; width: 100%"
         >
           <div
-            class="col-8 d-flex flex-column"
-            style="height: 100%"
+            class="col-auto d-flex flex-column"
+            style="height: 100%; width: 100%"
           >
             <input
               v-model="search"
@@ -70,14 +110,16 @@
               :can-select="true"
               class="flex-fill"
             >
-              <template slot-scope="{item}">
+              <template
+                slot-scope="{item}"
+              >
                 <div
                   class="col-1 p-0"
+                  :style="!isModSML20Compatible(item) ? 'background-color: #837971' : ''"
                 >
                   <img
                     :src="item.logo || noImageURL"
-                    width="100%"
-                    :style="!isModSML20Compatible(item) ? 'background-color: #837971' : ''"
+                    width="50px"
                   >
                 </div>
                 <div
@@ -116,37 +158,6 @@
                   >
                     {{ !item.versions[0] ? 'N/A' : (isModSML20Compatible(item) ? (isModVersionInstalled(item.versions[0]) ? "Remove" : (isModInstalled(item) ? "Update" : "Install")) : 'Outdated') }}
                   </button>
-                </div>
-              </template>
-            </list>
-          </div>
-          <div
-            class="col-4"
-            style="height: 100%"
-          >
-            <list
-              v-if="selectedMod && selectedMod.versions"
-              :objects="selectedMod.versions"
-              :can-select="false"
-            >
-              <template slot-scope="{item}">
-                <div
-                  class="col-3"
-                  style="min-width: 150px"
-                >
-                  <button
-                    :class="'my-1 btn ' + (isModVersionInstalled(item) ? 'btn-secondary' : 'btn-primary')"
-                    style="width: 100%"
-                    :disabled="!isVersionSML20Compatible(item)"
-                    @click="toggleModInstalled(item)"
-                  >
-                    {{ isVersionSML20Compatible(item) ? (isModVersionInstalled(item) ? "Remove" : "Install") : "Outdated" }}
-                  </button>
-                </div>
-                <div class="col-2 d-inline-flex align-items-center">
-                  <strong>{{ item.version }}</strong>
-                </div>
-                <div class="col-1">
                   <div
                     v-if="inProgress.includes(item)"
                     class="spinner-border"
@@ -294,11 +305,12 @@
 <script>
 import semver from 'semver';
 import {
-  getLatestSMLVersion,
   getInstalls,
   getAvailableMods,
   toggleDebug,
   clearCache,
+  getConfigs,
+  deleteConfig,
 } from 'satisfactory-mod-launcher-api';
 import marked from 'marked';
 import { exec } from 'child_process';
@@ -317,10 +329,11 @@ export default {
     return {
       selectedSatisfactoryInstall: null,
       satisfactoryInstalls: [],
-      availableMods: [],
-      latestSMLVersion: {},
-      SMLInProgress: false,
       selectedMod: {},
+      availableMods: [],
+      selectedConfig: '',
+      availableConfigs: [],
+      SMLInProgress: false,
       searchMods: [],
       search: '',
       filters: {
@@ -412,6 +425,9 @@ export default {
     selectedSatisfactoryInstall() {
       saveSetting('selectedSFInstall', this.selectedSatisfactoryInstall.installLocation);
     },
+    selectedConfig() {
+      saveSetting('selectedConfig', this.selectedConfig);
+    },
   },
   mounted() {
     this.$electron.ipcRenderer.on('openedByUrl', (e, url) => {
@@ -444,13 +460,12 @@ export default {
   },
   created() {
     const savedSelectedSFInstall = getSetting('selectedSFInstall', undefined);
+    this.selectedConfig = getSetting('selectedConfig', 'modded');
     Promise.all(
       [
         this.refreshSatisfactoryInstalls(savedSelectedSFInstall),
         this.refreshAvailableMods(),
-        getLatestSMLVersion().then((smlVersion) => {
-          this.latestSMLVersion = smlVersion.version;
-        }),
+        this.refreshAvailableConfigs(),
       ],
     ).then(() => {
       this.$electron.ipcRenderer.send('vue-ready');
@@ -519,11 +534,30 @@ export default {
         this.searchMods.reverse();
       }
     },
+    saveSelectedConfig() {
+      this.selectedSatisfactoryInstall.saveConfig(this.selectedConfig);
+    },
+    loadSelectedConfig() {
+      this.selectedSatisfactoryInstall.loadConfig(this.selectedConfig).then(() => {
+        this.refreshAvailableMods();
+      });
+    },
+    deleteSelectedConfig() {
+      deleteConfig(this.selectedConfig);
+      this.refreshAvailableConfigs();
+    },
     refreshAvailableMods() {
+      const currentlySelectedModID = this.selectedMod.id;
       return getAvailableMods().then((mods) => {
         this.availableMods = mods;
         this.refreshSearch();
+        this.selectedMod = this.searchMods.find((mod) => mod.id === currentlySelectedModID) || this.searchMods[0] || null;
       });
+    },
+    refreshAvailableConfigs() {
+      const currentlySelectedIdx = this.availableConfigs.indexOf(this.selectedConfig);
+      this.availableConfigs = getConfigs();
+      this.selectedConfig = this.availableConfigs.includes(this.selectedConfig) ? this.selectedConfig : this.availableConfigs[Math.min(currentlySelectedIdx, this.availableConfigs - 1)];
     },
     isModVersionInstalled(modVersion) {
       if (modVersion && modVersion.mod_id && modVersion.version) {
