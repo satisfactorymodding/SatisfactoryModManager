@@ -705,17 +705,21 @@ export default {
         });
     },
     installUninstallUpdate(mod) {
-      this.inProgress.push(mod);
-      if (this.isModInstalled(mod)) {
-        if (this.isModVersionInstalled(mod.versions[0])) {
-          this.uninstallMod(mod).then(() => {
-            this.checkDevSML();
-          });
+      if (this.inProgress.length === 0) {
+        this.inProgress.push(mod);
+        if (this.isModInstalled(mod)) {
+          if (this.isModVersionInstalled(mod.versions[0])) {
+            this.uninstallMod(mod).then(() => {
+              this.checkDevSML();
+            });
+          } else {
+            this.updateMod(mod);
+          }
         } else {
-          this.updateMod(mod);
+          this.installMod(mod);
         }
       } else {
-        this.installMod(mod);
+        this.$bvModal.msgBoxOk('Another operation is currently in progress. Wait for it to finish.');
       }
     },
     refreshSatisfactoryInstalls(savedSelectedInstall) {
