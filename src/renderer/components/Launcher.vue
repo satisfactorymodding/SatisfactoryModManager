@@ -27,7 +27,7 @@
         <div class="col-auto d-inline-flex align-items-center">
           <strong>SML: {{ selectedSatisfactoryInstall ? (selectedSatisfactoryInstall.smlVersion || 'Install a mod to install SML') : 'Select a Satisfactory Install' }}</strong>
         </div>
-        <div class="col-1">
+        <div class="col-1 d-inline-flex align-items-center">
           <div
             v-if="SMLInProgress"
             class="spinner-border"
@@ -38,7 +38,10 @@
         </div>
       </div>
       <div class="row flex-grow-0 flex-shrink-0 my-2">
-        <div class="col-5">
+        <div class="col-1 d-inline-flex align-items-center">
+          Configs:
+        </div>
+        <div class="col-4">
           <select
             v-model="selectedConfig"
             class="form-control"
@@ -68,12 +71,29 @@
             Load
           </button>
         </div>
+        <div class="col-1 d-inline-flex align-items-center">
+          <div
+            v-if="configLoadInProgress"
+            class="spinner-border"
+            role="status"
+          >
+            <span class="sr-only">Loading...</span>
+          </div>
+        </div>
         <div class="col-auto">
           <button
             class="btn btn-primary"
             @click="deleteSelectedConfig"
           >
             Delete
+          </button>
+        </div>
+        <div class="col-auto">
+          <button
+            class="btn btn-primary"
+            @click="newConfig"
+          >
+            New
           </button>
         </div>
       </div>
@@ -303,6 +323,30 @@
         </select>
       </form>
     </b-modal>
+    <b-modal
+      id="modal-new-config"
+      title="Add new config"
+      @ok="handleModalNewConfigOk"
+    >
+      <form
+        ref="newConfigForm"
+        @submit.stop.prevent="handleModalNewConfigSubmit"
+      >
+        <b-form-group
+          :state="newConfigNameState"
+          label="Config name"
+          label-for="config-name-input"
+          invalid-feedback="Config name is required"
+        >
+          <b-form-input
+            id="config-name-input"
+            v-model="newConfigName"
+            :state="newConfigNameState"
+            required
+          />
+        </b-form-group>
+      </form>
+    </b-modal>
   </main>
 </template>
 
@@ -337,7 +381,11 @@ export default {
       availableMods: [],
       selectedConfig: '',
       availableConfigs: [],
+      newConfigName: '',
+      newConfigNameState: null,
+      configLoadInProgress: false,
       SMLInProgress: false,
+      devSML: false,
       searchMods: [],
       search: '',
       filters: {
@@ -428,6 +476,7 @@ export default {
     },
     selectedSatisfactoryInstall() {
       saveSetting('selectedSFInstall', this.selectedSatisfactoryInstall.installLocation);
+      this.checkDevSML();
     },
     selectedConfig() {
       saveSetting('selectedConfig', this.selectedConfig);
@@ -458,13 +507,14 @@ export default {
         this.selectedSatisfactoryInstall.clearCache();
       }
     });
-    this.$electron.ipcRenderer.on('toggleSMLUserInstalled', () => {
-      this.toggleSMLUserInstalled();
+    this.$electron.ipcRenderer.on('toggleDevSML', () => {
+      this.toggleDevSML();
     });
   },
   created() {
     const savedSelectedSFInstall = getSetting('selectedSFInstall', undefined);
     this.selectedConfig = getSetting('selectedConfig', 'modded');
+    this.devSML = getSetting('devSML', false);
     Promise.all(
       [
         this.refreshSatisfactoryInstalls(savedSelectedSFInstall),
@@ -531,6 +581,12 @@ export default {
             if (modB.last_version_date && modA.last_version_date) {
               return modB.last_version_date.getTime() - modA.last_version_date.getTime();
             }
+            if (modB.last_version_date) {
+              return 1;
+            }
+            if (modA.last_version_date) {
+              return -1;
+            }
             return 0;
         }
       });
@@ -539,16 +595,53 @@ export default {
       }
     },
     saveSelectedConfig() {
-      this.selectedSatisfactoryInstall.saveConfig(this.selectedConfig);
+      this.selectedSatisfactoryInstall.saveConfig(this.selectedConfig).catch((err) => {
+        this.$bvModal.msgBoxOk(err.toString());
+      });
     },
     loadSelectedConfig() {
+      this.configLoadInProgress = true;
       this.selectedSatisfactoryInstall.loadConfig(this.selectedConfig).then(() => {
         this.refreshAvailableMods();
+        this.checkDevSML();
+        this.configLoadInProgress = false;
+      }).catch((err) => {
+        this.$bvModal.msgBoxOk(err.toString());
+        this.configLoadInProgress = false;
       });
     },
     deleteSelectedConfig() {
-      deleteConfig(this.selectedConfig);
+      try {
+        deleteConfig(this.selectedConfig);
+      } catch (err) {
+        this.$bvModal.msgBoxOk(err.toString());
+      }
       this.refreshAvailableConfigs();
+    },
+    newConfig() {
+      this.$bvModal.show('modal-new-config');
+    },
+    checkNewConfigFormValidity() {
+      const valid = this.$refs.newConfigForm.checkValidity();
+      this.newConfigNameState = valid;
+      return valid;
+    },
+    handleModalNewConfigOk(bvModalEvt) {
+      bvModalEvt.preventDefault();
+      this.handleModalNewConfigSubmit();
+    },
+    handleModalNewConfigSubmit() {
+      if (!this.checkNewConfigFormValidity()) {
+        return;
+      }
+      this.selectedConfig = this.newConfigName;
+      this.newConfigName = '';
+      this.newConfigNameState = null;
+      this.saveSelectedConfig();
+      this.refreshAvailableConfigs();
+      this.$nextTick(() => {
+        this.$bvModal.hide('modal-new-config');
+      });
     },
     refreshAvailableMods() {
       const currentlySelectedModID = this.selectedMod.id;
@@ -561,7 +654,7 @@ export default {
     refreshAvailableConfigs() {
       const currentlySelectedIdx = this.availableConfigs.indexOf(this.selectedConfig);
       this.availableConfigs = getConfigs();
-      this.selectedConfig = this.availableConfigs.includes(this.selectedConfig) ? this.selectedConfig : this.availableConfigs[Math.min(currentlySelectedIdx, this.availableConfigs - 1)];
+      this.selectedConfig = this.availableConfigs.includes(this.selectedConfig) ? this.selectedConfig : this.availableConfigs[Math.min(currentlySelectedIdx, this.availableConfigs.length - 1)];
     },
     isModVersionInstalled(modVersion) {
       if (modVersion && modVersion.mod_id && modVersion.version) {
@@ -615,7 +708,9 @@ export default {
       this.inProgress.push(mod);
       if (this.isModInstalled(mod)) {
         if (this.isModVersionInstalled(mod.versions[0])) {
-          this.uninstallMod(mod);
+          this.uninstallMod(mod).then(() => {
+            this.checkDevSML();
+          });
         } else {
           this.updateMod(mod);
         }
@@ -633,6 +728,7 @@ export default {
             const defaultInstall = this.satisfactoryInstalls[0];
             this.selectedSatisfactoryInstall = defaultInstall;
           }
+          this.checkDevSML();
         }
       });
     },
@@ -641,16 +737,27 @@ export default {
         exec(`start "" "${this.selectedSatisfactoryInstall.launchPath}"`).unref();
       }
     },
-    toggleSMLUserInstalled() {
-      this.SMLInProgress = true;
-      if (this.selectedSatisfactoryInstall && this.selectedSatisfactoryInstall.smlVersion) {
-        return this.selectedSatisfactoryInstall.uninstallSML().then(() => {
-          this.SMLInProgress = false;
-        });
+    checkDevSML() {
+      if (this.selectedSatisfactoryInstall) {
+        if (this.devSML) {
+          if (!this.selectedSatisfactoryInstall.smlVersion) {
+            this.SMLInProgress = true;
+            return this.selectedSatisfactoryInstall.installSML().then(() => {
+              this.SMLInProgress = false;
+            });
+          }
+        } else if (this.selectedSatisfactoryInstall.smlVersion) {
+          this.SMLInProgress = true;
+          return this.selectedSatisfactoryInstall.uninstallSML().then(() => {
+            this.SMLInProgress = false;
+          });
+        }
       }
-      return this.selectedSatisfactoryInstall.installSML().then(() => {
-        this.SMLInProgress = false;
-      });
+      return Promise.resolve();
+    },
+    toggleDevSML() {
+      this.devSML = !this.devSML;
+      return this.checkDevSML();
     },
   },
 };

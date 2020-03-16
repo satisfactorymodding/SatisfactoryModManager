@@ -72,7 +72,7 @@ const template = [
       {
         label: 'Toggle SML always installed',
         click: () => {
-          mainWindow.webContents.send('toggleSMLUserInstalled');
+          mainWindow.webContents.send('toggleDevSML');
         },
       },
     ],
@@ -112,8 +112,8 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     height: 700,
     useContentSize: true,
-    width: 900,
-    minWidth: 860,
+    width: 1000,
+    minWidth: 955,
     minHeight: 600,
     webPreferences: {
       nodeIntegration: true,
