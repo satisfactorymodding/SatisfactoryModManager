@@ -135,7 +135,7 @@
                   <strong>{{ item.versions[0] ? item.versions[0].version : 'N/A' }}</strong>
                 </div>
                 <div
-                  class="col-3 d-inline-flex align-items-center"
+                  class="col-2 d-inline-flex align-items-center"
                   :style="!isModSML20Compatible(item) ? 'background-color: #837971' : ''"
                 >
                   <strong>{{ item.authors.map((author) => author.user.username).join(', ') }}</strong>
@@ -154,12 +154,16 @@
                     :class="'my-1 btn ' + ((!item.versions[0] || isModVersionInstalled(item.versions[0])) ? 'btn-secondary' : 'btn-primary')"
                     style="font-size: 13px; width: 100%"
                     :disabled="!item.versions[0] || !isModSML20Compatible(item)"
-                    @click="toggleModInstalled(item.versions[0])"
+                    @click="installUninstallUpdate(item)"
                   >
                     {{ !item.versions[0] ? 'N/A' : (isModSML20Compatible(item) ? (isModVersionInstalled(item.versions[0]) ? "Remove" : (isModInstalled(item) ? "Update" : "Install")) : 'Outdated') }}
                   </button>
+                </div>
+                <div
+                  v-if="inProgress.includes(item)"
+                  class="col-1 d-inline-flex align-items-center"
+                >
                   <div
-                    v-if="inProgress.includes(item)"
                     class="spinner-border"
                     role="status"
                   >
@@ -574,34 +578,49 @@ export default {
         this.selectedMod = this.searchMods.find((mod) => mod.id === currentModId);
       });
     },
-    installMod(modVersion) {
+    installMod(mod) {
       return this.selectedSatisfactoryInstall
-        .installMod(modVersion.mod_id, modVersion.version)
+        .installMod(mod.id)
         .then(() => {
-          this.inProgress.splice(this.inProgress.indexOf(modVersion));
+          this.inProgress.splice(this.inProgress.indexOf(mod));
           this.refreshCurrentMod();
         }).catch((err) => {
           this.$bvModal.msgBoxOk(err.toString());
-          this.inProgress.splice(this.inProgress.indexOf(modVersion));
+          this.inProgress.splice(this.inProgress.indexOf(mod));
         });
     },
-    uninstallMod(modVersion) {
+    updateMod(mod) {
       return this.selectedSatisfactoryInstall
-        .uninstallMod(modVersion.mod_id)
+        .updateMod(mod.id)
         .then(() => {
-          this.inProgress.splice(this.inProgress.indexOf(modVersion));
+          this.inProgress.splice(this.inProgress.indexOf(mod));
           this.refreshCurrentMod();
         }).catch((err) => {
           this.$bvModal.msgBoxOk(err.toString());
-          this.inProgress.splice(this.inProgress.indexOf(modVersion));
+          this.inProgress.splice(this.inProgress.indexOf(mod));
         });
     },
-    toggleModInstalled(modVersion) {
-      this.inProgress.push(modVersion);
-      if (this.isModVersionInstalled(modVersion)) {
-        this.uninstallMod(modVersion);
+    uninstallMod(mod) {
+      return this.selectedSatisfactoryInstall
+        .uninstallMod(mod.id)
+        .then(() => {
+          this.inProgress.splice(this.inProgress.indexOf(mod));
+          this.refreshCurrentMod();
+        }).catch((err) => {
+          this.$bvModal.msgBoxOk(err.toString());
+          this.inProgress.splice(this.inProgress.indexOf(mod));
+        });
+    },
+    installUninstallUpdate(mod) {
+      this.inProgress.push(mod);
+      if (this.isModInstalled(mod)) {
+        if (this.isModVersionInstalled(mod.versions[0])) {
+          this.uninstallMod(mod);
+        } else {
+          this.updateMod(mod);
+        }
       } else {
-        this.installMod(modVersion);
+        this.installMod(mod);
       }
     },
     refreshSatisfactoryInstalls(savedSelectedInstall) {
