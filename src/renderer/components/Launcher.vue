@@ -6,6 +6,7 @@
           <select
             v-model="selectedSatisfactoryInstall"
             class="form-control"
+            :disabled="inProgress.length > 0 || configLoadInProgress"
           >
             <option
               v-for="install in satisfactoryInstalls"
@@ -45,6 +46,7 @@
           <select
             v-model="selectedConfig"
             class="form-control"
+            :disabled="inProgress.length > 0 || configLoadInProgress"
           >
             <option
               v-for="config in availableConfigs"
@@ -54,22 +56,6 @@
               {{ config }}
             </option>
           </select>
-        </div>
-        <div class="col-auto">
-          <button
-            class="btn btn-primary"
-            @click="saveSelectedConfig"
-          >
-            Save
-          </button>
-        </div>
-        <div class="col-auto">
-          <button
-            class="btn btn-primary"
-            @click="loadSelectedConfig"
-          >
-            Load
-          </button>
         </div>
         <div class="col-1 d-inline-flex align-items-center">
           <div
@@ -83,6 +69,7 @@
         <div class="col-auto">
           <button
             class="btn btn-primary"
+            :disabled="inProgress.length > 0 || configLoadInProgress"
             @click="deleteSelectedConfig"
           >
             Delete
@@ -91,6 +78,7 @@
         <div class="col-auto">
           <button
             class="btn btn-primary"
+            :disabled="inProgress.length > 0 || configLoadInProgress"
             @click="newConfig"
           >
             New
@@ -173,7 +161,7 @@
                   <button
                     :class="'my-1 btn ' + ((!item.versions[0] || isModVersionInstalled(item.versions[0])) ? 'btn-secondary' : 'btn-primary')"
                     style="font-size: 13px; width: 100%"
-                    :disabled="!item.versions[0] || !isModSML20Compatible(item)"
+                    :disabled="!item.versions[0] || !isModSML20Compatible(item) || inProgress.length > 0 || configLoadInProgress"
                     @click="installUninstallUpdate(item)"
                   >
                     {{ !item.versions[0] ? 'N/A' : (isModSML20Compatible(item) ? (isModVersionInstalled(item.versions[0]) ? "Remove" : (isModInstalled(item) ? "Update" : "Install")) : 'Outdated') }}
@@ -359,7 +347,7 @@ import {
   clearCache,
   getConfigs,
   deleteConfig,
-} from 'satisfactory-mod-launcher-api';
+} from 'satisfactory-mod-manager-api';
 import marked from 'marked';
 import { exec } from 'child_process';
 import sanitizeHtml from 'sanitize-html';
@@ -480,6 +468,7 @@ export default {
     },
     selectedConfig() {
       saveSetting('selectedConfig', this.selectedConfig);
+      this.loadSelectedConfig();
     },
   },
   mounted() {
@@ -513,7 +502,7 @@ export default {
   },
   created() {
     const savedSelectedSFInstall = getSetting('selectedSFInstall', undefined);
-    this.selectedConfig = getSetting('selectedConfig', 'modded');
+    this.selectedConfig = getSetting('selectedConfig', 'modded') || 'vanilla';
     this.devSML = getSetting('devSML', false);
     Promise.all(
       [
@@ -595,20 +584,25 @@ export default {
       }
     },
     saveSelectedConfig() {
-      this.selectedSatisfactoryInstall.saveConfig(this.selectedConfig).catch((err) => {
-        this.$bvModal.msgBoxOk(err.toString());
-      });
+      if (this.selectedSatisfactoryInstall) {
+        return this.selectedSatisfactoryInstall.saveConfig(this.selectedConfig).catch((err) => {
+          this.$bvModal.msgBoxOk(err.toString());
+        });
+      }
+      return Promise.resolve();
     },
     loadSelectedConfig() {
-      this.configLoadInProgress = true;
-      this.selectedSatisfactoryInstall.loadConfig(this.selectedConfig).then(() => {
-        this.refreshAvailableMods();
-        this.checkDevSML();
-        this.configLoadInProgress = false;
-      }).catch((err) => {
-        this.$bvModal.msgBoxOk(err.toString());
-        this.configLoadInProgress = false;
-      });
+      if (this.selectedSatisfactoryInstall) {
+        this.configLoadInProgress = true;
+        this.selectedSatisfactoryInstall.loadConfig(this.selectedConfig).then(() => {
+          this.refreshAvailableMods();
+          this.checkDevSML();
+          this.configLoadInProgress = false;
+        }).catch((err) => {
+          this.$bvModal.msgBoxOk(err.toString());
+          this.configLoadInProgress = false;
+        });
+      }
     },
     deleteSelectedConfig() {
       try {
@@ -675,8 +669,10 @@ export default {
       return this.selectedSatisfactoryInstall
         .installMod(mod.id)
         .then(() => {
-          this.inProgress.splice(this.inProgress.indexOf(mod));
-          this.refreshCurrentMod();
+          this.saveSelectedConfig().then(() => {
+            this.inProgress.splice(this.inProgress.indexOf(mod));
+            this.refreshCurrentMod();
+          });
         }).catch((err) => {
           this.$bvModal.msgBoxOk(err.toString());
           this.inProgress.splice(this.inProgress.indexOf(mod));
@@ -686,8 +682,10 @@ export default {
       return this.selectedSatisfactoryInstall
         .updateMod(mod.id)
         .then(() => {
-          this.inProgress.splice(this.inProgress.indexOf(mod));
-          this.refreshCurrentMod();
+          this.saveSelectedConfig().then(() => {
+            this.inProgress.splice(this.inProgress.indexOf(mod));
+            this.refreshCurrentMod();
+          });
         }).catch((err) => {
           this.$bvModal.msgBoxOk(err.toString());
           this.inProgress.splice(this.inProgress.indexOf(mod));
@@ -697,8 +695,10 @@ export default {
       return this.selectedSatisfactoryInstall
         .uninstallMod(mod.id)
         .then(() => {
-          this.inProgress.splice(this.inProgress.indexOf(mod));
-          this.refreshCurrentMod();
+          this.saveSelectedConfig().then(() => {
+            this.inProgress.splice(this.inProgress.indexOf(mod));
+            this.refreshCurrentMod();
+          });
         }).catch((err) => {
           this.$bvModal.msgBoxOk(err.toString());
           this.inProgress.splice(this.inProgress.indexOf(mod));

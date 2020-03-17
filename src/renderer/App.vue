@@ -17,7 +17,7 @@
 
 <script>
 export default {
-  name: 'SatisfactoryModLauncherGui',
+  name: 'SatisfactoryModManagerGUI',
 };
 </script>
 

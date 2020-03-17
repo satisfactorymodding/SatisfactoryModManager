@@ -1,14 +1,14 @@
-# Satisfactory Mod Launcher
+# Satisfactory Mod Manager
 
-Handles all the steps of installing mods, including download of SML and Bootstrapper. For questions, you can ask in the [Satisfactory Modding discord](https://discordapp.com/channels/370472939054956546/455857391477587979/677170263225270333)
+Handles all the steps of installing mods, including download of SML and Bootstrapper. For questions, you can ask in the [Satisfactory Modding discord](https://discord.gg/TShj39G)
 
 #### Installation
 
-Download the latest release from https://github.com/satisfactorymodding/SatisfactoryModLauncher/releases
+Download the latest release from https://github.com/satisfactorymodding/SatisfactoryModManager/releases
 
 #### Usage
 
-Just install it, choose an updated mod, and click install. Everything else is handled by SMLauncher
+Just install it, choose an updated mod, and click install. Everything else is handled by SMM
 
 #### Developmemnt
 ``` bash
