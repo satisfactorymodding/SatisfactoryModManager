@@ -20,6 +20,7 @@
         <div class="col-auto">
           <button
             class="btn btn-primary"
+            :disabled="inProgress.length > 0 || configLoadInProgress"
             @click="launchSatisfactory"
           >
             Launch Satisfactory
@@ -377,7 +378,7 @@ export default {
       searchMods: [],
       search: '',
       filters: {
-        compatibleOnly: false,
+        compatibleOnly: true,
         installedStatus: 'any',
         sortBy: 'lastVersionDate', // lastVersionDate, popularity, hotness, downloads, views
         sortOrder: 'descending', // ascending, descending
