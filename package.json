@@ -23,7 +23,7 @@
   },
   "build": {
     "productName": "Satisfactory Mod Manager",
-    "appId": "com.mircearoata.smmanagergui",
+    "appId": "com.mircearoata.smlaunchergui",
     "directories": {
       "output": "build"
     },
@@ -33,7 +33,7 @@
     "protocols": {
       "name": "Satisfactory Mod Manager",
       "schemes": [
-        "smmanager"
+        "smlauncher"
       ]
     },
     "dmg": {

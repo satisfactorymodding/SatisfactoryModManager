@@ -122,7 +122,7 @@ function createWindow() {
 
   ipcMain.once('vue-ready', () => {
     if (process.platform === 'win32') {
-      openedByUrl(process.argv.find((arg) => arg.startsWith('smmanager:')));
+      openedByUrl(process.argv.find((arg) => arg.startsWith('smlauncher:')));
     }
   });
 
@@ -141,7 +141,7 @@ function createWindow() {
 if (app.requestSingleInstanceLock()) {
   app.on('second-instance', (e, argv) => {
     if (process.platform === 'win32') {
-      openedByUrl(argv.find((arg) => arg.startsWith('smmanager:')));
+      openedByUrl(argv.find((arg) => arg.startsWith('smlauncher:')));
     }
     if (mainWindow) {
       if (mainWindow.isMinimized()) mainWindow.restore();
@@ -173,8 +173,8 @@ if (app.requestSingleInstanceLock()) {
     }
   });
 
-  if (!app.isDefaultProtocolClient('smmanager')) {
-    app.setAsDefaultProtocolClient('smmanager');
+  if (!app.isDefaultProtocolClient('smlauncher')) {
+    app.setAsDefaultProtocolClient('smlauncher');
   }
 
   app.on('will-finish-launching', () => {
