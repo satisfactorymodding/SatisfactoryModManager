@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'fs';
 import { getDataHome } from 'platform-folders';
 
-const appName = 'SatisfactoryModManager';
+const appName = 'SatisfactoryModLauncher';
 
 const settingsFilePath = path.join(getDataHome(), appName, 'settings.json');
 

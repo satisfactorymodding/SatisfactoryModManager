@@ -22,7 +22,7 @@
     "publish:linux": "yarn build && electron-builder build --linux"
   },
   "build": {
-    "productName": "Satisfactory Mod Manager",
+    "productName": "Satisfactory Mod Launcher",
     "appId": "com.mircearoata.smlaunchergui",
     "directories": {
       "output": "build"
@@ -31,7 +31,7 @@
       "dist/electron/**/*"
     ],
     "protocols": {
-      "name": "Satisfactory Mod Manager",
+      "name": "Satisfactory Mod Launcher",
       "schemes": [
         "smlauncher"
       ]
