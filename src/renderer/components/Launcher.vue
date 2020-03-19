@@ -166,6 +166,7 @@
                     :class="'my-1 btn ' + ((!item.versions[0] || isModVersionInstalled(item.versions[0])) ? 'btn-secondary' : 'btn-primary')"
                     style="font-size: 13px; width: 100%"
                     :disabled="!item.versions[0] || !isModSML20Compatible(item) || inProgress.length > 0 || configLoadInProgress || selectedConfig === 'vanilla'"
+                    :title="selectedConfig === 'vanilla' ? 'You cannot install mods in the vanilla config. Choose another config.' : ''"
                     @click="installUninstallUpdate(item)"
                   >
                     {{ !item.versions[0] ? 'N/A' : (isModSML20Compatible(item) ? (isModVersionInstalled(item.versions[0]) ? "Remove" : (isModInstalled(item) ? "Update" : "Install")) : 'Outdated') }}
@@ -181,6 +182,7 @@
                     :class="'my-1 btn btn-secondary'"
                     style="font-size: 13px; width: 100%"
                     :disabled="!item.versions[0] || !isModSML20Compatible(item) || inProgress.length > 0 || configLoadInProgress || selectedConfig === 'vanilla'"
+                    :title="selectedConfig === 'vanilla' ? 'You cannot install mods in the vanilla config. Choose another config.' : ''"
                     @click="$bvModal.show('modal-install')"
                   >
                     {{ !item.versions[0] ? 'N/A' : (isModSML20Compatible(item) ? 'Install old version' : 'Outdated') }}
