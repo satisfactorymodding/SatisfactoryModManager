@@ -275,7 +275,7 @@
     </b-modal>
     <b-modal
       id="filters-modal"
-      title="Uninstall Mod"
+      title="Filter Mods"
       ok-only
     >
       <form>
@@ -372,8 +372,6 @@ import { exec } from 'child_process';
 import sanitizeHtml from 'sanitize-html';
 import List from './List';
 import { getSetting, saveSetting } from '../settings';
-
-// TODO: configs
 
 export default {
   name: 'Launcher',

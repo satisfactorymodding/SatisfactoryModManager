@@ -20,3 +20,5 @@ thumbs.db
 
 *.exe
 external-dependencies/**/cache.json
+
+*.log
