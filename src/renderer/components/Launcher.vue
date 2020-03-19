@@ -354,6 +354,15 @@
         </b-form-group>
       </form>
     </b-modal>
+    <b-modal
+      id="modal-update-available"
+      :title="`New update available: ${availableUpdate ? availableUpdate.version : ''}`"
+      ok-only
+    >
+      <p>Update will be installed when the app closes.</p>
+      <!-- eslint-disable-next-line vue/no-v-html -->
+      <div v-html="availableUpdate ? availableUpdate.releaseNotes : ''" />
+    </b-modal>
   </main>
 </template>
 
@@ -451,6 +460,7 @@ export default {
           displayName: 'All',
         },
       ],
+      availableUpdate: null,
     };
   },
   computed: {
@@ -515,6 +525,10 @@ export default {
     });
     this.$electron.ipcRenderer.on('toggleDevSML', () => {
       this.toggleDevSML();
+    });
+    this.$electron.ipcRenderer.on('update-available', (e, updateInfo) => {
+      this.availableUpdate = updateInfo;
+      this.$bvModal.show('modal-update-available');
     });
   },
   created() {

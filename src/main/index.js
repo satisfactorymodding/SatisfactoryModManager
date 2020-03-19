@@ -163,8 +163,8 @@ if (app.requestSingleInstanceLock()) {
     }
   });
 
-  autoUpdater.on('update-downloaded', () => {
-    autoUpdater.quitAndInstall();
+  autoUpdater.on('update-available', (updateInfo) => {
+    mainWindow.webContents.send('update-available', updateInfo);
   });
 
   app.on('ready', () => {
