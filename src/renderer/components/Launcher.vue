@@ -124,6 +124,7 @@
               >
                 <div
                   class="col-1 p-0"
+                  style="flex: 0 0 7%; max-width: 7%;"
                   :style="!isModSML20Compatible(item) ? 'background-color: #837971' : ''"
                 >
                   <img
@@ -132,7 +133,8 @@
                   >
                 </div>
                 <div
-                  class="col-3 d-inline-flex align-items-center text-break"
+                  class="d-inline-flex align-items-center text-break"
+                  style="flex: 0 0 15%; max-width: 15%;"
                   :style="!isModSML20Compatible(item) ? 'background-color: #837971' : ''"
                 >
                   <strong>{{ item.name || '' }}</strong>
@@ -150,7 +152,8 @@
                   <strong>{{ item.authors.map((author) => author.user.username).join(', ') }}</strong>
                 </div>
                 <div
-                  class="col-2 d-inline-flex align-items-center"
+                  class="d-inline-flex align-items-center"
+                  style="flex: 0 0 10%; max-width: 10%;"
                   :style="!isModSML20Compatible(item) ? 'background-color: #837971' : ''"
                 >
                   <strong>{{ item.last_version_date ? item.last_version_date.toLocaleDateString() : 'N/A' }}</strong>
@@ -166,6 +169,21 @@
                     @click="installUninstallUpdate(item)"
                   >
                     {{ !item.versions[0] ? 'N/A' : (isModSML20Compatible(item) ? (isModVersionInstalled(item.versions[0]) ? "Remove" : (isModInstalled(item) ? "Update" : "Install")) : 'Outdated') }}
+                  </button>
+                </div>
+                <div
+                  class="d-inline-flex align-items-center"
+                  style="flex: 0 0 15%; max-width: 15%;"
+                  :style="!isModSML20Compatible(item) ? 'background-color: #837971' : ''"
+                >
+                  <button
+                    v-if="!isModInstalled(item)"
+                    :class="'my-1 btn btn-secondary'"
+                    style="font-size: 13px; width: 100%"
+                    :disabled="!item.versions[0] || !isModSML20Compatible(item) || inProgress.length > 0 || configLoadInProgress || selectedConfig === 'vanilla'"
+                    @click="$bvModal.show('modal-install')"
+                  >
+                    {{ !item.versions[0] ? 'N/A' : (isModSML20Compatible(item) ? 'Install old version' : 'Outdated') }}
                   </button>
                 </div>
                 <div
@@ -222,7 +240,7 @@
           class="form-control"
         >
           <option
-            v-for="version in selectedMod.versions"
+            v-for="version in selectedMod.versions ? selectedMod.versions.filter((ver) => isVersionSML20Compatible(ver)) : []"
             :key="version.version"
             :value="version"
           >
@@ -480,7 +498,7 @@ export default {
         const modID = parsed.searchParams.get('modID');
         const version = parsed.searchParams.get('version');
         this.selectedMod = this.availableMods.find((mod) => mod.id === modID);
-        this.modalInstallModVersion = this.selectedMod.versions.find((ver) => ver.version === version) || this.selectedMod.versions[0];
+        this.modalInstallModVersion = this.selectedMod.versions.filter((ver) => this.isVersionSML20Compatible(ver)).find((ver) => ver.version === version) || this.selectedMod.versions[0];
         this.$bvModal.show('modal-install');
       } else if (command === 'uninstall') {
         const modID = parsed.searchParams.get('modID');
@@ -527,7 +545,7 @@ export default {
       this.handleModalInstallSubmit();
     },
     handleModalInstallSubmit() {
-      this.installMod(this.modalInstallModVersion);
+      this.installOldVersion(this.selectedMod, this.modalInstallModVersion);
       this.$nextTick(() => {
         this.$bvModal.hide('modal-install');
       });
@@ -665,6 +683,20 @@ export default {
       this.refreshAvailableMods().then(() => {
         this.selectedMod = this.searchMods.find((mod) => mod.id === currentModId);
       });
+    },
+    installOldVersion(mod, version) {
+      this.inProgress.push(mod);
+      return this.selectedSatisfactoryInstall
+        .installMod(mod.id, version.version)
+        .then(() => {
+          this.saveSelectedConfig().then(() => {
+            this.inProgress.splice(this.inProgress.indexOf(mod));
+            this.refreshCurrentMod();
+          });
+        }).catch((err) => {
+          this.$bvModal.msgBoxOk(err.toString());
+          this.inProgress.splice(this.inProgress.indexOf(mod));
+        });
     },
     installMod(mod) {
       return this.selectedSatisfactoryInstall
