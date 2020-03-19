@@ -25,12 +25,20 @@ module.exports = {
     'linebreak-style': 0,
     'no-underscore-dangle': 0,
     'import/no-extraneous-dependencies': ['error', {'devDependencies': true}],
-    'max-len': ['error', { 'code': 200 }],
     'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0,
     'import/extensions': ['error', 'always', {
       js: 'never',
       vue: 'never'
-    }]
+    }],
+    'max-len': ['error', {
+      code: 200,
+      ignoreComments: true,
+      ignoreTrailingComments: true,
+      ignoreUrls: true,
+      ignoreStrings: true,
+      ignoreTemplateLiterals: true,
+      ignoreRegExpLiterals: true
+    }],
   },
   settings: {
     'import/resolver': {

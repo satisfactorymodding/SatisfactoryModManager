@@ -162,7 +162,7 @@
                   <button
                     :class="'my-1 btn ' + ((!item.versions[0] || isModVersionInstalled(item.versions[0])) ? 'btn-secondary' : 'btn-primary')"
                     style="font-size: 13px; width: 100%"
-                    :disabled="!item.versions[0] || !isModSML20Compatible(item) || inProgress.length > 0 || configLoadInProgress"
+                    :disabled="!item.versions[0] || !isModSML20Compatible(item) || inProgress.length > 0 || configLoadInProgress || selectedConfig === 'vanilla'"
                     @click="installUninstallUpdate(item)"
                   >
                     {{ !item.versions[0] ? 'N/A' : (isModSML20Compatible(item) ? (isModVersionInstalled(item.versions[0]) ? "Remove" : (isModInstalled(item) ? "Update" : "Install")) : 'Outdated') }}
@@ -706,21 +706,31 @@ export default {
         });
     },
     installUninstallUpdate(mod) {
-      if (this.inProgress.length === 0) {
-        this.inProgress.push(mod);
-        if (this.isModInstalled(mod)) {
-          if (this.isModVersionInstalled(mod.versions[0])) {
-            this.uninstallMod(mod).then(() => {
-              this.checkDevSML();
-            });
+      if (this.selectedConfig !== 'vanilla') {
+        if (this.inProgress.length === 0) {
+          this.inProgress.push(mod);
+          if (this.isModInstalled(mod)) {
+            if (this.isModVersionInstalled(mod.versions[0])) {
+              this.uninstallMod(mod).then(() => {
+                this.checkDevSML();
+              });
+            } else {
+              this.updateMod(mod);
+            }
           } else {
-            this.updateMod(mod);
+            this.installMod(mod);
           }
         } else {
-          this.installMod(mod);
+          this.$bvModal.msgBoxOk('Another operation is currently in progress. Wait for it to finish.');
         }
       } else {
-        this.$bvModal.msgBoxOk('Another operation is currently in progress. Wait for it to finish.');
+        const defaultModdedExists = this.availableConfigs.includes('modded');
+        const hasOtherConfigs = this.availableConfigs.length > (defaultModdedExists ? 2 : 1);
+        if (defaultModdedExists || hasOtherConfigs) {
+          this.$bvModal.msgBoxOk(`Cannot modify the vanilla config. Choose ${defaultModdedExists ? 'the modded config' : ''}${defaultModdedExists && hasOtherConfigs ? ' or ' : ''}${hasOtherConfigs ? 'one of your custom configs' : ''}`);
+        } else {
+          this.$bvModal.msgBoxOk('Cannot modify the vanilla config. Create a new config to be able to install mods.');
+        }
       }
     },
     refreshSatisfactoryInstalls(savedSelectedInstall) {
@@ -751,17 +761,18 @@ export default {
               this.SMLInProgress = false;
             });
           }
-        } else if (this.selectedSatisfactoryInstall.smlVersion) {
-          this.SMLInProgress = true;
-          return this.selectedSatisfactoryInstall.uninstallSML().then(() => {
-            this.SMLInProgress = false;
-          });
         }
       }
       return Promise.resolve();
     },
     toggleDevSML() {
       this.devSML = !this.devSML;
+      if (!this.devSML) {
+        this.SMLInProgress = true;
+        return this.selectedSatisfactoryInstall.uninstallSML().then(() => {
+          this.SMLInProgress = false;
+        });
+      }
       return this.checkDevSML();
     },
   },
