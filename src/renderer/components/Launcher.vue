@@ -809,18 +809,19 @@ export default {
               this.SMLInProgress = false;
             });
           }
+        } else {
+          this.SMLInProgress = true;
+          return this.selectedSatisfactoryInstall.uninstallSML().then(() => {
+            this.SMLInProgress = false;
+          });
         }
+        this.$electron.ipcRenderer.send('setDevSML', this.devSML);
       }
       return Promise.resolve();
     },
     toggleDevSML() {
       this.devSML = !this.devSML;
-      if (!this.devSML) {
-        this.SMLInProgress = true;
-        return this.selectedSatisfactoryInstall.uninstallSML().then(() => {
-          this.SMLInProgress = false;
-        });
-      }
+      saveSetting('devSML', this.devSML);
       return this.checkDevSML();
     },
   },

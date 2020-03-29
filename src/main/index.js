@@ -67,10 +67,13 @@ const template = [
     ],
   },
   {
+    id: 'developers',
     label: 'For Mod Developers',
     submenu: [
       {
+        id: 'devSML',
         label: 'Toggle SML always installed',
+        type: 'checkbox',
         click: () => {
           mainWindow.webContents.send('toggleDevSML');
         },
@@ -124,6 +127,10 @@ function createWindow() {
     if (process.platform === 'win32') {
       openedByUrl(process.argv.find((arg) => arg.startsWith('smlauncher:')));
     }
+  });
+
+  ipcMain.once('setDevSML', (e, isInstalled) => {
+    menu.getMenuItemById('developers').submenu.getMenuItemById('devSML').checked = isInstalled;
   });
 
   mainWindow.loadURL(winURL);

@@ -89,6 +89,7 @@
     "@babel/preset-env": "^7.7.4",
     "@babel/register": "^7.7.4",
     "@babel/runtime-corejs2": "^7.7.4",
+    "@typescript-eslint/eslint-plugin": "^2.25.0",
     "ajv": "^6.5.0",
     "babel-eslint": "^10.0.3",
     "babel-loader": "^8.0.6",
