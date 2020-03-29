@@ -690,7 +690,7 @@ export default {
       return false;
     },
     isModInstalled(mod) {
-      return mod.versions.some((version) => this.isModVersionInstalled(version));
+      return !!this.selectedSatisfactoryInstall.mods[mod.id];
     },
     refreshCurrentMod() {
       const currentModId = this.selectedMod.id;
