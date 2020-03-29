@@ -807,11 +807,17 @@ export default {
             this.SMLInProgress = true;
             return this.selectedSatisfactoryInstall.installSML().then(() => {
               this.SMLInProgress = false;
+            }).catch((err) => {
+              this.$bvModal.msgBoxOk(err.toString());
+              this.SMLInProgress = false;
             });
           }
         } else if (this.selectedSatisfactoryInstall.isSMLInstalledDev) {
           this.SMLInProgress = true;
           return this.selectedSatisfactoryInstall.uninstallSML().then(() => {
+            this.SMLInProgress = false;
+          }).catch((err) => {
+            this.$bvModal.msgBoxOk(err.toString());
             this.SMLInProgress = false;
           });
         }
