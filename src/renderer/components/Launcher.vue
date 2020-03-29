@@ -803,13 +803,13 @@ export default {
     checkDevSML() {
       if (this.selectedSatisfactoryInstall) {
         if (this.devSML) {
-          if (!this.selectedSatisfactoryInstall.smlVersion) {
+          if (!this.selectedSatisfactoryInstall.isSMLInstalledDev) {
             this.SMLInProgress = true;
             return this.selectedSatisfactoryInstall.installSML().then(() => {
               this.SMLInProgress = false;
             });
           }
-        } else {
+        } else if (this.selectedSatisfactoryInstall.isSMLInstalledDev) {
           this.SMLInProgress = true;
           return this.selectedSatisfactoryInstall.uninstallSML().then(() => {
             this.SMLInProgress = false;
