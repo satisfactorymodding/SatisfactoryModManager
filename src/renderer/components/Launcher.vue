@@ -27,7 +27,9 @@
           </button>
         </div>
         <div class="col-auto d-inline-flex align-items-center">
-          <strong>SML: {{ selectedSatisfactoryInstall ? (selectedSatisfactoryInstall.smlVersion || 'Install a mod to install SML') : 'Select a Satisfactory Install' }}</strong>
+          <strong v-if="selectedSatisfactoryInstall && selectedSatisfactoryInstall.smlVersion">
+            SML: {{ selectedSatisfactoryInstall ? (selectedSatisfactoryInstall.smlVersion || 'Install a mod to install SML') : 'Select a Satisfactory Install' }}
+          </strong>
         </div>
         <div class="col-1 d-inline-flex align-items-center">
           <div
