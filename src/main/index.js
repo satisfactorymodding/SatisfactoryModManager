@@ -84,6 +84,10 @@ const template = [
     role: 'help',
     submenu: [
       {
+        label: `SMLauncher v${app.getVersion()}`,
+        enabled: false,
+      },
+      {
         label: 'Join the Satisfactory Modding Discord',
         click: () => {
           shell.openExternal('https://discord.gg/TShj39G');
