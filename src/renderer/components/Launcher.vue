@@ -127,7 +127,7 @@
                 <div
                   class="col-1 p-0"
                   style="flex: 0 0 7%; max-width: 7%;"
-                  :style="!isModSML20Compatible(item) ? 'background-color: #837971' : ''"
+                  :style="!isModSML20Compatible(item) ? (item === selectedMod ? 'background-color: #b5987f' : 'background-color: #837971') : ''"
                 >
                   <img
                     :src="item.logo || noImageURL"
@@ -137,32 +137,32 @@
                 <div
                   class="d-inline-flex align-items-center text-break"
                   style="flex: 0 0 15%; max-width: 15%;"
-                  :style="!isModSML20Compatible(item) ? 'background-color: #837971' : ''"
+                  :style="!isModSML20Compatible(item) ? (item === selectedMod ? 'background-color: #b5987f' : 'background-color: #837971') : ''"
                 >
                   <strong>{{ item.name || '' }}</strong>
                 </div>
                 <div
                   class="col-1 d-inline-flex align-items-center"
-                  :style="!isModSML20Compatible(item) ? 'background-color: #837971' : ''"
+                  :style="!isModSML20Compatible(item) ? (item === selectedMod ? 'background-color: #b5987f' : 'background-color: #837971') : ''"
                 >
                   <strong>{{ item.versions[0] ? item.versions[0].version : 'N/A' }}</strong>
                 </div>
                 <div
                   class="col-2 d-inline-flex align-items-center"
-                  :style="!isModSML20Compatible(item) ? 'background-color: #837971' : ''"
+                  :style="!isModSML20Compatible(item) ? (item === selectedMod ? 'background-color: #b5987f' : 'background-color: #837971') : ''"
                 >
                   <strong>{{ item.authors.map((author) => author.user.username).join(', ') }}</strong>
                 </div>
                 <div
                   class="d-inline-flex align-items-center"
                   style="flex: 0 0 10%; max-width: 10%;"
-                  :style="!isModSML20Compatible(item) ? 'background-color: #837971' : ''"
+                  :style="!isModSML20Compatible(item) ? (item === selectedMod ? 'background-color: #b5987f' : 'background-color: #837971') : ''"
                 >
                   <strong>{{ item.last_version_date ? item.last_version_date.toLocaleDateString() : 'N/A' }}</strong>
                 </div>
                 <div
                   class="col-2 d-inline-flex align-items-center"
-                  :style="!isModSML20Compatible(item) ? 'background-color: #837971' : ''"
+                  :style="!isModSML20Compatible(item) ? (item === selectedMod ? 'background-color: #b5987f' : 'background-color: #837971') : ''"
                 >
                   <button
                     :class="'my-1 btn ' + ((!item.versions[0] || isModVersionInstalled(item.versions[0])) ? 'btn-secondary' : 'btn-primary')"
@@ -177,7 +177,7 @@
                 <div
                   class="d-inline-flex align-items-center"
                   style="flex: 0 0 15%; max-width: 15%;"
-                  :style="!isModSML20Compatible(item) ? 'background-color: #837971' : ''"
+                  :style="!isModSML20Compatible(item) ? (item === selectedMod ? 'background-color: #b5987f' : 'background-color: #837971') : ''"
                 >
                   <button
                     v-if="!isModInstalled(item)"
@@ -191,10 +191,11 @@
                   </button>
                 </div>
                 <div
-                  v-if="inProgress.includes(item)"
                   class="col-1 d-inline-flex align-items-center"
+                  :style="!isModSML20Compatible(item) ? (item === selectedMod ? 'background-color: #b5987f' : 'background-color: #837971') : ''"
                 >
                   <div
+                    v-if="inProgress.includes(item)"
                     class="spinner-border"
                     role="status"
                   >
@@ -472,7 +473,10 @@ export default {
       return 'https://ficsit.app/static/assets/images/no_image.png';
     },
     compiledMarkdownDescription() {
-      const html = sanitizeHtml(marked(this.selectedMod.full_description || ''));
+      const html = sanitizeHtml(marked(this.selectedMod.full_description || ''), {
+        allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'video', 'details', 'summary']),
+        allowedAttributes: Object.assign(sanitizeHtml.defaults.allowedAttributes, { img: ['src', 'width', 'height'], video: ['src', 'width', 'height', 'controls'] }),
+      });
       const el = document.createElement('html');
       el.innerHTML = html;
       const links = el.getElementsByTagName('a');
@@ -549,7 +553,7 @@ export default {
       this.$electron.ipcRenderer.send('vue-ready');
       const savedFilters = getSetting('filters', this.filters);
       Object.keys(this.filters).forEach((filter) => {
-        if (savedFilters[filter]) {
+        if (savedFilters[filter] !== undefined) {
           this.filters[filter] = savedFilters[filter];
         }
       });
@@ -697,7 +701,7 @@ export default {
     refreshCurrentMod() {
       const currentModId = this.selectedMod.id;
       this.refreshAvailableMods().then(() => {
-        this.selectedMod = this.searchMods.find((mod) => mod.id === currentModId);
+        this.selectedMod = this.searchMods.find((mod) => mod.id === currentModId) || this.searchMods[0];
       });
     },
     installOldVersion(mod, version) {
