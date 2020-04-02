@@ -149,6 +149,9 @@ function createWindow() {
   });
 }
 
+let isDownloadingUpdate = false;
+let quitWaitingForUpdate = false;
+
 if (app.requestSingleInstanceLock()) {
   app.on('second-instance', (e, argv) => {
     if (process.platform === 'win32') {
@@ -164,7 +167,11 @@ if (app.requestSingleInstanceLock()) {
 
   app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
-      app.quit();
+      if (!isDownloadingUpdate) {
+        app.quit();
+      } else {
+        quitWaitingForUpdate = true;
+      }
     }
   });
 
@@ -174,8 +181,23 @@ if (app.requestSingleInstanceLock()) {
     }
   });
 
+  autoUpdater.on('update-downloaded', () => {
+    if (quitWaitingForUpdate) {
+      autoUpdater.quitAndInstall(true);
+    } else {
+      isDownloadingUpdate = false;
+    }
+  });
+
+  autoUpdater.on('error', () => {
+    if (quitWaitingForUpdate) {
+      app.quit();
+    }
+  });
+
   autoUpdater.on('update-available', (updateInfo) => {
     mainWindow.webContents.send('update-available', updateInfo);
+    isDownloadingUpdate = true;
   });
 
   app.on('ready', () => {
