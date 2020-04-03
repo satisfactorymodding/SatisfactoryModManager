@@ -921,9 +921,9 @@
   integrity sha512-tHq6qdbT9U1IRSGf14CL0pUlULksvY9OZ+5eEgl1N7t+OA3tGvNpxJCzuKQlsNgCVwbAs670L1vcVQi8j9HjnA==
 
 "@types/node@*":
-  version "13.9.5"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-13.9.5.tgz#59738bf30b31aea1faa2df7f4a5f55613750cf00"
-  integrity sha512-hkzMMD3xu6BrJpGVLeQ3htQQNAcOrJjX7WFmtK8zWQpz2UJf13LCFF2ALA7c9OVdvc2vQJeDdjfR35M0sBCxvw==
+  version "13.11.0"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-13.11.0.tgz#390ea202539c61c8fa6ba4428b57e05bc36dc47b"
+  integrity sha512-uM4mnmsIIPK/yeO+42F2RQhGUIs39K2RFmugcJANppXe6J1nvH87PvzPZYpza7Xhhs8Yn9yIAVdLZ84z61+0xQ==
 
 "@types/node@^12.0.12":
   version "12.12.32"
@@ -960,9 +960,9 @@
     "@types/node" "*"
 
 "@types/tough-cookie@*":
-  version "2.3.6"
-  resolved "https://registry.yarnpkg.com/@types/tough-cookie/-/tough-cookie-2.3.6.tgz#c880579e087d7a0db13777ff8af689f4ffc7b0d5"
-  integrity sha512-wHNBMnkoEBiRAd3s8KTKwIuO9biFtTf0LehITzBhSco+HQI0xkXZbLOD55SW3Aqw3oUkHstkm5SPv58yaAdFPQ==
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@types/tough-cookie/-/tough-cookie-4.0.0.tgz#fef1904e4668b6e5ecee60c52cc6a078ffa6697d"
+  integrity sha512-I99sngh224D0M7XgW1s120zxCt3VYQ3IQsuw3P3jbq5GG4yc79+ZjyKznyOGIQrflfylLgcfekeZW/vk0yng6A==
 
 "@typescript-eslint/eslint-plugin@^2.25.0":
   version "2.25.0"
@@ -2419,6 +2419,11 @@ chardet@^0.7.0:
   version "0.7.0"
   resolved "https://registry.yarnpkg.com/chardet/-/chardet-0.7.0.tgz#90094849f0937f2eedc2425d0d28a9e5f0cbad9e"
   integrity sha512-mT8iDcrh03qDGRRmoA2hmBJnxpllMR+0/0qlzjqZES6NdiWDcZkCNAk4rPFZ9Q85r27unkiNNg8ZOiwZXBHwcA==
+
+child_process@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/child_process/-/child_process-1.0.2.tgz#b1f7e7fc73d25e7fd1d455adc94e143830182b5a"
+  integrity sha1-sffn/HPSXn/R1FWtyU4UODAYK1o=
 
 chokidar@^2.1.8:
   version "2.1.8"
@@ -5670,9 +5675,9 @@ jsprim@^1.2.2:
     verror "1.10.0"
 
 jszip@^3.2.2:
-  version "3.2.2"
-  resolved "https://registry.yarnpkg.com/jszip/-/jszip-3.2.2.tgz#b143816df7e106a9597a94c77493385adca5bd1d"
-  integrity sha512-NmKajvAFQpbg3taXQXr/ccS2wcucR1AZ+NtyWp2Nq7HHVsXhcJFR8p0Baf32C2yVvBylFWVeKf+WI2AnvlPhpA==
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/jszip/-/jszip-3.3.0.tgz#29d72c21a54990fa885b11fc843db320640d5271"
+  integrity sha512-EJ9k766htB1ZWnsV5ZMDkKLgA+201r/ouFF8R2OigVjVdcm2rurcBrrdXaeqBJbqnUVMko512PYmlncBKE1Huw==
   dependencies:
     lie "~3.3.0"
     pako "~1.0.2"
@@ -7906,9 +7911,9 @@ sass-loader@^8.0.0:
     semver "^6.3.0"
 
 satisfactory-mod-manager-api@^1.1.4:
-  version "1.1.4"
-  resolved "https://registry.yarnpkg.com/satisfactory-mod-manager-api/-/satisfactory-mod-manager-api-1.1.4.tgz#123f89958c2f58d571e3a93aca9005f92abc7899"
-  integrity sha512-pH//t8lBN4Lmt4YAY957SZUV8S5YDZ0B9GDJ7Re9gYHPS8WFIt5q/pdx+8kSvqcbOQm6K2ABOkTUGzqOAQgkPA==
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/satisfactory-mod-manager-api/-/satisfactory-mod-manager-api-1.1.5.tgz#f8955cf2ff48092be85a83c5076376016ec247bf"
+  integrity sha512-9NAzxpPIP0pmN08oH1ZNjitpj7mK4yYAAPWKQLW9b4+/BIcPAB+PBjg2EpSpN+SwV5pztC6JCGwzlaiCjAGE7w==
   dependencies:
     "@types/bindings" "^1.3.0"
     "@types/glob" "^7.1.1"
@@ -7916,6 +7921,7 @@ satisfactory-mod-manager-api@^1.1.4:
     "@types/request-promise-native" "^1.0.17"
     "@types/semver" "^6.2.0"
     bindings "^1.5.0"
+    child_process "^1.0.2"
     glob "^7.1.6"
     jszip "^3.2.2"
     platform-folders "^0.4.1"
