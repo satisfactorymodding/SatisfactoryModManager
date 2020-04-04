@@ -677,7 +677,7 @@ export default {
       });
     },
     refreshAvailableMods() {
-      const currentlySelectedModID = this.selectedMod.id;
+      const currentlySelectedModID = this.selectedMod ? this.selectedMod.id : '';
       return getAvailableMods().then((mods) => {
         this.availableMods = mods;
         this.refreshSearch();
@@ -699,9 +699,9 @@ export default {
       return !!this.selectedSatisfactoryInstall.mods[mod.id];
     },
     refreshCurrentMod() {
-      const currentModId = this.selectedMod.id;
+      const currentModId = this.selectedMod ? this.selectedMod.id : '';
       this.refreshAvailableMods().then(() => {
-        this.selectedMod = this.searchMods.find((mod) => mod.id === currentModId) || this.searchMods[0];
+        this.selectedMod = this.searchMods.find((mod) => mod.id === currentModId) || this.searchMods[0] || null;
       });
     },
     installOldVersion(mod, version) {
