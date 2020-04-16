@@ -377,6 +377,7 @@ import {
   getInstalls,
   getAvailableMods,
   toggleDebug,
+  isDebug,
   clearCache,
   getConfigs,
   deleteConfig,
@@ -404,7 +405,6 @@ export default {
       newConfigNameState: null,
       configLoadInProgress: false,
       SMLInProgress: false,
-      devSML: false,
       searchMods: [],
       search: '',
       filters: {
@@ -499,7 +499,6 @@ export default {
     },
     selectedSatisfactoryInstall() {
       saveSetting('selectedSFInstall', this.selectedSatisfactoryInstall.installLocation);
-      this.checkDevSML();
     },
     selectedConfig() {
       saveSetting('selectedConfig', this.selectedConfig);
@@ -524,15 +523,15 @@ export default {
     });
     this.$electron.ipcRenderer.on('toggleDebug', () => {
       toggleDebug();
+      if (isDebug()) {
+        this.$electron.ipcRenderer.send('openDevTools');
+      }
     });
     this.$electron.ipcRenderer.on('clearCache', () => {
       clearCache();
       if (this.selectedSatisfactoryInstall) {
         this.selectedSatisfactoryInstall.clearCache();
       }
-    });
-    this.$electron.ipcRenderer.on('toggleDevSML', () => {
-      this.toggleDevSML();
     });
     this.$electron.ipcRenderer.on('update-available', (e, updateInfo) => {
       this.availableUpdate = updateInfo;
@@ -542,7 +541,6 @@ export default {
   created() {
     const savedSelectedSFInstall = getSetting('selectedSFInstall', undefined);
     this.selectedConfig = getSetting('selectedConfig', 'modded') || 'vanilla';
-    this.devSML = getSetting('devSML', false);
     Promise.all(
       [
         this.refreshSatisfactoryInstalls(savedSelectedSFInstall),
@@ -635,7 +633,6 @@ export default {
         this.configLoadInProgress = true;
         this.selectedSatisfactoryInstall.loadConfig(this.selectedConfig).then(() => {
           this.refreshAvailableMods();
-          this.checkDevSML();
           this.configLoadInProgress = false;
         }).catch((err) => {
           this.$bvModal.msgBoxOk(err.toString());
@@ -763,9 +760,7 @@ export default {
           this.inProgress.push(mod);
           if (this.isModInstalled(mod)) {
             if (this.isModVersionInstalled(mod.versions[0])) {
-              this.uninstallMod(mod).then(() => {
-                this.checkDevSML();
-              });
+              this.uninstallMod(mod);
             } else {
               this.updateMod(mod);
             }
@@ -795,7 +790,6 @@ export default {
             const defaultInstall = this.satisfactoryInstalls[0];
             this.selectedSatisfactoryInstall = defaultInstall;
           }
-          this.checkDevSML();
         }
       });
     },
@@ -803,36 +797,6 @@ export default {
       if (this.selectedSatisfactoryInstall) {
         exec(`start "" "${this.selectedSatisfactoryInstall.launchPath}"`).unref();
       }
-    },
-    checkDevSML() {
-      if (this.selectedSatisfactoryInstall) {
-        if (this.devSML) {
-          if (!this.selectedSatisfactoryInstall.isSMLInstalledDev) {
-            this.SMLInProgress = true;
-            return this.selectedSatisfactoryInstall.installSML().then(() => {
-              this.SMLInProgress = false;
-            }).catch((err) => {
-              this.$bvModal.msgBoxOk(err.toString());
-              this.SMLInProgress = false;
-            });
-          }
-        } else if (this.selectedSatisfactoryInstall.isSMLInstalledDev) {
-          this.SMLInProgress = true;
-          return this.selectedSatisfactoryInstall.uninstallSML().then(() => {
-            this.SMLInProgress = false;
-          }).catch((err) => {
-            this.$bvModal.msgBoxOk(err.toString());
-            this.SMLInProgress = false;
-          });
-        }
-        this.$electron.ipcRenderer.send('setDevSML', this.devSML);
-      }
-      return Promise.resolve();
-    },
-    toggleDevSML() {
-      this.devSML = !this.devSML;
-      saveSetting('devSML', this.devSML);
-      return this.checkDevSML();
     },
   },
 };

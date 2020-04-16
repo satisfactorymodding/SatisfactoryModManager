@@ -67,20 +67,6 @@ const template = [
     ],
   },
   {
-    id: 'developers',
-    label: 'For Mod Developers',
-    submenu: [
-      {
-        id: 'devSML',
-        label: 'Toggle SML always installed',
-        type: 'checkbox',
-        click: () => {
-          mainWindow.webContents.send('toggleDevSML');
-        },
-      },
-    ],
-  },
-  {
     role: 'help',
     submenu: [
       {
@@ -133,11 +119,11 @@ function createWindow() {
     }
   });
 
-  ipcMain.once('setDevSML', (e, isInstalled) => {
-    menu.getMenuItemById('developers').submenu.getMenuItemById('devSML').checked = isInstalled;
-  });
-
   mainWindow.loadURL(winURL);
+
+  ipcMain.on('openDevTools', () => {
+    mainWindow.webContents.openDevTools();
+  });
 
   mainWindow.on('closed', () => {
     mainWindow = null;
