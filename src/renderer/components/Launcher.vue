@@ -27,9 +27,18 @@
           </button>
         </div>
         <div class="col-auto d-inline-flex align-items-center">
-          <strong v-if="selectedSatisfactoryInstall && selectedSatisfactoryInstall.smlVersion">
-            SML: {{ selectedSatisfactoryInstall ? (selectedSatisfactoryInstall.smlVersion || 'Install a mod to install SML') : 'Select a Satisfactory Install' }}
-          </strong>
+          <div v-if="selectedSatisfactoryInstall && selectedSatisfactoryInstall.smlVersion">
+            <strong>
+              SML: {{ selectedSatisfactoryInstall.smlVersion }}
+            </strong>
+            <button
+              v-if="cachedSMLHasUpdate"
+              class="btn btn-primary"
+              @click="updateSML"
+            >
+              Update SML
+            </button>
+          </div>
         </div>
         <div class="col-1 d-inline-flex align-items-center">
           <div
@@ -45,7 +54,21 @@
         <div class="col-1 d-inline-flex align-items-center">
           Configs:
         </div>
-        <div class="col-4">
+        <div
+          class="d-inline-flex align-items-center"
+          style="flex: 0 0 4.5%; max-width: 4.5%;"
+        >
+          <div
+            v-if="configLoadInProgress"
+            class="spinner-border"
+            role="status"
+          >
+            <span class="sr-only">Loading...</span>
+          </div>
+        </div>
+        <div
+          style="flex: 0 0 27.35%; max-width: 27.35%;"
+        >
           <select
             v-model="selectedConfig"
             class="form-control"
@@ -60,14 +83,14 @@
             </option>
           </select>
         </div>
-        <div class="col-1 d-inline-flex align-items-center">
-          <div
-            v-if="configLoadInProgress"
-            class="spinner-border"
-            role="status"
+        <div class="col-auto">
+          <button
+            class="btn btn-primary"
+            :disabled="inProgress.length > 0 || configLoadInProgress"
+            @click="newConfig"
           >
-            <span class="sr-only">Loading...</span>
-          </div>
+            New
+          </button>
         </div>
         <div class="col-auto">
           <button
@@ -76,15 +99,6 @@
             @click="deleteSelectedConfig"
           >
             Delete
-          </button>
-        </div>
-        <div class="col-auto">
-          <button
-            class="btn btn-primary"
-            :disabled="inProgress.length > 0 || configLoadInProgress"
-            @click="newConfig"
-          >
-            New
           </button>
         </div>
       </div>
@@ -368,11 +382,76 @@
       <!-- eslint-disable-next-line vue/no-v-html -->
       <div v-html="availableUpdate ? availableUpdate.releaseNotes : ''" />
     </b-modal>
+    <b-modal
+      id="modal-mod-updates"
+      title="Updates available"
+      ok-only
+      size="lg"
+      @hide="(evt) => { if(updatingAll) evt.preventDefault() }"
+    >
+      <button
+        class="btn btn-primary"
+        @click="updateAll"
+      >
+        Update all
+      </button>
+      <list
+        :objects="updates"
+        :can-select="false"
+        :scrollbar="false"
+        class="flex-fill"
+      >
+        <template
+          slot-scope="{item}"
+        >
+          <div
+            class="d-inline-flex align-items-center text-break"
+            style="flex: 0 0 40%; max-width: 40%;"
+          >
+            {{ (availableMods.find((mod) => mod.id === item.id) || { name: item.id }).name }} v{{ item.version }}
+          </div>
+          <div
+            class="d-inline-flex align-items-center text-break"
+            style="flex: 0 0 10%; max-width: 10%;"
+          >
+            <div
+              v-if="inProgress.includes(item.id)"
+              class="spinner-border"
+              role="status"
+            >
+              <span class="sr-only">Loading...</span>
+            </div>
+          </div>
+          <div
+            class="d-inline-flex align-items-center text-break"
+            style="flex: 0 0 15%; max-width: 15%;"
+          >
+            <button
+              class="btn btn-primary"
+              @click="updateById(item.id)"
+            >
+              Update
+            </button>
+          </div>
+          <div
+            class="d-inline-flex align-items-center text-break"
+            style="flex: 0 0 25%; max-width: 25%;"
+          >
+            <button
+              class="btn btn-secondary"
+              @click="ignoreVersion(item)"
+            >
+              Ignore update
+            </button>
+          </div>
+        </template>
+      </list>
+    </b-modal>
   </main>
 </template>
 
 <script>
-import semver from 'semver';
+import semver, { compare } from 'semver';
 import {
   getInstalls,
   getAvailableMods,
@@ -381,6 +460,7 @@ import {
   clearCache,
   getConfigs,
   deleteConfig,
+  getAvailableSMLVersions,
 } from 'satisfactory-mod-manager-api';
 import marked from 'marked';
 import { exec } from 'child_process';
@@ -466,6 +546,9 @@ export default {
         },
       ],
       availableUpdate: null,
+      updates: [],
+      updatingAll: false,
+      cachedSMLHasUpdate: false,
     };
   },
   computed: {
@@ -499,6 +582,7 @@ export default {
     },
     selectedSatisfactoryInstall() {
       saveSetting('selectedSFInstall', this.selectedSatisfactoryInstall.installLocation);
+      this.checkForUpdates();
     },
     selectedConfig() {
       saveSetting('selectedConfig', this.selectedConfig);
@@ -555,6 +639,7 @@ export default {
           this.filters[filter] = savedFilters[filter];
         }
       });
+      this.checkForUpdates();
     });
   },
   methods: {
@@ -701,18 +786,80 @@ export default {
         this.selectedMod = this.searchMods.find((mod) => mod.id === currentModId) || this.searchMods[0] || null;
       });
     },
+    hasSMLUpdate() {
+      return getAvailableSMLVersions()
+        .then((versions) => {
+          this.cachedSMLHasUpdate = this.selectedSatisfactoryInstall.smlVersion && this.selectedSatisfactoryInstall.smlVersion !== versions.sort((a, b) => -compare(a.version, b.version))[0].version;
+          return this.cachedSMLHasUpdate;
+        });
+    },
+    hasUpdate(mod) {
+      return this.isModSML20Compatible(mod) && !this.isModVersionInstalled(mod.versions[0]) && this.isModInstalled(mod);
+    },
+    checkForUpdates() {
+      this.updates = this.availableMods.filter((mod) => this.hasUpdate(mod)).map((mod) => ({ id: mod.id, version: mod.versions[0].version }));
+      this.hasSMLUpdate().then((hasUpdate) => {
+        getAvailableSMLVersions().then((versions) => versions.sort((a, b) => -compare(a.version, b.version))[0].version).then((latestSMLVersion) => {
+          if (hasUpdate) {
+            this.updates.push({ id: 'SML', version: latestSMLVersion });
+          }
+          const ignoredUpdates = getSetting('ignoredUpdates', []);
+          this.updates = this.updates.filter((update) => !ignoredUpdates.find((ignored) => ignored.id === update.id && ignored.version === update.version));
+          if (this.updates.length > 0) {
+            this.$bvModal.show('modal-mod-updates');
+          }
+        });
+      });
+    },
+    updateAll() {
+      if (this.updates.length === 0) {
+        this.updatingAll = false;
+        this.$nextTick(() => {
+          this.$bvModal.hide('modal-mod-updates');
+        });
+      } else {
+        this.updatingAll = true;
+        this.updateById(this.updates[0].id)
+          .then(() => {
+            this.updateAll();
+          });
+      }
+    },
+    updateById(id) {
+      this.inProgress.push(id);
+      return (id === 'SML' ? this.updateSML() : this.updateMod(this.availableMods.find((mod) => mod.id === id))).then(() => {
+        this.updates.removeWhere((update) => update.id === id);
+        this.inProgress.remove(id);
+        if (this.updates.length === 0) {
+          this.$nextTick(() => {
+            this.$bvModal.hide('modal-mod-updates');
+          });
+        }
+      }).catch(() => this.inProgress.remove(id));
+    },
+    ignoreVersion(update) {
+      this.updates.remove(update);
+      const ignoredUpdates = getSetting('ignoredUpdates', []);
+      ignoredUpdates.push(update);
+      saveSetting('ignoredUpdates', ignoredUpdates);
+      if (this.updates.length === 0) {
+        this.$nextTick(() => {
+          this.$bvModal.hide('modal-mod-updates');
+        });
+      }
+    },
     installOldVersion(mod, version) {
       this.inProgress.push(mod);
       return this.selectedSatisfactoryInstall
         .installMod(mod.id, version.version)
         .then(() => {
           this.saveSelectedConfig().then(() => {
-            this.inProgress.splice(this.inProgress.indexOf(mod));
+            this.inProgress.remove(mod);
             this.refreshCurrentMod();
           });
         }).catch((err) => {
           this.$bvModal.msgBoxOk(err.toString());
-          this.inProgress.splice(this.inProgress.indexOf(mod));
+          this.inProgress.remove(mod);
         });
     },
     installMod(mod) {
@@ -720,12 +867,12 @@ export default {
         .installMod(mod.id)
         .then(() => {
           this.saveSelectedConfig().then(() => {
-            this.inProgress.splice(this.inProgress.indexOf(mod));
+            this.inProgress.remove(mod);
             this.refreshCurrentMod();
           });
         }).catch((err) => {
           this.$bvModal.msgBoxOk(err.toString());
-          this.inProgress.splice(this.inProgress.indexOf(mod));
+          this.inProgress.remove(mod);
         });
     },
     updateMod(mod) {
@@ -733,12 +880,15 @@ export default {
         .updateMod(mod.id)
         .then(() => {
           this.saveSelectedConfig().then(() => {
-            this.inProgress.splice(this.inProgress.indexOf(mod));
+            this.inProgress.remove(mod);
+            if (this.updates.find((update) => mod.id === update.id)) {
+              this.updates.remove(this.updates.find((update) => mod.id === update.id));
+            }
             this.refreshCurrentMod();
           });
         }).catch((err) => {
           this.$bvModal.msgBoxOk(err.toString());
-          this.inProgress.splice(this.inProgress.indexOf(mod));
+          this.inProgress.remove(mod);
         });
     },
     uninstallMod(mod) {
@@ -746,12 +896,12 @@ export default {
         .uninstallMod(mod.id)
         .then(() => {
           this.saveSelectedConfig().then(() => {
-            this.inProgress.splice(this.inProgress.indexOf(mod));
+            this.inProgress.remove(mod);
             this.refreshCurrentMod();
           });
         }).catch((err) => {
           this.$bvModal.msgBoxOk(err.toString());
-          this.inProgress.splice(this.inProgress.indexOf(mod));
+          this.inProgress.remove(mod);
         });
     },
     installUninstallUpdate(mod) {
@@ -779,6 +929,20 @@ export default {
           this.$bvModal.msgBoxOk('Cannot modify the vanilla config. Create a new config to be able to install mods.');
         }
       }
+    },
+    updateSML() {
+      this.inProgress.push('SML');
+      return this.selectedSatisfactoryInstall
+        .updateSML()
+        .then(() => {
+          this.saveSelectedConfig().then(() => {
+            this.cachedSMLHasUpdate = false;
+            this.inProgress.remove('SML');
+          });
+        }).catch((err) => {
+          this.$bvModal.msgBoxOk(err.toString());
+          this.inProgress.remove('SML');
+        });
     },
     refreshSatisfactoryInstalls(savedSelectedInstall) {
       return getInstalls().then((installs) => {

@@ -1,7 +1,7 @@
 <template>
   <div
     class="container-fluid"
-    style="overflow: auto"
+    :style="'overflow: ' + (scrollbar ? 'auto' : 'visible')"
   >
     <div
       v-for="item in objects"
@@ -33,6 +33,10 @@ export default {
     canSelect: {
       type: Boolean,
       default: false,
+    },
+    scrollbar: {
+      type: Boolean,
+      default: true,
     },
   },
   data() {
