@@ -16,9 +16,8 @@ if (process.env.NODE_ENV !== 'development') {
 }
 
 let mainWindow;
-const winURL = process.env.NODE_ENV === 'development'
-  ? 'http://localhost:9080'
-  : `file://${__dirname}/index.html`;
+const mainURL = 'http://localhost:9080';
+const mainFile = path.resolve(__dirname, 'index.html');
 
 function openedByUrl(url) {
   if (url) {
@@ -119,7 +118,11 @@ function createWindow() {
     }
   });
 
-  mainWindow.loadURL(winURL);
+  if (process.env.NODE_ENV === 'development') {
+    mainWindow.loadURL(mainURL);
+  } else {
+    mainWindow.loadFile(mainFile);
+  }
 
   ipcMain.on('openDevTools', () => {
     mainWindow.webContents.openDevTools();
