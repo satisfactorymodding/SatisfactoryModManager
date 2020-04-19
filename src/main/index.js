@@ -97,25 +97,44 @@ const template = [
 const menu = Menu.buildFromTemplate(template);
 Menu.setApplicationMenu(menu);
 
+const normalSize = {
+  width: 500,
+  height: 800,
+};
+const expandedSize = {
+  width: 1574,
+  height: 800,
+};
+
 function createWindow() {
   /**
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    height: 700,
+    width: normalSize.width,
+    height: normalSize.height,
     useContentSize: true,
-    width: 1000,
-    minWidth: 955,
-    minHeight: 600,
+    minHeight: 800,
+    minWidth: 500,
     webPreferences: {
       nodeIntegration: true,
     },
+    frame: false,
+    resizable: false,
   });
 
   ipcMain.once('vue-ready', () => {
     if (process.platform === 'win32') {
       openedByUrl(process.argv.find((arg) => arg.startsWith('smlauncher:')));
     }
+  });
+
+  ipcMain.on('expand', () => {
+    mainWindow.setSize(expandedSize.width, expandedSize.height, true);
+  });
+
+  ipcMain.on('unexpand', () => {
+    mainWindow.setSize(normalSize.width, normalSize.height, true);
   });
 
   if (process.env.NODE_ENV === 'development') {

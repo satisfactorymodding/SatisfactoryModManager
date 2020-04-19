@@ -1,18 +1,9 @@
 <template>
-  <div id="app">
-    <ul class="nav nav-tabs header">
-      <li class="nav-item">
-        <router-link
-          class="nav-link"
-          exact-active-class="active"
-          to="/"
-        >
-          Launcher
-        </router-link>
-      </li>
-    </ul>
-    <router-view class="content" />
-  </div>
+  <v-app>
+    <v-content>
+      <router-view />
+    </v-content>
+  </v-app>
 </template>
 
 <script>
@@ -21,32 +12,113 @@ export default {
 };
 </script>
 
+<style scoped>
+div {
+  background: var(--v-background-base);
+}
+</style>
+
 <style>
-html,
-body,
-#app,
-main {
-  height: 100%;
+.theme--dark.v-card {
+  background-color: var(--v-background-base) !important;
 }
-#app,
-main {
-  display: flex !important;
-  flex-flow: column !important;
+
+div {
+  color: var(--v-text-base) !important;
 }
-#app .header,
-main .header {
-  flex: 0 0 auto;
+
+.v-btn {
+  letter-spacing: 0.03em !important;
 }
-#app .content,
-main .content {
-  flex: 1 1 auto;
+
+html {
+  overflow-y: auto !important;
 }
-.container-fluid {
-  height: 100%;
-  padding-left: 0px;
-  padding-right: 0px;
+
+.v-btn {
+  text-transform: none !important;
+  padding: 0px !important;
 }
-.selection-row {
-  overflow: hidden;
+
+.v-text-field {
+  padding-top: 6px !important;
+  margin-top: 12px !important;
+}
+
+.v-list-item__icon {
+  margin-top: 0px !important;
+  margin-bottom: 0px !important;
+}
+
+.v-divider {
+  border-color: var(--v-background-darken3) !important;
+}
+
+.v-label {
+  font-size: 12px !important;
+}
+
+.v-input {
+  font-size: 14px !important;
+}
+
+.v-input--selection-controls {
+  margin-top: 9px !important;
+}
+
+.v-input--switch--inset .v-input--switch__track {
+  opacity: 0.95 !important;
+}
+
+.custom.theme--dark.v-input--switch.v-input--is-disabled:not(.v-input--is-dirty) .v-input--switch__track {
+  color: var(--v-error-base) !important;
+}
+
+.theme--dark.v-input--switch .v-input--switch__thumb {
+  color: #424242!important;
+}
+
+.v-text-field__details, .custom>.v-input__control>.v-messages {
+  height: 0 !important;
+  min-height: 0 !important;
+}
+
+.custom.v-text-field>.v-input__control>.v-input__slot:before {
+  border-style: none;
+}
+.custom.v-text-field>.v-input__control>.v-input__slot:after {
+  border-style: none;
+}
+.custom>.v-input__control>.v-input__slot>.v-select__slot>.v-input__append-inner>.v-input__icon>.v-icon:before {
+  color: var(--v-text-base);
+}
+
+.v-text-field>.v-input__control>.v-input__slot:before {
+  border-color: var(--v-primary-base) !important;
+}
+
+.icon {
+  font-size: 19px !important;
+}
+
+::-webkit-scrollbar {
+  width: 20px;
+}
+::-webkit-scrollbar-track {
+  background: var(--v-background-base);
+  border: solid 3px transparent;
+  background-clip: content-box;
+  border-radius: 20px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--v-backgroundSecondary-base);
+  border: solid 6px transparent;
+  background-clip: content-box;
+  border-radius: 20px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: white;
+  border: solid 6px transparent;
+  background-clip: content-box;
 }
 </style>
