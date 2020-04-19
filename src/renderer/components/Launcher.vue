@@ -800,7 +800,7 @@ export default {
         });
     },
     hasUpdate(mod) {
-      return this.isModSML20Compatible(mod) && !this.isModVersionInstalled(mod.versions[0]) && this.isModInstalled(mod) && (mod.versions[0].sml_version === '2.1.0') === this.selectedSatisfactoryInstall.name.toLowerCase().includes('experimental'); // HACK
+      return this.isModSML20Compatible(mod) && !this.isModVersionInstalled(mod.versions[0]) && this.isModInstalled(mod) && (mod.versions[0].sml_version === '2.1.0' || mod.versions[0].sml_version === 'v2.1.0') === this.selectedSatisfactoryInstall.name.toLowerCase().includes('experimental'); // HACK
     },
     checkForUpdates() {
       this.updates = this.availableMods.filter((mod) => this.hasUpdate(mod)).map((mod) => ({ id: mod.id, version: mod.versions[0].version }));
