@@ -451,7 +451,9 @@
 </template>
 
 <script>
-import semver, { compare } from 'semver';
+import semver, {
+  compare, satisfies, coerce, valid,
+} from 'semver';
 import {
   getInstalls,
   getAvailableMods,
@@ -737,9 +739,9 @@ export default {
       this.$bvModal.show('modal-new-config');
     },
     checkNewConfigFormValidity() {
-      const valid = this.$refs.newConfigForm.checkValidity();
-      this.newConfigNameState = valid;
-      return valid;
+      const validForm = this.$refs.newConfigForm.checkValidity();
+      this.newConfigNameState = validForm;
+      return validForm;
     },
     handleModalNewConfigOk(bvModalEvt) {
       bvModalEvt.preventDefault();
@@ -789,7 +791,11 @@ export default {
     hasSMLUpdate() {
       return getAvailableSMLVersions()
         .then((versions) => {
-          this.cachedSMLHasUpdate = this.selectedSatisfactoryInstall.smlVersion && this.selectedSatisfactoryInstall.smlVersion !== versions.sort((a, b) => -compare(a.version, b.version))[0].version;
+          const compatibleVersions = versions
+            .filter((ver) => satisfies(valid(coerce(this.selectedSatisfactoryInstall.version)), `>=${ver.satisfactory_version}`));
+          this.cachedSMLHasUpdate = compatibleVersions.length > 0
+            && this.selectedSatisfactoryInstall.smlVersion
+            && this.selectedSatisfactoryInstall.smlVersion !== compatibleVersions.sort((a, b) => -compare(a.version, b.version))[0].version;
           return this.cachedSMLHasUpdate;
         });
     },
