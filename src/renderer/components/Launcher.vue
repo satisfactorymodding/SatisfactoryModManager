@@ -179,13 +179,13 @@
                   :style="!isModSML20Compatible(item) ? (item === selectedMod ? 'background-color: #b5987f' : 'background-color: #837971') : ''"
                 >
                   <button
-                    :class="'my-1 btn ' + ((!item.versions[0] || isModVersionInstalled(item.versions[0])) ? 'btn-secondary' : 'btn-primary')"
+                    :class="'my-1 btn ' + ((!item.versions[0] || (!hasUpdate(item) && isModInstalled(item))) ? 'btn-secondary' : 'btn-primary')"
                     style="font-size: 13px; width: 100%"
                     :disabled="!item.versions[0] || !isModSML20Compatible(item) || inProgress.length > 0 || configLoadInProgress || selectedConfig === 'vanilla'"
                     :title="selectedConfig === 'vanilla' ? 'You cannot install mods in the vanilla config. Choose another config.' : ''"
                     @click="installUninstallUpdate(item)"
                   >
-                    {{ !item.versions[0] ? 'N/A' : (isModSML20Compatible(item) ? (isModVersionInstalled(item.versions[0]) ? "Remove" : (isModInstalled(item) ? "Update" : "Install")) : 'Outdated') }}
+                    {{ !item.versions[0] ? 'N/A' : (isModSML20Compatible(item) ? (hasUpdate(item) ? "Update" : (isModInstalled(item) ? "Remove" : "Install")) : 'Outdated') }}
                   </button>
                 </div>
                 <div
@@ -451,7 +451,9 @@
 </template>
 
 <script>
-import semver, { compare } from 'semver';
+import semver, {
+  compare, satisfies, coerce, valid,
+} from 'semver';
 import {
   getInstalls,
   getAvailableMods,
@@ -737,9 +739,9 @@ export default {
       this.$bvModal.show('modal-new-config');
     },
     checkNewConfigFormValidity() {
-      const valid = this.$refs.newConfigForm.checkValidity();
-      this.newConfigNameState = valid;
-      return valid;
+      const validForm = this.$refs.newConfigForm.checkValidity();
+      this.newConfigNameState = validForm;
+      return validForm;
     },
     handleModalNewConfigOk(bvModalEvt) {
       bvModalEvt.preventDefault();
@@ -789,12 +791,16 @@ export default {
     hasSMLUpdate() {
       return getAvailableSMLVersions()
         .then((versions) => {
-          this.cachedSMLHasUpdate = this.selectedSatisfactoryInstall.smlVersion && this.selectedSatisfactoryInstall.smlVersion !== versions.sort((a, b) => -compare(a.version, b.version))[0].version;
+          const compatibleVersions = versions
+            .filter((ver) => satisfies(valid(coerce(this.selectedSatisfactoryInstall.version)), `>=${ver.satisfactory_version}`));
+          this.cachedSMLHasUpdate = compatibleVersions.length > 0
+            && this.selectedSatisfactoryInstall.smlVersion
+            && this.selectedSatisfactoryInstall.smlVersion !== compatibleVersions.sort((a, b) => -compare(a.version, b.version))[0].version;
           return this.cachedSMLHasUpdate;
         });
     },
     hasUpdate(mod) {
-      return this.isModSML20Compatible(mod) && !this.isModVersionInstalled(mod.versions[0]) && this.isModInstalled(mod);
+      return this.isModSML20Compatible(mod) && !this.isModVersionInstalled(mod.versions[0]) && this.isModInstalled(mod) && (mod.versions[0].sml_version === '2.1.0' || mod.versions[0].sml_version === 'v2.1.0') === this.selectedSatisfactoryInstall.name.toLowerCase().includes('experimental'); // HACK
     },
     checkForUpdates() {
       this.updates = this.availableMods.filter((mod) => this.hasUpdate(mod)).map((mod) => ({ id: mod.id, version: mod.versions[0].version }));

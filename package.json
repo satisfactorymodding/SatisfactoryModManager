@@ -1,6 +1,6 @@
 {
   "name": "satisfactory-mod-launcher-gui",
-  "version": "1.0.6",
+  "version": "1.0.8",
   "author": "mircearoata",
   "contributors": [
     {
@@ -78,7 +78,7 @@
     "marked": "^0.7.0",
     "platform-folders": "^0.4.1",
     "sanitize-html": "^1.21.1",
-    "satisfactory-mod-manager-api": "^1.1.6",
+    "satisfactory-mod-manager-api": "^1.1.7",
     "semver": "^6.3.0",
     "vue": "^2.5.16",
     "vue-context-menu": "^2.0.6",
