@@ -915,10 +915,10 @@ export default {
         if (this.inProgress.length === 0) {
           this.inProgress.push(mod);
           if (this.isModInstalled(mod)) {
-            if (this.isModVersionInstalled(mod.versions[0])) {
-              this.uninstallMod(mod);
-            } else {
+            if (this.hasUpdate(mod)) {
               this.updateMod(mod);
+            } else {
+              this.uninstallMod(mod);
             }
           } else {
             this.installMod(mod);
