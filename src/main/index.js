@@ -1,6 +1,6 @@
 
 import {
-  app, BrowserWindow, ipcMain, shell, Menu,
+  app, BrowserWindow, ipcMain, shell, Menu, screen,
 } from 'electron';
 import path from 'path';
 import { autoUpdater } from 'electron-updater';
@@ -97,19 +97,25 @@ const template = [
 const menu = Menu.buildFromTemplate(template);
 Menu.setApplicationMenu(menu);
 
+const initialWidth = 500;
+const initialHeight = 700;
+
 function createWindow() {
   /**
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    height: 700,
     useContentSize: true,
-    width: 1000,
-    minWidth: 955,
-    minHeight: 600,
+    height: initialHeight,
+    width: initialWidth,
+    minWidth: initialWidth,
+    minHeight: initialHeight,
+    maxWidth: initialWidth,
     webPreferences: {
       nodeIntegration: true,
     },
+    frame: false,
+    show: false,
   });
 
   ipcMain.once('vue-ready', () => {
@@ -126,6 +132,48 @@ function createWindow() {
 
   ipcMain.on('openDevTools', () => {
     mainWindow.webContents.openDevTools();
+  });
+
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show();
+  });
+
+  ipcMain.on('open-side-panel', () => {
+    const widthScreen = screen.getPrimaryDisplay().workAreaSize.width;
+    const heightScreen = screen.getPrimaryDisplay().workAreaSize.height;
+    mainWindow.setMinimumSize(initialWidth + 500, initialHeight);
+    mainWindow.setMaximumSize(widthScreen - 20, heightScreen - 20);
+    mainWindow.setBounds(
+      {
+        x: 10, y: 10, width: widthScreen - 20, height: heightScreen - 20,
+      },
+    );
+  });
+
+  ipcMain.on('close-side-panel', () => {
+    const widthScreen = screen.getPrimaryDisplay().workAreaSize.width;
+    const heightScreen = screen.getPrimaryDisplay().workAreaSize.height;
+    const MaxHeight = heightScreen - 20;
+    mainWindow.setMinimumSize(initialWidth, initialHeight);
+    mainWindow.setMaximumSize(initialWidth, MaxHeight);
+    mainWindow.setBounds(
+      {
+        x: (widthScreen / 2) - (initialWidth / 2),
+        y: mainWindow.getPosition()[1],
+        width: initialWidth,
+        height: MaxHeight,
+      },
+    );
+  });
+
+  ipcMain.on('display-app-menu', () => {
+    if (mainWindow) {
+      menu.popup({
+        window: mainWindow,
+        x: 10,
+        y: 10,
+      });
+    }
   });
 
   mainWindow.on('closed', () => {
