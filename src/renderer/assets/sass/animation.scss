@@ -1,0 +1,39 @@
+.loading-enter-active {
+  animation: coming 1s;
+  animation-delay: .5s;
+  opacity: 0;
+}
+.loading-leave-active {
+  animation: going 1s;
+}
+.ldot { 
+  animation: 1s blink infinite 
+}
+.ldot:nth-child(2) { 
+  animation-delay: 250ms 
+}
+.ldot:nth-child(3) { 
+  animation-delay: 500ms 
+}
+
+@keyframes going {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes coming {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes blink {
+  50% {
+    color: transparent 
+  }
+}

@@ -1,52 +1,59 @@
 <template>
-  <div id="app">
-    <ul class="nav nav-tabs header">
-      <li class="nav-item">
-        <router-link
-          class="nav-link"
-          exact-active-class="active"
-          to="/"
-        >
-          Launcher
-        </router-link>
-      </li>
-    </ul>
-    <router-view class="content" />
-  </div>
+  <v-app>
+    <v-theme-provider root>
+      <router-view class="content" />
+    </v-theme-provider>
+  </v-app>
 </template>
 
 <script>
 export default {
   name: 'SatisfactoryModLauncherGUI',
+  created() {
+    if (this.getBrowserWindow().getSize()[0] > 500) {
+      this.$store.state.isSidePanelOpen = true;
+    }
+    this.$eventBus.$on('minimize-app', () => {
+      this.minimizeApp();
+    });
+    this.$eventBus.$on('close-app', () => {
+      this.closeApp();
+    });
+    this.$eventBus.$on('open-side-panel', (data) => {
+      this.openSidePanel(data);
+    });
+    this.$eventBus.$on('close-side-panel', () => {
+      this.closeSidePanel();
+    });
+  },
+  methods: {
+    getBrowserWindow() {
+      return this.$electron.remote.getCurrentWindow();
+    },
+    minimizeApp() {
+      const browserWindow = this.getBrowserWindow();
+      if (browserWindow.minimizable) {
+        browserWindow.minimize();
+      }
+    },
+    closeApp() {
+      const browserWindow = this.getBrowserWindow();
+      browserWindow.close();
+    },
+    openSidePanel(data) {
+      if (!this.$store.state.isSidePanelOpen) {
+        this.$electron.ipcRenderer.send('open-side-panel');
+      }
+      this.$store.state.isSidePanelOpen = true;
+      this.$store.state.sidePanelData = data;
+    },
+    closeSidePanel() {
+      if (this.$store.state.isSidePanelOpen) {
+        this.$electron.ipcRenderer.send('close-side-panel');
+      }
+      this.$store.state.isSidePanelOpen = false;
+      this.$store.state.sidePanelData = null;
+    },
+  },
 };
 </script>
-
-<style>
-html,
-body,
-#app,
-main {
-  height: 100%;
-}
-#app,
-main {
-  display: flex !important;
-  flex-flow: column !important;
-}
-#app .header,
-main .header {
-  flex: 0 0 auto;
-}
-#app .content,
-main .content {
-  flex: 1 1 auto;
-}
-.container-fluid {
-  height: 100%;
-  padding-left: 0px;
-  padding-right: 0px;
-}
-.selection-row {
-  overflow: hidden;
-}
-</style>
