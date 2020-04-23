@@ -136,7 +136,9 @@ export default {
   },
   created() {
     this.initLauncher().then(() => {
-      this.isLoading = false;
+      setTimeout(() => {
+        this.isLoading = false;
+      }, 2000);
     });
   },
   methods: {
