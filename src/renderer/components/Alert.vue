@@ -7,14 +7,20 @@
       <v-alert
         v-if="alert"
         dense
+        tile
+        flat
         :type="alert"
-        :class="{'mb-0':!alertBody} + ' text-capitalize'"
+        class="text-capitalize mb-0"
       >
         {{ alertTitle }}
       </v-alert>
-      <v-card v-if="alertBody">
-        <v-card-text>
-          <p>{{ alertBody }}</p>
+      <v-card
+        v-if="alertBody"
+        tile
+        flat
+      >
+        <v-card-text class="pt-4">
+          <v-label>{{ alertBody }}</v-label>
           <!-- eslint-disable-next-line vue/no-v-html -->
           <div v-html="alertHtmlBody" />
         </v-card-text>
@@ -28,7 +34,7 @@ export default {
   data() {
     return {
       dialog: false,
-      alert: null,
+      alert: null, // error, info, warning, success
       alertTitle: null,
       alertBody: null,
       alertHtmlBody: null,
