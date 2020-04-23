@@ -25,3 +25,40 @@ yarn dist
 yarn lint
 
 ```
+<hr>
+
+### Upcoming feature
+- Toggle dark/light mode
+- Favorite tag
+- Mod status (Viewer, download count, etc)
+
+### Screenshot
+#### App
+<div align="center">
+  <img src="./screenshot/app-sample.png"/>
+</div>
+
+#### Mod Detail
+<div align="center">
+  <img src="./screenshot/detail-sample.png"/>
+</div>
+
+#### Mod Update
+<div align="center">
+  <img src="./screenshot/update-available-sample.png"/>
+</div>
+
+### info
+<div align="center">
+  <img src="./screenshot/info-sample.png"/>
+</div>
+
+### warning
+<div align="center">
+  <img src="./screenshot/warning-sample.png"/>
+</div>
+
+### error
+<div align="center">
+  <img src="./screenshot/error-sample.png"/>
+</div>
