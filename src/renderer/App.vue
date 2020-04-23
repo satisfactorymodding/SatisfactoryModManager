@@ -10,20 +10,15 @@
 export default {
   name: 'SatisfactoryModLauncherGUI',
   created() {
-    if (this.getBrowserWindow().getSize()[0] > 500) {
-      this.$store.state.isSidePanelOpen = true;
-    }
+    this.validateSidePanel();
     this.$eventBus.$on('minimize-app', () => {
       this.minimizeApp();
     });
     this.$eventBus.$on('close-app', () => {
       this.closeApp();
     });
-    this.$eventBus.$on('open-side-panel', (data) => {
-      this.openSidePanel(data);
-    });
-    this.$eventBus.$on('close-side-panel', () => {
-      this.closeSidePanel();
+    this.$eventBus.$on('open-close-side-panel', (data) => {
+      this.openCloseSidePanel(data);
     });
   },
   methods: {
@@ -40,19 +35,15 @@ export default {
       const browserWindow = this.getBrowserWindow();
       browserWindow.close();
     },
-    openSidePanel(data) {
-      if (!this.$store.state.isSidePanelOpen) {
-        this.$electron.ipcRenderer.send('open-side-panel');
-      }
-      this.$store.state.isSidePanelOpen = true;
-      this.$store.state.sidePanelData = data;
+    validateSidePanel() {
+      this.$store.state.isSidePanelOpen = this.getBrowserWindow().getSize()[0] > 500;
     },
-    closeSidePanel() {
-      if (this.$store.state.isSidePanelOpen) {
-        this.$electron.ipcRenderer.send('close-side-panel');
-      }
-      this.$store.state.isSidePanelOpen = false;
-      this.$store.state.sidePanelData = null;
+    openCloseSidePanel(data) {
+      this.validateSidePanel();
+      const eventName = (this.$store.state.isSidePanelOpen && !data) ? 'close-side-panel' : 'open-side-panel';
+      this.$electron.ipcRenderer.send(eventName);
+      this.$store.state.isSidePanelOpen = !this.$store.state.isSidePanelOpen;
+      this.$store.state.sidePanelData = data;
     },
   },
 };
