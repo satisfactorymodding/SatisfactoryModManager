@@ -114,7 +114,7 @@ export default {
       toggleDebug();
       if (isDebug()) {
         this.$electron.ipcRenderer.send('openDevTools');
-        this.$eventBus.$emit('open-side-panel');
+        this.$electron.ipcRenderer.send('open-side-panel');
       }
     });
     this.$electron.ipcRenderer.on('clearCache', () => {
