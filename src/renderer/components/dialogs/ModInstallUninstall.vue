@@ -1,5 +1,6 @@
 <template>
   <v-dialog
+    v-show="selectedMod"
     v-model="dialog"
     persistent
     max-width="500px"

@@ -89,6 +89,7 @@
 import { mapState } from 'vuex';
 import marked from 'marked';
 import sanitizeHtml from 'sanitize-html';
+import { isModInstalled } from '../utils/helper';
 
 export default {
   computed: {
@@ -119,6 +120,10 @@ export default {
       this.$eventBus.$emit('open-close-side-panel');
     },
     openDialogInstallOldVersion() {
+      if (isModInstalled(this.$store.state, this.sidePanelData)) {
+        this.$eventBus.$emit('popup-alert', 'info', 'Mod is already installed', 'If you want to install another version, uninstall the current version');
+        return;
+      }
       this.$store.state.modalInstallModVersion = {};
       this.$store.state.selectedMod = this.sidePanelData;
       this.$eventBus.$emit('show-mod-install-uninstall-dialog', true);
