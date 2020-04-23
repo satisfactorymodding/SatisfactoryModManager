@@ -100,6 +100,9 @@ const opt = {
     cachedSMLHasUpdate: false,
     isSidePanelOpen: false,
     sidePanelData: null,
+    featureFlag: {
+      favorite: false,
+  },
   },
   mutations: {
     setSearch(state, search) {

@@ -30,7 +30,7 @@
       <v-tooltip bottom>
         <template v-slot:activator="{ on }">
           <v-icon
-            v-show="isSelected(mod)"
+            v-show="isSelected(mod) && featureFlag.favorite"
             class="clickable-icon ml-1"
             v-on="on"
           >
@@ -83,6 +83,7 @@ export default {
       'selectedMod',
       'isSidePanelOpen',
       'sidePanelData',
+      'featureFlag',
     ]),
   },
   watch: {
@@ -105,7 +106,7 @@ export default {
       }
     },
     openModDetail(mod) {
-      this.$eventBus.$emit('open-side-panel', mod);
+      this.$eventBus.$emit('open-close-side-panel', mod);
     },
     isInstalledMod(mod) {
       return isModInstalled(this.$store.state, mod);
