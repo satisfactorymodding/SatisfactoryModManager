@@ -187,9 +187,8 @@ const opt = {
     },
     refreshCurrentMod(state) {
       const currentModId = state.selectedMod ? state.selectedMod.id : '';
-      this.commit('refreshAvailableMods').then(() => {
-        state.selectedMod = state.searchMods.find((mod) => mod.id === currentModId) || state.searchMods[0] || null;
-      });
+      this.commit('refreshAvailableMods');
+      state.selectedMod = state.searchMods.find((mod) => mod.id === currentModId) || state.searchMods[0] || null;
     },
   },
   actions: {
@@ -228,6 +227,8 @@ const opt = {
         commit('refreshAvailableConfigs');
       });
     },
+    handleModalInstallSubmit({ state, dispatch }) {
+      dispatch('installOldVersion', { mod: state.selectedMod, version: state.modalInstallModVersion });
       Vue.nextTick(() => {
         EventBus.$emit('hide-mod-install-uninstall-dialog');
       });
@@ -349,7 +350,7 @@ const opt = {
         });
       }
     },
-    installOldVersion({ state, commit, dispatch }, mod, version) {
+    installOldVersion({ state, commit, dispatch }, { mod, version }) {
       state.inProgress.push(mod);
       return state.selectedSatisfactoryInstall
         .installMod(mod.id, version.version)

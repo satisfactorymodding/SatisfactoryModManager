@@ -67,6 +67,7 @@
         <v-btn
           text
           x-small
+          :disabled="inProgress.length > 0 || configLoadInProgress"
           @click="openDialogInstallOldVersion()"
         >
           Install Previous Version
@@ -93,6 +94,8 @@ export default {
   computed: {
     ...mapState([
       'sidePanelData',
+      'inProgress',
+      'configLoadInProgress',
     ]),
     noImageURL() {
       return 'https://ficsit.app/static/assets/images/no_image.png';

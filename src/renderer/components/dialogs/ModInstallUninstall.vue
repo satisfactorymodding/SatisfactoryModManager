@@ -44,6 +44,14 @@
           text
           @click="dialog = false"
         >
+          Close
+        </v-btn>
+        <v-btn
+          color="blue darken-1"
+          text
+          :disabled="inProgress.length > 0 || configLoadInProgress"
+          @click="installUninstallMod"
+        >
           {{ isInstall ? 'Install' : 'Uninstall' }}
         </v-btn>
       </v-card-actions>
@@ -66,6 +74,8 @@ export default {
     ...mapState([
       'satisfactoryInstalls',
       'selectedMod',
+      'inProgress',
+      'configLoadInProgress',
     ]),
     selectedSatisfactoryInstall: {
       get() {
@@ -95,6 +105,12 @@ export default {
     this.$eventBus.$on('hide-mod-install-uninstall-dialog', () => {
       this.dialog = false;
     });
+  },
+  methods: {
+    installUninstallMod() {
+      const submitMethod = this.isInstall ? 'handleModalInstallSubmit' : 'handleModalUninstallSubmit';
+      this.$store.dispatch(submitMethod);
+    },
   },
 };
 </script>
