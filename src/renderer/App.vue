@@ -19,7 +19,7 @@ div {
 </style>
 
 <style>
-.theme--dark.v-card {
+.v-card {
   background-color: var(--v-background-base) !important;
 }
 
@@ -27,15 +27,12 @@ div {
   color: var(--v-text-base) !important;
 }
 
+html {
+  overflow-y: hidden !important;
+}
+
 .v-btn {
   letter-spacing: 0.03em !important;
-}
-
-html {
-  overflow-y: auto !important;
-}
-
-.v-btn {
   text-transform: none !important;
   padding: 0px !important;
 }
@@ -70,12 +67,46 @@ html {
   opacity: 0.95 !important;
 }
 
-.custom.theme--dark.v-input--switch.v-input--is-disabled:not(.v-input--is-dirty) .v-input--switch__track {
+.custom.incompatible.v-input--switch .v-input--switch__track {
   color: var(--v-error-base) !important;
 }
 
-.theme--dark.v-input--switch .v-input--switch__thumb {
-  color: #424242!important;
+.custom.v-input--switch .v-input--switch__thumb {
+  color: #424242 !important;
+}
+
+.custom.v-input.v-input--switch.v-input--is-disabled:not(.v-input--is-dirty) .v-input--switch__track {
+  color: hsla(0,0%,100%,.25) !important;
+}
+
+.custom.v-input--switch.v-input--dense.v-input--switch--inset .v-input--switch__track {
+  height: 15px;
+  width: 32px;
+  top: calc(50% - 7.5px);
+}
+
+.custom.v-input--switch.v-input--dense.v-input--switch--inset .v-input--switch__thumb {
+  width: 10px;
+  height: 10px;
+  top: calc(50% - 4.75px);
+}
+
+.custom.v-input--switch.v-input--dense.v-input--switch--inset .v-input--selection-controls__input {
+  width: 20px;
+}
+
+.custom.v-input--switch.v-input--dense.v-input--switch--inset .v-input--selection-controls__ripple {
+  width: 20px;
+  height: 20px;
+  top: calc(50% - 17px);
+}
+
+.custom.v-input--switch.v-input--dense.v-input--is-dirty .v-input--switch__thumb {
+  transform: translate(15px) !important;
+}
+
+.custom.v-input--switch.v-input--dense.v-input--is-dirty .v-input--selection-controls__ripple {
+  transform: translate(15px) !important;
 }
 
 .v-text-field__details, .custom>.v-input__control>.v-messages {
@@ -97,7 +128,7 @@ html {
   border-color: var(--v-primary-base) !important;
 }
 
-.icon {
+.v-icon {
   font-size: 19px !important;
 }
 

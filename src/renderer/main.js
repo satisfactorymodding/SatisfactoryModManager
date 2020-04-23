@@ -30,7 +30,9 @@ new Vue({
       themes: {
         dark: {
           primary: '#249a20',
+          warning: '#ffc107',
           error: '#e51c22',
+          info: '#039ae5',
           background: '#212226',
           backgroundSecondary: '#303136',
           text: '#9e9e9e',
@@ -38,7 +40,9 @@ new Vue({
         },
         light: {
           primary: '#249a20',
+          warning: '#ffc107',
           error: '#e51c22',
+          info: '#039ae5',
           background: '#fcfcfc',
           backgroundSecondary: '#d4d4d4',
           text: '#000',

@@ -13,7 +13,7 @@
         height="475px"
       >
         <template
-          v-for="(mod, index) in mods"
+          v-for="({ modInfo, isInstalled, isCompatible }, index) in mods"
         >
           <div
             :key="index"
@@ -25,14 +25,14 @@
 
             <v-list-item>
               <v-list-item-content>
-                <span>{{ mod.name }}</span>
+                <span>{{ modInfo.name }}</span>
               </v-list-item-content>
               <v-list-item-icon>
                 <div
                   class="d-inline-flex align-items-center mod-button"
-                  :class="expandedModId === mod.id ? 'active' : ''"
+                  :class="expandedModId === modInfo.id ? 'active' : ''"
                   fill-height
-                  @click="expandClicked(mod)"
+                  @click="expandClicked(modInfo)"
                 >
                   <v-icon
                     class="ma-1 icon"
@@ -43,24 +43,28 @@
                 </div>
                 <div
                   class="d-inline-flex align-items-center mod-button"
-                  :class="favoriteModIds.includes(mod.id) ? 'active' : ''"
+                  :class="favoriteModIds.includes(modInfo.id) ? 'active' : ''"
+                  style="margin-right: 15px"
                   fill-height
-                  @click="favoriteClicked(mod)"
+                  @click="favoriteClicked(modInfo)"
                 >
                   <v-icon
                     class="ma-1 icon"
-                    color="#ffc107"
+                    color="warning"
                   >
                     mdi-star
                   </v-icon>
                 </div>
                 <v-switch
+                  :value="isInstalled"
                   inset
                   dense
                   color="primary"
                   class="custom"
-                  :disabled="!mod.isCompatible"
-                  @change="switchClicked(mod)"
+                  :class="isCompatible ? '' : 'incompatible'"
+                  flat
+                  :disabled="!isCompatible || !!inProgress"
+                  @click.stop.prevent="switchClicked(modInfo)"
                 />
               </v-list-item-icon>
             </v-list-item>
@@ -86,11 +90,14 @@ export default {
       type: String,
       default: '',
     },
-  },
-  data() {
-    return {
-      selectedModIdx: -1,
-    };
+    inProgress: {
+      type: String,
+      default: '',
+    },
+    progressPercent: {
+      type: Number,
+      default: 0,
+    },
   },
   methods: {
     expandClicked(mod) {
@@ -124,10 +131,10 @@ div {
   color: var(--v-backgroundSecondary-lighten2) !important;
 }
 .mod-button.active {
-  opacity: 1;
+  opacity: 1 !important;
 }
 .mod-button:hover {
-  opacity: 1;
+  opacity: 0.65;
 }
 
 .list-shadow {
@@ -135,9 +142,9 @@ div {
   width: 100%;
   height: 100%;
   top: 0px;
-  box-shadow: inset 0px 60px 30px -20px rgba(0,0,0,0.35), inset 0px -60px 30px -20px rgba(0,0,0,0.35);
+  box-shadow: inset 0px 45px 20px -20px rgba(0,0,0,0.3), inset 0px -45px 20px -20px rgba(0,0,0,0.3);
   z-index: 1;
   background: transparent !important;
-  pointer-events:none;
+  pointer-events: none;
 }
 </style>

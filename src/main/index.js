@@ -102,7 +102,7 @@ const normalSize = {
   height: 800,
 };
 const expandedSize = {
-  width: 1574,
+  width: 1652,
   height: 800,
 };
 
@@ -134,6 +134,7 @@ function createWindow() {
   });
 
   ipcMain.on('unexpand', () => {
+    mainWindow.setMinimumSize(normalSize.width, normalSize.height); // https://github.com/electron/electron/issues/15560#issuecomment-451395078
     mainWindow.setSize(normalSize.width, normalSize.height, true);
   });
 
