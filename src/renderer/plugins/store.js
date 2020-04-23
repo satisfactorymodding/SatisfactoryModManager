@@ -228,15 +228,13 @@ const opt = {
         commit('refreshAvailableConfigs');
       });
     },
-    handleModalInstallSubmit(state) {
-      this.dispatch.installOldVersion(state.selectedMod, state.modalInstallModVersion);
-      this.$nextTick(() => {
+      Vue.nextTick(() => {
         EventBus.$emit('hide-mod-install-uninstall-dialog');
       });
     },
     handleModalUninstallSubmit({ state, dispatch }) {
       dispatch('uninstallMod', (state.selectedMod.versions.find((ver) => isModVersionInstalled(ver))));
-      this.$nextTick(() => {
+      Vue.nextTick(() => {
         EventBus.$emit('hide-mod-install-uninstall-dialog');
       });
     },
@@ -317,7 +315,7 @@ const opt = {
     updateAll({ state, dispatch }) {
       if (state.updates.length === 0) {
         state.updatingAll = false;
-        this.$nextTick(() => {
+        Vue.nextTick(() => {
           EventBus.$emit('hide-mod-update-dialog');
         });
       } else {
@@ -334,7 +332,7 @@ const opt = {
         state.updates.removeWhere((update) => update.id === id);
         state.inProgress.remove(id);
         if (state.updates.length === 0) {
-          this.$nextTick(() => {
+          Vue.nextTick(() => {
             EventBus.$emit('hide-mod-update-dialog');
           });
         }
@@ -346,7 +344,7 @@ const opt = {
       ignoredUpdates.push(update);
       saveSetting('ignoredUpdates', ignoredUpdates);
       if (state.updates.length === 0) {
-        this.$nextTick(() => {
+        Vue.nextTick(() => {
           EventBus.$emit('hide-mod-update-dialog');
         });
       }
