@@ -24,6 +24,7 @@
       </transition>
     </v-card>
     <ModUpdate />
+    <ModInstallUninstall />
   </v-card>
 </template>
 
@@ -31,12 +32,14 @@
 import arrayEqual from 'array-equal';
 import Mod from './Mod';
 import ModUpdate from './dialogs/ModUpdate';
+import ModInstallUninstall from './dialogs/ModInstallUninstall';
 
 export default {
   name: 'ModList',
   components: {
     Mod,
     ModUpdate,
+    ModInstallUninstall,
   },
   data() {
     return {

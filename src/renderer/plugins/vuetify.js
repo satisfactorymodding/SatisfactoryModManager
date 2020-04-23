@@ -23,6 +23,7 @@ import {
   mdiBookmark,
   mdiBookmarkCheck,
   mdiKeyboardBackspace,
+  mdiTarget,
 } from '@mdi/js';
 import '../assets/sass/main.scss';
 
@@ -73,6 +74,7 @@ const opts = {
       compatibleIcon: mdiBookmarkCheck,
       notCompatibleIcon: mdiBookmark,
       backIcon: mdiKeyboardBackspace,
+      targetVersionIcon: mdiTarget,
     },
   },
 };

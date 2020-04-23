@@ -63,15 +63,13 @@
           </template>
           <span>Close Mod Detail</span>
         </v-tooltip>
-        <v-spacer></v-spacer>
-        <v-btn icon>
-          <v-icon>mdi-magnify</v-icon>
-        </v-btn>
-        <v-btn icon>
-          <v-icon>mdi-heart</v-icon>
-        </v-btn>
-        <v-btn icon>
-          <v-icon>mdi-dots-vertical</v-icon>
+        <v-spacer />
+        <v-btn
+          text
+          x-small
+          @click="openDialogInstallOldVersion()"
+        >
+          Install Previous Version
         </v-btn>
       </v-toolbar>
     </v-card>
@@ -115,7 +113,12 @@ export default {
   },
   methods: {
     closenModDetail() {
-      this.$eventBus.$emit('close-side-panel');
+      this.$eventBus.$emit('open-close-side-panel');
+    },
+    openDialogInstallOldVersion() {
+      this.$store.state.modalInstallModVersion = {};
+      this.$store.state.selectedMod = this.sidePanelData;
+      this.$eventBus.$emit('show-mod-install-uninstall-dialog', true);
     },
   },
 };

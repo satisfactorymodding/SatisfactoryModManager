@@ -102,7 +102,7 @@ const opt = {
     sidePanelData: null,
     featureFlag: {
       favorite: false,
-  },
+    },
   },
   mutations: {
     setSearch(state, search) {
@@ -231,13 +231,13 @@ const opt = {
     handleModalInstallSubmit(state) {
       this.dispatch.installOldVersion(state.selectedMod, state.modalInstallModVersion);
       this.$nextTick(() => {
-        this.$bvModal.hide('modal-install');
+        EventBus.$emit('hide-mod-install-uninstall-dialog');
       });
     },
     handleModalUninstallSubmit({ state, dispatch }) {
       dispatch('uninstallMod', (state.selectedMod.versions.find((ver) => isModVersionInstalled(ver))));
       this.$nextTick(() => {
-        EventBus.$emit('hide-mod-uninstall-confirm');
+        EventBus.$emit('hide-mod-install-uninstall-dialog');
       });
     },
     saveSelectedConfig({ state }) {
@@ -423,11 +423,11 @@ const opt = {
         const version = parsed.searchParams.get('version');
         state.selectedMod = state.availableMods.find((mod) => mod.id === modID);
         state.modalInstallModVersion = state.selectedMod.versions.filter((ver) => isVersionSML20Compatible(ver)).find((ver) => ver.version === version) || state.selectedMod.versions[0];
-        // this.$bvModal.show('modal-install');
+        EventBus.$emit('show-mod-install-uninstall-dialog', true);
       } else if (command === 'uninstall') {
         const modID = parsed.searchParams.get('modID');
         state.selectedMod = state.availableMods.find((mod) => mod.id === modID);
-        // this.$bvModal.show('modal-uninstall');
+        EventBus.$emit('show-mod-install-uninstall-dialog', false);
       }
     },
   },

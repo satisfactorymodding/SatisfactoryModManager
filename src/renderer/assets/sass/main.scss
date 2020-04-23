@@ -166,6 +166,11 @@ a:hover {
       max-width: 100%;
     }
   }
+  code {
+    background-color: var(--v-color-1-base);
+    color: var(--v-primary-base);
+    padding: 0.5em;
+  }
 }
 .launcher-scroll::-webkit-scrollbar-track
 {
