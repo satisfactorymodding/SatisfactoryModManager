@@ -142,7 +142,7 @@ function createWindow() {
     const widthScreen = screen.getPrimaryDisplay().workAreaSize.width;
     const heightScreen = screen.getPrimaryDisplay().workAreaSize.height;
     mainWindow.setMinimumSize(initialWidth + 500, initialHeight);
-    mainWindow.setMaximumSize(widthScreen - 20, heightScreen - 20);
+    mainWindow.setMaximumSize(widthScreen, heightScreen);
     mainWindow.setBounds(
       {
         x: 10, y: 10, width: widthScreen - 20, height: heightScreen - 20,
@@ -155,7 +155,7 @@ function createWindow() {
     const heightScreen = screen.getPrimaryDisplay().workAreaSize.height;
     const MaxHeight = heightScreen - 20;
     mainWindow.setMinimumSize(initialWidth, initialHeight);
-    mainWindow.setMaximumSize(initialWidth, MaxHeight);
+    mainWindow.setMaximumSize(initialWidth, heightScreen);
     mainWindow.setBounds(
       {
         x: (widthScreen / 2) - (initialWidth / 2),
