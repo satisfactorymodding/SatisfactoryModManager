@@ -217,7 +217,6 @@ export default {
     selectedSatisfactoryInstall() {
       this.$store.commit('refreshSearch');
       saveSetting('selectedSFInstall', this.selectedSatisfactoryInstall.installLocation);
-      this.$store.dispatch('checkForUpdates');
     },
     filters: {
       handler() {

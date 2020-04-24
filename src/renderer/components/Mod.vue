@@ -88,7 +88,10 @@ export default {
   },
   watch: {
     installStatus(value) {
-      if ((value && !this.isInstalledMod(this.mod)) || (!value && this.isInstalledMod(this.mod))) {
+      if (
+        (value && !this.isInstalledMod(this.mod))
+        || (!value && this.isInstalledMod(this.mod) && !this.hasUpdateMod(this.mod))
+      ) {
         this.$store.dispatch('installUninstallUpdate', this.mod);
       }
     },

@@ -110,7 +110,7 @@ const opt = {
       this.commit('refreshSearch');
     },
     refreshSatisfactoryInstalls(state, savedSelectedInstall) {
-      return getInstalls().then((installs) => {
+      getInstalls().then((installs) => {
         state.satisfactoryInstalls = installs;
         if (state.satisfactoryInstalls.length > 0) {
           if (savedSelectedInstall) {
@@ -124,7 +124,7 @@ const opt = {
     },
     refreshAvailableMods(state) {
       const currentlySelectedModID = state.selectedMod ? state.selectedMod.id : '';
-      return getAvailableMods().then((mods) => {
+      getAvailableMods().then((mods) => {
         state.availableMods = mods;
         this.commit('refreshSearch');
         state.selectedMod = state.searchMods.find((mod) => mod.id === currentlySelectedModID) || state.searchMods[0] || null;
@@ -172,6 +172,7 @@ const opt = {
       if (state.filters.sortOrder === 'ascending') {
         state.searchMods.reverse();
       }
+      this.dispatch('checkForUpdates');
     },
     loadSelectedConfig(state) {
       if (state.selectedSatisfactoryInstall) {
@@ -192,7 +193,7 @@ const opt = {
     },
   },
   actions: {
-    initLauncher({ state, commit, dispatch }) {
+    initLauncher({ state, commit }) {
       const savedSelectedSFInstall = getSetting('selectedSFInstall', undefined);
       state.selectedConfig = getSetting('selectedConfig', 'modded') || 'vanilla';
       Promise.all(
@@ -209,7 +210,6 @@ const opt = {
             state.filters[filter] = savedFilters[filter];
           }
         });
-        dispatch('checkForUpdates');
       });
     },
     launchSatisfactory({ state }) {
@@ -321,7 +321,7 @@ const opt = {
         });
       } else {
         state.updatingAll = true;
-        dispatch('updateById', this.updates[0].id)
+        dispatch('updateById', state.updates[0].id)
           .then(() => {
             dispatch('updateAll');
           });

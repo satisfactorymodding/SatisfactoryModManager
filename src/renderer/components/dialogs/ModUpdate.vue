@@ -4,7 +4,17 @@
     persistent
     max-width="500px"
   >
-    <v-card>
+    <v-card class="position-relative">
+      <v-card
+        v-show="inProgress.length > 0 || configLoadInProgress"
+        class="position-absolute w-100"
+      >
+        <v-progress-linear
+          color="success"
+          indeterminate
+          height="2"
+        ></v-progress-linear>
+      </v-card>
       <v-card-title>
         <span class="headline">Mod Update Available</span>
       </v-card-title>
@@ -23,6 +33,7 @@
               >
                 <v-btn
                   icon
+                  :disabled="inProgress.length > 0 || configLoadInProgress"
                   @click="updateById(item.id)"
                 >
                   <v-icon color="green lighten-1">
@@ -31,6 +42,7 @@
                 </v-btn>
                 <v-btn
                   icon
+                  :disabled="inProgress.length > 0 || configLoadInProgress"
                   @click="ignoreVersion(item)"
                 >
                   <v-icon color="red lighten-1">
@@ -54,7 +66,8 @@
         <v-btn
           color="blue darken-1"
           text
-          @click="dialog = false"
+          :disabled="inProgress.length > 0 || configLoadInProgress"
+          @click="updateAll"
         >
           Update All
         </v-btn>
@@ -64,6 +77,8 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
+
 export default {
   data() {
     return {
@@ -71,6 +86,10 @@ export default {
     };
   },
   computed: {
+    ...mapState([
+      'inProgress',
+      'configLoadInProgress',
+    ]),
     updates() {
       return this.$store.state.updates;
     },
@@ -92,6 +111,9 @@ export default {
     },
     ignoreVersion(item) {
       this.$store.dispatch('ignoreVersion', item);
+    },
+    updateAll() {
+      this.$store.dispatch('updateAll');
     },
   },
 };

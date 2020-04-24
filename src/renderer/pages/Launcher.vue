@@ -38,6 +38,16 @@
           </v-btn>
         </div>
         <v-card
+          v-show="inProgress.length > 0 || configLoadInProgress"
+          class="position-absolute w-100"
+        >
+          <v-progress-linear
+            color="success"
+            indeterminate
+            height="2"
+          ></v-progress-linear>
+        </v-card>
+        <v-card
           v-if="isLoading"
           class="loading fixed-top w-100 h-100 d-flex align-items-center justify-content-center"
         >
