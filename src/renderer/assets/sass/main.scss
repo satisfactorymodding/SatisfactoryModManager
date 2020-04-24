@@ -43,6 +43,8 @@ a:hover {
 }
 .main-launcher {
   margin-top: 32px;
+  height: calc(100% - 32px);
+  max-height: calc(100% - 32px);;
 }
 .fs-05 {
   font-size: 0.5em !important;
@@ -61,7 +63,6 @@ a:hover {
 }
 .launcher-wrapper {
   display: table;
-  height: 100%;
 }
 .launcher-wrapper > div {
   display: table-row;
