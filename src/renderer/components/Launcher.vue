@@ -760,9 +760,17 @@ export default {
         this.$bvModal.hide('modal-new-config');
       });
     },
+    getAllMods(page) {
+      return getAvailableMods(page || 0).then((mods) => {
+        if (mods.length > 0) {
+          return this.getAllMods((page || 0) + 1).then((nextPageMods) => nextPageMods.concat(mods));
+        }
+        return Promise.resolve(mods);
+      });
+    },
     refreshAvailableMods() {
       const currentlySelectedModID = this.selectedMod ? this.selectedMod.id : '';
-      return getAvailableMods().then((mods) => {
+      return this.getAllMods().then((mods) => {
         this.availableMods = mods;
         this.refreshSearch();
         this.selectedMod = this.searchMods.find((mod) => mod.id === currentlySelectedModID) || this.searchMods[0] || null;
