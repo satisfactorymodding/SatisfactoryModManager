@@ -181,11 +181,12 @@
                   <button
                     :class="'my-1 btn ' + ((!item.versions[0] || (!hasUpdate(item) && isModInstalled(item))) ? 'btn-secondary' : 'btn-primary')"
                     style="font-size: 13px; width: 100%"
-                    :disabled="!item.versions[0] || !isModSML20Compatible(item) || inProgress.length > 0 || configLoadInProgress || selectedConfig === 'vanilla'"
+                    :disabled="!item.versions[0] || !isModSML20Compatible(item) || isGameOutdated(item) || inProgress.length > 0 || configLoadInProgress || selectedConfig === 'vanilla'"
                     :title="selectedConfig === 'vanilla' ? 'You cannot install mods in the vanilla config. Choose another config.' : ''"
                     @click="installUninstallUpdate(item)"
                   >
-                    {{ !item.versions[0] ? 'N/A' : (isModSML20Compatible(item) ? (hasUpdate(item) ? "Update" : (isModInstalled(item) ? "Remove" : "Install")) : 'Outdated') }}
+                    {{ !item.versions[0] ? 'N/A' :
+                      (isModSML20Compatible(item) ? (hasUpdate(item) ? "Update" : (isModInstalled(item) ? "Remove" : (isGameOutdated(item) ? 'Incompatible' :"Install"))) : 'Outdated') }}
                   </button>
                 </div>
                 <div
@@ -197,11 +198,11 @@
                     v-if="!isModInstalled(item)"
                     :class="'my-1 btn btn-secondary'"
                     style="font-size: 13px; width: 100%"
-                    :disabled="!item.versions[0] || !isModSML20Compatible(item) || inProgress.length > 0 || configLoadInProgress || selectedConfig === 'vanilla'"
+                    :disabled="!item.versions[0] || !isModSML20Compatible(item) || isGameOutdated(item) || inProgress.length > 0 || configLoadInProgress || selectedConfig === 'vanilla'"
                     :title="selectedConfig === 'vanilla' ? 'You cannot install mods in the vanilla config. Choose another config.' : ''"
                     @click="$bvModal.show('modal-install')"
                   >
-                    {{ !item.versions[0] ? 'N/A' : (isModSML20Compatible(item) ? 'Install old version' : 'Outdated') }}
+                    {{ !item.versions[0] ? 'N/A' : (isModSML20Compatible(item) ? (isGameOutdated(item) ? 'Incompatible' : 'Install old version') : 'Outdated') }}
                   </button>
                 </div>
                 <div
@@ -463,6 +464,7 @@ import {
   getConfigs,
   deleteConfig,
   getAvailableSMLVersions,
+  addDownloadProgressCallback,
 } from 'satisfactory-mod-manager-api';
 import marked from 'marked';
 import { exec } from 'child_process';
@@ -625,6 +627,7 @@ export default {
     });
   },
   created() {
+    addDownloadProgressCallback(this.downloadProgress);
     const savedSelectedSFInstall = getSetting('selectedSFInstall', undefined);
     this.selectedConfig = getSetting('selectedConfig', 'modded') || 'vanilla';
     Promise.all(
@@ -645,6 +648,11 @@ export default {
     });
   },
   methods: {
+    downloadProgress(url, progress, friendlyName) {
+      if (isDebug()) {
+        console.log(`Downloading ${friendlyName}: ${Math.round((progress.percent * 100) * 100) / 100}% (${progress.transferred / 1000}KB / ${progress.total / 1000}KB)`);
+      }
+    },
     handleModalInstallOk(bvModalEvt) {
       bvModalEvt.preventDefault();
       this.handleModalInstallSubmit();
@@ -670,6 +678,12 @@ export default {
     },
     isVersionSML20Compatible(version) {
       return semver.satisfies(version.sml_version, '>=2.0.0');
+    },
+    isGameOutdated(mod) {
+      return mod.versions.some((ver) => !this.isGameOutdatedVersion(ver));
+    },
+    isGameOutdatedVersion(version) {
+      return (version.sml_version === '2.0.0' || version.sml_version === 'v2.0.0') || this.selectedSatisfactoryInstall.name.toLowerCase().includes('experimental'); // HACK
     },
     refreshSearch() {
       this.searchMods = this.availableMods.filter((mod) => mod.name.toLowerCase().includes(this.search.toLowerCase())
@@ -808,7 +822,7 @@ export default {
         });
     },
     hasUpdate(mod) {
-      return this.isModSML20Compatible(mod) && !this.isModVersionInstalled(mod.versions[0]) && this.isModInstalled(mod) && (mod.versions[0].sml_version === '2.1.0' || mod.versions[0].sml_version === 'v2.1.0') === this.selectedSatisfactoryInstall.name.toLowerCase().includes('experimental'); // HACK
+      return this.isModSML20Compatible(mod) && !this.isModVersionInstalled(mod.versions[0]) && this.isModInstalled(mod) && ((mod.versions[0].sml_version === '2.0.0' || mod.versions[0].sml_version === 'v2.0.0') || this.selectedSatisfactoryInstall.name.toLowerCase().includes('experimental')); // HACK
     },
     checkForUpdates() {
       this.updates = this.availableMods.filter((mod) => this.hasUpdate(mod)).map((mod) => ({ id: mod.id, version: mod.versions[0].version }));
