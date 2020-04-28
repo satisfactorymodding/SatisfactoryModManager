@@ -181,12 +181,12 @@
                   <button
                     :class="'my-1 btn ' + ((!item.versions[0] || (!hasUpdate(item) && isModInstalled(item))) ? 'btn-secondary' : 'btn-primary')"
                     style="font-size: 13px; width: 100%"
-                    :disabled="!item.versions[0] || !isModSML20Compatible(item) || isGameOutdated(item) || inProgress.length > 0 || configLoadInProgress || selectedConfig === 'vanilla'"
+                    :disabled="!item.versions[0] || !isModSML20Compatible(item) || !isModCompatible(item) || inProgress.length > 0 || configLoadInProgress || selectedConfig === 'vanilla'"
                     :title="selectedConfig === 'vanilla' ? 'You cannot install mods in the vanilla config. Choose another config.' : ''"
                     @click="installUninstallUpdate(item)"
                   >
                     {{ !item.versions[0] ? 'N/A' :
-                      (isModSML20Compatible(item) ? (hasUpdate(item) ? "Update" : (isModInstalled(item) ? "Remove" : (isGameOutdated(item) ? 'Incompatible' :"Install"))) : 'Outdated') }}
+                      (isModSML20Compatible(item) ? (hasUpdate(item) ? "Update" : (isModInstalled(item) ? "Remove" : (!isModCompatible(item) ? 'Incompatible' :"Install"))) : 'Outdated') }}
                   </button>
                 </div>
                 <div
@@ -198,11 +198,11 @@
                     v-if="!isModInstalled(item)"
                     :class="'my-1 btn btn-secondary'"
                     style="font-size: 13px; width: 100%"
-                    :disabled="!item.versions[0] || !isModSML20Compatible(item) || isGameOutdated(item) || inProgress.length > 0 || configLoadInProgress || selectedConfig === 'vanilla'"
+                    :disabled="!item.versions[0] || !isModSML20Compatible(item) || !isModCompatible(item) || inProgress.length > 0 || configLoadInProgress || selectedConfig === 'vanilla'"
                     :title="selectedConfig === 'vanilla' ? 'You cannot install mods in the vanilla config. Choose another config.' : ''"
                     @click="$bvModal.show('modal-install')"
                   >
-                    {{ !item.versions[0] ? 'N/A' : (isModSML20Compatible(item) ? (isGameOutdated(item) ? 'Incompatible' : 'Install old version') : 'Outdated') }}
+                    {{ !item.versions[0] ? 'N/A' : (isModSML20Compatible(item) ? (!isModCompatible(item) ? 'Incompatible' : 'Install old version') : 'Outdated') }}
                   </button>
                 </div>
                 <div
@@ -553,6 +553,7 @@ export default {
       updates: [],
       updatingAll: false,
       cachedSMLHasUpdate: false,
+      smlVersions: [],
     };
   },
   computed: {
@@ -632,19 +633,26 @@ export default {
     this.selectedConfig = getSetting('selectedConfig', 'modded') || 'vanilla';
     Promise.all(
       [
+        this.getSMLVersions(),
         this.refreshSatisfactoryInstalls(savedSelectedSFInstall),
-        this.refreshAvailableMods(),
-        this.refreshAvailableConfigs(),
       ],
     ).then(() => {
-      this.$electron.ipcRenderer.send('vue-ready');
-      const savedFilters = getSetting('filters', this.filters);
-      Object.keys(this.filters).forEach((filter) => {
-        if (savedFilters[filter] !== undefined) {
-          this.filters[filter] = savedFilters[filter];
-        }
+      console.log(this.selectedSatisfactoryInstall);
+      Promise.all(
+        [
+          this.refreshAvailableMods(),
+          this.refreshAvailableConfigs(),
+        ],
+      ).then(() => {
+        this.$electron.ipcRenderer.send('vue-ready');
+        const savedFilters = getSetting('filters', this.filters);
+        Object.keys(this.filters).forEach((filter) => {
+          if (savedFilters[filter] !== undefined) {
+            this.filters[filter] = savedFilters[filter];
+          }
+        });
+        this.checkForUpdates();
       });
-      this.checkForUpdates();
     });
   },
   methods: {
@@ -679,11 +687,10 @@ export default {
     isVersionSML20Compatible(version) {
       return semver.satisfies(version.sml_version, '>=2.0.0');
     },
-    isGameOutdated(mod) {
-      return mod.versions.some((ver) => !this.isGameOutdatedVersion(ver));
-    },
-    isGameOutdatedVersion(version) {
-      return (version.sml_version === '2.0.0' || version.sml_version === 'v2.0.0') || this.selectedSatisfactoryInstall.name.toLowerCase().includes('experimental'); // HACK
+    isModCompatible(mod) {
+      return mod.versions.length > 0
+        && !!mod.versions.find((ver) => satisfies(ver.sml_version, '>=2.0.0')
+        && satisfies(valid(coerce(this.selectedSatisfactoryInstall.version)), `>=${valid(coerce(this.smlVersions.find((smlVer) => valid(coerce(smlVer.version)) === valid(coerce(ver.sml_version))).satisfactory_version))}`));
     },
     refreshSearch() {
       this.searchMods = this.availableMods.filter((mod) => mod.name.toLowerCase().includes(this.search.toLowerCase())
@@ -774,6 +781,11 @@ export default {
         this.$bvModal.hide('modal-new-config');
       });
     },
+    getSMLVersions() {
+      return getAvailableSMLVersions().then((versions) => {
+        this.smlVersions = versions;
+      });
+    },
     getAllMods(page) {
       return getAvailableMods(page || 0).then((mods) => {
         if (mods.length > 0) {
@@ -822,7 +834,7 @@ export default {
         });
     },
     hasUpdate(mod) {
-      return this.isModSML20Compatible(mod) && !this.isModVersionInstalled(mod.versions[0]) && this.isModInstalled(mod) && ((mod.versions[0].sml_version === '2.0.0' || mod.versions[0].sml_version === 'v2.0.0') || this.selectedSatisfactoryInstall.name.toLowerCase().includes('experimental')); // HACK
+      return this.isModSML20Compatible(mod) && !this.isModVersionInstalled(mod.versions[0]) && this.isModInstalled(mod) && this.isModCompatible(mod); // HACK
     },
     checkForUpdates() {
       this.updates = this.availableMods.filter((mod) => this.hasUpdate(mod)).map((mod) => ({ id: mod.id, version: mod.versions[0].version }));
