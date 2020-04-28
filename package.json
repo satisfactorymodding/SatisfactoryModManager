@@ -61,6 +61,9 @@
       "icon": "build/icons"
     }
   },
+  "resolutions": {
+    "cacheable-lookup": "4.1.2"
+  },
   "dependencies": {
     "@babel/runtime": "^7.7.4",
     "array-equal": "^1.0.0",

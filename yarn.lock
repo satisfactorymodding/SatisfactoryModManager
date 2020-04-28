@@ -2425,10 +2425,10 @@ cache-base@^1.0.1:
     union-value "^1.0.0"
     unset-value "^1.0.0"
 
-cacheable-lookup@^4.1.1:
-  version "4.2.1"
-  resolved "https://registry.yarnpkg.com/cacheable-lookup/-/cacheable-lookup-4.2.1.tgz#3449825d21b971e7971c4fd42b89522deb3a6d7f"
-  integrity sha512-DqtvWnUbBJgpOvgYctguN4jl36gjAZIQ/BjnSMsiK8/ubm1XIqi5qn40PRoyqaPAVZccXrwB+75Mhubcr5v+5A==
+cacheable-lookup@4.1.2, cacheable-lookup@^4.1.1:
+  version "4.1.2"
+  resolved "https://registry.yarnpkg.com/cacheable-lookup/-/cacheable-lookup-4.1.2.tgz#07c90b15910d4a5be6f3fa1a0ce73dfb9c192dc9"
+  integrity sha512-qwnOjdDFv4VNVjd5g+aKg7JuRS+q6bD8t9nk7l0tGTCPfLRX2jOmCTHFYc+leooxrtSKyOFzZz5MJQPUeYYkXA==
 
 cacheable-request@^6.0.0:
   version "6.1.0"
