@@ -453,7 +453,7 @@
 
 <script>
 import semver, {
-  compare, satisfies, coerce, valid,
+  compare, satisfies, coerce, valid, gt,
 } from 'semver';
 import {
   getInstalls,
@@ -637,7 +637,6 @@ export default {
         this.refreshSatisfactoryInstalls(savedSelectedSFInstall),
       ],
     ).then(() => {
-      console.log(this.selectedSatisfactoryInstall);
       Promise.all(
         [
           this.refreshAvailableMods(),
@@ -834,7 +833,12 @@ export default {
         });
     },
     hasUpdate(mod) {
-      return this.isModSML20Compatible(mod) && !this.isModVersionInstalled(mod.versions[0]) && this.isModInstalled(mod) && this.isModCompatible(mod); // HACK
+      if (this.isModSML20Compatible(mod) && this.isModInstalled(mod) && this.isModCompatible(mod)) {
+        const latestCompatibleVersion = mod.versions.find((ver) => satisfies(ver.sml_version, '>=2.0.0')
+        && satisfies(valid(coerce(this.selectedSatisfactoryInstall.version)), `>=${valid(coerce(this.smlVersions.find((smlVer) => valid(coerce(smlVer.version)) === valid(coerce(ver.sml_version))).satisfactory_version))}`));
+        return gt(latestCompatibleVersion.version, this.selectedSatisfactoryInstall.mods[mod.id]);
+      }
+      return false;
     },
     checkForUpdates() {
       this.updates = this.availableMods.filter((mod) => this.hasUpdate(mod)).map((mod) => ({ id: mod.id, version: mod.versions[0].version }));
