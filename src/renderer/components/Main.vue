@@ -15,7 +15,7 @@
       <ControlArea
         v-model="controlData"
         :configs="configs"
-        :compatibility="compatibility"
+        :mod-filters="modFilters"
         :sort-by="sortBy"
       />
       <ModsList
@@ -61,13 +61,39 @@
         @removeFromConfig="removeModFromConfig(expandedModId, $event)"
       />
     </v-card>
+    <v-dialog
+      :value="!!error"
+      max-width="290"
+    >
+      <v-card>
+        <v-card-title class="headline">
+          Error
+        </v-card-title>
+
+        <v-card-text>
+          {{ error }}
+        </v-card-text>
+
+        <v-card-actions>
+          <v-btn
+            color="primary"
+            text
+            @click="error = ''"
+          >
+            Ok
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-card>
 </template>
 
 <script>
 import {
-  getAvailableMods, getInstalls, getConfigs, setDebug, addDownloadProgressCallback,
+  getAvailableMods, getInstalls, getConfigs, setDebug, addDownloadProgressCallback, getAvailableSMLVersions,
+  loadCache,
 } from 'satisfactory-mod-manager-api';
+import { satisfies, coerce, valid } from 'semver';
 import TitleBar from './TitleBar';
 import ControlArea from './ControlArea';
 import ModsList from './ModsList';
@@ -88,20 +114,25 @@ export default {
       controlData: {
         config: {},
         filters: {
-          compatibility: {},
+          modFilters: {},
           sortBy: '',
         },
       },
       configs: [{ name: 'vanilla', items: [] }, { name: 'modded', items: [] }, { name: 'development', items: [] }],
-      compatibility: [{ name: 'All mods', mods: 50 }, { name: 'Compatible', mods: 30 }],
-      sortBy: ['Name, alphanumerical', 'Latest', 'Last update', 'Most popular', 'Favourite'],
+      modFilters: [{ name: 'All mods', mods: 50 }, { name: 'Compatible', mods: 30 }, { name: 'Favourite', mods: 30 }],
+      sortBy: ['Name', 'Last updated', 'Popularity', 'Downloads'],
       satisfactoryInstalls: [],
       selectedInstall: {},
+      smlVersions: [],
       mods: [],
       expandedModId: '',
       favoriteModIds: [],
       installedMods: [],
-      inProgress: '',
+      manifestMods: [],
+      inProgress: { id: '', progress: 0, message: '' },
+      currentDownloadProgress: {},
+      error: '',
+      fakeProgress: 0,
     };
   },
   watch: {
@@ -113,6 +144,7 @@ export default {
     },
   },
   mounted() {
+    setDebug(true);
     addDownloadProgressCallback(this.downloadProgress);
     if (this.hasUpdate) {
       this.settingsState = 'notify';
@@ -121,26 +153,41 @@ export default {
     this.configs = getConfigs().map((name) => ({ name, items: [] }));
     const savedConfigName = getSetting('selectedConfig', 'modded');
     this.controlData.config = this.configs.find((conf) => conf.name === savedConfigName);
-    [this.controlData.filters.compatibility] = this.compatibility;
+    [this.controlData.filters.modFilters] = this.modFilters;
     [this.controlData.filters.sortBy] = this.sortBy;
+    this.inProgress.id = '__loadingApp__';
     Promise.all([
+      loadCache(),
+      this.getSMLVersions(),
       this.getMods(),
       getInstalls().then((installs) => {
         this.satisfactoryInstalls = installs;
         const savedLocation = getSetting('selectedInstall');
         this.selectedInstall = this.satisfactoryInstalls.find((install) => install.installLocation === savedLocation) || this.satisfactoryInstalls[0];
+
+        return this.selectedInstall.loadConfig(savedConfigName);
       }),
     ]).then(() => {
-      this.refreshInstalledMods();
+      this.refreshModsInstalledCompatible();
       this.$electron.ipcRenderer.send('vue-ready');
+      this.inProgress.id = '';
     });
     this.unexpandMod();
-    setDebug(true);
   },
   methods: {
+    getSMLVersions() {
+      return getAvailableSMLVersions().then((versions) => {
+        this.smlVersions = versions;
+      });
+    },
     getMods() {
       return getAvailableMods().then((mods) => {
-        this.mods = mods.map((mod) => ({ modInfo: mod, isInstalled: false, isCompatible: true }));
+        this.mods = mods.map((mod) => ({
+          modInfo: mod,
+          isInstalled: false,
+          isCompatible: true,
+          isDependency: false,
+        }));
       });
     },
     settingsClicked() {
@@ -170,24 +217,62 @@ export default {
       this.favoriteModIds.remove(modId);
       saveSetting('favoriteMods', this.favoriteModIds);
     },
-    refreshInstalledMods() {
+    refreshModsInstalledCompatible() {
       this.installedMods = Object.keys(this.selectedInstall.mods);
+      this.manifestMods = this.selectedInstall.manifestMods;
       for (let i = 0; i < this.mods.length; i += 1) {
         this.mods[i].isInstalled = this.installedMods.includes(this.mods[i].modInfo.id);
+        this.mods[i].isDependency = this.installedMods.includes(this.mods[i].modInfo.id) && !this.manifestMods.includes(this.mods[i].modInfo.id);
+        this.mods[i].isCompatible = this.mods[i].modInfo.versions.length > 0
+        && !!this.mods[i].modInfo.versions.find((ver) => satisfies(ver.sml_version, '>=2.0.0')
+              && satisfies(valid(coerce(this.selectedInstall.version)), `>=${valid(coerce(this.smlVersions.find((smlVer) => valid(coerce(smlVer.version)) === valid(coerce(ver.sml_version))).satisfactory_version))}`));
       }
     },
     switchModInstalled(modId) {
-      this.inProgress = modId;
+      if (this.inProgress.id) {
+        this.showError('Another operation is currently in progress');
+        return;
+      }
+      let message = '';
+      // fake progress because manifest mutations don't return progress
+      this.currentDownloadProgress = {};
+      this.fakeProgress = 0;
+      const interval = setInterval(() => {
+        if (Object.keys(this.currentDownloadProgress).length === 0) {
+          this.fakeProgress += (1 - this.fakeProgress) * 0.005;
+          this.inProgress.progress = this.fakeProgress;
+          this.inProgress.message = message;
+        }
+      }, 100);
       if (this.mods.find((mod) => mod.modInfo.id === modId).isInstalled) {
-        this.selectedInstall.uninstallMod(modId).then(() => {
-          this.inProgress = '';
-          this.refreshInstalledMods();
+        message = 'Checking for mods that are no longer needed';
+        this.inProgress = { id: modId, progress: 0, message };
+        this.selectedInstall.uninstallMod(modId).then(() => this.selectedInstall.saveConfig(this.controlData.config.name)).then(() => {
+          this.inProgress.progress = 1;
+          setTimeout(() => {
+            this.inProgress = { id: '', progress: 0 };
+          }, 500);
+          clearInterval(interval);
+          this.refreshModsInstalledCompatible();
+        }).catch((e) => {
+          this.inProgress = { id: '', progress: 0 };
+          clearInterval(interval);
+          this.showError(e);
         });
       } else {
-        this.inProgress = modId;
-        this.selectedInstall.installMod(modId).then(() => {
-          this.inProgress = '';
-          this.refreshInstalledMods();
+        message = 'Finding the best version to install';
+        this.inProgress = { id: modId, progress: 0, message };
+        this.selectedInstall.installMod(modId).then(() => this.selectedInstall.saveConfig(this.controlData.config.name)).then(() => {
+          this.inProgress.progress = 1;
+          setTimeout(() => {
+            this.inProgress = { id: '', progress: 0 };
+          }, 500);
+          clearInterval(interval);
+          this.refreshModsInstalledCompatible();
+        }).catch((e) => {
+          this.inProgress = { id: '', progress: 0 };
+          clearInterval(interval);
+          this.showError(e);
         });
       }
     },
@@ -197,8 +282,23 @@ export default {
     removeModFromConfig(mod, config) {
       console.log(config);
     },
-    downloadProgress(url, progress) {
-      console.log(`Downloading ${url}: ${progress.percent}`);
+    downloadProgress(url, progress, friendlyName) {
+      this.currentDownloadProgress[url] = { friendlyName, progress: progress.percent };
+      const newProgress = (Object.keys(this.currentDownloadProgress)
+        .map((key) => this.currentDownloadProgress[key].progress).reduce((prev, current) => prev + current)
+      / Object.keys(this.currentDownloadProgress).length);
+      if (Math.abs(newProgress - this.inProgress.progress) >= 0.01 || newProgress >= 0.95) {
+        this.inProgress.progress = newProgress;
+        this.inProgress.message = `Downloading ${Object.keys(this.currentDownloadProgress).map((key) => `${this.currentDownloadProgress[key].friendlyName} ${Math.round(this.currentDownloadProgress[key].progress * 100)}%`).join(', ')}`;
+      }
+      if (progress.percent === 1) {
+        setTimeout(() => {
+          delete this.currentDownloadProgress[url];
+        }, 100);
+      }
+    },
+    showError(e) {
+      this.error = typeof e === 'string' ? e : e.message;
     },
   },
 };

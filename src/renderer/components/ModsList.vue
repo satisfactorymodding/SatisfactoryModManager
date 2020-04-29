@@ -6,14 +6,14 @@
     <div class="list-shadow" />
     <div
       style="overflow-y: scroll;"
-      class="mx-2"
+      class="mx-4"
     >
       <v-list
-        class="py-1 my-n4"
+        class="py-1 my-n4 custom"
         height="475px"
       >
         <template
-          v-for="({ modInfo, isInstalled, isCompatible }, index) in mods"
+          v-for="({ modInfo, isInstalled, isCompatible, isDependency }, index) in mods"
         >
           <div
             :key="index"
@@ -60,13 +60,27 @@
                   inset
                   dense
                   color="primary"
-                  class="custom"
+                  class="custom pr-1"
                   :class="isCompatible ? '' : 'incompatible'"
                   flat
-                  :disabled="!isCompatible || !!inProgress"
+                  :disabled="!isCompatible || isDependency || !!inProgress.id"
                   @click.stop.prevent="switchClicked(modInfo)"
                 />
               </v-list-item-icon>
+            </v-list-item>
+            <v-list-item
+              v-if="inProgress.id === modInfo.id"
+              style="height: 0px; min-height: 0px; padding: 0;"
+            >
+              <v-progress-linear
+                :value="Math.round(inProgress.progress * 100)"
+                color="warning"
+                height="49"
+                reactive
+                style="position: relative; top: -24.5px;"
+              >
+                <strong>{{ inProgress.message }}</strong>
+              </v-progress-linear>
             </v-list-item>
           </div>
         </template>
@@ -91,8 +105,8 @@ export default {
       default: '',
     },
     inProgress: {
-      type: String,
-      default: '',
+      type: Object,
+      default() { return {}; },
     },
     progressPercent: {
       type: Number,

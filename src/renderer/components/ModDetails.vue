@@ -57,7 +57,7 @@
     >
       <v-col
         cols="auto"
-        style="padding-right: 435px"
+        style="padding-right: 585px"
         @click="close"
       >
         <v-icon>
@@ -77,7 +77,7 @@
           mdi-chevron-down
         </v-icon>
       </v-col>-->
-      <v-col
+      <!--<v-col
         cols="auto"
       >
         <span
@@ -86,7 +86,7 @@
         <v-icon color="warning">
           mdi-alert
         </v-icon>
-      </v-col>
+      </v-col>-->
       <v-col
         cols="auto"
         align="center"
@@ -110,8 +110,9 @@
               dense
               color="primary"
               class="custom"
+              :class="mod.isCompatible ? '' : 'incompatible'"
               flat
-              :disabled="!mod.isCompatible || !!inProgress"
+              :disabled="!mod.isCompatible || !!inProgress.id"
               @click.stop.prevent="switchClicked(mod.modInfo)"
             />
           </v-col>
@@ -128,7 +129,7 @@
           <template v-slot:activator="{ on }">
             <v-btn
               text
-              :disabled="!!inProgress"
+              :disabled="!!inProgress.id"
               v-on="on"
             >
               Add to config&nbsp;
@@ -145,10 +146,11 @@
               :key="i"
               @click="toggleIsInConfig(conf)"
             >
-              <v-list-item-icon v-if="conf.items.includes(mod.modInfo.id)">
-                <v-icon>mdi-check</v-icon>
-              </v-list-item-icon>
-              <v-list-item-title>{{ conf.name }}</v-list-item-title>
+              <v-list-item-title>
+                <v-icon v-if="conf.items.includes(mod.modInfo.id)">
+                  mdi-check
+                </v-icon><span v-else>&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;{{ conf.name }}
+              </v-list-item-title>
             </v-list-item>
           </v-list>
         </v-menu>
@@ -215,8 +217,8 @@ export default {
       default: false,
     },
     inProgress: {
-      type: String,
-      default: '',
+      type: Object,
+      default() { return {}; },
     },
     configs: {
       type: Array,

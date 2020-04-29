@@ -67,7 +67,12 @@ html {
   opacity: 0.95 !important;
 }
 
-.custom.incompatible.v-input--switch .v-input--switch__track {
+.custom.v-input--switch.v-input--is-dirty.v-input--is-disabled {
+  opacity: 1;
+}
+
+.custom.incompatible.v-input.v-input--switch.v-input--is-disabled:not(.v-input--is-dirty) .v-input--switch__track,
+.custom.incompatible.v-input.v-input--switch.v-input--is-disabled .v-input--switch__track {
   color: var(--v-error-base) !important;
 }
 
@@ -107,6 +112,10 @@ html {
 
 .custom.v-input--switch.v-input--dense.v-input--is-dirty .v-input--selection-controls__ripple {
   transform: translate(15px) !important;
+}
+
+.custom.v-list .v-list-item {
+  padding: 0;
 }
 
 .v-text-field__details, .custom>.v-input__control>.v-messages {

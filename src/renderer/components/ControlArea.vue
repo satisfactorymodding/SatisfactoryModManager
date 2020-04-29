@@ -74,8 +74,8 @@
             class="px-2"
           >
             <v-select
-              v-model="value.filters.compatibility"
-              :items="compatibility"
+              v-model="value.filters.modFilters"
+              :items="modFilters"
               item-text="name"
               :return-object="true"
               label="SHOW"
@@ -125,7 +125,7 @@ export default {
       type: Array,
       default() { return []; },
     },
-    compatibility: {
+    modFilters: {
       type: Array,
       default() { return []; },
     },
