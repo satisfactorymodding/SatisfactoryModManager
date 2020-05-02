@@ -73,6 +73,13 @@ const template = [
         enabled: false,
       },
       {
+        label: 'Check for updates',
+        click: () => {
+          autoUpdater.checkForUpdates();
+        },
+      },
+      { type: 'separator' },
+      {
         label: 'Join the Satisfactory Modding Discord',
         click: () => {
           shell.openExternal('https://discord.gg/TShj39G');
