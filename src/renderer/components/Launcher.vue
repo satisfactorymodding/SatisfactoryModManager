@@ -689,6 +689,7 @@ export default {
     isModCompatible(mod) {
       return mod.versions.length > 0
         && !!mod.versions.find((ver) => satisfies(ver.sml_version, '>=2.0.0')
+        && this.smlVersions.some((smlVer) => valid(coerce(smlVer.version)) === valid(coerce(ver.sml_version)))
         && satisfies(valid(coerce(this.selectedSatisfactoryInstall.version)), `>=${valid(coerce(this.smlVersions.find((smlVer) => valid(coerce(smlVer.version)) === valid(coerce(ver.sml_version))).satisfactory_version))}`));
     },
     refreshSearch() {
