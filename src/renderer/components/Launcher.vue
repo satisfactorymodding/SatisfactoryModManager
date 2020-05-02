@@ -562,8 +562,8 @@ export default {
     },
     compiledMarkdownDescription() {
       const html = sanitizeHtml(marked(this.selectedMod.full_description || ''), {
-        allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'video', 'details', 'summary']),
-        allowedAttributes: Object.assign(sanitizeHtml.defaults.allowedAttributes, { img: ['src', 'width', 'height'], video: ['src', 'width', 'height', 'controls'] }),
+        allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'video', 'details', 'summary', 'source']),
+        allowedAttributes: Object.assign(sanitizeHtml.defaults.allowedAttributes, { img: ['src', 'width', 'height'], video: ['src', 'width', 'height', 'controls'], source: ['src', 'type'] }),
       });
       const el = document.createElement('html');
       el.innerHTML = html;
