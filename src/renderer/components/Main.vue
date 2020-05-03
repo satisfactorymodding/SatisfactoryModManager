@@ -49,7 +49,7 @@
     >
       <ModDetails
         v-if="expandedModId"
-        :mod="mods.find((mod) => mod.modInfo.id === expandedModId)"
+        :mod="mods.find((mod) => mod.modInfo.mod_reference === expandedModId)"
         :is-favorite="favoriteModIds.includes(expandedModId)"
         :in-progress="inProgress"
         :configs="configs"
@@ -159,13 +159,13 @@ export default {
     Promise.all([
       loadCache(),
       this.getSMLVersions(),
-      this.getMods(),
+      this.getAllMods(),
       getInstalls().then((installs) => {
         this.satisfactoryInstalls = installs;
         const savedLocation = getSetting('selectedInstall');
         this.selectedInstall = this.satisfactoryInstalls.find((install) => install.installLocation === savedLocation) || this.satisfactoryInstalls[0];
 
-        return this.selectedInstall.loadConfig(savedConfigName);
+        return this.selectedInstall.manifestMutate([], [], []);
       }),
     ]).then(() => {
       this.refreshModsInstalledCompatible();
@@ -180,8 +180,16 @@ export default {
         this.smlVersions = versions;
       });
     },
-    getMods() {
-      return getAvailableMods().then((mods) => {
+    getMods(page) {
+      return getAvailableMods(page || 0).then((mods) => {
+        if (mods.length > 0) {
+          return this.getMods((page || 0) + 1).then((otherMods) => mods.concat(otherMods));
+        }
+        return mods;
+      });
+    },
+    getAllMods() {
+      return this.getMods().then((mods) => {
         this.mods = mods.map((mod) => ({
           modInfo: mod,
           isInstalled: false,
@@ -221,10 +229,11 @@ export default {
       this.installedMods = Object.keys(this.selectedInstall.mods);
       this.manifestMods = this.selectedInstall.manifestMods;
       for (let i = 0; i < this.mods.length; i += 1) {
-        this.mods[i].isInstalled = this.installedMods.includes(this.mods[i].modInfo.id);
-        this.mods[i].isDependency = this.installedMods.includes(this.mods[i].modInfo.id) && !this.manifestMods.includes(this.mods[i].modInfo.id);
+        this.mods[i].isInstalled = this.installedMods.includes(this.mods[i].modInfo.mod_reference);
+        this.mods[i].isDependency = this.installedMods.includes(this.mods[i].modInfo.mod_reference) && !this.manifestMods.includes(this.mods[i].modInfo.mod_reference);
         this.mods[i].isCompatible = this.mods[i].modInfo.versions.length > 0
         && !!this.mods[i].modInfo.versions.find((ver) => satisfies(ver.sml_version, '>=2.0.0')
+              && this.smlVersions.some((smlVer) => valid(coerce(smlVer.version)) === valid(coerce(ver.sml_version)))
               && satisfies(valid(coerce(this.selectedInstall.version)), `>=${valid(coerce(this.smlVersions.find((smlVer) => valid(coerce(smlVer.version)) === valid(coerce(ver.sml_version))).satisfactory_version))}`));
       }
     },
@@ -239,15 +248,15 @@ export default {
       this.fakeProgress = 0;
       const interval = setInterval(() => {
         if (Object.keys(this.currentDownloadProgress).length === 0) {
-          this.fakeProgress += (1 - this.fakeProgress) * 0.005;
+          this.fakeProgress += (1 - this.fakeProgress) * 0.0025;
           this.inProgress.progress = this.fakeProgress;
           this.inProgress.message = message;
         }
-      }, 100);
-      if (this.mods.find((mod) => mod.modInfo.id === modId).isInstalled) {
+      }, 50);
+      if (this.mods.find((mod) => mod.modInfo.mod_reference === modId).isInstalled) {
         message = 'Checking for mods that are no longer needed';
         this.inProgress = { id: modId, progress: 0, message };
-        this.selectedInstall.uninstallMod(modId).then(() => this.selectedInstall.saveConfig(this.controlData.config.name)).then(() => {
+        this.selectedInstall.uninstallMod(modId).then(() => {
           this.inProgress.progress = 1;
           setTimeout(() => {
             this.inProgress = { id: '', progress: 0 };
@@ -262,7 +271,7 @@ export default {
       } else {
         message = 'Finding the best version to install';
         this.inProgress = { id: modId, progress: 0, message };
-        this.selectedInstall.installMod(modId).then(() => this.selectedInstall.saveConfig(this.controlData.config.name)).then(() => {
+        this.selectedInstall.installMod(modId).then(() => {
           this.inProgress.progress = 1;
           setTimeout(() => {
             this.inProgress = { id: '', progress: 0 };
@@ -287,10 +296,10 @@ export default {
       const newProgress = (Object.keys(this.currentDownloadProgress)
         .map((key) => this.currentDownloadProgress[key].progress).reduce((prev, current) => prev + current)
       / Object.keys(this.currentDownloadProgress).length);
-      if (Math.abs(newProgress - this.inProgress.progress) >= 0.01 || newProgress >= 0.95) {
+      if (Math.abs(newProgress - this.inProgress.progress) >= 0.005 || newProgress >= 0.95) {
         this.inProgress.progress = newProgress;
-        this.inProgress.message = `Downloading ${Object.keys(this.currentDownloadProgress).map((key) => `${this.currentDownloadProgress[key].friendlyName} ${Math.round(this.currentDownloadProgress[key].progress * 100)}%`).join(', ')}`;
       }
+      this.inProgress.message = `Downloading ${Object.keys(this.currentDownloadProgress).map((key) => `${this.currentDownloadProgress[key].friendlyName} ${Math.round(this.currentDownloadProgress[key].progress * 100)}%`).join(', ')}`;
       if (progress.percent === 1) {
         setTimeout(() => {
           delete this.currentDownloadProgress[url];

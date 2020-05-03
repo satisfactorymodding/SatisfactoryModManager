@@ -30,7 +30,7 @@
               <v-list-item-icon>
                 <div
                   class="d-inline-flex align-items-center mod-button"
-                  :class="expandedModId === modInfo.id ? 'active' : ''"
+                  :class="expandedModId === modInfo.mod_reference ? 'active' : ''"
                   fill-height
                   @click="expandClicked(modInfo)"
                 >
@@ -43,7 +43,7 @@
                 </div>
                 <div
                   class="d-inline-flex align-items-center mod-button"
-                  :class="favoriteModIds.includes(modInfo.id) ? 'active' : ''"
+                  :class="favoriteModIds.includes(modInfo.mod_reference) ? 'active' : ''"
                   style="margin-right: 15px"
                   fill-height
                   @click="favoriteClicked(modInfo)"
@@ -69,7 +69,7 @@
               </v-list-item-icon>
             </v-list-item>
             <v-list-item
-              v-if="inProgress.id === modInfo.id"
+              v-if="inProgress.id === modInfo.mod_reference"
               style="height: 0px; min-height: 0px; padding: 0;"
             >
               <v-progress-linear
@@ -115,23 +115,26 @@ export default {
   },
   methods: {
     expandClicked(mod) {
-      this.$emit('expandMod', mod.id);
+      this.$emit('expandMod', mod.mod_reference);
     },
     favoriteClicked(mod) {
-      if (!this.favoriteModIds.includes(mod.id)) {
-        this.$emit('favoriteMod', mod.id);
+      if (!this.favoriteModIds.includes(mod.mod_reference)) {
+        this.$emit('favoriteMod', mod.mod_reference);
       } else {
-        this.$emit('unfavoriteMod', mod.id);
+        this.$emit('unfavoriteMod', mod.mod_reference);
       }
     },
     switchClicked(mod) {
-      this.$emit('switchMod', mod.id);
+      this.$emit('switchMod', mod.mod_reference);
     },
   },
 };
 </script>
 
 <style scoped>
+.v-progress-linear {
+  transition-duration: 0.05s;
+}
 div {
   background: var(--v-backgroundSecondary-base) !important;
 }

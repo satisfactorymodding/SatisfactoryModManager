@@ -147,7 +147,7 @@
               @click="toggleIsInConfig(conf)"
             >
               <v-list-item-title>
-                <v-icon v-if="conf.items.includes(mod.modInfo.id)">
+                <v-icon v-if="conf.items.includes(mod.modInfo.mod_reference)">
                   mdi-check
                 </v-icon><span v-else>&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;{{ conf.name }}
               </v-list-item-title>
@@ -275,17 +275,17 @@ export default {
       this.expandDetails = !this.expandDetails;
     },
     switchClicked(mod) {
-      this.$emit('switchMod', mod.id);
+      this.$emit('switchMod', mod.mod_reference);
     },
     favoriteClicked() {
       if (!this.isFavorite) {
-        this.$emit('favoriteMod', this.mod.modInfo.id);
+        this.$emit('favoriteMod', this.mod.modInfo.mod_reference);
       } else {
-        this.$emit('unfavoriteMod', this.mod.modInfo.id);
+        this.$emit('unfavoriteMod', this.mod.modInfo.mod_reference);
       }
     },
     toggleIsInConfig(config) {
-      if (config.items.includes(this.mod.modInfo.id)) {
+      if (config.items.includes(this.mod.modInfo.mod_reference)) {
         this.$emit('addToConfig', config.name);
       } else {
         this.$emit('removeFromConfig', config.name);
