@@ -118,8 +118,8 @@ export default {
           sortBy: '',
         },
       },
-      configs: [{ name: 'vanilla', items: [] }, { name: 'modded', items: [] }, { name: 'development', items: [] }],
-      modFilters: [{ name: 'All mods', mods: 50 }, { name: 'Compatible', mods: 30 }, { name: 'Favourite', mods: 30 }],
+      configs: [],
+      modFilters: [{ name: 'All mods', mods: 0 }, { name: 'Compatible', mods: 0 }, { name: 'Favourite', mods: 0 }],
       sortBy: ['Name', 'Last updated', 'Popularity', 'Downloads'],
       satisfactoryInstalls: [],
       selectedInstall: {},
@@ -168,6 +168,8 @@ export default {
         return this.selectedInstall.manifestMutate([], [], []);
       }),
     ]).then(() => {
+      this.modFilters[0].mods = this.mods.length;
+      this.modFilters[2].mods = this.mods.filter((mod) => this.favoriteModIds.includes(mod.modInfo.mod_reference)).length;
       this.refreshModsInstalledCompatible();
       this.$electron.ipcRenderer.send('vue-ready');
       this.inProgress.id = '';
@@ -218,11 +220,13 @@ export default {
     favoriteMod(modId) {
       if (!this.favoriteModIds.includes(modId)) {
         this.favoriteModIds.push(modId);
+        this.modFilters[2].mods = this.mods.filter((mod) => this.favoriteModIds.includes(mod.modInfo.mod_reference)).length;
         saveSetting('favoriteMods', this.favoriteModIds);
       }
     },
     unfavoriteMod(modId) {
       this.favoriteModIds.remove(modId);
+      this.modFilters[2].mods = this.mods.filter((mod) => this.favoriteModIds.includes(mod.modInfo.mod_reference)).length;
       saveSetting('favoriteMods', this.favoriteModIds);
     },
     refreshModsInstalledCompatible() {
@@ -236,6 +240,7 @@ export default {
               && this.smlVersions.some((smlVer) => valid(coerce(smlVer.version)) === valid(coerce(ver.sml_version)))
               && satisfies(valid(coerce(this.selectedInstall.version)), `>=${valid(coerce(this.smlVersions.find((smlVer) => valid(coerce(smlVer.version)) === valid(coerce(ver.sml_version))).satisfactory_version))}`));
       }
+      this.modFilters[1].mods = this.mods.filter((mod) => mod.isCompatible).length;
     },
     switchModInstalled(modId) {
       if (this.inProgress.id) {

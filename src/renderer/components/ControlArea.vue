@@ -87,6 +87,13 @@
                 &nbsp;
                 <span class="green--text">({{ item.mods }})</span>
               </template>
+              <template
+                slot="item"
+                slot-scope="data"
+              >
+                <!-- HTML that describe how select should render items when the select is open -->
+                {{ data.item.name }} ({{ data.item.mods }})
+              </template>
             </v-select>
           </v-col>
           <v-col
