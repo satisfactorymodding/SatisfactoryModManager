@@ -615,6 +615,7 @@ export default {
       if (isDebug()) {
         this.$electron.ipcRenderer.send('openDevTools');
       }
+      saveSetting('debug', isDebug());
     });
     this.$electron.ipcRenderer.on('clearCache', () => {
       clearCache();
@@ -631,6 +632,9 @@ export default {
     addDownloadProgressCallback(this.downloadProgress);
     const savedSelectedSFInstall = getSetting('selectedSFInstall', undefined);
     this.selectedConfig = getSetting('selectedConfig', 'modded') || 'vanilla';
+    if (isDebug() !== getSetting('debug', false)) {
+      toggleDebug();
+    }
     Promise.all(
       [
         this.getSMLVersions(),
