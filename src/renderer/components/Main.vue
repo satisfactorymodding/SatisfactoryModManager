@@ -5,21 +5,30 @@
   >
     <v-card
       height="100%"
-      style="width: 500px; min-width: 500px; max-width: 500px;"
+      style="width: 500px; min-width: 500px; max-width: 500px; z-index: 1"
     >
       <TitleBar
         title="Satisfactory Mod Manager"
         :state="settingsState"
+        style="user-select: none;"
         @settingsClicked="settingsClicked"
       />
       <ControlArea
-        v-model="controlData"
+        :selected-install="selectedInstall"
+        :selected-config="selectedConfig"
+        :selected-filters="filters"
+        :installs="satisfactoryInstalls"
         :configs="configs"
         :mod-filters="modFilters"
         :sort-by="sortBy"
+        :in-progress="inProgress"
+        style="user-select: none;"
+        @selectedInstallChanged="selectedInstall = $event"
+        @selectedConfigChanged="selectedConfig = $event"
+        @selectedFiltersChanged="filters = $event"
       />
       <ModsList
-        :mods="mods"
+        :mods="filteredMods"
         :expanded-mod-id="expandedModId"
         :favorite-mod-ids="favoriteModIds"
         :in-progress="inProgress"
@@ -36,6 +45,7 @@
         elevation="0"
         height="82px"
         style="font-size: 18px;"
+        :disabled="!!inProgress.id"
       >
         <b>LAUNCH GAME</b>
       </v-btn>
@@ -85,10 +95,48 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog
+      hide-overlay
+      persistent
+      :value="inProgress.id === '__loadingApp__'"
+      width="500"
+      height="230"
+    >
+      <v-card
+        color="#2f3136 !important"
+      >
+        <v-row
+          no-gutters
+          justify="center"
+        >
+          <v-img
+            class="mt-4"
+            src="/static/smm_icon.png"
+            max-height="82px"
+            max-width="87px"
+          />
+        </v-row>
+        <v-card-title class="loading-text-main">
+          SATISFACTORY MOD MANAGER IS LOADING
+        </v-card-title>
+
+        <v-card-text class="text-center">
+          <v-progress-linear
+            :value="Math.round(inProgress.progress * 100)"
+            background-color="#000000"
+            color="#5bb71d"
+            height="2"
+            reactive
+          />
+          {{ inProgress.message || '&nbsp;' }}
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </v-card>
 </template>
 
 <script>
+// TODO: Loading screen
 import {
   getAvailableMods, getInstalls, getConfigs, setDebug, addDownloadProgressCallback, getAvailableSMLVersions,
   loadCache,
@@ -111,16 +159,15 @@ export default {
     return {
       settingsState: 'off',
       hasUpdate: false,
-      controlData: {
-        config: {},
-        filters: {
-          modFilters: {},
-          sortBy: '',
-        },
+      selectedConfig: {},
+      filters: {
+        modFilters: {},
+        sortBy: '',
+        search: '',
       },
       configs: [],
       modFilters: [{ name: 'All mods', mods: 0 }, { name: 'Compatible', mods: 0 }, { name: 'Favourite', mods: 0 }],
-      sortBy: ['Name', 'Last updated', 'Popularity', 'Downloads'],
+      sortBy: ['Name', 'Last updated', 'Popularity', 'Hotness', 'Views', 'Downloads'],
       satisfactoryInstalls: [],
       selectedInstall: {},
       smlVersions: [],
@@ -135,27 +182,77 @@ export default {
       fakeProgress: 0,
     };
   },
+  computed: {
+    filteredMods() {
+      let filtered;
+      if (this.filters.modFilters === this.modFilters[1]) filtered = this.mods.filter((mod) => mod.isCompatible);
+      else if (this.filters.modFilters === this.modFilters[2]) filtered = this.mods.filter((mod) => this.favoriteModIds.includes(mod.modInfo.mod_reference));
+      else filtered = [...this.mods];
+
+      if (this.filters.search !== '') {
+        filtered = filtered.filter((mod) => mod.modInfo.name.toLowerCase().includes(this.filters.search.toLowerCase())); // TODO: maybe search in description too
+      }
+
+      if (this.filters.sortBy === 'Name') filtered = filtered.sort((a, b) => a.modInfo.name.localeCompare(b.modInfo.name));
+      if (this.filters.sortBy === 'Last updated') filtered = filtered.sort((a, b) => b.modInfo.last_version_date - a.modInfo.last_version_date);
+      if (this.filters.sortBy === 'Popularity') filtered = filtered.sort((a, b) => b.modInfo.popularity - a.modInfo.popularity);
+      if (this.filters.sortBy === 'Hotness') filtered = filtered.sort((a, b) => b.modInfo.hotness - a.modInfo.hotness);
+      if (this.filters.sortBy === 'Views') filtered = filtered.sort((a, b) => b.modInfo.views - a.modInfo.views);
+      if (this.filters.sortBy === 'Downloads') filtered = filtered.sort((a, b) => b.modInfo.downloads - a.modInfo.downloads);
+
+      return filtered;
+    },
+  },
   watch: {
-    controlData: {
+    filters: {
       deep: true,
-      handler: (newValue) => {
-        console.log(newValue);
+      handler() {
+        saveSetting('filters', { modFilters: this.filters.modFilters.name, sortBy: this.filters.sortBy });
       },
+    },
+    selectedInstall() {
+      if (this.inProgress.id !== '__loadingApp__') {
+        this.inProgress.id = '__loadingApp__';
+        const savedConfigName = this.getSavedConfigName();
+        this.selectedConfig = this.configs.find((conf) => conf.name === savedConfigName);
+        this.selectedInstall.setConfig(savedConfigName).then(() => {
+          this.refreshModsInstalledCompatible();
+          this.inProgress.id = '';
+        }).catch((e) => {
+          this.showError(e);
+          this.inProgress.id = '';
+        });
+        saveSetting('selectedInstall', this.selectedInstall.installLocation);
+      }
+    },
+    selectedConfig(newValue) {
+      if (this.inProgress.id !== '__loadingApp__') {
+        this.inProgress.id = '__loadingApp__';
+        this.selectedInstall.setConfig(newValue.name).then(() => {
+          this.refreshModsInstalledCompatible();
+          this.inProgress.id = '';
+          this.saveSelectedConfig();
+        }).catch((e) => {
+          this.showError(e);
+          this.inProgress.id = '';
+        });
+      }
     },
   },
   mounted() {
+    this.inProgress.id = '__loadingApp__';
     setDebug(true);
     addDownloadProgressCallback(this.downloadProgress);
     if (this.hasUpdate) {
       this.settingsState = 'notify';
     }
     this.favoriteModIds = getSetting('favoriteMods', []);
-    this.configs = getConfigs().map((name) => ({ name, items: [] }));
-    const savedConfigName = getSetting('selectedConfig', 'modded');
-    this.controlData.config = this.configs.find((conf) => conf.name === savedConfigName);
-    [this.controlData.filters.modFilters] = this.modFilters;
-    [this.controlData.filters.sortBy] = this.sortBy;
-    this.inProgress.id = '__loadingApp__';
+    this.configs = getConfigs();
+
+    const savedFilters = getSetting('filters', { modFilters: this.modFilters[0].name, sortBy: this.filters.sortBy[0] });
+    console.log(savedFilters);
+    this.filters.modFilters = this.modFilters.find((modFilter) => modFilter.name === savedFilters.modFilters) || this.modFilters[0];
+    this.filters.sortBy = this.sortBy.find((item) => item === savedFilters.sortBy) || this.sortBy[0];
     Promise.all([
       loadCache(),
       this.getSMLVersions(),
@@ -164,10 +261,14 @@ export default {
         this.satisfactoryInstalls = installs;
         const savedLocation = getSetting('selectedInstall');
         this.selectedInstall = this.satisfactoryInstalls.find((install) => install.installLocation === savedLocation) || this.satisfactoryInstalls[0];
+        const savedConfigName = this.getSavedConfigName();
+        this.selectedConfig = this.configs.find((conf) => conf.name === savedConfigName);
 
-        return this.selectedInstall.manifestMutate([], [], []);
+        return this.selectedInstall.setConfig(this.getSavedConfigName());
       }),
-    ]).then(() => {
+    ]).catch((e) => {
+      this.showError(e);
+    }).then(() => {
       this.modFilters[0].mods = this.mods.length;
       this.modFilters[2].mods = this.mods.filter((mod) => this.favoriteModIds.includes(mod.modInfo.mod_reference)).length;
       this.refreshModsInstalledCompatible();
@@ -290,11 +391,22 @@ export default {
         });
       }
     },
+    // TODO
     addModToConfig(mod, config) {
       console.log(config);
     },
     removeModFromConfig(mod, config) {
       console.log(config);
+    },
+    saveSelectedConfig() {
+      let current = getSetting('selectedConfig', {});
+      if (typeof current !== 'object') { current = {}; }
+      current[this.selectedInstall.installLocation] = this.selectedConfig.name;
+      saveSetting('selectedConfig', current);
+    },
+    getSavedConfigName() {
+      const current = getSetting('selectedConfig', {});
+      return current[this.selectedInstall.installLocation] || 'modded';
     },
     downloadProgress(url, progress, friendlyName) {
       this.currentDownloadProgress[url] = { friendlyName, progress: progress.percent };
@@ -319,4 +431,13 @@ export default {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css?family=Open+Sans');
+.loading-text-main {
+  color: #e6e6e4;
+  text-align: center;
+  font-family: 'Open Sans';
+  font-size: 16px !important;
+  font-weight: 600;
+  display: block !important;
+}
 </style>

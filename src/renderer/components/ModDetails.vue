@@ -1,7 +1,7 @@
 <!-- eslint-disable vue/no-v-html -->
 <template>
   <v-container
-    style="width: 100%; height: 800px; padding: 0; box-shadow: inset 10px 0px 10px -10px rgba(0,0,0,1);"
+    style="width: 100%; height: 1075px; padding: 0; box-shadow: inset 10px 0px 10px -10px rgba(0,0,0,1);"
     fluid
   >
     <v-row
@@ -57,7 +57,7 @@
     >
       <v-col
         cols="auto"
-        style="padding-right: 585px"
+        style="padding-right: 500px"
         @click="close"
       >
         <v-icon>
@@ -70,12 +70,45 @@
       <!--<v-col
         cols="auto"
       >
-        <span
-          class="mx-2"
-        >Previous versions</span>
-        <v-icon>
-          mdi-chevron-down
-        </v-icon>
+        <v-menu
+          bottom
+          offset-y
+        >
+          <template v-slot:activator="{ on }">
+            <v-btn
+              text
+              :disabled="!!inProgress.id"
+              v-on="on"
+            >
+              <span
+                class="mx-2"
+              >Previous versions</span>
+              <v-icon>
+                mdi-chevron-down
+              </v-icon>
+            </v-btn>
+          </template>
+          <v-list>
+            <v-list-item>
+              <v-list-item-title>
+                <v-icon v-if="installedVersion === ''">
+                  mdi-check
+                </v-icon><span v-else>&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;Latest
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item
+              v-for="(version, i) in mod.modInfo.versions"
+              :key="i"
+              @click="installOldVersion(conf)"
+            >
+              <v-list-item-title>
+                <v-icon v-if="conf.items.some((item) => item.id === mod.modInfo.mod_reference)">
+                  mdi-check
+                </v-icon><span v-else>&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;{{ conf.name }}
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
       </v-col>-->
       <!--<v-col
         cols="auto"
@@ -147,7 +180,7 @@
               @click="toggleIsInConfig(conf)"
             >
               <v-list-item-title>
-                <v-icon v-if="conf.items.includes(mod.modInfo.mod_reference)">
+                <v-icon v-if="conf.items.some((item) => item.id === mod.modInfo.mod_reference)">
                   mdi-check
                 </v-icon><span v-else>&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;{{ conf.name }}
               </v-list-item-title>
@@ -190,14 +223,33 @@
       class="image-container"
       no-gutters
     >
-      <template v-for="n in Math.min(images.length, 6)">
-        <v-col
-          :key="n"
-          cols="4"
-        >
-          <img :src="images[n - 1]">
-        </v-col>
-      </template>
+      <div
+        :class="imagePage > 0 ? '' : 'hidden'"
+        class="images-button d-inline-flex align-center"
+        @click="imagePageLeft"
+      >
+        <v-icon>mdi-chevron-left</v-icon>
+      </div>
+      <v-row
+        class="scrollable-images"
+        :style="`left: ${-432 * imagePage}px; width: ${432 * Math.ceil(images.length / 2)}px`"
+      >
+        <template v-for="n in images.length">
+          <img
+            v-if="images[n - 1]"
+            :key="n"
+            :src="images[n - 1]"
+          >
+        </template>
+      </v-row>
+      <div
+        :class="imagePage < Math.ceil(images.length / 2) - 2 ? '' : 'hidden'"
+        class="images-button d-inline-flex align-center"
+        style="left: 1056px;"
+        @click="imagePageRight"
+      >
+        <v-icon>mdi-chevron-right</v-icon>
+      </div>
     </v-row>
   </v-container>
 </template>
@@ -228,6 +280,7 @@ export default {
   data() {
     return {
       expandDetails: false,
+      imagePage: 0,
     };
   },
   computed: {
@@ -274,6 +327,12 @@ export default {
     toggleExpandDetails() {
       this.expandDetails = !this.expandDetails;
     },
+    imagePageLeft() {
+      if (this.imagePage > 0) this.imagePage -= 1;
+    },
+    imagePageRight() {
+      if (this.imagePage < Math.ceil(this.images.length / 2) - 2) this.imagePage += 1;
+    },
     switchClicked(mod) {
       this.$emit('switchMod', mod.mod_reference);
     },
@@ -285,7 +344,7 @@ export default {
       }
     },
     toggleIsInConfig(config) {
-      if (config.items.includes(this.mod.modInfo.mod_reference)) {
+      if (config.items.some((item) => item.id === this.mod.modInfo.mod_reference)) {
         this.$emit('addToConfig', config.name);
       } else {
         this.$emit('removeFromConfig', config.name);
@@ -327,13 +386,13 @@ export default {
 .mod-description {
   display: block;
   overflow: hidden;
-  height: 165px;
+  height: 169px;
   box-shadow: inset 0px -35px 13px -16px rgba(0, 0, 0, 0.45);
 }
 
 .mod-description.expanded {
   overflow-y: auto;
-  height: 598px;
+  height: 655px;
   box-shadow: none;
 }
 .control-bar {
@@ -345,11 +404,6 @@ export default {
 }
 .expand-details-button.expanded {
   top: 5px;
-}
-.image-container img {
-  width: 384px;
-  height: 216px;
-  display: block;
 }
 .v-divider {
   border-color: var(--v-text-base) !important;
@@ -365,5 +419,34 @@ export default {
 .row {
   margin-left: 0 !important;
   margin-right: 0 !important;
+}
+.image-container {
+  overflow-x: hidden;
+  width: 100%;
+}
+.image-container img {
+  width: 432px;
+  height: 243px;
+  display: block;
+}
+.images-button {
+  text-align: center;
+  line-height: 10px;
+  position: absolute;
+  bottom: 218px;
+  box-shadow: inset 50px 0px 50px -50px rgba(0,0,0,1);
+  height: 486px;
+  z-index: 1;
+}
+.images-button.hidden {
+  visibility: hidden;
+}
+.scrollable-images {
+  width: 100%;
+  position: relative;
+  transition: all ease-in-out 0.5s;
+  position: absolute;
+  left: 0;
+  right: 0;
 }
 </style>

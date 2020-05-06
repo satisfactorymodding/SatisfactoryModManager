@@ -102,11 +102,11 @@ Menu.setApplicationMenu(menu);
 
 const normalSize = {
   width: 500,
-  height: 800,
+  height: 858,
 };
 const expandedSize = {
-  width: 1652,
-  height: 800,
+  width: 1575,
+  height: 858,
 };
 
 function createWindow() {

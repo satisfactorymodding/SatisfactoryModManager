@@ -6,6 +6,23 @@
       no-gutters
       class="mt-4"
     >
+      <v-col
+        cols="12"
+        class="px-2"
+      >
+        <v-select
+          v-model="selectedInstallModel"
+          :disabled="!!inProgress.id"
+          :items="installs"
+          item-text="displayName"
+          return-object
+          label="SATISFACTORY INSTALL"
+          class="custom"
+          append-icon="mdi-chevron-down"
+        />
+      </v-col>
+    </v-row>
+    <v-row no-gutters>
       <v-col cols="12">
         <v-row
           justify="center"
@@ -16,7 +33,8 @@
             class="px-2"
           >
             <v-select
-              v-model="value.config"
+              v-model="selectedConfigModel"
+              :disabled="!!inProgress.id"
               :items="configs"
               item-text="name"
               return-object
@@ -33,7 +51,10 @@
               <v-col
                 cols="6"
               >
-                <v-btn text>
+                <v-btn
+                  text
+                  :disabled="!!inProgress.id"
+                >
                   New&nbsp;
                   <v-icon
                     color="green"
@@ -46,7 +67,10 @@
               <v-col
                 cols="6"
               >
-                <v-btn text>
+                <v-btn
+                  text
+                  :disabled="!!inProgress.id"
+                >
                   Delete&nbsp;
                   <v-icon
                     color="red"
@@ -74,7 +98,8 @@
             class="px-2"
           >
             <v-select
-              v-model="value.filters.modFilters"
+              v-model="selectedFiltersModel.modFilters"
+              :disabled="!!inProgress.id"
               :items="modFilters"
               item-text="name"
               :return-object="true"
@@ -101,7 +126,8 @@
             class="px-2"
           >
             <v-select
-              v-model="value.filters.sortBy"
+              v-model="selectedFiltersModel.sortBy"
+              :disabled="!!inProgress.id"
               :items="sortBy"
               label="SORT BY"
               class="custom"
@@ -117,7 +143,8 @@
         class="px-2"
       >
         <v-text-field
-          v-model="value.filters.search"
+          v-model="selectedFiltersModel.search"
+          :disabled="!!inProgress.id"
           label="Search"
         />
       </v-col>
@@ -128,6 +155,10 @@
 <script>
 export default {
   props: {
+    installs: {
+      type: Array,
+      default() { return []; },
+    },
     configs: {
       type: Array,
       default() { return []; },
@@ -140,17 +171,45 @@ export default {
       type: Array,
       default() { return []; },
     },
-    value: {
+    selectedInstall: {
+      type: Object,
+      default() {
+        return {};
+      },
+    },
+    selectedConfig: {
+      type: Object,
+      default() {
+        return {};
+      },
+    },
+    selectedFilters: {
       type: Object,
       default() {
         return {
-          config: {},
-          filters: {
-            compatibility: {},
-            sortBy: {},
-          },
+          compatibility: {},
+          sortBy: {},
+          search: '',
         };
       },
+    },
+    inProgress: {
+      type: Object,
+      default() { return {}; },
+    },
+  },
+  computed: {
+    selectedInstallModel: {
+      get() { return this.selectedInstall; },
+      set(value) { this.$emit('selectedInstallChanged', value); },
+    },
+    selectedConfigModel: {
+      get() { return this.selectedConfig; },
+      set(value) { this.$emit('selectedConfigChanged', value); },
+    },
+    selectedFiltersModel: {
+      get() { return this.selectedFilters; },
+      set(value) { this.$emit('selectedFiltersChanged', value); },
     },
   },
 };
