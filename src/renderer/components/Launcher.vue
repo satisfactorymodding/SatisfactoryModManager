@@ -465,6 +465,7 @@ import {
   deleteConfig,
   getAvailableSMLVersions,
   addDownloadProgressCallback,
+  getAvailableBootstrapperVersions,
 } from 'satisfactory-mod-manager-api';
 import marked from 'marked';
 import { exec } from 'child_process';
@@ -554,6 +555,8 @@ export default {
       updatingAll: false,
       cachedSMLHasUpdate: false,
       smlVersions: [],
+      cachedBootstrapperHasUpdate: false,
+      bootstrapperVersions: [],
     };
   },
   computed: {
@@ -638,6 +641,7 @@ export default {
     Promise.all(
       [
         this.getSMLVersions(),
+        this.getBootstrapperVersions(),
         this.refreshSatisfactoryInstalls(savedSelectedSFInstall),
       ],
     ).then(() => {
@@ -790,6 +794,11 @@ export default {
         this.smlVersions = versions;
       });
     },
+    getBootstrapperVersions() {
+      return getAvailableBootstrapperVersions().then((versions) => {
+        this.bootstrapperVersions = versions;
+      });
+    },
     getAllMods(page) {
       return getAvailableMods(page || 0).then((mods) => {
         if (mods.length > 0) {
@@ -837,6 +846,17 @@ export default {
           return this.cachedSMLHasUpdate;
         });
     },
+    hasBootstrapperUpdate() {
+      return getAvailableBootstrapperVersions()
+        .then((versions) => {
+          const compatibleVersions = versions
+            .filter((ver) => satisfies(valid(coerce(this.selectedSatisfactoryInstall.version)), `>=${ver.satisfactory_version}`));
+          this.cachedBootstrapperHasUpdate = compatibleVersions.length > 0
+            && this.selectedSatisfactoryInstall.bootstrapperVersion
+            && this.selectedSatisfactoryInstall.bootstrapperVersion !== compatibleVersions.sort((a, b) => -compare(a.version, b.version))[0].version;
+          return this.cachedBootstrapperHasUpdate;
+        });
+    },
     hasUpdate(mod) {
       if (this.isModSML20Compatible(mod) && this.isModInstalled(mod) && this.isModCompatible(mod)) {
         const latestCompatibleVersion = mod.versions.find((ver) => satisfies(ver.sml_version, '>=2.0.0')
@@ -847,16 +867,23 @@ export default {
     },
     checkForUpdates() {
       this.updates = this.availableMods.filter((mod) => this.hasUpdate(mod)).map((mod) => ({ id: mod.id, version: mod.versions[0].version }));
-      this.hasSMLUpdate().then((hasUpdate) => {
+      this.hasSMLUpdate().then((hasSMLUpdate) => {
         getAvailableSMLVersions().then((versions) => versions.sort((a, b) => -compare(a.version, b.version))[0].version).then((latestSMLVersion) => {
-          if (hasUpdate) {
+          if (hasSMLUpdate) {
             this.updates.push({ id: 'SML', version: latestSMLVersion });
           }
-          const ignoredUpdates = getSetting('ignoredUpdates', []);
-          this.updates = this.updates.filter((update) => !ignoredUpdates.find((ignored) => ignored.id === update.id && ignored.version === update.version));
-          if (this.updates.length > 0) {
-            this.$bvModal.show('modal-mod-updates');
-          }
+          this.hasBootstrapperUpdate().then((hasBootstrapperUpdate) => {
+            getAvailableBootstrapperVersions().then((versions) => versions.sort((a, b) => -compare(a.version, b.version))[0].version).then((latestBootstrapperVersion) => {
+              if (hasBootstrapperUpdate) {
+                this.updates.push({ id: 'bootstrapper', version: latestBootstrapperVersion });
+              }
+              const ignoredUpdates = getSetting('ignoredUpdates', []);
+              this.updates = this.updates.filter((update) => !ignoredUpdates.find((ignored) => ignored.id === update.id && ignored.version === update.version));
+              if (this.updates.length > 0) {
+                this.$bvModal.show('modal-mod-updates');
+              }
+            });
+          });
         });
       });
     },
@@ -876,7 +903,8 @@ export default {
     },
     updateById(id) {
       this.inProgress.push(id);
-      return (id === 'SML' ? this.updateSML() : this.updateMod(this.availableMods.find((mod) => mod.id === id))).then(() => {
+      // eslint-disable-next-line no-nested-ternary
+      return (id === 'SML' ? this.updateSML() : (id === 'bootstrapper' ? this.updateBootstrapper() : this.updateMod(this.availableMods.find((mod) => mod.id === id)))).then(() => {
         this.updates.removeWhere((update) => update.id === id);
         this.inProgress.remove(id);
         if (this.updates.length === 0) {
@@ -991,6 +1019,20 @@ export default {
         }).catch((err) => {
           this.$bvModal.msgBoxOk(err.toString());
           this.inProgress.remove('SML');
+        });
+    },
+    updateBootstrapper() {
+      this.inProgress.push('bootstrapper');
+      return this.selectedSatisfactoryInstall
+        .updateBootstrapper()
+        .then(() => {
+          this.saveSelectedConfig().then(() => {
+            this.cachedSMLHasUpdate = false;
+            this.inProgress.remove('bootstrapper');
+          });
+        }).catch((err) => {
+          this.$bvModal.msgBoxOk(err.toString());
+          this.inProgress.remove('bootstrapper');
         });
     },
     refreshSatisfactoryInstalls(savedSelectedInstall) {
