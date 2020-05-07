@@ -166,7 +166,7 @@ export default {
         search: '',
       },
       configs: [],
-      modFilters: [{ name: 'All mods', mods: 0 }, { name: 'Compatible', mods: 0 }, { name: 'Favourite', mods: 0 }],
+      modFilters: [{ name: 'All mods', mods: 0 }, { name: 'Compatible', mods: 0 }, { name: 'Favourite', mods: 0 }, { name: 'Installed', mods: 0 }, { name: 'Not installed', mods: 0 }],
       sortBy: ['Name', 'Last updated', 'Popularity', 'Hotness', 'Views', 'Downloads'],
       satisfactoryInstalls: [],
       selectedInstall: {},
@@ -187,6 +187,8 @@ export default {
       let filtered;
       if (this.filters.modFilters === this.modFilters[1]) filtered = this.mods.filter((mod) => mod.isCompatible);
       else if (this.filters.modFilters === this.modFilters[2]) filtered = this.mods.filter((mod) => this.favoriteModIds.includes(mod.modInfo.mod_reference));
+      else if (this.filters.modFilters === this.modFilters[3]) filtered = this.mods.filter((mod) => mod.isInstalled);
+      else if (this.filters.modFilters === this.modFilters[4]) filtered = this.mods.filter((mod) => !mod.isInstalled);
       else filtered = [...this.mods];
 
       if (this.filters.search !== '') {
@@ -250,7 +252,6 @@ export default {
     this.configs = getConfigs();
 
     const savedFilters = getSetting('filters', { modFilters: this.modFilters[0].name, sortBy: this.filters.sortBy[0] });
-    console.log(savedFilters);
     this.filters.modFilters = this.modFilters.find((modFilter) => modFilter.name === savedFilters.modFilters) || this.modFilters[0];
     this.filters.sortBy = this.sortBy.find((item) => item === savedFilters.sortBy) || this.sortBy[0];
     Promise.all([
@@ -342,6 +343,8 @@ export default {
               && satisfies(valid(coerce(this.selectedInstall.version)), `>=${valid(coerce(this.smlVersions.find((smlVer) => valid(coerce(smlVer.version)) === valid(coerce(ver.sml_version))).satisfactory_version))}`));
       }
       this.modFilters[1].mods = this.mods.filter((mod) => mod.isCompatible).length;
+      this.modFilters[3].mods = this.mods.filter((mod) => mod.isInstalled).length;
+      this.modFilters[4].mods = this.mods.filter((mod) => !mod.isInstalled).length;
     },
     switchModInstalled(modId) {
       if (this.inProgress.id) {
