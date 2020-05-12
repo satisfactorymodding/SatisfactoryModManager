@@ -860,6 +860,7 @@ export default {
     hasUpdate(mod) {
       if (this.isModSML20Compatible(mod) && this.isModInstalled(mod) && this.isModCompatible(mod)) {
         const latestCompatibleVersion = mod.versions.find((ver) => satisfies(ver.sml_version, '>=2.0.0')
+        && this.smlVersions.some((smlVer) => valid(coerce(smlVer.version)) === valid(coerce(ver.sml_version)))
         && satisfies(valid(coerce(this.selectedSatisfactoryInstall.version)), `>=${valid(coerce(this.smlVersions.find((smlVer) => valid(coerce(smlVer.version)) === valid(coerce(ver.sml_version))).satisfactory_version))}`));
         return gt(latestCompatibleVersion.version, this.selectedSatisfactoryInstall.mods[mod.id]);
       }
