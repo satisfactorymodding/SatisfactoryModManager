@@ -77,7 +77,7 @@
           <template v-slot:activator="{ on }">
             <v-btn
               text
-              :disabled="!!inProgress.id"
+              :disabled="!!inProgress.length"
               v-on="on"
             >
               <span
@@ -145,7 +145,7 @@
               class="custom"
               :class="mod.isCompatible ? '' : 'incompatible'"
               flat
-              :disabled="!mod.isCompatible || !!inProgress.id"
+              :disabled="!mod.isCompatible || !!inProgress.length"
               @click.stop.prevent="switchClicked(mod.modInfo)"
             />
           </v-col>
@@ -162,7 +162,7 @@
           <template v-slot:activator="{ on }">
             <v-btn
               text
-              :disabled="!!inProgress.id"
+              :disabled="!!inProgress.length"
               v-on="on"
             >
               Add to config&nbsp;
@@ -269,8 +269,8 @@ export default {
       default: false,
     },
     inProgress: {
-      type: Object,
-      default() { return {}; },
+      type: Array,
+      default() { return []; },
     },
     configs: {
       type: Array,

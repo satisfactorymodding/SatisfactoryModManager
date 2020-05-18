@@ -133,6 +133,10 @@ html {
   color: var(--v-text-base);
 }
 
+.v-progress-linear.fast {
+  transition-duration: 0.05s;
+}
+
 .v-text-field>.v-input__control>.v-input__slot:before {
   border-color: var(--v-primary-base) !important;
 }

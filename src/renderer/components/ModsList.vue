@@ -63,23 +63,25 @@
                   class="custom pr-1"
                   :class="isCompatible ? '' : 'incompatible'"
                   flat
-                  :disabled="!isCompatible || isDependency || !!inProgress.id"
+                  :disabled="!isCompatible || isDependency || !!inProgress.length"
                   @click.stop.prevent="switchClicked(modInfo)"
                 />
               </v-list-item-icon>
             </v-list-item>
             <v-list-item
-              v-if="inProgress.id === modInfo.mod_reference"
+              v-if="inProgress.some((prog) => prog.id === modInfo.mod_reference)"
               style="height: 0px; min-height: 0px; padding: 0;"
             >
               <v-progress-linear
-                :value="Math.round(inProgress.progress * 100)"
+                :value="Math.round(lastElement(inProgress.find((prog) => prog.id === modInfo.mod_reference).progresses).progress * 100)"
+                :class="lastElement(inProgress.find((prog) => prog.id === modInfo.mod_reference).progresses).fastUpdate ? 'fast' : ''"
                 color="warning"
                 height="49"
                 reactive
                 style="position: relative; top: -24.5px;"
+                :indeterminate="lastElement(inProgress.find((prog) => prog.id === modInfo.mod_reference).progresses).progress < 0"
               >
-                <strong>{{ inProgress.message }}</strong>
+                <strong>{{ lastElement(inProgress.find((prog) => prog.id === modInfo.mod_reference).progresses).message }}</strong>
               </v-progress-linear>
             </v-list-item>
           </div>
@@ -90,6 +92,8 @@
 </template>
 
 <script>
+import { lastElement } from '../utils';
+
 export default {
   props: {
     mods: {
@@ -105,8 +109,8 @@ export default {
       default: '',
     },
     inProgress: {
-      type: Object,
-      default() { return {}; },
+      type: Array,
+      default() { return []; },
     },
     progressPercent: {
       type: Number,
@@ -127,14 +131,12 @@ export default {
     switchClicked(mod) {
       this.$emit('switchMod', mod.mod_reference);
     },
+    lastElement,
   },
 };
 </script>
 
 <style scoped>
-.v-progress-linear {
-  transition-duration: 0.05s;
-}
 div {
   background: var(--v-backgroundSecondary-base) !important;
 }
