@@ -19,7 +19,12 @@
           label="SATISFACTORY INSTALL"
           class="custom"
           append-icon="mdi-chevron-down"
-        />
+        >
+          <template v-slot:selection="{ item }">
+            <span>{{ item.displayName }}</span>
+            <span v-if="item.smlVersion">&nbsp;-&nbsp;SML v{{ item.smlVersion }}</span>
+          </template>
+        </v-select>
       </v-col>
     </v-row>
     <v-row no-gutters>
