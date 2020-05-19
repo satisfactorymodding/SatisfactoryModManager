@@ -63,7 +63,7 @@
                   class="custom pr-1"
                   :class="isCompatible ? '' : 'incompatible'"
                   flat
-                  :disabled="!isCompatible || isDependency || !!inProgress.length"
+                  :disabled="!isCompatible || isDependency || !!inProgress.length || !canInstallMods"
                   @click.stop.prevent="switchClicked(modInfo)"
                 />
               </v-list-item-icon>
@@ -112,9 +112,9 @@ export default {
       type: Array,
       default() { return []; },
     },
-    progressPercent: {
-      type: Number,
-      default: 0,
+    canInstallMods: {
+      type: Boolean,
+      default: true,
     },
   },
   methods: {

@@ -145,7 +145,7 @@
               class="custom"
               :class="mod.isCompatible ? '' : 'incompatible'"
               flat
-              :disabled="!mod.isCompatible || !!inProgress.length"
+              :disabled="!mod.isCompatible || !!inProgress.length || !canInstallMods"
               @click.stop.prevent="switchClicked(mod.modInfo)"
             />
           </v-col>
@@ -275,6 +275,10 @@ export default {
     configs: {
       type: Array,
       default() { return []; },
+    },
+    canInstallMods: {
+      type: Boolean,
+      default: true,
     },
   },
   data() {
