@@ -47,6 +47,7 @@
         height="82px"
         style="font-size: 18px;"
         :disabled="!!inProgress.length"
+        @click="launchSatisfactory"
       >
         <b>LAUNCH GAME</b>
       </v-btn>
@@ -151,6 +152,7 @@ import {
   setDebug, addDownloadProgressCallback,
   loadCache,
 } from 'satisfactory-mod-manager-api';
+import { exec } from 'child_process';
 import { satisfies, coerce, valid } from 'semver';
 import TitleBar from './TitleBar';
 import ControlArea from './ControlArea';
@@ -463,6 +465,11 @@ export default {
     },
     showError(e) {
       this.error = typeof e === 'string' ? e : e.message;
+    },
+    launchSatisfactory() {
+      if (this.selectedInstall) {
+        exec(`start "" "${this.selectedInstall.launchPath}"`).unref();
+      }
     },
     lastElement,
   },
