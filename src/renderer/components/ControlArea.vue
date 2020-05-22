@@ -12,7 +12,7 @@
       >
         <v-select
           v-model="selectedInstallModel"
-          :disabled="!!inProgress.length"
+          :disabled="!!inProgress.length || isGameRunning"
           :items="installs"
           item-text="displayName"
           return-object
@@ -39,7 +39,7 @@
           >
             <v-select
               v-model="selectedConfigModel"
-              :disabled="!!inProgress.length"
+              :disabled="!!inProgress.length || isGameRunning"
               :items="configs"
               item-text="name"
               return-object
@@ -58,7 +58,7 @@
               >
                 <v-btn
                   text
-                  :disabled="!!inProgress.length"
+                  :disabled="!!inProgress.length || isGameRunning"
                 >
                   New&nbsp;
                   <v-icon
@@ -74,7 +74,7 @@
               >
                 <v-btn
                   text
-                  :disabled="!!inProgress.length || selectedConfigModel.name === 'vanilla' || selectedConfigModel.name === 'modded' || selectedConfigModel.name === 'development'"
+                  :disabled="!!inProgress.length || isGameRunning || selectedConfigModel.name === 'vanilla' || selectedConfigModel.name === 'modded' || selectedConfigModel.name === 'development'"
                 >
                   Delete&nbsp;
                   <v-icon
@@ -104,7 +104,7 @@
           >
             <v-select
               v-model="selectedFiltersModel.modFilters"
-              :disabled="!!inProgress.length"
+              :disabled="!!inProgress.length || isGameRunning"
               :items="modFilters"
               item-text="name"
               :return-object="true"
@@ -132,7 +132,7 @@
           >
             <v-select
               v-model="selectedFiltersModel.sortBy"
-              :disabled="!!inProgress.length"
+              :disabled="!!inProgress.length || isGameRunning"
               :items="sortBy"
               label="SORT BY"
               class="custom"
@@ -149,7 +149,7 @@
       >
         <v-text-field
           v-model="selectedFiltersModel.search"
-          :disabled="!!inProgress.length"
+          :disabled="!!inProgress.length || isGameRunning"
           label="Search"
         />
       </v-col>
@@ -201,6 +201,10 @@ export default {
     inProgress: {
       type: Array,
       default() { return []; },
+    },
+    isGameRunning: {
+      type: Boolean,
+      default: false,
     },
   },
   computed: {

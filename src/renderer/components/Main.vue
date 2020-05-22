@@ -22,6 +22,7 @@
         :mod-filters="modFilters"
         :sort-by="sortBy"
         :in-progress="inProgress"
+        :is-game-running="isGameRunning"
         style="user-select: none;"
         @selectedInstallChanged="selectedInstall = $event"
         @selectedConfigChanged="selectedConfig = $event"
@@ -32,7 +33,7 @@
         :expanded-mod-id="expandedModId"
         :favorite-mod-ids="favoriteModIds"
         :in-progress="inProgress"
-        :can-install-mods="selectedConfig.name !== 'vanilla'"
+        :can-install-mods="canInstallMods"
         @expandMod="expandMod"
         @favoriteMod="favoriteMod"
         @unfavoriteMod="unfavoriteMod"
@@ -46,7 +47,7 @@
         elevation="0"
         height="82px"
         style="font-size: 18px;"
-        :disabled="!!inProgress.length"
+        :disabled="!!inProgress.length || isGameRunning"
         @click="launchSatisfactory"
       >
         <b>LAUNCH GAME</b>
@@ -65,7 +66,7 @@
         :is-favorite="favoriteModIds.includes(expandedModId)"
         :in-progress="inProgress"
         :configs="configs"
-        :can-install-mods="selectedConfig.name !== 'vanilla'"
+        :can-install-mods="canInstallMods"
         @close="unexpandMod"
         @favoriteMod="favoriteMod"
         @unfavoriteMod="unfavoriteMod"
@@ -151,6 +152,7 @@ import {
   getInstalls, getConfigs,
   setDebug, addDownloadProgressCallback,
   loadCache,
+  SatisfactoryInstall,
 } from 'satisfactory-mod-manager-api';
 import { exec } from 'child_process';
 import { satisfies, coerce, valid } from 'semver';
@@ -192,6 +194,8 @@ export default {
       inProgress: [], // { id: string, progresses: { id: string, progress: number, message: string, fast: boolean }[] }
       currentDownloadProgress: {},
       error: '',
+      isGameRunning: false,
+      isLaunchingGame: false,
     };
   },
   computed: {
@@ -215,6 +219,9 @@ export default {
       if (this.filters.sortBy === 'Downloads') filtered = filtered.sort((a, b) => b.modInfo.downloads - a.modInfo.downloads);
 
       return filtered;
+    },
+    canInstallMods() {
+      return this.selectedConfig.name !== 'vanilla' && !this.isGameRunning;
     },
   },
   watch: {
@@ -313,6 +320,9 @@ export default {
       this.$electron.ipcRenderer.send('vue-ready');
       this.inProgress.remove(appLoadProgress);
     }
+    setInterval(async () => {
+      this.isGameRunning = this.isLaunchingGame || await SatisfactoryInstall.isGameRunning();
+    }, 5000);
     this.unexpandMod();
   },
   methods: {
@@ -467,8 +477,11 @@ export default {
       this.error = typeof e === 'string' ? e : e.message;
     },
     launchSatisfactory() {
-      if (this.selectedInstall) {
+      if (this.selectedInstall && !this.isGameRunning) {
         exec(`start "" "${this.selectedInstall.launchPath}"`).unref();
+        this.isLaunchingGame = true;
+        this.isGameRunning = true;
+        setTimeout(() => { this.isLaunchingGame = false; }, 10000);
       }
     },
     lastElement,
