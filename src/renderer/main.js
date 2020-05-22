@@ -7,6 +7,7 @@ import App from './App';
 import router from './router';
 import 'vuetify/dist/vuetify.min.css';
 import '@mdi/font/css/materialdesignicons.css';
+import store from './store';
 
 if (!process.env.IS_WEB) Vue.use(vueElectron);
 
@@ -52,5 +53,6 @@ new Vue({
       dark: true,
     },
   }),
+  store,
   template: '<App/>',
 }).$mount('#app');

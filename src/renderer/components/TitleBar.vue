@@ -28,21 +28,26 @@
 <script>
 export default {
   props: {
-    state: {
-      type: String,
-      validator: (prop) => [
-        'off',
-        'on',
-        'notify',
-      ].includes(prop),
-      default: 'off',
-    },
     title: {
       type: String,
       default: '',
     },
   },
+  data() {
+    return {
+      menuOpen: false,
+    };
+  },
   computed: {
+    state() {
+      if (this.menuOpen) {
+        return 'on';
+      }
+      if (this.$store.state.hasUpdate) {
+        return 'notify';
+      }
+      return 'off';
+    },
     getColorForState() {
       if (this.state === 'notify') {
         return '#ffc107';
@@ -58,7 +63,7 @@ export default {
       this.$electron.remote.getCurrentWindow().close();
     },
     settingsClicked() {
-      this.$emit('settingsClicked');
+      this.menuOpen = !this.menuOpen;
     },
   },
 };
@@ -72,7 +77,7 @@ export default {
   display: flex;
   height: var(--titlebar-height);
 }
-.titlebar, .titlebar > *, .titlebar > * > * {
+.titlebar, .titlebar > * {
   color: var(--v-text2-base) !important;
   background-color: var(--v-background-base);
 }

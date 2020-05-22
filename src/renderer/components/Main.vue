@@ -9,36 +9,10 @@
     >
       <TitleBar
         title="Satisfactory Mod Manager"
-        :state="settingsState"
         style="user-select: none;"
-        @settingsClicked="settingsClicked"
       />
-      <ControlArea
-        :selected-install="selectedInstall"
-        :selected-config="selectedConfig"
-        :selected-filters="filters"
-        :installs="satisfactoryInstalls"
-        :configs="configs"
-        :mod-filters="modFilters"
-        :sort-by="sortBy"
-        :in-progress="inProgress"
-        :is-game-running="isGameRunning"
-        style="user-select: none;"
-        @selectedInstallChanged="selectedInstall = $event"
-        @selectedConfigChanged="selectedConfig = $event"
-        @selectedFiltersChanged="filters = $event"
-      />
-      <ModsList
-        :mods="filteredMods"
-        :expanded-mod-id="expandedModId"
-        :favorite-mod-ids="favoriteModIds"
-        :in-progress="inProgress"
-        :can-install-mods="canInstallMods"
-        @expandMod="expandMod"
-        @favoriteMod="favoriteMod"
-        @unfavoriteMod="unfavoriteMod"
-        @switchMod="switchModInstalled"
-      />
+      <ControlArea style="user-select: none;" />
+      <ModsList />
       <v-btn
         block
         tile
@@ -60,20 +34,7 @@
       width="100%"
       height="100%"
     >
-      <ModDetails
-        v-if="expandedModId"
-        :mod="mods.find((mod) => mod.modInfo.mod_reference === expandedModId)"
-        :is-favorite="favoriteModIds.includes(expandedModId)"
-        :in-progress="inProgress"
-        :configs="configs"
-        :can-install-mods="canInstallMods"
-        @close="unexpandMod"
-        @favoriteMod="favoriteMod"
-        @unfavoriteMod="unfavoriteMod"
-        @switchMod="switchModInstalled"
-        @addToConfig="addModToConfig(expandedModId, $event)"
-        @removeFromConfig="removeModFromConfig(expandedModId, $event)"
-      />
+      <ModDetails v-if="expandedModId" />
     </v-card>
     <v-dialog
       :value="!!error"
@@ -93,7 +54,7 @@
           <v-btn
             color="primary"
             text
-            @click="error = ''"
+            @click="clearError"
           >
             Ok
           </v-btn>
@@ -103,7 +64,7 @@
     <v-dialog
       hide-overlay
       persistent
-      :value="inProgress.some((prog) => prog.id === '__loadingApp__')"
+      :value="isLoadingAppInProgress"
       width="500"
       height="230"
     >
@@ -126,19 +87,19 @@
         </v-card-title>
 
         <v-card-text
-          v-if="inProgress.some((prog) => prog.id === '__loadingApp__')"
+          v-if="isLoadingAppInProgress"
           class="text-center"
         >
           <v-progress-linear
-            :value="Math.round(lastElement(inProgress.find((prog) => prog.id === '__loadingApp__').progresses).progress * 100)"
-            :class="lastElement(inProgress.find((prog) => prog.id === '__loadingApp__').progresses).fastUpdate ? 'fast' : ''"
+            :value="Math.round(currentLoadingAppProgress.progress * 100)"
+            :class="currentLoadingAppProgress.fastUpdate ? 'fast' : ''"
             background-color="#000000"
             color="#5bb71d"
             height="2"
             reactive
-            :indeterminate="lastElement(inProgress.find((prog) => prog.id === '__loadingApp__').progresses).progress < 0"
+            :indeterminate="currentLoadingAppProgress.progress < 0"
           />
-          {{ lastElement(inProgress.find((prog) => prog.id === '__loadingApp__').progresses).message || '&nbsp;' }}
+          {{ currentLoadingAppProgress.message || '&nbsp;' }}
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -146,21 +107,12 @@
 </template>
 
 <script>
-// TODO: Loading screen
-import {
-  getAvailableMods, getModsCount, MODS_PER_PAGE, getAvailableSMLVersions,
-  getInstalls, getConfigs,
-  setDebug, addDownloadProgressCallback,
-  loadCache,
-  SatisfactoryInstall,
-} from 'satisfactory-mod-manager-api';
+import { mapState } from 'vuex';
 import { exec } from 'child_process';
-import { satisfies, coerce, valid } from 'semver';
 import TitleBar from './TitleBar';
 import ControlArea from './ControlArea';
 import ModsList from './ModsList';
 import ModDetails from './ModDetails';
-import { getSetting, saveSetting } from '../settings';
 import { lastElement } from '../utils';
 
 export default {
@@ -170,318 +122,39 @@ export default {
     ModsList,
     ModDetails,
   },
-  data() {
-    return {
-      settingsState: 'off',
-      hasUpdate: false,
-      selectedConfig: {},
-      filters: {
-        modFilters: {},
-        sortBy: '',
-        search: '',
-      },
-      configs: [],
-      modFilters: [{ name: 'All mods', mods: 0 }, { name: 'Compatible', mods: 0 }, { name: 'Favourite', mods: 0 }, { name: 'Installed', mods: 0 }, { name: 'Not installed', mods: 0 }],
-      sortBy: ['Name', 'Last updated', 'Popularity', 'Hotness', 'Views', 'Downloads'],
-      satisfactoryInstalls: [],
-      selectedInstall: {},
-      smlVersions: [],
-      mods: [],
-      expandedModId: '',
-      favoriteModIds: [],
-      installedMods: [],
-      manifestMods: [],
-      inProgress: [], // { id: string, progresses: { id: string, progress: number, message: string, fast: boolean }[] }
-      currentDownloadProgress: {},
-      error: '',
-      isGameRunning: false,
-      isLaunchingGame: false,
-    };
-  },
   computed: {
-    filteredMods() {
-      let filtered;
-      if (this.filters.modFilters === this.modFilters[1]) filtered = this.mods.filter((mod) => mod.isCompatible);
-      else if (this.filters.modFilters === this.modFilters[2]) filtered = this.mods.filter((mod) => this.favoriteModIds.includes(mod.modInfo.mod_reference));
-      else if (this.filters.modFilters === this.modFilters[3]) filtered = this.mods.filter((mod) => mod.isInstalled);
-      else if (this.filters.modFilters === this.modFilters[4]) filtered = this.mods.filter((mod) => !mod.isInstalled);
-      else filtered = [...this.mods];
-
-      if (this.filters.search !== '') {
-        filtered = filtered.filter((mod) => mod.modInfo.name.toLowerCase().includes(this.filters.search.toLowerCase())); // TODO: maybe search in description too
-      }
-
-      if (this.filters.sortBy === 'Name') filtered = filtered.sort((a, b) => a.modInfo.name.localeCompare(b.modInfo.name));
-      if (this.filters.sortBy === 'Last updated') filtered = filtered.sort((a, b) => b.modInfo.last_version_date - a.modInfo.last_version_date);
-      if (this.filters.sortBy === 'Popularity') filtered = filtered.sort((a, b) => b.modInfo.popularity - a.modInfo.popularity);
-      if (this.filters.sortBy === 'Hotness') filtered = filtered.sort((a, b) => b.modInfo.hotness - a.modInfo.hotness);
-      if (this.filters.sortBy === 'Views') filtered = filtered.sort((a, b) => b.modInfo.views - a.modInfo.views);
-      if (this.filters.sortBy === 'Downloads') filtered = filtered.sort((a, b) => b.modInfo.downloads - a.modInfo.downloads);
-
-      return filtered;
+    ...mapState(
+      [
+        'selectedInstall',
+        'expandedModId',
+        'inProgress',
+        'isGameRunning',
+        'error',
+      ],
+    ),
+    isLoadingAppInProgress() {
+      return this.inProgress.some((prog) => prog.id === '__loadingApp__');
     },
-    canInstallMods() {
-      return this.selectedConfig.name !== 'vanilla' && !this.isGameRunning;
+    loadingAppProgress() {
+      return this.inProgress.find((prog) => prog.id === '__loadingApp__');
     },
-  },
-  watch: {
-    filters: {
-      deep: true,
-      handler() {
-        saveSetting('filters', { modFilters: this.filters.modFilters.name, sortBy: this.filters.sortBy });
-      },
-    },
-    async selectedInstall() {
-      if (!this.inProgress.some((prog) => prog.id === '__loadingApp__')) {
-        const loadProgress = {
-          id: '__loadingApp__',
-          progresses: [{
-            id: '', progress: -1, message: 'Validating mod install', fast: false,
-          }],
-        };
-        this.inProgress.push(loadProgress);
-        const savedConfigName = this.getSavedConfigName();
-        this.selectedConfig = this.configs.find((conf) => conf.name === savedConfigName);
-        try {
-          await this.selectedInstall.setConfig(savedConfigName);
-          this.refreshModsInstalledCompatible();
-        } catch (e) {
-          this.showError(e);
-        } finally {
-          this.inProgress.remove(loadProgress);
-        }
-        saveSetting('selectedInstall', this.selectedInstall.installLocation);
-      }
-    },
-    async selectedConfig(newValue) {
-      if (!this.inProgress.some((prog) => prog.id === '__loadingApp__')) {
-        const loadProgress = {
-          id: '__loadingApp__',
-          progresses: [{
-            id: '', progress: -1, message: 'Validating mod install', fast: false,
-          }],
-        };
-        this.inProgress.push(loadProgress);
-        try {
-          await this.selectedInstall.setConfig(newValue.name);
-          this.refreshModsInstalledCompatible();
-          this.saveSelectedConfig();
-        } catch (e) {
-          this.showError(e);
-        } finally {
-          this.inProgress.remove(loadProgress);
-        }
-      }
+    currentLoadingAppProgress() {
+      return lastElement(this.loadingAppProgress.progresses);
     },
   },
   async mounted() {
-    const appLoadProgress = {
-      id: '__loadingApp__',
-      progresses: [{
-        id: '', progress: -1, message: 'Loading', fast: false,
-      }],
-    };
-    this.inProgress.push(appLoadProgress);
-    setDebug(true);
-    addDownloadProgressCallback(this.downloadProgress);
-    if (this.hasUpdate) {
-      this.settingsState = 'notify';
-    }
-    this.favoriteModIds = getSetting('favoriteMods', []);
-    this.configs = getConfigs();
-
-    const savedFilters = getSetting('filters', { modFilters: this.modFilters[0].name, sortBy: this.filters.sortBy[0] });
-    this.filters.modFilters = this.modFilters.find((modFilter) => modFilter.name === savedFilters.modFilters) || this.modFilters[0];
-    this.filters.sortBy = this.sortBy.find((item) => item === savedFilters.sortBy) || this.sortBy[0];
-    try {
-      await Promise.all([
-        (async () => {
-          await loadCache();
-          this.satisfactoryInstalls = getInstalls();
-          const installValidateProgress = { id: 'validatingInstall', progress: -1, message: 'Validating mod install' };
-          appLoadProgress.progresses.push(installValidateProgress);
-          const savedLocation = getSetting('selectedInstall');
-          this.selectedInstall = this.satisfactoryInstalls.find((install) => install.installLocation === savedLocation) || this.satisfactoryInstalls[0];
-          const savedConfigName = this.getSavedConfigName();
-          this.selectedConfig = this.configs.find((conf) => conf.name === savedConfigName);
-
-          await this.selectedInstall.setConfig(this.getSavedConfigName());
-          appLoadProgress.progresses.remove(installValidateProgress);
-        })(),
-        this.getSMLVersions(),
-        this.getAllMods(appLoadProgress),
-      ]);
-    } catch (e) {
-      this.showError(e);
-    } finally {
-      this.modFilters[0].mods = this.mods.length;
-      this.modFilters[2].mods = this.mods.filter((mod) => this.favoriteModIds.includes(mod.modInfo.mod_reference)).length;
-      this.refreshModsInstalledCompatible();
-      this.$electron.ipcRenderer.send('vue-ready');
-      this.inProgress.remove(appLoadProgress);
-    }
-    setInterval(async () => {
-      this.isGameRunning = this.isLaunchingGame || await SatisfactoryInstall.isGameRunning();
-    }, 5000);
-    this.unexpandMod();
+    this.$electron.ipcRenderer.send('unexpand');
+    await this.$store.dispatch('initApp');
+    this.$electron.ipcRenderer.send('vue-ready');
   },
   methods: {
-    async getSMLVersions() {
-      this.smlVersions = await getAvailableSMLVersions();
-    },
-    async getAllMods(progress) {
-      const getModsProgress = { id: 'getMods', progress: -1, message: 'Getting available mods' };
-      if (progress) {
-        progress.progresses.push(getModsProgress);
-      }
-      let modsGot = 0;
-      const modCount = await getModsCount();
-      getModsProgress.message = `Getting available mods (${modsGot}/${modCount})`;
-      getModsProgress.progress = 0;
-      const modPages = Math.ceil(modCount / MODS_PER_PAGE);
-      const mods = (await Promise.all(Array.from({ length: modPages }).map(async (_, i) => {
-        const page = await getAvailableMods(i);
-        modsGot += page.length;
-        getModsProgress.progress += 1 / modPages;
-        getModsProgress.message = `Getting available mods (${modsGot}/${modCount})`;
-        return page;
-      }))).flat(1);
-      this.mods = mods.map((mod) => ({
-        modInfo: mod,
-        isInstalled: false,
-        isCompatible: true,
-        isDependency: false,
-      }));
-      if (progress) {
-        progress.progresses.remove(getModsProgress);
-      }
-    },
-    settingsClicked() {
-      if (this.settingsState !== 'on') {
-        this.settingsState = 'on';
-      } else if (this.hasUpdate) {
-        this.settingsState = 'notify';
-      } else {
-        this.settingsState = 'off';
-      }
-    },
-    expandMod(modId) {
-      this.expandedModId = modId;
-      this.$electron.ipcRenderer.send('expand');
-    },
-    unexpandMod() {
-      this.expandedModId = '';
-      this.$electron.ipcRenderer.send('unexpand');
-    },
-    favoriteMod(modId) {
-      if (!this.favoriteModIds.includes(modId)) {
-        this.favoriteModIds.push(modId);
-        this.modFilters[2].mods = this.mods.filter((mod) => this.favoriteModIds.includes(mod.modInfo.mod_reference)).length;
-        saveSetting('favoriteMods', this.favoriteModIds);
-      }
-    },
-    unfavoriteMod(modId) {
-      this.favoriteModIds.remove(modId);
-      this.modFilters[2].mods = this.mods.filter((mod) => this.favoriteModIds.includes(mod.modInfo.mod_reference)).length;
-      saveSetting('favoriteMods', this.favoriteModIds);
-    },
-    refreshModsInstalledCompatible() {
-      this.installedMods = Object.keys(this.selectedInstall.mods);
-      this.manifestMods = this.selectedInstall.manifestMods;
-      for (let i = 0; i < this.mods.length; i += 1) {
-        this.mods[i].isInstalled = this.installedMods.includes(this.mods[i].modInfo.mod_reference);
-        this.mods[i].isDependency = this.installedMods.includes(this.mods[i].modInfo.mod_reference) && !this.manifestMods.includes(this.mods[i].modInfo.mod_reference);
-        this.mods[i].isCompatible = this.mods[i].modInfo.versions.length > 0
-        && !!this.mods[i].modInfo.versions.find((ver) => satisfies(ver.sml_version, '>=2.0.0')
-              && this.smlVersions.some((smlVer) => valid(coerce(smlVer.version)) === valid(coerce(ver.sml_version)))
-              && satisfies(valid(coerce(this.selectedInstall.version)), `>=${valid(coerce(this.smlVersions.find((smlVer) => valid(coerce(smlVer.version)) === valid(coerce(ver.sml_version))).satisfactory_version))}`));
-      }
-      this.modFilters[1].mods = this.mods.filter((mod) => mod.isCompatible).length;
-      this.modFilters[3].mods = this.mods.filter((mod) => mod.isInstalled).length;
-      this.modFilters[4].mods = this.mods.filter((mod) => !mod.isInstalled).length;
-    },
-    async switchModInstalled(modId) {
-      if (this.inProgress.length > 0) {
-        this.showError('Another operation is currently in progress');
-        return;
-      }
-      this.currentDownloadProgress = [];
-      const modProgress = { id: modId, progresses: [] };
-      this.inProgress.push(modProgress);
-      const placeholderProgreess = {
-        id: 'placeholder', progress: -1, message: '', fastUpdate: false,
-      };
-      modProgress.progresses.push(placeholderProgreess);
-      if (this.mods.find((mod) => mod.modInfo.mod_reference === modId).isInstalled) {
-        placeholderProgreess.message = 'Checking for mods that are no longer needed';
-        try {
-          await this.selectedInstall.uninstallMod(modId);
-          placeholderProgreess.progress = 1;
-          this.refreshModsInstalledCompatible();
-        } catch (e) {
-          this.showError(e);
-        } finally {
-          setTimeout(() => {
-            this.inProgress.remove(modProgress);
-          }, 500);
-        }
-      } else {
-        placeholderProgreess.message = 'Finding the best version to install';
-        try {
-          await this.selectedInstall.installMod(modId);
-          placeholderProgreess.progress = 1;
-          this.refreshModsInstalledCompatible();
-        } catch (e) {
-          this.showError(e);
-        } finally {
-          setTimeout(() => {
-            this.inProgress.remove(modProgress);
-          }, 500);
-        }
-      }
-    },
-    // TODO
-    addModToConfig(mod, config) {
-      console.log(config);
-    },
-    removeModFromConfig(mod, config) {
-      console.log(config);
-    },
-    saveSelectedConfig() {
-      let current = getSetting('selectedConfig', {});
-      if (typeof current !== 'object') { current = {}; }
-      current[this.selectedInstall.installLocation] = this.selectedConfig.name;
-      saveSetting('selectedConfig', current);
-    },
-    getSavedConfigName() {
-      const current = getSetting('selectedConfig', {});
-      return current[this.selectedInstall.installLocation] || 'modded';
-    },
-    downloadProgress(url, progress, friendlyName) {
-      if (!this.currentDownloadProgress[url]) {
-        this.currentDownloadProgress[url] = {
-          id: `download_${url}`, progress: 0, message: '', fastUpdate: true,
-        };
-        this.inProgress[0].progresses.push(this.currentDownloadProgress[url]);
-      }
-      this.currentDownloadProgress[url].message = `Downloading ${friendlyName} ${Math.round(progress.percent * 100)}%`;
-      this.currentDownloadProgress[url].progress = progress.percent;
-      if (progress.percent === 1) {
-        setTimeout(() => {
-          this.inProgress[0].progresses.remove(this.currentDownloadProgress[url]);
-          delete this.currentDownloadProgress[url];
-        }, 100);
-      }
-    },
-    showError(e) {
-      this.error = typeof e === 'string' ? e : e.message;
+    clearError() {
+      this.$store.dispatch('clearError');
     },
     launchSatisfactory() {
       if (this.selectedInstall && !this.isGameRunning) {
         exec(`start "" "${this.selectedInstall.launchPath}"`).unref();
-        this.isLaunchingGame = true;
-        this.isGameRunning = true;
-        setTimeout(() => { this.isLaunchingGame = false; }, 10000);
+        this.$store.commit('launchGame');
       }
     },
     lastElement,

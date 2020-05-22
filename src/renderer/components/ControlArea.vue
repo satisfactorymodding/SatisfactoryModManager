@@ -13,7 +13,7 @@
         <v-select
           v-model="selectedInstallModel"
           :disabled="!!inProgress.length || isGameRunning"
-          :items="installs"
+          :items="satisfactoryInstalls"
           item-text="displayName"
           return-object
           label="SATISFACTORY INSTALL"
@@ -158,67 +158,29 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
+
 export default {
-  props: {
-    installs: {
-      type: Array,
-      default() { return []; },
-    },
-    configs: {
-      type: Array,
-      default() { return []; },
-    },
-    modFilters: {
-      type: Array,
-      default() { return []; },
-    },
-    sortBy: {
-      type: Array,
-      default() { return []; },
-    },
-    selectedInstall: {
-      type: Object,
-      default() {
-        return {};
-      },
-    },
-    selectedConfig: {
-      type: Object,
-      default() {
-        return {};
-      },
-    },
-    selectedFilters: {
-      type: Object,
-      default() {
-        return {
-          compatibility: {},
-          sortBy: {},
-          search: '',
-        };
-      },
-    },
-    inProgress: {
-      type: Array,
-      default() { return []; },
-    },
-    isGameRunning: {
-      type: Boolean,
-      default: false,
-    },
-  },
   computed: {
+    ...mapState([
+      'satisfactoryInstalls',
+      'configs',
+      'modFilters',
+      'sortBy',
+      'inProgress',
+      'isGameRunning',
+    ]),
     selectedInstallModel: {
-      get() { return this.selectedInstall; },
-      set(value) { this.$emit('selectedInstallChanged', value); },
+      get() { return this.$store.state.selectedInstall; },
+      set(value) { this.$store.dispatch('selectInstall', value); },
     },
     selectedConfigModel: {
-      get() { return this.selectedConfig; },
-      set(value) { this.$emit('selectedConfigChanged', value); },
+      get() { return this.$store.state.selectedConfig; },
+      set(value) { this.$store.dispatch('selectConfig', value); },
     },
     selectedFiltersModel: {
-      get() { return this.selectedFilters; },
-      set(value) { this.$emit('selectedFiltersChanged', value); },
+      get() { return this.$store.state.filters; },
+      set(value) { this.$store.dispatch('setFilters', value); },
     },
   },
 };

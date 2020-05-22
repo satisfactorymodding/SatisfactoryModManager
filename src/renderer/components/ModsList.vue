@@ -73,15 +73,15 @@
               style="height: 0px; min-height: 0px; padding: 0;"
             >
               <v-progress-linear
-                :value="Math.round(lastElement(inProgress.find((prog) => prog.id === modInfo.mod_reference).progresses).progress * 100)"
-                :class="lastElement(inProgress.find((prog) => prog.id === modInfo.mod_reference).progresses).fastUpdate ? 'fast' : ''"
+                :value="Math.round(currentModProgress(modInfo.mod_reference).progress * 100)"
+                :class="currentModProgress(modInfo.mod_reference).fastUpdate ? 'fast' : ''"
                 color="warning"
                 height="49"
                 reactive
                 style="position: relative; top: -24.5px;"
-                :indeterminate="lastElement(inProgress.find((prog) => prog.id === modInfo.mod_reference).progresses).progress < 0"
+                :indeterminate="currentModProgress(modInfo.mod_reference).progress < 0"
               >
-                <strong>{{ lastElement(inProgress.find((prog) => prog.id === modInfo.mod_reference).progresses).message }}</strong>
+                <strong>{{ currentModProgress(modInfo.mod_reference).message }}</strong>
               </v-progress-linear>
             </v-list-item>
           </div>
@@ -92,44 +92,36 @@
 </template>
 
 <script>
+import { mapState, mapGetters } from 'vuex';
 import { lastElement } from '../utils';
 
 export default {
-  props: {
-    mods: {
-      type: Array,
-      default() { return []; },
-    },
-    favoriteModIds: {
-      type: Array,
-      default() { return []; },
-    },
-    expandedModId: {
-      type: String,
-      default: '',
-    },
-    inProgress: {
-      type: Array,
-      default() { return []; },
-    },
-    canInstallMods: {
-      type: Boolean,
-      default: true,
-    },
+  computed: {
+    ...mapState([
+      'favoriteModIds',
+      'expandedModId',
+      'inProgress',
+    ]),
+    ...mapGetters({
+      mods: 'filteredMods',
+      canInstallMods: 'canInstallMods',
+    }),
   },
   methods: {
     expandClicked(mod) {
-      this.$emit('expandMod', mod.mod_reference);
+      this.$store.dispatch('expandMod', mod.mod_reference);
     },
     favoriteClicked(mod) {
-      if (!this.favoriteModIds.includes(mod.mod_reference)) {
-        this.$emit('favoriteMod', mod.mod_reference);
-      } else {
-        this.$emit('unfavoriteMod', mod.mod_reference);
-      }
+      this.$store.dispatch('toggleModFavorite', mod.mod_reference);
     },
     switchClicked(mod) {
-      this.$emit('switchMod', mod.mod_reference);
+      this.$store.dispatch('switchModInstalled', mod.mod_reference);
+    },
+    modProgress(mod) {
+      return this.inProgress.find((prog) => prog.id === mod);
+    },
+    currentModProgress(mod) {
+      return lastElement(this.modProgress(mod).progresses);
     },
     lastElement,
   },

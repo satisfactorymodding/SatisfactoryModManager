@@ -257,30 +257,9 @@
 <script>
 import marked from 'marked';
 import sanitizeHtml from 'sanitize-html';
+import { mapState, mapGetters } from 'vuex';
 
 export default {
-  props: {
-    mod: {
-      type: Object,
-      default() { return {}; },
-    },
-    isFavorite: {
-      type: Boolean,
-      default: false,
-    },
-    inProgress: {
-      type: Array,
-      default() { return []; },
-    },
-    configs: {
-      type: Array,
-      default() { return []; },
-    },
-    canInstallMods: {
-      type: Boolean,
-      default: true,
-    },
-  },
   data() {
     return {
       expandDetails: false,
@@ -288,6 +267,19 @@ export default {
     };
   },
   computed: {
+    ...mapState([
+      'configs',
+      'inProgress',
+    ]),
+    ...mapGetters([
+      'canInstallMods',
+    ]),
+    mod() {
+      return this.$store.state.mods.find((mod) => mod.modInfo.mod_reference === this.$store.state.expandedModId);
+    },
+    isFavorite() {
+      return this.$store.state.favoriteModIds.includes(this.$store.state.expandedModId);
+    },
     icon() {
       return this.mod.modInfo.logo || 'https://ficsit.app/static/assets/images/no_image.png';
     },
@@ -326,7 +318,7 @@ export default {
   },
   methods: {
     close() {
-      this.$emit('close');
+      this.$store.dispatch('unexpandMod');
     },
     toggleExpandDetails() {
       this.expandDetails = !this.expandDetails;
@@ -338,20 +330,16 @@ export default {
       if (this.imagePage < Math.ceil(this.images.length / 2) - 2) this.imagePage += 1;
     },
     switchClicked(mod) {
-      this.$emit('switchMod', mod.mod_reference);
+      this.$store.dispatch('switchModInstalled', mod.mod_reference);
     },
     favoriteClicked() {
-      if (!this.isFavorite) {
-        this.$emit('favoriteMod', this.mod.modInfo.mod_reference);
-      } else {
-        this.$emit('unfavoriteMod', this.mod.modInfo.mod_reference);
-      }
+      this.$store.dispatch('toggleModFavorite', this.mod.modInfo.mod_reference);
     },
     toggleIsInConfig(config) {
       if (config.items.some((item) => item.id === this.mod.modInfo.mod_reference)) {
-        this.$emit('addToConfig', config.name);
+        this.$store.dispatch('addModToConfig', { mod: this.$store.state.expandedModId, config: config.name });
       } else {
-        this.$emit('removeFromConfig', config.name);
+        this.$store.dispatch('removeModFromConfig', { mod: this.$store.state.expandedModId, config: config.name });
       }
     },
   },
