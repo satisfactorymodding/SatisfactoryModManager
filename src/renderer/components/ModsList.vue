@@ -25,7 +25,7 @@
 
             <v-list-item>
               <v-list-item-content>
-                <span>{{ modInfo.name }}</span>
+                <span :class="isCompatible || 'error--text'">{{ modInfo.name }}</span>
               </v-list-item-content>
               <v-list-item-icon>
                 <div
