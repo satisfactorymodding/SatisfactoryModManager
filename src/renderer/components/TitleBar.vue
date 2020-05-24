@@ -167,6 +167,15 @@
                 </v-icon>
               </v-list-item-action>
             </v-list-item>
+
+            <v-divider />
+
+            <v-list-item>
+              <v-list-item-action />
+              <v-list-item-content>
+                <v-list-item-title>Satisfactory Mod Manager v{{ version }}</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
           </v-list>
         </v-card>
       </v-menu>
@@ -229,6 +238,9 @@ export default {
       set(value) {
         this.$store.dispatch('setExpandModInfoOnStart', value);
       },
+    },
+    version() {
+      return this.$electron.remote.app.getVersion();
     },
   },
   methods: {
