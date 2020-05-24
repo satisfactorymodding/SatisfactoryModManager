@@ -14,6 +14,15 @@ import { saveSetting, getSetting } from './settings';
 
 Vue.use(Vuex);
 
+const MAX_DOWNLOAD_NAME_LENGTH = 25;
+
+function limitDownloadNameLength(name) {
+  if (name.length > MAX_DOWNLOAD_NAME_LENGTH) {
+    return `${name.substr(0, MAX_DOWNLOAD_NAME_LENGTH - 3)}...`;
+  }
+  return name;
+}
+
 export default new Vuex.Store({
   state: {
     hasUpdate: true,
@@ -76,14 +85,16 @@ export default new Vuex.Store({
       state.modFilters[3].mods = state.mods.filter((mod) => mod.isInstalled).length;
       state.modFilters[4].mods = state.mods.filter((mod) => !mod.isInstalled).length;
     },
-    downloadProgress(state, { url, progress, friendlyName }) {
+    downloadProgress(state, {
+      url, progress, name, version,
+    }) {
       if (!state.currentDownloadProgress[url]) {
         state.currentDownloadProgress[url] = {
           id: `download_${url}`, progress: 0, message: '', fastUpdate: true,
         };
         state.inProgress[0].progresses.push(state.currentDownloadProgress[url]);
       }
-      state.currentDownloadProgress[url].message = `Downloading ${friendlyName} ${Math.round(progress.percent * 100)}%`;
+      state.currentDownloadProgress[url].message = `Downloading ${limitDownloadNameLength(name)} v${version} ${Math.round(progress.percent * 100)}%`;
       state.currentDownloadProgress[url].progress = progress.percent;
       if (progress.percent === 1) {
         setTimeout(() => {
@@ -252,7 +263,9 @@ export default new Vuex.Store({
       };
       state.inProgress.push(appLoadProgress);
       setDebug(true);
-      addDownloadProgressCallback((url, progress, friendlyName) => commit('downloadProgress', { url, progress, friendlyName }));
+      addDownloadProgressCallback((url, progress, name, version) => commit('downloadProgress', {
+        url, progress, name, version,
+      }));
       commit('setFavoriteModIds', { favoriteModIds: getSetting('favoriteMods', []) });
       commit('setConfigs', { configs: getConfigs() });
 
