@@ -51,7 +51,7 @@ html {
   border-color: var(--v-background-darken3) !important;
 }
 
-.v-label {
+.custom .v-label {
   font-size: 12px !important;
 }
 

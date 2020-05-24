@@ -5,6 +5,8 @@ import {} from './utils';
 import {
   setDebug, addDownloadProgressCallback, getConfigs, loadCache, getInstalls, SatisfactoryInstall, getAvailableSMLVersions, MODS_PER_PAGE, getModsCount,
   getAvailableMods,
+  createConfig,
+  deleteConfig,
 } from 'satisfactory-mod-manager-api';
 import { satisfies, coerce, valid } from 'semver';
 import { ipcRenderer } from 'electron';
@@ -30,7 +32,6 @@ export default new Vuex.Store({
     mods: [],
     expandedModId: '',
     favoriteModIds: [],
-    installedMods: [],
     manifestMods: [],
     inProgress: [], // { id: string, progresses: { id: string, progress: number, message: string, fast: boolean }[] }
     currentDownloadProgress: {},
@@ -61,11 +62,11 @@ export default new Vuex.Store({
       state.smlVersions = smlVersions;
     },
     refreshModsInstalledCompatible(state) {
-      state.installedMods = Object.keys(state.selectedInstall.mods);
+      const installedMods = Object.keys(state.selectedInstall.mods);
       state.manifestMods = state.selectedInstall.manifestMods;
       for (let i = 0; i < state.mods.length; i += 1) {
-        state.mods[i].isInstalled = state.installedMods.includes(state.mods[i].modInfo.mod_reference);
-        state.mods[i].isDependency = state.installedMods.includes(state.mods[i].modInfo.mod_reference) && !state.manifestMods.includes(state.mods[i].modInfo.mod_reference);
+        state.mods[i].isInstalled = installedMods.includes(state.mods[i].modInfo.mod_reference);
+        state.mods[i].isDependency = installedMods.includes(state.mods[i].modInfo.mod_reference) && !state.manifestMods.includes(state.mods[i].modInfo.mod_reference);
         state.mods[i].isCompatible = state.mods[i].modInfo.versions.length > 0
         && !!state.mods[i].modInfo.versions.find((ver) => satisfies(ver.sml_version, '>=2.0.0')
               && state.smlVersions.some((smlVer) => valid(coerce(smlVer.version)) === valid(coerce(ver.sml_version)))
@@ -220,6 +221,19 @@ export default new Vuex.Store({
       }
       state.modFilters[2].mods = state.mods.filter((mod) => state.favoriteModIds.includes(mod.modInfo.mod_reference)).length;
       saveSetting('favoriteMods', state.favoriteModIds);
+    },
+    createConfig({ dispatch, state }, { configName, copyCurrent }) {
+      createConfig(configName, copyCurrent ? state.selectedConfig.name : 'vanilla');
+      const newConfig = { name: configName, items: copyCurrent ? state.selectedConfig.items : [] };
+      state.configs.push(newConfig);
+      dispatch('selectConfig', newConfig);
+    },
+    deleteConfig({ dispatch, state }, { configName }) {
+      deleteConfig(configName);
+      state.configs.removeWhere((config) => config.name === configName);
+      if (state.selectedConfig.name === configName) {
+        dispatch('selectConfig', state.configs.find((config) => config.name === 'modded'));
+      }
     },
     async addModToConfig(_, { mod, config }) {
       // TODO

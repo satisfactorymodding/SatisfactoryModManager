@@ -59,6 +59,7 @@
                 <v-btn
                   text
                   :disabled="!!inProgress.length || isGameRunning"
+                  @click="showCreateConfigDialog"
                 >
                   New&nbsp;
                   <v-icon
@@ -75,6 +76,7 @@
                 <v-btn
                   text
                   :disabled="!!inProgress.length || isGameRunning || selectedConfigModel.name === 'vanilla' || selectedConfigModel.name === 'modded' || selectedConfigModel.name === 'development'"
+                  @click="showDeleteConfigDialog"
                 >
                   Delete&nbsp;
                   <v-icon
@@ -149,11 +151,84 @@
       >
         <v-text-field
           v-model="selectedFiltersModel.search"
+          class="custom-search"
           :disabled="!!inProgress.length || isGameRunning"
           label="Search"
         />
       </v-col>
     </v-row>
+    <v-dialog
+      :value="newConfigDialog"
+      persistent
+    >
+      <v-card>
+        <v-card-title class="headline">
+          New config
+        </v-card-title>
+
+        <v-card-text>
+          <v-form
+            ref="newConfigForm"
+            v-model="newConfigFormValid"
+          >
+            <v-text-field
+              v-model="newConfigName"
+              label="Name"
+              required
+              :rules="[v => !!v || 'Name is required']"
+            />
+            <v-switch
+              v-model="newConfigCopyCurrent"
+              label="Copy current config"
+            />
+            <v-btn
+              color="primary"
+              text
+              @click="createConfig"
+            >
+              Create
+            </v-btn>
+            <v-btn
+              color="text"
+              text
+              @click="cancelCreateConfig"
+            >
+              Cancel
+            </v-btn>
+          </v-form>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+    <v-dialog
+      :value="deleteConfigDialog"
+      persistent
+    >
+      <v-card>
+        <v-card-title class="headline">
+          Delete config
+        </v-card-title>
+
+        <v-card-text>
+          <span>Are you sure you want to delete config {{ selectedConfigModel.name }}</span>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn
+            color="text"
+            text
+            @click="deleteConfig"
+          >
+            Delete
+          </v-btn>
+          <v-btn
+            color="primary"
+            text
+            @click="cancelDeleteConfig"
+          >
+            Cancel
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -161,6 +236,15 @@
 import { mapState } from 'vuex';
 
 export default {
+  data() {
+    return {
+      newConfigFormValid: true,
+      newConfigDialog: false,
+      newConfigName: '',
+      newConfigCopyCurrent: false,
+      deleteConfigDialog: false,
+    };
+  },
   computed: {
     ...mapState([
       'satisfactoryInstalls',
@@ -183,8 +267,40 @@ export default {
       set(value) { this.$store.dispatch('setFilters', value); },
     },
   },
+  methods: {
+    showCreateConfigDialog() {
+      this.newConfigDialog = true;
+    },
+    createConfig() {
+      if (this.$refs.newConfigForm.validate()) {
+        this.$store.dispatch('createConfig', { configName: this.newConfigName, copyCurrent: this.newConfigCopyCurrent });
+        this.cancelCreateConfig();
+      }
+    },
+    cancelCreateConfig() {
+      this.newConfigName = '';
+      this.newConfigCopyCurrent = false;
+      this.newConfigDialog = false;
+    },
+    showDeleteConfigDialog() {
+      this.deleteConfigDialog = true;
+    },
+    deleteConfig() {
+      this.$store.dispatch('deleteConfig', { configName: this.$store.state.selectedConfig.name });
+      this.cancelDeleteConfig();
+    },
+    cancelDeleteConfig() {
+      this.deleteConfigDialog = false;
+    },
+  },
 };
 </script>
+
+<style>
+.custom-search .v-label {
+  font-size: 12px !important;
+}
+</style>
 
 <style scoped>
 .buttons {
