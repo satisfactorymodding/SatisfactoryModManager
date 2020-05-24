@@ -270,15 +270,16 @@ export default {
     ...mapState([
       'configs',
       'inProgress',
+      'expandedModId',
     ]),
     ...mapGetters([
       'canInstallMods',
     ]),
     mod() {
-      return this.$store.state.mods.find((mod) => mod.modInfo.mod_reference === this.$store.state.expandedModId);
+      return this.$store.state.mods.find((mod) => mod.modInfo.mod_reference === this.expandedModId);
     },
     isFavorite() {
-      return this.$store.state.favoriteModIds.includes(this.$store.state.expandedModId);
+      return this.$store.state.favoriteModIds.includes(this.expandedModId);
     },
     icon() {
       return this.mod.modInfo.logo || 'https://ficsit.app/static/assets/images/no_image.png';
@@ -314,6 +315,11 @@ export default {
         }
       }
       return imgUrls;
+    },
+  },
+  watch: {
+    expandedModId() {
+      this.imagePage = 0;
     },
   },
   methods: {
