@@ -4,12 +4,172 @@
       class="d-inline-flex align-items-center"
       @click="settingsClicked"
     >
-      <v-icon
-        :color="getColorForState"
-        class="ma-1 icon"
+      <v-menu
+        v-model="menuOpen"
+        :close-on-content-click="false"
+        offset-x
       >
-        mdi-cog
-      </v-icon>
+        <template v-slot:activator="{ on }">
+          <v-icon
+            :color="getColorForState"
+            class="ma-1 app-icon"
+            v-on="on"
+          >
+            mdi-cog
+          </v-icon>
+        </template>
+        <v-card class="app-menu">
+          <v-list>
+            <v-list-item
+              v-if="hasUpdate"
+              @click="installUpdates"
+            >
+              <v-list-item-action />
+              <v-list-item-content>
+                <v-list-item-title>Updates ready to install</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+
+            <v-list-item>
+              <v-list-item-action>
+                <v-icon color="text">
+                  mdi-cog
+                </v-icon>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title>Settings</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+
+            <v-divider />
+
+            <v-list-item>
+              <v-list-item-action />
+              <v-list-item-content>
+                <v-list-item-title>Expand mod info</v-list-item-title>
+              </v-list-item-content>
+
+              <v-list-item-action>
+                <v-switch v-model="expandModInfoOnStart" />
+              </v-list-item-action>
+            </v-list-item>
+
+            <v-divider inset />
+
+            <v-list-item>
+              <v-list-item-action />
+              <v-list-item-content>
+                <v-list-item-title>Dark mode</v-list-item-title>
+              </v-list-item-content>
+
+              <v-list-item-action>
+                <v-switch v-model="$vuetify.theme.dark" />
+              </v-list-item-action>
+            </v-list-item>
+
+            <v-divider inset />
+
+            <v-list-item>
+              <v-list-item-action>
+                <v-icon color="text">
+                  mdi-information
+                </v-icon>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title>About</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+
+            <v-divider />
+
+            <v-list-item>
+              <v-list-item-action />
+              <v-list-item-content>
+                <v-list-item-title>Credits</v-list-item-title>
+              </v-list-item-content>
+
+              <v-list-item-action>
+                <v-icon color="text">
+                  mdi-information
+                </v-icon>
+              </v-list-item-action>
+            </v-list-item>
+
+            <v-divider inset />
+
+            <v-list-item>
+              <v-list-item-action />
+              <v-list-item-content>
+                <v-list-item-title>Attribution</v-list-item-title>
+              </v-list-item-content>
+
+              <v-list-item-action>
+                <v-icon color="text">
+                  mdi-information
+                </v-icon>
+              </v-list-item-action>
+            </v-list-item>
+
+            <v-divider inset />
+
+            <v-list-item>
+              <v-list-item-action />
+              <v-list-item-content>
+                <v-list-item-title>Help</v-list-item-title>
+              </v-list-item-content>
+
+              <v-list-item-action>
+                <v-icon color="text">
+                  mdi-information
+                </v-icon>
+              </v-list-item-action>
+            </v-list-item>
+
+            <v-divider inset />
+
+            <v-list-item>
+              <v-list-item-action>
+                <v-icon color="text">
+                  mdi-discord
+                </v-icon>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title>Discord</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+
+            <v-divider />
+
+            <v-list-item @click="moddingDiscord">
+              <v-list-item-action />
+              <v-list-item-content>
+                <v-list-item-title>Satisfactory Modding</v-list-item-title>
+              </v-list-item-content>
+
+              <v-list-item-action>
+                <v-icon color="text">
+                  mdi-open-in-new
+                </v-icon>
+              </v-list-item-action>
+            </v-list-item>
+
+            <v-divider inset />
+
+            <v-list-item @click="officialDiscord">
+              <v-list-item-action />
+              <v-list-item-content>
+                <v-list-item-title>Official Satisfactory</v-list-item-title>
+              </v-list-item-content>
+
+              <v-list-item-action>
+                <v-icon color="text">
+                  mdi-open-in-new
+                </v-icon>
+              </v-list-item-action>
+            </v-list-item>
+          </v-list>
+        </v-card>
+      </v-menu>
     </div>
     <div class="bar">
       <div class="dragregion">
@@ -26,6 +186,8 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
+
 export default {
   props: {
     title: {
@@ -39,11 +201,14 @@ export default {
     };
   },
   computed: {
+    ...mapState([
+      'hasUpdate',
+    ]),
     state() {
       if (this.menuOpen) {
         return 'on';
       }
-      if (this.$store.state.hasUpdate) {
+      if (this.hasUpdate) {
         return 'notify';
       }
       return 'off';
@@ -57,6 +222,14 @@ export default {
       }
       return '#9e9e9e';
     },
+    expandModInfoOnStart: {
+      get() {
+        return this.$store.state.expandModInfoOnStart;
+      },
+      set(value) {
+        this.$store.dispatch('setExpandModInfoOnStart', value);
+      },
+    },
   },
   methods: {
     onClose() {
@@ -64,6 +237,15 @@ export default {
     },
     settingsClicked() {
       this.menuOpen = !this.menuOpen;
+    },
+    installUpdates() {
+      console.log('UPDATE');
+    },
+    moddingDiscord() {
+      this.$electron.shell.openExternal('https://discord.gg/TShj39G');
+    },
+    officialDiscord() {
+      this.$electron.shell.openExternal('https://discord.gg/Satisfactory');
     },
   },
 };
@@ -81,9 +263,31 @@ export default {
   color: var(--v-text2-base) !important;
   background-color: var(--v-background-base);
 }
-.icon {
+.app-menu .v-list {
+  background-color: var(--v-menuBackground-base);
+}
+.v-icon {
   font-size: 16px !important;
+}
+.app-icon {
   padding: 3px 0px 0px 3px;
+}
+.app-icon.v-icon.v-icon:after {
+    background-color: rgba(0,0,0,0);
+}
+.v-list-item {
+  padding-left: 10px !important;
+}
+.v-list-item__action:first-child {
+  margin-right: 0px !important;
+}
+.v-divider--inset:not(.v-divider--vertical) {
+  margin-left: 30px !important;
+  max-width: calc(100% - 30px) !important;
+}
+.v-divider:not(.v-divider--inset):not(.v-divider--vertical) {
+  margin-left: 10px !important;
+  max-width: calc(100% - 40px) !important;
 }
 .bar {
   flex-grow: 1;

@@ -47,6 +47,7 @@ export default new Vuex.Store({
     error: '',
     isGameRunning: false,
     isLaunchingGame: false,
+    expandModInfoOnStart: false,
   },
   mutations: {
     setFilters(state, { newFilters }) {
@@ -122,6 +123,9 @@ export default new Vuex.Store({
     },
     setGameRunning(state, isGameRunning) {
       state.isGameRunning = isGameRunning;
+    },
+    setExpandModInfoOnStart(state, value) {
+      state.expandModInfoOnStart = value;
     },
   },
   actions: {
@@ -254,7 +258,9 @@ export default new Vuex.Store({
       // TODO
       console.log(mod, config);
     },
-    async initApp({ commit, dispatch, state }) {
+    async initApp({
+      commit, dispatch, state, getters,
+    }) {
       const appLoadProgress = {
         id: '__loadingApp__',
         progresses: [{
@@ -268,6 +274,7 @@ export default new Vuex.Store({
       }));
       commit('setFavoriteModIds', { favoriteModIds: getSetting('favoriteMods', []) });
       commit('setConfigs', { configs: getConfigs() });
+      commit('setExpandModInfoOnStart', getSetting('expandModInfoOnStart', false));
 
       const savedFilters = getSetting('filters', { modFilters: state.modFilters[0].name, sortBy: state.filters.sortBy[0] });
       commit('setFilters', {
@@ -304,6 +311,9 @@ export default new Vuex.Store({
         state.modFilters[2].mods = state.mods.filter((mod) => state.favoriteModIds.includes(mod.modInfo.mod_reference)).length;
         commit('refreshModsInstalledCompatible');
         state.inProgress.remove(appLoadProgress);
+        if (state.expandModInfoOnStart) {
+          dispatch('expandMod', getters.filteredMods[0].modInfo.mod_reference);
+        }
       }
       setInterval(async () => {
         commit('setGameRunning', state.isLaunchingGame || await SatisfactoryInstall.isGameRunning());
@@ -344,6 +354,10 @@ export default new Vuex.Store({
     },
     clearError({ commit }) {
       commit('showError', { e: '' });
+    },
+    setExpandModInfoOnStart({ commit }, value) {
+      commit('setExpandModInfoOnStart', value);
+      saveSetting('expandModInfoOnStart', value);
     },
   },
   getters: {

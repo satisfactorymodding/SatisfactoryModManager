@@ -47,10 +47,6 @@ html {
   margin-bottom: 0px !important;
 }
 
-.v-divider {
-  border-color: var(--v-background-darken3) !important;
-}
-
 .custom .v-label {
   font-size: 12px !important;
 }

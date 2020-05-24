@@ -129,6 +129,9 @@ export default {
 </script>
 
 <style scoped>
+.v-divider {
+  border-color: var(--v-background-darken3) !important;
+}
 div {
   background: var(--v-backgroundSecondary-base) !important;
 }
