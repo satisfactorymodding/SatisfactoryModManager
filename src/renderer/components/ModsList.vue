@@ -56,7 +56,7 @@
                   </v-icon>
                 </div>
                 <v-switch
-                  :value="isInstalled"
+                  v-model="mods[index].isInstalled"
                   inset
                   dense
                   color="primary"
