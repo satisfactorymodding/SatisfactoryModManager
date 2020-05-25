@@ -57,7 +57,6 @@
     >
       <v-col
         cols="auto"
-        style="padding-right: 500px"
         @click="close"
       >
         <v-icon>
@@ -67,6 +66,7 @@
           class="mx-2"
         >Close</span>
       </v-col>
+      <v-spacer />
       <!--<v-col
         cols="auto"
       >
@@ -151,7 +151,7 @@
           </v-col>
         </v-row>
       </v-col>
-      <v-col
+      <!--<v-col
         cols="auto"
         @click="close"
       >
@@ -187,7 +187,7 @@
             </v-list-item>
           </v-list>
         </v-menu>
-      </v-col>
+      </v-col>-->
       <v-col
         cols="auto"
         align="center"

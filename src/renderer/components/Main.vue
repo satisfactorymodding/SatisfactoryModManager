@@ -17,7 +17,6 @@
         block
         tile
         color="primary"
-        dark
         elevation="0"
         height="82px"
         style="font-size: 18px;"
@@ -69,7 +68,7 @@
       height="230"
     >
       <v-card
-        color="#2f3136 !important"
+        color="loadingBackground !important"
       >
         <v-row
           no-gutters

@@ -8,6 +8,7 @@ import router from './router';
 import 'vuetify/dist/vuetify.min.css';
 import '@mdi/font/css/materialdesignicons.css';
 import store from './store';
+import { getSetting } from './settings';
 
 if (!process.env.IS_WEB) Vue.use(vueElectron);
 
@@ -39,6 +40,7 @@ new Vue({
           menuBackground: '#000000',
           text: '#9e9e9e',
           text2: '#b7b8bc',
+          loadingBackground: '#2f3136',
         },
         light: {
           primary: '#249a20',
@@ -50,9 +52,10 @@ new Vue({
           menuBackground: '#ffffff',
           text: '#000',
           text2: '#000',
+          loadingBackground: '#ffffff',
         },
       },
-      dark: true,
+      dark: getSetting('darkMode', true),
     },
   }),
   store,

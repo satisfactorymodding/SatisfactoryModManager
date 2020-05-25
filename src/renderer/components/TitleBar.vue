@@ -63,7 +63,7 @@
               </v-list-item-content>
 
               <v-list-item-action>
-                <v-switch v-model="$vuetify.theme.dark" />
+                <v-switch v-model="darkMode" />
               </v-list-item-action>
             </v-list-item>
 
@@ -196,6 +196,7 @@
 
 <script>
 import { mapState } from 'vuex';
+import { saveSetting } from '../settings';
 
 export default {
   props: {
@@ -230,6 +231,15 @@ export default {
         return 'primary';
       }
       return '#9e9e9e';
+    },
+    darkMode: {
+      get() {
+        return this.$vuetify.theme.dark;
+      },
+      set(value) {
+        this.$vuetify.theme.dark = value;
+        saveSetting('darkMode', value);
+      },
     },
     expandModInfoOnStart: {
       get() {

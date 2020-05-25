@@ -9,8 +9,8 @@
       class="mx-4"
     >
       <v-list
-        class="py-1 my-n4 custom"
-        height="475px"
+        class="pt-1 mt-n4 custom"
+        height="459px"
       >
         <template
           v-for="({ modInfo, isInstalled, isCompatible, isDependency }, index) in mods"
@@ -139,7 +139,7 @@ div {
   margin-top: 5px;
   margin-right: 5px;
   font-size: 25px;
-  opacity: 0.2;
+  opacity: 0.75;
 }
 .mod-button:not(:hover):not(.active)>.v-icon {
   color: var(--v-backgroundSecondary-lighten2) !important;

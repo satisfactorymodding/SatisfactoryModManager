@@ -174,7 +174,7 @@ export default new Vuex.Store({
           current[state.selectedInstall.installLocation] = state.selectedConfig.name;
           saveSetting('selectedConfig', current);
         } catch (e) {
-          dispatch('showError', { e });
+          dispatch('showError', e);
         } finally {
           state.inProgress.remove(loadProgress);
         }
@@ -199,7 +199,7 @@ export default new Vuex.Store({
           placeholderProgreess.progress = 1;
           commit('refreshModsInstalledCompatible');
         } catch (e) {
-          dispatch('showError', { e });
+          dispatch('showError', e);
         } finally {
           setTimeout(() => {
             state.inProgress.remove(modProgress);
