@@ -145,7 +145,7 @@
               class="custom"
               :class="mod.isCompatible ? '' : 'incompatible'"
               flat
-              :disabled="!mod.isCompatible || !!inProgress.length || !canInstallMods"
+              :disabled="!mod.isCompatible || mod.isDependency || !!inProgress.length || !canInstallMods"
               @click.stop.prevent="switchClicked(mod.modInfo)"
             />
           </v-col>
