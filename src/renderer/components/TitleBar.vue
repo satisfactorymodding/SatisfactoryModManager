@@ -41,7 +41,7 @@
               </v-list-item-content>
             </v-list-item>
 
-            <v-divider />
+            <v-divider class="custom" />
 
             <v-list-item>
               <v-list-item-action />
@@ -54,7 +54,10 @@
               </v-list-item-action>
             </v-list-item>
 
-            <v-divider inset />
+            <v-divider
+              class="custom"
+              inset
+            />
 
             <v-list-item>
               <v-list-item-action />
@@ -67,7 +70,10 @@
               </v-list-item-action>
             </v-list-item>
 
-            <v-divider inset />
+            <v-divider
+              class="custom"
+              inset
+            />
 
             <v-list-item>
               <v-list-item-action>
@@ -80,9 +86,9 @@
               </v-list-item-content>
             </v-list-item>
 
-            <v-divider />
+            <v-divider class="custom" />
 
-            <v-list-item>
+            <v-list-item @click.stop="creditsDialog = true">
               <v-list-item-action />
               <v-list-item-content>
                 <v-list-item-title>Credits</v-list-item-title>
@@ -93,11 +99,38 @@
                   mdi-information
                 </v-icon>
               </v-list-item-action>
+              <v-dialog v-model="creditsDialog">
+                <v-card>
+                  <v-card-title>
+                    Credits
+                  </v-card-title>
+                  <v-card-text>
+                    Mircea Roata - programming<br>
+                    Deantendo - UI &amp; icons<br>
+                    Vilsol - <a
+                      href="https://ficsit.app"
+                      target="_blank"
+                    >ficsit.app</a>
+                  </v-card-text>
+                  <v-card-actions>
+                    <v-btn
+                      color="primary"
+                      text
+                      @click="creditsDialog = false"
+                    >
+                      Close
+                    </v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-dialog>
             </v-list-item>
 
-            <v-divider inset />
+            <v-divider
+              class="custom"
+              inset
+            />
 
-            <v-list-item>
+            <v-list-item @click.stop="attributionDialog = true">
               <v-list-item-action />
               <v-list-item-content>
                 <v-list-item-title>Attribution</v-list-item-title>
@@ -108,11 +141,51 @@
                   mdi-information
                 </v-icon>
               </v-list-item-action>
+              <v-dialog v-model="attributionDialog">
+                <v-card>
+                  <v-card-title>
+                    Attribution
+                  </v-card-title>
+                  <v-card-text>
+                    This app uses:<br>
+                    <a
+                      href="https://github.com/electron/electron"
+                      target="_blank"
+                    >Electron</a><br>
+                    <a
+                      href="https://github.com/vuejs/vue"
+                      target="_blank"
+                    >Vue</a><br>
+                    <a
+                      href="https://github.com/vuetifyjs/vuetify"
+                      target="_blank"
+                    >Vuetify</a><br>
+                    Licensed under MIT license<br>
+                    <a
+                      href="https://materialdesignicons.com/"
+                      target="_blank"
+                    >Material Design Icons</a><br>
+                    And many others
+                  </v-card-text>
+                  <v-card-actions>
+                    <v-btn
+                      color="primary"
+                      text
+                      @click="attributionDialog = false"
+                    >
+                      Close
+                    </v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-dialog>
             </v-list-item>
 
-            <v-divider inset />
+            <v-divider
+              class="custom"
+              inset
+            />
 
-            <v-list-item>
+            <v-list-item @click.stop="helpDialog = true">
               <v-list-item-action />
               <v-list-item-content>
                 <v-list-item-title>Help</v-list-item-title>
@@ -123,9 +196,75 @@
                   mdi-information
                 </v-icon>
               </v-list-item-action>
+              <v-dialog v-model="helpDialog">
+                <v-card>
+                  <v-card-title>
+                    Attribution
+                  </v-card-title>
+                  <v-card-text>
+                    <h3>General troubleshooting</h3><br>
+                    If something doesn't behave as expected, the first thing to try is <a @click="clearCache">clearing the cache</a><br>
+                    If that doesn't work, <a @click="enableDebug">enable debug mode</a>, then click on the "Console" tab of the Developer Tool Panel.<br>
+                    Recreate what you tried to do and went wrong, then send screenshot of the console<br>
+                    <!-- TODO: generate debug info button -->
+                    <v-divider />
+                    <h3>Why does SML not show mods?</h3><br>
+                    Fist, check that Epic can start the game. If you changed where the game is located, you need to make Epic update its install info. To do so:<br>
+                    1. Rename the game folder to something temporary<br>
+                    2. Start install from Epic to the directory you want the game to be in (the original folder name, before step 1)<br>
+                    3. After it downloads a bit close Epic<br>
+                    4. Copy back the files from the temporary folder EXCEPT the .egstore folder<br>
+                    5. Start Epic and resume the install so it finds that it is actually already installed<br>
+
+                    If you are running a cracked version of the game, ping @Moderator in the <a @click="moddingDiscord">modding discord</a> for help.
+                  </v-card-text>
+                  <v-card-actions>
+                    <v-btn
+                      color="primary"
+                      text
+                      @click="helpDialog = false"
+                    >
+                      Close
+                    </v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-dialog>
             </v-list-item>
 
-            <v-divider inset />
+            <v-divider
+              class="custom"
+              inset
+            />
+
+            <v-list-item>
+              <v-list-item-action />
+              <v-list-item-content>
+                <v-list-item-title>Debug mode</v-list-item-title>
+              </v-list-item-content>
+
+              <v-list-item-action>
+                <v-switch v-model="debugMode" />
+              </v-list-item-action>
+            </v-list-item>
+
+            <v-divider
+              class="custom"
+              inset
+            />
+
+            <v-list-item
+              @click="clearCache"
+            >
+              <v-list-item-action />
+              <v-list-item-content>
+                <v-list-item-title>Clear cache</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+
+            <v-divider
+              class="custom"
+              inset
+            />
 
             <v-list-item>
               <v-list-item-action>
@@ -138,7 +277,7 @@
               </v-list-item-content>
             </v-list-item>
 
-            <v-divider />
+            <v-divider class="custom" />
 
             <v-list-item @click="moddingDiscord">
               <v-list-item-action />
@@ -153,7 +292,10 @@
               </v-list-item-action>
             </v-list-item>
 
-            <v-divider inset />
+            <v-divider
+              class="custom"
+              inset
+            />
 
             <v-list-item @click="officialDiscord">
               <v-list-item-action />
@@ -168,7 +310,7 @@
               </v-list-item-action>
             </v-list-item>
 
-            <v-divider />
+            <v-divider class="custom" />
 
             <v-list-item>
               <v-list-item-action />
@@ -191,10 +333,57 @@
         <span>&#10005;</span>
       </div>
     </div>
+    <v-dialog v-model="modUpdatesDialog">
+      <v-card>
+        <v-card-title>
+          Mod updates available
+        </v-card-title>
+        <v-card-text>
+          TODO
+        </v-card-text>
+        <v-card-actions>
+          <v-btn
+            color="primary"
+            text
+            @click="modUpdatesDialog = false"
+          >
+            Close
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog v-model="smmUpdateDialog">
+      <v-card>
+        <v-card-title>
+          SMM update available: {{ availableUpdate ? availableUpdate.version : '' }}
+        </v-card-title>
+        <v-card-text>
+          <!-- eslint-disable-next-line vue/no-v-html -->
+          <div v-html="availableUpdate ? availableUpdate.releaseNotes.substr(availableUpdate.releaseNotes.indexOf('<h2>Changelog</h2>')) : ''" />
+        </v-card-text>
+        <v-card-actions>
+          <v-btn
+            color="primary"
+            text
+            @click="installNow"
+          >
+            Update now
+          </v-btn>
+          <v-btn
+            color="primary"
+            text
+            @click="installAtExit"
+          >
+            Update at exit
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
 <script>
+import { clearCache } from 'satisfactory-mod-manager-api';
 import { mapState } from 'vuex';
 import { saveSetting } from '../settings';
 
@@ -208,6 +397,12 @@ export default {
   data() {
     return {
       menuOpen: false,
+      creditsDialog: false,
+      attributionDialog: false,
+      helpDialog: false,
+      availableUpdate: null,
+      modUpdatesDialog: false,
+      smmUpdateDialog: false,
     };
   },
   computed: {
@@ -241,6 +436,17 @@ export default {
         saveSetting('darkMode', value);
       },
     },
+    debugMode: {
+      get() {
+        return this.$store.state.debugMode;
+      },
+      set(value) {
+        this.$store.dispatch('setDebugMode', value);
+        if (value) {
+          this.$electron.ipcRenderer.send('openDevTools');
+        }
+      },
+    },
     expandModInfoOnStart: {
       get() {
         return this.$store.state.expandModInfoOnStart;
@@ -252,6 +458,15 @@ export default {
     version() {
       return this.$electron.remote.app.getVersion();
     },
+  },
+  mounted() {
+    this.$electron.ipcRenderer.on('updateAvailable', (e, updateInfo) => {
+      this.availableUpdate = updateInfo;
+      this.smmUpdateDialog = true;
+    });
+    setInterval(() => {
+      this.$electron.ipcRenderer.send('checkForUpdates');
+    }, 5 * 60 * 1000);
   },
   methods: {
     onClose() {
@@ -268,6 +483,21 @@ export default {
     },
     officialDiscord() {
       this.$electron.shell.openExternal('https://discord.gg/Satisfactory');
+    },
+    enableDebug() {
+      this.debugMode = true;
+    },
+    clearCache() {
+      clearCache();
+      if (this.$store.state.selectedInstall) {
+        this.$store.state.selectedInstall.clearCache();
+      }
+    },
+    installNow() {
+      // TODO
+    },
+    installAtExit() {
+      // TODO
     },
   },
 };
@@ -303,11 +533,11 @@ export default {
 .v-list-item__action:first-child {
   margin-right: 0px !important;
 }
-.v-divider--inset:not(.v-divider--vertical) {
+.custom.v-divider--inset:not(.v-divider--vertical) {
   margin-left: 30px !important;
   max-width: calc(100% - 30px) !important;
 }
-.v-divider:not(.v-divider--inset):not(.v-divider--vertical) {
+.custom.v-divider:not(.v-divider--inset):not(.v-divider--vertical) {
   margin-left: 10px !important;
   max-width: calc(100% - 40px) !important;
 }
