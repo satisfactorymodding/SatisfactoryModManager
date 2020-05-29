@@ -129,6 +129,7 @@ if (app.requestSingleInstanceLock()) {
   autoUpdater.fullChangelog = true;
 
   autoUpdater.on('update-downloaded', () => {
+    mainWindow.webContents.send('updateDownloaded');
     if (quitWaitingForUpdate) {
       autoUpdater.quitAndInstall(false);
     } else {
@@ -136,7 +137,12 @@ if (app.requestSingleInstanceLock()) {
     }
   });
 
+  autoUpdater.on('download-progress', (info) => {
+    mainWindow.webContents.send('updateDownloadProgress', info);
+  });
+
   autoUpdater.on('error', () => {
+    mainWindow.webContents.send('updateNotAvailable');
     if (quitWaitingForUpdate) {
       app.quit();
     }
@@ -144,6 +150,10 @@ if (app.requestSingleInstanceLock()) {
 
   ipcMain.on('checkForUpdates', () => {
     autoUpdater.checkForUpdates();
+  });
+
+  autoUpdater.on('update-not-available', () => {
+    mainWindow.webContents.send('updateNotAvailable');
   });
 
   autoUpdater.on('update-available', (updateInfo) => {

@@ -91,7 +91,7 @@
         >
           <v-progress-linear
             :value="Math.round(currentLoadingAppProgress.progress * 100)"
-            :class="currentLoadingAppProgress.fastUpdate ? 'fast' : ''"
+            :class="currentLoadingAppProgress.fast ? 'fast' : ''"
             background-color="#000000"
             color="#5bb71d"
             height="2"
@@ -99,6 +99,48 @@
             :indeterminate="currentLoadingAppProgress.progress < 0"
           />
           {{ currentLoadingAppProgress.message || '&nbsp;' }}
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+    <v-dialog
+      hide-overlay
+      persistent
+      :value="showUpdateDownloadProgress"
+      width="500"
+      height="230"
+    >
+      <v-card
+        color="loadingBackground !important"
+      >
+        <v-row
+          no-gutters
+          justify="center"
+        >
+          <v-img
+            class="mt-4"
+            src="/static/smm_icon.png"
+            max-height="82px"
+            max-width="87px"
+          />
+        </v-row>
+        <v-card-title class="loading-text-main">
+          UPDATING SATISFACTORY MOD MANAGER
+        </v-card-title>
+
+        <v-card-text
+          v-if="isUpdateDownloadInProgress"
+          class="text-center"
+        >
+          <v-progress-linear
+            :value="Math.round(currentUpdateDownloadProgress.progress * 100)"
+            :class="currentUpdateDownloadProgress.fast ? 'fast' : ''"
+            background-color="#000000"
+            color="#5bb71d"
+            height="2"
+            reactive
+            :indeterminate="currentUpdateDownloadProgress.progress < 0"
+          />
+          {{ currentUpdateDownloadProgress.message || '&nbsp;' }}
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -113,6 +155,7 @@ import ControlArea from './ControlArea';
 import ModsList from './ModsList';
 import ModDetails from './ModDetails';
 import { lastElement } from '../utils';
+import { getSetting } from '../settings';
 
 export default {
   components: {
@@ -120,6 +163,12 @@ export default {
     ControlArea,
     ModsList,
     ModDetails,
+  },
+  data() {
+    return {
+      smmUpdateDownloadProgress: {},
+      showUpdateDownloadProgress: false,
+    };
   },
   computed: {
     ...mapState(
@@ -140,13 +189,71 @@ export default {
     currentLoadingAppProgress() {
       return lastElement(this.loadingAppProgress.progresses);
     },
+    isUpdateDownloadInProgress() {
+      return this.inProgress.some((prog) => prog.id === '__downloadingUpdate__');
+    },
+    updateDownloadProgress() {
+      return this.inProgress.find((prog) => prog.id === '__downloadingUpdate__');
+    },
+    currentUpdateDownloadProgress() {
+      return lastElement(this.updateDownloadProgress.progresses);
+    },
   },
   async mounted() {
     this.$electron.ipcRenderer.send('unexpand');
+    this.$electron.ipcRenderer.on('updateAvailable', () => {
+      this.smmUpdateDownloadProgress = {
+        id: '__downloadingUpdate__',
+        progresses: [{
+          id: '', progress: -1, message: 'Downloading update', fast: false,
+        }],
+      };
+      this.inProgress.push(this.smmUpdateDownloadProgress);
+      this.$electron.ipcRenderer.on('updateDownloadProgress', this.updateProgress);
+      this.$electron.ipcRenderer.once('updateDownloaded', () => {
+        this.inProgress.remove(this.smmUpdateDownloadProgress);
+        this.$electron.ipcRenderer.off('updateDownloadProgress', this.updateProgress);
+      });
+    });
+    if (getSetting('updateCheckMode', 'launch') === 'launch') {
+      const hasUpdate = await this.checkForUpdates();
+      if (hasUpdate) {
+        this.downloadUpdate();
+        return;
+      }
+      this.$root.$emit('doneLaunchUpdateCheck');
+    }
+    this.$root.$on('downloadUpdate', this.downloadUpdate);
     await this.$store.dispatch('initApp');
     this.$electron.ipcRenderer.send('vue-ready');
   },
   methods: {
+    async checkForUpdates() {
+      this.$electron.ipcRenderer.send('checkForUpdates');
+      return new Promise((resolve) => {
+        this.$electron.ipcRenderer.once('updateAvailable', () => {
+          resolve(true);
+        });
+        this.$electron.ipcRenderer.once('updateNotAvailable', () => {
+          resolve(false);
+        });
+      });
+    },
+    downloadUpdate() {
+      this.showUpdateDownloadProgress = true;
+      this.$electron.ipcRenderer.on('updateDownloaded', () => {
+        setInterval(() => {
+          if (this.inProgress.length === 0) {
+            this.$electron.remote.getCurrentWindow().close();
+          }
+        }, 100);
+      });
+    },
+    updateProgress(e, info) {
+      this.smmUpdateDownloadProgress.progresses[0].progress = info.percent / 100;
+      this.smmUpdateDownloadProgress.progresses[0].message = `Downloading update ${Math.round(info.percent)}% (${Math.round((info.transferred / 1000 / 1000) * 100) / 100}/${Math.round((info.total / 1000 / 1000) * 100) / 100}MB - ${Math.round((info.bytesPerSecond / 1000) * 100) / 100} KB/s)`;
+      this.smmUpdateDownloadProgress.progresses[0].fast = true;
+    },
     clearError() {
       this.$store.dispatch('clearError');
     },

@@ -92,7 +92,7 @@ export default new Vuex.Store({
     }) {
       if (!state.currentDownloadProgress[url]) {
         state.currentDownloadProgress[url] = {
-          id: `download_${url}`, progress: 0, message: '', fastUpdate: true,
+          id: `download_${url}`, progress: 0, message: '', fast: true,
         };
         state.inProgress[0].progresses.push(state.currentDownloadProgress[url]);
       }
@@ -193,7 +193,7 @@ export default new Vuex.Store({
       const modProgress = { id: modId, progresses: [] };
       state.inProgress.push(modProgress);
       const placeholderProgreess = {
-        id: 'placeholder', progress: -1, message: '', fastUpdate: false,
+        id: 'placeholder', progress: -1, message: '', fast: false,
       };
       modProgress.progresses.push(placeholderProgreess);
       if (state.mods.find((mod) => mod.modInfo.mod_reference === modId).isInstalled) {

@@ -20,15 +20,97 @@
         </template>
         <v-card class="app-menu">
           <v-list>
-            <v-list-item
-              v-if="hasUpdate"
-              @click="installUpdates"
+            <v-menu
+              v-model="updatesMenuOpen"
+              :close-on-content-click="false"
+              offset-x
+              :nudge-right="20"
             >
-              <v-list-item-action />
-              <v-list-item-content>
-                <v-list-item-title>Updates ready to install</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
+              <template v-slot:activator="{ on }">
+                <v-list-item
+                  v-on="on"
+                >
+                  <v-list-item-action />
+                  <v-list-item-content>
+                    <v-list-item-title>{{ hasUpdate || availableSMMUpdate ? 'Updates ready to install' : 'Update settings' }}</v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+              </template>
+              <v-card class="app-menu">
+                <v-list>
+                  <v-list-item>
+                    <v-list-item-action>
+                      <v-icon color="text">
+                        mdi-cog
+                      </v-icon>
+                    </v-list-item-action>
+                    <v-list-item-content>
+                      <v-list-item-title>Update options</v-list-item-title>
+                    </v-list-item-content>
+                  </v-list-item>
+
+                  <v-divider class="custom" />
+
+                  <v-list-item>
+                    <v-list-item-action />
+                    <v-list-item-content>
+                      <v-list-item-title>Update SMM at</v-list-item-title>
+                    </v-list-item-content>
+                    <v-list-item-action>
+                      <v-select
+                        v-model="updateCheckMode"
+                        :items="['launch', 'exit', 'ask']"
+                      />
+                    </v-list-item-action>
+                  </v-list-item>
+
+                  <v-divider
+                    inset
+                    class="custom"
+                  />
+
+                  <v-list-item>
+                    <v-list-item-action>
+                      <v-icon color="text">
+                        mdi-update
+                      </v-icon>
+                    </v-list-item-action>
+                    <v-list-item-content>
+                      <v-list-item-title>Updates</v-list-item-title>
+                    </v-list-item-content>
+                  </v-list-item>
+
+                  <v-divider class="custom" />
+
+                  <v-list-item>
+                    <v-list-item-action />
+                    <v-list-item-content>
+                      <v-list-item-title>Mod updates (0)<!--TODO--></v-list-item-title>
+                    </v-list-item-content>
+                  </v-list-item>
+
+                  <v-divider
+                    inset
+                    class="custom"
+                  />
+
+                  <v-list-item
+                    :disabled="!availableSMMUpdate"
+                    @click="smmUpdateDialog = true"
+                  >
+                    <v-list-item-action />
+                    <v-list-item-content>
+                      <v-list-item-title>SMM updates ({{ smmUpdateCount }})</v-list-item-title>
+                    </v-list-item-content>
+                  </v-list-item>
+
+                  <v-divider
+                    inset
+                    class="custom"
+                  />
+                </v-list>
+              </v-card>
+            </v-menu>
 
             <v-list-item>
               <v-list-item-action>
@@ -199,23 +281,25 @@
               <v-dialog v-model="helpDialog">
                 <v-card>
                   <v-card-title>
-                    Attribution
+                    Help
                   </v-card-title>
                   <v-card-text>
-                    <h3>General troubleshooting</h3><br>
+                    <h3>General troubleshooting</h3>
                     If something doesn't behave as expected, the first thing to try is <a @click="clearCache">clearing the cache</a><br>
                     If that doesn't work, <a @click="enableDebug">enable debug mode</a>, then click on the "Console" tab of the Developer Tool Panel.<br>
                     Recreate what you tried to do and went wrong, then send screenshot of the console<br>
                     <!-- TODO: generate debug info button -->
-                    <v-divider />
-                    <h3>Why does SML not show mods?</h3><br>
+                    <br><v-divider /><br>
+                    <h3>Why does SML not show mods?</h3>
+                    <h4>Epic</h4>
                     Fist, check that Epic can start the game. If you changed where the game is located, you need to make Epic update its install info. To do so:<br>
                     1. Rename the game folder to something temporary<br>
                     2. Start install from Epic to the directory you want the game to be in (the original folder name, before step 1)<br>
                     3. After it downloads a bit close Epic<br>
                     4. Copy back the files from the temporary folder EXCEPT the .egstore folder<br>
                     5. Start Epic and resume the install so it finds that it is actually already installed<br>
-
+                    <br>
+                    <h4>Cracked</h4>
                     If you are running a cracked version of the game, ping @Moderator in the <a @click="moddingDiscord">modding discord</a> for help.
                   </v-card-text>
                   <v-card-actions>
@@ -358,7 +442,7 @@
     >
       <v-card>
         <v-card-title>
-          SMM update available: {{ availableUpdate ? availableUpdate.version : '' }}
+          SMM update available: {{ availableSMMUpdate ? availableSMMUpdate.version : '' }}
         </v-card-title>
         <v-card-text>
           <!-- eslint-disable-next-line vue/no-v-html -->
@@ -368,7 +452,7 @@
           <v-btn
             color="primary"
             text
-            @click="close"
+            @click="updateNow"
           >
             Update now
           </v-btn>
@@ -388,7 +472,7 @@
 <script>
 import { clearCache } from 'satisfactory-mod-manager-api';
 import { mapState } from 'vuex';
-import { saveSetting } from '../settings';
+import { saveSetting, getSetting } from '../settings';
 
 export default {
   props: {
@@ -400,12 +484,14 @@ export default {
   data() {
     return {
       menuOpen: false,
+      updatesMenuOpen: false,
       creditsDialog: false,
       attributionDialog: false,
       helpDialog: false,
-      availableUpdate: null,
+      availableSMMUpdate: null,
       modUpdatesDialog: false,
       smmUpdateDialog: false,
+      cachedUpdateCheckMode: false,
     };
   },
   computed: {
@@ -462,17 +548,36 @@ export default {
       return this.$electron.remote.app.getVersion();
     },
     smmUpdateNotes() {
-      if (!this.availableUpdate) {
+      if (!this.availableSMMUpdate) {
         return '';
       }
-      return this.availableUpdate.releaseNotes.map((release) => release.note.substr(release.note.indexOf('<h2>Changelog</h2>')).replace('<h2>Changelog</h2>', `<h2>v${release.version} changelog</h2>`)).join('\n');
+      return this.availableSMMUpdate.releaseNotes.map((release) => release.note.substr(release.note.indexOf('<h2>Changelog</h2>')).replace('<h2>Changelog</h2>', `<h2>v${release.version} changelog</h2>`)).join('\n');
+    },
+    smmUpdateCount() {
+      if (!this.availableSMMUpdate) {
+        return 0;
+      }
+      return this.availableSMMUpdate.releaseNotes.length;
+    },
+    updateCheckMode: {
+      get() {
+        return this.cachedUpdateCheckMode;
+      },
+      set(value) {
+        saveSetting('updateCheckMode', value);
+        this.cachedUpdateCheckMode = value;
+      },
     },
   },
   mounted() {
-    this.$electron.ipcRenderer.on('updateAvailable', (e, updateInfo) => {
-      this.availableUpdate = updateInfo;
-      this.smmUpdateDialog = true;
-    });
+    this.cachedUpdateCheckMode = getSetting('updateCheckMode', 'launch');
+    if (this.updateCheckMode === 'launch') {
+      this.$root.once('doneLaunchUpdateCheck', () => {
+        this.addUpdateListener();
+      });
+    } else {
+      this.addUpdateListener();
+    }
     setInterval(() => {
       this.$electron.ipcRenderer.send('checkForUpdates');
     }, 5 * 60 * 1000);
@@ -501,6 +606,18 @@ export default {
       if (this.$store.state.selectedInstall) {
         this.$store.state.selectedInstall.clearCache();
       }
+    },
+    addUpdateListener() {
+      this.$electron.ipcRenderer.on('updateAvailable', (e, updateInfo) => {
+        this.availableSMMUpdate = updateInfo;
+        if (this.updateCheckMode === 'ask') {
+          this.smmUpdateDialog = true;
+        }
+      });
+    },
+    updateNow() {
+      this.$root.$emit('downloadUpdate');
+      this.smmUpdateDialog = false;
     },
   },
 };

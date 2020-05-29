@@ -74,7 +74,7 @@
             >
               <v-progress-linear
                 :value="Math.round(currentModProgress(modInfo.mod_reference).progress * 100)"
-                :class="currentModProgress(modInfo.mod_reference).fastUpdate ? 'fast' : ''"
+                :class="currentModProgress(modInfo.mod_reference).fast ? 'fast' : ''"
                 color="warning"
                 height="49"
                 reactive
