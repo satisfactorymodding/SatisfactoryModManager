@@ -328,7 +328,7 @@
       </div>
       <div
         class="button close"
-        @click="onClose"
+        @click="close"
       >
         <span>&#10005;</span>
       </div>
@@ -352,27 +352,30 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-dialog v-model="smmUpdateDialog">
+    <v-dialog
+      v-model="smmUpdateDialog"
+      persistent
+    >
       <v-card>
         <v-card-title>
           SMM update available: {{ availableUpdate ? availableUpdate.version : '' }}
         </v-card-title>
         <v-card-text>
           <!-- eslint-disable-next-line vue/no-v-html -->
-          <div v-html="availableUpdate ? availableUpdate.releaseNotes.substr(availableUpdate.releaseNotes.indexOf('<h2>Changelog</h2>')) : ''" />
+          <div v-html="smmUpdateNotes" />
         </v-card-text>
         <v-card-actions>
           <v-btn
             color="primary"
             text
-            @click="installNow"
+            @click="close"
           >
             Update now
           </v-btn>
           <v-btn
             color="primary"
             text
-            @click="installAtExit"
+            @click="smmUpdateDialog = false"
           >
             Update at exit
           </v-btn>
@@ -458,6 +461,12 @@ export default {
     version() {
       return this.$electron.remote.app.getVersion();
     },
+    smmUpdateNotes() {
+      if (!this.availableUpdate) {
+        return '';
+      }
+      return this.availableUpdate.releaseNotes.map((release) => release.note.substr(release.note.indexOf('<h2>Changelog</h2>')).replace('<h2>Changelog</h2>', `<h2>v${release.version} changelog</h2>`)).join('\n');
+    },
   },
   mounted() {
     this.$electron.ipcRenderer.on('updateAvailable', (e, updateInfo) => {
@@ -469,7 +478,7 @@ export default {
     }, 5 * 60 * 1000);
   },
   methods: {
-    onClose() {
+    close() {
       this.$electron.remote.getCurrentWindow().close();
     },
     settingsClicked() {
@@ -492,12 +501,6 @@ export default {
       if (this.$store.state.selectedInstall) {
         this.$store.state.selectedInstall.clearCache();
       }
-    },
-    installNow() {
-      // TODO
-    },
-    installAtExit() {
-      // TODO
     },
   },
 };

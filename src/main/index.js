@@ -54,21 +54,6 @@ function createWindow() {
     resizable: false,
   });
 
-  ipcMain.once('vue-ready', () => {
-    if (process.platform === 'win32') {
-      openedByUrl(process.argv.find((arg) => arg.startsWith('smlauncher:')));
-    }
-  });
-
-  ipcMain.on('expand', () => {
-    mainWindow.setSize(expandedSize.width, expandedSize.height, true);
-  });
-
-  ipcMain.on('unexpand', () => {
-    mainWindow.setMinimumSize(normalSize.width, normalSize.height); // https://github.com/electron/electron/issues/15560#issuecomment-451395078
-    mainWindow.setSize(normalSize.width, normalSize.height, true);
-  });
-
   if (process.env.NODE_ENV === 'development') {
     mainWindow.loadURL(mainURL);
   } else {
@@ -91,6 +76,7 @@ function createWindow() {
 
 let isDownloadingUpdate = false;
 let quitWaitingForUpdate = false;
+let hasUpdate = false;
 
 if (app.requestSingleInstanceLock()) {
   app.on('second-instance', (e, argv) => {
@@ -107,10 +93,14 @@ if (app.requestSingleInstanceLock()) {
 
   app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
-      if (!isDownloadingUpdate) {
-        app.quit();
+      if (hasUpdate) {
+        if (!isDownloadingUpdate) {
+          autoUpdater.quitAndInstall(false);
+        } else {
+          quitWaitingForUpdate = true;
+        }
       } else {
-        quitWaitingForUpdate = true;
+        app.quit();
       }
     }
   });
@@ -121,9 +111,26 @@ if (app.requestSingleInstanceLock()) {
     }
   });
 
+  ipcMain.once('vue-ready', () => {
+    if (process.platform === 'win32') {
+      openedByUrl(process.argv.find((arg) => arg.startsWith('smlauncher:')));
+    }
+  });
+
+  ipcMain.on('expand', () => {
+    mainWindow.setSize(expandedSize.width, expandedSize.height, true);
+  });
+
+  ipcMain.on('unexpand', () => {
+    mainWindow.setMinimumSize(normalSize.width, normalSize.height); // https://github.com/electron/electron/issues/15560#issuecomment-451395078
+    mainWindow.setSize(normalSize.width, normalSize.height, true);
+  });
+
+  autoUpdater.fullChangelog = true;
+
   autoUpdater.on('update-downloaded', () => {
     if (quitWaitingForUpdate) {
-      autoUpdater.quitAndInstall(true);
+      autoUpdater.quitAndInstall(false);
     } else {
       isDownloadingUpdate = false;
     }
@@ -142,6 +149,7 @@ if (app.requestSingleInstanceLock()) {
   autoUpdater.on('update-available', (updateInfo) => {
     mainWindow.webContents.send('updateAvailable', updateInfo);
     isDownloadingUpdate = true;
+    hasUpdate = true;
   });
 
   app.on('ready', () => {
