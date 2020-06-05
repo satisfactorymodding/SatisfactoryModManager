@@ -60,7 +60,23 @@
                       <v-select
                         v-model="updateCheckMode"
                         :items="['launch', 'exit', 'ask']"
+                        style="width: 108px"
                       />
+                    </v-list-item-action>
+                  </v-list-item>
+
+                  <v-divider
+                    inset
+                    class="custom"
+                  />
+
+                  <v-list-item>
+                    <v-list-item-action />
+                    <v-list-item-content>
+                      <v-list-item-title>Show ignored updates</v-list-item-title>
+                    </v-list-item-content>
+                    <v-list-item-action>
+                      <v-switch v-model="showIgnoredUpdates" />
                     </v-list-item-action>
                   </v-list-item>
 
@@ -82,10 +98,13 @@
 
                   <v-divider class="custom" />
 
-                  <v-list-item>
+                  <v-list-item
+                    :disabled="filteredModUpdates.length === 0"
+                    @click="modUpdatesDialog = true"
+                  >
                     <v-list-item-action />
                     <v-list-item-content>
-                      <v-list-item-title>Mod updates (0)<!--TODO--></v-list-item-title>
+                      <v-list-item-title>Mod updates ({{ filteredModUpdates.length }})</v-list-item-title>
                     </v-list-item-content>
                   </v-list-item>
 
@@ -417,19 +436,124 @@
         <span>&#10005;</span>
       </div>
     </div>
-    <v-dialog v-model="modUpdatesDialog">
+    <v-dialog
+      v-model="modUpdatesDialog"
+      max-width="600"
+    >
       <v-card>
         <v-card-title>
           Mod updates available
         </v-card-title>
         <v-card-text>
-          TODO
+          <v-btn
+            color="primary"
+            text
+            :disabled="inProgress.length > 0"
+            @click="updateAll"
+          >
+            Update all
+          </v-btn>
+          <v-progress-linear
+            v-if="isMultiModUpdateInProgress"
+            :value="Math.round(currentMultiModUpdateProgress.progress * 100)"
+            :class="currentMultiModUpdateProgress.fast ? 'fast' : ''"
+            color="warning"
+            height="49"
+            reactive
+            :indeterminate="currentMultiModUpdateProgress.progress < 0"
+          >
+            <strong>{{ currentMultiModUpdateProgress.message }}</strong>
+          </v-progress-linear>
+          <v-list
+            v-else
+            class="custom"
+            dense
+          >
+            <template v-for="(update, index) in filteredModUpdates">
+              <div :key="index">
+                <v-list-item
+                  v-if="inProgress.some((prog) => prog.id === update.item)"
+                >
+                  <v-progress-linear
+                    :value="Math.round(currentModProgress(update.item).progress * 100)"
+                    :class="currentModProgress(update.item).fast ? 'fast' : ''"
+                    color="warning"
+                    height="49"
+                    reactive
+                    :indeterminate="currentModProgress(update.item).progress < 0"
+                  >
+                    <strong>{{ currentModProgress(update.item).message }}</strong>
+                  </v-progress-linear>
+                </v-list-item>
+                <v-list-item v-else>
+                  <v-list-item-content>
+                    <v-list-item-title>{{ update.name }}</v-list-item-title>
+                    <v-list-item-subtitle>current: v{{ update.currentVersion }}, available: v{{ update.version }}</v-list-item-subtitle>
+                  </v-list-item-content>
+                  <v-list-item-action style="margin-left: 10px">
+                    <v-btn
+                      color="text"
+                      text
+                      @click="viewChangelog(update)"
+                    >
+                      Changelog
+                    </v-btn>
+                  </v-list-item-action>
+                  <v-list-item-action>
+                    <v-btn
+                      color="primary"
+                      text
+                      :disabled="inProgress.length > 0"
+                      @click="updateItem(update)"
+                    >
+                      Update
+                    </v-btn>
+                  </v-list-item-action>
+                  <v-list-item-action style="margin-left: 0">
+                    <v-btn
+                      color="text"
+                      text
+                      @click="isIgnored(update) ? unignoreUpdate(update) : ignoreUpdate(update)"
+                    >
+                      {{ isIgnored(update) ? 'Unignore' : 'Ignore' }}
+                    </v-btn>
+                  </v-list-item-action>
+                </v-list-item>
+              </div>
+            </template>
+          </v-list>
         </v-card-text>
         <v-card-actions>
           <v-btn
             color="primary"
             text
             @click="modUpdatesDialog = false"
+          >
+            Close
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog v-model="changelogDialog">
+      <v-card v-if="viewChangelogUpdate">
+        <v-card-title>
+          {{ viewChangelogUpdate.name }} v{{ viewChangelogUpdate.version }} changelog
+        </v-card-title>
+        <v-card-text>
+          <template v-for="(release, index) in viewChangelogUpdate.releases">
+            <div :key="index">
+              <h3>v{{ release.version }}</h3>
+              <!-- eslint-disable vue/no-v-html -->
+              <span v-html="changelogHTML(release)" />
+              <v-divider v-if="index != viewChangelogUpdate.releases.length - 1" />
+            </div>
+          </template>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn
+            color="primary"
+            text
+            @click="changelogDialog = false"
           >
             Close
           </v-btn>
@@ -452,7 +576,7 @@
           <v-btn
             color="primary"
             text
-            @click="updateNow"
+            @click="updateSMMNow"
           >
             Update now
           </v-btn>
@@ -473,6 +597,11 @@
 import { clearCache } from 'satisfactory-mod-manager-api';
 import { mapState } from 'vuex';
 import { saveSetting, getSetting } from '../settings';
+import {
+  markdownAsElement, ignoreUpdate, unignoreUpdate, lastElement,
+} from '../utils';
+
+const UPDATE_CHECK_INTERVAL = 5 * 60 * 1000;
 
 export default {
   props: {
@@ -489,15 +618,25 @@ export default {
       attributionDialog: false,
       helpDialog: false,
       availableSMMUpdate: null,
+      modUpdates: [],
       modUpdatesDialog: false,
       smmUpdateDialog: false,
-      cachedUpdateCheckMode: false,
+      cachedUpdateCheckMode: 'launch',
+      nextCheckForUpdates: -1,
+      viewChangelogUpdate: null,
+      changelogDialog: false,
+      showIgnoredUpdates: false,
+      ignoredUpdates: [],
     };
   },
   computed: {
     ...mapState([
-      'hasUpdate',
+      'inProgress',
+      'selectedInstall',
     ]),
+    ...mapState({
+      allMods: 'mods',
+    }),
     state() {
       if (this.menuOpen) {
         return 'on';
@@ -568,19 +707,38 @@ export default {
         this.cachedUpdateCheckMode = value;
       },
     },
+    hasUpdate() {
+      return !!this.availableSMMUpdate || this.filteredModUpdates.length > 0;
+    },
+    filteredModUpdates() {
+      return (this.showIgnoredUpdates ? this.modUpdates : this.modUpdates.filter((update) => !this.isIgnored(update)));
+    },
+    isMultiModUpdateInProgress() {
+      return this.inProgress.some((prog) => prog.id === '__updateMods__');
+    },
+    multiModUpdateProgress() {
+      return this.inProgress.find((prog) => prog.id === '__updateMods__');
+    },
+    currentMultiModUpdateProgress() {
+      return lastElement(this.multiModUpdateProgress.progresses);
+    },
+  },
+  watch: {
+    async selectedInstall() {
+      await this.checkForUpdates();
+    },
   },
   mounted() {
     this.cachedUpdateCheckMode = getSetting('updateCheckMode', 'launch');
+    this.ignoredUpdates = getSetting('ignoredUpdates', []);
     if (this.updateCheckMode === 'launch') {
-      this.$root.once('doneLaunchUpdateCheck', () => {
+      this.$root.$once('doneLaunchUpdateCheck', () => {
         this.addUpdateListener();
       });
     } else {
       this.addUpdateListener();
     }
-    setInterval(() => {
-      this.$electron.ipcRenderer.send('checkForUpdates');
-    }, 5 * 60 * 1000);
+    this.nextCheckForUpdates = setTimeout(() => this.checkForUpdates(), UPDATE_CHECK_INTERVAL);
   },
   methods: {
     close() {
@@ -588,9 +746,6 @@ export default {
     },
     settingsClicked() {
       this.menuOpen = !this.menuOpen;
-    },
-    installUpdates() {
-      console.log('UPDATE');
     },
     moddingDiscord() {
       this.$electron.shell.openExternal('https://discord.gg/TShj39G');
@@ -615,9 +770,59 @@ export default {
         }
       });
     },
-    updateNow() {
+    async checkForUpdates() {
+      clearTimeout(this.nextCheckForUpdates);
+      // don't check for updates while something is in progress
+      while (this.inProgress.length > 0) {
+        // eslint-disable-next-line no-await-in-loop
+        await new Promise((resolve) => setTimeout(() => resolve(), 500));
+      }
+      this.$electron.ipcRenderer.send('checkForUpdates');
+      this.modUpdates = (await this.$store.state.selectedInstall.checkForUpdates()).map((update) => Object.assign(update, {
+        name: this.allMods.find((mod) => mod.modInfo.mod_reference === update.item)?.modInfo.name || update.item,
+      }));
+      this.nextCheckForUpdates = setTimeout(() => this.checkForUpdates(), UPDATE_CHECK_INTERVAL);
+    },
+    updateSMMNow() {
       this.$root.$emit('downloadUpdate');
       this.smmUpdateDialog = false;
+    },
+    async updateAll() {
+      await this.$store.dispatch('updateMulti', this.filteredModUpdates);
+      const currentUpdates = this.filteredModUpdates;
+      this.modUpdates.removeWhere((update) => currentUpdates.includes(update));
+      if (this.filteredModUpdates.length === 0) {
+        this.modUpdatesDialog = false;
+      }
+    },
+    async updateItem(update) {
+      await this.$store.dispatch('updateSingle', update);
+      this.modUpdates.remove(update);
+      if (this.filteredModUpdates.length === 0) {
+        this.modUpdatesDialog = false;
+      }
+    },
+    ignoreUpdate(update) {
+      this.ignoredUpdates = ignoreUpdate(update.item, update.version);
+    },
+    unignoreUpdate(update) {
+      this.ignoredUpdates = unignoreUpdate(update.item, update.version);
+    },
+    isIgnored(update) {
+      return this.ignoredUpdates.some((ignoredUpdate) => ignoredUpdate.item === update.item && ignoredUpdate.version === update.version);
+    },
+    viewChangelog(update) {
+      this.viewChangelogUpdate = update;
+      this.changelogDialog = true;
+    },
+    changelogHTML(release) {
+      return markdownAsElement(release.changelog).innerHTML;
+    },
+    modProgress(mod) {
+      return this.inProgress.find((prog) => prog.id === mod);
+    },
+    currentModProgress(mod) {
+      return lastElement(this.modProgress(mod).progresses);
     },
   },
 };
@@ -637,6 +842,12 @@ export default {
 }
 .app-menu .v-list {
   background-color: var(--v-menuBackground-base);
+}
+.custom.v-list {
+  background-color: var(--v-background-base);
+}
+.custom.v-list .v-list-item__action {
+  margin: 0;
 }
 .v-icon {
   font-size: 16px !important;

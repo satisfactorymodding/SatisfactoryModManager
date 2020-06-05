@@ -255,9 +255,8 @@
 </template>
 
 <script>
-import marked from 'marked';
-import sanitizeHtml from 'sanitize-html';
 import { mapState, mapGetters } from 'vuex';
+import { markdownAsElement } from '../utils';
 
 export default {
   data() {
@@ -288,13 +287,7 @@ export default {
       return this.mod.modInfo.authors.map((author) => author.user.username).join(', ');
     },
     descriptionAsElement() {
-      const html = sanitizeHtml(marked(this.mod.modInfo.full_description || ''), {
-        allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'video', 'details', 'summary', 'h1', 'h2']),
-        allowedAttributes: Object.assign(sanitizeHtml.defaults.allowedAttributes, { img: ['src', 'width', 'height'], video: ['src', 'width', 'height', 'controls'] }),
-      });
-      const el = document.createElement('html');
-      el.innerHTML = html;
-      return el;
+      return markdownAsElement(this.mod.modInfo.full_description || '');
     },
     modDescription() {
       const el = this.descriptionAsElement;

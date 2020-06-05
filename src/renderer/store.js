@@ -25,7 +25,6 @@ function limitDownloadNameLength(name) {
 
 export default new Vuex.Store({
   state: {
-    hasUpdate: true,
     filters: {
       modFilters: {},
       sortBy: '',
@@ -254,14 +253,6 @@ export default new Vuex.Store({
         dispatch('selectConfig', state.configs.find((config) => config.name === 'modded'));
       }
     },
-    async addModToConfig(_, { mod, config }) {
-      // TODO
-      console.log(mod, config);
-    },
-    async removeModFromConfig(_, { mod, config }) {
-      // TODO
-      console.log(mod, config);
-    },
     async initApp({
       commit, dispatch, state, getters,
     }) {
@@ -354,6 +345,7 @@ export default new Vuex.Store({
     },
     showError({ commit }, e) {
       commit('showError', { e });
+      // eslint-disable-next-line no-console
       console.error(e);
     },
     clearError({ commit }) {
@@ -367,6 +359,50 @@ export default new Vuex.Store({
       setDebug(value);
       commit('setDebugMode', value);
       saveSetting('debugMode', value);
+    },
+    async updateSingle({ state, commit, dispatch }, update) {
+      const updateProgress = {
+        id: update.item,
+        progresses: [],
+      };
+      const placeholderProgreess = {
+        id: '', progress: -1, message: `Updating ${update.item} to v${update.version}`, fast: false,
+      };
+      updateProgress.progresses.push(placeholderProgreess);
+      state.inProgress.push(updateProgress);
+      try {
+        await state.selectedInstall.manifestMutate([], [], [update.item]);
+        placeholderProgreess.progress = 1;
+        commit('refreshModsInstalledCompatible');
+      } catch (e) {
+        dispatch('showError', e);
+      } finally {
+        setTimeout(() => {
+          state.inProgress.remove(updateProgress);
+        }, 500);
+      }
+    },
+    async updateMulti({ state, commit, dispatch }, updates) {
+      const updateProgress = {
+        id: '__updateMods__',
+        progresses: [],
+      };
+      const placeholderProgreess = {
+        id: '', progress: -1, message: `Updating ${updates.length} mods`, fast: false,
+      };
+      updateProgress.progresses.push(placeholderProgreess);
+      state.inProgress.push(updateProgress);
+      try {
+        await state.selectedInstall.manifestMutate([], [], updates.map((update) => update.item));
+        placeholderProgreess.progress = 1;
+        commit('refreshModsInstalledCompatible');
+      } catch (e) {
+        dispatch('showError', e);
+      } finally {
+        setTimeout(() => {
+          state.inProgress.remove(updateProgress);
+        }, 500);
+      }
     },
   },
   getters: {

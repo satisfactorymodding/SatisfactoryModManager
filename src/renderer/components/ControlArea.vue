@@ -158,7 +158,7 @@
       </v-col>
     </v-row>
     <v-dialog
-      :value="newConfigDialog"
+      v-model="newConfigDialog"
       persistent
     >
       <v-card>
@@ -200,7 +200,7 @@
       </v-card>
     </v-dialog>
     <v-dialog
-      :value="deleteConfigDialog"
+      v-model="deleteConfigDialog"
       persistent
     >
       <v-card>

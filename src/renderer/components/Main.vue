@@ -36,9 +36,8 @@
       <ModDetails v-if="expandedModId" />
     </v-card>
     <v-dialog
-      :value="!!error"
+      v-model="errorDialog"
       max-width="290"
-      persistent
     >
       <v-card>
         <v-card-title class="headline">
@@ -180,6 +179,14 @@ export default {
         'error',
       ],
     ),
+    errorDialog: {
+      get() {
+        return !!this.error;
+      },
+      set() {
+        this.clearError();
+      },
+    },
     isLoadingAppInProgress() {
       return this.inProgress.some((prog) => prog.id === '__loadingApp__');
     },
