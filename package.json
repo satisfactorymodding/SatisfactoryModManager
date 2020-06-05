@@ -1,5 +1,5 @@
 {
-  "name": "satisfactory-mod-launcher-gui",
+  "name": "satisfactory-mod-manager-gui",
   "version": "1.0.6",
   "author": "mircearoata",
   "description": "Handles Satisfactory mods and mod loader",
@@ -22,8 +22,8 @@
     "publish:linux": "yarn build && electron-builder build --linux"
   },
   "build": {
-    "productName": "Satisfactory Mod Launcher",
-    "appId": "com.mircearoata.smlaunchergui",
+    "productName": "Satisfactory Mod Manager",
+    "appId": "com.mircearoata.smmanagergui",
     "directories": {
       "output": "build"
     },
@@ -31,7 +31,7 @@
       "dist/electron/**/*"
     ],
     "protocols": {
-      "name": "Satisfactory Mod Launcher",
+      "name": "Satisfactory Mod Manager",
       "schemes": [
         "smlauncher"
       ]
@@ -59,6 +59,11 @@
     },
     "linux": {
       "icon": "build/icons"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true
     }
   },
   "dependencies": {
