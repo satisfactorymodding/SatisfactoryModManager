@@ -27,34 +27,34 @@
               <v-list-item-content>
                 <span :class="isCompatible || 'error--text'">{{ modInfo.name }}</span>
               </v-list-item-content>
-              <v-list-item-icon>
-                <div
-                  class="d-inline-flex align-items-center mod-button"
-                  :class="expandedModId === modInfo.mod_reference ? 'active' : ''"
-                  fill-height
+              <v-list-item-action
+                class="mod-button custom"
+                :class="expandedModId === modInfo.mod_reference ? 'active' : ''"
+              >
+                <v-icon
+                  class="ma-1 icon"
+                  color="primary"
                   @click="expandClicked(modInfo)"
                 >
-                  <v-icon
-                    class="ma-1 icon"
-                    color="primary"
-                  >
-                    mdi-import
-                  </v-icon>
-                </div>
-                <div
-                  class="d-inline-flex align-items-center mod-button"
-                  :class="favoriteModIds.includes(modInfo.mod_reference) ? 'active' : ''"
-                  style="margin-right: 15px"
-                  fill-height
+                  mdi-import
+                </v-icon>
+              </v-list-item-action>
+              <v-list-item-action
+                :class="favoriteModIds.includes(modInfo.mod_reference) ? 'active' : ''"
+                class="mod-button custom"
+              >
+                <v-icon
+                  class="ma-1 icon"
+                  color="warning"
                   @click="favoriteClicked(modInfo)"
                 >
-                  <v-icon
-                    class="ma-1 icon"
-                    color="warning"
-                  >
-                    mdi-star
-                  </v-icon>
-                </div>
+                  mdi-star
+                </v-icon>
+              </v-list-item-action>
+              <v-list-item-action
+                class="custom"
+                style="margin-right: 10px"
+              >
                 <v-switch
                   v-model="mods[index].isInstalled"
                   inset
@@ -66,7 +66,7 @@
                   :disabled="!isCompatible || isDependency || !!inProgress.length || !canInstallMods"
                   @click.stop.prevent="switchClicked(modInfo)"
                 />
-              </v-list-item-icon>
+              </v-list-item-action>
             </v-list-item>
             <v-list-item
               v-if="inProgress.some((prog) => prog.id === modInfo.mod_reference)"
@@ -129,6 +129,10 @@ export default {
 </script>
 
 <style scoped>
+.custom.v-list-item__action {
+  margin-top: 0;
+  margin-bottom: 0;
+}
 .v-divider {
   border-color: var(--v-background-darken3) !important;
 }

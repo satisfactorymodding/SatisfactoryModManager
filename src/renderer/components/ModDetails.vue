@@ -206,7 +206,7 @@
             align="center"
           >
             <v-switch
-              :value="isFavorite"
+              v-model="isFavorite"
               inset
               dense
               color="primary"
