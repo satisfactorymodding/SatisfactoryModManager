@@ -75,7 +75,7 @@
         >
           <v-img
             class="mt-4"
-            src="/static/smm_icon.png"
+            src="static/smm_icon.png"
             max-height="82px"
             max-width="87px"
           />
@@ -117,7 +117,7 @@
         >
           <v-img
             class="mt-4"
-            src="/static/smm_icon.png"
+            src="static/smm_icon.png"
             max-height="82px"
             max-width="87px"
           />
