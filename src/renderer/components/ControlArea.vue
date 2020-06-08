@@ -105,7 +105,7 @@
             class="px-2"
           >
             <v-select
-              v-model="selectedFiltersModel.modFilters"
+              v-model="modFiltersModel"
               :disabled="!!inProgress.length || isGameRunning"
               :items="modFilters"
               item-text="name"
@@ -133,7 +133,7 @@
             class="px-2"
           >
             <v-select
-              v-model="selectedFiltersModel.sortBy"
+              v-model="sortByModel"
               :disabled="!!inProgress.length || isGameRunning"
               :items="sortBy"
               label="SORT BY"
@@ -150,7 +150,7 @@
         class="px-2"
       >
         <v-text-field
-          v-model="selectedFiltersModel.search"
+          v-model="searchModel"
           class="custom-search"
           :disabled="!!inProgress.length || isGameRunning"
           label="Search"
@@ -262,9 +262,29 @@ export default {
       get() { return this.$store.state.selectedConfig; },
       set(value) { this.$store.dispatch('selectConfig', value); },
     },
-    selectedFiltersModel: {
-      get() { return this.$store.state.filters; },
-      set(value) { this.$store.dispatch('setFilters', value); },
+    modFiltersModel: {
+      get() { return this.$store.state.filters.modFilters; },
+      set(value) {
+        const newFilters = this.$store.state.filters;
+        newFilters.modFilters = value;
+        this.$store.dispatch('setFilters', newFilters);
+      },
+    },
+    searchModel: {
+      get() { return this.$store.state.filters.search; },
+      set(value) {
+        const newFilters = this.$store.state.filters;
+        newFilters.search = value;
+        this.$store.dispatch('setFilters', newFilters);
+      },
+    },
+    sortByModel: {
+      get() { return this.$store.state.filters.sortBy; },
+      set(value) {
+        const newFilters = this.$store.state.filters;
+        newFilters.sortBy = value;
+        this.$store.dispatch('setFilters', newFilters);
+      },
     },
   },
   methods: {

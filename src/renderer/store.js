@@ -33,7 +33,7 @@ export default new Vuex.Store({
     configs: [],
     selectedConfig: {},
     modFilters: [{ name: 'All mods', mods: 0 }, { name: 'Compatible', mods: 0 }, { name: 'Favourite', mods: 0 }, { name: 'Installed', mods: 0 }, { name: 'Not installed', mods: 0 }],
-    sortBy: ['Name', 'Last updated', 'Popularity', 'Hotness', 'Views', 'Downloads'],
+    sortBy: ['Last updated', 'Name', 'Popularity', 'Hotness', 'Views', 'Downloads'],
     satisfactoryInstalls: [],
     selectedInstall: {},
     smlVersions: [],
