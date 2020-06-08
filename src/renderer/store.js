@@ -283,7 +283,17 @@ export default new Vuex.Store({
         await Promise.all([
           (async () => {
             await loadCache();
-            commit('setInstalls', { installs: getInstalls() });
+            const { installs, invalidInstalls } = getInstalls();
+            if (installs.length === 0) {
+              if (invalidInstalls.length !== 0) {
+                if (invalidInstalls.length > 1) {
+                  throw new Error(`${invalidInstalls.length} Satisfactory installs were found, but all of them point to folders that don't exist. Check the help menu.`);
+                }
+                throw new Error(`${invalidInstalls.length} Satisfactory install was found, but it points to a folder that doesn't exist. Check the help menu.`);
+              }
+              throw new Error('No Satisfactory installs found. Check the help menu.');
+            }
+            commit('setInstalls', { installs });
             const installValidateProgress = { id: 'validatingInstall', progress: -1, message: 'Validating mod install' };
             appLoadProgress.progresses.push(installValidateProgress);
             const savedLocation = getSetting('selectedInstall');
