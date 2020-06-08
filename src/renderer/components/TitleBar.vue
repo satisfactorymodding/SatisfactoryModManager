@@ -309,7 +309,7 @@
                     Recreate what you tried to do and went wrong, then send screenshot of the console<br>
                     <!-- TODO: generate debug info button -->
                     <br><v-divider /><br>
-                    <h3>Why does SML not show mods?</h3>
+                    <h3>X Satisfactory installs were found error</h3>
                     <h4>Epic</h4>
                     Fist, check that Epic can start the game. If you changed where the game is located, you need to make Epic update its install info. To do so:<br>
                     1. Rename the game folder to something temporary<br>
@@ -317,9 +317,12 @@
                     3. After it downloads a bit close Epic<br>
                     4. Copy back the files from the temporary folder EXCEPT the .egstore folder<br>
                     5. Start Epic and resume the install so it finds that it is actually already installed<br>
-                    <br>
+                    <br><v-divider /><br>
+                    <h3>No Satisfactory installs found</h3>
+                    <h4>Epic</h4>
+                    Make sure you have the game installed, and Epic can find and launch it.<br>
                     <h4>Cracked</h4>
-                    If you are running a cracked version of the game, ping @Moderator in the <a @click="moddingDiscord">modding discord</a> for help.
+                    We do not support piracy, thus Satisfactory Mod Manager does not work with cracked copies of the game<br>
                   </v-card-text>
                   <v-card-actions>
                     <v-btn
