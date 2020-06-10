@@ -283,7 +283,7 @@ export default new Vuex.Store({
         await Promise.all([
           (async () => {
             await loadCache();
-            const { installs, invalidInstalls } = getInstalls();
+            const { installs, invalidInstalls } = await getInstalls();
             if (installs.length === 0) {
               if (invalidInstalls.length !== 0) {
                 if (invalidInstalls.length > 1) {
