@@ -903,7 +903,6 @@ export default {
 }
 .button>span {
   flex-grow: 1;
-  margin-top: -3px;
   user-select: none;
 }
 .button:hover {

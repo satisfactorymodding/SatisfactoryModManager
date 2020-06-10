@@ -24,7 +24,9 @@
             />
 
             <v-list-item>
-              <v-list-item-content>
+              <v-list-item-content
+                @click="expandClicked(modInfo)"
+              >
                 <span :class="isCompatible || 'error--text'">{{ modInfo.name }}</span>
               </v-list-item-content>
               <v-list-item-action

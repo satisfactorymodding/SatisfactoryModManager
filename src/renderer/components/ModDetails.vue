@@ -225,7 +225,7 @@
     >
       <div
         :class="imagePage > 0 ? '' : 'hidden'"
-        class="images-button d-inline-flex align-center"
+        class="images-button left d-inline-flex align-center"
         @click="imagePageLeft"
       >
         <v-icon>mdi-chevron-left</v-icon>
@@ -239,18 +239,30 @@
             v-if="images[n - 1]"
             :key="n"
             :src="images[n - 1]"
+            @click="bigImage(n - 1)"
           >
         </template>
       </v-row>
       <div
         :class="imagePage < Math.ceil(images.length / 2) - 2 ? '' : 'hidden'"
-        class="images-button d-inline-flex align-center"
+        class="images-button right d-inline-flex align-center"
         style="left: 1056px;"
         @click="imagePageRight"
       >
         <v-icon>mdi-chevron-right</v-icon>
       </div>
     </v-row>
+    <v-dialog
+      v-model="showBigImage"
+      width="unset"
+    >
+      <v-card>
+        <img
+          :src="bigImageSrc"
+          style="display: block; max-height: 750px"
+        >
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -263,6 +275,7 @@ export default {
     return {
       expandDetails: false,
       imagePage: 0,
+      bigImageSrc: '',
     };
   },
   computed: {
@@ -309,6 +322,16 @@ export default {
       }
       return imgUrls;
     },
+    showBigImage: {
+      get() {
+        return !!this.bigImageSrc;
+      },
+      set(value) {
+        if (!value) {
+          this.bigImageSrc = '';
+        }
+      },
+    },
   },
   watch: {
     expandedModId() {
@@ -340,6 +363,9 @@ export default {
       } else {
         this.$store.dispatch('removeModFromConfig', { mod: this.$store.state.expandedModId, config: config.name });
       }
+    },
+    bigImage(idx) {
+      this.bigImageSrc = this.images[idx];
     },
   },
 };
@@ -424,10 +450,15 @@ export default {
   text-align: center;
   line-height: 10px;
   position: absolute;
-  bottom: 218px;
-  box-shadow: inset 50px 0px 50px -50px rgba(0,0,0,1);
+  bottom: 217px;
   height: 486px;
   z-index: 1;
+}
+.images-button.left {
+  box-shadow: inset 50px 0px 50px -50px rgba(0,0,0,1);
+}
+.images-button.right {
+  box-shadow: inset -50px 0px 50px -50px rgba(0,0,0,1);
 }
 .images-button.hidden {
   visibility: hidden;
