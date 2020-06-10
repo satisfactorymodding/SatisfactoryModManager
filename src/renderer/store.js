@@ -271,11 +271,11 @@ export default new Vuex.Store({
       commit('setConfigs', { configs: getConfigs() });
       commit('setExpandModInfoOnStart', getSetting('expandModInfoOnStart', false));
 
-      const savedFilters = getSetting('filters', { modFilters: state.modFilters[0].name, sortBy: state.filters.sortBy[0] });
+      const savedFilters = getSetting('filters', { modFilters: state.modFilters[1].name, sortBy: state.filters.sortBy[0] }); // default Compatible, Last Updated
       commit('setFilters', {
         newFilters: {
-          modFilters: state.modFilters.find((modFilter) => modFilter.name === savedFilters.modFilters) || state.modFilters[0],
-          sortBy: state.sortBy.find((item) => item === savedFilters.sortBy) || state.sortBy[0],
+          modFilters: state.modFilters.find((modFilter) => modFilter.name === savedFilters.modFilters) || state.modFilters[1], // default Compatible
+          sortBy: state.sortBy.find((item) => item === savedFilters.sortBy) || state.sortBy[0], // default Last Updated
           search: '',
         },
       });
@@ -287,11 +287,11 @@ export default new Vuex.Store({
             if (installs.length === 0) {
               if (invalidInstalls.length !== 0) {
                 if (invalidInstalls.length > 1) {
-                  throw new Error(`${invalidInstalls.length} Satisfactory installs were found, but all of them point to folders that don't exist. Check the help menu.`);
+                  throw new Error(`${invalidInstalls.length} Satisfactory installs were found, but all of them point to folders that don't exist.`);
                 }
-                throw new Error(`${invalidInstalls.length} Satisfactory install was found, but it points to a folder that doesn't exist. Check the help menu.`);
+                throw new Error(`${invalidInstalls.length} Satisfactory install was found, but it points to a folder that doesn't exist.`);
               }
-              throw new Error('No Satisfactory installs found. Check the help menu.');
+              throw new Error('No Satisfactory installs found.');
             }
             commit('setInstalls', { installs });
             const installValidateProgress = { id: 'validatingInstall', progress: -1, message: 'Validating mod install' };
