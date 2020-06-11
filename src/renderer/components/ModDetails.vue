@@ -165,7 +165,7 @@
               :disabled="!!inProgress.length"
               v-on="on"
             >
-              Add to config&nbsp;
+              Add to profile&nbsp;
               <v-icon
                 class="icon"
               >
@@ -175,9 +175,9 @@
           </template>
           <v-list>
             <v-list-item
-              v-for="(conf, i) in configs"
+              v-for="(conf, i) in profiles"
               :key="i"
-              @click="toggleIsInConfig(conf)"
+              @click="toggleIsInProfile(conf)"
             >
               <v-list-item-title>
                 <v-icon v-if="conf.items.some((item) => item.id === mod.modInfo.mod_reference)">
@@ -280,7 +280,7 @@ export default {
   },
   computed: {
     ...mapState([
-      'configs',
+      'profiles',
       'inProgress',
       'expandedModId',
     ]),
@@ -357,11 +357,11 @@ export default {
     favoriteClicked() {
       this.$store.dispatch('toggleModFavorite', this.mod.modInfo.mod_reference);
     },
-    toggleIsInConfig(config) {
-      if (config.items.some((item) => item.id === this.mod.modInfo.mod_reference)) {
-        this.$store.dispatch('addModToConfig', { mod: this.$store.state.expandedModId, config: config.name });
+    toggleIsInProfile(profile) {
+      if (profile.items.some((item) => item.id === this.mod.modInfo.mod_reference)) {
+        this.$store.dispatch('addModToProfile', { mod: this.$store.state.expandedModId, profile: profile.name });
       } else {
-        this.$store.dispatch('removeModFromConfig', { mod: this.$store.state.expandedModId, config: config.name });
+        this.$store.dispatch('removeModFromProfile', { mod: this.$store.state.expandedModId, profile: profile.name });
       }
     },
     bigImage(idx) {

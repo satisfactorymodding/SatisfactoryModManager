@@ -143,20 +143,20 @@
                 >
                   <v-list-item-action />
                   <v-list-item-content>
-                    <v-list-item-title>Configs</v-list-item-title>
+                    <v-list-item-title>Profiles</v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
               </template>
               <v-card class="app-menu">
                 <v-list>
-                  <v-list-item @click="exportConfig">
+                  <v-list-item @click="exportProfile">
                     <v-list-item-action>
                       <v-icon color="text">
                         mdi-content-save
                       </v-icon>
                     </v-list-item-action>
                     <v-list-item-content>
-                      <v-list-item-title>Export config</v-list-item-title>
+                      <v-list-item-title>Export profile</v-list-item-title>
                     </v-list-item-content>
                   </v-list-item>
 
@@ -164,14 +164,14 @@
                     class="custom"
                     inset
                   />
-                  <v-list-item @click="importConfigDialog = true">
+                  <v-list-item @click="importProfileDialog = true">
                     <v-list-item-action>
                       <v-icon color="text">
                         mdi-download
                       </v-icon>
                     </v-list-item-action>
                     <v-list-item-content>
-                      <v-list-item-title>Import config</v-list-item-title>
+                      <v-list-item-title>Import profile</v-list-item-title>
                     </v-list-item-content>
                   </v-list-item>
                 </v-list>
@@ -643,49 +643,49 @@
       </v-card>
     </v-dialog>
     <v-dialog
-      v-model="importConfigDialog"
+      v-model="importProfileDialog"
     >
       <v-card>
         <v-card-title>
-          Import config
+          Import profile
         </v-card-title>
         <v-card-text>
           <v-form
-            ref="importConfigForm"
-            v-model="importConfigFormValid"
+            ref="importProfileForm"
+            v-model="importProfileFormValid"
           >
             <v-file-input
-              v-model="importConfigFile"
-              label="Config file"
-              accept=".smmcfg"
+              v-model="importProfileFile"
+              label="Profile file"
+              accept=".smmprofile"
               required
-              :rules="[v => !!v || 'Choose a config to import']"
+              :rules="[v => !!v || 'Choose a profile to import']"
             />
             <v-text-field
-              v-model="importConfigName"
+              v-model="importProfileName"
               label="Name"
               required
-              :rules="[v => !!v || 'Config name is required']"
+              :rules="[v => !!v || 'Profile name is required']"
             />
             <v-switch
-              v-model="importConfigVersions"
+              v-model="importProfileVersions"
               label="Import mod versions"
             />
-            <span class="warning--text">{{ importConfigMessage }}</span>
+            <span class="warning--text">{{ importProfileMessage }}</span>
           </v-form>
         </v-card-text>
         <v-card-actions>
           <v-btn
             color="primary"
             text
-            @click="importConfig"
+            @click="importProfile"
           >
             Import
           </v-btn>
           <v-btn
             color="primary"
             text
-            @click="importConfigDialog = false"
+            @click="importProfileDialog = false"
           >
             Cancel
           </v-btn>
@@ -695,7 +695,7 @@
     <v-dialog
       hide-overlay
       persistent
-      :value="isConfigExportInProgress"
+      :value="isProfileExportInProgress"
       width="500"
       height="230"
     >
@@ -714,30 +714,30 @@
           />
         </v-row>
         <v-card-title class="loading-text-main">
-          EXPORTING CONFIG
+          EXPORTING PROFILE
         </v-card-title>
 
         <v-card-text
-          v-if="isConfigExportInProgress"
+          v-if="isProfileExportInProgress"
           class="text-center"
         >
           <v-progress-linear
-            :value="Math.round(currentConfigExportProgress.progress * 100)"
-            :class="currentConfigExportProgress.fast ? 'fast' : ''"
+            :value="Math.round(currentProfileExportProgress.progress * 100)"
+            :class="currentProfileExportProgress.fast ? 'fast' : ''"
             background-color="#000000"
             color="#5bb71d"
             height="2"
             reactive
-            :indeterminate="currentConfigExportProgress.progress < 0"
+            :indeterminate="currentProfileExportProgress.progress < 0"
           />
-          {{ currentConfigExportProgress.message || '&nbsp;' }}
+          {{ currentProfileExportProgress.message || '&nbsp;' }}
         </v-card-text>
       </v-card>
     </v-dialog>
     <v-dialog
       hide-overlay
       persistent
-      :value="isConfigImportInProgress"
+      :value="isProfileImportInProgress"
       width="500"
       height="230"
     >
@@ -756,23 +756,23 @@
           />
         </v-row>
         <v-card-title class="loading-text-main">
-          IMPORTING CONFIG
+          IMPORTING PROFILE
         </v-card-title>
 
         <v-card-text
-          v-if="isConfigImportInProgress"
+          v-if="isProfileImportInProgress"
           class="text-center"
         >
           <v-progress-linear
-            :value="Math.round(currentConfigImportProgress.progress * 100)"
-            :class="currentConfigImportProgress.fast ? 'fast' : ''"
+            :value="Math.round(currentProfileImportProgress.progress * 100)"
+            :class="currentProfileImportProgress.fast ? 'fast' : ''"
             background-color="#000000"
             color="#5bb71d"
             height="2"
             reactive
-            :indeterminate="currentConfigImportProgress.progress < 0"
+            :indeterminate="currentProfileImportProgress.progress < 0"
           />
-          {{ currentConfigImportProgress.message || '&nbsp;' }}
+          {{ currentProfileImportProgress.message || '&nbsp;' }}
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -813,13 +813,13 @@ export default {
       changelogDialog: false,
       showIgnoredUpdates: false,
       ignoredUpdates: [],
-      importConfigDialog: false,
-      importConfigFile: null,
-      importConfigName: '',
-      importConfigVersions: false,
-      importConfigFormValid: true,
-      importConfigMetadata: null,
-      importConfigMessage: '',
+      importProfileDialog: false,
+      importProfileFile: null,
+      importProfileName: '',
+      importProfileVersions: false,
+      importProfileFormValid: true,
+      importProfileMetadata: null,
+      importProfileMessage: '',
     };
   },
   computed: {
@@ -915,55 +915,55 @@ export default {
     currentMultiModUpdateProgress() {
       return lastElement(this.multiModUpdateProgress.progresses);
     },
-    isConfigExportInProgress() {
-      return this.inProgress.some((prog) => prog.id === '__exportConfig__');
+    isProfileExportInProgress() {
+      return this.inProgress.some((prog) => prog.id === '__exportProfile__');
     },
-    configExportProgress() {
-      return this.inProgress.find((prog) => prog.id === '__exportConfig__');
+    profileExportProgress() {
+      return this.inProgress.find((prog) => prog.id === '__exportProfile__');
     },
-    currentConfigExportProgress() {
-      return lastElement(this.configExportProgress.progresses);
+    currentProfileExportProgress() {
+      return lastElement(this.profileExportProgress.progresses);
     },
-    isConfigImportInProgress() {
-      return this.inProgress.some((prog) => prog.id === '__importConfig__');
+    isProfileImportInProgress() {
+      return this.inProgress.some((prog) => prog.id === '__importProfile__');
     },
-    configImportProgress() {
-      return this.inProgress.find((prog) => prog.id === '__importConfig__');
+    profileImportProgress() {
+      return this.inProgress.find((prog) => prog.id === '__importProfile__');
     },
-    currentConfigImportProgress() {
-      return lastElement(this.configImportProgress.progresses);
+    currentProfileImportProgress() {
+      return lastElement(this.profileImportProgress.progresses);
     },
   },
   watch: {
     async selectedInstall() {
       await this.checkForUpdates();
     },
-    async importConfigFile(file) {
+    async importProfileFile(file) {
       if (file) {
         const zipData = new StreamZip({ file: file.path });
         try {
           await new Promise((resolve) => zipData.on('ready', resolve));
           const metadata = JSON.parse(zipData.entryDataSync('metadata.json').toString('utf8'));
           zipData.close();
-          this.importConfigMetadata = metadata;
+          this.importProfileMetadata = metadata;
         } catch (e) {
           zipData.close();
-          this.importConfigMetadata = null;
+          this.importProfileMetadata = null;
           this.$store.dispatch('showError', e);
         }
       } else {
-        this.importConfigMetadata = null;
+        this.importProfileMetadata = null;
       }
     },
-    importConfigMetadata(metadata) {
+    importProfileMetadata(metadata) {
       if (metadata) {
         if (validAndGreater(metadata.gameVersion, this.$store.state.selectedInstall.version)) {
-          this.importConfigMessage = `This config is made for game version ${metadata.gameVersion}, but you're using an older version: ${this.$store.state.selectedInstall.version}. Things might not work as expected.`;
+          this.importProfileMessage = `This profile is made for game version ${metadata.gameVersion}, but you're using an older version: ${this.$store.state.selectedInstall.version}. Things might not work as expected.`;
         } else {
-          this.importConfigMessage = '';
+          this.importProfileMessage = '';
         }
       } else {
-        this.importConfigMessage = '';
+        this.importProfileMessage = '';
       }
     },
   },
@@ -1063,63 +1063,52 @@ export default {
     currentModProgress(mod) {
       return lastElement(this.modProgress(mod).progresses);
     },
-    async exportConfig() {
+    async exportProfile() {
       const result = this.$electron.remote.dialog.showSaveDialogSync(this.$electron.remote.getCurrentWindow(), {
-        title: 'Export config as',
+        title: 'Export profile as',
         filters: [
-          { name: 'SMM Config', extensions: ['smmcfg'] },
+          { name: 'SMM Profile', extensions: ['smmprofile'] },
         ],
       });
       if (result) {
-        const exportConfigProgress = {
-          id: '__exportConfig__',
+        const exportProfileProgress = {
+          id: '__exportProfile__',
           progresses: [{
-            id: '', progress: -1, message: `Exporting config ${this.$store.state.selectedConfig.name}`, fast: false,
+            id: '', progress: -1, message: `Exporting profile ${this.$store.state.selectedProfile.name}`, fast: false,
           }],
         };
-        this.$store.state.inProgress.push(exportConfigProgress);
+        this.$store.state.inProgress.push(exportProfileProgress);
         try {
-          await this.$store.state.selectedInstall.exportConfig(result);
+          await this.$store.state.selectedInstall.exportProfile(result);
         } catch (e) {
           this.$store.dispatch('showError', e);
         }
-        this.$store.state.inProgress.remove(exportConfigProgress);
+        this.$store.state.inProgress.remove(exportProfileProgress);
       }
     },
-    showImportConfigPathDialog() {
-      const result = this.$electron.remote.dialog.showOpenDialogSync(this.$electron.remote.getCurrentWindow(), {
-        title: 'Import config',
-        filters: [
-          { name: 'SMM Config', extensions: ['smmcfg'] },
-        ],
-      });
-      if (result) {
-        [this.importConfigPath] = result;
-      }
-    },
-    async importConfig() {
-      if (this.$refs.importConfigForm.validate()) {
-        const importConfigProgress = {
-          id: '__importConfig__',
+    async importProfile() {
+      if (this.$refs.importProfileForm.validate()) {
+        const importProfileProgress = {
+          id: '__importProfile__',
           progresses: [{
-            id: '', progress: -1, message: `Importing config as ${this.importConfigName}`, fast: false,
+            id: '', progress: -1, message: `Importing profile as ${this.importProfileName}`, fast: false,
           }],
         };
-        this.$store.state.inProgress.push(importConfigProgress);
+        this.$store.state.inProgress.push(importProfileProgress);
         try {
-          await this.$store.state.selectedInstall.importConfig(this.importConfigFile.path, this.importConfigName, this.importConfigVersions);
-          this.$store.state.inProgress.remove(importConfigProgress);
-          const newConfig = { name: this.importConfigName, items: [] }; // TODO: Items
-          this.$store.state.configs.push(newConfig);
-          await this.$store.dispatch('selectConfig', newConfig);
+          await this.$store.state.selectedInstall.importProfile(this.importProfileFile.path, this.importProfileName, this.importProfileVersions);
+          this.$store.state.inProgress.remove(importProfileProgress);
+          const newProfile = { name: this.importProfileName, items: [] }; // TODO: Items
+          this.$store.state.profiles.push(newProfile);
+          await this.$store.dispatch('selectProfile', newProfile);
         } catch (e) {
           this.$store.dispatch('showError', e);
-          this.$store.state.inProgress.remove(importConfigProgress);
+          this.$store.state.inProgress.remove(importProfileProgress);
         }
-        this.importConfigFile = null;
-        this.importConfigName = '';
-        this.importConfigVersions = false;
-        this.importConfigDialog = false;
+        this.importProfileFile = null;
+        this.importProfileName = '';
+        this.importProfileVersions = false;
+        this.importProfileDialog = false;
       }
     },
   },

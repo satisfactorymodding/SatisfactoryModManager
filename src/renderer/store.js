@@ -3,10 +3,10 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import {} from './utils';
 import {
-  setDebug, addDownloadProgressCallback, getConfigs, loadCache, getInstalls, SatisfactoryInstall, getAvailableSMLVersions, MODS_PER_PAGE, getModsCount,
+  setDebug, addDownloadProgressCallback, getProfiles, loadCache, getInstalls, SatisfactoryInstall, getAvailableSMLVersions, MODS_PER_PAGE, getModsCount,
   getAvailableMods,
-  createConfig,
-  deleteConfig,
+  createProfile,
+  deleteProfile,
 } from 'satisfactory-mod-manager-api';
 import { satisfies, coerce, valid } from 'semver';
 import { ipcRenderer } from 'electron';
@@ -30,8 +30,8 @@ export default new Vuex.Store({
       sortBy: '',
       search: '',
     },
-    configs: [],
-    selectedConfig: {},
+    profiles: [],
+    selectedProfile: {},
     modFilters: [{ name: 'All mods', mods: 0 }, { name: 'Compatible', mods: 0 }, { name: 'Favourite', mods: 0 }, { name: 'Installed', mods: 0 }, { name: 'Not installed', mods: 0 }],
     sortBy: ['Last updated', 'Name', 'Popularity', 'Hotness', 'Views', 'Downloads'],
     satisfactoryInstalls: [],
@@ -56,14 +56,14 @@ export default new Vuex.Store({
     setInstall(state, { newInstall }) {
       state.selectedInstall = newInstall;
     },
-    setConfig(state, { newConfig }) {
-      state.selectedConfig = newConfig;
+    setProfile(state, { newProfile }) {
+      state.selectedProfile = newProfile;
     },
     setInstalls(state, { installs }) {
       state.satisfactoryInstalls = installs;
     },
-    setConfigs(state, { configs }) {
-      state.configs = configs;
+    setProfiles(state, { profiles }) {
+      state.profiles = profiles;
     },
     setFavoriteModIds(state, { favoriteModIds }) {
       state.favoriteModIds = favoriteModIds;
@@ -146,10 +146,10 @@ export default new Vuex.Store({
           }],
         };
         state.inProgress.push(loadProgress);
-        const savedConfigName = getSetting('selectedConfig', {})[state.selectedInstall.installLocation] || 'modded';
-        commit('setConfig', { newConfig: state.configs.find((conf) => conf.name === savedConfigName) });
+        const savedProfileName = getSetting('selectedProfile', {})[state.selectedInstall.installLocation] || 'modded';
+        commit('setProfile', { newProfile: state.profiles.find((conf) => conf.name === savedProfileName) });
         try {
-          await newInstall.setConfig(savedConfigName);
+          await newInstall.setProfile(savedProfileName);
           commit('refreshModsInstalledCompatible');
         } catch (e) {
           dispatch('showError', e);
@@ -159,8 +159,8 @@ export default new Vuex.Store({
         saveSetting('selectedInstall', newInstall.installLocation);
       }
     },
-    async selectConfig({ commit, dispatch, state }, newConfig) {
-      commit('setConfig', { newConfig });
+    async selectProfile({ commit, dispatch, state }, newProfile) {
+      commit('setProfile', { newProfile });
       if (!state.inProgress.some((prog) => prog.id === '__loadingApp__')) {
         const loadProgress = {
           id: '__loadingApp__',
@@ -170,12 +170,12 @@ export default new Vuex.Store({
         };
         state.inProgress.push(loadProgress);
         try {
-          await state.selectedInstall.setConfig(newConfig.name);
+          await state.selectedInstall.setProfile(newProfile.name);
           commit('refreshModsInstalledCompatible');
-          let current = getSetting('selectedConfig', {});
+          let current = getSetting('selectedProfile', {});
           if (typeof current !== 'object') { current = {}; }
-          current[state.selectedInstall.installLocation] = state.selectedConfig.name;
-          saveSetting('selectedConfig', current);
+          current[state.selectedInstall.installLocation] = state.selectedProfile.name;
+          saveSetting('selectedProfile', current);
         } catch (e) {
           dispatch('showError', e);
         } finally {
@@ -240,17 +240,17 @@ export default new Vuex.Store({
       state.modFilters[2].mods = state.mods.filter((mod) => state.favoriteModIds.includes(mod.modInfo.mod_reference)).length;
       saveSetting('favoriteMods', state.favoriteModIds);
     },
-    createConfig({ dispatch, state }, { configName, copyCurrent }) {
-      createConfig(configName, copyCurrent ? state.selectedConfig.name : 'vanilla');
-      const newConfig = { name: configName, items: copyCurrent ? state.selectedConfig.items : [] };
-      state.configs.push(newConfig);
-      dispatch('selectConfig', newConfig);
+    createProfile({ dispatch, state }, { profileName, copyCurrent }) {
+      createProfile(profileName, copyCurrent ? state.selectedProfile.name : 'vanilla');
+      const newProfile = { name: profileName, items: copyCurrent ? state.selectedProfile.items : [] };
+      state.profiles.push(newProfile);
+      dispatch('selectProfile', newProfile);
     },
-    deleteConfig({ dispatch, state }, { configName }) {
-      deleteConfig(configName);
-      state.configs.removeWhere((config) => config.name === configName);
-      if (state.selectedConfig.name === configName) {
-        dispatch('selectConfig', state.configs.find((config) => config.name === 'modded'));
+    deleteProfile({ dispatch, state }, { profileName }) {
+      deleteProfile(profileName);
+      state.profiles.removeWhere((profile) => profile.name === profileName);
+      if (state.selectedProfile.name === profileName) {
+        dispatch('selectProfile', state.profiles.find((profile) => profile.name === 'modded'));
       }
     },
     async initApp({
@@ -268,7 +268,7 @@ export default new Vuex.Store({
         url, progress, name, version,
       }));
       commit('setFavoriteModIds', { favoriteModIds: getSetting('favoriteMods', []) });
-      commit('setConfigs', { configs: getConfigs() });
+      commit('setProfiles', { profiles: getProfiles() });
       commit('setExpandModInfoOnStart', getSetting('expandModInfoOnStart', false));
 
       const savedFilters = getSetting('filters', { modFilters: state.modFilters[1].name, sortBy: state.filters.sortBy[0] }); // default Compatible, Last Updated
@@ -298,10 +298,10 @@ export default new Vuex.Store({
             appLoadProgress.progresses.push(installValidateProgress);
             const savedLocation = getSetting('selectedInstall');
             commit('setInstall', { newInstall: state.satisfactoryInstalls.find((install) => install.installLocation === savedLocation) || state.satisfactoryInstalls[0] });
-            const savedConfigName = getSetting('selectedConfig', {})[state.selectedInstall.installLocation] || 'modded';
-            commit('setConfig', { newConfig: state.configs.find((conf) => conf.name === savedConfigName) });
+            const savedProfileName = getSetting('selectedProfile', {})[state.selectedInstall.installLocation] || 'modded';
+            commit('setProfile', { newProfile: state.profiles.find((conf) => conf.name === savedProfileName) });
 
-            await state.selectedInstall.setConfig(savedConfigName);
+            await state.selectedInstall.setProfile(savedProfileName);
             appLoadProgress.progresses.remove(installValidateProgress);
           })(),
           (async () => {
@@ -438,7 +438,7 @@ export default new Vuex.Store({
       return filtered;
     },
     canInstallMods(state) {
-      return state.selectedConfig.name !== 'vanilla' && !state.isGameRunning;
+      return state.selectedProfile.name !== 'vanilla' && !state.isGameRunning;
     },
   },
 });

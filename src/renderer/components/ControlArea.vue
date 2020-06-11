@@ -38,12 +38,12 @@
             class="px-2"
           >
             <v-select
-              v-model="selectedConfigModel"
+              v-model="selectedProfileModel"
               :disabled="!!inProgress.length || isGameRunning"
-              :items="configs"
+              :items="profiles"
               item-text="name"
               return-object
-              label="SELECT CONFIG"
+              label="SELECT PROFILE"
               class="custom"
               append-icon="mdi-chevron-down"
             />
@@ -59,7 +59,7 @@
                 <v-btn
                   text
                   :disabled="!!inProgress.length || isGameRunning"
-                  @click="showCreateConfigDialog"
+                  @click="showCreateProfileDialog"
                 >
                   New&nbsp;
                   <v-icon
@@ -75,8 +75,8 @@
               >
                 <v-btn
                   text
-                  :disabled="!!inProgress.length || isGameRunning || selectedConfigModel.name === 'vanilla' || selectedConfigModel.name === 'modded' || selectedConfigModel.name === 'development'"
-                  @click="showDeleteConfigDialog"
+                  :disabled="!!inProgress.length || isGameRunning || selectedProfileModel.name === 'vanilla' || selectedProfileModel.name === 'modded' || selectedProfileModel.name === 'development'"
+                  @click="showDeleteProfileDialog"
                 >
                   Delete&nbsp;
                   <v-icon
@@ -158,40 +158,40 @@
       </v-col>
     </v-row>
     <v-dialog
-      v-model="newConfigDialog"
+      v-model="newProfileDialog"
       persistent
     >
       <v-card>
         <v-card-title class="headline">
-          New config
+          New profile
         </v-card-title>
 
         <v-card-text>
           <v-form
-            ref="newConfigForm"
-            v-model="newConfigFormValid"
+            ref="newProfileForm"
+            v-model="newProfileFormValid"
           >
             <v-text-field
-              v-model="newConfigName"
+              v-model="newProfileName"
               label="Name"
               required
               :rules="[v => !!v || 'Name is required']"
             />
             <v-switch
-              v-model="newConfigCopyCurrent"
-              label="Copy current config"
+              v-model="newProfileCopyCurrent"
+              label="Copy current profile"
             />
             <v-btn
               color="primary"
               text
-              @click="createConfig"
+              @click="createProfile"
             >
               Create
             </v-btn>
             <v-btn
               color="text"
               text
-              @click="cancelCreateConfig"
+              @click="cancelCreateProfile"
             >
               Cancel
             </v-btn>
@@ -200,29 +200,29 @@
       </v-card>
     </v-dialog>
     <v-dialog
-      v-model="deleteConfigDialog"
+      v-model="deleteProfileDialog"
       persistent
     >
       <v-card>
         <v-card-title class="headline">
-          Delete config
+          Delete profile
         </v-card-title>
 
         <v-card-text>
-          <span>Are you sure you want to delete config {{ selectedConfigModel.name }}</span>
+          <span>Are you sure you want to delete profile {{ selectedProfileModel.name }}</span>
         </v-card-text>
         <v-card-actions>
           <v-btn
             color="text"
             text
-            @click="deleteConfig"
+            @click="deleteProfile"
           >
             Delete
           </v-btn>
           <v-btn
             color="primary"
             text
-            @click="cancelDeleteConfig"
+            @click="cancelDeleteProfile"
           >
             Cancel
           </v-btn>
@@ -238,17 +238,17 @@ import { mapState } from 'vuex';
 export default {
   data() {
     return {
-      newConfigFormValid: true,
-      newConfigDialog: false,
-      newConfigName: '',
-      newConfigCopyCurrent: false,
-      deleteConfigDialog: false,
+      newProfileFormValid: true,
+      newProfileDialog: false,
+      newProfileName: '',
+      newProfileCopyCurrent: false,
+      deleteProfileDialog: false,
     };
   },
   computed: {
     ...mapState([
       'satisfactoryInstalls',
-      'configs',
+      'profiles',
       'modFilters',
       'sortBy',
       'inProgress',
@@ -258,9 +258,9 @@ export default {
       get() { return this.$store.state.selectedInstall; },
       set(value) { this.$store.dispatch('selectInstall', value); },
     },
-    selectedConfigModel: {
-      get() { return this.$store.state.selectedConfig; },
-      set(value) { this.$store.dispatch('selectConfig', value); },
+    selectedProfileModel: {
+      get() { return this.$store.state.selectedProfile; },
+      set(value) { this.$store.dispatch('selectProfile', value); },
     },
     modFiltersModel: {
       get() { return this.$store.state.filters.modFilters; },
@@ -288,29 +288,29 @@ export default {
     },
   },
   methods: {
-    showCreateConfigDialog() {
-      this.newConfigDialog = true;
+    showCreateProfileDialog() {
+      this.newProfileDialog = true;
     },
-    createConfig() {
-      if (this.$refs.newConfigForm.validate()) {
-        this.$store.dispatch('createConfig', { configName: this.newConfigName, copyCurrent: this.newConfigCopyCurrent });
-        this.cancelCreateConfig();
+    createProfile() {
+      if (this.$refs.newProfileForm.validate()) {
+        this.$store.dispatch('createProfile', { profileName: this.newProfileName, copyCurrent: this.newProfileCopyCurrent });
+        this.cancelCreateProfile();
       }
     },
-    cancelCreateConfig() {
-      this.newConfigName = '';
-      this.newConfigCopyCurrent = false;
-      this.newConfigDialog = false;
+    cancelCreateProfile() {
+      this.newProfileName = '';
+      this.newProfileCopyCurrent = false;
+      this.newProfileDialog = false;
     },
-    showDeleteConfigDialog() {
-      this.deleteConfigDialog = true;
+    showDeleteProfileDialog() {
+      this.deleteProfileDialog = true;
     },
-    deleteConfig() {
-      this.$store.dispatch('deleteConfig', { configName: this.$store.state.selectedConfig.name });
-      this.cancelDeleteConfig();
+    deleteProfile() {
+      this.$store.dispatch('deleteProfile', { profileName: this.$store.state.selectedProfile.name });
+      this.cancelDeleteProfile();
     },
-    cancelDeleteConfig() {
-      this.deleteConfigDialog = false;
+    cancelDeleteProfile() {
+      this.deleteProfileDialog = false;
     },
   },
 };
