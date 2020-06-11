@@ -19,6 +19,16 @@ div {
 </style>
 
 <style>
+@import url('https://fonts.googleapis.com/css?family=Open+Sans');
+.loading-text-main {
+  color: #e6e6e4;
+  text-align: center;
+  font-family: 'Open Sans';
+  font-size: 16px !important;
+  font-weight: 600;
+  display: block !important;
+}
+
 .v-card {
   background-color: var(--v-background-base) !important;
 }

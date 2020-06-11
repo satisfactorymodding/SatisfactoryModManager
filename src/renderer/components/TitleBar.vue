@@ -21,7 +21,6 @@
         <v-card class="app-menu">
           <v-list>
             <v-menu
-              v-model="updatesMenuOpen"
               :close-on-content-click="false"
               offset-x
               :nudge-right="20"
@@ -130,6 +129,56 @@
                 </v-list>
               </v-card>
             </v-menu>
+
+            <v-divider class="custom" />
+
+            <v-menu
+              :close-on-content-click="false"
+              offset-x
+              :nudge-right="20"
+            >
+              <template v-slot:activator="{ on }">
+                <v-list-item
+                  v-on="on"
+                >
+                  <v-list-item-action />
+                  <v-list-item-content>
+                    <v-list-item-title>Configs</v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+              </template>
+              <v-card class="app-menu">
+                <v-list>
+                  <v-list-item @click="exportConfig">
+                    <v-list-item-action>
+                      <v-icon color="text">
+                        mdi-content-save
+                      </v-icon>
+                    </v-list-item-action>
+                    <v-list-item-content>
+                      <v-list-item-title>Export config</v-list-item-title>
+                    </v-list-item-content>
+                  </v-list-item>
+
+                  <v-divider
+                    class="custom"
+                    inset
+                  />
+                  <v-list-item @click="importConfigDialog = true">
+                    <v-list-item-action>
+                      <v-icon color="text">
+                        mdi-download
+                      </v-icon>
+                    </v-list-item-action>
+                    <v-list-item-content>
+                      <v-list-item-title>Import config</v-list-item-title>
+                    </v-list-item-content>
+                  </v-list-item>
+                </v-list>
+              </v-card>
+            </v-menu>
+
+            <v-divider class="custom" />
 
             <v-list-item>
               <v-list-item-action>
@@ -593,12 +642,147 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog
+      v-model="importConfigDialog"
+    >
+      <v-card>
+        <v-card-title>
+          Import config
+        </v-card-title>
+        <v-card-text>
+          <v-form
+            ref="importConfigForm"
+            v-model="importConfigFormValid"
+          >
+            <v-file-input
+              v-model="importConfigFile"
+              label="Config file"
+              accept=".smmcfg"
+              required
+              :rules="[v => !!v || 'Choose a config to import']"
+            />
+            <v-text-field
+              v-model="importConfigName"
+              label="Name"
+              required
+              :rules="[v => !!v || 'Config name is required']"
+            />
+            <v-switch
+              v-model="importConfigVersions"
+              label="Import mod versions"
+            />
+            <span class="warning--text">{{ importConfigMessage }}</span>
+          </v-form>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn
+            color="primary"
+            text
+            @click="importConfig"
+          >
+            Import
+          </v-btn>
+          <v-btn
+            color="primary"
+            text
+            @click="importConfigDialog = false"
+          >
+            Cancel
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog
+      hide-overlay
+      persistent
+      :value="isConfigExportInProgress"
+      width="500"
+      height="230"
+    >
+      <v-card
+        color="loadingBackground !important"
+      >
+        <v-row
+          no-gutters
+          justify="center"
+        >
+          <v-img
+            class="mt-4"
+            src="static/smm_icon.png"
+            max-height="82px"
+            max-width="87px"
+          />
+        </v-row>
+        <v-card-title class="loading-text-main">
+          EXPORTING CONFIG
+        </v-card-title>
+
+        <v-card-text
+          v-if="isConfigExportInProgress"
+          class="text-center"
+        >
+          <v-progress-linear
+            :value="Math.round(currentConfigExportProgress.progress * 100)"
+            :class="currentConfigExportProgress.fast ? 'fast' : ''"
+            background-color="#000000"
+            color="#5bb71d"
+            height="2"
+            reactive
+            :indeterminate="currentConfigExportProgress.progress < 0"
+          />
+          {{ currentConfigExportProgress.message || '&nbsp;' }}
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+    <v-dialog
+      hide-overlay
+      persistent
+      :value="isConfigImportInProgress"
+      width="500"
+      height="230"
+    >
+      <v-card
+        color="loadingBackground !important"
+      >
+        <v-row
+          no-gutters
+          justify="center"
+        >
+          <v-img
+            class="mt-4"
+            src="static/smm_icon.png"
+            max-height="82px"
+            max-width="87px"
+          />
+        </v-row>
+        <v-card-title class="loading-text-main">
+          IMPORTING CONFIG
+        </v-card-title>
+
+        <v-card-text
+          v-if="isConfigImportInProgress"
+          class="text-center"
+        >
+          <v-progress-linear
+            :value="Math.round(currentConfigImportProgress.progress * 100)"
+            :class="currentConfigImportProgress.fast ? 'fast' : ''"
+            background-color="#000000"
+            color="#5bb71d"
+            height="2"
+            reactive
+            :indeterminate="currentConfigImportProgress.progress < 0"
+          />
+          {{ currentConfigImportProgress.message || '&nbsp;' }}
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
 <script>
-import { clearCache } from 'satisfactory-mod-manager-api';
+import { clearCache, validAndGreater } from 'satisfactory-mod-manager-api';
 import { mapState } from 'vuex';
+import StreamZip from 'node-stream-zip';
 import { saveSetting, getSetting } from '../settings';
 import {
   markdownAsElement, ignoreUpdate, unignoreUpdate, lastElement,
@@ -616,7 +800,6 @@ export default {
   data() {
     return {
       menuOpen: false,
-      updatesMenuOpen: false,
       creditsDialog: false,
       attributionDialog: false,
       helpDialog: false,
@@ -630,6 +813,13 @@ export default {
       changelogDialog: false,
       showIgnoredUpdates: false,
       ignoredUpdates: [],
+      importConfigDialog: false,
+      importConfigFile: null,
+      importConfigName: '',
+      importConfigVersions: false,
+      importConfigFormValid: true,
+      importConfigMetadata: null,
+      importConfigMessage: '',
     };
   },
   computed: {
@@ -725,10 +915,56 @@ export default {
     currentMultiModUpdateProgress() {
       return lastElement(this.multiModUpdateProgress.progresses);
     },
+    isConfigExportInProgress() {
+      return this.inProgress.some((prog) => prog.id === '__exportConfig__');
+    },
+    configExportProgress() {
+      return this.inProgress.find((prog) => prog.id === '__exportConfig__');
+    },
+    currentConfigExportProgress() {
+      return lastElement(this.configExportProgress.progresses);
+    },
+    isConfigImportInProgress() {
+      return this.inProgress.some((prog) => prog.id === '__importConfig__');
+    },
+    configImportProgress() {
+      return this.inProgress.find((prog) => prog.id === '__importConfig__');
+    },
+    currentConfigImportProgress() {
+      return lastElement(this.configImportProgress.progresses);
+    },
   },
   watch: {
     async selectedInstall() {
       await this.checkForUpdates();
+    },
+    async importConfigFile(file) {
+      if (file) {
+        const zipData = new StreamZip({ file: file.path });
+        try {
+          await new Promise((resolve) => zipData.on('ready', resolve));
+          const metadata = JSON.parse(zipData.entryDataSync('metadata.json').toString('utf8'));
+          zipData.close();
+          this.importConfigMetadata = metadata;
+        } catch (e) {
+          zipData.close();
+          this.importConfigMetadata = null;
+          this.$store.dispatch('showError', e);
+        }
+      } else {
+        this.importConfigMetadata = null;
+      }
+    },
+    importConfigMetadata(metadata) {
+      if (metadata) {
+        if (validAndGreater(metadata.gameVersion, this.$store.state.selectedInstall.version)) {
+          this.importConfigMessage = `This config is made for game version ${metadata.gameVersion}, but you're using an older version: ${this.$store.state.selectedInstall.version}. Things might not work as expected.`;
+        } else {
+          this.importConfigMessage = '';
+        }
+      } else {
+        this.importConfigMessage = '';
+      }
     },
   },
   mounted() {
@@ -826,6 +1062,65 @@ export default {
     },
     currentModProgress(mod) {
       return lastElement(this.modProgress(mod).progresses);
+    },
+    async exportConfig() {
+      const result = this.$electron.remote.dialog.showSaveDialogSync(this.$electron.remote.getCurrentWindow(), {
+        title: 'Export config as',
+        filters: [
+          { name: 'SMM Config', extensions: ['smmcfg'] },
+        ],
+      });
+      if (result) {
+        const exportConfigProgress = {
+          id: '__exportConfig__',
+          progresses: [{
+            id: '', progress: -1, message: `Exporting config ${this.$store.state.selectedConfig.name}`, fast: false,
+          }],
+        };
+        this.$store.state.inProgress.push(exportConfigProgress);
+        try {
+          await this.$store.state.selectedInstall.exportConfig(result);
+        } catch (e) {
+          this.$store.dispatch('showError', e);
+        }
+        this.$store.state.inProgress.remove(exportConfigProgress);
+      }
+    },
+    showImportConfigPathDialog() {
+      const result = this.$electron.remote.dialog.showOpenDialogSync(this.$electron.remote.getCurrentWindow(), {
+        title: 'Import config',
+        filters: [
+          { name: 'SMM Config', extensions: ['smmcfg'] },
+        ],
+      });
+      if (result) {
+        [this.importConfigPath] = result;
+      }
+    },
+    async importConfig() {
+      if (this.$refs.importConfigForm.validate()) {
+        const importConfigProgress = {
+          id: '__importConfig__',
+          progresses: [{
+            id: '', progress: -1, message: `Importing config as ${this.importConfigName}`, fast: false,
+          }],
+        };
+        this.$store.state.inProgress.push(importConfigProgress);
+        try {
+          await this.$store.state.selectedInstall.importConfig(this.importConfigFile.path, this.importConfigName, this.importConfigVersions);
+          this.$store.state.inProgress.remove(importConfigProgress);
+          const newConfig = { name: this.importConfigName, items: [] }; // TODO: Items
+          this.$store.state.configs.push(newConfig);
+          await this.$store.dispatch('selectConfig', newConfig);
+        } catch (e) {
+          this.$store.dispatch('showError', e);
+          this.$store.state.inProgress.remove(importConfigProgress);
+        }
+        this.importConfigFile = null;
+        this.importConfigName = '';
+        this.importConfigVersions = false;
+        this.importConfigDialog = false;
+      }
     },
   },
 };
