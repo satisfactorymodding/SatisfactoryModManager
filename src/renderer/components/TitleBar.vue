@@ -33,6 +33,9 @@
                   <v-list-item-content>
                     <v-list-item-title>{{ hasUpdate || availableSMMUpdate ? 'Updates ready to install' : 'Update settings' }}</v-list-item-title>
                   </v-list-item-content>
+                  <v-list-item-action>
+                    <v-icon>mdi-chevron-right</v-icon>
+                  </v-list-item-action>
                 </v-list-item>
               </template>
               <v-card class="app-menu">
@@ -145,6 +148,9 @@
                   <v-list-item-content>
                     <v-list-item-title>Profiles</v-list-item-title>
                   </v-list-item-content>
+                  <v-list-item-action>
+                    <v-icon>mdi-chevron-right</v-icon>
+                  </v-list-item-action>
                 </v-list-item>
               </template>
               <v-card class="app-menu">
@@ -164,6 +170,7 @@
                     class="custom"
                     inset
                   />
+
                   <v-list-item @click="importProfileDialog = true">
                     <v-list-item-action>
                       <v-icon color="text">
@@ -173,7 +180,62 @@
                     <v-list-item-content>
                       <v-list-item-title>Import profile</v-list-item-title>
                     </v-list-item-content>
+                    <v-dialog
+                      v-model="importProfileDialog"
+                    >
+                      <v-card>
+                        <v-card-title>
+                          Import profile
+                        </v-card-title>
+                        <v-card-text>
+                          <v-form
+                            ref="importProfileForm"
+                            v-model="importProfileFormValid"
+                          >
+                            <v-file-input
+                              v-model="importProfileFile"
+                              label="Profile file"
+                              accept=".smmprofile"
+                              required
+                              :rules="[v => !!v || 'Choose a profile to import']"
+                            />
+                            <v-text-field
+                              v-model="importProfileName"
+                              label="Name"
+                              required
+                              :rules="[v => !!v || 'Profile name is required']"
+                            />
+                            <v-switch
+                              v-model="importProfileVersions"
+                              label="Import mod versions"
+                            />
+                            <span class="warning--text">{{ importProfileMessage }}</span>
+                          </v-form>
+                        </v-card-text>
+                        <v-card-actions>
+                          <v-btn
+                            color="primary"
+                            text
+                            @click="importProfile"
+                          >
+                            Import
+                          </v-btn>
+                          <v-btn
+                            color="primary"
+                            text
+                            @click="importProfileDialog = false"
+                          >
+                            Cancel
+                          </v-btn>
+                        </v-card-actions>
+                      </v-card>
+                    </v-dialog>
                   </v-list-item>
+
+                  <v-divider
+                    inset
+                    class="custom"
+                  />
                 </v-list>
               </v-card>
             </v-menu>
@@ -391,30 +453,72 @@
               inset
             />
 
-            <v-list-item>
-              <v-list-item-action />
-              <v-list-item-content>
-                <v-list-item-title>Debug mode</v-list-item-title>
-              </v-list-item-content>
-
-              <v-list-item-action>
-                <v-switch v-model="debugMode" />
-              </v-list-item-action>
-            </v-list-item>
-
-            <v-divider
-              class="custom"
-              inset
-            />
-
-            <v-list-item
-              @click="clearCache"
+            <v-menu
+              :close-on-content-click="false"
+              offset-x
+              :nudge-right="20"
             >
-              <v-list-item-action />
-              <v-list-item-content>
-                <v-list-item-title>Clear cache</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
+              <template v-slot:activator="{ on }">
+                <v-list-item
+                  v-on="on"
+                >
+                  <v-list-item-action />
+                  <v-list-item-content>
+                    <v-list-item-title>Debug</v-list-item-title>
+                  </v-list-item-content>
+                  <v-list-item-action>
+                    <v-icon>mdi-chevron-right</v-icon>
+                  </v-list-item-action>
+                </v-list-item>
+              </template>
+              <v-card class="app-menu">
+                <v-list>
+                  <v-list-item>
+                    <v-list-item-action />
+                    <v-list-item-content>
+                      <v-list-item-title>Debug mode</v-list-item-title>
+                    </v-list-item-content>
+
+                    <v-list-item-action>
+                      <v-switch v-model="debugMode" />
+                    </v-list-item-action>
+                  </v-list-item>
+
+                  <v-divider
+                    class="custom"
+                    inset
+                  />
+
+                  <v-list-item
+                    @click="clearCache"
+                  >
+                    <v-list-item-action />
+                    <v-list-item-content>
+                      <v-list-item-title>Clear cache</v-list-item-title>
+                    </v-list-item-content>
+                  </v-list-item>
+
+                  <v-divider
+                    class="custom"
+                    inset
+                  />
+
+                  <v-list-item
+                    @click="exportDebugData"
+                  >
+                    <v-list-item-action />
+                    <v-list-item-content>
+                      <v-list-item-title>Generate debug info</v-list-item-title>
+                    </v-list-item-content>
+                  </v-list-item>
+
+                  <v-divider
+                    inset
+                    class="custom"
+                  />
+                </v-list>
+              </v-card>
+            </v-menu>
 
             <v-divider
               class="custom"
@@ -643,56 +747,6 @@
       </v-card>
     </v-dialog>
     <v-dialog
-      v-model="importProfileDialog"
-    >
-      <v-card>
-        <v-card-title>
-          Import profile
-        </v-card-title>
-        <v-card-text>
-          <v-form
-            ref="importProfileForm"
-            v-model="importProfileFormValid"
-          >
-            <v-file-input
-              v-model="importProfileFile"
-              label="Profile file"
-              accept=".smmprofile"
-              required
-              :rules="[v => !!v || 'Choose a profile to import']"
-            />
-            <v-text-field
-              v-model="importProfileName"
-              label="Name"
-              required
-              :rules="[v => !!v || 'Profile name is required']"
-            />
-            <v-switch
-              v-model="importProfileVersions"
-              label="Import mod versions"
-            />
-            <span class="warning--text">{{ importProfileMessage }}</span>
-          </v-form>
-        </v-card-text>
-        <v-card-actions>
-          <v-btn
-            color="primary"
-            text
-            @click="importProfile"
-          >
-            Import
-          </v-btn>
-          <v-btn
-            color="primary"
-            text
-            @click="importProfileDialog = false"
-          >
-            Cancel
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-    <v-dialog
       hide-overlay
       persistent
       :value="isProfileExportInProgress"
@@ -780,12 +834,16 @@
 </template>
 
 <script>
-import { clearCache, validAndGreater } from 'satisfactory-mod-manager-api';
+import { clearCache, validAndGreater, getLogFilePath } from 'satisfactory-mod-manager-api';
 import { mapState } from 'vuex';
 import StreamZip from 'node-stream-zip';
+import JSZip from 'jszip';
+import fs from 'fs';
+import path from 'path';
+import { getCacheFolder } from 'platform-folders';
 import { saveSetting, getSetting } from '../settings';
 import {
-  markdownAsElement, ignoreUpdate, unignoreUpdate, lastElement,
+  markdownAsElement, ignoreUpdate, unignoreUpdate, lastElement, filenameFriendlyDate,
 } from '../utils';
 
 const UPDATE_CHECK_INTERVAL = 5 * 60 * 1000;
@@ -1069,6 +1127,7 @@ export default {
         filters: [
           { name: 'SMM Profile', extensions: ['smmprofile'] },
         ],
+        defaultPath: `${this.$store.state.selectedProfile.name}.smmprofile`,
       });
       if (result) {
         const exportProfileProgress = {
@@ -1109,6 +1168,38 @@ export default {
         this.importProfileName = '';
         this.importProfileVersions = false;
         this.importProfileDialog = false;
+      }
+    },
+    async exportDebugData() {
+      const debugDataZip = new JSZip();
+      const metadata = {
+        installsFound: this.$store.state.satisfactoryInstalls,
+        selectedInstall: this.$store.state.selectedInstall,
+        profile: this.$store.state.selectedProfile,
+        installedMods: this.$store.state.selectedInstall?.mods,
+        smlVersion: this.$store.state.selectedInstall?.smlVersion,
+        bootstrapperVersion: this.$store.state.selectedInstall?.bootstrapperVersion,
+      };
+      debugDataZip.file('SatisfactoryModManager.log', fs.createReadStream(getLogFilePath()));
+      if (this.$store.state.selectedInstall) {
+        debugDataZip.file('pre-launch-debug.log', fs.createReadStream(path.join(this.$store.state.selectedInstall.installLocation, 'pre-launch-debug.log')));
+        debugDataZip.file('SatisfactoryModLoader.log', fs.createReadStream(path.join(this.$store.state.selectedInstall.installLocation, 'SatisfactoryModLoader.log')));
+        debugDataZip.file('FactoryGame.log', fs.createReadStream(path.join(getCacheFolder(), 'FactoryGame', 'Saved', 'Logs', 'FactoryGame.log')));
+      }
+      debugDataZip.file('metadata.json', JSON.stringify(metadata, null, 4));
+
+      const result = this.$electron.remote.dialog.showSaveDialogSync(this.$electron.remote.getCurrentWindow(), {
+        title: 'Save debug data as',
+        filters: [
+          { name: 'SMM Debug Data', extensions: ['zip'] },
+        ],
+        defaultPath: `SMMDebug_${filenameFriendlyDate(new Date())}.zip`,
+      });
+
+      if (result) {
+        await new Promise((resolve, reject) => {
+          debugDataZip.generateNodeStream().pipe(fs.createWriteStream(result)).on('finish', resolve).on('error', reject);
+        });
       }
     },
   },
@@ -1153,7 +1244,7 @@ export default {
 }
 .custom.v-divider--inset:not(.v-divider--vertical) {
   margin-left: 30px !important;
-  max-width: calc(100% - 30px) !important;
+  max-width: calc(100% - 60px) !important;
 }
 .custom.v-divider:not(.v-divider--inset):not(.v-divider--vertical) {
   margin-left: 10px !important;

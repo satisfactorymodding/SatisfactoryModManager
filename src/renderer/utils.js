@@ -32,3 +32,16 @@ export function unignoreUpdate(item, version) {
   saveSetting('ignoredUpdates', ignoredUpdates);
   return ignoredUpdates;
 }
+
+/**
+ * @param {Date} date The date
+ */
+export function filenameFriendlyDate(date) {
+  const year = date.getUTCFullYear();
+  const month = date.getUTCMonth();
+  const day = date.getUTCDate();
+  const hour = date.getUTCHours();
+  const minute = date.getUTCMinutes();
+  const second = date.getUTCSeconds();
+  return `${year}-${month}-${day}_${hour}-${minute}-${second}`;
+}
