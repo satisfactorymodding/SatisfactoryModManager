@@ -60,7 +60,6 @@
       </v-card>
     </v-dialog>
     <v-dialog
-      hide-overlay
       persistent
       :value="isLoadingAppInProgress"
       width="500"
@@ -102,7 +101,6 @@
       </v-card>
     </v-dialog>
     <v-dialog
-      hide-overlay
       persistent
       :value="showUpdateDownloadProgress"
       width="500"
@@ -143,18 +141,59 @@
         </v-card-text>
       </v-card>
     </v-dialog>
+    <v-dialog
+      v-model="oldSMLauncherInstalled"
+      width="500"
+      height="230"
+    >
+      <v-card
+        color="loadingBackground !important"
+      >
+        <v-card-title class="loading-text-main">
+          Old SMLauncher install
+        </v-card-title>
+
+        <v-card-text
+          class="text-center"
+        >
+          The update from SMLauncher to SMM is installed as a new app because of the name change. Uninstall the old SMLauncher version
+        </v-card-text>
+
+        <v-card-actions>
+          <v-btn
+            color="primary"
+            text
+            @click="uninstallOldSMLauncher"
+          >
+            Uninstall old SMLauncher
+          </v-btn>
+          <v-btn
+            color="text"
+            text
+            @click="oldSMLauncherInstalled = false"
+          >
+            Close
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-card>
 </template>
 
 <script>
 import { mapState } from 'vuex';
 import { exec } from 'child_process';
+import { getCacheFolder } from 'platform-folders';
+import fs from 'fs';
+import path from 'path';
 import TitleBar from './TitleBar';
 import ControlArea from './ControlArea';
 import ModsList from './ModsList';
 import ModDetails from './ModDetails';
 import { lastElement } from '../utils';
 import { getSetting } from '../settings';
+
+const SMLauncherUninstallerPath = path.join(getCacheFolder(), 'Programs', 'satisfactory-mod-launcher-gui', 'Uninstall Satisfactory Mod Launcher.exe');
 
 export default {
   components: {
@@ -167,6 +206,7 @@ export default {
     return {
       smmUpdateDownloadProgress: {},
       showUpdateDownloadProgress: false,
+      oldSMLauncherInstalled: false,
     };
   },
   computed: {
@@ -233,6 +273,7 @@ export default {
     this.$root.$on('downloadUpdate', this.downloadUpdate);
     await this.$store.dispatch('initApp');
     this.$electron.ipcRenderer.send('vue-ready');
+    this.oldSMLauncherInstalled = fs.existsSync(SMLauncherUninstallerPath);
   },
   methods: {
     async checkForUpdates() {
@@ -269,6 +310,12 @@ export default {
         exec(`start "" "${this.selectedInstall.launchPath}"`).unref();
         this.$store.commit('launchGame');
       }
+    },
+    uninstallOldSMLauncher() {
+      if (fs.existsSync(SMLauncherUninstallerPath)) {
+        exec(`start "" "${SMLauncherUninstallerPath}"`).unref();
+      }
+      this.oldSMLauncherInstalled = false;
     },
     lastElement,
   },

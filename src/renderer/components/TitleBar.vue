@@ -762,7 +762,6 @@
       </v-card>
     </v-dialog>
     <v-dialog
-      hide-overlay
       persistent
       :value="isProfileExportInProgress"
       width="500"
@@ -804,7 +803,6 @@
       </v-card>
     </v-dialog>
     <v-dialog
-      hide-overlay
       persistent
       :value="isProfileImportInProgress"
       width="500"
