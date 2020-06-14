@@ -62,8 +62,9 @@
     },
     "nsis": {
       "oneClick": false,
-      "perMachine": true,
-      "allowToChangeInstallationDirectory": true
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "${productName} Setup.${ext}"
     }
   },
   "dependencies": {
