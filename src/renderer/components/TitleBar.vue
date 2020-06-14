@@ -416,13 +416,12 @@
                   <v-card-text>
                     <h3>General troubleshooting</h3>
                     If something doesn't behave as expected, the first thing to try is <a @click="clearCache">clearing the cache</a><br>
-                    If that doesn't work, <a @click="enableDebug">enable debug mode</a>, then click on the "Console" tab of the Developer Tool Panel.<br>
-                    Recreate what you tried to do and went wrong, then send screenshot of the console<br>
-                    <!-- TODO: generate debug info button -->
+                    If that doesn't work, <a @click="enableDebug">enable debug mode</a>, recreate what you tried to do and went wrong, then <a @click="exportDebugData">generate debug data</a>
+                    and upload the generated zip to the modding discord, #help-using-mods channel<br>
                     <br><v-divider /><br>
                     <h3>X Satisfactory installs were found error</h3>
-                    <h4>Epic</h4>
-                    Fist, check that Epic can start the game. If you changed where the game is located, you need to make Epic update its install info. To do so:<br>
+                    <h4>Epic Games</h4>
+                    First, check that Epic can start the game. If you changed where the game is located, you need to make Epic update its install info. To do so:<br>
                     1. Rename the game folder to something temporary<br>
                     2. Start install from Epic to the directory you want the game to be in (the original folder name, before step 1)<br>
                     3. After it downloads a bit close Epic<br>
@@ -430,10 +429,13 @@
                     5. Start Epic and resume the install so it finds that it is actually already installed<br>
                     <br><v-divider /><br>
                     <h3>No Satisfactory installs found</h3>
-                    <h4>Epic</h4>
-                    Make sure you have the game installed, and Epic can find and launch it.<br>
+                    <h4>Epic Games / Steam</h4>
+                    Make sure you have the game installed, and Epic/Steam can find and launch it.<br>
                     <h4>Cracked</h4>
                     We do not support piracy, thus Satisfactory Mod Manager does not work with cracked copies of the game<br>
+                    <br><v-divider /><br>
+                    <h3>Your issue is not here</h3>
+                    Ask for help in the modding discord, #help-using-mods channel
                   </v-card-text>
                   <v-card-actions>
                     <v-btn
@@ -834,7 +836,9 @@
 </template>
 
 <script>
-import { clearCache, validAndGreater, getLogFilePath } from 'satisfactory-mod-manager-api';
+import {
+  clearCache, validAndGreater, getLogFilePath, setDebug,
+} from 'satisfactory-mod-manager-api';
 import { mapState } from 'vuex';
 import StreamZip from 'node-stream-zip';
 import JSZip from 'jszip';
@@ -878,6 +882,7 @@ export default {
       importProfileFormValid: true,
       importProfileMetadata: null,
       importProfileMessage: '',
+      cachedDebugMode: false,
     };
   },
   computed: {
@@ -917,13 +922,12 @@ export default {
     },
     debugMode: {
       get() {
-        return this.$store.state.debugMode;
+        return this.cachedDebugMode;
       },
       set(value) {
-        this.$store.dispatch('setDebugMode', value);
-        if (value) {
-          this.$electron.ipcRenderer.send('openDevTools');
-        }
+        setDebug(value);
+        saveSetting('debugMode', value);
+        this.cachedDebugMode = value;
       },
     },
     expandModInfoOnStart: {
@@ -1026,6 +1030,7 @@ export default {
     },
   },
   mounted() {
+    this.cachedDebugMode = getSetting('debugMode', false);
     this.cachedUpdateCheckMode = getSetting('updateCheckMode', 'launch');
     this.ignoredUpdates = getSetting('ignoredUpdates', []);
     if (this.updateCheckMode === 'launch') {

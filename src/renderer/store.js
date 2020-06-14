@@ -3,7 +3,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import {} from './utils';
 import {
-  setDebug, addDownloadProgressCallback, getProfiles, loadCache, getInstalls, SatisfactoryInstall, getAvailableSMLVersions, MODS_PER_PAGE, getModsCount,
+  addDownloadProgressCallback, getProfiles, loadCache, getInstalls, SatisfactoryInstall, getAvailableSMLVersions, MODS_PER_PAGE, getModsCount,
   getAvailableMods,
   createProfile,
   deleteProfile,
@@ -46,7 +46,6 @@ export default new Vuex.Store({
     isGameRunning: false,
     isLaunchingGame: false,
     expandModInfoOnStart: false,
-    debugMode: false,
   },
   mutations: {
     setFilters(state, { newFilters }) {
@@ -127,9 +126,6 @@ export default new Vuex.Store({
     },
     setExpandModInfoOnStart(state, value) {
       state.expandModInfoOnStart = value;
-    },
-    setDebugMode(state, value) {
-      state.debugMode = value;
     },
   },
   actions: {
@@ -293,7 +289,6 @@ export default new Vuex.Store({
         }],
       };
       state.inProgress.push(appLoadProgress);
-      dispatch('setDebugMode', getSetting('debugMode', false));
       addDownloadProgressCallback((url, progress, name, version) => commit('downloadProgress', {
         url, progress, name, version,
       }));
@@ -394,11 +389,6 @@ export default new Vuex.Store({
     setExpandModInfoOnStart({ commit }, value) {
       commit('setExpandModInfoOnStart', value);
       saveSetting('expandModInfoOnStart', value);
-    },
-    setDebugMode({ commit }, value) {
-      setDebug(value);
-      commit('setDebugMode', value);
-      saveSetting('debugMode', value);
     },
     async updateSingle({ state, commit, dispatch }, update) {
       const updateProgress = {
