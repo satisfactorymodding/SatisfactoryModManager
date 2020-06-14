@@ -67,7 +67,7 @@
         >Close</span>
       </v-col>
       <v-spacer />
-      <!--<v-col
+      <v-col
         cols="auto"
       >
         <v-menu
@@ -77,39 +77,50 @@
           <template v-slot:activator="{ on }">
             <v-btn
               text
-              :disabled="!!inProgress.length"
+              :disabled="!!inProgress.length || !mod.isInstalled"
               v-on="on"
             >
               <span
                 class="mx-2"
-              >Previous versions</span>
+              >Versions</span>
               <v-icon>
                 mdi-chevron-down
               </v-icon>
             </v-btn>
           </template>
           <v-list>
-            <v-list-item>
-              <v-list-item-title>
-                <v-icon v-if="installedVersion === ''">
-                  mdi-check
-                </v-icon><span v-else>&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;Latest
-              </v-list-item-title>
-            </v-list-item>
             <v-list-item
-              v-for="(version, i) in mod.modInfo.versions"
-              :key="i"
-              @click="installOldVersion(conf)"
+              @click="installVersion('')"
             >
-              <v-list-item-title>
-                <v-icon v-if="conf.items.some((item) => item.id === mod.modInfo.mod_reference)">
+              <v-list-item-action>
+                <v-icon v-if="!mod.manifestVersion">
                   mdi-check
-                </v-icon><span v-else>&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;{{ conf.name }}
-              </v-list-item-title>
+                </v-icon>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title>Latest</v-list-item-title>
+              </v-list-item-content>
             </v-list-item>
+            <template
+              v-for="(version, i) in mod.modInfo.versions"
+            >
+              <v-list-item
+                :key="i"
+                @click="installVersion(version.version)"
+              >
+                <v-list-item-action>
+                  <v-icon v-if="validAndEq(mod.manifestVersion, version.version)">
+                    mdi-check
+                  </v-icon>
+                </v-list-item-action>
+                <v-list-item-content>
+                  <v-list-item-title>{{ version.version }}</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+            </template>
           </v-list>
         </v-menu>
-      </v-col>-->
+      </v-col>
       <!--<v-col
         cols="auto"
       >
@@ -268,6 +279,7 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
+import { eq, coerce, valid } from 'semver';
 import { markdownAsElement } from '../utils';
 
 export default {
@@ -357,6 +369,9 @@ export default {
     favoriteClicked() {
       this.$store.dispatch('toggleModFavorite', this.mod.modInfo.mod_reference);
     },
+    installVersion(version) {
+      this.$store.dispatch('installModVersion', { modId: this.mod.modInfo.mod_reference, version });
+    },
     toggleIsInProfile(profile) {
       if (profile.items.some((item) => item.id === this.mod.modInfo.mod_reference)) {
         this.$store.dispatch('addModToProfile', { mod: this.$store.state.expandedModId, profile: profile.name });
@@ -366,6 +381,14 @@ export default {
     },
     bigImage(idx) {
       this.bigImageSrc = this.images[idx];
+    },
+    validAndEq(v1, v2) {
+      const v1Valid = valid(coerce(v1));
+      const v2Valid = valid(coerce(v2));
+      if (v1Valid && v2Valid) {
+        return eq(v1Valid, v2Valid);
+      }
+      return false;
     },
   },
 };

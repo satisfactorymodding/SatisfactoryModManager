@@ -40,7 +40,6 @@ export default new Vuex.Store({
     mods: [],
     expandedModId: '',
     favoriteModIds: [],
-    manifestMods: [],
     inProgress: [], // { id: string, progresses: { id: string, progress: number, message: string, fast: boolean }[] }
     currentDownloadProgress: {},
     error: '',
@@ -72,11 +71,13 @@ export default new Vuex.Store({
       state.smlVersions = smlVersions;
     },
     refreshModsInstalledCompatible(state) {
-      const installedMods = Object.keys(state.selectedInstall.mods);
-      state.manifestMods = state.selectedInstall.manifestMods;
+      const installedModVersions = state.selectedInstall.mods;
+      const { manifestMods } = state.selectedInstall;
       for (let i = 0; i < state.mods.length; i += 1) {
-        state.mods[i].isInstalled = installedMods.includes(state.mods[i].modInfo.mod_reference);
-        state.mods[i].isDependency = installedMods.includes(state.mods[i].modInfo.mod_reference) && !state.manifestMods.includes(state.mods[i].modInfo.mod_reference);
+        state.mods[i].isInstalled = !!installedModVersions[state.mods[i].modInfo.mod_reference];
+        state.mods[i].manifestVersion = manifestMods.find((mod) => mod.id === state.mods[i].modInfo.mod_reference)?.version;
+        state.mods[i].installedVersion = installedModVersions[state.mods[i].modInfo.mod_reference];
+        state.mods[i].isDependency = !!installedModVersions[state.mods[i].modInfo.mod_reference] && !manifestMods.some((mod) => mod.id === state.mods[i].modInfo.mod_reference);
         state.mods[i].isCompatible = state.mods[i].modInfo.versions.length > 0
         && !!state.mods[i].modInfo.versions.find((ver) => satisfies(ver.sml_version, '>=2.0.0')
               && state.smlVersions.some((smlVer) => valid(coerce(smlVer.version)) === valid(coerce(ver.sml_version)))
@@ -221,6 +222,35 @@ export default new Vuex.Store({
             state.inProgress.remove(modProgress);
           }, 500);
         }
+      }
+    },
+    async installModVersion({ commit, dispatch, state }, { modId, version }) {
+      if (state.inProgress.length > 0) {
+        dispatch('showError', 'Another operation is currently in progress');
+        return;
+      }
+      commit('clearDownloadProgress');
+      const modProgress = { id: modId, progresses: [] };
+      state.inProgress.push(modProgress);
+      const placeholderProgreess = {
+        id: 'placeholder', progress: -1, message: '', fast: false,
+      };
+      modProgress.progresses.push(placeholderProgreess);
+      placeholderProgreess.message = `Installing ${version ? `${modId} v${version}` : `latest ${modId}`}`;
+      try {
+        if (version) {
+          await state.selectedInstall.installMod(modId, version);
+        } else {
+          await state.selectedInstall.updateMod(modId);
+        }
+        placeholderProgreess.progress = 1;
+        commit('refreshModsInstalledCompatible');
+      } catch (e) {
+        dispatch('showError', e);
+      } finally {
+        setTimeout(() => {
+          state.inProgress.remove(modProgress);
+        }, 500);
       }
     },
     expandMod({ commit }, modId) {
