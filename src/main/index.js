@@ -1,6 +1,6 @@
 
 import {
-  app, BrowserWindow, ipcMain, shell,
+  app, BrowserWindow, ipcMain, shell, screen,
 } from 'electron';
 import path from 'path';
 import { autoUpdater } from 'electron-updater';
@@ -37,22 +37,53 @@ const expandedSize = {
   height: 858,
 };
 
+let scaledNormalSize = normalSize;
+let scaledExpandedSize = expandedSize;
+let currentScale = 1;
+let isExpanded = false;
+
+function updateSize() {
+  const size = isExpanded ? scaledExpandedSize : scaledNormalSize;
+  mainWindow.setMinimumSize(size.width, size.height); // https://github.com/electron/electron/issues/15560#issuecomment-451395078
+  mainWindow.setSize(size.width, size.height, true);
+}
+
+function updateScale() {
+  const newScale = screen.getDisplayMatching(mainWindow.getBounds()).scaleFactor;
+  if (newScale !== currentScale) {
+    mainWindow.webContents.zoomFactor = 1 / newScale;
+    scaledNormalSize = {
+      width: Math.trunc(normalSize.width / newScale),
+      height: Math.trunc(normalSize.height / newScale),
+    };
+    scaledExpandedSize = {
+      width: Math.trunc(expandedSize.width / newScale),
+      height: Math.trunc(expandedSize.height / newScale),
+    };
+    currentScale = newScale;
+    updateSize();
+  }
+}
+
 function createWindow() {
   /**
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    width: normalSize.width,
-    height: normalSize.height,
+    width: scaledNormalSize.width,
+    height: scaledNormalSize.height,
     useContentSize: true,
-    minHeight: 800,
-    minWidth: 500,
+    minHeight: scaledNormalSize.height,
+    minWidth: scaledNormalSize.width,
     webPreferences: {
       nodeIntegration: true,
     },
     frame: false,
     resizable: false,
   });
+
+  mainWindow.on('move', () => updateScale());
+  updateScale();
 
   if (process.env.NODE_ENV === 'development') {
     mainWindow.loadURL(mainURL);
@@ -118,12 +149,13 @@ if (app.requestSingleInstanceLock()) {
   });
 
   ipcMain.on('expand', () => {
-    mainWindow.setSize(expandedSize.width, expandedSize.height, true);
+    isExpanded = true;
+    updateSize();
   });
 
   ipcMain.on('unexpand', () => {
-    mainWindow.setMinimumSize(normalSize.width, normalSize.height); // https://github.com/electron/electron/issues/15560#issuecomment-451395078
-    mainWindow.setSize(normalSize.width, normalSize.height, true);
+    isExpanded = false;
+    updateSize();
   });
 
   autoUpdater.fullChangelog = true;
