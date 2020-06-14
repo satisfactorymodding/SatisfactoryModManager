@@ -23,7 +23,7 @@
         :disabled="!!inProgress.length || isGameRunning"
         @click="launchSatisfactory"
       >
-        <b>LAUNCH GAME</b>
+        <b>{{ isGameRunning ? 'GAME IS RUNNING' : 'LAUNCH GAME' }}</b>
       </v-btn>
     </v-card>
     <v-card
