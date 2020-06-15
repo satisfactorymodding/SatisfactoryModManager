@@ -1,6 +1,6 @@
 
 import {
-  app, BrowserWindow, ipcMain, shell, screen,
+  app, BrowserWindow, ipcMain, shell,
 } from 'electron';
 import path from 'path';
 import { autoUpdater } from 'electron-updater';
@@ -37,53 +37,33 @@ const expandedSize = {
   height: 858,
 };
 
-let scaledNormalSize = normalSize;
-let scaledExpandedSize = expandedSize;
-let currentScale = 1;
 let isExpanded = false;
 
 function updateSize() {
-  const size = isExpanded ? scaledExpandedSize : scaledNormalSize;
+  const size = isExpanded ? expandedSize : normalSize;
   mainWindow.setMinimumSize(size.width, size.height); // https://github.com/electron/electron/issues/15560#issuecomment-451395078
   mainWindow.setSize(size.width, size.height, true);
 }
 
-function updateScale() {
-  const newScale = screen.getDisplayMatching(mainWindow.getBounds()).scaleFactor;
-  if (newScale !== currentScale) {
-    mainWindow.webContents.zoomFactor = 1 / newScale;
-    scaledNormalSize = {
-      width: Math.trunc(normalSize.width / newScale),
-      height: Math.trunc(normalSize.height / newScale),
-    };
-    scaledExpandedSize = {
-      width: Math.trunc(expandedSize.width / newScale),
-      height: Math.trunc(expandedSize.height / newScale),
-    };
-    currentScale = newScale;
-    updateSize();
-  }
-}
+app.commandLine.appendSwitch('high-dpi-support', 1);
+app.commandLine.appendSwitch('force-device-scale-factor', 1);
 
 function createWindow() {
   /**
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    width: scaledNormalSize.width,
-    height: scaledNormalSize.height,
+    width: normalSize.width,
+    height: normalSize.height,
     useContentSize: true,
-    minHeight: scaledNormalSize.height,
-    minWidth: scaledNormalSize.width,
+    minHeight: normalSize.height,
+    minWidth: normalSize.width,
     webPreferences: {
       nodeIntegration: true,
     },
     frame: false,
     resizable: false,
   });
-
-  mainWindow.on('move', () => updateScale());
-  updateScale();
 
   if (process.env.NODE_ENV === 'development') {
     mainWindow.loadURL(mainURL);
