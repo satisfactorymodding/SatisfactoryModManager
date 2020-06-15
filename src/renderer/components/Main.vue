@@ -262,6 +262,15 @@ export default {
         this.$electron.ipcRenderer.off('updateDownloadProgress', this.updateProgress);
       });
     });
+    this.$electron.ipcRenderer.on('openedByUrl', (e, url) => {
+      const parsed = new URL(url);
+      const command = parsed.pathname.replace(/^\/+|\/+$/g, '');
+      if (command === 'install') {
+        const modID = parsed.searchParams.get('modID');
+        const version = parsed.searchParams.get('version');
+        this.$store.dispatch('installModVersion', { modId: modID, version });
+      }
+    });
     if (getSetting('updateCheckMode', 'launch') === 'launch') {
       const hasUpdate = await this.checkForUpdates();
       if (hasUpdate) {

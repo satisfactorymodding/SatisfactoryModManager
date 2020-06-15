@@ -234,7 +234,7 @@ export default new Vuex.Store({
       modProgress.progresses.push(placeholderProgreess);
       placeholderProgreess.message = `Installing ${version ? `${modId} v${version}` : `latest ${modId}`}`;
       try {
-        if (version) {
+        if (version || !state.mods.find((mod) => mod.modInfo.mod_reference === modId)?.isInstalled) {
           await state.selectedInstall.installMod(modId, version);
         } else {
           await state.selectedInstall.updateMod(modId);

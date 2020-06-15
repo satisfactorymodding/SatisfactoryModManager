@@ -33,7 +33,7 @@
     "protocols": {
       "name": "Satisfactory Mod Manager",
       "schemes": [
-        "smlauncher"
+        "smmanager"
       ]
     },
     "dmg": {
