@@ -1055,7 +1055,9 @@ export default {
   },
   methods: {
     close() {
-      this.$electron.remote.getCurrentWindow().close();
+      if (this.inProgress.length === 0) {
+        this.$electron.remote.getCurrentWindow().close();
+      }
     },
     settingsClicked() {
       this.menuOpen = !this.menuOpen;
