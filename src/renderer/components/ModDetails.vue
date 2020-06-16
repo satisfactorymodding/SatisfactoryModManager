@@ -1,12 +1,16 @@
 <!-- eslint-disable vue/no-v-html -->
 <template>
-  <v-container
-    style="width: 100%; height: 1075px; padding: 0; box-shadow: inset 10px 0px 10px -10px rgba(0,0,0,1);"
-    fluid
+  <v-card
+    tile
+    flat
+    class="d-flex flex-column"
+    width="100%"
+    height="100%"
+    style="padding: 0; box-shadow: inset 10px 0px 10px -10px rgba(0,0,0,1);"
   >
     <v-row
       no-gutters
-      style="padding-top: 32px;"
+      style="padding-top: 32px; flex: 0"
     >
       <v-col cols="auto">
         <img
@@ -29,13 +33,14 @@
           no-gutters
           class="pt-6 pb-1"
         >
-          <v-col cols="4">
+          <v-col cols="auto">
             <span class="header">{{ mod.modInfo.name }}</span>
           </v-col>
         </v-row>
         <v-row
           class="mod-description"
           :class="expandDetails ? 'expanded' : ''"
+          :style="expandDetails ? `height: ${windowHeight - 203}px;` : ''"
           v-html="modDescription"
         />
         <v-row
@@ -54,6 +59,7 @@
     <v-row
       class="control-bar"
       align="center"
+      style="flex: 0"
     >
       <v-col
         cols="auto"
@@ -231,34 +237,36 @@
     </v-row>
     <v-row
       v-if="!expandDetails"
-      class="image-container"
+      class="image-container flex-grow-1 flex-shrink-1"
       no-gutters
     >
       <div
         :class="imagePage > 0 ? '' : 'hidden'"
         class="images-button left d-inline-flex align-center"
-        @click="imagePageLeft"
+        @click="imagePage -= 1"
       >
         <v-icon>mdi-chevron-left</v-icon>
       </div>
-      <v-row
+      <div
+        ref="images"
         class="scrollable-images"
-        :style="`left: ${-432 * imagePage}px; width: ${432 * Math.ceil(images.length / 2)}px`"
+        style="height: calc(100% - 372px);"
       >
         <template v-for="n in images.length">
           <img
             v-if="images[n - 1]"
             :key="n"
+            ref="image"
             :src="images[n - 1]"
             @click="bigImage(n - 1)"
           >
         </template>
-      </v-row>
+      </div>
       <div
-        :class="imagePage < Math.ceil(images.length / 2) - 2 ? '' : 'hidden'"
+        :class="canScrollImagesRight ? '' : 'hidden'"
         class="images-button right d-inline-flex align-center"
-        style="left: 1056px;"
-        @click="imagePageRight"
+        style="right: 0"
+        @click="imagePage += 1"
       >
         <v-icon>mdi-chevron-right</v-icon>
       </div>
@@ -274,7 +282,7 @@
         >
       </v-card>
     </v-dialog>
-  </v-container>
+  </v-card>
 </template>
 
 <script>
@@ -286,8 +294,12 @@ export default {
   data() {
     return {
       expandDetails: false,
-      imagePage: 0,
+      imagePage: -1,
       bigImageSrc: '',
+      images: [],
+      imagesPerColumn: 1,
+      canScrollImagesRight: false,
+      windowHeight: 0,
     };
   },
   computed: {
@@ -322,18 +334,6 @@ export default {
       }
       return el.innerHTML;
     },
-    images() {
-      // TODO: other image sources
-      const el = this.descriptionAsElement;
-      const imgs = el.getElementsByTagName('img');
-      const imgUrls = [];
-      for (let i = 0; i < imgs.length; i += 1) {
-        if (imgs[i].src) {
-          imgUrls.push(imgs[i].src);
-        }
-      }
-      return imgUrls;
-    },
     showBigImage: {
       get() {
         return !!this.bigImageSrc;
@@ -347,8 +347,20 @@ export default {
   },
   watch: {
     expandedModId() {
-      this.imagePage = 0;
+      this.generateImages();
     },
+    imagePage() {
+      this.calculatePageLocation();
+    },
+  },
+  created() {
+    window.addEventListener('resize', this.onResize);
+  },
+  mounted() {
+    this.generateImages();
+  },
+  destroyed() {
+    window.removeEventListener('resize', this.onResize);
   },
   methods: {
     close() {
@@ -356,12 +368,6 @@ export default {
     },
     toggleExpandDetails() {
       this.expandDetails = !this.expandDetails;
-    },
-    imagePageLeft() {
-      if (this.imagePage > 0) this.imagePage -= 1;
-    },
-    imagePageRight() {
-      if (this.imagePage < Math.ceil(this.images.length / 2) - 2) this.imagePage += 1;
     },
     switchClicked(mod) {
       this.$store.dispatch('switchModInstalled', mod.mod_reference);
@@ -382,6 +388,33 @@ export default {
     bigImage(idx) {
       this.bigImageSrc = this.images[idx];
     },
+    async generateImages() {
+      const el = this.descriptionAsElement;
+      const imgs = [...el.getElementsByTagName('img')];
+      await Promise.all(imgs.map(async (img) => {
+        while (!img.complete) {
+        // eslint-disable-next-line no-await-in-loop
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+      }));
+      imgs.sort((a, b) => a.naturalWidth - b.naturalWidth);
+      this.images = imgs.map((img) => img.src);
+      this.imagePage = 0;
+      setTimeout(() => this.calculatePageLocation(), 500);
+    },
+    calculatePageLocation() {
+      if (this.$refs.image && this.$refs.image[0]) {
+        let currentWidth = 0;
+        this.imagesPerColumn = Math.round(this.$refs.images.clientHeight / this.$refs.image[0].height);
+        for (let i = 0; i < this.imagePage && this.$refs.image[i * this.imagesPerColumn]; i += 1) {
+          currentWidth += this.$refs.image[i * this.imagesPerColumn].width;
+        }
+        this.$refs.images.scrollLeft = currentWidth;
+        this.canScrollImagesRight = this.$refs.images.scrollWidth - this.$refs.images.clientWidth > currentWidth;
+      } else {
+        this.canScrollImagesRight = false;
+      }
+    },
     validAndEq(v1, v2) {
       const v1Valid = valid(coerce(v1));
       const v2Valid = valid(coerce(v2));
@@ -390,13 +423,17 @@ export default {
       }
       return false;
     },
+    onResize() {
+      this.calculatePageLocation();
+      this.windowHeight = window.innerHeight;
+    },
   },
 };
 </script>
 
 <style>
 .mod-description img {
-  max-width: 600px;
+  max-width: 100%;
 }
 .mod-description {
   font-size: 13.5px;
@@ -428,11 +465,11 @@ export default {
   overflow: hidden;
   height: 169px;
   box-shadow: inset 0px -35px 13px -16px rgba(0, 0, 0, 0.45);
+  word-break: break-word;
 }
 
 .mod-description.expanded {
   overflow-y: auto;
-  height: 655px;
   box-shadow: none;
 }
 .control-bar {
@@ -465,16 +502,30 @@ export default {
   width: 100%;
 }
 .image-container img {
-  width: 432px;
-  height: 243px;
+  height: 100%;
   display: block;
+}
+@media (min-height: 850px) {
+  .image-container img {
+    height: 50%;
+  }
+}
+@media (min-height: 1000px) {
+  .image-container img {
+    height: 33.33%;
+  }
+}
+@media (min-height: 1500px) {
+  .image-container img {
+    height: 25%;
+  }
 }
 .images-button {
   text-align: center;
   line-height: 10px;
   position: absolute;
-  bottom: 217px;
-  height: 486px;
+  bottom: 0;
+  top: 370px;
   z-index: 1;
 }
 .images-button.left {
@@ -488,10 +539,14 @@ export default {
 }
 .scrollable-images {
   width: 100%;
-  position: relative;
   transition: all ease-in-out 0.5s;
   position: absolute;
   left: 0;
   right: 0;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
 }
 </style>

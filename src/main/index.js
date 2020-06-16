@@ -5,6 +5,7 @@ import {
 import path from 'path';
 import { autoUpdater } from 'electron-updater';
 import WebSocket from 'ws';
+import { getSetting, saveSetting } from '../renderer/settings';
 
 
 process.env.SMM_API_USERAGENT = process.env.NODE_ENV !== 'development' ? app.name : 'SMM-dev';
@@ -18,6 +19,7 @@ if (process.env.NODE_ENV !== 'development') {
   global.__static = path.join(__dirname, '/static').replace(/\\/g, '\\\\');
 }
 
+/** @type { BrowserWindow } */
 let mainWindow;
 const mainURL = 'http://localhost:9080';
 const mainFile = path.resolve(__dirname, 'index.html');
@@ -28,25 +30,34 @@ function openedByUrl(url) {
   }
 }
 
-const normalSize = {
+const normalSize = getSetting('normalSize', {
   width: 500,
   height: 858,
+});
+const minNormalSize = {
+  width: 500,
+  height: 725,
 };
-const expandedSize = {
+const expandedSize = getSetting('expandedSize', {
   width: 1575,
   height: 858,
+});
+const minExpandedSize = {
+  width: 1200,
+  height: 725,
 };
 
 let isExpanded = false;
+let isChangingExpanded = false;
 
 function updateSize() {
   const size = isExpanded ? expandedSize : normalSize;
-  mainWindow.setMinimumSize(size.width, size.height); // https://github.com/electron/electron/issues/15560#issuecomment-451395078
+  const minSize = isExpanded ? minExpandedSize : minNormalSize;
+  mainWindow.setMinimumSize(minSize.width, minSize.height); // https://github.com/electron/electron/issues/15560#issuecomment-451395078
+  mainWindow.setMaximumSize(isExpanded ? 2147483647 : normalSize.width, 2147483647);
   mainWindow.setSize(size.width, size.height, true);
 }
 
-app.commandLine.appendSwitch('high-dpi-support', 1);
-app.commandLine.appendSwitch('force-device-scale-factor', 1);
 
 function createWindow() {
   /**
@@ -55,14 +66,14 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: normalSize.width,
     height: normalSize.height,
+    minHeight: minNormalSize.height,
+    minWidth: minNormalSize.width,
+    maxWidth: normalSize.width,
     useContentSize: true,
-    minHeight: normalSize.height,
-    minWidth: normalSize.width,
     webPreferences: {
       nodeIntegration: true,
     },
     frame: false,
-    resizable: false,
   });
 
   if (process.env.NODE_ENV === 'development') {
@@ -70,6 +81,18 @@ function createWindow() {
   } else {
     mainWindow.loadFile(mainFile);
   }
+
+  mainWindow.on('resize', () => {
+    if (!isChangingExpanded) {
+      normalSize.height = mainWindow.getBounds().height;
+      expandedSize.height = mainWindow.getBounds().height;
+      if (isExpanded) {
+        expandedSize.width = mainWindow.getBounds().width;
+      }
+      saveSetting('normalSize', normalSize);
+      saveSetting('expandedSize', expandedSize);
+    }
+  });
 
   ipcMain.on('openDevTools', () => {
     mainWindow.webContents.openDevTools();
@@ -129,13 +152,17 @@ if (app.requestSingleInstanceLock()) {
   });
 
   ipcMain.on('expand', () => {
+    isChangingExpanded = true;
     isExpanded = true;
     updateSize();
+    isChangingExpanded = false;
   });
 
   ipcMain.on('unexpand', () => {
+    isChangingExpanded = true;
     isExpanded = false;
     updateSize();
+    isChangingExpanded = false;
   });
 
   autoUpdater.fullChangelog = true;

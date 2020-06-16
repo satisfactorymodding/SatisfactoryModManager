@@ -1227,6 +1227,7 @@ export default {
 <style scoped>
 .app-title {
   font-size: 16px !important;
+  padding-top: 5px;
 }
 .titlebar {
   display: flex;
@@ -1246,7 +1247,7 @@ export default {
   margin: 0;
 }
 .v-icon {
-  font-size: 16px !important;
+  font-size: 18px !important;
 }
 .app-icon {
   padding: 3px 0px 0px 3px;

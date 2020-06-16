@@ -58,7 +58,7 @@ html {
 }
 
 .custom .v-label {
-  font-size: 12px !important;
+  font-size: 14px !important;
 }
 
 .v-input {

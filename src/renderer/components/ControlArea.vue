@@ -4,7 +4,6 @@
   >
     <v-row
       no-gutters
-      class="mt-4"
     >
       <v-col
         cols="12"
@@ -318,7 +317,7 @@ export default {
 
 <style>
 .custom-search .v-label {
-  font-size: 12px !important;
+  font-size: 14px !important;
 }
 </style>
 

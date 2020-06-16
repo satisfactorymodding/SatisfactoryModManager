@@ -5,12 +5,11 @@
   >
     <div class="list-shadow" />
     <div
-      style="overflow-y: scroll;"
+      style="overflow-y: scroll; height: 100%;"
       class="mx-4"
     >
       <v-list
         class="pt-1 mt-n4 custom"
-        height="459px"
       >
         <template
           v-for="({ modInfo, isInstalled, isCompatible, isDependency }, index) in mods"
