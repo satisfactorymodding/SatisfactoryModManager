@@ -1232,6 +1232,7 @@ export default {
 .titlebar {
   display: flex;
   height: var(--titlebar-height);
+  padding-bottom: 4px;
 }
 .titlebar, .titlebar > * {
   color: var(--v-text2-base) !important;

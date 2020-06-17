@@ -6,11 +6,11 @@
     class="d-flex flex-column"
     width="100%"
     height="100%"
-    style="padding: 0; box-shadow: inset 10px 0px 10px -10px rgba(0,0,0,1);"
+    style="padding: 0; box-shadow: inset 10px 0 10px -10px rgba(0,0,0,1), inset 0 10px 10px -10px rgba(0,0,0,1);"
   >
     <v-row
       no-gutters
-      style="padding-top: 32px; flex: 0"
+      style="padding-top: 16px; flex: 0"
     >
       <v-col cols="auto">
         <img
@@ -40,7 +40,7 @@
         <v-row
           class="mod-description"
           :class="expandDetails ? 'expanded' : ''"
-          :style="expandDetails ? `height: ${windowHeight - 203}px;` : ''"
+          :style="expandDetails ? `height: ${windowHeight - 187}px;` : ''"
           v-html="modDescription"
         />
         <v-row
@@ -49,7 +49,7 @@
           @click="toggleExpandDetails"
         >
           <v-col
-            style="text-align: center; line-height: 10px"
+            class="expand-details-text"
           >
             <span>Show {{ expandDetails ? 'less' : 'more' }}<br><v-icon v-if="!expandDetails">mdi-chevron-down</v-icon><v-icon v-else>mdi-chevron-up</v-icon></span>
           </v-col>
@@ -235,42 +235,13 @@
         </v-row>
       </v-col>
     </v-row>
-    <v-row
-      v-if="!expandDetails"
-      class="image-container flex-grow-1 flex-shrink-1"
-      no-gutters
-    >
-      <div
-        :class="imagePage > 0 ? '' : 'hidden'"
-        class="images-button left d-inline-flex align-center"
-        @click="imagePage -= 1"
-      >
-        <v-icon>mdi-chevron-left</v-icon>
-      </div>
-      <div
-        ref="images"
-        class="scrollable-images"
-        style="height: calc(100% - 372px);"
-      >
-        <template v-for="n in images.length">
-          <img
-            v-if="images[n - 1]"
-            :key="n"
-            ref="image"
-            :src="images[n - 1]"
-            @click="bigImage(n - 1)"
-          >
-        </template>
-      </div>
-      <div
-        :class="canScrollImagesRight ? '' : 'hidden'"
-        class="images-button right d-inline-flex align-center"
-        style="right: 0"
-        @click="imagePage += 1"
-      >
-        <v-icon>mdi-chevron-right</v-icon>
-      </div>
-    </v-row>
+    <ModImageContainer
+      :can-scroll-images-right="canScrollImagesRight"
+      :expand-details="expandDetails"
+      :image-page="imagePage"
+      :images="images"
+      :big-image="bigImage"
+    />
     <v-dialog
       v-model="showBigImage"
       width="unset"
@@ -289,8 +260,10 @@
 import { mapState, mapGetters } from 'vuex';
 import { eq, coerce, valid } from 'semver';
 import { markdownAsElement } from '../utils';
+import ModImageContainer from './ModImageContainer';
 
 export default {
+  components: { ModImageContainer },
   data() {
     return {
       expandDetails: false,
@@ -497,10 +470,7 @@ export default {
   margin-left: 0 !important;
   margin-right: 0 !important;
 }
-.image-container {
-  overflow-x: hidden;
-  width: 100%;
-}
+
 .image-container img {
   height: 100%;
   display: block;
@@ -520,33 +490,13 @@ export default {
     height: 25%;
   }
 }
-.images-button {
+
+.expand-details-text {
   text-align: center;
   line-height: 10px;
-  position: absolute;
-  bottom: 0;
-  top: 370px;
-  z-index: 1;
 }
-.images-button.left {
-  box-shadow: inset 50px 0px 50px -50px rgba(0,0,0,1);
-}
-.images-button.right {
-  box-shadow: inset -50px 0px 50px -50px rgba(0,0,0,1);
-}
-.images-button.hidden {
-  visibility: hidden;
-}
-.scrollable-images {
-  width: 100%;
-  transition: all ease-in-out 0.5s;
-  position: absolute;
-  left: 0;
-  right: 0;
-  display: flex;
-  flex-direction: column;
-  flex-wrap: wrap;
-  overflow-x: hidden;
-  scroll-behavior: smooth;
+:not(.expanded) > .expand-details-text {
+  padding-bottom: 0;
+  padding-top: 17px;
 }
 </style>

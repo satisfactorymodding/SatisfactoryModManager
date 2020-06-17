@@ -1,35 +1,40 @@
 <template>
   <v-card
-    class="d-flex"
+    class="d-flex flex-column"
     height="100%"
   >
+    <TitleBar
+      title="Satisfactory Mod Manager"
+      style="user-select: none;"
+    />
     <v-card
+      class="d-flex"
       height="100%"
-      style="width: 500px; min-width: 500px; max-width: 500px; z-index: 1"
-      class="d-flex flex-column"
     >
-      <TitleBar
-        title="Satisfactory Mod Manager"
-        style="user-select: none;"
-      />
-      <ControlArea style="user-select: none;" />
-      <ModsList
-        class="flex-grow-1 flex-shrink-1"
-        style="height: 0px"
-      />
-      <v-btn
-        block
-        tile
-        color="primary"
-        elevation="0"
-        style="font-size: 18px; height: 50px; min-height: 50px; max-height: 50px;"
-        :disabled="!!inProgress.length || isGameRunning"
-        @click="launchSatisfactory"
+      <v-card
+        height="100%"
+        style="width: 500px; min-width: 500px; max-width: 500px; z-index: 1; box-shadow: inset 0 10px 10px -10px rgba(0,0,0,1)"
+        class="d-flex flex-column"
       >
-        <b>{{ isGameRunning ? 'GAME IS RUNNING' : 'LAUNCH GAME' }}</b>
-      </v-btn>
+        <ControlArea style="user-select: none;" />
+        <ModsList
+          class="flex-grow-1 flex-shrink-1"
+          style="height: 0px"
+        />
+        <v-btn
+          block
+          tile
+          color="primary"
+          elevation="0"
+          style="font-size: 18px; height: 50px; min-height: 50px; max-height: 50px;"
+          :disabled="!!inProgress.length || isGameRunning"
+          @click="launchSatisfactory"
+        >
+          <b>{{ isGameRunning ? 'GAME IS RUNNING' : 'LAUNCH GAME' }}</b>
+        </v-btn>
+      </v-card>
+      <ModDetails v-if="expandedModId" />
     </v-card>
-    <ModDetails v-if="expandedModId" />
     <v-dialog
       v-model="errorDialog"
       max-width="290"

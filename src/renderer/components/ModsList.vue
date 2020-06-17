@@ -3,10 +3,18 @@
     class="py-4"
     style="position: relative;"
   >
-    <div class="list-shadow" />
+    <div
+      v-if="topShadow"
+      class="list-shadow-top"
+    />
+    <div
+      v-if="bottomShadow"
+      class="list-shadow-bottom"
+    />
     <div
       style="overflow-y: scroll; height: 100%;"
       class="mx-4"
+      @scroll="onScroll"
     >
       <v-list
         class="pt-1 mt-n4 custom"
@@ -24,6 +32,7 @@
 
             <v-list-item>
               <v-list-item-content
+                style="cursor: pointer; user-select: none;"
                 @click="expandClicked(modInfo)"
               >
                 <span :class="isCompatible || 'error--text'">{{ modInfo.name }}</span>
@@ -97,6 +106,12 @@ import { mapState, mapGetters } from 'vuex';
 import { lastElement } from '../utils';
 
 export default {
+  data() {
+    return {
+      topShadow: false,
+      bottomShadow: true,
+    };
+  },
   computed: {
     ...mapState([
       'favoriteModIds',
@@ -123,6 +138,11 @@ export default {
     },
     currentModProgress(mod) {
       return lastElement(this.modProgress(mod).progresses);
+    },
+    onScroll(event) {
+      this.topShadow = event.target.scrollTop > 0;
+      this.bottomShadow = event.target.scrollTop + event.target.offsetHeight < event.target.scrollHeight;
+      console.log(event.target.scrollTop, this.topShadow, this.bottomShadow);
     },
     lastElement,
   },
@@ -156,14 +176,20 @@ div {
   opacity: 0.65;
 }
 
-.list-shadow {
+.list-shadow-top, .list-shadow-bottom {
   position: absolute;
   width: 100%;
   height: 100%;
-  top: 0px;
-  box-shadow: inset 0px 45px 20px -20px rgba(0,0,0,0.3), inset 0px -45px 20px -20px rgba(0,0,0,0.3);
+  top: 0;
   z-index: 1;
   background: transparent !important;
   pointer-events: none;
+}
+
+.list-shadow-top {
+  box-shadow: inset 0px 45px 20px -20px rgba(0,0,0,0.3);
+}
+.list-shadow-bottom {
+  box-shadow: inset 0px -45px 20px -20px rgba(0,0,0,0.3);
 }
 </style>
