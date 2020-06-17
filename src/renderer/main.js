@@ -1,10 +1,8 @@
 import Vue from 'vue';
-import axios from 'axios';
 
 import vueElectron from 'vue-electron';
 import Vuetify from 'vuetify';
 import App from './App';
-import router from './router';
 import 'vuetify/dist/vuetify.min.css';
 import '@mdi/font/css/materialdesignicons.css';
 import store from './store';
@@ -12,15 +10,12 @@ import { getSetting } from './settings';
 
 if (!process.env.IS_WEB) Vue.use(vueElectron);
 
-// eslint-disable-next-line no-multi-assign
-Vue.http = Vue.prototype.$http = axios;
 Vue.config.productionTip = false;
 Vue.use(Vuetify);
 
 /* eslint-disable no-new */
 new Vue({
   components: { App },
-  router,
   vuetify: new Vuetify({
     icons: {
       iconfont: 'mdi',

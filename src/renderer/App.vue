@@ -1,14 +1,19 @@
 <template>
   <v-app>
     <v-content>
-      <router-view />
+      <Main />
     </v-content>
   </v-app>
 </template>
 
 <script>
+import Main from './components/Main';
+
 export default {
   name: 'SatisfactoryModManager',
+  components: {
+    Main,
+  },
 };
 </script>
 
