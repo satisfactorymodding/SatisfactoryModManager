@@ -40,7 +40,7 @@
         <v-row
           class="mod-description"
           :class="expandDetails ? 'expanded' : ''"
-          :style="expandDetails ? `height: ${windowHeight - 187}px;` : ''"
+          :style="expandDetails ? `height: ${windowHeight - 219}px;` : ''"
         >
           <div
             v-if="!expandDetails"
