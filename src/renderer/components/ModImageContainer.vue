@@ -1,7 +1,8 @@
 <template>
   <v-row
     v-if="!expandDetails"
-    class="image-container flex-grow-1 flex-shrink-1"
+    class="image-container"
+    style="flex-grow: 2"
     no-gutters
   >
     <div
@@ -18,10 +19,10 @@
     >
       <template v-for="n in images.length">
         <img
-          class="mod-gallery-image"
           v-if="images[n - 1]"
           :key="n"
           ref="image"
+          class="mod-gallery-image"
           :src="images[n - 1]"
           @click="bigImage(n - 1)"
         >
@@ -41,11 +42,26 @@
 export default {
   name: 'ModImageContainer',
   props: {
-    bigImage: {},
-    canScrollImagesRight: {},
-    expandDetails: {},
-    imagePage: {},
-    images: {},
+    bigImage: {
+      type: Function,
+      default: () => {},
+    },
+    canScrollImagesRight: {
+      type: Boolean,
+      default: false,
+    },
+    expandDetails: {
+      type: Boolean,
+      default: false,
+    },
+    imagePage: {
+      type: Number,
+      default: 0,
+    },
+    images: {
+      type: Array,
+      default: () => [],
+    },
   },
 };
 </script>

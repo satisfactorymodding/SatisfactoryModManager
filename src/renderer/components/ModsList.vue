@@ -142,7 +142,6 @@ export default {
     onScroll(event) {
       this.topShadow = event.target.scrollTop > 0;
       this.bottomShadow = event.target.scrollTop + event.target.offsetHeight < event.target.scrollHeight;
-      console.log(event.target.scrollTop, this.topShadow, this.bottomShadow);
     },
     lastElement,
   },

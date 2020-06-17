@@ -10,7 +10,7 @@
   >
     <v-row
       no-gutters
-      style="padding-top: 16px; flex: 0"
+      style="padding-top: 16px; flex: 0; flex-grow: 1;"
     >
       <v-col cols="auto">
         <img
@@ -41,9 +41,15 @@
           class="mod-description"
           :class="expandDetails ? 'expanded' : ''"
           :style="expandDetails ? `height: ${windowHeight - 187}px;` : ''"
-          v-html="modDescription"
-        />
+        >
+          <div
+            v-if="!expandDetails"
+            class="expended-description-shadow"
+          />
+          <div v-html="modDescription" />
+        </v-row>
         <v-row
+          v-if="images && images.length > 0"
           class="expand-details-button"
           :class="expandDetails ? 'expanded' : ''"
           @click="toggleExpandDetails"
@@ -236,6 +242,7 @@
       </v-col>
     </v-row>
     <ModImageContainer
+      v-if="images && images.length > 0"
       :can-scroll-images-right="canScrollImagesRight"
       :expand-details="expandDetails"
       :image-page="imagePage"
@@ -324,6 +331,9 @@ export default {
     },
     imagePage() {
       this.calculatePageLocation();
+    },
+    images() {
+      this.expandDetails = !this.images || this.images.length === 0;
     },
   },
   created() {
@@ -437,7 +447,6 @@ export default {
   display: block;
   overflow: hidden;
   height: 169px;
-  box-shadow: inset 0px -35px 13px -16px rgba(0, 0, 0, 0.45);
   word-break: break-word;
 }
 
@@ -498,5 +507,11 @@ export default {
 :not(.expanded) > .expand-details-text {
   padding-bottom: 0;
   padding-top: 17px;
+}
+.expended-description-shadow {
+  position: absolute;
+  width: 100%;
+  height: 169px;
+  box-shadow: inset 0px -35px 13px -16px rgba(0, 0, 0, 0.45);
 }
 </style>
