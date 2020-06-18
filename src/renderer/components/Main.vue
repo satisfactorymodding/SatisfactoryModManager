@@ -186,7 +186,7 @@ import { exec } from 'child_process';
 import { getCacheFolder } from 'platform-folders';
 import fs from 'fs';
 import path from 'path';
-import TitleBar from './TitleBar';
+import TitleBar from './title-bar/TitleBar';
 import ControlArea from './ControlArea';
 import ModsList from './ModsList';
 import ModDetails from './ModDetails';
