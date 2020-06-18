@@ -10,7 +10,7 @@
   >
     <v-row
       no-gutters
-      style="padding-top: 16px; flex: 0; flex-grow: 1;"
+      style="padding-top: 16px; flex: 0;"
     >
       <v-col cols="auto">
         <img
@@ -40,7 +40,7 @@
         <v-row
           class="mod-description"
           :class="expandDetails ? 'expanded' : ''"
-          :style="expandDetails ? `height: ${windowHeight - 219}px;` : ''"
+          :style="expandDetails ? `height: ${images && images.length > 0 ? windowHeight - 220 : windowHeight - 167}px;` : ''"
         >
           <div
             v-if="!expandDetails"
@@ -241,23 +241,17 @@
         </v-row>
       </v-col>
     </v-row>
-    <ModImageContainer
-      v-if="images && images.length > 0"
-      :expand-details="expandDetails"
-      :images="images"
-      :big-image="bigImage"
-    />
-    <v-dialog
-      v-model="showBigImage"
-      width="unset"
+    <v-row
+      v-if="!expandDetails"
+      class="image-container"
+      style="flex-grow: 2"
+      no-gutters
     >
-      <v-card>
-        <img
-          :src="bigImageSrc"
-          style="display: block; max-height: 750px"
-        >
-      </v-card>
-    </v-dialog>
+      <ModImageContainer
+        v-if="images && images.length > 0"
+        :images="images"
+      />
+    </v-row>
   </v-card>
 </template>
 
@@ -272,8 +266,6 @@ export default {
   data() {
     return {
       expandDetails: false,
-      imagePage: -1,
-      bigImageSrc: '',
       images: [],
       windowHeight: 0,
     };
@@ -310,16 +302,6 @@ export default {
       }
       return el.innerHTML;
     },
-    showBigImage: {
-      get() {
-        return !!this.bigImageSrc;
-      },
-      set(value) {
-        if (!value) {
-          this.bigImageSrc = '';
-        }
-      },
-    },
   },
   watch: {
     expandedModId() {
@@ -332,11 +314,12 @@ export default {
   created() {
     window.addEventListener('resize', this.onResize);
   },
-  mounted() {
-    this.generateImages();
-  },
   destroyed() {
     window.removeEventListener('resize', this.onResize);
+  },
+  mounted() {
+    this.generateImages();
+    this.windowHeight = window.innerHeight;
   },
   methods: {
     close() {
@@ -360,9 +343,6 @@ export default {
       } else {
         this.$store.dispatch('removeModFromProfile', { mod: this.$store.state.expandedModId, profile: profile.name });
       }
-    },
-    bigImage(idx) {
-      this.bigImageSrc = this.images[idx];
     },
     async generateImages() {
       const el = this.descriptionAsElement;
@@ -420,20 +400,18 @@ export default {
   color: var(--v-info-base);
   font-weight: 500;
 }
+
 .mod-description {
   display: block;
   overflow: hidden;
   height: 169px;
   word-break: break-word;
 }
-
 .mod-description.expanded {
   overflow-y: auto;
   box-shadow: none;
 }
-.control-bar {
-  background: rgba(0, 0, 0, 0.45);
-}
+
 .expand-details-button {
   position: relative;
   top: -5px;
@@ -441,40 +419,27 @@ export default {
 .expand-details-button.expanded {
   top: 5px;
 }
+
 .v-divider {
   border-color: var(--v-text-base) !important;
 }
+
 .custom.v-input {
   margin-top: 0 !important;
   color: var(--v-background-base);
+}
+
+.control-bar {
+  background: rgba(0, 0, 0, 0.45);
 }
 .control-bar .col {
   padding-top: 2px !important;
   padding-bottom: 2px !important;
 }
+
 .row {
   margin-left: 0 !important;
   margin-right: 0 !important;
-}
-
-.image-container img {
-  height: 100%;
-  display: block;
-}
-@media (min-height: 850px) {
-  .image-container img {
-    height: 50%;
-  }
-}
-@media (min-height: 1000px) {
-  .image-container img {
-    height: 33.33%;
-  }
-}
-@media (min-height: 1500px) {
-  .image-container img {
-    height: 25%;
-  }
 }
 
 .expand-details-text {
