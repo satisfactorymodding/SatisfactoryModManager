@@ -66,13 +66,4 @@ export default {
 };
 </script>
 <style scoped>
-    .dragregion > span {
-        flex-grow: 1;
-        margin-top: -3px;
-    }
-
-    .button > span {
-        flex-grow: 1;
-        user-select: none;
-    }
 </style>

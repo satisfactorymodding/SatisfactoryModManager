@@ -9,7 +9,7 @@
           <div :key="index">
             <h3>v{{ release.version }}</h3>
             <!-- eslint-disable vue/no-v-html -->
-            <span v-html="changelogHTML" />
+            <span v-html="changelogHTML(release)" />
             <v-divider v-if="index != viewChangelogUpdate.releases.length - 1" />
           </div>
         </template>
@@ -47,13 +47,4 @@ export default {
 };
 </script>
 <style scoped>
-    .dragregion > span {
-        flex-grow: 1;
-        margin-top: -3px;
-    }
-
-    .button > span {
-        flex-grow: 1;
-        user-select: none;
-    }
 </style>

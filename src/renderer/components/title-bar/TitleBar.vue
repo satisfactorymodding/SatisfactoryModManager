@@ -226,33 +226,6 @@ export default {
   color: var(--v-text2-base) !important;
   background-color: var(--v-background-base);
 }
-.app-menu .v-list {
-  background-color: var(--v-menuBackground-base);
-}
-.custom.v-list {
-  background-color: var(--v-background-base);
-}
-.custom.v-list .v-list-item__action {
-  margin: 0;
-}
-.v-icon {
-  font-size: 18px !important;
-}
-
-.v-list-item {
-  padding-left: 10px !important;
-}
-.v-list-item__action:first-child {
-  margin-right: 0px !important;
-}
-.custom.v-divider--inset:not(.v-divider--vertical) {
-  margin-left: 30px !important;
-  max-width: calc(100% - 60px) !important;
-}
-.custom.v-divider:not(.v-divider--inset):not(.v-divider--vertical) {
-  margin-left: 10px !important;
-  max-width: calc(100% - 40px) !important;
-}
 .bar {
   flex-grow: 1;
   display: flex;
@@ -293,9 +266,5 @@ export default {
 .button>span.dash {
   vertical-align: sub;
   margin-top: 0px;
-}
-#settingsIcon {
-  height: 18px;
-  margin: 4.5px;
 }
 </style>

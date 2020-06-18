@@ -899,4 +899,31 @@ export default {
         flex-grow: 1;
         user-select: none;
     }
+
+    .app-menu .v-list {
+      background-color: var(--v-menuBackground-base);
+    }
+    .custom.v-list {
+      background-color: var(--v-background-base);
+    }
+    .custom.v-list .v-list-item__action {
+      margin: 0;
+    }
+    .v-icon {
+      font-size: 18px !important;
+    }
+    .v-list-item {
+      padding-left: 10px !important;
+    }
+    .v-list-item__action:first-child {
+      margin-right: 0px !important;
+    }
+    .custom.v-divider--inset:not(.v-divider--vertical) {
+      margin-left: 30px !important;
+      max-width: calc(100% - 60px) !important;
+    }
+    .custom.v-divider:not(.v-divider--inset):not(.v-divider--vertical) {
+      margin-left: 10px !important;
+      max-width: calc(100% - 40px) !important;
+    }
 </style>
