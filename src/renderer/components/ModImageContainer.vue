@@ -46,21 +46,49 @@ export default {
       type: Function,
       default: () => {},
     },
-    canScrollImagesRight: {
-      type: Boolean,
-      default: false,
-    },
     expandDetails: {
       type: Boolean,
       default: false,
     },
-    imagePage: {
-      type: Number,
-      default: 0,
-    },
     images: {
       type: Array,
       default: () => [],
+    },
+  },
+  data() {
+    return {
+      imagePage: 0,
+      imagesPerColumn: 1,
+      canScrollImagesRight: false,
+    };
+  },
+  watch: {
+    imagePage() {
+      this.calculatePageLocation();
+    },
+    images() {
+      this.calculatePageLocation();
+    },
+  },
+  created() {
+    window.addEventListener('resize', this.calculatePageLocation);
+  },
+  mounted() {
+    this.calculatePageLocation();
+  },
+  methods: {
+    calculatePageLocation() {
+      if (this.$refs.image && this.$refs.image[0]) {
+        let currentWidth = 0;
+        this.imagesPerColumn = Math.round(this.$refs.images.clientHeight / this.$refs.image[0].height);
+        for (let i = 0; i < this.imagePage && this.$refs.image[i * this.imagesPerColumn]; i += 1) {
+          currentWidth += this.$refs.image[i * this.imagesPerColumn].width;
+        }
+        this.$refs.images.scrollLeft = currentWidth;
+        this.canScrollImagesRight = currentWidth + this.$refs.images.offsetWidth < this.$refs.images.scrollWidth;
+      } else {
+        this.canScrollImagesRight = false;
+      }
     },
   },
 };
@@ -109,7 +137,7 @@ export default {
         line-height: 10px;
         position: absolute;
         bottom: 0;
-        top: 370px;
+        top: 351px;
         z-index: 1;
     }
 
@@ -136,5 +164,9 @@ export default {
 
     .mod-gallery-image {
         cursor: pointer;
+    }
+
+    .hidden {
+      visibility: hidden;
     }
 </style>

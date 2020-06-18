@@ -243,9 +243,7 @@
     </v-row>
     <ModImageContainer
       v-if="images && images.length > 0"
-      :can-scroll-images-right="canScrollImagesRight"
       :expand-details="expandDetails"
-      :image-page="imagePage"
       :images="images"
       :big-image="bigImage"
     />
@@ -277,8 +275,6 @@ export default {
       imagePage: -1,
       bigImageSrc: '',
       images: [],
-      imagesPerColumn: 1,
-      canScrollImagesRight: false,
       windowHeight: 0,
     };
   },
@@ -329,9 +325,6 @@ export default {
     expandedModId() {
       this.generateImages();
     },
-    imagePage() {
-      this.calculatePageLocation();
-    },
     images() {
       this.expandDetails = !this.images || this.images.length === 0;
     },
@@ -376,27 +369,12 @@ export default {
       const imgs = [...el.getElementsByTagName('img')];
       await Promise.all(imgs.map(async (img) => {
         while (!img.complete) {
-        // eslint-disable-next-line no-await-in-loop
+          // eslint-disable-next-line no-await-in-loop
           await new Promise((resolve) => setTimeout(resolve, 100));
         }
       }));
       imgs.sort((a, b) => a.naturalWidth - b.naturalWidth);
       this.images = imgs.map((img) => img.src);
-      this.imagePage = 0;
-      setTimeout(() => this.calculatePageLocation(), 500);
-    },
-    calculatePageLocation() {
-      if (this.$refs.image && this.$refs.image[0]) {
-        let currentWidth = 0;
-        this.imagesPerColumn = Math.round(this.$refs.images.clientHeight / this.$refs.image[0].height);
-        for (let i = 0; i < this.imagePage && this.$refs.image[i * this.imagesPerColumn]; i += 1) {
-          currentWidth += this.$refs.image[i * this.imagesPerColumn].width;
-        }
-        this.$refs.images.scrollLeft = currentWidth;
-        this.canScrollImagesRight = this.$refs.images.scrollWidth - this.$refs.images.clientWidth > currentWidth;
-      } else {
-        this.canScrollImagesRight = false;
-      }
     },
     validAndEq(v1, v2) {
       const v1Valid = valid(coerce(v1));
@@ -407,7 +385,6 @@ export default {
       return false;
     },
     onResize() {
-      this.calculatePageLocation();
       this.windowHeight = window.innerHeight;
     },
   },
