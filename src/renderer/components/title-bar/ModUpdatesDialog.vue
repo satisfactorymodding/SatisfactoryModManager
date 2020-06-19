@@ -12,7 +12,7 @@
           color="primary"
           text
           :disabled="inProgress.length > 0"
-          @click="updateAll"
+          @click="$emit('updateAll')"
         >
           Update all
         </v-btn>
@@ -60,7 +60,7 @@
                   <v-btn
                     color="text"
                     text
-                    @click="viewChangelog"
+                    @click="$emit('viewChangelog', update)"
                   >
                     Changelog
                   </v-btn>
@@ -70,7 +70,7 @@
                     color="primary"
                     text
                     :disabled="inProgress.length > 0"
-                    @click="updateItem"
+                    @click="$emit('updateItem', update)"
                   >
                     Update
                   </v-btn>
@@ -79,9 +79,9 @@
                   <v-btn
                     color="text"
                     text
-                    @click="isIgnored ? unignoreUpdate : ignoreUpdate"
+                    @click="isIgnored(update) ? $emit('unignoreUpdate', update) : $emit('ignoreUpdate', update)"
                   >
-                    {{ isIgnored ? 'Unignore' : 'Ignore' }}
+                    {{ isIgnored(update) ? 'Unignore' : 'Ignore' }}
                   </v-btn>
                 </v-list-item-action>
               </v-list-item>
@@ -101,41 +101,22 @@
     </v-card>
   </v-dialog>
 </template>
+
 <script>
+import { mapState } from 'vuex';
 import { lastElement } from '../../utils';
 
 export default {
-  name: 'ModUpdatesDialog',
   props: {
     filteredModUpdates: {
       type: Array,
       default: () => [],
     },
-    ignoreUpdate: {
-      type: Function,
-      default: () => {},
-    },
-    inProgress: {
+    ignoredUpdates: {
       type: Array,
       default: () => [],
     },
     isIgnored: {
-      type: Function,
-      default: () => {},
-    },
-    unignoreUpdate: {
-      type: Function,
-      default: () => {},
-    },
-    updateAll: {
-      type: Function,
-      default: () => {},
-    },
-    updateItem: {
-      type: Function,
-      default: () => {},
-    },
-    viewChangelog: {
       type: Function,
       default: () => {},
     },
@@ -146,6 +127,9 @@ export default {
     };
   },
   computed: {
+    ...mapState([
+      'inProgress',
+    ]),
     isMultiModUpdateInProgress() {
       return this.inProgress.some((prog) => prog.id === '__updateMods__');
     },
@@ -166,5 +150,18 @@ export default {
   },
 };
 </script>
+
 <style scoped>
+.custom.v-list {
+  background-color: var(--v-background-base);
+}
+.custom.v-list .v-list-item__action {
+  margin: 0;
+}
+.v-list-item {
+  padding-left: 10px !important;
+}
+.v-list-item__action:first-child {
+  margin-right: 0px !important;
+}
 </style>

@@ -15,7 +15,7 @@
         <v-btn
           color="primary"
           text
-          @click="updateSMMNow"
+          @click="$emit('updateSMMNow')"
         >
           Update now
         </v-btn>
@@ -30,9 +30,9 @@
     </v-card>
   </v-dialog>
 </template>
+
 <script>
 export default {
-  name: 'SMMUpdateDialog',
   props: {
     availableSMMUpdate: {
       type: Object,
@@ -42,10 +42,6 @@ export default {
       type: String,
       default: '',
     },
-    updateSMMNow: {
-      type: Function,
-      default: () => {},
-    },
   },
   data() {
     return {
@@ -54,5 +50,3 @@ export default {
   },
 };
 </script>
-<style scoped>
-</style>

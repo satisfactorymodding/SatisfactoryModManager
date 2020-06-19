@@ -41,18 +41,16 @@
     </v-card>
   </v-dialog>
 </template>
+
 <script>
+import { mapState } from 'vuex';
 import { lastElement } from '../../utils';
 
 export default {
-  name: 'ProfileImportProgressDialog',
-  props: {
-    inProgress: {
-      type: Array,
-      default: () => [],
-    },
-  },
   computed: {
+    ...mapState([
+      'inProgress',
+    ]),
     isProfileImportInProgress() {
       return this.inProgress.some((prog) => prog.id === '__importProfile__');
     },
@@ -65,5 +63,3 @@ export default {
   },
 };
 </script>
-<style scoped>
-</style>

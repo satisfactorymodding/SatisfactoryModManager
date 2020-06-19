@@ -26,14 +26,12 @@
     </v-card>
   </v-dialog>
 </template>
+
 <script>
+import { markdownAsElement } from '../../utils';
+
 export default {
-  name: 'ChangelogDialog',
   props: {
-    changelogHTML: {
-      type: Function,
-      default: () => {},
-    },
     viewChangelogUpdate: {
       type: Object,
       default: () => undefined,
@@ -44,7 +42,10 @@ export default {
       changelogDialog: false,
     };
   },
+  methods: {
+    changelogHTML(release) {
+      return markdownAsElement(release.changelog).innerHTML;
+    },
+  },
 };
 </script>
-<style scoped>
-</style>

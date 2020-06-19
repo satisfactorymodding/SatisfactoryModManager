@@ -418,7 +418,7 @@ export default new Vuex.Store({
         progresses: [],
       };
       const placeholderProgreess = {
-        id: '', progress: -1, message: `Updating ${updates.length} mods`, fast: false,
+        id: '', progress: -1, message: `Updating ${updates.length} mod${updates.length > 1 ? 's' : ''}`, fast: false,
       };
       updateProgress.progresses.push(placeholderProgreess);
       state.inProgress.push(updateProgress);

@@ -2,18 +2,17 @@
   <div class="titlebar">
     <div
       class="d-inline-flex align-items-center"
-      @click="$refs.appMenu.menuOpen = !$refs.appMenu.menuOpen"
     >
       <AppMenu
         ref="appMenu"
         :available-s-m-m-update="availableSMMUpdate"
-        :check-for-updates="checkForUpdates"
         :filtered-mod-updates="filteredModUpdates"
-        :show-ignored-updates="showIgnoredUpdates"
-        :add-update-listener="addUpdateListener"
-        :set-show-ignored-updates="setShowIgnoredUpdates"
-        :open-smm-update-dialog="openSmmUpdateDialog"
-        :open-mod-updates-dialog="openModUpdatesDialog"
+        :show-ignored-updates.sync="showIgnoredUpdates"
+        :update-check-mode.sync="updateCheckMode"
+        @checkForUpdates="checkForUpdates"
+        @addUpdateListener="addUpdateListener"
+        @openSMMUpdateDialog="openSMMUpdateDialog"
+        @openModUpdatesDialog="openModUpdatesDialog"
       />
     </div>
     <div class="bar">
@@ -28,27 +27,28 @@
       </div>
     </div>
     <ModUpdatesDialog
+      ref="modUpdatesDialog"
       :filtered-mod-updates="filteredModUpdates"
-      :ignore-update="ignoreUpdate"
-      :in-progress="inProgress"
+      :ignored-updates="ignoredUpdates"
       :is-ignored="isIgnored"
-      :unignore-update="unignoreUpdate"
-      :update-all="updateAll"
-      :update-item="updateItem"
-      :view-changelog="viewChangelog"
+      @ignoreUpdate="ignoreUpdate"
+      @unignoreUpdate="unignoreUpdate"
+      @updateItem="updateItem"
+      @updateAll="updateAll"
+      @viewChangelog="viewChangelog"
     />
     <ChangelogDialog
-      :changelog-h-t-m-l="changelogHTML"
+      ref="changelogDialog"
       :view-changelog-update="viewChangelogUpdate"
     />
     <SMMUpdateDialog
       ref="smmUpdateDialog"
       :available-s-m-m-update="availableSMMUpdate"
       :smm-update-notes="smmUpdateNotes"
-      :update-s-m-m-now="updateSMMNow"
+      @updateSMMNow="updateSMMNow"
     />
-    <ProfileExportProgressDialog :in-progress="inProgress" />
-    <ProfileImportProgressDialog :in-progress="inProgress" />
+    <ProfileExportProgressDialog />
+    <ProfileImportProgressDialog />
   </div>
 </template>
 
@@ -57,9 +57,9 @@ import {
   validAndGreater,
 } from 'satisfactory-mod-manager-api';
 import { mapState } from 'vuex';
-import { getSetting } from '../../settings';
+import { getSetting, saveSetting } from '../../settings';
 import {
-  ignoreUpdate, markdownAsElement, unignoreUpdate,
+  ignoreUpdate, unignoreUpdate,
 } from '../../utils';
 import ProfileImportProgressDialog from './ProfileImportProgressDialog';
 import ProfileExportProgressDialog from './ProfileExportProgressDialog';
@@ -94,6 +94,7 @@ export default {
       showIgnoredUpdates: false,
       ignoredUpdates: [],
       importProfileMetadata: null,
+      cachedUpdateCheckMode: 'launch',
     };
   },
   computed: {
@@ -116,6 +117,15 @@ export default {
     filteredModUpdates() {
       return (this.showIgnoredUpdates ? this.modUpdates : this.modUpdates.filter((update) => !this.isIgnored(update)));
     },
+    updateCheckMode: {
+      get() {
+        return this.cachedUpdateCheckMode;
+      },
+      set(value) {
+        saveSetting('updateCheckMode', value);
+        this.cachedUpdateCheckMode = value;
+      },
+    },
   },
   watch: {
     async selectedInstall() {
@@ -135,14 +145,23 @@ export default {
   },
   mounted() {
     this.ignoredUpdates = getSetting('ignoredUpdates', []);
+    this.cachedUpdateCheckMode = getSetting('updateCheckMode', 'launch');
+
+    if (this.updateChecKmode === 'launch') {
+      this.$root.$once('doneLaunchUpdateCheck', () => {
+        this.addUpdateListener();
+      });
+    } else {
+      this.addUpdateListener();
+    }
     this.nextCheckForUpdates = setTimeout(() => this.checkForUpdates(), UPDATE_CHECK_INTERVAL);
   },
   methods: {
     setShowIgnoredUpdates(value) {
       this.showIgnoredUpdates = value;
     },
-    openSmmUpdateDialog() {
-      this.refs.smmUpdateDialog.smmUpdateDialog = true;
+    openSMMUpdateDialog() {
+      this.$refs.smmUpdateDialog.smmUpdateDialog = true;
     },
     openModUpdatesDialog() {
       this.$refs.modUpdatesDialog.modUpdatesDialog = true;
@@ -156,7 +175,7 @@ export default {
       this.$electron.ipcRenderer.on('updateAvailable', (e, updateInfo) => {
         this.availableSMMUpdate = updateInfo;
         if (this.updateCheckMode === 'ask') {
-          this.$refs.smmUpdateDialog.smmUpdateDialogdateDialog = true;
+          this.$refs.smmUpdateDialog.smmUpdateDialog = true;
         }
       });
     },
@@ -205,9 +224,6 @@ export default {
       this.viewChangelogUpdate = update;
       this.$refs.changelogDialog.changelogDialog = true;
     },
-    changelogHTML(release) {
-      return markdownAsElement(release.changelog).innerHTML;
-    },
   },
 };
 </script>
@@ -219,7 +235,6 @@ export default {
 }
 .titlebar {
   display: flex;
-  height: var(--titlebar-height);
   padding-bottom: 4px;
 }
 .titlebar, .titlebar > * {
@@ -255,9 +270,6 @@ export default {
 .button>span {
   flex-grow: 1;
   user-select: none;
-}
-.button:hover {
-  background-color: var(--titlebar-button-hover-color);
 }
 .close:hover {
   background-color: red;

@@ -50,7 +50,7 @@
 
               <v-divider class="custom" />
 
-              <v-list-item @click="checkForUpdates">
+              <v-list-item @click="$emit('checkForUpdates')">
                 <v-list-item-action />
                 <v-list-item-content>
                   <v-list-item-title>Check for updates</v-list-item-title>
@@ -114,7 +114,7 @@
 
               <v-list-item
                 :disabled="filteredModUpdates.length === 0"
-                @click="openModUpdatesDialog()"
+                @click="$emit('openModUpdatesDialog')"
               >
                 <v-list-item-action />
                 <v-list-item-content>
@@ -129,7 +129,7 @@
 
               <v-list-item
                 :disabled="!availableSMMUpdate"
-                @click="openSmmUpdateDialog()"
+                @click="$emit('openSMMUpdateDialog')"
               >
                 <v-list-item-action />
                 <v-list-item-content>
@@ -619,6 +619,7 @@
     </v-card>
   </v-menu>
 </template>
+
 <script>
 import { clearCache, getLogFilePath, setDebug } from 'satisfactory-mod-manager-api';
 import JSZip from 'jszip';
@@ -630,23 +631,10 @@ import { filenameFriendlyDate } from '../../utils';
 import { getSetting, saveSetting } from '../../settings';
 
 export default {
-  name: 'AppMenu',
   props: {
     availableSMMUpdate: {
       type: Object,
       default: () => ({}),
-    },
-    checkForUpdates: {
-      type: Function,
-      default: () => {},
-    },
-    addUpdateListener: {
-      type: Function,
-      default: () => {},
-    },
-    setShowIgnoredUpdates: {
-      type: Function,
-      default: () => {},
     },
     filteredModUpdates: {
       type: Array,
@@ -656,13 +644,9 @@ export default {
       type: Boolean,
       default: false,
     },
-    openSmmUpdateDialog: {
-      type: Function,
-      default: () => {},
-    },
-    openModUpdatesDialog: {
-      type: Function,
-      default: () => {},
+    updateCheckMode: {
+      type: String,
+      default: '',
     },
   },
   data() {
@@ -678,7 +662,6 @@ export default {
       helpDialog: false,
       cachedDebugMode: false,
       menuOpen: false,
-      cachedUpdateCheckMode: 'launch',
     };
   },
   computed: {
@@ -739,21 +722,12 @@ export default {
         this.cachedDebugMode = value;
       },
     },
-    updateCheckMode: {
-      get() {
-        return this.cachedUpdateCheckMode;
-      },
-      set(value) {
-        saveSetting('updateCheckMode', value);
-        this.cachedUpdateCheckMode = value;
-      },
-    },
     showIgnoredUpdatesLocal: {
       get() {
         return this.showIgnoredUpdates;
       },
       set(value) {
-        this.setShowIgnoredUpdates(value);
+        this.$emit('update:showIgnoredUpdates', value);
       },
     },
   },
@@ -778,15 +752,6 @@ export default {
   },
   mounted() {
     this.cachedDebugMode = getSetting('debugMode', false);
-    this.cachedUpdateCheckMode = getSetting('updateCheckMode', 'launch');
-
-    if (this.updateCheckMode === 'launch') {
-      this.$root.$once('doneLaunchUpdateCheck', () => {
-        this.addUpdateListener();
-      });
-    } else {
-      this.addUpdateListener();
-    }
   },
   methods: {
     moddingDiscord() {
@@ -885,45 +850,36 @@ export default {
   },
 };
 </script>
+
 <style scoped>
-    .app-icon {
-        padding: 3px 0px 0px 3px;
-    }
+.app-icon {
+  padding: 3px 0px 0px 3px;
+}
 
-    .dragregion > span {
-        flex-grow: 1;
-        margin-top: -3px;
-    }
-
-    .button > span {
-        flex-grow: 1;
-        user-select: none;
-    }
-
-    .app-menu .v-list {
-      background-color: var(--v-menuBackground-base);
-    }
-    .custom.v-list {
-      background-color: var(--v-background-base);
-    }
-    .custom.v-list .v-list-item__action {
-      margin: 0;
-    }
-    .v-icon {
-      font-size: 18px !important;
-    }
-    .v-list-item {
-      padding-left: 10px !important;
-    }
-    .v-list-item__action:first-child {
-      margin-right: 0px !important;
-    }
-    .custom.v-divider--inset:not(.v-divider--vertical) {
-      margin-left: 30px !important;
-      max-width: calc(100% - 60px) !important;
-    }
-    .custom.v-divider:not(.v-divider--inset):not(.v-divider--vertical) {
-      margin-left: 10px !important;
-      max-width: calc(100% - 40px) !important;
-    }
+.app-menu .v-list {
+  background-color: var(--v-menuBackground-base);
+}
+.custom.v-list {
+  background-color: var(--v-background-base);
+}
+.custom.v-list .v-list-item__action {
+  margin: 0;
+}
+.v-icon {
+  font-size: 18px !important;
+}
+.v-list-item {
+  padding-left: 10px !important;
+}
+.v-list-item__action:first-child {
+  margin-right: 0px !important;
+}
+.custom.v-divider--inset:not(.v-divider--vertical) {
+  margin-left: 30px !important;
+  max-width: calc(100% - 60px) !important;
+}
+.custom.v-divider:not(.v-divider--inset):not(.v-divider--vertical) {
+  margin-left: 10px !important;
+  max-width: calc(100% - 40px) !important;
+}
 </style>
