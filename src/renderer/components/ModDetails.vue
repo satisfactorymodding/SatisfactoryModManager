@@ -56,7 +56,7 @@
           <v-col
             class="expand-details-text"
           >
-            <span>Show {{ expandDetails ? 'less' : 'more' }}<br><v-icon v-if="!expandDetails">mdi-chevron-down</v-icon><v-icon v-else>mdi-chevron-up</v-icon></span>
+            <span>{{ expandDetails ? 'See gallery' : 'Full description' }}<br><v-icon v-if="!expandDetails">mdi-chevron-down</v-icon><v-icon v-else>mdi-chevron-up</v-icon></span>
           </v-col>
         </v-row>
       </v-col>
@@ -344,16 +344,17 @@ export default {
       }
     },
     async generateImages() {
-      const el = this.descriptionAsElement;
-      const imgs = [...el.getElementsByTagName('img')];
-      await Promise.all(imgs.map(async (img) => {
-        while (!img.complete) {
-          // eslint-disable-next-line no-await-in-loop
-          await new Promise((resolve) => setTimeout(resolve, 100));
-        }
-      }));
-      imgs.sort((a, b) => a.naturalWidth - b.naturalWidth);
-      this.images = imgs.map((img) => img.src);
+      this.images = []; // gallery is disabled until width issue is fixed
+      // const el = this.descriptionAsElement;
+      // const imgs = [...el.getElementsByTagName('img')];
+      // await Promise.all(imgs.map(async (img) => {
+      //   while (!img.complete) {
+      //     // eslint-disable-next-line no-await-in-loop
+      //     await new Promise((resolve) => setTimeout(resolve, 100));
+      //   }
+      // }));
+      // imgs.sort((a, b) => a.naturalWidth - b.naturalWidth);
+      // this.images = imgs.map((img) => img.src);
     },
     validAndEq(v1, v2) {
       const v1Valid = valid(coerce(v1));
