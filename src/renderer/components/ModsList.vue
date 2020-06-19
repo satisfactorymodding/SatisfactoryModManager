@@ -12,9 +12,10 @@
       class="list-shadow-bottom"
     />
     <div
+      ref="modsList"
       style="overflow-y: scroll; height: 100%;"
       class="mx-4"
-      @scroll="onScroll"
+      @scroll="modsListScrolled"
     >
       <v-list
         class="pt-1 mt-n4 custom"
@@ -123,6 +124,11 @@ export default {
       canInstallMods: 'canInstallMods',
     }),
   },
+  watch: {
+    mods() {
+      setTimeout(() => this.modsListScrolled(), 1);
+    },
+  },
   methods: {
     expandClicked(mod) {
       this.$store.dispatch('expandMod', mod.mod_reference);
@@ -139,9 +145,9 @@ export default {
     currentModProgress(mod) {
       return lastElement(this.modProgress(mod).progresses);
     },
-    onScroll(event) {
-      this.topShadow = event.target.scrollTop > 0;
-      this.bottomShadow = event.target.scrollTop + event.target.offsetHeight < event.target.scrollHeight;
+    modsListScrolled() {
+      this.topShadow = this.$refs.modsList.scrollTop > 0;
+      this.bottomShadow = this.$refs.modsList.scrollTop + this.$refs.modsList.offsetHeight < this.$refs.modsList.scrollHeight;
     },
     lastElement,
   },
