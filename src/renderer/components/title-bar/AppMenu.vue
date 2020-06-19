@@ -752,6 +752,10 @@ export default {
   },
   mounted() {
     this.cachedDebugMode = getSetting('debugMode', false);
+
+    if (this.debugMode) {
+      setDebug(this.debugMode);
+    }
   },
   methods: {
     moddingDiscord() {

@@ -25,7 +25,6 @@ export function ignoreUpdate(item, version) {
   return ignoredUpdates;
 }
 
-
 export function unignoreUpdate(item, version) {
   const ignoredUpdates = getSetting('ignoredUpdates', []);
   ignoredUpdates.removeWhere((update) => update.item === item && update.version === version);

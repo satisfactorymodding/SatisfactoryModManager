@@ -2,7 +2,6 @@
 <template>
   <v-card
     tile
-    flat
     class="d-flex flex-column"
     width="100%"
     height="100%"

@@ -1,4 +1,3 @@
-
 import {
   app, BrowserWindow, ipcMain, shell,
 } from 'electron';
@@ -6,7 +5,6 @@ import path from 'path';
 import { autoUpdater } from 'electron-updater';
 import WebSocket from 'ws';
 import { getSetting, saveSetting } from '../renderer/settings';
-
 
 process.env.SMM_API_USERAGENT = process.env.NODE_ENV !== 'development' ? app.name : 'SMM-dev';
 process.env.SMM_API_USERAGENT_VERSION = process.env.NODE_ENV !== 'development' ? app.getVersion() : 'development';
@@ -18,6 +16,8 @@ process.env.SMM_API_USERAGENT_VERSION = process.env.NODE_ENV !== 'development' ?
 if (process.env.NODE_ENV !== 'development') {
   global.__static = path.join(__dirname, '/static').replace(/\\/g, '\\\\');
 }
+
+app.allowRendererProcessReuse = false;
 
 /** @type { BrowserWindow } */
 let mainWindow;
@@ -63,7 +63,6 @@ function updateSize() {
   mainWindow.setMaximumSize(isExpanded ? 2147483647 : normalSize.width, 2147483647);
   mainWindow.setSize(size.width, size.height, true);
 }
-
 
 function createWindow() {
   /**
