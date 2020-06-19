@@ -24,9 +24,15 @@ let mainWindow;
 const mainURL = 'http://localhost:9080';
 const mainFile = path.resolve(__dirname, 'index.html');
 
+function sendToWindow(channel, ...args) {
+  if (mainWindow && mainWindow.webContents) {
+    mainWindow.webContents.send(channel, ...args);
+  }
+}
+
 function openedByUrl(url) {
   if (url) {
-    mainWindow.webContents.send('openedByUrl', url);
+    sendToWindow('openedByUrl', url);
   }
 }
 
@@ -168,7 +174,7 @@ if (app.requestSingleInstanceLock()) {
   autoUpdater.fullChangelog = true;
 
   autoUpdater.on('update-downloaded', () => {
-    mainWindow.webContents.send('updateDownloaded');
+    sendToWindow('updateDownloaded');
     if (quitWaitingForUpdate) {
       autoUpdater.quitAndInstall(false);
     } else {
@@ -177,11 +183,12 @@ if (app.requestSingleInstanceLock()) {
   });
 
   autoUpdater.on('download-progress', (info) => {
-    mainWindow.webContents.send('updateDownloadProgress', info);
+    // TODO: this doesn't fire for differential downloads https://github.com/electron-userland/electron-builder/issues/2521
+    sendToWindow('updateDownloadProgress', info);
   });
 
   autoUpdater.on('error', () => {
-    mainWindow.webContents.send('updateNotAvailable');
+    sendToWindow('updateNotAvailable');
     if (quitWaitingForUpdate) {
       app.quit();
     }
@@ -192,11 +199,11 @@ if (app.requestSingleInstanceLock()) {
   });
 
   autoUpdater.on('update-not-available', () => {
-    mainWindow.webContents.send('updateNotAvailable');
+    sendToWindow('updateNotAvailable');
   });
 
   autoUpdater.on('update-available', (updateInfo) => {
-    mainWindow.webContents.send('updateAvailable', updateInfo);
+    sendToWindow('updateAvailable', updateInfo);
     isDownloadingUpdate = true;
     hasUpdate = true;
   });
