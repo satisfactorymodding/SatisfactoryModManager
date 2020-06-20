@@ -20,10 +20,22 @@
         <span class="app-title">{{ title }}</span>
       </div>
       <div
+        class="button minimize"
+        @click="minimize"
+      >
+        <span>&#128469;</span>
+      </div>
+      <div
+        class="button maximize"
+        @click="maximize"
+      >
+        <span>{{ isMaximized ? '&#128471;' : '&#128470;' }}</span>
+      </div>
+      <div
         class="button close"
         @click="close"
       >
-        <span>&#10005;</span>
+        <span>&#128473;</span>
       </div>
     </div>
     <ModUpdatesDialog
@@ -91,6 +103,7 @@ export default {
       showIgnoredUpdates: false,
       ignoredUpdates: [],
       cachedUpdateCheckMode: 'launch',
+      isMaximized: false,
     };
   },
   computed: {
@@ -128,9 +141,14 @@ export default {
       await this.checkForUpdates();
     },
   },
+  created() {
+    this.$electron.remote.getCurrentWindow().on('maximize', this.onMaximize);
+    this.$electron.remote.getCurrentWindow().on('unmaximize', this.onUnmaximize);
+  },
   mounted() {
     this.ignoredUpdates = getSetting('ignoredUpdates', []);
     this.cachedUpdateCheckMode = getSetting('updateCheckMode', 'launch');
+    this.isMaximized = this.$electron.remote.getCurrentWindow().isMaximized();
 
     if (this.updateChecKmode === 'launch') {
       this.$root.$once('doneLaunchUpdateCheck', () => {
@@ -141,6 +159,10 @@ export default {
     }
     this.nextCheckForUpdates = setTimeout(() => this.checkForUpdates(), UPDATE_CHECK_INTERVAL);
   },
+  destroyed() {
+    this.$electron.remote.getCurrentWindow().off('maximize', this.onMaximize);
+    this.$electron.remote.getCurrentWindow().off('unmaximize', this.onUnmaximize);
+  },
   methods: {
     openSMMUpdateDialog() {
       this.$refs.smmUpdateDialog.smmUpdateDialog = true;
@@ -148,10 +170,26 @@ export default {
     openModUpdatesDialog() {
       this.$refs.modUpdatesDialog.modUpdatesDialog = true;
     },
+    minimize() {
+      this.$electron.remote.getCurrentWindow().minimize();
+    },
+    maximize() {
+      if (!this.isMaximized) {
+        this.$electron.remote.getCurrentWindow().maximize();
+      } else {
+        this.$electron.remote.getCurrentWindow().unmaximize();
+      }
+    },
     close() {
       if (this.inProgress.length === 0) {
         this.$electron.remote.getCurrentWindow().close();
       }
+    },
+    onMaximize() {
+      this.isMaximized = true;
+    },
+    onUnmaximize() {
+      this.isMaximized = false;
     },
     addUpdateListener() {
       this.$electron.ipcRenderer.on('updateAvailable', (e, updateInfo) => {
@@ -253,9 +291,13 @@ export default {
   flex-grow: 1;
   user-select: none;
 }
+.button:hover {
+  background-color: gray;
+  color: white !important;
+}
 .close:hover {
   background-color: red;
-  color: white;
+  color: white !important;
 }
 .button>span.dash {
   vertical-align: sub;

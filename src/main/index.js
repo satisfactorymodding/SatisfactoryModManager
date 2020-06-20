@@ -82,6 +82,10 @@ function createWindow() {
     frame: false,
   });
 
+  if (getSetting('maximized', false)) {
+    mainWindow.maximize();
+  }
+
   if (process.env.NODE_ENV === 'development') {
     mainWindow.loadURL(mainURL);
   } else {
@@ -98,6 +102,14 @@ function createWindow() {
       saveSetting('normalSize', normalSize);
       saveSetting('expandedSize', expandedSize);
     }
+  });
+
+  mainWindow.on('maximize', () => {
+    saveSetting('maximized', true);
+  });
+
+  mainWindow.on('unmaximize', () => {
+    saveSetting('maximized', false);
   });
 
   ipcMain.on('openDevTools', () => {
