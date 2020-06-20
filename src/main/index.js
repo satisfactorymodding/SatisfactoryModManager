@@ -1,5 +1,5 @@
 import {
-  app, BrowserWindow, ipcMain, shell,
+  app, BrowserWindow, ipcMain, shell, screen,
 } from 'electron';
 import path from 'path';
 import { autoUpdater } from 'electron-updater';
@@ -173,6 +173,10 @@ if (app.requestSingleInstanceLock()) {
     isChangingExpanded = true;
     isExpanded = true;
     updateSize();
+    const windowScreen = screen.getDisplayMatching(mainWindow.getBounds());
+    if (mainWindow.getBounds().x + mainWindow.getBounds().width > windowScreen.workArea.x + windowScreen.workArea.width) {
+      mainWindow.setPosition(windowScreen.workArea.x + windowScreen.workArea.width - mainWindow.getBounds().width, mainWindow.getBounds().y, true);
+    }
     isChangingExpanded = false;
   });
 
