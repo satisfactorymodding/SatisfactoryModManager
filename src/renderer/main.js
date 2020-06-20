@@ -6,7 +6,7 @@ import App from './App';
 import 'vuetify/dist/vuetify.min.css';
 import '@mdi/font/css/materialdesignicons.css';
 import store from './store';
-import { getSetting } from './settings';
+import { getSetting } from '../settings';
 
 if (!process.env.IS_WEB) Vue.use(vueElectron);
 

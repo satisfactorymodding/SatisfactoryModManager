@@ -54,7 +54,7 @@
 
 <script>
 import { mapState } from 'vuex';
-import { getSetting, saveSetting } from '../../settings';
+import { getSetting, saveSetting } from '../../../settings';
 import {
   ignoreUpdate, unignoreUpdate,
 } from '../../utils';

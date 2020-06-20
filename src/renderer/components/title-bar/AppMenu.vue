@@ -630,7 +630,7 @@ import path from 'path';
 import { getCacheFolder } from 'platform-folders';
 import StreamZip from 'node-stream-zip';
 import { filenameFriendlyDate } from '../../utils';
-import { getSetting, saveSetting } from '../../settings';
+import { getSetting, saveSetting } from '../../../settings';
 
 export default {
   props: {

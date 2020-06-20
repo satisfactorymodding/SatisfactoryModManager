@@ -4,7 +4,7 @@ import {
 import path from 'path';
 import { autoUpdater } from 'electron-updater';
 import WebSocket from 'ws';
-import { getSetting, saveSetting } from '../renderer/settings';
+import { getSetting, saveSetting } from '../settings';
 
 process.env.SMM_API_USERAGENT = process.env.NODE_ENV !== 'development' ? app.name : 'SMM-dev';
 process.env.SMM_API_USERAGENT_VERSION = process.env.NODE_ENV !== 'development' ? app.getVersion() : 'development';

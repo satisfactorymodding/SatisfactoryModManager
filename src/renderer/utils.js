@@ -1,6 +1,6 @@
 import marked from 'marked';
 import sanitizeHtml from 'sanitize-html';
-import { getSetting, saveSetting } from './settings';
+import { getSetting, saveSetting } from '../settings';
 
 export function lastElement(arr) {
   return arr[arr.length - 1];

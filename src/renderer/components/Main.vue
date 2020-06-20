@@ -191,7 +191,7 @@ import ControlArea from './ControlArea';
 import ModsList from './ModsList';
 import ModDetails from './ModDetails';
 import { lastElement } from '../utils';
-import { getSetting } from '../settings';
+import { getSetting } from '../../settings';
 
 const SMLauncherUninstallerPath = path.join(getCacheFolder(), 'Programs', 'satisfactory-mod-launcher-gui', 'Uninstall Satisfactory Mod Launcher.exe');
 
