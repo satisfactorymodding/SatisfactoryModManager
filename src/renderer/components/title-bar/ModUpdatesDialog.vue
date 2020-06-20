@@ -38,14 +38,14 @@
                 v-if="inProgress.some((prog) => prog.id === update.item)"
               >
                 <v-progress-linear
-                  :value="Math.round(currentModProgress.progress * 100)"
-                  :class="currentModProgress.fast ? 'fast' : ''"
+                  :value="Math.round(currentModProgress(update.item).progress * 100)"
+                  :class="currentModProgress(update.item).fast ? 'fast' : ''"
                   color="warning"
                   height="49"
                   reactive
-                  :indeterminate="currentModProgress.progress < 0"
+                  :indeterminate="currentModProgress(update.item).progress < 0"
                 >
-                  <strong>{{ currentModProgress.message }}</strong>
+                  <strong>{{ currentModProgress(update.item).message }}</strong>
                 </v-progress-linear>
               </v-list-item>
               <v-list-item v-else>
