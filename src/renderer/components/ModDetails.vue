@@ -22,11 +22,21 @@
         <v-row
           no-gutters
         >
-          <v-col cols="2">
+          <v-col cols="4">
             <span class="header">By:</span>
           </v-col>
-          <v-col cols="6">
+          <v-col cols="8">
             <span class="authors">{{ authors }}</span>
+          </v-col>
+        </v-row>
+        <v-row
+          no-gutters
+        >
+          <v-col cols="4">
+            <span class="header">Latest version:</span>
+          </v-col>
+          <v-col cols="8">
+            <span class="authors">{{ mod.modInfo.versions[0] ? mod.modInfo.versions[0].version : 'N/A' }}</span>
           </v-col>
         </v-row>
         <v-row
@@ -40,7 +50,7 @@
         <v-row
           class="mod-description"
           :class="expandDetails ? 'expanded' : ''"
-          :style="expandDetails ? `height: ${images && images.length > 0 ? windowHeight - 220 : windowHeight - 167}px;` : ''"
+          :style="expandDetails ? `height: ${images && images.length > 0 ? windowHeight - 244 : windowHeight - 190}px;` : ''"
         >
           <div
             v-if="!expandDetails"
@@ -395,7 +405,7 @@ export default {
   margin: 0 32px 32px 32px;
 }
 .header {
-  font-weight: 1000;
+  font-weight: 700;
 }
 .authors {
   color: var(--v-info-base);
