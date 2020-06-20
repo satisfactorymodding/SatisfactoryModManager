@@ -789,7 +789,8 @@ export default {
       const metadata = {
         installsFound: this.$store.state.satisfactoryInstalls,
         selectedInstall: this.$store.state.selectedInstall,
-        profile: this.$store.state.selectedProfile,
+        profiles: this.$store.state.profiles,
+        selectedProfile: this.$store.state.selectedProfile,
         installedMods: this.$store.state.selectedInstall?.mods,
         smlVersion: this.$store.state.selectedInstall?.smlVersion,
         bootstrapperVersion: this.$store.state.selectedInstall?.bootstrapperVersion,
