@@ -2,14 +2,14 @@ import path from 'path';
 import fs from 'fs';
 import { getDataHome } from 'platform-folders';
 
-const appName = 'SatisfactoryModLauncher';
+const appName = 'SatisfactoryModManager';
 
 const settingsFilePath = path.join(getDataHome(), appName, 'settings.json');
 
 export function getSetting(name, defaultValue) {
   try {
     const settings = JSON.parse(fs.readFileSync(settingsFilePath));
-    return settings[name] || defaultValue;
+    return (typeof settings[name] !== 'undefined') ? settings[name] : defaultValue;
   } catch (e) {
     return defaultValue;
   }

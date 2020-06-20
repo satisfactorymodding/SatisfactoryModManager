@@ -24,6 +24,7 @@
     }
   },
   "plugins": [
-    "@babel/plugin-proposal-function-bind"
+    "@babel/plugin-proposal-function-bind",
+    "@babel/plugin-transform-runtime"
   ]
 }

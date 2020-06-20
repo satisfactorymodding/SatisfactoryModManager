@@ -1,11 +1,13 @@
-
 import {
-  app, BrowserWindow, ipcMain, shell, Menu,
+  app, BrowserWindow, ipcMain, shell,
 } from 'electron';
 import path from 'path';
 import { autoUpdater } from 'electron-updater';
 import WebSocket from 'ws';
+import { getSetting, saveSetting } from '../renderer/settings';
 
+process.env.SMM_API_USERAGENT = process.env.NODE_ENV !== 'development' ? app.name : 'SMM-dev';
+process.env.SMM_API_USERAGENT_VERSION = process.env.NODE_ENV !== 'development' ? app.getVersion() : 'development';
 
 /**
  * Set `__static` path to static files in production
@@ -15,114 +17,68 @@ if (process.env.NODE_ENV !== 'development') {
   global.__static = path.join(__dirname, '/static').replace(/\\/g, '\\\\');
 }
 
+app.allowRendererProcessReuse = false;
+
+/** @type { BrowserWindow } */
 let mainWindow;
 const mainURL = 'http://localhost:9080';
 const mainFile = path.resolve(__dirname, 'index.html');
 
-function openedByUrl(url) {
-  if (url) {
-    mainWindow.webContents.send('openedByUrl', url);
+function sendToWindow(channel, ...args) {
+  if (mainWindow && mainWindow.webContents) {
+    mainWindow.webContents.send(channel, ...args);
   }
 }
 
-const isMac = process.platform === 'darwin';
+function openedByUrl(url) {
+  if (url) {
+    sendToWindow('openedByUrl', url);
+  }
+}
 
-const template = [
-  // { role: 'appMenu' }
-  ...(isMac ? [{
-    label: app.name,
-    submenu: [
-      { role: 'about' },
-      { type: 'separator' },
-      { role: 'services' },
-      { type: 'separator' },
-      { role: 'hide' },
-      { role: 'hideothers' },
-      { role: 'unhide' },
-      { type: 'separator' },
-      { role: 'quit' },
-    ],
-  }] : []),
-  // { role: 'fileMenu' }
-  {
-    label: 'File',
-    submenu: [
-      isMac ? { role: 'close' } : { role: 'quit' },
-    ],
-  },
-  // { role: 'viewMenu' }
-  {
-    label: 'View',
-    submenu: [
-      { role: 'reload' },
-      { role: 'forcereload' },
-      { role: 'toggledevtools' },
-      { type: 'separator' },
-      { role: 'resetzoom' },
-      { role: 'zoomin' },
-      { role: 'zoomout' },
-      { type: 'separator' },
-      { role: 'togglefullscreen' },
-    ],
-  },
-  {
-    role: 'help',
-    submenu: [
-      {
-        label: `SMLauncher v${app.getVersion()}`,
-        enabled: false,
-      },
-      {
-        label: 'Check for updates',
-        click: () => {
-          autoUpdater.checkForUpdates();
-        },
-      },
-      { type: 'separator' },
-      {
-        label: 'Join the Satisfactory Modding Discord',
-        click: () => {
-          shell.openExternal('https://discord.gg/TShj39G');
-        },
-      },
-      {
-        label: 'Toggle Debug Mode',
-        click: () => {
-          mainWindow.webContents.send('toggleDebug');
-        },
-      },
-      {
-        label: 'Clear Cache',
-        click: () => {
-          mainWindow.webContents.send('clearCache');
-        },
-      },
-    ],
-  },
-];
+const normalSize = getSetting('normalSize', {
+  width: 500,
+  height: 858,
+});
+const minNormalSize = {
+  width: 500,
+  height: 725,
+};
+const expandedSize = getSetting('expandedSize', {
+  width: 1575,
+  height: 858,
+});
+const minExpandedSize = {
+  width: 1200,
+  height: 725,
+};
 
-const menu = Menu.buildFromTemplate(template);
-Menu.setApplicationMenu(menu);
+let isExpanded = false;
+let isChangingExpanded = false;
+
+function updateSize() {
+  const size = isExpanded ? expandedSize : normalSize;
+  const minSize = isExpanded ? minExpandedSize : minNormalSize;
+  mainWindow.setMinimumSize(minSize.width, minSize.height); // https://github.com/electron/electron/issues/15560#issuecomment-451395078
+  mainWindow.setMaximumSize(isExpanded ? 2147483647 : normalSize.width, 2147483647);
+  mainWindow.setSize(size.width, size.height, true);
+}
 
 function createWindow() {
   /**
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    height: 700,
+    width: normalSize.width,
+    height: normalSize.height,
+    minHeight: minNormalSize.height,
+    minWidth: minNormalSize.width,
+    maxWidth: normalSize.width,
     useContentSize: true,
-    width: 1000,
-    minWidth: 955,
-    minHeight: 600,
     webPreferences: {
       nodeIntegration: true,
     },
-  });
-
-  ipcMain.once('vue-ready', () => {
-    if (process.platform === 'win32') {
-      openedByUrl(process.argv.find((arg) => arg.startsWith('smlauncher:')));
-    }
+    frame: false,
   });
 
   if (process.env.NODE_ENV === 'development') {
@@ -130,6 +86,18 @@ function createWindow() {
   } else {
     mainWindow.loadFile(mainFile);
   }
+
+  mainWindow.on('resize', () => {
+    if (!isChangingExpanded) {
+      normalSize.height = mainWindow.getBounds().height;
+      expandedSize.height = mainWindow.getBounds().height;
+      if (isExpanded) {
+        expandedSize.width = mainWindow.getBounds().width;
+      }
+      saveSetting('normalSize', normalSize);
+      saveSetting('expandedSize', expandedSize);
+    }
+  });
 
   ipcMain.on('openDevTools', () => {
     mainWindow.webContents.openDevTools();
@@ -147,11 +115,12 @@ function createWindow() {
 
 let isDownloadingUpdate = false;
 let quitWaitingForUpdate = false;
+let hasUpdate = false;
 
 if (app.requestSingleInstanceLock()) {
   app.on('second-instance', (e, argv) => {
     if (process.platform === 'win32') {
-      openedByUrl(argv.find((arg) => arg.startsWith('smlauncher:')));
+      openedByUrl(argv.find((arg) => arg.startsWith('smmanager:')));
     }
     if (mainWindow) {
       if (mainWindow.isMinimized()) mainWindow.restore();
@@ -163,10 +132,14 @@ if (app.requestSingleInstanceLock()) {
 
   app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
-      if (!isDownloadingUpdate) {
-        app.quit();
+      if (hasUpdate) {
+        if (!isDownloadingUpdate) {
+          autoUpdater.quitAndInstall(false);
+        } else {
+          quitWaitingForUpdate = true;
+        }
       } else {
-        quitWaitingForUpdate = true;
+        app.quit();
       }
     }
   });
@@ -177,23 +150,61 @@ if (app.requestSingleInstanceLock()) {
     }
   });
 
+  ipcMain.once('vue-ready', () => {
+    if (process.platform === 'win32') {
+      openedByUrl(process.argv.find((arg) => arg.startsWith('smmanager:')));
+    }
+  });
+
+  ipcMain.on('expand', () => {
+    isChangingExpanded = true;
+    isExpanded = true;
+    updateSize();
+    isChangingExpanded = false;
+  });
+
+  ipcMain.on('unexpand', () => {
+    isChangingExpanded = true;
+    isExpanded = false;
+    updateSize();
+    isChangingExpanded = false;
+  });
+
+  autoUpdater.fullChangelog = true;
+
   autoUpdater.on('update-downloaded', () => {
+    sendToWindow('updateDownloaded');
     if (quitWaitingForUpdate) {
-      autoUpdater.quitAndInstall(true);
+      autoUpdater.quitAndInstall(false);
     } else {
       isDownloadingUpdate = false;
     }
   });
 
+  autoUpdater.on('download-progress', (info) => {
+    // TODO: this doesn't fire for differential downloads https://github.com/electron-userland/electron-builder/issues/2521
+    sendToWindow('updateDownloadProgress', info);
+  });
+
   autoUpdater.on('error', () => {
+    sendToWindow('updateNotAvailable');
     if (quitWaitingForUpdate) {
       app.quit();
     }
   });
 
+  ipcMain.on('checkForUpdates', () => {
+    autoUpdater.checkForUpdates();
+  });
+
+  autoUpdater.on('update-not-available', () => {
+    sendToWindow('updateNotAvailable');
+  });
+
   autoUpdater.on('update-available', (updateInfo) => {
-    mainWindow.webContents.send('update-available', updateInfo);
+    sendToWindow('updateAvailable', updateInfo);
     isDownloadingUpdate = true;
+    hasUpdate = true;
   });
 
   app.on('ready', () => {
@@ -202,8 +213,8 @@ if (app.requestSingleInstanceLock()) {
     }
   });
 
-  if (!app.isDefaultProtocolClient('smlauncher')) {
-    app.setAsDefaultProtocolClient('smlauncher');
+  if (!app.isDefaultProtocolClient('smmanager')) {
+    app.setAsDefaultProtocolClient('smmanager');
   }
 
   app.on('will-finish-launching', () => {
