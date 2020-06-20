@@ -134,7 +134,7 @@ if (app.requestSingleInstanceLock()) {
     if (process.platform !== 'darwin') {
       if (hasUpdate) {
         if (!isDownloadingUpdate) {
-          autoUpdater.quitAndInstall(false);
+          autoUpdater.quitAndInstall(true, true);
         } else {
           quitWaitingForUpdate = true;
         }
@@ -175,7 +175,7 @@ if (app.requestSingleInstanceLock()) {
   autoUpdater.on('update-downloaded', () => {
     sendToWindow('updateDownloaded');
     if (quitWaitingForUpdate) {
-      autoUpdater.quitAndInstall(false);
+      autoUpdater.quitAndInstall(true, false);
     } else {
       isDownloadingUpdate = false;
     }
