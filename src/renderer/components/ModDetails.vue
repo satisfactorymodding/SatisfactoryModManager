@@ -5,10 +5,11 @@
     class="d-flex flex-column"
     width="100%"
     height="100%"
-    style="padding: 0; box-shadow: inset 10px 0 10px -10px rgba(0,0,0,1), inset 0 10px 10px -10px rgba(0,0,0,1);"
+    style="padding: 0; box-shadow: inset 10px 0 10px -10px rgba(0,0,0,1), inset 0 10px 10px -10px rgba(0,0,0,1); max-width: calc(100vw - 500px);"
   >
     <v-row
       no-gutters
+      class="flex-nowrap"
       style="padding-top: 16px; flex: 0;"
     >
       <v-col cols="auto">
@@ -17,7 +18,7 @@
           class="mod-icon"
         >
       </v-col>
-      <v-col>
+      <v-col style="max-width: calc(100% - 320px)">
         <v-row
           no-gutters
         >

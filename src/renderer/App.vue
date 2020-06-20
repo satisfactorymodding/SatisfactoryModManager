@@ -176,4 +176,13 @@ html {
   border: solid 6px transparent;
   background-clip: content-box;
 }
+.mod-description pre {
+  overflow: auto;
+}
+pre::-webkit-scrollbar-thumb {
+  background: #303136 !important;
+  border: solid 6px transparent;
+  background-clip: content-box;
+  border-radius: 20px;
+}
 </style>
