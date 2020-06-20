@@ -793,6 +793,7 @@ export default {
         installedMods: this.$store.state.selectedInstall?.mods,
         smlVersion: this.$store.state.selectedInstall?.smlVersion,
         bootstrapperVersion: this.$store.state.selectedInstall?.bootstrapperVersion,
+        smmVersion: this.version,
       };
       debugDataZip.file('SatisfactoryModManager.log', fs.createReadStream(getLogFilePath()));
       if (this.$store.state.selectedInstall) {
