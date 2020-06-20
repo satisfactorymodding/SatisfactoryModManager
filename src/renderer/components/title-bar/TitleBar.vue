@@ -53,9 +53,6 @@
 </template>
 
 <script>
-import {
-  validAndGreater,
-} from 'satisfactory-mod-manager-api';
 import { mapState } from 'vuex';
 import { getSetting, saveSetting } from '../../settings';
 import {
@@ -93,7 +90,6 @@ export default {
       viewChangelogUpdate: null,
       showIgnoredUpdates: false,
       ignoredUpdates: [],
-      importProfileMetadata: null,
       cachedUpdateCheckMode: 'launch',
     };
   },
@@ -131,17 +127,6 @@ export default {
     async selectedInstall() {
       await this.checkForUpdates();
     },
-    importProfileMetadata(metadata) {
-      if (metadata) {
-        if (validAndGreater(metadata.gameVersion, this.$store.state.selectedInstall.version)) {
-          this.importProfileMessage = `This profile is made for game version ${metadata.gameVersion}, but you're using an older version: ${this.$store.state.selectedInstall.version}. Things might not work as expected.`;
-        } else {
-          this.importProfileMessage = '';
-        }
-      } else {
-        this.importProfileMessage = '';
-      }
-    },
   },
   mounted() {
     this.ignoredUpdates = getSetting('ignoredUpdates', []);
@@ -157,9 +142,6 @@ export default {
     this.nextCheckForUpdates = setTimeout(() => this.checkForUpdates(), UPDATE_CHECK_INTERVAL);
   },
   methods: {
-    setShowIgnoredUpdates(value) {
-      this.showIgnoredUpdates = value;
-    },
     openSMMUpdateDialog() {
       this.$refs.smmUpdateDialog.smmUpdateDialog = true;
     },

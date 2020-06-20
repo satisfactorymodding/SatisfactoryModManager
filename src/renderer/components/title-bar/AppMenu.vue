@@ -621,7 +621,9 @@
 </template>
 
 <script>
-import { clearCache, getLogFilePath, setDebug } from 'satisfactory-mod-manager-api';
+import {
+  clearCache, getLogFilePath, setDebug, validAndGreater,
+} from 'satisfactory-mod-manager-api';
 import JSZip from 'jszip';
 import fs from 'fs';
 import path from 'path';
@@ -656,6 +658,7 @@ export default {
       importProfileFormValid: true,
       importProfileDialog: false,
       importProfileFile: null,
+      importProfileMetadata: null,
       importProfileName: '',
       importProfileVersions: false,
       importProfileMessage: '',
@@ -747,6 +750,17 @@ export default {
         }
       } else {
         this.importProfileMetadata = null;
+      }
+    },
+    importProfileMetadata(metadata) {
+      if (metadata) {
+        if (validAndGreater(metadata.gameVersion, this.$store.state.selectedInstall.version)) {
+          this.importProfileMessage = `This profile is made for game version ${metadata.gameVersion}, but you're using an older version: ${this.$store.state.selectedInstall.version}. Things might not work as expected.`;
+        } else {
+          this.importProfileMessage = '';
+        }
+      } else {
+        this.importProfileMessage = '';
       }
     },
   },
