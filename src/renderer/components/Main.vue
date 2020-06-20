@@ -37,6 +37,7 @@
     </v-card>
     <v-dialog
       v-model="errorDialog"
+      :persistent="errorPersistent"
       max-width="290"
     >
       <v-card>
@@ -48,7 +49,7 @@
           {{ error }}
         </v-card-text>
 
-        <v-card-actions>
+        <v-card-actions v-if="!errorPersistent">
           <v-btn
             color="primary"
             text
@@ -217,6 +218,7 @@ export default {
         'inProgress',
         'isGameRunning',
         'error',
+        'errorPersistent',
       ],
     ),
     errorDialog: {

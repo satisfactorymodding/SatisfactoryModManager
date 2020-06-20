@@ -43,6 +43,7 @@ export default new Vuex.Store({
     inProgress: [], // { id: string, progresses: { id: string, progress: number, message: string, fast: boolean }[] }
     currentDownloadProgress: {},
     error: '',
+    errorPersistent: false,
     isGameRunning: false,
     isLaunchingGame: false,
     expandModInfoOnStart: false,
@@ -115,6 +116,11 @@ export default new Vuex.Store({
     },
     showError(state, { e }) {
       state.error = typeof e === 'string' ? e : e.message;
+      state.errorPersistent = false;
+    },
+    showErrorPersistent(state, { e }) {
+      state.error = typeof e === 'string' ? e : e.message;
+      state.errorPersistent = true;
     },
     launchGame(state) {
       state.isLaunchingGame = true;
@@ -312,11 +318,12 @@ export default new Vuex.Store({
             if (installs.length === 0) {
               if (invalidInstalls.length !== 0) {
                 if (invalidInstalls.length > 1) {
-                  throw new Error(`${invalidInstalls.length} Satisfactory installs were found, but all of them point to folders that don't exist.`);
+                  dispatch('showErrorPersistent', new Error(`${invalidInstalls.length} Satisfactory installs were found, but all of them point to folders that don't exist.`));
                 }
-                throw new Error(`${invalidInstalls.length} Satisfactory install was found, but it points to a folder that doesn't exist.`);
+                dispatch('showErrorPersistent', new Error(`${invalidInstalls.length} Satisfactory install was found, but it points to a folder that doesn't exist.`));
               }
-              throw new Error('No Satisfactory installs found.');
+              dispatch('showErrorPersistent', new Error('No Satisfactory installs found.'));
+              return;
             }
             commit('setInstalls', { installs });
             const installValidateProgress = { id: 'validatingInstall', progress: -1, message: 'Validating mod install' };
@@ -380,6 +387,11 @@ export default new Vuex.Store({
     },
     showError({ commit }, e) {
       commit('showError', { e });
+      // eslint-disable-next-line no-console
+      console.error(e);
+    },
+    showErrorPersistent({ commit }, e) {
+      commit('showErrorPersistent', { e });
       // eslint-disable-next-line no-console
       console.error(e);
     },
