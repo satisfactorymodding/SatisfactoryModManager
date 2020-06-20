@@ -69,6 +69,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.7.4",
+    "electron-log": "^4.2.2",
     "electron-updater": "^4.2.2",
     "jszip": "^3.4.0",
     "marked": "^1.1.0",

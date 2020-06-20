@@ -5,6 +5,7 @@ import path from 'path';
 import { autoUpdater } from 'electron-updater';
 import WebSocket from 'ws';
 import { getSetting, saveSetting } from '../settings';
+import './differentialUpdateProgress';
 
 process.env.SMM_API_USERAGENT = process.env.NODE_ENV !== 'development' ? app.name : 'SMM-dev';
 process.env.SMM_API_USERAGENT_VERSION = process.env.NODE_ENV !== 'development' ? app.getVersion() : 'development';
@@ -182,7 +183,6 @@ if (app.requestSingleInstanceLock()) {
   });
 
   autoUpdater.on('download-progress', (info) => {
-    // TODO: this doesn't fire for differential downloads https://github.com/electron-userland/electron-builder/issues/2521
     sendToWindow('updateDownloadProgress', info);
   });
 
