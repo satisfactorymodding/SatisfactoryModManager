@@ -191,7 +191,7 @@ import TitleBar from './title-bar/TitleBar';
 import ControlArea from './ControlArea';
 import ModsList from './ModsList';
 import ModDetails from './ModDetails';
-import { lastElement } from '../utils';
+import { lastElement, bytesToAppropriate } from '../utils';
 import { getSetting } from '../../settings';
 
 const SMLauncherUninstallerPath = path.join(getCacheFolder(), 'Programs', 'satisfactory-mod-launcher-gui', 'Uninstall Satisfactory Mod Launcher.exe');
@@ -310,7 +310,7 @@ export default {
     },
     updateProgress(e, info) {
       this.smmUpdateDownloadProgress.progresses[0].progress = info.percent / 100;
-      this.smmUpdateDownloadProgress.progresses[0].message = `Downloading update ${Math.round(info.percent)}% (${Math.round((info.transferred / 1000 / 1000) * 100) / 100}/${Math.round((info.total / 1000 / 1000) * 100) / 100}MB - ${Math.round((info.bytesPerSecond / 1000) * 100) / 100} KB/s)`;
+      this.smmUpdateDownloadProgress.progresses[0].message = `Downloading update ${Math.round(info.percent)}% (${bytesToAppropriate(info.transferred)}/${bytesToAppropriate(info.total)} - ${bytesToAppropriate(info.bytesPerSecond)}/s)`;
       this.smmUpdateDownloadProgress.progresses[0].fast = true;
     },
     clearError() {

@@ -44,3 +44,17 @@ export function filenameFriendlyDate(date) {
   const second = date.getUTCSeconds();
   return `${year}-${month}-${day}_${hour}-${minute}-${second}`;
 }
+
+export function roundWithDecimals(number, decimals = 0) {
+  return Math.round(number * (10 ** decimals)) / (10 ** decimals);
+}
+
+const sizeRanges = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+export function bytesToAppropriate(bytes) {
+  let rangeNum = 0;
+  while (bytes >= 1024 ** (rangeNum + 1)) {
+    rangeNum += 1;
+  }
+  return `${roundWithDecimals(bytes / (1024 ** rangeNum), 2)} ${sizeRanges[rangeNum]}`;
+}

@@ -41,6 +41,16 @@
         </v-row>
         <v-row
           no-gutters
+        >
+          <v-col cols="4">
+            <span class="header">Download size:</span>
+          </v-col>
+          <v-col cols="8">
+            <span class="authors">{{ mod.modInfo.versions[0] && mod.modInfo.versions[0].size ? bytesToAppropriate(mod.modInfo.versions[0].size) : 'N/A' }}</span>
+          </v-col>
+        </v-row>
+        <v-row
+          no-gutters
           class="pt-6 pb-1"
         >
           <v-col cols="auto">
@@ -50,7 +60,7 @@
         <v-row
           class="mod-description"
           :class="expandDetails ? 'expanded' : ''"
-          :style="expandDetails ? `height: ${images && images.length > 0 ? windowHeight - 244 : windowHeight - 190}px;` : ''"
+          :style="expandDetails ? `height: ${images && images.length > 0 ? windowHeight - 267 : windowHeight - 213}px;` : ''"
         >
           <div
             v-if="!expandDetails"
@@ -268,7 +278,7 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { eq, coerce, valid } from 'semver';
-import { markdownAsElement } from '../utils';
+import { markdownAsElement, bytesToAppropriate } from '../utils';
 import ModImageContainer from './ModImageContainer';
 
 export default {
@@ -378,6 +388,7 @@ export default {
     onResize() {
       this.windowHeight = window.innerHeight;
     },
+    bytesToAppropriate,
   },
 };
 </script>
