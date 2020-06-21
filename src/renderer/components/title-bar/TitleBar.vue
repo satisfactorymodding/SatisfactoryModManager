@@ -110,6 +110,7 @@ export default {
     ...mapState([
       'inProgress',
       'selectedInstall',
+      'selectedProfile',
     ]),
     ...mapState({
       allMods: 'mods',
@@ -139,6 +140,15 @@ export default {
   watch: {
     async selectedInstall() {
       await this.checkForUpdates();
+      if (this.filteredModUpdates.length > 0) {
+        this.openModUpdatesDialog();
+      }
+    },
+    async selectedProfile() {
+      await this.checkForUpdates();
+      if (this.filteredModUpdates.length > 0) {
+        this.openModUpdatesDialog();
+      }
     },
   },
   created() {
@@ -150,7 +160,7 @@ export default {
     this.cachedUpdateCheckMode = getSetting('updateCheckMode', 'launch');
     this.isMaximized = this.$electron.remote.getCurrentWindow().isMaximized();
 
-    if (this.updateChecKmode === 'launch') {
+    if (this.updateCheckmode === 'launch') {
       this.$root.$once('doneLaunchUpdateCheck', () => {
         this.addUpdateListener();
       });
@@ -194,7 +204,7 @@ export default {
     addUpdateListener() {
       this.$electron.ipcRenderer.on('updateAvailable', (e, updateInfo) => {
         this.availableSMMUpdate = updateInfo;
-        if (this.updateCheckMode === 'ask') {
+        if (this.updateCheckMode === 'ask' || this.updateCheckmode === 'launch') {
           this.$refs.smmUpdateDialog.smmUpdateDialog = true;
         }
       });
