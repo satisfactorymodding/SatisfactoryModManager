@@ -632,6 +632,16 @@ import StreamZip from 'node-stream-zip';
 import { filenameFriendlyDate } from '../../utils';
 import { getSetting, saveSetting } from '../../../settings';
 
+/**
+ * @param {JSZip} zip The zip file to add to
+ * @param {string} filePath The file to add to the zip
+ */
+function addFileToZipIfExists(zip, filePath, customName) {
+  if (fs.existsSync(filePath)) {
+    zip.file(customName || path.basename(filePath), fs.createReadStream(filePath));
+  }
+}
+
 export default {
   props: {
     availableSMMUpdate: {
@@ -785,25 +795,6 @@ export default {
       }
     },
     async exportDebugData() {
-      const debugDataZip = new JSZip();
-      const metadata = {
-        installsFound: this.$store.state.satisfactoryInstalls,
-        selectedInstall: this.$store.state.selectedInstall,
-        profiles: this.$store.state.profiles,
-        selectedProfile: this.$store.state.selectedProfile,
-        installedMods: this.$store.state.selectedInstall?.mods,
-        smlVersion: this.$store.state.selectedInstall?.smlVersion,
-        bootstrapperVersion: this.$store.state.selectedInstall?.bootstrapperVersion,
-        smmVersion: this.version,
-      };
-      debugDataZip.file('SatisfactoryModManager.log', fs.createReadStream(getLogFilePath()));
-      if (this.$store.state.selectedInstall) {
-        debugDataZip.file('pre-launch-debug.log', fs.createReadStream(path.join(this.$store.state.selectedInstall.installLocation, 'pre-launch-debug.log')));
-        debugDataZip.file('SatisfactoryModLoader.log', fs.createReadStream(path.join(this.$store.state.selectedInstall.installLocation, 'SatisfactoryModLoader.log')));
-        debugDataZip.file('FactoryGame.log', fs.createReadStream(path.join(getCacheFolder(), 'FactoryGame', 'Saved', 'Logs', 'FactoryGame.log')));
-      }
-      debugDataZip.file('metadata.json', JSON.stringify(metadata, null, 4));
-
       const result = this.$electron.remote.dialog.showSaveDialogSync(this.$electron.remote.getCurrentWindow(), {
         title: 'Save debug data as',
         filters: [
@@ -813,9 +804,32 @@ export default {
       });
 
       if (result) {
-        await new Promise((resolve, reject) => {
-          debugDataZip.generateNodeStream().pipe(fs.createWriteStream(result)).on('finish', resolve).on('error', reject);
-        });
+        const debugDataZip = new JSZip();
+        const metadata = {
+          installsFound: this.$store.state.satisfactoryInstalls,
+          selectedInstall: this.$store.state.selectedInstall,
+          profiles: this.$store.state.profiles,
+          selectedProfile: this.$store.state.selectedProfile,
+          installedMods: this.$store.state.selectedInstall?.mods,
+          smlVersion: this.$store.state.selectedInstall?.smlVersion,
+          bootstrapperVersion: this.$store.state.selectedInstall?.bootstrapperVersion,
+          smmVersion: this.version,
+        };
+        debugDataZip.file('metadata.json', JSON.stringify(metadata, null, 4));
+        addFileToZipIfExists(debugDataZip, getLogFilePath(), 'SatisfactoryModManager.log');
+        if (this.$store.state.selectedInstall) {
+          addFileToZipIfExists(debugDataZip, path.join(this.$store.state.selectedInstall.installLocation, 'pre-launch-debug.log'));
+          addFileToZipIfExists(debugDataZip, path.join(this.$store.state.selectedInstall.installLocation, 'SatisfactoryModLoader.log'));
+          addFileToZipIfExists(debugDataZip, path.join(getCacheFolder(), 'FactoryGame', 'Saved', 'Logs', 'FactoryGame.log'));
+        }
+
+        try {
+          await new Promise((resolve, reject) => {
+            debugDataZip.generateNodeStream().pipe(fs.createWriteStream(result)).on('finish', resolve).on('error', reject);
+          });
+        } catch (e) {
+          this.$store.dispatch('showError', e);
+        }
       }
     },
     async importProfile() {
