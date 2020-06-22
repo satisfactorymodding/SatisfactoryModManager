@@ -223,12 +223,6 @@ if (app.requestSingleInstanceLock()) {
     hasUpdate = true;
   });
 
-  app.on('ready', () => {
-    if (process.env.NODE_ENV === 'production') {
-      autoUpdater.checkForUpdates();
-    }
-  });
-
   if (!app.isDefaultProtocolClient('smmanager')) {
     app.setAsDefaultProtocolClient('smmanager');
   }

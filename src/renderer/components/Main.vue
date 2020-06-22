@@ -273,14 +273,12 @@ export default {
         this.$store.dispatch('installModVersion', { modId: modID, version });
       }
     });
-    if (getSetting('updateCheckMode', 'launch') === 'launch') {
-      const hasUpdate = await this.checkForUpdates();
-      if (hasUpdate) {
-        this.downloadUpdate();
-        return;
-      }
-      this.$root.$emit('doneLaunchUpdateCheck');
+    const hasUpdate = await this.checkForUpdates();
+    if (hasUpdate && getSetting('updateCheckMode', 'launch') === 'launch') {
+      this.downloadUpdate();
+      return;
     }
+    this.$root.$emit('doneLaunchUpdateCheck');
     this.$root.$on('downloadUpdate', this.downloadUpdate);
     await this.$store.dispatch('initApp');
     this.$electron.ipcRenderer.send('vue-ready');
