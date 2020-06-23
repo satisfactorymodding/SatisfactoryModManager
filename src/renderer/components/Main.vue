@@ -206,6 +206,7 @@ export default {
   data() {
     return {
       smmUpdateDownloadProgress: {},
+      updateDownloadFinished: false,
       showUpdateDownloadProgress: false,
       oldSMLauncherInstalled: false,
     };
@@ -257,10 +258,11 @@ export default {
           id: '', progress: -1, message: 'Downloading update', fast: false,
         }],
       };
-      this.inProgress.push(this.smmUpdateDownloadProgress);
+      this.updateDownloadFinished = false;
       this.$electron.ipcRenderer.on('updateDownloadProgress', this.updateProgress);
       this.$electron.ipcRenderer.once('updateDownloaded', () => {
         this.inProgress.remove(this.smmUpdateDownloadProgress);
+        this.updateDownloadFinished = true;
         this.$electron.ipcRenderer.off('updateDownloadProgress', this.updateProgress);
       });
     });
@@ -297,14 +299,23 @@ export default {
       });
     },
     downloadUpdate() {
-      this.showUpdateDownloadProgress = true;
-      this.$electron.ipcRenderer.on('updateDownloaded', () => {
+      if (!this.updateDownloadFinished) {
+        this.showUpdateDownloadProgress = true;
+        this.inProgress.push(this.smmUpdateDownloadProgress);
+        this.$electron.ipcRenderer.on('updateDownloaded', () => {
+          setInterval(() => {
+            if (this.inProgress.length === 0) {
+              this.$electron.remote.getCurrentWindow().close();
+            }
+          }, 100);
+        });
+      } else {
         setInterval(() => {
           if (this.inProgress.length === 0) {
             this.$electron.remote.getCurrentWindow().close();
           }
         }, 100);
-      });
+      }
     },
     updateProgress(e, info) {
       this.smmUpdateDownloadProgress.progresses[0].progress = info.percent / 100;
