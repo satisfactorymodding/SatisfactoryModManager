@@ -52,14 +52,12 @@ let rendererConfig = {
             // Requires sass-loader@^7.0.0
             options: {
               implementation: require('sass'),
-              fiber: require('fibers'),
               indentedSyntax: true // optional
             },
             // Requires sass-loader@^8.0.0
             options: {
               implementation: require('sass'),
               sassOptions: {
-                fiber: require('fibers'),
                 indentedSyntax: true // optional
               },
             },
@@ -173,6 +171,7 @@ let rendererConfig = {
   resolve: {
     alias: {
       '@': path.join(__dirname, '../src/renderer'),
+      '~': path.join(__dirname, '../src'),
       'vue$': 'vue/dist/vue.esm.js'
     },
     extensions: ['.js', '.vue', '.json', '.css', '.node']

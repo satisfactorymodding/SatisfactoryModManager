@@ -6,7 +6,7 @@ import App from './App';
 import 'vuetify/dist/vuetify.min.css';
 import '@mdi/font/css/materialdesignicons.css';
 import store from './store';
-import { getSetting } from '../settings';
+import { getSetting } from '~/settings';
 
 if (!process.env.IS_WEB) Vue.use(vueElectron);
 
@@ -31,8 +31,9 @@ new Vue({
           error: '#e51c22',
           info: '#039ae5',
           background: '#212226',
-          backgroundSecondary: '#303136',
-          menuBackground: '#000000',
+          backgroundModsList: '#303136',
+          backgroundMenu: '#000000',
+          backgroundMenuBar: '#141414',
           text: '#9e9e9e',
           text2: '#b7b8bc',
           loadingBackground: '#2f3136',
@@ -43,8 +44,9 @@ new Vue({
           error: '#e51c22',
           info: '#039ae5',
           background: '#fcfcfc',
-          backgroundSecondary: '#d4d4d4',
-          menuBackground: '#ffffff',
+          backgroundModsList: '#d4d4d4',
+          backgroundMenu: '#ffffff',
+          backgroundMenuBar: '#ffffff',
           text: '#000',
           text2: '#000',
           loadingBackground: '#ffffff',

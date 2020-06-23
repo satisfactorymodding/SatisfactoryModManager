@@ -3,32 +3,32 @@ module.exports = {
   parser: 'vue-eslint-parser',
   parserOptions: {
     parser: 'babel-eslint',
-    sourceType: 'module'
+    sourceType: 'module',
   },
   env: {
     browser: true,
-    node: true
+    node: true,
   },
   extends: [
     'airbnb-base',
     'plugin:vue/recommended',
     'plugin:import/errors',
-    'plugin:import/warnings'
+    'plugin:import/warnings',
   ],
   globals: {
-    __static: true
+    __static: true,
   },
   plugins: [
-    'html'
+    'html',
   ],
   rules: {
     'linebreak-style': 0,
     'no-underscore-dangle': 0,
-    'import/no-extraneous-dependencies': ['error', {'devDependencies': true}],
+    'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
     'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0,
     'import/extensions': ['error', 'always', {
       js: 'never',
-      vue: 'never'
+      vue: 'never',
     }],
     'max-len': ['error', {
       code: 200,
@@ -37,14 +37,17 @@ module.exports = {
       ignoreUrls: true,
       ignoreStrings: true,
       ignoreTemplateLiterals: true,
-      ignoreRegExpLiterals: true
+      ignoreRegExpLiterals: true,
     }],
   },
   settings: {
     'import/resolver': {
       node: {
-        extensions: ['.js','.jsx','.vue']
-      }
+        extensions: ['.js', '.jsx', '.vue'],
+      },
+      webpack: {
+        config: './.electron-vue/webpack.renderer.config.js',
+      },
     },
-  }
-}
+  },
+};

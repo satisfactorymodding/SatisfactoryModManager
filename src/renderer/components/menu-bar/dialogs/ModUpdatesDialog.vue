@@ -104,7 +104,7 @@
 
 <script>
 import { mapState } from 'vuex';
-import { lastElement } from '../../utils';
+import { lastElement } from '@/utils';
 
 export default {
   props: {

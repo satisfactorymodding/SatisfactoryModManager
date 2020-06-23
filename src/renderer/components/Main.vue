@@ -3,19 +3,17 @@
     class="d-flex flex-column"
     height="100%"
   >
-    <TitleBar
-      title="Satisfactory Mod Manager"
-      style="user-select: none;"
-    />
+    <TitleBar title="Satisfactory Mod Manager" />
     <v-card
       class="d-flex"
       height="100%"
     >
       <v-card
         height="100%"
-        style="width: 500px; min-width: 500px; max-width: 500px; z-index: 1; box-shadow: inset 0 10px 10px -10px rgba(0,0,0,1)"
+        style="width: 500px; min-width: 500px; max-width: 500px; z-index: 1;"
         class="d-flex flex-column"
       >
+        <MenuBar />
         <ControlArea style="user-select: none;" />
         <ModsList
           class="flex-grow-1 flex-shrink-1"
@@ -187,18 +185,20 @@ import { exec } from 'child_process';
 import { getCacheFolder } from 'platform-folders';
 import fs from 'fs';
 import path from 'path';
-import TitleBar from './title-bar/TitleBar';
+import { lastElement, bytesToAppropriate } from '@/utils';
+import { getSetting } from '~/settings';
+import TitleBar from './TitleBar';
+import MenuBar from './menu-bar/MenuBar';
 import ControlArea from './ControlArea';
 import ModsList from './mods-list/ModsList';
 import ModDetails from './mod-details/ModDetails';
-import { lastElement, bytesToAppropriate } from '../utils';
-import { getSetting } from '../../settings';
 
 const SMLauncherUninstallerPath = path.join(getCacheFolder(), 'Programs', 'satisfactory-mod-launcher-gui', 'Uninstall Satisfactory Mod Launcher.exe');
 
 export default {
   components: {
     TitleBar,
+    MenuBar,
     ControlArea,
     ModsList,
     ModDetails,

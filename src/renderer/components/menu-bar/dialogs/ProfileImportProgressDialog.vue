@@ -1,7 +1,7 @@
 <template>
   <v-dialog
     persistent
-    :value="isProfileExportInProgress"
+    :value="isProfileImportInProgress"
     width="500"
     height="230"
   >
@@ -14,29 +14,29 @@
       >
         <v-img
           class="mt-4"
-          src="../../../../static/smm_icon.png"
+          src="static/smm_icon.png"
           max-height="82px"
           max-width="87px"
         />
       </v-row>
       <v-card-title class="loading-text-main">
-        EXPORTING PROFILE
+        IMPORTING PROFILE
       </v-card-title>
 
       <v-card-text
-        v-if="isProfileExportInProgress"
+        v-if="isProfileImportInProgress"
         class="text-center"
       >
         <v-progress-linear
-          :value="Math.round(currentProfileExportProgress.progress * 100)"
-          :class="currentProfileExportProgress.fast ? 'fast' : ''"
+          :value="Math.round(currentProfileImportProgress.progress * 100)"
+          :class="currentProfileImportProgress.fast ? 'fast' : ''"
           background-color="#000000"
           color="#5bb71d"
           height="2"
           reactive
-          :indeterminate="currentProfileExportProgress.progress < 0"
+          :indeterminate="currentProfileImportProgress.progress < 0"
         />
-        {{ currentProfileExportProgress.message || '&nbsp;' }}
+        {{ currentProfileImportProgress.message || '&nbsp;' }}
       </v-card-text>
     </v-card>
   </v-dialog>
@@ -44,21 +44,21 @@
 
 <script>
 import { mapState } from 'vuex';
-import { lastElement } from '../../utils';
+import { lastElement } from '@/utils';
 
 export default {
   computed: {
     ...mapState([
       'inProgress',
     ]),
-    isProfileExportInProgress() {
-      return this.inProgress.some((prog) => prog.id === '__exportProfile__');
+    isProfileImportInProgress() {
+      return this.inProgress.some((prog) => prog.id === '__importProfile__');
     },
-    profileExportProgress() {
-      return this.inProgress.find((prog) => prog.id === '__exportProfile__');
+    profileImportProgress() {
+      return this.inProgress.find((prog) => prog.id === '__importProfile__');
     },
-    currentProfileExportProgress() {
-      return lastElement(this.profileExportProgress.progresses);
+    currentProfileImportProgress() {
+      return lastElement(this.profileImportProgress.progresses);
     },
   },
 };

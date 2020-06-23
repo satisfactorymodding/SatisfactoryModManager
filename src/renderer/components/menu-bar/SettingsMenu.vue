@@ -1,152 +1,24 @@
 <template>
   <v-menu
-    v-model="menuOpen"
     :close-on-content-click="false"
     offset-x
   >
-    <template v-slot:activator="{ on }">
-      <v-icon
-        :color="getColorForState"
-        class="ma-1 app-icon"
+    <template v-slot:activator="{ on, attrs }">
+      <v-btn
+        v-bind="attrs"
+        class="ma-2 px-2"
         v-on="on"
       >
-        mdi-cog
-      </v-icon>
-    </template>
-    <v-card class="app-menu">
-      <v-list>
-        <v-menu
-          :close-on-content-click="false"
-          offset-x
-          :nudge-right="20"
+        <v-icon
+          style="margin-right: 12px"
         >
-          <template v-slot:activator="{ on }">
-            <v-list-item
-              v-on="on"
-            >
-              <v-list-item-action />
-              <v-list-item-content>
-                <v-list-item-title>
-                  {{ hasUpdate || availableSMMUpdate ? 'Updates ready to install' : 'Update settings' }}
-                </v-list-item-title>
-              </v-list-item-content>
-              <v-list-item-action>
-                <v-icon>mdi-chevron-right</v-icon>
-              </v-list-item-action>
-            </v-list-item>
-          </template>
-          <v-card class="app-menu">
-            <v-list>
-              <v-list-item>
-                <v-list-item-action>
-                  <v-icon color="text">
-                    mdi-cog
-                  </v-icon>
-                </v-list-item-action>
-                <v-list-item-content>
-                  <v-list-item-title>Update options</v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-
-              <v-divider class="custom" />
-
-              <v-list-item @click="$emit('checkForUpdates')">
-                <v-list-item-action />
-                <v-list-item-content>
-                  <v-list-item-title>Check for updates</v-list-item-title>
-                </v-list-item-content>
-                <v-list-item-action />
-              </v-list-item>
-
-              <v-divider
-                insert
-                class="custom"
-              />
-
-              <v-list-item>
-                <v-list-item-action />
-                <v-list-item-content>
-                  <v-list-item-title>Update SMM at</v-list-item-title>
-                </v-list-item-content>
-                <v-list-item-action>
-                  <v-select
-                    v-model="updateCheckMode"
-                    :items="['launch', 'exit', 'ask']"
-                    style="width: 108px"
-                  />
-                </v-list-item-action>
-              </v-list-item>
-
-              <v-divider
-                inset
-                class="custom"
-              />
-
-              <v-list-item>
-                <v-list-item-action />
-                <v-list-item-content>
-                  <v-list-item-title>Show ignored updates</v-list-item-title>
-                </v-list-item-content>
-                <v-list-item-action>
-                  <v-switch
-                    v-model="showIgnoredUpdatesLocal"
-                  />
-                </v-list-item-action>
-              </v-list-item>
-
-              <v-divider
-                inset
-                class="custom"
-              />
-
-              <v-list-item>
-                <v-list-item-action>
-                  <v-icon color="text">
-                    mdi-update
-                  </v-icon>
-                </v-list-item-action>
-                <v-list-item-content>
-                  <v-list-item-title>Updates</v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-
-              <v-divider class="custom" />
-
-              <v-list-item
-                :disabled="filteredModUpdates.length === 0"
-                @click="$emit('openModUpdatesDialog')"
-              >
-                <v-list-item-action />
-                <v-list-item-content>
-                  <v-list-item-title>Mod updates ({{ filteredModUpdates.length }})</v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-
-              <v-divider
-                inset
-                class="custom"
-              />
-
-              <v-list-item
-                :disabled="!availableSMMUpdate"
-                @click="$emit('openSMMUpdateDialog')"
-              >
-                <v-list-item-action />
-                <v-list-item-content>
-                  <v-list-item-title>SMM updates ({{ smmUpdateCount }})</v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-
-              <v-divider
-                inset
-                class="custom"
-              />
-            </v-list>
-          </v-card>
-        </v-menu>
-
-        <v-divider class="custom" />
-
+          mdi-cog
+        </v-icon>
+        <span>SMM</span>
+      </v-btn>
+    </template>
+    <v-card>
+      <v-list class="menu">
         <v-menu
           :close-on-content-click="false"
           offset-x
@@ -165,8 +37,8 @@
               </v-list-item-action>
             </v-list-item>
           </template>
-          <v-card class="app-menu">
-            <v-list>
+          <v-card>
+            <v-list class="menu">
               <v-list-item @click="exportProfile">
                 <v-list-item-action>
                   <v-icon color="text">
@@ -243,6 +115,79 @@
                     </v-card-actions>
                   </v-card>
                 </v-dialog>
+              </v-list-item>
+
+              <v-divider
+                inset
+                class="custom"
+              />
+            </v-list>
+          </v-card>
+        </v-menu>
+
+        <v-divider
+          class="custom"
+        />
+
+        <v-menu
+          :close-on-content-click="false"
+          offset-x
+          :nudge-right="20"
+        >
+          <template v-slot:activator="{ on }">
+            <v-list-item
+              v-on="on"
+            >
+              <v-list-item-action />
+              <v-list-item-content>
+                <v-list-item-title>Debug</v-list-item-title>
+              </v-list-item-content>
+              <v-list-item-action>
+                <v-icon>mdi-chevron-right</v-icon>
+              </v-list-item-action>
+            </v-list-item>
+          </template>
+          <v-card>
+            <v-list class="menu">
+              <v-list-item>
+                <v-list-item-action />
+                <v-list-item-content>
+                  <v-list-item-title>Debug mode</v-list-item-title>
+                </v-list-item-content>
+
+                <v-list-item-action>
+                  <v-switch
+                    v-model="debugMode"
+                  />
+                </v-list-item-action>
+              </v-list-item>
+
+              <v-divider
+                class="custom"
+                inset
+              />
+
+              <v-list-item
+                @click="clearCache"
+              >
+                <v-list-item-action />
+                <v-list-item-content>
+                  <v-list-item-title>Clear cache</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+
+              <v-divider
+                class="custom"
+                inset
+              />
+
+              <v-list-item
+                @click="exportDebugData"
+              >
+                <v-list-item-action />
+                <v-list-item-content>
+                  <v-list-item-title>Generate debug info</v-list-item-title>
+                </v-list-item-content>
               </v-list-item>
 
               <v-divider
@@ -489,80 +434,6 @@
           inset
         />
 
-        <v-menu
-          :close-on-content-click="false"
-          offset-x
-          :nudge-right="20"
-        >
-          <template v-slot:activator="{ on }">
-            <v-list-item
-              v-on="on"
-            >
-              <v-list-item-action />
-              <v-list-item-content>
-                <v-list-item-title>Debug</v-list-item-title>
-              </v-list-item-content>
-              <v-list-item-action>
-                <v-icon>mdi-chevron-right</v-icon>
-              </v-list-item-action>
-            </v-list-item>
-          </template>
-          <v-card class="app-menu">
-            <v-list>
-              <v-list-item>
-                <v-list-item-action />
-                <v-list-item-content>
-                  <v-list-item-title>Debug mode</v-list-item-title>
-                </v-list-item-content>
-
-                <v-list-item-action>
-                  <v-switch
-                    v-model="debugMode"
-                  />
-                </v-list-item-action>
-              </v-list-item>
-
-              <v-divider
-                class="custom"
-                inset
-              />
-
-              <v-list-item
-                @click="clearCache"
-              >
-                <v-list-item-action />
-                <v-list-item-content>
-                  <v-list-item-title>Clear cache</v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-
-              <v-divider
-                class="custom"
-                inset
-              />
-
-              <v-list-item
-                @click="exportDebugData"
-              >
-                <v-list-item-action />
-                <v-list-item-content>
-                  <v-list-item-title>Generate debug info</v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-
-              <v-divider
-                inset
-                class="custom"
-              />
-            </v-list>
-          </v-card>
-        </v-menu>
-
-        <v-divider
-          class="custom"
-          inset
-        />
-
         <v-list-item>
           <v-list-item-action>
             <v-icon color="text">
@@ -629,8 +500,8 @@ import fs from 'fs';
 import path from 'path';
 import { getCacheFolder } from 'platform-folders';
 import StreamZip from 'node-stream-zip';
-import { filenameFriendlyDate } from '../../utils';
-import { getSetting, saveSetting } from '../../../settings';
+import { filenameFriendlyDate } from '@/utils';
+import { getSetting, saveSetting } from '~/settings';
 
 /**
  * @param {JSZip} zip The zip file to add to
@@ -643,24 +514,6 @@ function addFileToZipIfExists(zip, filePath, customName) {
 }
 
 export default {
-  props: {
-    availableSMMUpdate: {
-      type: Object,
-      default: () => ({}),
-    },
-    filteredModUpdates: {
-      type: Array,
-      default: () => [],
-    },
-    showIgnoredUpdates: {
-      type: Boolean,
-      default: false,
-    },
-    updateCheckMode: {
-      type: String,
-      default: '',
-    },
-  },
   data() {
     return {
       attributionDialog: false,
@@ -674,39 +527,11 @@ export default {
       importProfileMessage: '',
       helpDialog: false,
       cachedDebugMode: false,
-      menuOpen: false,
     };
   },
   computed: {
     version() {
       return this.$electron.remote.app.getVersion();
-    },
-    state() {
-      if (this.menuOpen) {
-        return 'on';
-      }
-      if (this.hasUpdate) {
-        return 'notify';
-      }
-      return 'off';
-    },
-    getColorForState() {
-      if (this.state === 'notify') {
-        return '#ffc107';
-      }
-      if (this.state === 'on') {
-        return 'primary';
-      }
-      return '#9e9e9e';
-    },
-    hasUpdate() {
-      return !!this.availableSMMUpdate || this.filteredModUpdates.length > 0;
-    },
-    smmUpdateCount() {
-      if (!this.availableSMMUpdate) {
-        return 0;
-      }
-      return this.availableSMMUpdate.releaseNotes.length;
     },
     expandModInfoOnStart: {
       get() {
@@ -733,14 +558,6 @@ export default {
         setDebug(value);
         saveSetting('debugMode', value);
         this.cachedDebugMode = value;
-      },
-    },
-    showIgnoredUpdatesLocal: {
-      get() {
-        return this.showIgnoredUpdates;
-      },
-      set(value) {
-        this.$emit('update:showIgnoredUpdates', value);
       },
     },
   },
@@ -884,36 +701,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.app-icon {
-  padding: 3px 0px 0px 3px;
-}
-
-.app-menu .v-list {
-  background-color: var(--v-menuBackground-base);
-}
-.custom.v-list {
-  background-color: var(--v-background-base);
-}
-.custom.v-list .v-list-item__action {
-  margin: 0;
-}
-.v-icon {
-  font-size: 18px !important;
-}
-.v-list-item {
-  padding-left: 10px !important;
-}
-.v-list-item__action:first-child {
-  margin-right: 0px !important;
-}
-.custom.v-divider--inset:not(.v-divider--vertical) {
-  margin-left: 30px !important;
-  max-width: calc(100% - 60px) !important;
-}
-.custom.v-divider:not(.v-divider--inset):not(.v-divider--vertical) {
-  margin-left: 10px !important;
-  max-width: calc(100% - 40px) !important;
-}
-</style>

@@ -5,7 +5,7 @@
     class="d-flex flex-column"
     width="100%"
     height="100%"
-    style="padding: 0; box-shadow: inset 10px 0 10px -10px rgba(0,0,0,1), inset 0 10px 10px -10px rgba(0,0,0,1); max-width: calc(100vw - 500px);"
+    style="padding: 0; box-shadow: inset 10px 0 10px -10px rgba(0,0,0,1); max-width: calc(100vw - 500px);"
   >
     <v-row
       no-gutters
@@ -278,7 +278,7 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { eq, coerce, valid } from 'semver';
-import { markdownAsElement, bytesToAppropriate } from '../../utils';
+import { markdownAsElement, bytesToAppropriate } from '@/utils';
 import ModImageContainer from './ModImageContainer';
 
 export default {

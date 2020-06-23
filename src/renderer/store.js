@@ -10,7 +10,7 @@ import {
 } from 'satisfactory-mod-manager-api';
 import { satisfies, coerce, valid } from 'semver';
 import { ipcRenderer } from 'electron';
-import { saveSetting, getSetting } from '../settings';
+import { saveSetting, getSetting } from '~/settings';
 
 Vue.use(Vuex);
 

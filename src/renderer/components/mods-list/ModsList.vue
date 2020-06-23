@@ -18,7 +18,7 @@
       @scroll="modsListScrolled"
     >
       <v-list
-        class="pt-1 mt-n4 custom px-1"
+        class="pt-3 mt-n4 custom px-1"
       >
         <template
           v-for="(mod, index) in mods"
@@ -35,7 +35,7 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { lastElement } from '../../utils';
+import { lastElement } from '@/utils';
 import ModsListItem from './ModsListItem';
 
 export default {
@@ -76,7 +76,7 @@ export default {
 
 <style scoped>
 div {
-  background: var(--v-backgroundSecondary-base) !important;
+  background: var(--v-backgroundModsList-base) !important;
 }
 
 .list-shadow-top, .list-shadow-bottom {

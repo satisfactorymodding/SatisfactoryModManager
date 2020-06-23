@@ -166,7 +166,7 @@ html {
   border-radius: 20px;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--v-backgroundSecondary-base);
+  background: var(--v-backgroundModsList-base);
   border: solid 6px transparent;
   background-clip: content-box;
   border-radius: 20px;

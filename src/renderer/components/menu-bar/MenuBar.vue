@@ -1,66 +1,39 @@
 <template>
-  <div class="titlebar">
-    <div
-      class="d-inline-flex align-items-center"
-    >
-      <AppMenu
-        ref="appMenu"
-        :available-s-m-m-update="availableSMMUpdate"
-        :filtered-mod-updates="filteredModUpdates"
-        :show-ignored-updates.sync="showIgnoredUpdates"
-        :update-check-mode.sync="updateCheckMode"
-        @checkForUpdates="checkForUpdates"
-        @addUpdateListener="addUpdateListener"
-        @openSMMUpdateDialog="openSMMUpdateDialog"
-        @openModUpdatesDialog="openModUpdatesDialog"
-      />
-    </div>
-    <div class="bar">
-      <div class="dragregion">
-        <span class="app-title">{{ title }}</span>
-      </div>
-      <div
-        class="button minimize"
-        @click="minimize"
-      >
-        <v-icon
-          color="text"
-          style="margin-left: calc(50% - 9.5px);"
+  <v-container
+    fluid
+    class="py-0"
+  >
+    <v-row class="px-3">
+      <v-col cols="auto">
+        <SettingsMenu />
+      </v-col>
+      <v-spacer />
+      <v-col cols="auto">
+        <span class="d-inline-flex align-center fill-height">{{ hasUpdate ? 'Updates available' : 'No updates right now' }}</span>
+      </v-col>
+      <v-col cols="auto">
+        <v-btn
+          style="min-width: 36px"
+          class="ma-2 px-2"
+          @click="manualCheckForUpdates"
         >
-          mdi-window-minimize
-        </v-icon>
-      </div>
-      <div
-        class="button maximize"
-        @click="maximize"
-      >
-        <v-icon
-          v-if="isMaximized"
-          color="text"
-          style="margin-left: calc(50% - 9.5px);"
-        >
-          mdi-window-restore
-        </v-icon>
-        <v-icon
-          v-else
-          color="text"
-          style="margin-left: calc(50% - 9.5px);"
-        >
-          mdi-window-maximize
-        </v-icon>
-      </div>
-      <div
-        class="button close"
-        @click="close"
-      >
-        <v-icon
-          color="text"
-          style="margin-left: calc(50% - 9.5px);"
-        >
-          mdi-window-close
-        </v-icon>
-      </div>
-    </div>
+          <v-icon style="font-size: 25px !important">
+            mdi-update
+          </v-icon>
+        </v-btn>
+      </v-col>
+      <v-col cols="auto">
+        <UpdatesMenu
+          :available-s-m-m-update="availableSMMUpdate"
+          :filtered-mod-updates="filteredModUpdates"
+          :show-ignored-updates.sync="showIgnoredUpdates"
+          :update-check-mode.sync="updateCheckMode"
+          @addUpdateListener="addUpdateListener"
+          @openSMMUpdateDialog="openSMMUpdateDialog"
+          @openModUpdatesDialog="openModUpdatesDialog"
+        />
+      </v-col>
+    </v-row>
     <ModUpdatesDialog
       ref="modUpdatesDialog"
       :filtered-mod-updates="filteredModUpdates"
@@ -84,38 +57,34 @@
     />
     <ProfileExportProgressDialog />
     <ProfileImportProgressDialog />
-  </div>
+  </v-container>
 </template>
 
 <script>
 import { mapState } from 'vuex';
-import { getSetting, saveSetting } from '../../../settings';
 import {
   ignoreUpdate, unignoreUpdate,
-} from '../../utils';
-import ProfileImportProgressDialog from './ProfileImportProgressDialog';
-import ProfileExportProgressDialog from './ProfileExportProgressDialog';
-import SMMUpdateDialog from './SMMUpdateDialog';
-import ChangelogDialog from './ChangelogDialog';
-import ModUpdatesDialog from './ModUpdatesDialog';
-import AppMenu from './AppMenu';
+} from '@/utils';
+import SettingsMenu from './SettingsMenu';
+import UpdatesMenu from './UpdatesMenu';
+import ProfileImportProgressDialog from './dialogs/ProfileImportProgressDialog';
+import ProfileExportProgressDialog from './dialogs/ProfileExportProgressDialog';
+import SMMUpdateDialog from './dialogs/SMMUpdateDialog';
+import ChangelogDialog from './dialogs/ChangelogDialog';
+import ModUpdatesDialog from './dialogs/ModUpdatesDialog';
+import { getSetting, saveSetting } from '~/settings';
 
 const UPDATE_CHECK_INTERVAL = 5 * 60 * 1000;
 
 export default {
   components: {
-    AppMenu,
+    SettingsMenu,
+    UpdatesMenu,
     ModUpdatesDialog,
     ChangelogDialog,
     SMMUpdateDialog,
     ProfileExportProgressDialog,
     ProfileImportProgressDialog,
-  },
-  props: {
-    title: {
-      type: String,
-      default: '',
-    },
   },
   data() {
     return {
@@ -126,7 +95,6 @@ export default {
       showIgnoredUpdates: false,
       ignoredUpdates: [],
       cachedUpdateCheckMode: 'launch',
-      isMaximized: false,
     };
   },
   computed: {
@@ -162,28 +130,17 @@ export default {
   },
   watch: {
     async selectedInstall() {
-      await this.checkForUpdates();
-      if (this.filteredModUpdates.length > 0) {
-        this.openModUpdatesDialog();
-      }
+      await this.manualCheckForUpdates();
     },
     async selectedProfile() {
-      await this.checkForUpdates();
-      if (this.filteredModUpdates.length > 0) {
-        this.openModUpdatesDialog();
-      }
+      await this.manualCheckForUpdates();
     },
-  },
-  created() {
-    this.$electron.remote.getCurrentWindow().on('maximize', this.onMaximize);
-    this.$electron.remote.getCurrentWindow().on('unmaximize', this.onUnmaximize);
   },
   mounted() {
     this.ignoredUpdates = getSetting('ignoredUpdates', []);
     this.cachedUpdateCheckMode = getSetting('updateCheckMode', 'launch');
-    this.isMaximized = this.$electron.remote.getCurrentWindow().isMaximized();
 
-    if (this.updateCheckmode === 'launch') {
+    if (this.updateCheckMode === 'launch') {
       this.$root.$once('doneLaunchUpdateCheck', () => {
         this.addUpdateListener();
       });
@@ -192,37 +149,12 @@ export default {
     }
     this.nextCheckForUpdates = setTimeout(() => this.checkForUpdates(), UPDATE_CHECK_INTERVAL);
   },
-  destroyed() {
-    this.$electron.remote.getCurrentWindow().off('maximize', this.onMaximize);
-    this.$electron.remote.getCurrentWindow().off('unmaximize', this.onUnmaximize);
-  },
   methods: {
     openSMMUpdateDialog() {
       this.$refs.smmUpdateDialog.smmUpdateDialog = true;
     },
     openModUpdatesDialog() {
       this.$refs.modUpdatesDialog.modUpdatesDialog = true;
-    },
-    minimize() {
-      this.$electron.remote.getCurrentWindow().minimize();
-    },
-    maximize() {
-      if (!this.isMaximized) {
-        this.$electron.remote.getCurrentWindow().maximize();
-      } else {
-        this.$electron.remote.getCurrentWindow().unmaximize();
-      }
-    },
-    close() {
-      if (this.inProgress.length === 0) {
-        this.$electron.remote.getCurrentWindow().close();
-      }
-    },
-    onMaximize() {
-      this.isMaximized = true;
-    },
-    onUnmaximize() {
-      this.isMaximized = false;
     },
     addUpdateListener() {
       this.$electron.ipcRenderer.on('updateAvailable', (e, updateInfo) => {
@@ -232,11 +164,17 @@ export default {
         }
       });
     },
+    async manualCheckForUpdates() {
+      await this.checkForUpdates();
+      if (this.filteredModUpdates.length > 0) {
+        this.openModUpdatesDialog();
+      }
+    },
     async checkForUpdates() {
       clearTimeout(this.nextCheckForUpdates);
       // don't check for updates while something is in progress
       while (this.inProgress.length > 0) {
-        // eslint-disable-next-line no-await-in-loop
+      // eslint-disable-next-line no-await-in-loop
         await new Promise((resolve) => setTimeout(() => resolve(), 500));
       }
       this.$electron.ipcRenderer.send('checkForUpdates');
@@ -281,59 +219,39 @@ export default {
 };
 </script>
 
+<style>
+.menu.v-list {
+  background-color: var(--v-backgroundMenu-base) !important;
+}
+.menu .custom.v-list .v-list-item__action {
+  margin: 0;
+}
+.menu .v-icon {
+  font-size: 18px !important;
+}
+.menu .v-list-item {
+  padding-left: 10px !important;
+}
+.menu .v-list-item__action:first-child {
+  margin-right: 0px !important;
+}
+.menu .custom.v-divider--inset:not(.v-divider--vertical) {
+  margin-left: 30px !important;
+  max-width: calc(100% - 60px) !important;
+}
+.menu .custom.v-divider:not(.v-divider--inset):not(.v-divider--vertical) {
+  margin-left: 10px !important;
+  max-width: calc(100% - 40px) !important;
+}
+</style>
+
 <style scoped>
-.app-title {
-  font-size: 16px !important;
-  padding-top: 5px;
+div {
+  background-color: var(--v-backgroundMenuBar-base);
 }
-.titlebar {
-  display: flex;
-  padding-bottom: 4px;
-}
-.titlebar, .titlebar > * {
-  color: var(--v-text2-base) !important;
-  background-color: var(--v-background-base);
-}
-.bar {
-  flex-grow: 1;
-  display: flex;
-}
-.dragregion {
-  flex-grow: 1;
-  text-align: center;
-  vertical-align: middle;
-  margin: 3px 3px 0px 0px;
-  -webkit-app-region: drag;
-  display: flex;
-  align-items: center;
-}
-.dragregion>span {
-  flex-grow: 1;
-  margin-top: -3px;
-}
-.button {
-  width: 44px;
-  text-align: center;
-  font-size: 12pt;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  color: var(--v-text-base);
-}
-.button>span {
-  flex-grow: 1;
-  user-select: none;
-}
-.button:hover {
-  background-color: gray;
-  color: white !important;
-}
-.close:hover {
-  background-color: red;
-  color: white !important;
-}
-.button>span.dash {
-  vertical-align: sub;
-  margin-top: 0px;
+.col {
+  padding: 0;
+  padding-top: 8px;
+  padding-bottom: 8px;
 }
 </style>

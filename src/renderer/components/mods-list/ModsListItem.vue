@@ -106,7 +106,7 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { lastElement } from '../../utils';
+import { lastElement } from '@/utils';
 
 export default {
   props: {
@@ -165,7 +165,7 @@ export default {
   margin-bottom: 0;
 }
 div {
-  background: var(--v-backgroundSecondary-base) !important;
+  background: var(--v-backgroundModsList-base) !important;
 }
 .mod-button {
   margin-top: 5px;
@@ -174,7 +174,7 @@ div {
   opacity: 0.75;
 }
 .mod-button:not(:hover):not(.active)>.v-icon {
-  color: var(--v-backgroundSecondary-lighten2) !important;
+  color: var(--v-backgroundModsList-lighten2) !important;
 }
 .mod-button.active {
   opacity: 1 !important;

@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { markdownAsElement } from '../../utils';
+import { markdownAsElement } from '@/utils';
 
 export default {
   props: {
