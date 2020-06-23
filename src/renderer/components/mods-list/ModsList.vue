@@ -18,19 +18,15 @@
       @scroll="modsListScrolled"
     >
       <v-list
-        class="pt-1 mt-n4 custom"
+        class="pt-1 mt-n4 custom px-1"
       >
         <template
           v-for="(mod, index) in mods"
         >
-          <div :key="index">
-            <v-divider
-              v-if="index != 0"
-            />
-            <ModsListItem
-              :mod="mod"
-            />
-          </div>
+          <ModsListItem
+            :key="index"
+            :mod="mod"
+          />
         </template>
       </v-list>
     </div>
@@ -79,30 +75,8 @@ export default {
 </script>
 
 <style scoped>
-.custom.v-list-item__action {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-.v-divider {
-  border-color: var(--v-background-darken3) !important;
-}
 div {
   background: var(--v-backgroundSecondary-base) !important;
-}
-.mod-button {
-  margin-top: 5px;
-  margin-right: 5px;
-  font-size: 25px;
-  opacity: 0.75;
-}
-.mod-button:not(:hover):not(.active)>.v-icon {
-  color: var(--v-backgroundSecondary-lighten2) !important;
-}
-.mod-button.active {
-  opacity: 1 !important;
-}
-.mod-button:hover {
-  opacity: 0.65;
 }
 
 .list-shadow-top, .list-shadow-bottom {

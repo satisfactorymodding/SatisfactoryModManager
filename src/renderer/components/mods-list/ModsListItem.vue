@@ -1,13 +1,48 @@
 <template>
-  <div
-    class="px-3"
-  >
+  <div>
     <v-list-item>
+      <v-list-item-avatar
+        tile
+        style="margin-top: 0px; margin-bottom: 0px"
+      >
+        <v-img :src="icon" />
+      </v-list-item-avatar>
       <v-list-item-content
-        style="cursor: pointer; user-select: none;"
+        style="cursor: pointer; user-select: none; padding: 0;"
         @click="expandClicked"
       >
-        <span :class="mod.isCompatible || 'error--text'">{{ mod.modInfo.name }}</span>
+        <v-list-item-title :class="mod.isCompatible || 'error--text'">
+          {{ mod.modInfo.name }}
+        </v-list-item-title>
+        <v-list-item-subtitle>
+          <v-row style="padding-left: 12px">
+            <v-col
+              cols="4"
+              style="padding: 0"
+            >
+              <div class="d-inline-flex align-center">
+                <v-icon
+                  color="text"
+                  style="padding-right: 4px"
+                >
+                  mdi-eye
+                </v-icon>
+                {{ mod.modInfo.views.toLocaleString() }}
+              </div>
+            </v-col>
+            <v-col style="padding: 0">
+              <div class="d-inline-flex align-center">
+                <v-icon
+                  color="text"
+                  style="padding-right: 4px"
+                >
+                  mdi-download
+                </v-icon>
+                {{ mod.modInfo.downloads.toLocaleString() }}
+              </div>
+            </v-col>
+          </v-row>
+        </v-list-item-subtitle>
       </v-list-item-content>
       <v-list-item-action
         class="mod-button custom"
@@ -97,6 +132,9 @@ export default {
     isFavorite() {
       return this.favoriteModIds.includes(this.mod.modInfo.mod_reference);
     },
+    icon() {
+      return this.mod.modInfo.logo || 'https://ficsit.app/static/assets/images/no_image.png';
+    },
     isModInProgress() {
       return !!this.modProgress;
     },
@@ -126,9 +164,6 @@ export default {
   margin-top: 0;
   margin-bottom: 0;
 }
-.v-divider {
-  border-color: var(--v-background-darken3) !important;
-}
 div {
   background: var(--v-backgroundSecondary-base) !important;
 }
@@ -146,22 +181,5 @@ div {
 }
 .mod-button:hover {
   opacity: 0.65;
-}
-
-.list-shadow-top, .list-shadow-bottom {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  z-index: 1;
-  background: transparent !important;
-  pointer-events: none;
-}
-
-.list-shadow-top {
-  box-shadow: inset 0px 45px 20px -20px rgba(0,0,0,0.3);
-}
-.list-shadow-bottom {
-  box-shadow: inset 0px -45px 20px -20px rgba(0,0,0,0.3);
 }
 </style>
