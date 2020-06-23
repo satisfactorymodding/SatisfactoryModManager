@@ -189,8 +189,8 @@ import fs from 'fs';
 import path from 'path';
 import TitleBar from './title-bar/TitleBar';
 import ControlArea from './ControlArea';
-import ModsList from './ModsList';
-import ModDetails from './ModDetails';
+import ModsList from './mods-list/ModsList';
+import ModDetails from './mod-details/ModDetails';
 import { lastElement, bytesToAppropriate } from '../utils';
 import { getSetting } from '../../settings';
 

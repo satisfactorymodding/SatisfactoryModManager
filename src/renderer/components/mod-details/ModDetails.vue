@@ -278,7 +278,7 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { eq, coerce, valid } from 'semver';
-import { markdownAsElement, bytesToAppropriate } from '../utils';
+import { markdownAsElement, bytesToAppropriate } from '../../utils';
 import ModImageContainer from './ModImageContainer';
 
 export default {
