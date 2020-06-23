@@ -23,19 +23,42 @@
         class="button minimize"
         @click="minimize"
       >
-        <span>&#128469;</span>
+        <v-icon
+          color="text"
+          style="margin-left: calc(50% - 9.5px);"
+        >
+          mdi-window-minimize
+        </v-icon>
       </div>
       <div
         class="button maximize"
         @click="maximize"
       >
-        <span>{{ isMaximized ? '&#128471;' : '&#128470;' }}</span>
+        <v-icon
+          v-if="isMaximized"
+          color="text"
+          style="margin-left: calc(50% - 9.5px);"
+        >
+          mdi-window-restore
+        </v-icon>
+        <v-icon
+          v-else
+          color="text"
+          style="margin-left: calc(50% - 9.5px);"
+        >
+          mdi-window-maximize
+        </v-icon>
       </div>
       <div
         class="button close"
         @click="close"
       >
-        <span>&#128473;</span>
+        <v-icon
+          color="text"
+          style="margin-left: calc(50% - 9.5px);"
+        >
+          mdi-window-close
+        </v-icon>
       </div>
     </div>
     <ModUpdatesDialog
