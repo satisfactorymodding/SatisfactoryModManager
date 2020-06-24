@@ -1,7 +1,6 @@
 /* eslint-disable no-param-reassign */
 import Vue from 'vue';
 import Vuex from 'vuex';
-import {} from './utils';
 import {
   addDownloadProgressCallback, getProfiles, loadCache, getInstalls, SatisfactoryInstall, getAvailableSMLVersions, MODS_PER_PAGE, getModsCount,
   getAvailableMods,
@@ -10,11 +9,12 @@ import {
 } from 'satisfactory-mod-manager-api';
 import { satisfies, coerce, valid } from 'semver';
 import { ipcRenderer } from 'electron';
+import { bytesToAppropriate, secondsToAppropriate } from './utils';
 import { saveSetting, getSetting } from '~/settings';
 
 Vue.use(Vuex);
 
-const MAX_DOWNLOAD_NAME_LENGTH = 25;
+const MAX_DOWNLOAD_NAME_LENGTH = 20;
 
 function limitDownloadNameLength(name) {
   if (name.length > MAX_DOWNLOAD_NAME_LENGTH) {
@@ -86,24 +86,6 @@ export default new Vuex.Store({
       state.modFilters[1].mods = state.mods.filter((mod) => mod.isCompatible).length;
       state.modFilters[3].mods = state.mods.filter((mod) => mod.isInstalled).length;
       state.modFilters[4].mods = state.mods.filter((mod) => !mod.isInstalled).length;
-    },
-    downloadProgress(state, {
-      url, progress, name, version,
-    }) {
-      if (!state.currentDownloadProgress[url]) {
-        state.currentDownloadProgress[url] = {
-          id: `download_${url}`, progress: 0, message: '', fast: true,
-        };
-        state.inProgress[0].progresses.push(state.currentDownloadProgress[url]);
-      }
-      state.currentDownloadProgress[url].message = `Downloading ${limitDownloadNameLength(name)} v${version} ${Math.round(progress.percent * 100)}%`;
-      state.currentDownloadProgress[url].progress = progress.percent;
-      if (progress.percent === 1) {
-        setTimeout(() => {
-          state.inProgress[0].progresses.remove(state.currentDownloadProgress[url]);
-          delete state.currentDownloadProgress[url];
-        }, 100);
-      }
     },
     setAvailableMods(state, { mods }) {
       state.mods = mods;
@@ -295,9 +277,23 @@ export default new Vuex.Store({
         }],
       };
       state.inProgress.push(appLoadProgress);
-      addDownloadProgressCallback((url, progress, name, version) => commit('downloadProgress', {
-        url, progress, name, version,
-      }));
+      addDownloadProgressCallback((url, progress, name, version, elapsedTime) => {
+        if (!state.currentDownloadProgress[url]) {
+          state.currentDownloadProgress[url] = {
+            id: `download_${url}`, progress: 0, message: '', fast: true,
+          };
+          state.inProgress[0].progresses.push(state.currentDownloadProgress[url]);
+        }
+        const speed = progress.transferred / (elapsedTime / 1000);
+        state.currentDownloadProgress[url].message = `${limitDownloadNameLength(name)} v${version}: ${Math.round(progress.percent * 100)}% | ${bytesToAppropriate(progress.transferred)} / ${bytesToAppropriate(progress.total)} | ${bytesToAppropriate(speed)}/s | ${secondsToAppropriate((progress.total - progress.transferred) / speed)}`;
+        state.currentDownloadProgress[url].progress = progress.percent;
+        if (progress.percent === 1) {
+          setTimeout(() => {
+            state.inProgress[0].progresses.remove(state.currentDownloadProgress[url]);
+            delete state.currentDownloadProgress[url];
+          }, 100);
+        }
+      });
       commit('setFavoriteModIds', { favoriteModIds: getSetting('favoriteMods', []) });
       commit('setProfiles', { profiles: getProfiles() });
       commit('setExpandModInfoOnStart', getSetting('expandModInfoOnStart', false));

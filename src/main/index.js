@@ -38,11 +38,11 @@ function openedByUrl(url) {
 }
 
 const normalSize = getSetting('normalSize', {
-  width: 500,
+  width: 600,
   height: 858,
 });
 const minNormalSize = {
-  width: 500,
+  width: 600,
   height: 725,
 };
 const expandedSize = getSetting('expandedSize', {
@@ -50,7 +50,7 @@ const expandedSize = getSetting('expandedSize', {
   height: 858,
 });
 const minExpandedSize = {
-  width: 1200,
+  width: 1300,
   height: 725,
 };
 

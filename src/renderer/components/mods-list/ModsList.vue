@@ -18,7 +18,7 @@
       @scroll="modsListScrolled"
     >
       <v-list
-        class="pt-3 mt-n4 custom px-1"
+        class="pt-3 mt-n4 custom"
       >
         <template
           v-for="(mod, index) in mods"
@@ -94,5 +94,23 @@ div {
 }
 .list-shadow-bottom {
   box-shadow: inset 0px -45px 20px -20px rgba(0,0,0,0.3);
+}
+
+::-webkit-scrollbar-track {
+  background: var(--v-background-base);
+  border: solid 9px transparent;
+  background-clip: content-box;
+  border-radius: 100px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--v-background-base);
+  border: solid 2px transparent;
+  background-clip: content-box;
+  border-radius: 20px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: white;
+  border: solid 2px transparent;
+  background-clip: content-box;
 }
 </style>

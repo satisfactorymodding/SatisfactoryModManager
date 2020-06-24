@@ -5,7 +5,7 @@
     class="d-flex flex-column"
     width="100%"
     height="100%"
-    style="padding: 0; box-shadow: inset 10px 0 10px -10px rgba(0,0,0,1); max-width: calc(100vw - 500px);"
+    style="padding: 0; box-shadow: inset 10px 0 10px -10px rgba(0,0,0,1); max-width: calc(100vw - 600px);"
   >
     <v-row
       no-gutters

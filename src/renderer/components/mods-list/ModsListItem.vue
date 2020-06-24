@@ -1,11 +1,15 @@
 <template>
-  <div>
-    <v-list-item>
+  <div style="margin-top: 6px; margin-bottom: 6px; user-select: none;">
+    <v-list-item
+      class="mod"
+      :class="(isExpanded ? 'expanded' : '') + ' ' + (isModInProgress ? 'in-progress' : '')"
+      style="min-height: 45px; margin-top: 0; margin-bottom: 0; border-radius: 5px; z-index: 1;"
+    >
       <v-list-item-avatar
         tile
-        style="margin-top: 0px; margin-bottom: 0px"
+        style="margin-top: 0px; margin-bottom: 0px; margin-right: 8px; height: 45px; width: 45px;"
       >
-        <v-img :src="icon" />
+        <img :src="icon">
       </v-list-item-avatar>
       <v-list-item-content
         style="cursor: pointer; user-select: none; padding: 0;"
@@ -14,11 +18,10 @@
         <v-list-item-title :class="mod.isCompatible || 'error--text'">
           {{ mod.modInfo.name }}
         </v-list-item-title>
-        <v-list-item-subtitle>
+        <v-list-item-subtitle v-if="!isModInProgress">
           <v-row style="padding-left: 12px">
             <v-col
-              cols="4"
-              style="padding: 0"
+              style="padding: 0; flex: 0 0 20%; max-width: 20%;"
             >
               <div class="d-inline-flex align-center">
                 <v-icon
@@ -43,19 +46,18 @@
             </v-col>
           </v-row>
         </v-list-item-subtitle>
+        <v-list-item-subtitle v-else>
+          <div class="d-inline-flex align-center">
+            <v-icon
+              color="warning"
+              style="padding-right: 4px"
+            >
+              mdi-information
+            </v-icon>
+            <span style="font-size: 12px">{{ currentModProgress.message }}</span>
+          </div>
+        </v-list-item-subtitle>
       </v-list-item-content>
-      <v-list-item-action
-        class="mod-button custom"
-        :class="expandedModId === mod.modInfo.mod_reference ? 'active' : ''"
-      >
-        <v-icon
-          class="ma-1 icon"
-          color="primary"
-          @click="expandClicked"
-        >
-          mdi-import
-        </v-icon>
-      </v-list-item-action>
       <v-list-item-action
         :class="isFavorite ? 'active' : ''"
         class="mod-button custom"
@@ -70,36 +72,61 @@
       </v-list-item-action>
       <v-list-item-action
         class="custom"
-        style="margin-right: 10px"
+        style="margin-right: 10px; margin-left: 5px"
       >
-        <v-switch
-          v-model="mod.isInstalled"
-          inset
-          dense
-          color="primary"
-          class="custom pr-1"
-          :class="mod.isCompatible ? '' : 'incompatible'"
-          flat
-          :disabled="!mod.isCompatible || mod.isDependency || !!inProgress.length || !canInstallMods"
-          @click.stop.prevent="switchClicked"
-        />
+        <v-icon
+          v-if="!mod.isCompatible"
+          color="error"
+        >
+          mdi-alert
+        </v-icon>
+        <v-icon
+          v-else-if="isModInProgress"
+          color="warning"
+        >
+          mdi-sync
+        </v-icon>
+        <v-icon
+          v-else-if="mod.isInstalled && (mod.isDependency || !canInstallMods || inProgress.length > 0)"
+          color="green"
+        >
+          mdi-checkbox-marked
+        </v-icon>
+        <v-icon
+          v-else-if="mod.isInstalled"
+          color="green"
+          @click="switchInstalled"
+        >
+          mdi-checkbox-marked
+        </v-icon>
+        <v-icon
+          v-else-if="!canInstallMods || inProgress.length > 0"
+          color="text"
+        >
+          mdi-checkbox-blank-outline
+        </v-icon>
+        <v-icon
+          v-else
+          color="text"
+          @click="switchInstalled"
+        >
+          mdi-checkbox-blank-outline
+        </v-icon>
       </v-list-item-action>
     </v-list-item>
     <v-list-item
       v-if="isModInProgress"
-      style="height: 0px; min-height: 0px; padding: 0;"
+      style="height: 0px; min-height: 0px; padding: 0; z-index: 0"
     >
       <v-progress-linear
         :value="Math.round(currentModProgress.progress * 100)"
         :class="currentModProgress.fast ? 'fast' : ''"
-        color="warning"
-        height="49"
+        color="mod-list-progress-bar"
+        height="45"
         reactive
-        style="position: relative; top: -24.5px;"
+        style="position: relative; top: -22.5px; margin-left: 45px"
         :indeterminate="currentModProgress.progress < 0"
-      >
-        <strong>{{ currentModProgress.message }}</strong>
-      </v-progress-linear>
+      />
     </v-list-item>
   </div>
 </template>
@@ -132,6 +159,9 @@ export default {
     isFavorite() {
       return this.favoriteModIds.includes(this.mod.modInfo.mod_reference);
     },
+    isExpanded() {
+      return this.expandedModId === this.mod.modInfo.mod_reference;
+    },
     icon() {
       return this.mod.modInfo.logo || 'https://ficsit.app/static/assets/images/no_image.png';
     },
@@ -152,25 +182,34 @@ export default {
     favoriteClicked() {
       this.$store.dispatch('toggleModFavorite', this.mod.modInfo.mod_reference);
     },
-    switchClicked() {
+    switchInstalled() {
       this.$store.dispatch('switchModInstalled', this.mod.modInfo.mod_reference);
     },
   },
 };
 </script>
 
+<style>
+.mod-list-progress-bar {
+  background-color: var(--v-backgroundModsList-darken1) !important;
+  border-color: var(--v-backgroundModsList-darken1) !important;
+}
+</style>
+
 <style scoped>
+.v-icon {
+  transition: background-color 0ms !important;
+}
+.v-list-item__subtitle .v-icon {
+  font-size: 16px !important
+}
 .custom.v-list-item__action {
   margin-top: 0;
   margin-bottom: 0;
 }
-div {
-  background: var(--v-backgroundModsList-base) !important;
-}
 .mod-button {
   margin-top: 5px;
   margin-right: 5px;
-  font-size: 25px;
   opacity: 0.75;
 }
 .mod-button:not(:hover):not(.active)>.v-icon {
@@ -181,5 +220,15 @@ div {
 }
 .mod-button:hover {
   opacity: 0.65;
+}
+
+.mod, .mod * {
+  background: var(--v-backgroundModsList-base) !important;
+}
+.mod.in-progress, .mod.in-progress * {
+  background: transparent !important;
+}
+.expanded, .expanded *{
+  background-color: var(--v-backgroundModsList-darken1) !important;
 }
 </style>
