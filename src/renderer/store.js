@@ -189,9 +189,7 @@ export default new Vuex.Store({
         } catch (e) {
           dispatch('showError', e);
         } finally {
-          setTimeout(() => {
-            state.inProgress.remove(modProgress);
-          }, 500);
+          state.inProgress.remove(modProgress);
         }
       } else {
         placeholderProgreess.message = 'Finding the best version to install';
@@ -202,9 +200,7 @@ export default new Vuex.Store({
         } catch (e) {
           dispatch('showError', e);
         } finally {
-          setTimeout(() => {
-            state.inProgress.remove(modProgress);
-          }, 500);
+          state.inProgress.remove(modProgress);
         }
       }
     },
@@ -232,9 +228,7 @@ export default new Vuex.Store({
       } catch (e) {
         dispatch('showError', e);
       } finally {
-        setTimeout(() => {
-          state.inProgress.remove(modProgress);
-        }, 500);
+        state.inProgress.remove(modProgress);
       }
     },
     expandMod({ commit }, modId) {
@@ -415,9 +409,7 @@ export default new Vuex.Store({
       } catch (e) {
         dispatch('showError', e);
       } finally {
-        setTimeout(() => {
-          state.inProgress.remove(updateProgress);
-        }, 500);
+        state.inProgress.remove(updateProgress);
       }
     },
     async updateMulti({ state, commit, dispatch }, updates) {
@@ -437,9 +429,7 @@ export default new Vuex.Store({
       } catch (e) {
         dispatch('showError', e);
       } finally {
-        setTimeout(() => {
-          state.inProgress.remove(updateProgress);
-        }, 500);
+        state.inProgress.remove(updateProgress);
       }
     },
   },
