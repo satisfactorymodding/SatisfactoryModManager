@@ -180,22 +180,25 @@
               v-model="newProfileCopyCurrent"
               label="Copy current profile"
             />
-            <v-btn
-              color="primary"
-              text
-              @click="createProfile"
-            >
-              Create
-            </v-btn>
-            <v-btn
-              color="text"
-              text
-              @click="cancelCreateProfile"
-            >
-              Cancel
-            </v-btn>
+            <span class="warning--text">{{ newProfileMessage }}</span>
           </v-form>
         </v-card-text>
+        <v-card-actions>
+          <v-btn
+            color="primary"
+            text
+            @click="createProfile"
+          >
+            Create
+          </v-btn>
+          <v-btn
+            color="text"
+            text
+            @click="cancelCreateProfile"
+          >
+            Cancel
+          </v-btn>
+        </v-card-actions>
       </v-card>
     </v-dialog>
     <v-dialog
@@ -233,6 +236,7 @@
 
 <script>
 import { mapState } from 'vuex';
+import { filenamify } from '@/utils';
 
 export default {
   data() {
@@ -241,6 +245,7 @@ export default {
       newProfileDialog: false,
       newProfileName: '',
       newProfileCopyCurrent: false,
+      newProfileMessage: '',
       deleteProfileDialog: false,
     };
   },
@@ -286,13 +291,23 @@ export default {
       },
     },
   },
+  watch: {
+    newProfileName(name) {
+      const validName = filenamify(name);
+      if (name !== validName) {
+        this.newProfileMessage = `Profile will be saved as ${validName}`;
+      } else {
+        this.newProfileMessage = '';
+      }
+    },
+  },
   methods: {
     showCreateProfileDialog() {
       this.newProfileDialog = true;
     },
     createProfile() {
       if (this.$refs.newProfileForm.validate()) {
-        this.$store.dispatch('createProfile', { profileName: this.newProfileName, copyCurrent: this.newProfileCopyCurrent });
+        this.$store.dispatch('createProfile', { profileName: filenamify(this.newProfileName), copyCurrent: this.newProfileCopyCurrent });
         this.cancelCreateProfile();
       }
     },

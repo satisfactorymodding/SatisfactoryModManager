@@ -94,7 +94,7 @@
                           v-model="importProfileVersions"
                           label="Import mod versions"
                         />
-                        <span class="warning--text">{{ importProfileMessage }}</span>
+                        <span class="warning--text">{{ importProfileMessages.join('\n') }}</span>
                       </v-form>
                     </v-card-text>
                     <v-card-actions>
@@ -486,7 +486,7 @@ import fs from 'fs';
 import path from 'path';
 import { getCacheFolder } from 'platform-folders';
 import StreamZip from 'node-stream-zip';
-import { filenameFriendlyDate } from '@/utils';
+import { filenameFriendlyDate, filenamify } from '@/utils';
 import { getSetting, saveSetting } from '~/settings';
 
 /**
@@ -510,7 +510,7 @@ export default {
       importProfileMetadata: null,
       importProfileName: '',
       importProfileVersions: false,
-      importProfileMessage: '',
+      importProfileMessages: ['', ''],
       helpDialog: false,
       cachedDebugMode: false,
     };
@@ -557,14 +557,18 @@ export default {
       }
     },
     importProfileMetadata(metadata) {
-      if (metadata) {
-        if (validAndGreater(metadata.gameVersion, this.$store.state.selectedInstall.version)) {
-          this.importProfileMessage = `This profile is made for game version ${metadata.gameVersion}, but you're using an older version: ${this.$store.state.selectedInstall.version}. Things might not work as expected.`;
-        } else {
-          this.importProfileMessage = '';
-        }
+      if (metadata && validAndGreater(metadata.gameVersion, this.$store.state.selectedInstall.version)) {
+        this.importProfileMessages[0] = `This profile is made for game version ${metadata.gameVersion}, but you're using an older version: ${this.$store.state.selectedInstall.version}. Things might not work as expected.`;
       } else {
-        this.importProfileMessage = '';
+        this.importProfileMessages[0] = '';
+      }
+    },
+    importProfileName(name) {
+      const validName = filenamify(name);
+      if (name !== validName) {
+        this.importProfileMessages[1] = `Profile will be saved as ${validName}`;
+      } else {
+        this.importProfileMessages[1] = '';
       }
     },
   },
@@ -628,6 +632,7 @@ export default {
     },
     async importProfile() {
       if (this.$refs.importProfileForm.validate()) {
+        this.importProfileName = filenamify(this.importProfileName);
         const importProfileProgress = {
           id: '__importProfile__',
           progresses: [{

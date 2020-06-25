@@ -1,5 +1,6 @@
 import marked from 'marked';
 import sanitizeHtml from 'sanitize-html';
+import originalFilenamify from 'filenamify';
 import { getSetting, saveSetting } from '~/settings';
 
 export function lastElement(arr) {
@@ -73,4 +74,8 @@ export function secondsToAppropriate(seconds) {
     rangeNum += 1;
   }
   return `${roundWithDecimals(seconds / timeRanges[ranges[rangeNum]], 0)}${ranges[rangeNum]}`;
+}
+
+export function filenamify(str) {
+  return originalFilenamify(str, { replacement: '_' });
 }

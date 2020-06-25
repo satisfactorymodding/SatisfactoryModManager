@@ -132,7 +132,7 @@ export default new Vuex.Store({
         };
         state.inProgress.push(loadProgress);
         const savedProfileName = getSetting('selectedProfile', {})[state.selectedInstall.installLocation] || 'modded';
-        commit('setProfile', { newProfile: state.profiles.find((conf) => conf.name === savedProfileName) });
+        commit('setProfile', { newProfile: state.profiles.find((conf) => conf.name.toLowerCase() === savedProfileName.toLowerCase()) });
         try {
           await newInstall.setProfile(savedProfileName);
           commit('refreshModsInstalledCompatible');
@@ -321,7 +321,7 @@ export default new Vuex.Store({
             const savedLocation = getSetting('selectedInstall');
             commit('setInstall', { newInstall: state.satisfactoryInstalls.find((install) => install.installLocation === savedLocation) || state.satisfactoryInstalls[0] });
             const savedProfileName = getSetting('selectedProfile', {})[state.selectedInstall.installLocation] || 'modded';
-            commit('setProfile', { newProfile: state.profiles.find((conf) => conf.name === savedProfileName) });
+            commit('setProfile', { newProfile: state.profiles.find((conf) => conf.name.toLowerCase() === savedProfileName.toLowerCase()) });
 
             await state.selectedInstall.setProfile(savedProfileName);
             appLoadProgress.progresses.remove(installValidateProgress);
