@@ -232,24 +232,6 @@
         />
 
         <v-list-item>
-          <v-list-item-action />
-          <v-list-item-content>
-            <v-list-item-title>Dark mode</v-list-item-title>
-          </v-list-item-content>
-
-          <v-list-item-action>
-            <v-switch
-              v-model="darkMode"
-            />
-          </v-list-item-action>
-        </v-list-item>
-
-        <v-divider
-          class="custom"
-          inset
-        />
-
-        <v-list-item>
           <v-list-item-action>
             <v-icon color="text">
               mdi-information
@@ -481,7 +463,11 @@
         <v-divider class="custom" />
 
         <v-list-item>
-          <v-list-item-action />
+          <v-list-item-action>
+            <v-icon color="text">
+              mdi-information
+            </v-icon>
+          </v-list-item-action>
           <v-list-item-content>
             <v-list-item-title>Satisfactory Mod Manager v{{ version }}</v-list-item-title>
           </v-list-item-content>
@@ -539,15 +525,6 @@ export default {
       },
       set(value) {
         this.$store.dispatch('setExpandModInfoOnStart', value);
-      },
-    },
-    darkMode: {
-      get() {
-        return this.$vuetify.theme.dark;
-      },
-      set(value) {
-        this.$vuetify.theme.dark = value;
-        saveSetting('darkMode', value);
       },
     },
     debugMode: {
