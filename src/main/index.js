@@ -66,10 +66,10 @@ function updateSize() {
 }
 
 function createWindow() {
-  /**
-   * Initial window options
-   */
+  const windowLocation = getSetting('windowLocation', {});
   mainWindow = new BrowserWindow({
+    x: windowLocation.x,
+    y: windowLocation.y,
     width: normalSize.width,
     height: normalSize.height,
     minHeight: minNormalSize.height,
@@ -110,6 +110,10 @@ function createWindow() {
 
   mainWindow.on('unmaximize', () => {
     saveSetting('maximized', false);
+  });
+
+  mainWindow.on('move', () => {
+    saveSetting('windowLocation', { x: mainWindow.getBounds().x, y: mainWindow.getBounds().y });
   });
 
   ipcMain.on('openDevTools', () => {
@@ -184,6 +188,10 @@ if (app.requestSingleInstanceLock()) {
     isChangingExpanded = true;
     isExpanded = false;
     updateSize();
+    const windowScreen = screen.getDisplayMatching(mainWindow.getBounds());
+    if (mainWindow.getBounds().x + mainWindow.getBounds().width < windowScreen.workArea.x) {
+      mainWindow.setPosition(windowScreen.workArea.x, mainWindow.getBounds().y, true);
+    }
     isChangingExpanded = false;
   });
 
