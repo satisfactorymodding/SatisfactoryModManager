@@ -26,5 +26,5 @@ export function saveSetting(name, value) {
   if (!fs.existsSync(path.dirname(settingsFilePath))) {
     fs.mkdirSync(path.dirname(settingsFilePath), { recursive: true });
   }
-  fs.writeFileSync(settingsFilePath, JSON.stringify(settings));
+  fs.writeFileSync(settingsFilePath, JSON.stringify(settings, null, 4));
 }
