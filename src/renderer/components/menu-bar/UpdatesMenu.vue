@@ -8,7 +8,7 @@
       <v-btn
         style="min-width: 36px"
         v-bind="attrs"
-        class="ma-2 px-2"
+        class="my-2 mx-1"
         v-on="on"
       >
         <v-icon style="font-size: 25px !important">

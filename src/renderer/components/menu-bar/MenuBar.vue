@@ -3,18 +3,73 @@
     fluid
     class="py-0"
   >
-    <v-row class="px-3">
+    <v-row
+      class="px-3"
+      :class="hasUpdate ? 'update-available' : ''"
+    >
       <v-col cols="auto">
         <SettingsMenu />
       </v-col>
       <v-spacer />
       <v-col cols="auto">
-        <span class="d-inline-flex align-center fill-height">{{ hasUpdate ? 'Updates available' : 'No updates right now' }}</span>
+        <span
+          v-if="!hasUpdate"
+          class="d-inline-flex align-center fill-height mx-1"
+        >No updates right now</span>
+        <v-btn
+          v-else-if="filteredModUpdates.length === 0 || !availableSMMUpdate"
+          class="my-2 mx-1"
+          @click="filteredModUpdates.length > 0 ? openModUpdatesDialog() : openSMMUpdateDialog()"
+        >
+          <span class="mx-1">
+            {{ filteredModUpdates.length > 0 ? 'Mod updates are available' : 'SMM updates are available' }}
+          </span>
+        </v-btn>
+        <v-menu v-else>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              class="my-2 mx-1"
+              v-bind="attrs"
+              v-on="on"
+            >
+              <span class="mx-1">
+                SMM and mod updates are avaialble
+              </span>
+            </v-btn>
+          </template>
+          <v-card>
+            <v-list class="menu">
+              <v-list-item @click="openModUpdatesDialog">
+                <v-list-item-action />
+                <v-list-item-content>
+                  <v-list-item-title>Mod updates ({{ filteredModUpdates.length }})</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+
+              <v-divider
+                inset
+                class="custom"
+              />
+
+              <v-list-item @click="openSMMUpdateDialog">
+                <v-list-item-action />
+                <v-list-item-content>
+                  <v-list-item-title>SMM updates ({{ smmUpdateCount }})</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+
+              <v-divider
+                inset
+                class="custom"
+              />
+            </v-list>
+          </v-card>
+        </v-menu>
       </v-col>
       <v-col cols="auto">
         <v-btn
           style="min-width: 36px"
-          class="ma-2 px-2"
+          class="my-2 mx-1"
           @click="manualCheckForUpdates"
         >
           <v-icon style="font-size: 25px !important">
@@ -127,13 +182,19 @@ export default {
         this.cachedUpdateCheckMode = value;
       },
     },
+    smmUpdateCount() {
+      if (!this.availableSMMUpdate) {
+        return 0;
+      }
+      return this.availableSMMUpdate.releaseNotes.length;
+    },
   },
   watch: {
     async selectedInstall() {
-      await this.manualCheckForUpdates();
+      await this.checkForUpdates();
     },
     async selectedProfile() {
-      await this.manualCheckForUpdates();
+      await this.checkForUpdates();
     },
   },
   mounted() {
@@ -246,6 +307,10 @@ export default {
 </style>
 
 <style scoped>
+.row.update-available, .row.update-available>* {
+  background-color: var(--v-primary-base) !important;
+  color: black !important;
+}
 div {
   background-color: var(--v-backgroundMenuBar-base);
 }
