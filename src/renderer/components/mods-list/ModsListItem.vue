@@ -46,7 +46,10 @@
             </v-col>
           </v-row>
         </v-list-item-subtitle>
-        <v-list-item-subtitle v-else>
+        <v-list-item-subtitle
+          v-else
+          style="z-index: 2;"
+        >
           <div class="d-inline-flex align-center">
             <v-icon
               color="warning"
@@ -54,7 +57,7 @@
             >
               mdi-information
             </v-icon>
-            <span style="font-size: 12px">{{ currentModProgress.message }}</span>
+            <span style="font-size: 11px">{{ currentModProgress.message }}</span>
           </div>
         </v-list-item-subtitle>
       </v-list-item-content>
@@ -63,7 +66,7 @@
         class="mod-button custom"
       >
         <v-icon
-          class="ma-1 icon"
+          class="icon"
           color="warning"
           @click="favoriteClicked"
         >
@@ -71,8 +74,7 @@
         </v-icon>
       </v-list-item-action>
       <v-list-item-action
-        class="custom"
-        style="margin-right: 10px; margin-left: 5px"
+        class="custom mod-button"
       >
         <v-icon
           v-if="!mod.isCompatible"
@@ -201,7 +203,7 @@ export default {
   transition: background-color 0ms !important;
 }
 .v-list-item__subtitle .v-icon {
-  font-size: 16px !important
+  font-size: 14px !important
 }
 .custom.v-list-item__action {
   margin-top: 0;
@@ -209,6 +211,7 @@ export default {
 }
 .mod-button {
   margin-top: 5px;
+  margin-left: 0 !important;
   margin-right: 5px;
   opacity: 0.75;
 }

@@ -14,7 +14,7 @@
     <div
       ref="modsList"
       style="overflow-y: scroll; height: 100%;"
-      class="mx-4"
+      class="ml-4"
       @scroll="modsListScrolled"
     >
       <v-list
@@ -96,6 +96,9 @@ div {
   box-shadow: inset 0px -45px 20px -20px rgba(0,0,0,0.3);
 }
 
+::-webkit-scrollbar {
+  width: 20px;
+}
 ::-webkit-scrollbar-track {
   background: var(--v-background-base);
   border: solid 9px transparent;

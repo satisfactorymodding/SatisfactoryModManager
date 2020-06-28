@@ -5,7 +5,7 @@
     class="d-flex"
     width="100%"
     height="100%"
-    style="padding: 0; box-shadow: inset 10px 0 10px -10px rgba(0,0,0,1); max-width: calc(100vw - 600px);"
+    style="padding: 0; box-shadow: inset 10px 0 10px -10px rgba(0,0,0,1); max-width: calc(100vw - 550px);"
   >
     <ModDetailsInfo
       :mod="mod"
@@ -14,7 +14,7 @@
     />
     <v-card
       height="100%"
-      style="max-width: calc(100% - 296px);"
+      class="mod-description-card"
     >
       <v-container
         fluid
@@ -162,6 +162,14 @@ export default {
   word-break: break-word;
   overflow-y: auto;
   box-shadow: none;
+}
+.mod-description-card {
+  max-width: calc(100% - 296px);
+}
+@media (max-height: 700px) {
+  .mod-description-card {
+    max-width: calc(100% - 240px);
+  }
 }
 
 .row {

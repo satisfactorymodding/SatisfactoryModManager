@@ -10,7 +10,7 @@
     >
       <v-card
         height="100%"
-        style="width: 600px; min-width: 600px; max-width: 600px; z-index: 1;"
+        style="width: 550px; min-width: 550px; max-width: 550px; z-index: 1;"
         class="d-flex flex-column"
       >
         <MenuBar />
@@ -61,7 +61,7 @@
     <v-dialog
       persistent
       :value="isLoadingAppInProgress"
-      width="600"
+      width="500"
       height="230"
     >
       <v-card
@@ -102,7 +102,7 @@
     <v-dialog
       persistent
       :value="showUpdateDownloadProgress"
-      width="600"
+      width="500"
       height="230"
     >
       <v-card
@@ -142,7 +142,7 @@
     </v-dialog>
     <v-dialog
       v-model="oldSMLauncherInstalled"
-      width="600"
+      width="500"
       height="230"
     >
       <v-card

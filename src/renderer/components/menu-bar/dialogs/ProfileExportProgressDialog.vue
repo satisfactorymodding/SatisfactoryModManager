@@ -2,7 +2,7 @@
   <v-dialog
     persistent
     :value="isProfileExportInProgress"
-    width="600"
+    width="500"
     height="230"
   >
     <v-card

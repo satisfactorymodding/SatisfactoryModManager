@@ -1,8 +1,6 @@
 <template>
   <v-card
-    width="296"
-    max-width="296"
-    min-width="296"
+    class="mod-details-card"
   >
     <v-container
       fluid
@@ -12,9 +10,8 @@
     >
       <v-row style="padding-bottom: 15px">
         <img
+          class="mod-icon"
           :src="icon"
-          width="256"
-          height="256"
         >
       </v-row>
       <v-row style="padding-bottom: 15px">
@@ -223,7 +220,6 @@ export default {
 .mod-icon {
   width: 256px;
   height: 256px;
-  margin: 0 32px 32px 32px;
 }
 .mod-stats * {
   font-size: 14px;
@@ -242,5 +238,25 @@ export default {
 .row {
   margin-left: 0 !important;
   margin-right: 0 !important;
+}
+.mod-icon {
+  height: 256px;
+  width: 256px;
+}
+.mod-details-card {
+  width: 296px;
+  min-width: 296px;
+  max-width: 296px;
+}
+@media (max-height: 700px) {
+  .mod-icon {
+    height: 200px;
+    width: 200px;
+  }
+  .mod-details-card {
+    width: 240px;
+    min-width: 240px;
+    max-width: 240px;
+  }
 }
 </style>

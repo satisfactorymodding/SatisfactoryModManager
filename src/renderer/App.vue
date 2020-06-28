@@ -54,7 +54,7 @@ html {
 
 .v-text-field {
   padding-top: 6px !important;
-  margin-top: 12px !important;
+  margin-top: 6px !important;
 }
 
 .v-list-item__icon {

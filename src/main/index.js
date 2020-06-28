@@ -38,20 +38,20 @@ function openedByUrl(url) {
 }
 
 const normalSize = getSetting('normalSize', {
-  width: 600,
-  height: 858,
+  width: 550,
+  height: 850,
 });
 const minNormalSize = {
-  width: 600,
-  height: 725,
+  width: 550,
+  height: 650,
 };
 const expandedSize = getSetting('expandedSize', {
   width: 1575,
-  height: 858,
+  height: 850,
 });
 const minExpandedSize = {
-  width: 1300,
-  height: 725,
+  width: 1225,
+  height: 650,
 };
 
 let isExpanded = false;

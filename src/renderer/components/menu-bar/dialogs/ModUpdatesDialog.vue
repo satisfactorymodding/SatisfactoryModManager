@@ -1,7 +1,7 @@
 <template>
   <v-dialog
     v-model="modUpdatesDialog"
-    max-width="600"
+    max-width="500"
   >
     <v-card>
       <v-card-title>
