@@ -143,6 +143,14 @@
           <span class="header">{{ mod.modInfo.tags ? mod.modInfo.tags.map((tag) => `#${tag}`).join(' ') : 'N/A' }}</span><br>-->
         </span>
       </v-row>
+      <v-row>
+        <a
+          class="primary--text"
+          style="font-weight: 600"
+          target="_blank"
+          :href="`https://ficsit.app/mod/${mod.modInfo.id}`"
+        >View on ficsit.app</a>
+      </v-row>
       <v-spacer style="flex-basis: 100%" />
       <v-row>
         <v-btn
@@ -252,11 +260,12 @@ export default {
   .mod-icon {
     height: 200px;
     width: 200px;
+    margin-left: 10px;
   }
   .mod-details-card {
-    width: 240px;
-    min-width: 240px;
-    max-width: 240px;
+    width: 260px;
+    min-width: 260px;
+    max-width: 260px;
   }
 }
 </style>

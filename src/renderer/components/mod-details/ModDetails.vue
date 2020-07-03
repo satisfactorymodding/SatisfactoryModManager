@@ -16,12 +16,13 @@
     <v-card
       v-if="!isR"
       height="100%"
+      width="100%"
       class="mod-description-card"
     >
       <v-container
         fluid
         class="d-flex flex-column"
-        style="height: 100%"
+        style="height: 100%; padding: 20px 12x 15px 20px;"
       >
         <v-row style="flex-basis: 0; overflow: auto;">
           <div
@@ -29,9 +30,9 @@
             v-html="modDescription"
           />
         </v-row>
-        <v-row style="flex-grow: 0">
+        <v-row style="flex-grow: 0;">
           <v-spacer />
-          <v-col style="flex-grow: 0">
+          <v-col style="flex-grow: 0; padding-bottom: 0">
             <v-btn
               raised
               width="150px"
@@ -51,7 +52,7 @@
           </v-col>
           <v-col
             v-if="mod.isCompatible"
-            style="flex-grow: 0"
+            style="flex-grow: 0; padding-bottom: 0"
           >
             <v-btn
               width="150px"
@@ -184,7 +185,7 @@ export default {
 }
 @media (max-height: 700px) {
   .mod-description-card {
-    max-width: calc(100% - 240px);
+    max-width: calc(100% - 260px);
   }
 }
 
