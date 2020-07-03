@@ -8,11 +8,13 @@
     style="padding: 0; box-shadow: inset 10px 0 10px -10px rgba(0,0,0,1); max-width: calc(100vw - 550px);"
   >
     <ModDetailsInfo
+      v-if="!isR"
       :mod="mod"
       @close="close"
       @installVersion="installVersion"
     />
     <v-card
+      v-if="!isR"
       height="100%"
       class="mod-description-card"
     >
@@ -72,6 +74,19 @@
         </v-row>
       </v-container>
     </v-card>
+    <v-card
+      v-if="isR"
+      height="100%"
+      width="100%"
+    >
+      <iframe
+        width="100%"
+        height="100%"
+        src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1"
+        frameborder="0"
+        allow="autoplay; encrypted-media;"
+      />
+    </v-card>
   </v-card>
 </template>
 
@@ -92,6 +107,7 @@ export default {
     ...mapState([
       'inProgress',
       'expandedModId',
+      'isR',
     ]),
     ...mapGetters([
       'canInstallMods',

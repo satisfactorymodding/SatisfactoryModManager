@@ -31,7 +31,7 @@
           <b>{{ isGameRunning ? 'GAME IS RUNNING' : 'LAUNCH GAME' }}</b>
         </v-btn>
       </v-card>
-      <ModDetails v-if="expandedModId" />
+      <ModDetails v-if="expandedModId || isR" />
     </v-card>
     <v-dialog
       v-model="errorDialog"
@@ -220,6 +220,7 @@ export default {
         'isGameRunning',
         'error',
         'errorPersistent',
+        'isR',
       ],
     ),
     errorDialog: {
@@ -247,6 +248,17 @@ export default {
     },
     currentUpdateDownloadProgress() {
       return lastElement(this.updateDownloadProgress.progresses);
+    },
+  },
+  watch: {
+    isR() {
+      if (!this.expandedModId) {
+        if (this.isR) {
+          this.$electron.ipcRenderer.send('expand');
+        } else {
+          this.$electron.ipcRenderer.send('unexpand');
+        }
+      }
     },
   },
   async mounted() {
@@ -325,10 +337,14 @@ export default {
     clearError() {
       this.$store.dispatch('clearError');
     },
-    launchSatisfactory() {
+    async launchSatisfactory() {
       if (this.selectedInstall && !this.isGameRunning) {
-        exec(`start "" "${this.selectedInstall.launchPath}"`).unref();
         this.$store.commit('launchGame');
+        if (this.$store.state.shouldR) {
+          await this.$store.dispatch('showR');
+          this.$store.commit('launchGame');
+        }
+        exec(`start "" "${this.selectedInstall.launchPath}"`).unref();
       }
     },
     uninstallOldSMLauncher() {

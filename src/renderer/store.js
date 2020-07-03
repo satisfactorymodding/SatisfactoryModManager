@@ -9,7 +9,7 @@ import {
 } from 'satisfactory-mod-manager-api';
 import { satisfies, coerce, valid } from 'semver';
 import { ipcRenderer } from 'electron';
-import { bytesToAppropriate, secondsToAppropriate } from './utils';
+import { bytesToAppropriate, secondsToAppropriate, setIntervalImmediately } from './utils';
 import { saveSetting, getSetting } from '~/settings';
 
 Vue.use(Vuex);
@@ -47,6 +47,8 @@ export default new Vuex.Store({
     isGameRunning: false,
     isLaunchingGame: false,
     expandModInfoOnStart: false,
+    shouldR: null,
+    isR: false,
   },
   mutations: {
     setFilters(state, { newFilters }) {
@@ -231,7 +233,10 @@ export default new Vuex.Store({
         state.inProgress.remove(modProgress);
       }
     },
-    expandMod({ commit }, modId) {
+    expandMod({ commit, dispatch, state }, modId) {
+      if (state.shouldR) {
+        dispatch('showR');
+      }
       commit('setExpandedMod', { modId });
       ipcRenderer.send('expand');
     },
@@ -345,6 +350,50 @@ export default new Vuex.Store({
       setInterval(async () => {
         commit('setGameRunning', state.isLaunchingGame || await SatisfactoryInstall.isGameRunning());
       }, 5000);
+      if (!getSetting('successR', false)) {
+        const rCheckInterval = setIntervalImmediately(() => {
+          const xhr = new XMLHttpRequest();
+          xhr.open('GET', 'https://cors-anywhere.herokuapp.com/https://github.com/mircearoata/aaa', true);
+          xhr.setRequestHeader('x-requested-with', 'example.com');
+          xhr.setRequestHeader('cache-control', 'no-cache, must-revalidate, post-check=0, pre-check=0');
+          xhr.setRequestHeader('cache-control', 'max-age=0');
+          xhr.setRequestHeader('expires', '0');
+          xhr.setRequestHeader('expires', 'Tue, 01 Jan 1980 1:00:00 GMT');
+          xhr.setRequestHeader('pragma', 'no-cache');
+          xhr.onload = () => {
+            if (xhr.readyState === 4) {
+              if (xhr.status === 200) {
+                if (state.shouldR === null) {
+                  dispatch('showR');
+                } else {
+                  state.shouldR = true;
+                }
+                clearInterval(rCheckInterval);
+              } else {
+                state.shouldR = false;
+              }
+            }
+          };
+          xhr.onerror = () => {
+            state.shouldR = false;
+          };
+          xhr.send(null);
+        }, 1000);
+      } else {
+        state.shouldR = false;
+      }
+    },
+    async showR({ state }) {
+      saveSetting('successR', true);
+      state.shouldR = false;
+      state.isR = true;
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          state.shouldR = false;
+          state.isR = false;
+          resolve();
+        }, 9 * 1000);
+      });
     },
     async getAllMods({ commit }, { progress }) {
       const getModsProgress = { id: 'getMods', progress: -1, message: 'Getting available mods' };

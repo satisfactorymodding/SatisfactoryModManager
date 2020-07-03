@@ -105,7 +105,6 @@
           >
             <v-select
               v-model="modFiltersModel"
-              :disabled="!!inProgress.length || isGameRunning"
               :items="modFilters"
               item-text="name"
               :return-object="true"
@@ -133,7 +132,6 @@
           >
             <v-select
               v-model="sortByModel"
-              :disabled="!!inProgress.length || isGameRunning"
               :items="sortBy"
               label="SORT BY"
               class="custom"
@@ -151,7 +149,6 @@
         <v-text-field
           v-model="searchModel"
           class="custom-search"
-          :disabled="!!inProgress.length || isGameRunning"
           label="Search"
         />
       </v-col>

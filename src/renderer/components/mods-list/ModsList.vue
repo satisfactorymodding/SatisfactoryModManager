@@ -107,13 +107,13 @@ div {
 }
 ::-webkit-scrollbar-thumb {
   background: var(--v-background-base);
-  border: solid 2px transparent;
+  border: solid 3.5px transparent;
   background-clip: content-box;
   border-radius: 20px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: white;
-  border: solid 2px transparent;
+  border: solid 3.5px transparent;
   background-clip: content-box;
 }
 </style>

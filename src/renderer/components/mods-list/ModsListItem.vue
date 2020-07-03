@@ -63,7 +63,7 @@
       </v-list-item-content>
       <v-list-item-action
         :class="isFavorite ? 'active' : ''"
-        class="mod-button custom"
+        class="mod-button toggle custom"
       >
         <v-icon
           class="icon"
@@ -213,9 +213,11 @@ export default {
   margin-top: 5px;
   margin-left: 0 !important;
   margin-right: 5px;
+}
+.mod-button.toggle {
   opacity: 0.75;
 }
-.mod-button:not(:hover):not(.active)>.v-icon {
+.mod-button.toggle:not(:hover):not(.active)>.v-icon {
   color: var(--v-backgroundModsList-lighten2) !important;
 }
 .mod-button.active {

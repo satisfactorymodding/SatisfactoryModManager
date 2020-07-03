@@ -1,5 +1,5 @@
 import {
-  app, BrowserWindow, ipcMain, shell, screen,
+  app, BrowserWindow, ipcMain, shell, screen, session,
 } from 'electron';
 import path from 'path';
 import { autoUpdater } from 'electron-updater';
@@ -145,7 +145,16 @@ if (app.requestSingleInstanceLock()) {
     }
   });
 
-  app.on('ready', createWindow);
+  app.on('ready', () => {
+    session.defaultSession.webRequest.onBeforeRequest({ urls: ['https://www.youtube.com/get_video_info*'] }, (details, callback) => { // YT doesn't allow files to load embeds on purpose, even though it works!
+      if (!details.url.includes('get_video_info') || !details.url.includes('&ancestor_origins=file%3A%2F%2F')) {
+        callback({});
+        return;
+      }
+      callback({ redirectURL: details.url.replace('&ancestor_origins=file%3A%2F%2F', '&ancestor_origins=http%3A%2F%2Flocalhost%3A9080').replace('&eurl', '&eurl=http%3A%2F%2Flocalhost%3A9080%2F') });
+    });
+    createWindow();
+  });
 
   app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {

@@ -79,3 +79,8 @@ export function secondsToAppropriate(seconds) {
 export function filenamify(str) {
   return originalFilenamify(str, { replacement: '_' });
 }
+
+export function setIntervalImmediately(func, interval) {
+  func();
+  return setInterval(func, interval);
+}
