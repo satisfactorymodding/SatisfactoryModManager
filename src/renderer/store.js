@@ -6,6 +6,7 @@ import {
   getAvailableMods,
   createProfile,
   deleteProfile,
+  getMod,
 } from 'satisfactory-mod-manager-api';
 import { satisfies, coerce, valid } from 'semver';
 import { ipcRenderer } from 'electron';
@@ -38,6 +39,7 @@ export default new Vuex.Store({
     selectedInstall: {},
     smlVersions: [],
     mods: [],
+    hiddenInstalledMods: [],
     expandedModId: '',
     favoriteModIds: [],
     inProgress: [], // { id: string, progresses: { id: string, progress: number, message: string, fast: boolean }[] }
@@ -91,6 +93,9 @@ export default new Vuex.Store({
     setAvailableMods(state, { mods }) {
       state.mods = mods;
     },
+    setHiddenInstalledMods(state, { mods }) {
+      state.hiddenInstalledMods = mods;
+    },
     setExpandedMod(state, { modId }) {
       state.expandedModId = modId;
     },
@@ -137,6 +142,7 @@ export default new Vuex.Store({
         try {
           await newInstall.setProfile(savedProfileName);
           commit('refreshModsInstalledCompatible');
+          dispatch('findHiddenInstalledMods');
         } catch (e) {
           dispatch('showError', e);
         } finally {
@@ -158,6 +164,7 @@ export default new Vuex.Store({
         try {
           await state.selectedInstall.setProfile(newProfile.name);
           commit('refreshModsInstalledCompatible');
+          dispatch('findHiddenInstalledMods');
           const current = getSetting('selectedProfile', {});
           current[state.selectedInstall.installLocation] = state.selectedProfile.name;
           saveSetting('selectedProfile', current);
@@ -168,7 +175,27 @@ export default new Vuex.Store({
         }
       }
     },
-    async switchModInstalled({ commit, dispatch, state }, modId) {
+    async findHiddenInstalledMods({ commit, state }) {
+      const { manifestMods, mods: installedModVersions } = state.selectedInstall;
+      commit('setHiddenInstalledMods', {
+        mods:
+        (await Promise.all(Object.keys(installedModVersions)
+          .filter((modID) => !state.mods.some((mod) => mod.modInfo.mod_reference === modID)) // not in the available mods list
+          .filter((modID) => !(!!installedModVersions[modID] && !manifestMods.some((mod) => mod.id === modID))) // not dependency
+          .map((modID) => getMod(modID)))
+        ).map((mod) => ({
+          modInfo: mod,
+          isCompatible: false,
+          isInstalled: true,
+          isDependency: false,
+          manifestVersion: manifestMods.find((manifestMod) => manifestMod.id === mod.mod_reference)?.version,
+          installedVersion: installedModVersions[mod.mod_reference],
+        })),
+      });
+    },
+    async switchModInstalled({
+      commit, dispatch, state, getters,
+    }, modId) {
       if (state.inProgress.length > 0) {
         dispatch('showError', 'Another operation is currently in progress');
         return;
@@ -180,12 +207,13 @@ export default new Vuex.Store({
         id: 'placeholder', progress: -1, message: '', fast: false,
       };
       modProgress.progresses.push(placeholderProgreess);
-      if (state.mods.find((mod) => mod.modInfo.mod_reference === modId).isInstalled) {
+      if (getters.allMods.find((mod) => mod.modInfo.mod_reference === modId).isInstalled) {
         placeholderProgreess.message = 'Checking for mods that are no longer needed';
         try {
           await state.selectedInstall.uninstallMod(modId);
           placeholderProgreess.progress = 1;
           commit('refreshModsInstalledCompatible');
+          dispatch('findHiddenInstalledMods');
         } catch (e) {
           dispatch('showError', e);
         } finally {
@@ -197,6 +225,7 @@ export default new Vuex.Store({
           await state.selectedInstall.installMod(modId);
           placeholderProgreess.progress = 1;
           commit('refreshModsInstalledCompatible');
+          dispatch('findHiddenInstalledMods');
         } catch (e) {
           dispatch('showError', e);
         } finally {
@@ -204,7 +233,9 @@ export default new Vuex.Store({
         }
       }
     },
-    async installModVersion({ commit, dispatch, state }, { modId, version }) {
+    async installModVersion({
+      commit, dispatch, state, getters,
+    }, { modId, version }) {
       if (state.inProgress.length > 0) {
         dispatch('showError', 'Another operation is currently in progress');
         return;
@@ -218,13 +249,14 @@ export default new Vuex.Store({
       modProgress.progresses.push(placeholderProgreess);
       placeholderProgreess.message = `Installing ${version ? `${modId} v${version}` : `latest ${modId}`}`;
       try {
-        if (version || !state.mods.find((mod) => mod.modInfo.mod_reference === modId)?.isInstalled) {
+        if (version || !getters.allMods.find((mod) => mod.modInfo.mod_reference === modId)?.isInstalled) {
           await state.selectedInstall.installMod(modId, version);
         } else {
           await state.selectedInstall.updateMod(modId);
         }
         placeholderProgreess.progress = 1;
         commit('refreshModsInstalledCompatible');
+        dispatch('findHiddenInstalledMods');
       } catch (e) {
         dispatch('showError', e);
       } finally {
@@ -242,13 +274,13 @@ export default new Vuex.Store({
       commit('setExpandedMod', { modId: '' });
       ipcRenderer.send('unexpand');
     },
-    toggleModFavorite({ state }, modId) {
+    toggleModFavorite({ state, getters }, modId) {
       if (!state.favoriteModIds.includes(modId)) {
         state.favoriteModIds.push(modId);
       } else {
         state.favoriteModIds.remove(modId);
       }
-      state.modFilters[2].mods = state.mods.filter((mod) => state.favoriteModIds.includes(mod.modInfo.mod_reference)).length;
+      state.modFilters[2].mods = getters.allMods.filter((mod) => state.favoriteModIds.includes(mod.modInfo.mod_reference)).length;
       saveSetting('favoriteMods', state.favoriteModIds);
     },
     createProfile({ dispatch, state }, { profileName, copyCurrent }) {
@@ -339,9 +371,10 @@ export default new Vuex.Store({
       } catch (e) {
         dispatch('showError', e);
       } finally {
-        state.modFilters[0].mods = state.mods.length;
-        state.modFilters[2].mods = state.mods.filter((mod) => state.favoriteModIds.includes(mod.modInfo.mod_reference)).length;
+        state.modFilters[0].mods = getters.allMods.length;
+        state.modFilters[2].mods = getters.allMods.filter((mod) => state.favoriteModIds.includes(mod.modInfo.mod_reference)).length;
         commit('refreshModsInstalledCompatible');
+        dispatch('findHiddenInstalledMods');
         state.inProgress.remove(appLoadProgress);
         if (state.expandModInfoOnStart && getters.filteredMods[0]) {
           dispatch('expandMod', getters.filteredMods[0].modInfo.mod_reference);
@@ -456,6 +489,7 @@ export default new Vuex.Store({
         await state.selectedInstall.manifestMutate([], [], [update.item]);
         placeholderProgreess.progress = 1;
         commit('refreshModsInstalledCompatible');
+        dispatch('findHiddenInstalledMods');
       } catch (e) {
         dispatch('showError', e);
       } finally {
@@ -476,6 +510,7 @@ export default new Vuex.Store({
         await state.selectedInstall.manifestMutate([], [], updates.map((update) => update.item));
         placeholderProgreess.progress = 1;
         commit('refreshModsInstalledCompatible');
+        dispatch('findHiddenInstalledMods');
       } catch (e) {
         dispatch('showError', e);
       } finally {
@@ -484,13 +519,16 @@ export default new Vuex.Store({
     },
   },
   getters: {
-    filteredMods(state) {
-      let filtered;
-      if (state.filters.modFilters === state.modFilters[1]) filtered = state.mods.filter((mod) => mod.isCompatible);
-      else if (state.filters.modFilters === state.modFilters[2]) filtered = state.mods.filter((mod) => state.favoriteModIds.includes(mod.modInfo.mod_reference));
-      else if (state.filters.modFilters === state.modFilters[3]) filtered = state.mods.filter((mod) => mod.isInstalled);
-      else if (state.filters.modFilters === state.modFilters[4]) filtered = state.mods.filter((mod) => !mod.isInstalled);
-      else filtered = [...state.mods];
+    allMods(state) {
+      return [...state.mods, ...state.hiddenInstalledMods];
+    },
+    filteredMods(state, getters) {
+      const { allMods } = getters;
+      let filtered = allMods;
+      if (state.filters.modFilters === state.modFilters[1]) filtered = allMods.filter((mod) => mod.isCompatible);
+      else if (state.filters.modFilters === state.modFilters[2]) filtered = allMods.filter((mod) => state.favoriteModIds.includes(mod.modInfo.mod_reference));
+      else if (state.filters.modFilters === state.modFilters[3]) filtered = allMods.filter((mod) => mod.isInstalled);
+      else if (state.filters.modFilters === state.modFilters[4]) filtered = allMods.filter((mod) => !mod.isInstalled);
 
       if (state.filters.search !== '') {
         filtered = filtered.filter((mod) => mod.modInfo.name.toLowerCase().includes(state.filters.search.toLowerCase())); // TODO: maybe search in description too

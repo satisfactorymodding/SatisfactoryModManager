@@ -77,19 +77,7 @@
         class="custom mod-button"
       >
         <v-icon
-          v-if="!mod.isCompatible"
-          color="error"
-        >
-          mdi-alert
-        </v-icon>
-        <v-icon
-          v-else-if="isModInProgress"
-          color="warning"
-        >
-          mdi-sync
-        </v-icon>
-        <v-icon
-          v-else-if="mod.isInstalled && (mod.isDependency || !canInstallMods || inProgress.length > 0)"
+          v-if="mod.isInstalled && (mod.isDependency || !canInstallMods || inProgress.length > 0)"
           color="green"
         >
           mdi-checkbox-marked
@@ -100,6 +88,18 @@
           @click="switchInstalled"
         >
           mdi-checkbox-marked
+        </v-icon>
+        <v-icon
+          v-else-if="!mod.isCompatible"
+          color="error"
+        >
+          mdi-alert
+        </v-icon>
+        <v-icon
+          v-else-if="isModInProgress"
+          color="warning"
+        >
+          mdi-sync
         </v-icon>
         <v-icon
           v-else-if="!canInstallMods || inProgress.length > 0"
