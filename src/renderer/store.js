@@ -73,8 +73,7 @@ export default new Vuex.Store({
       state.smlVersions = smlVersions;
     },
     refreshModsInstalledCompatible(state) {
-      const installedModVersions = state.selectedInstall.mods;
-      const { manifestMods } = state.selectedInstall;
+      const { manifestMods, mods: installedModVersions } = state.selectedInstall;
       for (let i = 0; i < state.mods.length; i += 1) {
         state.mods[i].isInstalled = !!installedModVersions[state.mods[i].modInfo.mod_reference];
         state.mods[i].manifestVersion = manifestMods.find((mod) => mod.id === state.mods[i].modInfo.mod_reference)?.version;
@@ -159,8 +158,7 @@ export default new Vuex.Store({
         try {
           await state.selectedInstall.setProfile(newProfile.name);
           commit('refreshModsInstalledCompatible');
-          let current = getSetting('selectedProfile', {});
-          if (typeof current !== 'object') { current = {}; }
+          const current = getSetting('selectedProfile', {});
           current[state.selectedInstall.installLocation] = state.selectedProfile.name;
           saveSetting('selectedProfile', current);
         } catch (e) {
@@ -328,7 +326,9 @@ export default new Vuex.Store({
             const savedProfileName = getSetting('selectedProfile', {})[state.selectedInstall.installLocation] || 'modded';
             commit('setProfile', { newProfile: state.profiles.find((conf) => conf.name.toLowerCase() === savedProfileName.toLowerCase()) });
 
-            await state.selectedInstall.setProfile(savedProfileName);
+            if (!await SatisfactoryInstall.isGameRunning()) {
+              await state.selectedInstall.setProfile(savedProfileName);
+            }
             appLoadProgress.progresses.remove(installValidateProgress);
           })(),
           (async () => {
@@ -343,10 +343,11 @@ export default new Vuex.Store({
         state.modFilters[2].mods = state.mods.filter((mod) => state.favoriteModIds.includes(mod.modInfo.mod_reference)).length;
         commit('refreshModsInstalledCompatible');
         state.inProgress.remove(appLoadProgress);
-        if (state.expandModInfoOnStart) {
+        if (state.expandModInfoOnStart && getters.filteredMods[0]) {
           dispatch('expandMod', getters.filteredMods[0].modInfo.mod_reference);
         }
       }
+      commit('setGameRunning', state.isLaunchingGame || await SatisfactoryInstall.isGameRunning());
       setInterval(async () => {
         commit('setGameRunning', state.isLaunchingGame || await SatisfactoryInstall.isGameRunning());
       }, 5000);
