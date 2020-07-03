@@ -172,7 +172,7 @@ html {
   border-radius: 20px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: white;
+  background: var(--v-text-base);
   border: solid 6px transparent;
   background-clip: content-box;
 }

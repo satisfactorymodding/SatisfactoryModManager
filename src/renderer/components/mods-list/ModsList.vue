@@ -96,9 +96,6 @@ div {
   box-shadow: inset 0px -45px 20px -20px rgba(0,0,0,0.3);
 }
 
-::-webkit-scrollbar {
-  width: 20px;
-}
 ::-webkit-scrollbar-track {
   background: var(--v-background-base);
   border: solid 9px transparent;
@@ -112,7 +109,6 @@ div {
   border-radius: 20px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: white;
   border: solid 3.5px transparent;
   background-clip: content-box;
 }
