@@ -67,15 +67,22 @@
         </v-menu>
       </v-col>
       <v-col cols="auto">
-        <v-btn
-          style="min-width: 36px"
-          class="my-2 mx-1"
-          @click="manualCheckForUpdates"
-        >
-          <v-icon style="font-size: 25px !important">
-            mdi-update
-          </v-icon>
-        </v-btn>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              style="min-width: 36px"
+              class="my-2 mx-1"
+              v-bind="attrs"
+              v-on="on"
+              @click="manualCheckForUpdates"
+            >
+              <v-icon style="font-size: 25px !important">
+                mdi-update
+              </v-icon>
+            </v-btn>
+          </template>
+          <span>Check for updates</span>
+        </v-tooltip>
       </v-col>
       <v-col cols="auto">
         <UpdatesMenu
