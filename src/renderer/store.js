@@ -342,10 +342,11 @@ export default new Vuex.Store({
             const { installs, invalidInstalls } = await getInstalls();
             if (installs.length === 0) {
               if (invalidInstalls.length !== 0) {
+                const invalidInstallsString = invalidInstalls.map((invalidInstall) => `"${invalidInstall}"`).join('\n');
                 if (invalidInstalls.length > 1) {
-                  dispatch('showErrorPersistent', new Error(`${invalidInstalls.length} Satisfactory installs were found, but all of them point to folders that don't exist.`));
+                  dispatch('showErrorPersistent', new Error(`${invalidInstalls.length} Satisfactory installs were found, but all of them point to folders that don't exist.\n${invalidInstallsString}`));
                 }
-                dispatch('showErrorPersistent', new Error(`${invalidInstalls.length} Satisfactory install was found, but it points to a folder that doesn't exist.`));
+                dispatch('showErrorPersistent', new Error(`${invalidInstalls.length} Satisfactory install was found, but it points to a folder that doesn't exist.\n${invalidInstallsString}`));
               }
               dispatch('showErrorPersistent', new Error('No Satisfactory installs found.'));
               return;
