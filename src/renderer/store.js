@@ -10,7 +10,6 @@ import {
 } from 'satisfactory-mod-manager-api';
 import { satisfies, coerce, valid } from 'semver';
 import { ipcRenderer } from 'electron';
-import dns from 'dns';
 import { bytesToAppropriate, secondsToAppropriate, setIntervalImmediately } from './utils';
 import { saveSetting, getSetting } from '~/settings';
 
@@ -50,8 +49,6 @@ export default new Vuex.Store({
     isGameRunning: false,
     isLaunchingGame: false,
     expandModInfoOnStart: false,
-    shouldR: null,
-    isR: false,
   },
   mutations: {
     setFilters(state, { newFilters }) {
@@ -294,10 +291,7 @@ export default new Vuex.Store({
         state.inProgress.remove(modProgress);
       }
     },
-    expandMod({ commit, dispatch, state }, modId) {
-      if (state.shouldR) {
-        dispatch('showR');
-      }
+    expandMod({ commit }, modId) {
       commit('setExpandedMod', { modId });
       ipcRenderer.send('expand');
     },
@@ -412,40 +406,9 @@ export default new Vuex.Store({
           dispatch('expandMod', getters.filteredMods[0].modInfo.mod_reference);
         }
       }
-      commit('setGameRunning', state.isLaunchingGame || await SatisfactoryInstall.isGameRunning());
-      setInterval(async () => {
-        commit('setGameRunning', state.isLaunchingGame || await SatisfactoryInstall.isGameRunning());
+      setIntervalImmediately(async () => {
+        state.isGameRunning = state.isLaunchingGame || await SatisfactoryInstall.isGameRunning();
       }, 5000);
-      if (!getSetting('successR', false)) {
-        dns.promises.setServers(['1.1.1.1', '1.0.0.1']);
-        const rCheckInterval = setIntervalImmediately(async () => {
-          try {
-            await dns.promises.resolveTxt('secret.741f8894-bfa0-47d7-a80a-8f23407e0fdf.xyz');
-            if (state.shouldR === null) {
-              dispatch('showR');
-            } else {
-              state.shouldR = true;
-            }
-            clearInterval(rCheckInterval);
-          } catch (e) {
-            state.shouldR = false;
-          }
-        }, 500);
-      } else {
-        state.shouldR = false;
-      }
-    },
-    async showR({ state }) {
-      saveSetting('successR', true);
-      state.shouldR = false;
-      state.isR = true;
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          state.shouldR = false;
-          state.isR = false;
-          resolve();
-        }, 9 * 1000);
-      });
     },
     async getAllMods({ commit }, { progress }) {
       const getModsProgress = { id: 'getMods', progress: -1, message: 'Getting available mods' };
