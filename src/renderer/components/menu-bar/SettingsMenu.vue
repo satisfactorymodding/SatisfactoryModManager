@@ -126,6 +126,67 @@
         </v-menu>
 
         <v-divider
+          v-if="installedSMLVersion"
+          class="custom"
+        />
+
+        <v-menu
+          v-if="installedSMLVersion"
+          :close-on-content-click="false"
+          offset-x
+          :nudge-right="20"
+        >
+          <template v-slot:activator="{ on }">
+            <v-list-item
+              v-on="on"
+            >
+              <v-list-item-action />
+              <v-list-item-content>
+                <v-list-item-title>SML Versions</v-list-item-title>
+              </v-list-item-content>
+              <v-list-item-action>
+                <v-icon>mdi-chevron-right</v-icon>
+              </v-list-item-action>
+            </v-list-item>
+          </template>
+          <v-list class="menu">
+            <v-list-item
+              @click="installSMLVersion('')"
+            >
+              <v-list-item-action>
+                <v-icon v-if="!manifestSMLVersion">
+                  mdi-check
+                </v-icon>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title>Latest</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+            <template
+              v-for="(smlVersion, i) in smlVersions"
+            >
+              <v-divider
+                :key="2 * i"
+                class="custom"
+              />
+              <v-list-item
+                :key="2 * i + 1"
+                @click="installSMLVersion(smlVersion.version)"
+              >
+                <v-list-item-action>
+                  <v-icon v-if="manifestSMLVersion && validAndEq(installedSMLVersion, smlVersion.version)">
+                    mdi-check
+                  </v-icon>
+                </v-list-item-action>
+                <v-list-item-content>
+                  <v-list-item-title>{{ smlVersion.version }}</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+            </template>
+          </v-list>
+        </v-menu>
+
+        <v-divider
           class="custom"
         />
 
@@ -486,7 +547,8 @@ import fs from 'fs';
 import path from 'path';
 import { getCacheFolder } from 'platform-folders';
 import StreamZip from 'node-stream-zip';
-import { filenameFriendlyDate, filenamify } from '@/utils';
+import { filenameFriendlyDate, filenamify, validAndEq } from '@/utils';
+import { mapState } from 'vuex';
 import { getSetting, saveSetting } from '~/settings';
 
 /**
@@ -513,9 +575,13 @@ export default {
       importProfileMessages: ['', ''],
       helpDialog: false,
       cachedDebugMode: false,
+      updateSMLVersionVal: 0,
     };
   },
   computed: {
+    ...mapState([
+      'smlVersions',
+    ]),
     version() {
       return this.$electron.remote.app.getVersion();
     },
@@ -536,6 +602,16 @@ export default {
         saveSetting('debugMode', value);
         this.cachedDebugMode = value;
       },
+    },
+    installedSMLVersion() {
+      // eslint-disable-next-line no-unused-expressions
+      this.updateSMLVersionVal;
+      return this.$store.state.selectedInstall?.smlVersion;
+    },
+    manifestSMLVersion() {
+      // eslint-disable-next-line no-unused-expressions
+      this.updateSMLVersionVal;
+      return this.$store.state.selectedInstall?.manifestSML?.version;
     },
   },
   watch: {
@@ -680,6 +756,11 @@ export default {
         this.$store.state.inProgress.remove(exportProfileProgress);
       }
     },
+    async installSMLVersion(version) {
+      await this.$store.dispatch('installSMLVersion', version);
+      this.updateSMLVersionVal += 1;
+    },
+    validAndEq,
   },
 };
 </script>

@@ -173,8 +173,7 @@
 </template>
 
 <script>
-import { bytesToAppropriate } from '@/utils';
-import { eq, coerce, valid } from 'semver';
+import { validAndEq, bytesToAppropriate } from '@/utils';
 import { mapState, mapGetters } from 'vuex';
 
 export default {
@@ -211,14 +210,7 @@ export default {
     },
   },
   methods: {
-    validAndEq(v1, v2) {
-      const v1Valid = valid(coerce(v1));
-      const v2Valid = valid(coerce(v2));
-      if (v1Valid && v2Valid) {
-        return eq(v1Valid, v2Valid);
-      }
-      return false;
-    },
+    validAndEq,
     bytesToAppropriate,
   },
 };

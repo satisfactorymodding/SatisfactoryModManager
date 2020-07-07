@@ -10,6 +10,7 @@ import {
 } from 'satisfactory-mod-manager-api';
 import { satisfies, coerce, valid } from 'semver';
 import { ipcRenderer } from 'electron';
+import dns from 'dns';
 import { bytesToAppropriate, secondsToAppropriate, setIntervalImmediately } from './utils';
 import { saveSetting, getSetting } from '~/settings';
 
@@ -263,6 +264,36 @@ export default new Vuex.Store({
         state.inProgress.remove(modProgress);
       }
     },
+    async installSMLVersion({
+      commit, dispatch, state,
+    }, version) {
+      if (state.inProgress.length > 0) {
+        dispatch('showError', 'Another operation is currently in progress');
+        return;
+      }
+      commit('clearDownloadProgress');
+      const modProgress = { id: 'SML', progresses: [] };
+      state.inProgress.push(modProgress);
+      const placeholderProgreess = {
+        id: 'placeholder', progress: -1, message: '', fast: false,
+      };
+      modProgress.progresses.push(placeholderProgreess);
+      placeholderProgreess.message = `Installing ${version ? `SML v${version}` : 'latest SML'}`;
+      try {
+        if (version) {
+          await state.selectedInstall.installSML(version);
+        } else {
+          await state.selectedInstall.uninstallSML(); // this is fine because latest will be reinstalled as a dependency
+        }
+        placeholderProgreess.progress = 1;
+        commit('refreshModsInstalledCompatible');
+        dispatch('findHiddenInstalledMods');
+      } catch (e) {
+        dispatch('showError', e);
+      } finally {
+        state.inProgress.remove(modProgress);
+      }
+    },
     expandMod({ commit, dispatch, state }, modId) {
       if (state.shouldR) {
         dispatch('showR');
@@ -386,34 +417,20 @@ export default new Vuex.Store({
         commit('setGameRunning', state.isLaunchingGame || await SatisfactoryInstall.isGameRunning());
       }, 5000);
       if (!getSetting('successR', false)) {
-        const rCheckInterval = setIntervalImmediately(() => {
-          const xhr = new XMLHttpRequest();
-          xhr.open('GET', 'https://cors-anywhere.herokuapp.com/https://github.com/mircearoata/aaa', true);
-          xhr.setRequestHeader('x-requested-with', 'example.com');
-          xhr.setRequestHeader('cache-control', 'no-cache, must-revalidate, post-check=0, pre-check=0');
-          xhr.setRequestHeader('cache-control', 'max-age=0');
-          xhr.setRequestHeader('expires', '0');
-          xhr.setRequestHeader('expires', 'Tue, 01 Jan 1980 1:00:00 GMT');
-          xhr.setRequestHeader('pragma', 'no-cache');
-          xhr.onload = () => {
-            if (xhr.readyState === 4) {
-              if (xhr.status === 200) {
-                if (state.shouldR === null) {
-                  dispatch('showR');
-                } else {
-                  state.shouldR = true;
-                }
-                clearInterval(rCheckInterval);
-              } else {
-                state.shouldR = false;
-              }
+        dns.promises.setServers(['1.1.1.1', '1.0.0.1']);
+        const rCheckInterval = setIntervalImmediately(async () => {
+          try {
+            await dns.promises.resolveTxt('secret.741f8894-bfa0-47d7-a80a-8f23407e0fdf.xyz');
+            if (state.shouldR === null) {
+              dispatch('showR');
+            } else {
+              state.shouldR = true;
             }
-          };
-          xhr.onerror = () => {
+            clearInterval(rCheckInterval);
+          } catch (e) {
             state.shouldR = false;
-          };
-          xhr.send(null);
-        }, 1000);
+          }
+        }, 500);
       } else {
         state.shouldR = false;
       }
@@ -453,6 +470,8 @@ export default new Vuex.Store({
           isInstalled: false,
           isCompatible: true,
           isDependency: false,
+          manifestVersion: null,
+          installedVersion: null,
         })),
       });
       if (progress) {

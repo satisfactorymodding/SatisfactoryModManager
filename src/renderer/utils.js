@@ -1,6 +1,7 @@
 import marked from 'marked';
 import sanitizeHtml from 'sanitize-html';
 import originalFilenamify from 'filenamify';
+import { valid, coerce, eq } from 'semver';
 import { getSetting, saveSetting } from '~/settings';
 
 export function lastElement(arr) {
@@ -31,6 +32,15 @@ export function unignoreUpdate(item, version) {
   ignoredUpdates.removeWhere((update) => update.item === item && update.version === version);
   saveSetting('ignoredUpdates', ignoredUpdates);
   return ignoredUpdates;
+}
+
+export function validAndEq(v1, v2) {
+  const v1Valid = valid(coerce(v1));
+  const v2Valid = valid(coerce(v2));
+  if (v1Valid && v2Valid) {
+    return eq(v1Valid, v2Valid);
+  }
+  return false;
 }
 
 /**
