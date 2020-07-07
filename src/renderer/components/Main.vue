@@ -36,14 +36,14 @@
     <v-dialog
       v-model="errorDialog"
       :persistent="errorPersistent"
-      max-width="290"
+      max-width="550"
     >
       <v-card>
         <v-card-title class="headline">
           Error
         </v-card-title>
 
-        <v-card-text>
+        <v-card-text style="white-space: pre-line;">
           {{ error }}
         </v-card-text>
 
