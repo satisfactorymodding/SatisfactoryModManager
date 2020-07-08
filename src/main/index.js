@@ -160,7 +160,7 @@ if (app.requestSingleInstanceLock()) {
     if (process.platform !== 'darwin') {
       if (hasUpdate) {
         if (!isDownloadingUpdate) {
-          autoUpdater.quitAndInstall(true, true);
+          autoUpdater.quitAndInstall(false, true); // Enable silent again when https://github.com/electron-userland/electron-builder/issues/4815 (and similar) is fixed
         } else {
           quitWaitingForUpdate = true;
         }
@@ -209,7 +209,7 @@ if (app.requestSingleInstanceLock()) {
   autoUpdater.on('update-downloaded', () => {
     sendToWindow('updateDownloaded');
     if (quitWaitingForUpdate) {
-      autoUpdater.quitAndInstall(true, false);
+      autoUpdater.quitAndInstall(false, false); // Enable silent again when https://github.com/electron-userland/electron-builder/issues/4815 (and similar) is fixed
     } else {
       isDownloadingUpdate = false;
     }
