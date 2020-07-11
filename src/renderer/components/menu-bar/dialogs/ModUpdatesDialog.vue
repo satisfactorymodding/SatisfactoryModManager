@@ -45,7 +45,7 @@
                   reactive
                   :indeterminate="currentModProgress(update.item).progress < 0"
                 >
-                  <strong>{{ currentModProgress(update.item).message }}</strong>
+                  <strong style="font-size: 12px">{{ currentModProgress(update.item).message }}</strong>
                 </v-progress-linear>
               </v-list-item>
               <v-list-item v-else>
