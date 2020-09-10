@@ -389,7 +389,12 @@ export default new Vuex.Store({
             commit('setProfile', { newProfile: state.profiles.find((conf) => conf.name.toLowerCase() === savedProfileName.toLowerCase()) });
 
             if (!await SatisfactoryInstall.isGameRunning()) {
-              await state.selectedInstall.setProfile(savedProfileName);
+              try {
+                await state.selectedInstall.setProfile(savedProfileName);
+              } catch (e) {
+                commit('setProfile', { newProfile: state.selectedInstall.profile });
+                throw e;
+              }
             }
             appLoadProgress.progresses.remove(installValidateProgress);
           })(),
