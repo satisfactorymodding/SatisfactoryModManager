@@ -76,11 +76,13 @@ export default new Vuex.Store({
     },
     refreshModsInstalledCompatible(state) {
       const { manifestMods, mods: installedModVersions } = state.selectedInstall;
+      const lockfile = state.selectedInstall.readLockfile();
       for (let i = 0; i < state.mods.length; i += 1) {
         state.mods[i].isInstalled = !!installedModVersions[state.mods[i].modInfo.mod_reference];
+        state.mods[i].isInManifest = manifestMods.some((mod) => mod.id === state.mods[i].modInfo.mod_reference);
         state.mods[i].manifestVersion = manifestMods.find((mod) => mod.id === state.mods[i].modInfo.mod_reference)?.version;
         state.mods[i].installedVersion = installedModVersions[state.mods[i].modInfo.mod_reference];
-        state.mods[i].isDependency = !!installedModVersions[state.mods[i].modInfo.mod_reference] && !manifestMods.some((mod) => mod.id === state.mods[i].modInfo.mod_reference);
+        state.mods[i].dependants = Object.entries(lockfile).filter(([, data]) => !!data.dependencies[state.mods[i].modInfo.mod_reference]).map(([item]) => item);
         state.mods[i].isCompatible = state.mods[i].modInfo.versions.length > 0
         && !!state.mods[i].modInfo.versions.find((ver) => satisfies(minVersion(ver.sml_version), '>=2.0.0')
               && state.smlVersions.some((smlVer) => valid(coerce(smlVer.version)) === valid(coerce(ver.sml_version)))
@@ -419,7 +421,7 @@ export default new Vuex.Store({
         state.isGameRunning = state.isLaunchingGame || await SatisfactoryInstall.isGameRunning();
       }, 5000);
     },
-    async getAllMods({ commit }, { progress }) {
+    async getAllMods({ commit, getters }, { progress }) {
       const getModsProgress = { id: 'getMods', progress: -1, message: 'Getting available mods' };
       if (progress) {
         progress.progresses.push(getModsProgress);
@@ -441,9 +443,28 @@ export default new Vuex.Store({
           modInfo: mod,
           isInstalled: false,
           isCompatible: true,
-          isDependency: false,
+          dependants: [],
+          isInManifest: false,
           manifestVersion: null,
           installedVersion: null,
+          get isDependency() {
+            return !this.isInManifest && !!this.dependants.length;
+          },
+          get dependantsFriendly() {
+            const friendlyNames = this.dependants.map((item) => getters.allMods.find((mod2) => mod2.modInfo.mod_reference === item)?.modInfo.name);
+            friendlyNames.sort();
+            if (friendlyNames.length === 0) { return 'none'; }
+            let finalString = friendlyNames[0];
+            let i = 1;
+            while (i < friendlyNames.length && finalString.length + `, ${friendlyNames[i]}`.length <= 40) {
+              finalString += `, ${friendlyNames[i]}`;
+              i += 1;
+            }
+            if (i < friendlyNames.length) {
+              finalString += ` and ${friendlyNames.length - i} more`;
+            }
+            return finalString;
+          },
         })),
       });
       if (progress) {

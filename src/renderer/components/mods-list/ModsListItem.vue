@@ -76,12 +76,22 @@
       <v-list-item-action
         class="custom mod-button"
       >
-        <v-icon
+        <v-tooltip
           v-if="mod.isInstalled && (mod.isDependency || !canInstallMods || inProgress.length > 0)"
-          color="green"
+          color="background"
+          left
         >
-          mdi-checkbox-marked
-        </v-icon>
+          <template v-slot:activator="{ on, attrs }">
+            <v-icon
+              color="green"
+              v-bind="attrs"
+              v-on="on"
+            >
+              mdi-checkbox-marked
+            </v-icon>
+          </template>
+          <span>Dependency of {{ mod.dependantsFriendly }}</span>
+        </v-tooltip>
         <v-icon
           v-else-if="mod.isInstalled"
           color="green"
