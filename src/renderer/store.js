@@ -397,6 +397,8 @@ export default new Vuex.Store({
                 commit('setProfile', { newProfile: state.selectedInstall.profile });
                 throw e;
               }
+            } else {
+              state.selectedInstall._profile = savedProfileName;
             }
             appLoadProgress.progresses.remove(installValidateProgress);
           })(),
