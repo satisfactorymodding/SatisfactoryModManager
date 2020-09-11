@@ -153,6 +153,7 @@ export default {
       availableSMMUpdate: null,
       modUpdates: [],
       nextCheckForUpdates: -1,
+      updateCheckInProgress: false,
       viewChangelogUpdate: null,
       showIgnoredUpdates: false,
       ignoredUpdates: [],
@@ -239,10 +240,12 @@ export default {
       }
     },
     async checkForUpdates() {
+      if (this.updateCheckInProgress) return;
+      this.updateCheckInProgress = true;
       clearTimeout(this.nextCheckForUpdates);
       // don't check for updates while something is in progress
       while (this.inProgress.length > 0) {
-      // eslint-disable-next-line no-await-in-loop
+        // eslint-disable-next-line no-await-in-loop
         await new Promise((resolve) => setTimeout(() => resolve(), 500));
       }
       this.$electron.ipcRenderer.send('checkForUpdates');
@@ -250,6 +253,7 @@ export default {
         name: this.allMods.find((mod) => mod.modInfo.mod_reference === update.item)?.modInfo.name || update.item,
       }));
       this.nextCheckForUpdates = setTimeout(() => this.checkForUpdates(), UPDATE_CHECK_INTERVAL);
+      this.updateCheckInProgress = false;
     },
     updateSMMNow() {
       this.$root.$emit('downloadUpdate');
