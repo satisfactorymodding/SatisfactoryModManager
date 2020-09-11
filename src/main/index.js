@@ -130,6 +130,7 @@ function createWindow() {
   });
 }
 
+let isAutoUpdateTarget = true; // will be set to false if checkForUpdates errors
 let isDownloadingUpdate = false;
 let quitWaitingForUpdate = false;
 let hasUpdate = false;
@@ -227,7 +228,22 @@ if (app.requestSingleInstanceLock()) {
   });
 
   ipcMain.on('checkForUpdates', () => {
-    autoUpdater.checkForUpdates();
+    if (isAutoUpdateTarget) {
+      autoUpdater.checkForUpdates().catch((e) => {
+        console.log(`Error checking for updates: ${e}`);
+      });
+    } else {
+      sendToWindow('updateNotAvailable');
+    }
+  });
+
+  autoUpdater.on('error', (_, err) => {
+    sendToWindow('updateNotAvailable');
+    if (!err.includes('ENOENT')) {
+      sendToWindow('autoUpdateError', err);
+    } else {
+      isAutoUpdateTarget = false;
+    }
   });
 
   autoUpdater.on('update-not-available', () => {

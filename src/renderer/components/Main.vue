@@ -25,10 +25,10 @@
           color="primary"
           elevation="0"
           style="font-size: 18px; height: 50px; min-height: 50px; max-height: 50px;"
-          :disabled="!!inProgress.length || isGameRunning"
+          :disabled="!!inProgress.length || isGameRunning || !selectedInstall.launchPath"
           @click="launchSatisfactory"
         >
-          <b>{{ isGameRunning ? 'GAME IS RUNNING' : 'LAUNCH GAME' }}</b>
+          <b>{{ isGameRunning ? 'GAME IS RUNNING' : (selectedInstall.launchPath ? 'LAUNCH GAME' : 'CANNOT LAUNCH THIS INSTALL') }}</b>
         </v-btn>
       </v-card>
       <ModDetails v-if="expandedModId" />
@@ -64,9 +64,7 @@
       width="500"
       height="230"
     >
-      <v-card
-        color="loadingBackground !important"
-      >
+      <v-card color="loadingBackground !important">
         <v-row
           no-gutters
           justify="center"
@@ -105,9 +103,7 @@
       width="500"
       height="230"
     >
-      <v-card
-        color="loadingBackground !important"
-      >
+      <v-card color="loadingBackground !important">
         <v-row
           no-gutters
           justify="center"
@@ -145,9 +141,7 @@
       width="500"
       height="230"
     >
-      <v-card
-        color="loadingBackground !important"
-      >
+      <v-card color="loadingBackground !important">
         <v-card-title class="loading-text-main">
           Old SMLauncher install
         </v-card-title>
@@ -266,7 +260,7 @@ export default {
         this.$electron.ipcRenderer.off('updateDownloadProgress', this.updateProgress);
       });
     });
-    this.$electron.ipcRenderer.on('openedByUrl', (e, url) => {
+    this.$electron.ipcRenderer.on('openedByUrl', (_, url) => {
       const parsed = new URL(url);
       const command = parsed.pathname.replace(/^\/+|\/+$/g, '');
       if (command === 'install') {
@@ -274,6 +268,9 @@ export default {
         const version = parsed.searchParams.get('version');
         this.$store.dispatch('installModVersion', { modId: modID, version });
       }
+    });
+    this.$electron.ipcRenderer.on('autoUpdateError', (_, err) => {
+      this.$store.dispatch('showError', `Error while checking for SMM updates: ${err}`);
     });
     const hasUpdate = await this.checkForUpdates();
     if (hasUpdate && getSetting('updateCheckMode', 'launch') === 'launch') {
@@ -328,7 +325,7 @@ export default {
     async launchSatisfactory() {
       if (this.selectedInstall && !this.isGameRunning) {
         this.$store.commit('launchGame');
-        exec(`start "" "${this.selectedInstall.launchPath}"`).unref();
+        exec(this.selectedInstall.launchPath).unref();
       }
     },
     uninstallOldSMLauncher() {

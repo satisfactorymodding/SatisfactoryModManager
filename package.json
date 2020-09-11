@@ -9,17 +9,12 @@
     "build": "node .electron-vue/build.js",
     "build:dir": "node .electron-vue/build.js && electron-builder --dir",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
-    "build:web": "cross-env BUILD_TARGET=web node .electron-vue/build.js",
     "dev": "node .electron-vue/dev-runner.js",
     "lint": "eslint --ext .js,.vue -f ./node_modules/eslint-friendly-formatter --fix src",
-    "pack": "yarn pack:main &&  yarn pack:renderer",
-    "pack:main": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.main.config.js",
-    "pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
     "postinstall": "yarn lint && electron-builder install-app-deps",
-    "dist": "yarn build && electron-builder build",
-    "publish:win": "yarn build && electron-builder build --win",
-    "publish:mac": "yarn build && electron-builder build --mac",
-    "publish:linux": "yarn build && electron-builder build --linux"
+    "dist:win": "yarn build && electron-builder build -w nsis",
+    "dist:linux": "yarn build && electron-builder build -l appImage",
+    "dist": "node ./dist/distPlatform.js"
   },
   "build": {
     "productName": "Satisfactory Mod Manager",
@@ -52,20 +47,30 @@
       ]
     },
     "mac": {
-      "icon": "build/icons/icon.icns"
+      "icon": "icons/icon.icns"
     },
     "win": {
-      "icon": "build/icons/icon.ico"
+      "icon": "icons/icon.ico"
     },
     "linux": {
-      "icon": "build/icons"
+      "icon": "icons",
+      "category": "Game"
     },
     "nsis": {
       "oneClick": false,
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
       "artifactName": "${productName} Setup.${ext}"
-    }
+    },
+    "portable": {
+      "artifactName": "${productName} Portable.${ext}"
+    },
+    "appImage": {
+      "artifactName": "${productName}.${ext}"
+    },
+    "asarUnpack": [
+      "**/node_modules/exiftool-vendored.*/**/*"
+    ]
   },
   "dependencies": {
     "@babel/runtime": "^7.7.4",
