@@ -558,7 +558,7 @@ import { getSetting, saveSetting } from '~/settings';
  */
 function addFileToZipIfExists(zip, filePath, customName) {
   if (fs.existsSync(filePath)) {
-    zip.file(customName || path.basename(filePath), fs.createReadStream(filePath));
+    zip.file(customName || path.basename(filePath), fs.createReadStream(filePath), { date: fs.statSync(filePath).mtime });
   }
 }
 

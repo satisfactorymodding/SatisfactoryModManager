@@ -48,7 +48,7 @@ export function validAndEq(v1, v2) {
  */
 export function filenameFriendlyDate(date) {
   const year = date.getUTCFullYear();
-  const month = date.getUTCMonth();
+  const month = date.getUTCMonth() + 1;
   const day = date.getUTCDate();
   const hour = date.getUTCHours();
   const minute = date.getUTCMinutes();
