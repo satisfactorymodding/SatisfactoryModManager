@@ -76,6 +76,7 @@
                         ref="importProfileForm"
                         v-model="importProfileFormValid"
                         @update="importProfileFormValid = $event"
+                        @submit.stop.prevent="importProfile"
                       >
                         <v-file-input
                           v-model="importProfileFile"

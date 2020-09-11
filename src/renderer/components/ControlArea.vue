@@ -166,6 +166,7 @@
           <v-form
             ref="newProfileForm"
             v-model="newProfileFormValid"
+            @submit.stop.prevent="createProfile"
           >
             <v-text-field
               v-model="newProfileName"
