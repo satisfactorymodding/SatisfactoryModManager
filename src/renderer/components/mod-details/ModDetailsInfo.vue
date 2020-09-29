@@ -23,6 +23,7 @@
           <span
             class="primary--text"
             style="font-weight: 600"
+            @click="searchByAuthor"
           >{{ mod.modInfo.authors[0].user.username }}</span>
         </span>
       </v-row>
@@ -103,7 +104,7 @@
           </template>
           <v-list>
             <v-list-item
-              @click="$emit('installVersion', '')"
+              @click="$emit('install-version', '')"
             >
               <v-list-item-action>
                 <v-icon v-if="!mod.manifestVersion">
@@ -117,7 +118,7 @@
             <v-list-item
               v-for="(version, i) in mod.modInfo.versions"
               :key="i"
-              @click="$emit('installVersion', version.version)"
+              @click="$emit('install-version', version.version)"
             >
               <v-list-item-action>
                 <v-icon v-if="validAndEq(mod.manifestVersion, version.version)">
@@ -210,6 +211,11 @@ export default {
     },
   },
   methods: {
+    searchByAuthor() {
+      const newFilters = this.$store.state.filters;
+      newFilters.search = `author:"${this.mod.modInfo.authors[0].user.username}"`;
+      this.$store.dispatch('setFilters', newFilters);
+    },
     validAndEq,
     bytesToAppropriate,
   },

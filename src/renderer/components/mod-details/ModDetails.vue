@@ -10,7 +10,7 @@
     <ModDetailsInfo
       :mod="mod"
       @close="close"
-      @installVersion="installVersion"
+      @install-version="installVersion"
     />
     <v-card
       height="100%"
