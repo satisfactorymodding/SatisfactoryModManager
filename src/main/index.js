@@ -239,6 +239,7 @@ if (app.requestSingleInstanceLock()) {
 
   autoUpdater.on('error', (_, err) => {
     sendToWindow('updateNotAvailable');
+    isDownloadingUpdate = false;
     if (!err.includes('ENOENT')) {
       sendToWindow('autoUpdateError', err);
     } else {
