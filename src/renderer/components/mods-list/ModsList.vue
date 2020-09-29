@@ -36,6 +36,8 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { lastElement } from '@/utils';
+import Fuse from 'fuse.js';
+import debounce from 'debounce';
 import ModsListItem from './ModsListItem';
 
 export default {
@@ -46,6 +48,7 @@ export default {
     return {
       topShadow: false,
       bottomShadow: true,
+      mods: [],
     };
   },
   computed: {
@@ -53,22 +56,68 @@ export default {
       'favoriteModIds',
       'expandedModId',
       'inProgress',
+      'filters',
     ]),
     ...mapGetters({
-      mods: 'filteredMods',
+      filteredMods: 'filteredMods',
       canInstallMods: 'canInstallMods',
     }),
+    search() {
+      return this.filters.search;
+    },
   },
   watch: {
     mods() {
       setTimeout(() => this.modsListScrolled(), 1);
     },
+    search() {
+      this.updateSearch();
+    },
+    filteredMods() {
+      this.updateSearch();
+    },
+  },
+  mounted() {
+    this.updateSearch('');
   },
   methods: {
     modsListScrolled() {
       this.topShadow = this.$refs.modsList.scrollTop > 0;
       this.bottomShadow = this.$refs.modsList.scrollTop + this.$refs.modsList.offsetHeight < this.$refs.modsList.scrollHeight;
     },
+    updateSearch: debounce(function updateSearch() {
+      let searchString = this.search;
+      if (searchString === '') {
+        this.mods = this.filteredMods;
+        return;
+      }
+      searchString = searchString.replace(/(?:author:"(.+?)"|author:([^\s"]+))/g, '="$1$2"');
+
+      const fuse = new Fuse(this.filteredMods, {
+        keys: [
+          {
+            name: 'modInfo.name',
+            weight: 2,
+          },
+          {
+            name: 'modInfo.short_description',
+            weight: 1,
+          },
+          {
+            name: 'modInfo.full_description',
+            weight: 0.75,
+          },
+          {
+            name: 'modInfo.authors.user.username',
+            weight: 0.4,
+          },
+        ],
+        useExtendedSearch: true,
+        threshold: 0.15,
+        minMatchCharLength: searchString.length * 0.8,
+      });
+      this.mods = fuse.search(searchString).map((result) => result.item);
+    }),
     lastElement,
   },
 };

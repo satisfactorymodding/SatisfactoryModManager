@@ -74,9 +74,11 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.7.4",
+    "debounce": "^1.2.0",
     "electron-log": "^4.2.2",
     "electron-updater": "^4.3.4",
     "filenamify": "^4.1.0",
+    "fuse.js": "^6.4.1",
     "jszip": "^3.4.0",
     "marked": "^1.1.0",
     "node-stream-zip": "^1.11.2",

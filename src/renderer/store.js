@@ -559,10 +559,6 @@ export default new Vuex.Store({
       else if (state.filters.modFilters === state.modFilters[3]) filtered = allMods.filter((mod) => mod.isInstalled);
       else if (state.filters.modFilters === state.modFilters[4]) filtered = allMods.filter((mod) => !mod.isInstalled);
 
-      if (state.filters.search !== '') {
-        filtered = filtered.filter((mod) => mod.modInfo.name.toLowerCase().includes(state.filters.search.toLowerCase())); // TODO: maybe search in description too
-      }
-
       if (state.filters.sortBy === 'Name') filtered = filtered.sort((a, b) => a.modInfo.name.localeCompare(b.modInfo.name));
       if (state.filters.sortBy === 'Last updated') filtered = filtered.sort((a, b) => b.modInfo.last_version_date - a.modInfo.last_version_date);
       if (state.filters.sortBy === 'Popularity') filtered = filtered.sort((a, b) => b.modInfo.popularity - a.modInfo.popularity);
