@@ -7,6 +7,7 @@ import {
   createProfile,
   deleteProfile,
   getMod,
+  renameProfile,
 } from 'satisfactory-mod-manager-api';
 import {
   satisfies, coerce, valid, minVersion,
@@ -324,6 +325,19 @@ export default new Vuex.Store({
       if (state.selectedProfile.name === profileName) {
         dispatch('selectProfile', state.profiles.find((profile) => profile.name === 'modded'));
       }
+    },
+    renameProfile({ state }, { newProfile: newName }) {
+      const oldName = state.selectedProfile.name;
+      renameProfile(oldName, newName);
+      const selectedProfile = getSetting('selectedProfile', {});
+      Object.keys(selectedProfile).forEach((install) => {
+        if (selectedProfile[install] === oldName) {
+          selectedProfile[install] = newName;
+        }
+      });
+      saveSetting('selectedProfile', selectedProfile);
+      const profile = state.profiles.find((p) => p.name === oldName);
+      profile.name = newName;
     },
     async initApp({
       commit, dispatch, state, getters,

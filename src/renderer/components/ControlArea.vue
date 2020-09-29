@@ -53,7 +53,7 @@
           >
             <v-row>
               <v-col
-                cols="6"
+                cols="4"
               >
                 <v-btn
                   text
@@ -70,7 +70,24 @@
                 </v-btn>
               </v-col>
               <v-col
-                cols="6"
+                cols="4"
+              >
+                <v-btn
+                  text
+                  :disabled="!!inProgress.length || isGameRunning || selectedProfileModel.name === 'vanilla' || selectedProfileModel.name === 'modded' || selectedProfileModel.name === 'development'"
+                  @click="showRenameProfileDialog"
+                >
+                  Rename&nbsp;
+                  <v-icon
+                    color="yellow"
+                    class="icon"
+                  >
+                    mdi-pencil
+                  </v-icon>
+                </v-btn>
+              </v-col>
+              <v-col
+                cols="4"
               >
                 <v-btn
                   text
@@ -200,6 +217,49 @@
       </v-card>
     </v-dialog>
     <v-dialog
+      v-model="renameProfileDialog"
+      persistent
+    >
+      <v-card>
+        <v-card-title class="headline">
+          Rename profile
+        </v-card-title>
+
+        <v-card-text>
+          <span>Current profile name: {{ selectedProfileModel.name }}</span>
+          <v-form
+            ref="renameProfileForm"
+            v-model="newProfileFormValid"
+            @submit.stop.prevent="renameProfile"
+          >
+            <v-text-field
+              v-model="newProfileName"
+              label="Name"
+              required
+              :rules="[v => !!v || 'Name is required']"
+            />
+            <span class="warning--text">{{ newProfileMessage }}</span>
+          </v-form>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn
+            color="primary"
+            text
+            @click="renameProfile"
+          >
+            Rename
+          </v-btn>
+          <v-btn
+            color="text"
+            text
+            @click="cancelRenameProfile"
+          >
+            Cancel
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog
       v-model="deleteProfileDialog"
       persistent
     >
@@ -245,6 +305,7 @@ export default {
       newProfileCopyCurrent: false,
       newProfileMessage: '',
       deleteProfileDialog: false,
+      renameProfileDialog: false,
     };
   },
   computed: {
@@ -323,6 +384,19 @@ export default {
     },
     cancelDeleteProfile() {
       this.deleteProfileDialog = false;
+    },
+    showRenameProfileDialog() {
+      this.renameProfileDialog = true;
+    },
+    renameProfile() {
+      if (this.$refs.renameProfileForm.validate()) {
+        this.$store.dispatch('renameProfile', { newProfile: filenamify(this.newProfileName) });
+        this.cancelRenameProfile();
+      }
+    },
+    cancelRenameProfile() {
+      this.newProfileName = '';
+      this.renameProfileDialog = false;
     },
   },
 };
