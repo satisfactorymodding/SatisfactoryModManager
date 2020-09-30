@@ -2187,7 +2187,7 @@ base@^0.11.1:
     mixin-deep "^1.2.0"
     pascalcase "^0.1.1"
 
-batch-cluster@^5.11.1:
+batch-cluster@^5.11.2:
   version "5.11.2"
   resolved "https://registry.yarnpkg.com/batch-cluster/-/batch-cluster-5.11.2.tgz#518cb7dca3459fe74289e4384b68afd849b4eb54"
   integrity sha512-+9ZL6DKnUS75i1aDH8ltCa4q4P5oHo7LYZkKnH7BBbERPqkTxt2lCtkLHo/p37yv2SSr5BVNABnfRrtgq0fv9g==
@@ -4312,27 +4312,27 @@ execa@^1.0.0:
     signal-exit "^3.0.0"
     strip-eof "^1.0.0"
 
-exiftool-vendored.exe@^12.1.0:
+exiftool-vendored.exe@^12.6.0:
   version "12.6.0"
   resolved "https://registry.yarnpkg.com/exiftool-vendored.exe/-/exiftool-vendored.exe-12.6.0.tgz#1dcbbcfa61ae0336fc003aee08cf2547a990c160"
   integrity sha512-gJSjt1YyVU5B1WfuP7TVv7rGM3MnM0V5zw+Q7mM3zzvKl4WAmkQaPPkRGDoRZUhFqK8bUz2WbcniZOgw5LGcnA==
 
-exiftool-vendored.pl@^12.1.0:
+exiftool-vendored.pl@^12.6.0:
   version "12.6.0"
   resolved "https://registry.yarnpkg.com/exiftool-vendored.pl/-/exiftool-vendored.pl-12.6.0.tgz#af093b98b91770515c65279d23abfd15efdcba84"
   integrity sha512-XeALcaaPKQWhEYiUik3KmhBLFKYNd44OWZLi7x8lvys5VH1a5ZpSNhErp+teeaPs0PkPWCImieElaXLIo9DG6g==
 
-exiftool-vendored@^11.3.0:
-  version "11.5.0"
-  resolved "https://registry.yarnpkg.com/exiftool-vendored/-/exiftool-vendored-11.5.0.tgz#cb81801652f74ae246be7b46b1461cb5661d4a1e"
-  integrity sha512-Eb5vtoE7ZhLBi1ZsJ1pDbZYLy4m4L6mV1mOAGATprvWax5KOoRgFZq5EIFWylT2o/ahz3ayqJ8thPoLpRW/SWw==
+exiftool-vendored@^12.1.0:
+  version "12.2.0"
+  resolved "https://registry.yarnpkg.com/exiftool-vendored/-/exiftool-vendored-12.2.0.tgz#48a52eff3f481b8ffd0cf7f2c9ec46ead24784de"
+  integrity sha512-1YKbJf1Ttm3TqcRlJQrSUgQGOR0kKhyIpUnD+dFppoinl0E0KHandBKqEtLirwFVOtaUnOjjx9ywRGOoipyumA==
   dependencies:
-    batch-cluster "^5.11.1"
-    luxon "^1.24.1"
+    batch-cluster "^5.11.2"
+    luxon "^1.25.0"
     tz-lookup "^6.1.25"
   optionalDependencies:
-    exiftool-vendored.exe "^12.1.0"
-    exiftool-vendored.pl "^12.1.0"
+    exiftool-vendored.exe "^12.6.0"
+    exiftool-vendored.pl "^12.6.0"
 
 expand-brackets@^2.1.4:
   version "2.1.4"
@@ -5094,10 +5094,10 @@ graphql-tag@^2.10.3:
   resolved "https://registry.yarnpkg.com/graphql-tag/-/graphql-tag-2.11.0.tgz#1deb53a01c46a7eb401d6cb59dec86fa1cccbffd"
   integrity sha512-VmsD5pJqWJnQZMUeRwrDhfgoyqcfwEkvtpANqcoUG8/tOLkwNgU9mzub/Mc78OJMhHjx7gfAMTxzdG43VGg3bA==
 
-graphql@15.1.0:
-  version "15.1.0"
-  resolved "https://registry.yarnpkg.com/graphql/-/graphql-15.1.0.tgz#b93e28de805294ec08e1630d901db550cb8960a1"
-  integrity sha512-0TVyfOlCGhv/DBczQkJmwXOK6fjWkjzY3Pt7wY8i0gcYXq8aogG3weCsg48m72lywKSeOqedEHvVPOvZvSD51Q==
+graphql@15.3.0:
+  version "15.3.0"
+  resolved "https://registry.yarnpkg.com/graphql/-/graphql-15.3.0.tgz#3ad2b0caab0d110e3be4a5a9b2aa281e362b5278"
+  integrity sha512-GTCJtzJmkFLWRfFJuoo9RWWa/FfamUHgiFosxi/X1Ani4AVWbeyBenZTNX6dM+7WSbbFfTo/25eh0LLkwHMw2w==
 
 handle-thing@^2.0.0:
   version "2.0.1"
@@ -6417,7 +6417,7 @@ lru-cache@^6.0.0:
   dependencies:
     yallist "^4.0.0"
 
-luxon@^1.24.1:
+luxon@^1.25.0:
   version "1.25.0"
   resolved "https://registry.yarnpkg.com/luxon/-/luxon-1.25.0.tgz#d86219e90bc0102c0eb299d65b2f5e95efe1fe72"
   integrity sha512-hEgLurSH8kQRjY6i4YLey+mcKVAWXbDNlZRmM6AgWDJ1cY3atl8Ztf5wEY7VBReFbmGnwQPz7KYJblL8B2k0jQ==
@@ -7655,13 +7655,6 @@ private@^0.1.8, private@~0.1.5:
   resolved "https://registry.yarnpkg.com/private/-/private-0.1.8.tgz#2381edb3689f7a53d653190060fcf822d2f368ff"
   integrity sha512-VvivMrbvd2nKkiG38qjULzlc+4Vx4wm/whI9pQD35YrARNnhxeiRktSOhSukRLFNlzg6Br/cJPet5J/u19r/mg==
 
-process-exists@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/process-exists/-/process-exists-4.0.0.tgz#dc12d87798c17b3f129f716631e2ccdaf240b4ab"
-  integrity sha512-BnlcYPiZjSW+fye12g9B7UeCzMAOdMkxuTz3zcytJ2BHwYZf2RoKvuuwUcJLeXlGj58x9YQrvhT21PmKhUc4UQ==
-  dependencies:
-    ps-list "^6.3.0"
-
 process-nextick-args@~2.0.0:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
@@ -7700,10 +7693,10 @@ prr@~1.0.1:
   resolved "https://registry.yarnpkg.com/prr/-/prr-1.0.1.tgz#d3fc114ba06995a45ec6893f484ceb1d78f5f476"
   integrity sha1-0/wRS6BplaRexok/SEzrHXj19HY=
 
-ps-list@^6.3.0:
-  version "6.3.0"
-  resolved "https://registry.yarnpkg.com/ps-list/-/ps-list-6.3.0.tgz#a2b775c2db7d547a28fbaa3a05e4c281771259be"
-  integrity sha512-qau0czUSB0fzSlBOQt0bo+I2v6R+xiQdj78e1BR/Qjfl5OHWJ/urXi8+ilw1eHe+5hSeDI1wrwVTgDp2wst4oA==
+ps-list@^7.2.0:
+  version "7.2.0"
+  resolved "https://registry.yarnpkg.com/ps-list/-/ps-list-7.2.0.tgz#3d110e1de8249a4b178c9b1cf2a215d1e4e42fc0"
+  integrity sha512-v4Bl6I3f2kJfr5o80ShABNHAokIgY+wFDTQfE+X3zWYgSGQOCBeYptLZUpoOALBqO5EawmDN/tjTldJesd0ujQ==
 
 pseudomap@^1.0.2:
   version "1.0.2"
@@ -8333,10 +8326,10 @@ sass@^1.26.3:
   dependencies:
     chokidar ">=2.0.0 <4.0.0"
 
-satisfactory-mod-manager-api@^2.0.3:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/satisfactory-mod-manager-api/-/satisfactory-mod-manager-api-2.0.3.tgz#526e03b1c72a7ebe8e2f866cd8dcad443e4bdaa5"
-  integrity sha512-oDgCC2iU0mwgAf2/zu0lm0/oNJhP0oAijK//FfaKz/pM4CDRiMK9ZOpWP+44g3z5BN1/Ki4p5ZqoaoUInb8ROA==
+satisfactory-mod-manager-api@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/satisfactory-mod-manager-api/-/satisfactory-mod-manager-api-2.1.0.tgz#695f0ef2bae328b107574b84bec321c01093bb45"
+  integrity sha512-DYASHNO5BONBRkdza6ii48+BYqJcXphZdZkZDAMLR9PhWFfbS3jszOnZsWhJX3jFz/SVtttdrO+rqXW/nBpbWw==
   dependencies:
     apollo-cache-inmemory "^1.6.5"
     apollo-client "^2.6.8"
@@ -8346,15 +8339,16 @@ satisfactory-mod-manager-api@^2.0.3:
     bindings "^1.5.0"
     child_process "^1.0.2"
     cross-fetch "^3.0.4"
-    exiftool-vendored "^11.3.0"
+    exiftool-vendored "^12.1.0"
     filenamify "^4.1.0"
     got "^11.0.2"
-    graphql "15.1.0"
+    graphql "15.3.0"
     graphql-tag "^2.10.3"
+    ini "^1.3.5"
     jszip "^3.4.0"
     node-stream-zip "^1.11.1"
     platform-folders "^0.5.1"
-    process-exists "^4.0.0"
+    ps-list "^7.2.0"
     semver "^7.1.1"
     vdf "^0.0.2"
     winreg "^1.2.4"
