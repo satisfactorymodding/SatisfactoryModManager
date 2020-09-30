@@ -3,7 +3,10 @@
     class="d-flex flex-column"
     height="100%"
   >
-    <TitleBar title="Satisfactory Mod Manager" />
+    <TitleBar
+      v-if="!hasFrame"
+      title="Satisfactory Mod Manager"
+    />
     <v-card
       class="d-flex"
       height="100%"
@@ -241,6 +244,9 @@ export default {
     },
     currentUpdateDownloadProgress() {
       return lastElement(this.updateDownloadProgress.progresses);
+    },
+    hasFrame() {
+      return this.$electron.remote.getGlobal('frame');
     },
   },
   async mounted() {

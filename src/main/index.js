@@ -66,6 +66,8 @@ function updateSize() {
 }
 
 function createWindow() {
+  const frame = process.platform === 'linux';
+  global.frame = frame;
   const windowLocation = getSetting('windowLocation', {});
   mainWindow = new BrowserWindow({
     x: windowLocation.x,
@@ -79,8 +81,10 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: true,
     },
-    frame: false,
+    frame,
   });
+
+  app.applicationMenu = null;
 
   if (getSetting('maximized', false)) {
     mainWindow.maximize();
