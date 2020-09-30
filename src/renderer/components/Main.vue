@@ -47,7 +47,9 @@
         </v-card-title>
 
         <v-card-text style="white-space: pre-line;">
-          {{ error }}
+          <span>{{ error }}</span>
+          <br>
+          <span>Seems wrong? <a @click="exportDebugData">Generate debug info</a> and send it over on <a @click="moddingDiscord">the modding discord</a> in #help-using-mods</span>
         </v-card-text>
 
         <v-card-actions v-if="!errorPersistent">
@@ -339,6 +341,12 @@ export default {
         exec(`start "" "${SMLauncherUninstallerPath}"`).unref();
       }
       this.oldSMLauncherInstalled = false;
+    },
+    exportDebugData() {
+      this.$root.$emit('exportDebugData');
+    },
+    moddingDiscord() {
+      this.$root.$emit('moddingDiscord');
     },
     lastElement,
   },

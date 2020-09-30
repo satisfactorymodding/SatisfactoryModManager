@@ -655,6 +655,9 @@ export default {
     if (this.debugMode) {
       setDebug(this.debugMode);
     }
+
+    this.$root.$on('exportDebugData', this.exportDebugData);
+    this.$root.$on('moddingDiscord', this.moddingDiscord);
   },
   methods: {
     moddingDiscord() {
