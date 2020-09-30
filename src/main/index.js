@@ -82,6 +82,7 @@ function createWindow() {
       nodeIntegration: true,
     },
     frame,
+    icon: process.platform === 'linux' ? path.join(__dirname, '../../icons/64x64.png') : undefined, // https://github.com/AppImage/AppImageKit/wiki/Bundling-Electron-apps
   });
 
   app.applicationMenu = null;
