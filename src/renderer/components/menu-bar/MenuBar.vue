@@ -153,7 +153,7 @@ export default {
       availableSMMUpdate: null,
       modUpdates: [],
       nextCheckForUpdates: -1,
-      updateCheckInProgress: false,
+      currentCheckForUpdates: -1,
       viewChangelogUpdate: null,
       showIgnoredUpdates: false,
       ignoredUpdates: [],
@@ -240,20 +240,28 @@ export default {
       }
     },
     async checkForUpdates() {
-      if (this.updateCheckInProgress) return;
-      this.updateCheckInProgress = true;
+      this.currentCheckForUpdates += 1;
+      const thisCheckForUpdates = this.currentCheckForUpdates;
       clearTimeout(this.nextCheckForUpdates);
       // don't check for updates while something is in progress
       while (this.inProgress.length > 0) {
         // eslint-disable-next-line no-await-in-loop
-        await new Promise((resolve) => setTimeout(() => resolve(), 500));
+        await new Promise((res) => setTimeout(() => res(), 500));
+        if (thisCheckForUpdates !== this.currentCheckForUpdates) {
+          return;
+        }
+      }
+      if (thisCheckForUpdates !== this.currentCheckForUpdates) {
+        return;
       }
       this.$electron.ipcRenderer.send('checkForUpdates');
-      this.modUpdates = (await this.$store.state.selectedInstall.checkForUpdates()).map((update) => Object.assign(update, {
+      const modUpdates = (await this.$store.state.selectedInstall.checkForUpdates()).map((update) => Object.assign(update, {
         name: this.allMods.find((mod) => mod.modInfo.mod_reference === update.item)?.modInfo.name || update.item,
       }));
-      this.nextCheckForUpdates = setTimeout(() => this.checkForUpdates(), UPDATE_CHECK_INTERVAL);
-      this.updateCheckInProgress = false;
+      if (thisCheckForUpdates === this.currentCheckForUpdates) {
+        this.modUpdates = modUpdates;
+        this.nextCheckForUpdates = setTimeout(() => this.checkForUpdates(), UPDATE_CHECK_INTERVAL);
+      }
     },
     updateSMMNow() {
       this.$root.$emit('downloadUpdate');
