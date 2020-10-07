@@ -33,7 +33,7 @@
               v-on="on"
             >
               <span class="mx-1">
-                SMM and mod updates are avaialble
+                SMM and mod updates are available
               </span>
             </v-btn>
           </template>
