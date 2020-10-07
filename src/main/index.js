@@ -140,6 +140,15 @@ let isDownloadingUpdate = false;
 let quitWaitingForUpdate = false;
 let hasUpdate = false;
 
+function isNetworkError(errorObject) {
+  return errorObject.message === 'net::ERR_INTERNET_DISCONNECTED'
+      || errorObject.message === 'net::ERR_PROXY_CONNECTION_FAILED'
+      || errorObject.message === 'net::ERR_CONNECTION_RESET'
+      || errorObject.message === 'net::ERR_CONNECTION_CLOSE'
+      || errorObject.message === 'net::ERR_NAME_NOT_RESOLVED'
+      || errorObject.message === 'net::ERR_CONNECTION_TIMED_OUT';
+}
+
 if (app.requestSingleInstanceLock()) {
   app.on('second-instance', (e, argv) => {
     if (process.platform === 'win32') {
@@ -245,7 +254,7 @@ if (app.requestSingleInstanceLock()) {
   autoUpdater.on('error', (_, err) => {
     sendToWindow('updateNotAvailable');
     isDownloadingUpdate = false;
-    if (!err.includes('ENOENT')) {
+    if (!err.includes('ENOENT') && !isNetworkError(err)) {
       sendToWindow('autoUpdateError', err);
     } else {
       isAutoUpdateTarget = false;
