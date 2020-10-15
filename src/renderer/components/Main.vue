@@ -28,10 +28,10 @@
           color="primary"
           elevation="0"
           style="font-size: 18px; height: 50px; min-height: 50px; max-height: 50px;"
-          :disabled="!!inProgress.length || isGameRunning || !selectedInstall.launchPath"
+          :disabled="!!inProgress.length || isGameRunning || (selectedInstall && !selectedInstall.launchPath)"
           @click="launchSatisfactory"
         >
-          <b>{{ isGameRunning ? 'GAME IS RUNNING' : (selectedInstall.launchPath ? 'LAUNCH GAME' : 'CANNOT LAUNCH THIS INSTALL') }}</b>
+          <b>{{ isGameRunning ? 'GAME IS RUNNING' : (selectedInstall && selectedInstall.launchPath ? 'LAUNCH GAME' : 'CANNOT LAUNCH THIS INSTALL') }}</b>
         </v-btn>
       </v-card>
       <ModDetails v-if="expandedModId" />

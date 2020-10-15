@@ -39,7 +39,7 @@ export default new Vuex.Store({
     modFilters: [{ name: 'All mods', mods: 0 }, { name: 'Compatible', mods: 0 }, { name: 'Favourite', mods: 0 }, { name: 'Installed', mods: 0 }, { name: 'Not installed', mods: 0 }],
     sortBy: ['Last updated', 'Name', 'Popularity', 'Hotness', 'Views', 'Downloads'],
     satisfactoryInstalls: [],
-    selectedInstall: {},
+    selectedInstall: null,
     smlVersions: [],
     mods: [],
     hiddenInstalledMods: [],
@@ -200,7 +200,7 @@ export default new Vuex.Store({
       commit, dispatch, state, getters,
     }, modId) {
       if (state.inProgress.length > 0) {
-        dispatch('showError', 'Another operation is currently in progress');
+        dispatch('showError', `Another operation is currently in progress while trying to (un)install a mod: ${state.inProgress.map((progress) => progress.id)}`);
         return;
       }
       commit('clearDownloadProgress');
@@ -240,7 +240,7 @@ export default new Vuex.Store({
       commit, dispatch, state, getters,
     }, { modId, version }) {
       if (state.inProgress.length > 0) {
-        dispatch('showError', 'Another operation is currently in progress');
+        dispatch('showError', `Another operation is currently in progress while trying to install a mod version: ${state.inProgress.map((progress) => progress.id)}`);
         return;
       }
       commit('clearDownloadProgress');
@@ -270,7 +270,7 @@ export default new Vuex.Store({
       commit, dispatch, state,
     }, version) {
       if (state.inProgress.length > 0) {
-        dispatch('showError', 'Another operation is currently in progress');
+        dispatch('showError', `Another operation is currently in progress while trying to install a SML version: ${state.inProgress.map((progress) => progress.id)}`);
         return;
       }
       commit('clearDownloadProgress');
