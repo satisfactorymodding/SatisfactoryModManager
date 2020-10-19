@@ -43,8 +43,16 @@ export default {
     };
   },
   methods: {
+    changelogElement(release) {
+      return markdownAsElement(release.changelog);
+    },
     changelogHTML(release) {
-      return markdownAsElement(release.changelog).innerHTML;
+      const el = this.changelogElement(release);
+      const links = el.getElementsByTagName('a');
+      for (let i = 0; i < links.length; i += 1) {
+        links[i].target = '_blank';
+      }
+      return el.innerHTML;
     },
   },
 };
