@@ -7,6 +7,8 @@ import WebSocket from 'ws';
 import { getSetting, saveSetting } from '../settings';
 import './differentialUpdateProgress';
 
+require('electron-debug')({ isEnabled: true, showDevTools: false });
+
 process.env.SMM_API_USERAGENT = process.env.NODE_ENV !== 'development' ? app.name : 'SMM-dev';
 process.env.SMM_API_USERAGENT_VERSION = process.env.NODE_ENV !== 'development' ? app.getVersion() : 'development';
 
@@ -255,7 +257,8 @@ if (app.requestSingleInstanceLock()) {
     sendToWindow('updateNotAvailable');
     isDownloadingUpdate = false;
     if (!err.includes('ENOENT') && !isNetworkError(err)) {
-      sendToWindow('autoUpdateError', err);
+      console.error(err);
+      // sendToWindow('autoUpdateError', err);
     } else {
       isAutoUpdateTarget = false;
     }

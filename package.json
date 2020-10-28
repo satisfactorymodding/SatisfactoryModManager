@@ -76,6 +76,7 @@
   "dependencies": {
     "@babel/runtime": "^7.7.4",
     "debounce": "^1.2.0",
+    "electron-debug": "^3.0.1",
     "electron-log": "^4.2.2",
     "electron-updater": "^4.3.4",
     "filenamify": "^4.1.0",
@@ -115,7 +116,6 @@
     "devtron": "^1.4.0",
     "electron": "^9.0.4",
     "electron-builder": "^22.7.0",
-    "electron-debug": "^3.0.1",
     "electron-devtools-installer": "^3.0.0",
     "eslint": "^7.2.0",
     "eslint-config-airbnb-base": "^14.0.0",
