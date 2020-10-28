@@ -46,7 +46,7 @@
           </v-list-item-content>
           <v-list-item-action>
             <v-select
-              v-model="updateCheckMode"
+              v-model="updateCheckModeLocal"
               :items="['launch', 'exit', 'ask']"
               style="width: 108px"
             />
@@ -151,6 +151,14 @@ export default {
         return 0;
       }
       return this.availableSMMUpdate.releaseNotes.length;
+    },
+    updateCheckModeLocal: {
+      get() {
+        return this.updateCheckMode;
+      },
+      set(value) {
+        this.$emit('update:updateCheckMode', value);
+      },
     },
     showIgnoredUpdatesLocal: {
       get() {
