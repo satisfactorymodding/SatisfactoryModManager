@@ -85,7 +85,7 @@ export default new Vuex.Store({
         state.mods[i].installedVersion = installedModVersions[state.mods[i].modInfo.mod_reference];
         state.mods[i].dependants = Object.entries(lockfile).filter(([, data]) => !!data.dependencies[state.mods[i].modInfo.mod_reference]).map(([item]) => item);
         state.mods[i].isCompatible = state.mods[i].modInfo.versions.length > 0
-        && !!state.mods[i].modInfo.versions.find((ver) => satisfies(minVersion(ver.sml_version), '>=2.0.0')
+        && !!state.mods[i].modInfo.versions.find((ver) => valid(ver.sml_version) && satisfies(minVersion(ver.sml_version), '>=2.0.0')
               && state.smlVersions.some((smlVer) => valid(coerce(smlVer.version)) === valid(coerce(ver.sml_version)))
               && satisfies(valid(coerce(state.selectedInstall.version)), `>=${valid(coerce(state.smlVersions.find((smlVer) => valid(coerce(smlVer.version)) === valid(coerce(ver.sml_version))).satisfactory_version))}`));
       }
