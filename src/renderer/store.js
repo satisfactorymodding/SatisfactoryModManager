@@ -31,6 +31,7 @@ export default new Vuex.Store({
     favoriteModIds: [],
     inProgress: [], // { id: string, progresses: { id: string, progress: number, message: string, fast: boolean }[] }
     currentDownloadProgress: {},
+    installSetupError: '',
     error: '',
     errorPersistent: false,
     isGameRunning: false,
@@ -65,6 +66,9 @@ export default new Vuex.Store({
     },
     clearDownloadProgress(state) {
       state.downloadProgress = [];
+    },
+    showInstallSetupError(state, { e }) {
+      state.installSetupError = typeof e === 'string' ? e : e.message;
     },
     showError(state, { e }) {
       state.error = typeof e === 'string' ? e : e.message;
@@ -338,6 +342,8 @@ export default new Vuex.Store({
             } else {
               state.selectedInstall._profile = savedProfileName;
             }
+
+            dispatch('setupInstalls');
             appLoadProgress.progresses.remove(installValidateProgress);
           })(),
         ]);
@@ -351,6 +357,18 @@ export default new Vuex.Store({
         state.isGameRunning = state.isLaunchingGame || await SatisfactoryInstall.isGameRunning();
       }, 5000);
     },
+    async setupInstalls({ dispatch, state }) {
+      try {
+        await Promise.all(state.satisfactoryInstalls.map((install) => (install.setup ? install.setup() : Promise.resolve())));
+      } catch (e) {
+        dispatch('showInstallSetupError', e);
+      }
+    },
+    showInstallSetupError({ commit }, e) {
+      commit('showInstallSetupError', { e });
+      // eslint-disable-next-line no-console
+      console.error(e);
+    },
     showError({ commit }, e) {
       commit('showError', { e });
       // eslint-disable-next-line no-console
@@ -363,6 +381,9 @@ export default new Vuex.Store({
     },
     clearError({ commit }) {
       commit('showError', { e: '' });
+    },
+    clearInstallSetupError({ commit }) {
+      commit('showInstallSetupError', { e: '' });
     },
     setExpandModInfoOnStart({ commit }, value) {
       commit('setExpandModInfoOnStart', value);

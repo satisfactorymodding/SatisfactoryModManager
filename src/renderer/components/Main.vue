@@ -72,6 +72,33 @@
       </v-card>
     </v-dialog>
     <v-dialog
+      v-model="installSetupErrorDialog"
+      persistent
+      max-width="550"
+    >
+      <v-card>
+        <v-card-title class="headline">
+          Error
+        </v-card-title>
+
+        <v-card-text style="white-space: pre-line;">
+          <span>{{ installSetupError }}</span>
+          <br>
+          <span>Seems wrong? <a @click="exportDebugData">Generate debug info</a> and send it over on <a @click="moddingDiscord">the modding discord</a> in #help-using-mods</span>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-btn
+            color="primary"
+            text
+            @click="retryInstallSetup"
+          >
+            Retry
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog
       persistent
       :value="isLoadingAppInProgress"
       width="500"
@@ -232,6 +259,7 @@ export default {
         'expandedModId',
         'inProgress',
         'isGameRunning',
+        'installSetupError',
         'error',
         'errorPersistent',
       ],
@@ -243,6 +271,9 @@ export default {
       set() {
         this.clearError();
       },
+    },
+    installSetupErrorDialog() {
+      return !!this.installSetupError;
     },
     isLoadingAppInProgress() {
       return this.inProgress.some((prog) => prog.id === '__loadingApp__');
@@ -345,6 +376,10 @@ export default {
     },
     clearError() {
       this.$store.dispatch('clearError');
+    },
+    retryInstallSetup() {
+      this.$store.dispatch('clearInstallSetupError');
+      this.$store.dispatch('setupInstalls');
     },
     async launchSatisfactory() {
       if (this.selectedInstall && !this.isGameRunning) {
