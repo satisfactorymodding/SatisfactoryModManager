@@ -323,6 +323,7 @@ export default {
       this.mods = fuse.search(searchString).map((result) => result.item);
     }),
     async isCompatible(mod) {
+      if (!this.$store.state.selectedInstall) return false;
       return isCompatibleFast(mod, this.$store.state.selectedInstall.version);
     },
     lastElement,

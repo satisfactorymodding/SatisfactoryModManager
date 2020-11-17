@@ -128,6 +128,7 @@ export default {
   asyncComputed: {
     isCompatible: {
       get() {
+        if (!this.$store.state.selectedInstall) return false;
         return isCompatibleFast(this.mod, this.$store.state.selectedInstall.version);
       },
       default: false,
