@@ -150,7 +150,10 @@
               </v-list-item-action>
             </v-list-item>
           </template>
-          <v-list class="menu">
+          <v-list
+            class="menu overflow-y-auto"
+            style="max-height: 90vh"
+          >
             <v-list-item
               @click="installSMLVersion('')"
             >

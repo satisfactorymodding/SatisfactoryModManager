@@ -102,7 +102,10 @@
               </v-icon>
             </v-btn>
           </template>
-          <v-list>
+          <v-list
+            style="max-height: 90vh"
+            class="overflow-y-auto"
+          >
             <v-list-item
               @click="$emit('install-version', '')"
             >
