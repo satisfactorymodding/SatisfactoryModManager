@@ -197,7 +197,7 @@ export default {
       `,
       variables() {
         return {
-          references: this.hiddenInstalledModReferences,
+          references: this.hiddenInstalledModReferences.length > 0 ? this.hiddenInstalledModReferences : [''], // requesting getMods with empty references will return all (hidden) mods
         };
       },
       update: (data) => data.getMods.mods,
