@@ -11,25 +11,21 @@
       v-if="bottomShadow"
       class="list-shadow-bottom"
     />
-    <div
+    <v-virtual-scroll
       ref="modsList"
-      style="overflow-y: scroll; height: 100%;"
-      class="ml-4"
-      @scroll="modsListScrolled"
+      class="pt-3 ml-4 custom"
+      :items="mods"
+      bench="20"
+      item-height="51"
+      style="overflow-y: scroll;"
     >
-      <v-list
-        class="pt-3 mt-n4 custom"
-      >
-        <template
-          v-for="(mod, index) in mods"
-        >
-          <ModsListItem
-            :key="index"
-            :mod="mod"
-          />
-        </template>
-      </v-list>
-    </div>
+      <template v-slot:default="{ item: mod, index }">
+        <ModsListItem
+          :key="index"
+          :mod="mod"
+        />
+      </template>
+    </v-virtual-scroll>
   </div>
 </template>
 
@@ -56,8 +52,7 @@ export default {
   },
   data() {
     return {
-      topShadow: false,
-      bottomShadow: true,
+      isMounted: false,
       mods: [],
       availableMods: [],
       hiddenInstalledMods: [],
@@ -167,6 +162,14 @@ export default {
       // eslint-disable-next-line vue/no-side-effects-in-computed-properties
       return this.filters.sortBy.sort(this.filters.modFilters.filter(this.allMods, this));
     },
+    topShadow() {
+      if (!this.isMounted) return false;
+      return (this.$refs.modsList?.first || 0) > 0;
+    },
+    bottomShadow() {
+      if (!this.isMounted) return false;
+      return (this.$refs.modsList?.last || 0) < (this.$refs.modsList?.items.length || 0) - 1;
+    },
   },
   apollo: {
     hiddenInstalledMods: {
@@ -201,9 +204,6 @@ export default {
     },
   },
   watch: {
-    mods() {
-      this.$nextTick(() => this.modsListScrolled());
-    },
     search() {
       this.updateSearch();
     },
@@ -286,12 +286,9 @@ export default {
       search: '',
     });
     this.updateSearch('');
+    this.isMounted = true;
   },
   methods: {
-    modsListScrolled() {
-      this.topShadow = this.$refs.modsList.scrollTop > 0;
-      this.bottomShadow = this.$refs.modsList.scrollTop + this.$refs.modsList.offsetHeight < this.$refs.modsList.scrollHeight;
-    },
     updateSearch: debounce(function updateSearch() {
       let searchString = this.search;
       if (searchString === '') {
@@ -343,7 +340,7 @@ div {
   width: 100%;
   height: 100%;
   top: 0;
-  z-index: 1;
+  z-index: 2;
   background: transparent !important;
   pointer-events: none;
 }

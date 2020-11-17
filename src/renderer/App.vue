@@ -125,7 +125,7 @@ html {
   transform: translate(15px) !important;
 }
 
-.custom.v-list .v-list-item {
+.custom.v-list .v-list-item, .custom.v-virtual-scroll .v-list-item {
   padding: 0;
 }
 
