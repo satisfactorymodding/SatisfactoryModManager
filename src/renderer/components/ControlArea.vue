@@ -122,7 +122,7 @@
           >
             <v-select
               v-model="modFiltersModel"
-              :items="modFilters"
+              :items="availableFilters"
               item-text="name"
               :return-object="true"
               label="SHOW"
@@ -149,7 +149,9 @@
           >
             <v-select
               v-model="sortByModel"
-              :items="sortBy"
+              :items="availableSorting"
+              item-text="name"
+              :return-object="true"
               label="SORT BY"
               class="custom"
               append-icon="mdi-chevron-down"
@@ -297,6 +299,20 @@ import { mapState } from 'vuex';
 import { filenamify } from '@/utils';
 
 export default {
+  props: {
+    filters: {
+      type: Object,
+      required: true,
+    },
+    availableFilters: {
+      type: Array,
+      required: true,
+    },
+    availableSorting: {
+      type: Array,
+      required: true,
+    },
+  },
   data() {
     return {
       newProfileFormValid: true,
@@ -312,8 +328,6 @@ export default {
     ...mapState([
       'satisfactoryInstalls',
       'profiles',
-      'modFilters',
-      'sortBy',
       'inProgress',
       'isGameRunning',
     ]),
@@ -326,28 +340,20 @@ export default {
       set(value) { this.$store.dispatch('selectProfile', value); },
     },
     modFiltersModel: {
-      get() { return this.$store.state.filters.modFilters; },
-      set(value) {
-        const newFilters = this.$store.state.filters;
-        newFilters.modFilters = value;
-        this.$store.dispatch('setFilters', newFilters);
-      },
+      get() { return this.filters.modFilters; },
+      set(value) { this.$emit('update:filters', { ...this.filters, modFilters: value }); },
     },
     searchModel: {
-      get() { return this.$store.state.filters.search; },
-      set(value) {
-        const newFilters = this.$store.state.filters;
-        newFilters.search = value;
-        this.$store.dispatch('setFilters', newFilters);
-      },
+      get() { return this.filters.search; },
+      set(value) { this.$emit('update:filters', { ...this.filters, search: value }); },
     },
     sortByModel: {
-      get() { return this.$store.state.filters.sortBy; },
-      set(value) {
-        const newFilters = this.$store.state.filters;
-        newFilters.sortBy = value;
-        this.$store.dispatch('setFilters', newFilters);
-      },
+      get() { return this.filters.sortBy; },
+      set(value) { this.$emit('update:filters', { ...this.filters, sortBy: value }); },
+    },
+    filtersModel: {
+      get() { return this.filters; },
+      set(data) { this.$emit('update:filters', data); },
     },
   },
   watch: {

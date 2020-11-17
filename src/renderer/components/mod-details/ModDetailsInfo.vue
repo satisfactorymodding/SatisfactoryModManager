@@ -15,7 +15,7 @@
         >
       </v-row>
       <v-row style="padding-bottom: 15px">
-        <span class="header">{{ mod.modInfo.name }}</span>
+        <span class="header">{{ mod.name }}</span>
       </v-row>
       <v-row style="padding-bottom: 10px">
         <span>
@@ -24,7 +24,7 @@
             class="primary--text"
             style="font-weight: 600"
             @click="searchByAuthor"
-          >{{ mod.modInfo.authors[0].user.username }}</span>
+          >{{ mod.authors[0].user.username }}</span>
         </span>
       </v-row>
       <v-row
@@ -42,7 +42,7 @@
               width="100%"
               v-on="on"
             >
-              <span>See contributors <span class="primary--text">({{ mod.modInfo.authors.length }})</span></span>
+              <span>See contributors <span class="primary--text">({{ mod.authors.length }})</span></span>
               <v-spacer />
               <v-icon
                 right
@@ -54,7 +54,7 @@
           </template>
           <v-list>
             <v-list-item
-              v-for="(author, index) in mod.modInfo.authors"
+              v-for="(author, index) in mod.authors"
               :key="index"
             >
               <v-list-item-avatar>
@@ -71,10 +71,10 @@
       <v-row style="padding-bottom: 10px">
         <span>
           Mod info:<br>
-          Size: <span class="header">{{ mod.modInfo.versions[0] && mod.modInfo.versions[0].size ? bytesToAppropriate(mod.modInfo.versions[0].size) : 'N/A' }}</span><br>
-          Created: <span class="header">{{ mod.modInfo.created_at.toLocaleDateString() }}</span><br>
-          Updated: <span class="header">{{ mod.modInfo.last_version_date ? mod.modInfo.last_version_date.toLocaleString() : 'N/A' }}</span><br>
-          Latest version: <span class="header">{{ mod.modInfo.versions[0] ? mod.modInfo.versions[0].version : 'N/A' }}</span><br>
+          Size: <span class="header">{{ mod.versions[0] && mod.versions[0].size ? bytesToAppropriate(mod.versions[0].size) : 'N/A' }}</span><br>
+          Created: <span class="header">{{ mod.created_at.toLocaleDateString() }}</span><br>
+          Updated: <span class="header">{{ mod.last_version_date ? mod.last_version_date.toLocaleString() : 'N/A' }}</span><br>
+          Latest version: <span class="header">{{ mod.versions[0] ? mod.versions[0].version : 'N/A' }}</span><br>
         </span>
       </v-row>
       <v-row
@@ -89,7 +89,7 @@
               raised
               v-bind="attrs"
               width="100%"
-              :disabled="!!inProgress.length || !mod.isInstalled"
+              :disabled="!!inProgress.length || !isInstalled"
               v-on="on"
             >
               <span>Mod version options</span>
@@ -107,7 +107,7 @@
               @click="$emit('install-version', '')"
             >
               <v-list-item-action>
-                <v-icon v-if="!mod.manifestVersion">
+                <v-icon v-if="!manifestVersion">
                   mdi-check
                 </v-icon>
               </v-list-item-action>
@@ -116,12 +116,12 @@
               </v-list-item-content>
             </v-list-item>
             <v-list-item
-              v-for="(version, i) in mod.modInfo.versions"
+              v-for="(version, i) in mod.versions"
               :key="i"
               @click="$emit('install-version', version.version)"
             >
               <v-list-item-action>
-                <v-icon v-if="validAndEq(mod.manifestVersion, version.version)">
+                <v-icon v-if="validAndEq(manifestVersion, version.version)">
                   mdi-check
                 </v-icon>
               </v-list-item-action>
@@ -138,10 +138,10 @@
             class="header"
             :class="multiplayerSupportColor + '--text'"
           >{{ multiplayerSupport }}</span><br>-->
-          Total downloads: <span class="header">{{ mod.modInfo.downloads.toLocaleString() }}</span><br>
-          Views: <span class="header">{{ mod.modInfo.views.toLocaleString() }}</span><br>
+          Total downloads: <span class="header">{{ mod.downloads.toLocaleString() }}</span><br>
+          Views: <span class="header">{{ mod.views.toLocaleString() }}</span><br>
           <!--Tags:<br>
-          <span class="header">{{ mod.modInfo.tags ? mod.modInfo.tags.map((tag) => `#${tag}`).join(' ') : 'N/A' }}</span><br>-->
+          <span class="header">{{ mod.tags ? mod.tags.map((tag) => `#${tag}`).join(' ') : 'N/A' }}</span><br>-->
         </span>
       </v-row>
       <v-row>
@@ -149,7 +149,7 @@
           class="primary--text"
           style="font-weight: 600"
           target="_blank"
-          :href="`https://ficsit.app/mod/${mod.modInfo.id}`"
+          :href="`https://ficsit.app/mod/${mod.id}`"
         >View on ficsit.app</a>
       </v-row>
       <v-spacer style="flex-basis: 100%" />
@@ -183,6 +183,10 @@ export default {
       type: Object,
       default: () => ({}),
     },
+    isInstalled: {
+      type: Boolean,
+      default: false,
+    },
   },
   computed: {
     ...mapState([
@@ -192,10 +196,10 @@ export default {
       'canInstallMods',
     ]),
     icon() {
-      return this.mod.modInfo.logo || 'https://ficsit.app/static/assets/images/no_image.png';
+      return this.mod.logo || 'https://ficsit.app/static/assets/images/no_image.png';
     },
     multiplayerSupport() {
-      return this.mod.modInfo.multiplayer_support || 'N/A';
+      return this.mod.multiplayer_support || 'N/A';
     },
     multiplayerSupportColor() {
       switch (this.multiplayerSupport) {
@@ -209,11 +213,14 @@ export default {
           return 'red';
       }
     },
+    manifestVersion() {
+      return this.$store.state.manifestMods[this.mod.mod_reference];
+    },
   },
   methods: {
     searchByAuthor() {
       const newFilters = this.$store.state.filters;
-      newFilters.search = `author:"${this.mod.modInfo.authors[0].user.username}"`;
+      newFilters.search = `author:"${this.mod.authors[0].user.username}"`;
       this.$store.dispatch('setFilters', newFilters);
     },
     validAndEq,

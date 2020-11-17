@@ -549,7 +549,8 @@ import path from 'path';
 import { getCacheFolder } from 'platform-folders';
 import StreamZip from 'node-stream-zip';
 import { filenameFriendlyDate, filenamify, validAndEq } from '@/utils';
-import { mapState } from 'vuex';
+import gql from 'graphql-tag';
+import { satisfies } from 'semver';
 import { getSetting, saveSetting } from '~/settings';
 
 /**
@@ -580,9 +581,6 @@ export default {
     };
   },
   computed: {
-    ...mapState([
-      'smlVersions',
-    ]),
     version() {
       return this.$electron.remote.app.getVersion();
     },
@@ -605,14 +603,25 @@ export default {
       },
     },
     installedSMLVersion() {
-      // eslint-disable-next-line no-unused-expressions
-      this.updateSMLVersionVal;
-      return this.$store.state.selectedInstall?.smlVersion;
+      return this.$store.state.installedMods.SML?.version;
     },
     manifestSMLVersion() {
-      // eslint-disable-next-line no-unused-expressions
-      this.updateSMLVersionVal;
-      return this.$store.state.selectedInstall?.manifestSML?.version;
+      return this.$store.state.manifestMods.SML;
+    },
+  },
+  apollo: {
+    smlVersions: {
+      query: gql`
+        query smlVersions {
+          getSMLVersions(filter: {limit: 100}) {
+            sml_versions {
+              id,
+              version,
+            }
+          }
+        }
+      `,
+      update: (data) => data.getSMLVersions.sml_versions.filter((ver) => satisfies(ver.version, '>=2.0.0')),
     },
   },
   watch: {

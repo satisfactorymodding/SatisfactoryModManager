@@ -39,6 +39,7 @@ module.exports = {
       ignoreTemplateLiterals: true,
       ignoreRegExpLiterals: true,
     }],
+    'no-param-reassign': ['error', { props: false }],
   },
   settings: {
     'import/resolver': {

@@ -2,19 +2,33 @@ import Vue from 'vue';
 
 import vueElectron from 'vue-electron';
 import Vuetify from 'vuetify';
+import VueApollo from 'vue-apollo';
+import AsyncComputed from 'vue-async-computed';
 import App from './App';
 import 'vuetify/dist/vuetify.min.css';
 import '@mdi/font/css/materialdesignicons.css';
 import store from './store';
+import { apolloClient } from './graphql';
 
 if (!process.env.IS_WEB) Vue.use(vueElectron);
 
 Vue.config.productionTip = false;
 Vue.use(Vuetify);
 
+Vue.use(VueApollo);
+Vue.use(AsyncComputed);
+
 /* eslint-disable no-new */
 new Vue({
   components: { App },
+  apolloProvider: new VueApollo({
+    defaultClient: apolloClient,
+    defaultOptions: {
+      $query: {
+        fetchPolicy: 'cache-and-network',
+      },
+    },
+  }),
   vuetify: new Vuetify({
     icons: {
       iconfont: 'mdi',

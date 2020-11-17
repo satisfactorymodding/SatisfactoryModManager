@@ -1,8 +1,12 @@
 import marked from 'marked';
 import sanitizeHtml from 'sanitize-html';
 import originalFilenamify from 'filenamify';
-import { valid, coerce, eq } from 'semver';
+import {
+  valid, coerce, eq, validRange, satisfies, minVersion,
+} from 'semver';
+import gql from 'graphql-tag';
 import { getSetting, saveSetting } from '~/settings';
+import { apolloClient } from './graphql';
 
 export function lastElement(arr) {
   return arr[arr.length - 1];
@@ -93,4 +97,29 @@ export function filenamify(str) {
 export function setIntervalImmediately(func, interval) {
   func();
   return setInterval(func, interval);
+}
+
+export async function isCompatibleFast(mod, gameVersion) {
+  if (mod.versions.length === 0 || mod.hidden) {
+    return false;
+  }
+  const smlVersions = (await apolloClient.query({
+    query: gql`
+      query smlVersions {
+        getSMLVersions(filter: {limit: 100}) {
+          sml_versions {
+            id,
+            version,
+            satisfactory_version,
+          }
+        }
+      }
+    `,
+  })).data.getSMLVersions.sml_versions;
+  return mod.versions.some((ver) => (
+    validRange(ver.sml_version)
+    && satisfies(minVersion(ver.sml_version), '>=2.0.0')
+    && smlVersions.some((smlVer) => (
+      satisfies(valid(coerce(smlVer.version)), valid(coerce(ver.sml_version)))
+      && satisfies(valid(coerce(gameVersion)), `>=${valid(coerce(smlVer.satisfactory_version))}`)))));
 }

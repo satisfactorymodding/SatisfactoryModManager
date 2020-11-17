@@ -127,6 +127,7 @@ import { mapState } from 'vuex';
 import {
   ignoreUpdate, unignoreUpdate,
 } from '@/utils';
+import gql from 'graphql-tag';
 import SettingsMenu from './SettingsMenu';
 import UpdatesMenu from './UpdatesMenu';
 import ProfileImportProgressDialog from './dialogs/ProfileImportProgressDialog';
@@ -166,9 +167,6 @@ export default {
       'selectedInstall',
       'selectedProfile',
     ]),
-    ...mapState({
-      allMods: 'mods',
-    }),
     smmUpdateNotes() {
       if (!this.availableSMMUpdate) {
         return '';
@@ -255,9 +253,21 @@ export default {
         return;
       }
       this.$electron.ipcRenderer.send('checkForUpdates');
-      const modUpdates = (await this.$store.state.selectedInstall.checkForUpdates()).map((update) => Object.assign(update, {
-        name: this.allMods.find((mod) => mod.modInfo.mod_reference === update.item)?.modInfo.name || update.item,
-      }));
+      const modUpdates = await Promise.all((await this.$store.state.selectedInstall.checkForUpdates()).map(async (update) => Object.assign(update, {
+        name: (await this.$apollo.query({
+          query: gql`
+            query getModName($modReference: ModReference!) {
+              mod: getModByReference(modReference: $modReference) {
+                id,
+                name,
+              }
+            }
+          `,
+          variables: {
+            modReference: update.item,
+          },
+        })).data.mod.name || update.item,
+      })));
       if (thisCheckForUpdates === this.currentCheckForUpdates) {
         this.modUpdates = modUpdates;
         this.nextCheckForUpdates = setTimeout(() => this.checkForUpdates(), UPDATE_CHECK_INTERVAL);

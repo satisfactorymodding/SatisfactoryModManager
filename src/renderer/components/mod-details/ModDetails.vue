@@ -7,12 +7,21 @@
     height="100%"
     style="padding: 0; box-shadow: inset 10px 0 10px -10px rgba(0,0,0,1); max-width: calc(100vw - 550px);"
   >
+    <v-overlay
+      v-if="!mod || mod.mod_reference !== expandedModId"
+      absolute
+    >
+      Loading...
+    </v-overlay>
     <ModDetailsInfo
+      v-if="mod"
       :mod="mod"
+      :is-installed="isInstalled"
       @close="close"
       @install-version="installVersion"
     />
     <v-card
+      v-if="mod"
       height="100%"
       width="100%"
       class="mod-description-card"
@@ -49,7 +58,7 @@
             </v-btn>
           </v-col>
           <v-col
-            v-if="mod.isCompatible"
+            v-if="isCompatible || isInstalled"
             style="flex-grow: 0; padding-bottom: 0"
           >
             <v-btn
@@ -59,14 +68,14 @@
               @click="switchClicked"
             >
               <span style="vertical-align: middle;">
-                {{ mod.isInstalled ? 'Remove mod' : 'Install mod' }}
+                {{ isInstalled ? 'Remove mod' : 'Install mod' }}
               </span>
               <v-spacer />
               <v-icon
                 right
-                :color="mod.isInstalled ? 'red' : 'text'"
+                :color="isInstalled ? 'red' : 'text'"
               >
-                {{ mod.isInstalled ? 'mdi-delete' : 'mdi-download' }}
+                {{ isInstalled ? 'mdi-delete' : 'mdi-download' }}
               </v-icon>
             </v-btn>
           </v-col>
@@ -78,7 +87,8 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { markdownAsElement } from '@/utils';
+import gql from 'graphql-tag';
+import { markdownAsElement, isCompatibleFast } from '@/utils';
 import ModDetailsInfo from './ModDetailsInfo';
 
 export default {
@@ -97,14 +107,11 @@ export default {
     ...mapGetters([
       'canInstallMods',
     ]),
-    mod() {
-      return this.$store.state.mods.find((mod) => mod.modInfo.mod_reference === this.expandedModId);
-    },
     isFavorite() {
       return this.$store.state.favoriteModIds.includes(this.expandedModId);
     },
     descriptionAsElement() {
-      return markdownAsElement(this.mod.modInfo.full_description || '');
+      return markdownAsElement(this.mod.full_description || '');
     },
     modDescription() {
       const el = this.descriptionAsElement;
@@ -114,19 +121,70 @@ export default {
       }
       return el.innerHTML;
     },
+    isInstalled() {
+      return !!this.$store.state.installedMods[this.expandedModId];
+    },
+  },
+  asyncComputed: {
+    isCompatible: {
+      get() {
+        return isCompatibleFast(this.mod, this.$store.state.selectedInstall.version);
+      },
+      default: false,
+    },
+  },
+  apollo: {
+    mod: {
+      query: gql`
+        query getModDetails($modReference: ModReference!) {
+          mod: getModByReference(modReference: $modReference)
+          {
+            id,
+            name,
+            logo,
+            mod_reference,
+            full_description,
+            created_at,
+            last_version_date,
+            downloads,
+            views,
+            hidden,
+            authors {
+              user {
+                username,
+                avatar
+              }
+              role
+            },
+            versions(filter: {limit: 100}) {
+              id,
+              version,
+              sml_version,
+              size
+            }
+          }
+        }
+      `,
+      variables() {
+        return {
+          modReference: this.expandedModId,
+        };
+      },
+      pollInterval: 5 * 60 * 1000,
+    },
   },
   methods: {
     close() {
       this.$store.dispatch('unexpandMod');
     },
     switchClicked() {
-      this.$store.dispatch('switchModInstalled', this.mod.modInfo.mod_reference);
+      this.$store.dispatch('switchModInstalled', this.expandedModId);
     },
     favoriteClicked() {
-      this.$store.dispatch('toggleModFavorite', this.mod.modInfo.mod_reference);
+      this.$store.dispatch('toggleModFavorite', this.expandedModId);
     },
     installVersion(version) {
-      this.$store.dispatch('installModVersion', { modId: this.mod.modInfo.mod_reference, version });
+      this.$store.dispatch('installModVersion', { modId: this.expandedModId, version });
     },
   },
 };

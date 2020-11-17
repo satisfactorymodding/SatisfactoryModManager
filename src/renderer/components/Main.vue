@@ -17,10 +17,18 @@
         class="d-flex flex-column"
       >
         <MenuBar />
-        <ControlArea style="user-select: none;" />
+        <ControlArea
+          style="user-select: none;"
+          :filters.sync="filters"
+          :available-filters="availableFilters"
+          :available-sorting="availableSorting"
+        />
         <ModsList
           class="flex-grow-1 flex-shrink-1"
           style="height: 0px"
+          :filters.sync="filters"
+          @set-available-filters="availableFilters = $event"
+          @set-available-sorting="availableSorting = $event"
         />
         <v-btn
           block
@@ -208,6 +216,13 @@ export default {
       updateDownloadFinished: false,
       showUpdateDownloadProgress: false,
       oldSMLauncherInstalled: false,
+      filters: {
+        modFilters: {},
+        sortBy: '',
+        search: '',
+      },
+      availableFilters: [],
+      availableSorting: [],
     };
   },
   computed: {
@@ -288,6 +303,7 @@ export default {
     this.$root.$emit('doneLaunchUpdateCheck');
     this.$root.$on('downloadUpdate', this.downloadUpdate);
     await this.$store.dispatch('initApp');
+
     this.$electron.ipcRenderer.send('vue-ready');
     this.oldSMLauncherInstalled = fs.existsSync(SMLauncherUninstallerPath);
   },

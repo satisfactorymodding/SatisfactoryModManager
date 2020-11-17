@@ -15,8 +15,8 @@
         style="cursor: pointer; user-select: none; padding: 0;"
         @click="expandClicked"
       >
-        <v-list-item-title :class="mod.isCompatible || 'error--text'">
-          {{ mod.modInfo.name }}
+        <v-list-item-title :class="isCompatible || 'error--text'">
+          {{ mod.name }}
         </v-list-item-title>
         <v-list-item-subtitle v-if="!isModInProgress">
           <v-row style="padding-left: 12px">
@@ -30,7 +30,7 @@
                 >
                   mdi-eye
                 </v-icon>
-                {{ mod.modInfo.views.toLocaleString() }}
+                {{ mod.views.toLocaleString() }}
               </div>
             </v-col>
             <v-col style="padding: 0">
@@ -41,7 +41,7 @@
                 >
                   mdi-download
                 </v-icon>
-                {{ mod.modInfo.downloads.toLocaleString() }}
+                {{ mod.downloads.toLocaleString() }}
               </div>
             </v-col>
           </v-row>
@@ -77,7 +77,7 @@
         class="custom mod-button"
       >
         <v-tooltip
-          v-if="mod.isInstalled && (mod.isDependency || !canInstallMods || inProgress.length > 0)"
+          v-if="isInstalled && (isDependency || !canInstallMods || inProgress.length > 0)"
           color="background"
           left
         >
@@ -90,17 +90,17 @@
               mdi-checkbox-marked
             </v-icon>
           </template>
-          <span>Dependency of {{ mod.dependantsFriendly }}</span>
+          <span>Dependency of {{ dependantsFriendly }}</span>
         </v-tooltip>
         <v-icon
-          v-else-if="mod.isInstalled"
+          v-else-if="isInstalled"
           color="green"
           @click="switchInstalled"
         >
           mdi-checkbox-marked
         </v-icon>
         <v-icon
-          v-else-if="!mod.isCompatible"
+          v-else-if="!isCompatible"
           color="error"
         >
           mdi-alert
@@ -145,7 +145,8 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { lastElement } from '@/utils';
+import { lastElement, isCompatibleFast } from '@/utils';
+import gql from 'graphql-tag';
 
 export default {
   props: {
@@ -169,33 +170,80 @@ export default {
       'canInstallMods',
     ]),
     isFavorite() {
-      return this.favoriteModIds.includes(this.mod.modInfo.mod_reference);
+      return this.favoriteModIds.includes(this.mod.mod_reference);
     },
     isExpanded() {
-      return this.expandedModId === this.mod.modInfo.mod_reference;
+      return this.expandedModId === this.mod.mod_reference;
     },
     icon() {
-      return this.mod.modInfo.logo || 'https://ficsit.app/static/assets/images/no_image.png';
+      return this.mod.logo || 'https://ficsit.app/static/assets/images/no_image.png';
     },
     isModInProgress() {
       return !!this.modProgress;
     },
     modProgress() {
-      return this.inProgress.find((prog) => prog.id === this.mod.modInfo.mod_reference);
+      return this.inProgress.find((prog) => prog.id === this.mod.mod_reference);
     },
     currentModProgress() {
       return lastElement(this.modProgress.progresses);
     },
+    isInstalled() {
+      return !!this.$store.state.installedMods[this.mod.mod_reference];
+    },
+    dependants() {
+      return Object.entries(this.$store.state.installedMods || {}).filter(([, data]) => !!data.dependencies[this.mod.mod_reference]).map(([item]) => item);
+    },
+    isDependency() {
+      return this.$store.state.manifestMods && !this.$store.state.manifestMods[this.mod.mod_reference] && this.dependants.length > 0;
+    },
+  },
+  asyncComputed: {
+    isCompatible: {
+      get() {
+        return isCompatibleFast(this.mod, this.$store.state.selectedInstall.version);
+      },
+      default: true,
+    },
+    dependantsFriendly: {
+      async get() {
+        const friendlyNames = await Promise.all(this.dependants.map(async (item) => (await this.$apollo.query({
+          query: gql`
+            query getModName($modReference: ModReference!) {
+              mod: getModByReference(modReference: $modReference) {
+                id,
+                name,
+              }
+            }
+          `,
+          variables: {
+            modReference: item,
+          },
+        })).data.mod.name));
+        friendlyNames.sort();
+        if (friendlyNames.length === 0) { return 'none'; }
+        let finalString = friendlyNames[0];
+        let i = 1;
+        while (i < friendlyNames.length && finalString.length + `, ${friendlyNames[i]}`.length <= 40) {
+          finalString += `, ${friendlyNames[i]}`;
+          i += 1;
+        }
+        if (i < friendlyNames.length) {
+          finalString += ` and ${friendlyNames.length - i} more`;
+        }
+        return finalString;
+      },
+      default: '',
+    },
   },
   methods: {
     expandClicked() {
-      this.$store.dispatch('expandMod', this.mod.modInfo.mod_reference);
+      this.$store.dispatch('expandMod', this.mod.mod_reference);
     },
     favoriteClicked() {
-      this.$store.dispatch('toggleModFavorite', this.mod.modInfo.mod_reference);
+      this.$store.dispatch('toggleModFavorite', this.mod.mod_reference);
     },
     switchInstalled() {
-      this.$store.dispatch('switchModInstalled', this.mod.modInfo.mod_reference);
+      this.$store.dispatch('switchModInstalled', this.mod.mod_reference);
     },
   },
 };

@@ -35,20 +35,110 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { lastElement } from '@/utils';
+import { lastElement, setIntervalImmediately, isCompatibleFast } from '@/utils';
 import Fuse from 'fuse.js';
 import debounce from 'debounce';
+import gql from 'graphql-tag';
 import ModsListItem from './ModsListItem';
+import { getSetting, saveSetting } from '~/settings';
+
+const MODS_PER_QUERY = 50;
 
 export default {
   components: {
     ModsListItem,
+  },
+  props: {
+    filters: {
+      type: Object,
+      required: true,
+    },
   },
   data() {
     return {
       topShadow: false,
       bottomShadow: true,
       mods: [],
+      availableMods: [],
+      hiddenInstalledMods: [],
+      compatibleMods: [],
+      availableFilters: [
+        {
+          name: 'All mods',
+          filter(mods) {
+            return mods;
+          },
+          mods: 0,
+        },
+        {
+          name: 'Compatible',
+          filter(mods, vm) {
+            return vm.compatibleMods;
+          },
+          mods: 0,
+        },
+        {
+          name: 'Favourite',
+          filter(mods, vm) {
+            return mods.filter((mod) => vm.$store.state.favoriteModIds.includes(mod.mod_reference));
+          },
+          mods: 0,
+        },
+        {
+          name: 'Installed',
+          filter(mods, vm) {
+            const installedMods = Object.keys(vm.$store.state.installedMods);
+            return mods.filter((mod) => installedMods.includes(mod.mod_reference));
+          },
+          mods: 0,
+        },
+        {
+          name: 'Not installed',
+          filter(mods, vm) {
+            const installedMods = Object.keys(vm.$store.state.installedMods);
+            return mods.filter((mod) => !installedMods.includes(mod.mod_reference));
+          },
+          mods: 0,
+        },
+      ],
+      availableSorting: [
+        {
+          name: 'Last updated',
+          sort(mods) {
+            return mods.sort((a, b) => b.last_version_date - a.last_version_date);
+          },
+        },
+        {
+          name: 'Name',
+          sort(mods) {
+            return mods.sort((a, b) => a.name.localeCompare(b.name));
+          },
+        },
+        {
+          name: 'Popularity',
+          sort(mods) {
+            return mods.sort((a, b) => b.popularity - a.popularity);
+          },
+        },
+        {
+          name: 'Hotness',
+          sort(mods) {
+            return mods.sort((a, b) => b.hotness - a.hotness);
+          },
+        },
+        {
+          name: 'Views',
+          sort(mods) {
+            return mods.sort((a, b) => b.views - a.views);
+          },
+        },
+        {
+          name: 'Downloads',
+          sort(mods) {
+            return mods.sort((a, b) => b.downloads - a.downloads);
+          },
+        },
+      ],
     };
   },
   computed: {
@@ -56,19 +146,63 @@ export default {
       'favoriteModIds',
       'expandedModId',
       'inProgress',
-      'filters',
+      'installedMods',
     ]),
-    ...mapGetters({
-      filteredMods: 'filteredMods',
-      canInstallMods: 'canInstallMods',
-    }),
+    ...mapGetters([
+      'canInstallMods',
+    ]),
     search() {
       return this.filters.search;
+    },
+    hiddenInstalledModReferences() {
+      return Object.keys(this.$store.state.installedMods)
+        .filter((modID) => !this.availableMods.some((mod) => mod.mod_reference === modID)) // not in the available mods list
+        .filter((modID) => this.$store.state.manifestMods[modID] !== undefined); // not dependency
+    },
+    allMods() {
+      return [...this.availableMods, ...this.hiddenInstalledMods].filter((mod, idx, arr) => arr.findIndex((other) => other.mod_reference === mod.mod_reference) === idx);
+    },
+    filteredMods() {
+      if (!this.filters.modFilters?.filter || !this.filters.sortBy?.sort) { return this.allMods; }
+      // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+      return this.filters.sortBy.sort(this.filters.modFilters.filter(this.allMods, this));
+    },
+  },
+  apollo: {
+    hiddenInstalledMods: {
+      query: gql`
+        query getHiddenInstalledMods($references: [String!]) {
+          getMods(filter: { references: $references, hidden: true }) {
+            mods {
+              id,
+              name,
+              mod_reference,
+              downloads,
+              views,
+              popularity,
+              hotness,
+              logo,
+              hidden,
+              last_version_date,
+              versions(filter: { limit: 100 }) {
+                id,
+                sml_version,
+              }
+            }
+          }
+        }
+      `,
+      variables() {
+        return {
+          references: this.hiddenInstalledModReferences,
+        };
+      },
+      update: (data) => data.getMods.mods,
     },
   },
   watch: {
     mods() {
-      setTimeout(() => this.modsListScrolled(), 1);
+      this.$nextTick(() => this.modsListScrolled());
     },
     search() {
       this.updateSearch();
@@ -76,8 +210,81 @@ export default {
     filteredMods() {
       this.updateSearch();
     },
+    filters(newValue, oldValue) {
+      if (newValue.modFilters !== oldValue.modFilters || newValue.sortBy !== oldValue.sortBy) {
+        saveSetting('filters', { modFilters: this.filters.modFilters.name, sortBy: this.filters.sortBy.name });
+      }
+    },
+    async allMods(allMods) {
+      if (!this.$store.state.selectedInstall) {
+        this.compatibleMods = [];
+        return;
+      }
+      const { version } = this.$store.state.selectedInstall;
+      this.compatibleMods = (await Promise.all(allMods.map(async (mod) => ((await isCompatibleFast(mod, version)) ? mod : null)))).filter((mod) => !!mod);
+      this.availableFilters.forEach(async (filter) => { filter.mods = filter.filter(allMods, this).length; });
+    },
+    installedMods() {
+      this.availableFilters.forEach(async (filter) => { filter.mods = filter.filter(this.allMods, this).length; });
+    },
+    favoriteModIds() {
+      this.availableFilters.forEach(async (filter) => { filter.mods = filter.filter(this.allMods, this).length; });
+    },
   },
   mounted() {
+    this.$emit('set-available-filters', this.availableFilters);
+    this.$emit('set-available-sorting', this.availableSorting);
+
+    this.$nextTick(() => {
+      setIntervalImmediately(async () => {
+        const availableModsCount = (await this.$apollo.query({
+          query: gql`
+            query getMods {
+              availableMods: getMods {
+                count
+              }
+            }
+          `,
+        })).data.availableMods.count;
+        if (availableModsCount !== this.availableMods.length) {
+          this.availableMods = (await Promise.all(Array.from({ length: Math.ceil(availableModsCount / MODS_PER_QUERY) }).map(async (_, page) => (await this.$apollo.query({
+            query: gql`
+              query getMods($limit: Int!, $offset: Int!) {
+                availableMods: getMods(filter: { limit: $limit, offset: $offset }) {
+                  mods {
+                    id,
+                    name,
+                    mod_reference,
+                    downloads,
+                    views,
+                    popularity,
+                    hotness,
+                    logo,
+                    hidden,
+                    last_version_date,
+                    versions(filter: { limit: 100 }) {
+                      id,
+                      sml_version,
+                    }
+                  }
+                }
+              }
+            `,
+            variables: {
+              limit: MODS_PER_QUERY,
+              offset: page * MODS_PER_QUERY,
+            },
+          })).data.availableMods.mods))).flat(1);
+        }
+      }, 5 * 60 * 1000);
+    });
+
+    const savedFilters = getSetting('filters', { modFilters: this.availableFilters[1].name, sortBy: this.availableSorting[0].name }); // default Compatible, Last Updated
+    this.$emit('update:filters', {
+      modFilters: this.availableFilters.find((modFilter) => modFilter.name === savedFilters.modFilters) || this.availableFilters[1], // default Compatible
+      sortBy: this.availableSorting.find((item) => item === savedFilters.sortBy) || this.availableSorting[0], // default Last Updated
+      search: '',
+    });
     this.updateSearch('');
   },
   methods: {
@@ -96,19 +303,19 @@ export default {
       const fuse = new Fuse(this.filteredMods, {
         keys: [
           {
-            name: 'modInfo.name',
+            name: 'name',
             weight: 2,
           },
           {
-            name: 'modInfo.short_description',
+            name: 'short_description',
             weight: 1,
           },
           {
-            name: 'modInfo.full_description',
+            name: 'full_description',
             weight: 0.75,
           },
           {
-            name: 'modInfo.authors.user.username',
+            name: 'authors.user.username',
             weight: 0.4,
           },
         ],
@@ -118,6 +325,9 @@ export default {
       });
       this.mods = fuse.search(searchString).map((result) => result.item);
     }),
+    async isCompatible(mod) {
+      return isCompatibleFast(mod, this.$store.state.selectedInstall.version);
+    },
     lastElement,
   },
 };
