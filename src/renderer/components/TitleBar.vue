@@ -126,6 +126,7 @@ export default {
 .titlebar {
   display: flex;
   user-select: none;
+  z-index: 9999;
 }
 .titlebar, .titlebar > * {
   color: var(--v-text2-base) !important;
