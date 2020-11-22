@@ -57,8 +57,7 @@ export default new Vuex.Store({
       state.favoriteModIds = favoriteModIds;
     },
     refreshInstalledMods(state) {
-      const { manifestMods } = state.selectedInstall;
-      state.manifestMods = manifestMods.reduce((prev, mod) => Object.assign(prev, { [mod.id]: mod.version || null }), {});
+      state.manifestMods = state.selectedInstall.readManifest().items.reduce((prev, mod) => Object.assign(prev, { [mod.id]: mod.version || null }), {});
       state.installedMods = state.selectedInstall.readLockfile();
     },
     setExpandedMod(state, { modId }) {
@@ -223,7 +222,7 @@ export default new Vuex.Store({
         if (version) {
           await state.selectedInstall.installSML(version);
         } else {
-          await state.selectedInstall.uninstallSML(); // this is fine because latest will be reinstalled as a dependency
+          await state.selectedInstall.updateSML(); // this is fine because latest will be reinstalled as a dependency
         }
         placeholderProgreess.progress = 1;
         commit('refreshInstalledMods');
