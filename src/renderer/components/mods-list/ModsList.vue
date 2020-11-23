@@ -142,6 +142,7 @@ export default {
       'expandedModId',
       'inProgress',
       'installedMods',
+      'selectedInstall',
     ]),
     ...mapGetters([
       'canInstallMods',
@@ -215,14 +216,11 @@ export default {
         saveSetting('filters', { modFilters: this.filters.modFilters.name, sortBy: this.filters.sortBy.name });
       }
     },
-    async allMods(allMods) {
-      if (!this.$store.state.selectedInstall) {
-        this.compatibleMods = [];
-        return;
-      }
-      const { version } = this.$store.state.selectedInstall;
-      this.compatibleMods = (await Promise.all(allMods.map(async (mod) => ((await isCompatibleFast(mod, version)) ? mod : null)))).filter((mod) => !!mod);
-      this.availableFilters.forEach(async (filter) => { filter.mods = filter.filter(allMods, this).length; });
+    selectedInstall() {
+      this.updateFilters();
+    },
+    allMods() {
+      this.updateFilters();
     },
     installedMods() {
       this.availableFilters.forEach(async (filter) => { filter.mods = filter.filter(this.allMods, this).length; });
@@ -322,6 +320,15 @@ export default {
       });
       this.mods = fuse.search(searchString).map((result) => result.item);
     }),
+    async updateFilters() {
+      if (!this.$store.state.selectedInstall) {
+        this.compatibleMods = [];
+        return;
+      }
+      const { version } = this.$store.state.selectedInstall;
+      this.compatibleMods = (await Promise.all(this.allMods.map(async (mod) => ((await isCompatibleFast(mod, version)) ? mod : null)))).filter((mod) => !!mod);
+      this.availableFilters.forEach(async (filter) => { filter.mods = filter.filter(this.allMods, this).length; });
+    },
     async isCompatible(mod) {
       if (!this.$store.state.selectedInstall) return false;
       return isCompatibleFast(mod, this.$store.state.selectedInstall.version);
