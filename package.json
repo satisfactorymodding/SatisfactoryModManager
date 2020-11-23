@@ -104,6 +104,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.7.4",
+    "@babel/eslint-parser": "^7.12.1",
     "@babel/plugin-proposal-function-bind": "^7.7.4",
     "@babel/plugin-transform-runtime": "^7.9.6",
     "@babel/preset-env": "^7.7.4",
@@ -111,7 +112,6 @@
     "@babel/runtime-corejs2": "^7.7.4",
     "@mdi/font": "^5.3.45",
     "ajv": "^6.5.0",
-    "babel-eslint": "^10.0.3",
     "babel-loader": "^8.0.6",
     "babili-webpack-plugin": "^0.1.2",
     "cfonts": "^2.1.2",

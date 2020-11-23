@@ -266,7 +266,7 @@ export default {
           variables: {
             modReference: update.item,
           },
-        })).data?.mod?.name || update.item,
+        })).data.mod?.name || update.item,
       })));
       if (thisCheckForUpdates === this.currentCheckForUpdates) {
         this.modUpdates = modUpdates;
