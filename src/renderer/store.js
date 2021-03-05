@@ -321,6 +321,7 @@ export default new Vuex.Store({
               } else {
                 dispatch('showErrorPersistent', new Error('No Satisfactory installs found.'));
               }
+              state.inProgress.remove(appLoadProgress);
               return;
             }
             commit('setInstalls', { installs });
