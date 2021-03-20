@@ -10,7 +10,7 @@ Download the latest release from https://github.com/satisfactorymodding/Satisfac
 
 Just install it, choose an updated mod, and click install. Everything else is handled by SMM
 
-#### Developmemnt
+#### Development
 ``` bash
 # install dependencies
 yarn install
