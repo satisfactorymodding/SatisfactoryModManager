@@ -173,16 +173,17 @@ function greeting () {
   console.log(chalk.blue('  getting ready...') + '\n')
 }
 
-function init () {
+async function init () {
   greeting()
 
-  Promise.all([startRenderer(), startMain()])
-    .then(() => {
-      startElectron()
-    })
-    .catch(err => {
-      console.error(err)
-    })
+  try {
+    await startRenderer();
+    await startMain();
+    startElectron()
+  }
+  catch(err) {
+    console.log(err);
+  }
 }
 
 init()

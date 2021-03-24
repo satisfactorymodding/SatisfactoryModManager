@@ -4,9 +4,9 @@
     offset-x
     left
   >
-    <template v-slot:activator="{ on: menuOn, attrs: menuAttrs }">
+    <template #activator="{ on: menuOn, attrs: menuAttrs }">
       <v-tooltip bottom>
-        <template v-slot:activator="{ on: tooltipOn, attrs: tooltipAttrs }">
+        <template #activator="{ on: tooltipOn, attrs: tooltipAttrs }">
           <v-btn
             style="min-width: 36px"
             class="my-2 mx-1"

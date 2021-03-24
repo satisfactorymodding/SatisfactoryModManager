@@ -19,7 +19,7 @@
       item-height="51"
       style="overflow-y: scroll;"
     >
-      <template v-slot:default="{ item: mod, index }">
+      <template #default="{ item: mod, index }">
         <ModsListItem
           :key="index"
           :mod="mod"
@@ -160,7 +160,7 @@ export default {
     },
     filteredMods() {
       if (!this.filters.modFilters?.filter || !this.filters.sortBy?.sort) { return this.allMods; }
-      // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+      // eslint-disable-next-line vue/no-side-effects-in-computed-properties, vue/no-mutating-props
       return this.filters.sortBy.sort(this.filters.modFilters.filter(this.allMods, this));
     },
     topShadow() {

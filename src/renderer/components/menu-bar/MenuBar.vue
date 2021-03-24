@@ -1,7 +1,7 @@
 <template>
   <v-container
     fluid
-    class="py-0"
+    class="py-0 mt-4"
   >
     <v-row
       class="px-3"
@@ -26,7 +26,7 @@
           </span>
         </v-btn>
         <v-menu v-else>
-          <template v-slot:activator="{ on, attrs }">
+          <template #activator="{ on, attrs }">
             <v-btn
               class="my-2 mx-1"
               v-bind="attrs"
@@ -68,7 +68,7 @@
       </v-col>
       <v-col cols="auto">
         <v-tooltip bottom>
-          <template v-slot:activator="{ on, attrs }">
+          <template #activator="{ on, attrs }">
             <v-btn
               style="min-width: 36px"
               class="my-2 mx-1"

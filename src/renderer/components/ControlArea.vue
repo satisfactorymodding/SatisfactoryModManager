@@ -1,6 +1,7 @@
 <template>
   <v-container
     fluid
+    class="mt-2"
   >
     <v-row
       no-gutters
@@ -19,7 +20,7 @@
           class="custom"
           append-icon="mdi-chevron-down"
         >
-          <template v-slot:selection="{ item }">
+          <template #selection="{ item }">
             <span>{{ item.displayName }}</span>
             <span v-if="item.smlVersion">&nbsp;-&nbsp;SML v{{ item.smlVersion }}</span>
           </template>
@@ -129,7 +130,7 @@
               class="custom"
               append-icon="mdi-chevron-down"
             >
-              <template v-slot:selection="{ item }">
+              <template #selection="{ item }">
                 <span>{{ item.name }}</span>
                 &nbsp;
                 <span class="green--text">({{ item.mods }})</span>

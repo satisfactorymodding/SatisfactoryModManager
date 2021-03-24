@@ -3,7 +3,7 @@
     :close-on-content-click="false"
     offset-x
   >
-    <template v-slot:activator="{ on, attrs }">
+    <template #activator="{ on, attrs }">
       <v-btn
         v-bind="attrs"
         class="ma-2 px-2"
@@ -24,7 +24,7 @@
           offset-x
           :nudge-right="20"
         >
-          <template v-slot:activator="{ on }">
+          <template #activator="{ on }">
             <v-list-item
               v-on="on"
             >
@@ -137,7 +137,7 @@
           offset-x
           :nudge-right="20"
         >
-          <template v-slot:activator="{ on }">
+          <template #activator="{ on }">
             <v-list-item
               v-on="on"
             >
@@ -199,7 +199,7 @@
           offset-x
           :nudge-right="20"
         >
-          <template v-slot:activator="{ on }">
+          <template #activator="{ on }">
             <v-list-item
               v-on="on"
             >

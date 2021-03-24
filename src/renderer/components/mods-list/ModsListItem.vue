@@ -4,6 +4,7 @@
       class="mod"
       :class="(isExpanded ? 'expanded' : '') + ' ' + (isModInProgress ? 'in-progress' : '')"
       style="min-height: 45px; margin-top: 0; margin-bottom: 0; border-radius: 5px; z-index: 1;"
+      two-line
     >
       <v-list-item-avatar
         tile
@@ -19,32 +20,27 @@
           {{ mod.name }}
         </v-list-item-title>
         <v-list-item-subtitle v-if="!isModInProgress">
-          <v-row style="padding-left: 12px">
-            <v-col
-              style="padding: 0; flex: 0 0 20%; max-width: 20%;"
+          <div
+            class="d-inline-flex align-center"
+            style="width: 20%"
+          >
+            <v-icon
+              color="text"
+              style="padding-right: 4px"
             >
-              <div class="d-inline-flex align-center">
-                <v-icon
-                  color="text"
-                  style="padding-right: 4px"
-                >
-                  mdi-eye
-                </v-icon>
-                {{ mod.views.toLocaleString() }}
-              </div>
-            </v-col>
-            <v-col style="padding: 0">
-              <div class="d-inline-flex align-center">
-                <v-icon
-                  color="text"
-                  style="padding-right: 4px"
-                >
-                  mdi-download
-                </v-icon>
-                {{ mod.downloads.toLocaleString() }}
-              </div>
-            </v-col>
-          </v-row>
+              mdi-eye
+            </v-icon>
+            {{ mod.views.toLocaleString() }}
+          </div>
+          <div class="d-inline-flex align-center">
+            <v-icon
+              color="text"
+              style="padding-right: 4px"
+            >
+              mdi-download
+            </v-icon>
+            {{ mod.downloads.toLocaleString() }}
+          </div>
         </v-list-item-subtitle>
         <v-list-item-subtitle
           v-else
@@ -81,7 +77,7 @@
           color="background"
           left
         >
-          <template v-slot:activator="{ on, attrs }">
+          <template #activator="{ on, attrs }">
             <v-icon
               color="green"
               v-bind="attrs"

@@ -34,7 +34,7 @@
           open-on-hover
           offset-y
         >
-          <template v-slot:activator="{ on, attrs }">
+          <template #activator="{ on, attrs }">
             <v-btn
               color="backgroundModsList-darken1"
               raised
@@ -83,7 +83,7 @@
         <v-menu
           offset-y
         >
-          <template v-slot:activator="{ on, attrs }">
+          <template #activator="{ on, attrs }">
             <v-btn
               color="backgroundModsList-darken1"
               raised

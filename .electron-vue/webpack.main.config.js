@@ -2,11 +2,11 @@
 
 process.env.BABEL_ENV = 'main'
 
-const path = require('path')
-const { dependencies } = require('../package.json')
-const webpack = require('webpack')
-
-const BabiliWebpackPlugin = require('babili-webpack-plugin')
+const path = require('path');
+const { dependencies } = require('../package.json');
+const webpack = require('webpack');
+const ESLintPlugin = require('eslint-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 
 let mainConfig = {
   entry: {
@@ -17,17 +17,6 @@ let mainConfig = {
   ],
   module: {
     rules: [
-      {
-        test: /\.(js)$/,
-        enforce: 'pre',
-        exclude: /node_modules/,
-        use: {
-          loader: 'eslint-loader',
-          options: {
-            formatter: require('eslint-friendly-formatter')
-          }
-        }
-      },
       {
         test: /\.js$/,
         use: 'babel-loader',
@@ -49,12 +38,16 @@ let mainConfig = {
     path: path.join(__dirname, '../dist/electron')
   },
   plugins: [
-    new webpack.NoEmitOnErrorsPlugin()
+    new webpack.NoEmitOnErrorsPlugin(),
+    new ESLintPlugin({
+      formatter: require('eslint-friendly-formatter')
+    }),
   ],
   resolve: {
     extensions: ['.js', '.json', '.node']
   },
-  target: 'electron-main'
+  target: 'electron-main',
+  optimization: {},
 }
 
 /**
@@ -73,11 +66,12 @@ if (process.env.NODE_ENV !== 'production') {
  */
 if (process.env.NODE_ENV === 'production') {
   mainConfig.plugins.push(
-    new BabiliWebpackPlugin(),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': '"production"'
     })
   )
+  mainConfig.optimization.minimize = true;
+  mainConfig.optimization.minimizer = [new TerserPlugin()];
 }
 
 module.exports = mainConfig
