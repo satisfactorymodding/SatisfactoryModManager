@@ -94,6 +94,7 @@
     "sanitize-html": "^2.3.3",
     "satisfactory-mod-manager-api": "^2.1.4",
     "semver": "^7.3.5",
+    "socket.io": "^4.0.0",
     "vue": "^2.5.16",
     "vue-apollo": "^3.0.7",
     "vue-async-computed": "^3.9.0",

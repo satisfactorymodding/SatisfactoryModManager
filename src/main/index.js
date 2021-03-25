@@ -3,7 +3,7 @@ import {
 } from 'electron';
 import path from 'path';
 import { autoUpdater } from 'electron-updater';
-import WebSocket from 'ws';
+import socketio from 'socket.io';
 import { getSetting, saveSetting } from '../settings';
 import './differentialUpdateProgress';
 
@@ -287,10 +287,15 @@ if (app.requestSingleInstanceLock()) {
     });
   });
 
-  const wss = new WebSocket.Server({ port: 33642 });
-  wss.on('connection', (ws) => {
-    ws.on('message', (message) => {
-      console.log('received: %s', message);
+  const wss = new socketio.Server(33642);
+  wss.on('connection', (socket) => {
+    socket.on('installedMods', () => {
+      ipcMain.once('installedMods', (event, installedMods) => {
+        const result = {};
+        Object.entries(installedMods).forEach(([item, data]) => { result[item] = data.version; });
+        socket.emit('installedMods', result);
+      });
+      mainWindow.webContents.send('installedMods');
     });
   });
 } else {

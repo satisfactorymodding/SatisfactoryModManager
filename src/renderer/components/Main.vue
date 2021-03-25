@@ -299,6 +299,9 @@ export default {
   },
   async mounted() {
     this.$electron.ipcRenderer.send('unexpand');
+    this.$electron.ipcRenderer.on('installedMods', () => {
+      this.$electron.ipcRenderer.send('installedMods', this.$store.state.installedMods);
+    });
     this.$electron.ipcRenderer.on('updateAvailable', () => {
       this.smmUpdateDownloadProgress = {
         id: '__downloadingUpdate__',
