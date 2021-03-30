@@ -314,9 +314,9 @@ export default new Vuex.Store({
               if (invalidInstalls.length !== 0) {
                 const invalidInstallsString = invalidInstalls.map((invalidInstall) => `"${invalidInstall}"`).join('\n');
                 if (invalidInstalls.length > 1) {
-                  dispatch('showErrorPersistent', new Error(`${invalidInstalls.length} Satisfactory installs were found, but all of them point to folders that don't exist.\n${invalidInstallsString}`));
+                  dispatch('showErrorPersistent', new Error(`${invalidInstalls.length} Satisfactory installs were found, but all of them point to folders that don't exist.\nNote: this error can be caused by running the game in experimental mode\n${invalidInstallsString}`));
                 } else {
-                  dispatch('showErrorPersistent', new Error(`${invalidInstalls.length} Satisfactory install was found, but it points to a folder that doesn't exist.\n${invalidInstallsString}`));
+                  dispatch('showErrorPersistent', new Error(`${invalidInstalls.length} Satisfactory install was found, but it points to a folder that doesn't exist.\nNote: this error can be caused by running the game in experimental mode\n${invalidInstallsString}`));
                 }
               } else {
                 dispatch('showErrorPersistent', new Error('No Satisfactory installs found.'));
