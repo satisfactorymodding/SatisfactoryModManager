@@ -224,9 +224,7 @@ export default {
   },
   methods: {
     searchByAuthor() {
-      const newFilters = this.$store.state.filters;
-      newFilters.search = `author:"${this.mod.authors[0].user.username}"`;
-      this.$store.dispatch('setFilters', newFilters);
+      this.$root.$emit('updateSearch', `author:"${this.mod.authors[0].user.username}"`);
     },
     validAndEq,
     bytesToAppropriate,

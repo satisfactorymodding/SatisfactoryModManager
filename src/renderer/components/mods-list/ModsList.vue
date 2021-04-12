@@ -181,6 +181,13 @@ export default {
               id,
               name,
               mod_reference,
+              short_description,
+              full_description,
+              authors {
+                user {
+                  username,
+                }
+              },
               downloads,
               views,
               popularity,
@@ -253,6 +260,13 @@ export default {
                     id,
                     name,
                     mod_reference,
+                    short_description,
+                    full_description,
+                    authors {
+                      user {
+                        username,
+                      }
+                    },
                     downloads,
                     views,
                     popularity,
@@ -283,7 +297,14 @@ export default {
       sortBy: this.availableSorting.find((item) => item === savedFilters.sortBy) || this.availableSorting[0], // default Last Updated
       search: '',
     });
-    this.updateSearch('');
+    this.$root.$on('updateSearch', (search) => {
+      this.$emit('update:filters', {
+        ...this.filters,
+        search,
+      });
+      this.updateSearch();
+    });
+    this.updateSearch();
     this.isMounted = true;
   },
   methods: {
@@ -315,8 +336,8 @@ export default {
           },
         ],
         useExtendedSearch: true,
-        threshold: 0.15,
-        minMatchCharLength: searchString.length * 0.8,
+        threshold: 0.2,
+        ignoreLocation: true,
       });
       this.mods = fuse.search(searchString).map((result) => result.item);
     }),
