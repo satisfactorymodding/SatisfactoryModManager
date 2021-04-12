@@ -6,15 +6,16 @@
     <template #activator="{ on, attrs }">
       <v-btn
         v-bind="attrs"
-        class="ma-2 px-2"
+        class="my-2 px-2 d-inline-flex align-center"
+        style="height: 28px"
         v-on="on"
       >
         <v-icon
-          style="margin-right: 12px"
+          style="margin-right: 4px; font-size: 16px !important"
         >
           mdi-cog
         </v-icon>
-        <span>SMM</span>
+        <span>Settings</span>
       </v-btn>
     </template>
     <v-card>
@@ -406,76 +407,6 @@
           inset
         />
 
-        <v-list-item @click.stop="helpDialog = true">
-          <v-list-item-action />
-          <v-list-item-content>
-            <v-list-item-title>Help</v-list-item-title>
-          </v-list-item-content>
-
-          <v-list-item-action>
-            <v-icon color="text">
-              mdi-information
-            </v-icon>
-          </v-list-item-action>
-          <v-dialog v-model="helpDialog">
-            <v-card>
-              <v-card-title>
-                Help
-              </v-card-title>
-              <v-card-text>
-                <h3>General troubleshooting</h3>
-                If something doesn't behave as expected, the first thing to try is <a
-                  @click="clearCache"
-                >clearing
-                  the cache</a><br>
-                If that doesn't work, <a @click="debugMode = true">enable debug mode</a>, recreate what you
-                tried
-                to do and went wrong, then <a @click="exportDebugData">generate debug data</a>
-                and upload the generated zip to the modding discord, #help-using-mods channel<br>
-                <br>
-                <v-divider />
-                <br>
-                <h3>X Satisfactory installs were found error</h3>
-                <h4>Epic Games</h4>
-                First, check that Epic can start the game. If you changed where the game is located, you
-                need to make Epic update its install info. To do so:<br>
-                1. Rename the game folder to something temporary<br>
-                2. Start install from Epic to the directory you want the game to be in (the original
-                folder
-                name, before step 1)<br>
-                3. After it downloads a bit close Epic<br>
-                4. Copy back the files from the temporary folder EXCEPT the .egstore folder<br>
-                5. Start Epic and resume the install so it finds that it is actually already
-                installed<br>
-                <br>
-                <v-divider />
-                <br>
-                <h3>No Satisfactory installs found</h3>
-                <h4>Epic Games / Steam</h4>
-                Make sure you have the game installed, and Epic/Steam can find and launch it.<br>
-                <h4>Cracked</h4>
-                We do not support piracy, thus Satisfactory Mod Manager does not work with cracked
-                copies of
-                the game<br>
-                <br>
-                <v-divider />
-                <br>
-                <h3>Your issue is not here</h3>
-                Ask for help in the modding discord, #help-using-mods channel
-              </v-card-text>
-              <v-card-actions>
-                <v-btn
-                  color="primary"
-                  text
-                  @click="helpDialog = false"
-                >
-                  Close
-                </v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
-        </v-list-item>
-
         <v-divider
           class="custom"
           inset
@@ -527,6 +458,46 @@
 
         <v-divider class="custom" />
 
+        <template v-if="konami">
+          <v-menu
+            :close-on-content-click="false"
+            offset-x
+            :nudge-right="20"
+          >
+            <template #activator="{ on }">
+              <v-list-item
+                v-on="on"
+              >
+                <v-list-item-action />
+                <v-list-item-content>
+                  <v-list-item-title>Secret settings</v-list-item-title>
+                </v-list-item-content>
+                <v-list-item-action>
+                  <v-icon>mdi-chevron-right</v-icon>
+                </v-list-item-action>
+              </v-list-item>
+            </template>
+            <v-card>
+              <v-list class="menu">
+                <v-list-item>
+                  <v-list-item-action />
+                  <v-list-item-content>
+                    <v-list-item-title>Launch button</v-list-item-title>
+                  </v-list-item-content>
+
+                  <v-list-item-action>
+                    <v-switch
+                      v-model="launchButton"
+                    />
+                  </v-list-item-action>
+                </v-list-item>
+              </v-list>
+            </v-card>
+          </v-menu>
+
+          <v-divider class="custom" />
+        </template>
+
         <v-list-item>
           <v-list-item-action>
             <v-icon color="text">
@@ -554,6 +525,7 @@ import StreamZip from 'node-stream-zip';
 import { filenameFriendlyDate, filenamify, validAndEq } from '@/utils';
 import gql from 'graphql-tag';
 import { satisfies } from 'semver';
+import { mapState } from 'vuex';
 import { getSetting, saveSetting } from '~/settings';
 
 /**
@@ -578,12 +550,14 @@ export default {
       importProfileName: '',
       importProfileVersions: false,
       importProfileMessages: ['', ''],
-      helpDialog: false,
       cachedDebugMode: false,
       updateSMLVersionVal: 0,
     };
   },
   computed: {
+    ...mapState([
+      'konami',
+    ]),
     version() {
       return this.$electron.remote.app.getVersion();
     },
@@ -603,6 +577,14 @@ export default {
         setDebug(value);
         saveSetting('debugMode', value);
         this.cachedDebugMode = value;
+      },
+    },
+    launchButton: {
+      get() {
+        return this.$store.state.launchButton;
+      },
+      set(value) {
+        this.$store.dispatch('launchButton', value);
       },
     },
     installedSMLVersion() {
@@ -670,6 +652,7 @@ export default {
 
     this.$root.$on('exportDebugData', this.exportDebugData);
     this.$root.$on('moddingDiscord', this.moddingDiscord);
+    this.$root.$on('clearCache', this.clearCache);
   },
   methods: {
     moddingDiscord() {

@@ -37,7 +37,10 @@
             v-html="modDescription"
           />
         </v-row>
-        <v-row style="flex-grow: 0;">
+        <v-row
+          style="flex-grow: 0;"
+          class="pb-2"
+        >
           <v-spacer />
           <v-col style="flex-grow: 0; padding-bottom: 0">
             <v-btn

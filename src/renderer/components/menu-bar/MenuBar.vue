@@ -1,24 +1,40 @@
 <template>
   <v-container
     fluid
-    class="py-0 mt-4"
+    class="py-0 mt-2 pb-2"
   >
     <v-row
-      class="px-3"
+      class="px-4 pl-5"
       :class="hasUpdate ? 'update-available' : ''"
     >
       <v-col cols="auto">
         <SettingsMenu />
       </v-col>
+      <v-col cols="auto">
+        <v-btn
+          class="ma-2 ml-1 px-2 d-inline-flex align-center"
+          style="height: 28px"
+          @click="helpDialog = true"
+        >
+          <v-icon
+            style="margin-right: 4px; font-size: 16px !important"
+          >
+            mdi-help-circle
+          </v-icon>
+          <span>Help</span>
+        </v-btn>
+      </v-col>
       <v-spacer />
       <v-col cols="auto">
         <span
           v-if="!hasUpdate"
-          class="d-inline-flex align-center fill-height mx-1"
+          class="d-inline-flex align-center fill-height mx-3"
+          style="font-size: 14px"
         >No updates right now</span>
         <v-btn
           v-else-if="filteredModUpdates.length === 0 || !availableSMMUpdate"
           class="my-2 mx-1"
+          style="height: 28px"
           @click="filteredModUpdates.length > 0 ? openModUpdatesDialog() : openSMMUpdateDialog()"
         >
           <span class="mx-1">
@@ -29,6 +45,7 @@
           <template #activator="{ on, attrs }">
             <v-btn
               class="my-2 mx-1"
+              style="height: 28px"
               v-bind="attrs"
               v-on="on"
             >
@@ -67,24 +84,6 @@
         </v-menu>
       </v-col>
       <v-col cols="auto">
-        <v-tooltip bottom>
-          <template #activator="{ on, attrs }">
-            <v-btn
-              style="min-width: 36px"
-              class="my-2 mx-1"
-              v-bind="attrs"
-              v-on="on"
-              @click="manualCheckForUpdates"
-            >
-              <v-icon style="font-size: 25px !important">
-                mdi-update
-              </v-icon>
-            </v-btn>
-          </template>
-          <span>Check for updates</span>
-        </v-tooltip>
-      </v-col>
-      <v-col cols="auto">
         <UpdatesMenu
           :available-s-m-m-update="availableSMMUpdate"
           :filtered-mod-updates="filteredModUpdates"
@@ -119,6 +118,66 @@
     />
     <ProfileExportProgressDialog />
     <ProfileImportProgressDialog />
+    <v-dialog
+      v-model="helpDialog"
+    >
+      <v-card>
+        <v-card-title
+          style="background-color: unset"
+        >
+          Help
+        </v-card-title>
+        <v-card-text
+          style="background-color: unset"
+        >
+          <h3>General troubleshooting</h3>
+          If something doesn't behave as expected, the first thing to try is
+          <a @click="clearCache">clearing the cache</a><br>
+          If that doesn't work, <a @click="exportDebugData">generate debug data</a>
+          and upload the generated zip to the modding discord, #help-using-mods channel<br>
+          <br>
+          <v-divider />
+          <br>
+          <h3>X Satisfactory installs were found error</h3>
+          <h4>Epic Games</h4>
+          First, check that Epic can start the game. If you changed where the game is located, you
+          need to make Epic update its install info. To do so:<br>
+          1. Rename the game folder to something temporary<br>
+          2. Start install from Epic to the directory you want the game to be in (the original
+          folder name, before step 1)<br>
+          3. After it downloads a bit close Epic<br>
+          4. Copy back the files from the temporary folder EXCEPT the .egstore folder<br>
+          5. Start Epic and resume the install so it finds that it is actually already
+          installed<br>
+          <br>
+          <v-divider />
+          <br>
+          <h3>No Satisfactory installs found</h3>
+          <h4>Epic Games / Steam</h4>
+          Make sure you have the game installed, and Epic/Steam can find and launch it.<br>
+          <h4>Cracked</h4>
+          We do not support piracy, thus Satisfactory Mod Manager does not work with cracked
+          copies of
+          the game<br>
+          <br>
+          <v-divider />
+          <br>
+          <h3>Your issue is not here</h3>
+          Ask for help in the modding discord, #help-using-mods channel
+        </v-card-text>
+        <v-card-actions
+          style="background-color: unset"
+        >
+          <v-btn
+            color="primary"
+            text
+            @click="helpDialog = false"
+          >
+            Close
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -159,6 +218,7 @@ export default {
       showIgnoredUpdates: false,
       ignoredUpdates: [],
       cachedUpdateCheckMode: 'launch',
+      helpDialog: false,
     };
   },
   computed: {
@@ -305,6 +365,12 @@ export default {
       this.viewChangelogUpdate = update;
       this.$refs.changelogDialog.changelogDialog = true;
     },
+    exportDebugData() {
+      this.$root.$emit('exportDebugData');
+    },
+    clearCache() {
+      this.$root.$emit('clearCache');
+    },
   },
 };
 </script>
@@ -342,6 +408,9 @@ export default {
 }
 div {
   background-color: var(--v-backgroundMenuBar-base);
+}
+div.v-dialog__content {
+  background-color: unset;
 }
 .col {
   padding: 0;

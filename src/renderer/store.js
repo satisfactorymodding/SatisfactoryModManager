@@ -2,10 +2,12 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import {
   addDownloadProgressCallback, getProfiles, loadCache, getInstalls, SatisfactoryInstall,
+  getProfileFolderPath, readManifest, readLockfile,
   createProfile,
   deleteProfile,
   renameProfile,
 } from 'satisfactory-mod-manager-api';
+import path from 'path';
 import { ipcRenderer } from 'electron';
 import { bytesToAppropriate, secondsToAppropriate, setIntervalImmediately } from './utils';
 import { saveSetting, getSetting } from '~/settings';
@@ -25,6 +27,7 @@ export default new Vuex.Store({
   state: {
     profiles: [],
     selectedProfile: {},
+    modsEnabled: true,
     satisfactoryInstalls: [],
     selectedInstall: null,
     expandedModId: '',
@@ -39,6 +42,8 @@ export default new Vuex.Store({
     expandModInfoOnStart: false,
     installedMods: {},
     manifestMods: {},
+    konami: false,
+    launchButton: false,
   },
   mutations: {
     setInstall(state, { newInstall }) {
@@ -46,6 +51,9 @@ export default new Vuex.Store({
     },
     setProfile(state, { newProfile }) {
       state.selectedProfile = newProfile;
+    },
+    setModsEnabled(state, modsEnabled) {
+      state.modsEnabled = modsEnabled;
     },
     setInstalls(state, { installs }) {
       state.satisfactoryInstalls = installs;
@@ -57,8 +65,8 @@ export default new Vuex.Store({
       state.favoriteModIds = favoriteModIds;
     },
     refreshInstalledMods(state) {
-      state.manifestMods = state.selectedInstall.readManifest().items.reduce((prev, mod) => Object.assign(prev, { [mod.id]: mod.version || null }), {});
-      state.installedMods = state.selectedInstall.readLockfile();
+      state.manifestMods = readManifest(path.join(getProfileFolderPath(state.selectedProfile.name), 'manifest.json')).items.reduce((prev, mod) => Object.assign(prev, { [mod.id]: mod.version || null }), {});
+      state.installedMods = readLockfile(path.join(getProfileFolderPath(state.selectedProfile.name), state.selectedInstall.lockfileName));
     },
     setExpandedMod(state, { modId }) {
       state.expandedModId = modId;
@@ -88,6 +96,12 @@ export default new Vuex.Store({
     setExpandModInfoOnStart(state, value) {
       state.expandModInfoOnStart = value;
     },
+    konami(state) {
+      state.konami = true;
+    },
+    launchButton(state, value) {
+      state.launchButton = value;
+    },
   },
   actions: {
     async selectInstall({ commit, dispatch, state }, newInstall) {
@@ -102,8 +116,14 @@ export default new Vuex.Store({
         state.inProgress.push(loadProgress);
         const savedProfileName = getSetting('selectedProfile', {})[state.selectedInstall.installLocation] || 'modded';
         commit('setProfile', { newProfile: state.profiles.find((conf) => conf.name.toLowerCase() === savedProfileName.toLowerCase()) });
+        const savedModsEnabled = getSetting('modsEnabled', {})[state.selectedInstall.installLocation] || true;
+        commit('setModsEnabled', savedModsEnabled);
         try {
-          await newInstall.setProfile(savedProfileName);
+          if (state.modsEnabled) {
+            await newInstall.setProfile(savedProfileName);
+          } else {
+            await newInstall.setProfile('vanilla');
+          }
           commit('refreshInstalledMods');
         } catch (e) {
           dispatch('showError', e);
@@ -116,6 +136,33 @@ export default new Vuex.Store({
     async selectProfile({ commit, dispatch, state }, newProfile) {
       commit('setProfile', { newProfile });
       if (!state.inProgress.some((prog) => prog.id === '__loadingApp__')) {
+        if (state.modsEnabled) {
+          const loadProgress = {
+            id: '__loadingApp__',
+            progresses: [{
+              id: '', progress: -1, message: 'Validating mod install', fast: false,
+            }],
+          };
+          state.inProgress.push(loadProgress);
+          try {
+            await state.selectedInstall.setProfile(newProfile.name);
+            commit('refreshInstalledMods');
+            const current = getSetting('selectedProfile', {});
+            current[state.selectedInstall.installLocation] = state.selectedProfile.name;
+            saveSetting('selectedProfile', current);
+          } catch (e) {
+            dispatch('showError', e);
+          } finally {
+            state.inProgress.remove(loadProgress);
+          }
+        } else {
+          commit('refreshInstalledMods');
+        }
+      }
+    },
+    async setModsEnabled({ commit, dispatch, state }, modsEnabled) {
+      commit('setModsEnabled', modsEnabled);
+      if (!state.inProgress.some((prog) => prog.id === '__loadingApp__')) {
         const loadProgress = {
           id: '__loadingApp__',
           progresses: [{
@@ -124,11 +171,15 @@ export default new Vuex.Store({
         };
         state.inProgress.push(loadProgress);
         try {
-          await state.selectedInstall.setProfile(newProfile.name);
+          if (state.modsEnabled) {
+            await state.selectedInstall.setProfile(state.selectedProfile.name);
+          } else {
+            await state.selectedInstall.setProfile('vanilla');
+          }
           commit('refreshInstalledMods');
-          const current = getSetting('selectedProfile', {});
-          current[state.selectedInstall.installLocation] = state.selectedProfile.name;
-          saveSetting('selectedProfile', current);
+          const current = getSetting('modsEnabled', {});
+          current[state.selectedInstall.installLocation] = state.modsEnabled;
+          saveSetting('modsEnabled', current);
         } catch (e) {
           dispatch('showError', e);
         } finally {
@@ -141,6 +192,10 @@ export default new Vuex.Store({
     }, modId) {
       if (state.inProgress.length > 0) {
         dispatch('showError', `Another operation is currently in progress while trying to (un)install a mod: ${state.inProgress.map((progress) => progress.id)}`);
+        return;
+      }
+      if (!state.modsEnabled) {
+        dispatch('showError', 'Enable mods to be able to make changes');
         return;
       }
       commit('clearDownloadProgress');
@@ -181,6 +236,10 @@ export default new Vuex.Store({
         dispatch('showError', `Another operation is currently in progress while trying to install a mod version: ${state.inProgress.map((progress) => progress.id)}`);
         return;
       }
+      if (!state.modsEnabled) {
+        dispatch('showError', 'Enable mods to be able to make changes');
+        return;
+      }
       commit('clearDownloadProgress');
       const modProgress = { id: modId, progresses: [] };
       state.inProgress.push(modProgress);
@@ -208,6 +267,10 @@ export default new Vuex.Store({
     }, version) {
       if (state.inProgress.length > 0) {
         dispatch('showError', `Another operation is currently in progress while trying to install a SML version: ${state.inProgress.map((progress) => progress.id)}`);
+        return;
+      }
+      if (!state.modsEnabled) {
+        dispatch('showError', 'Enable mods to be able to make changes');
         return;
       }
       commit('clearDownloadProgress');
@@ -304,6 +367,10 @@ export default new Vuex.Store({
       commit('setFavoriteModIds', { favoriteModIds: getSetting('favoriteMods', []) });
       commit('setProfiles', { profiles: getProfiles() });
       commit('setExpandModInfoOnStart', getSetting('expandModInfoOnStart', false));
+      if (getSetting('konami', false)) {
+        commit('konami');
+      }
+      commit('launchButton', getSetting('launchButton', false));
 
       try {
         await Promise.all([
@@ -331,6 +398,11 @@ export default new Vuex.Store({
             commit('setInstall', { newInstall: state.satisfactoryInstalls.find((install) => install.installLocation === savedLocation) || state.satisfactoryInstalls[0] });
             const savedProfileName = getSetting('selectedProfile', {})[state.selectedInstall.installLocation] || 'modded';
             commit('setProfile', { newProfile: state.profiles.find((conf) => conf.name.toLowerCase() === savedProfileName.toLowerCase()) });
+            let savedModsEnabled = getSetting('modsEnabled', {})[state.selectedInstall.installLocation];
+            if (savedModsEnabled === undefined) {
+              savedModsEnabled = true;
+            }
+            commit('setModsEnabled', savedModsEnabled);
 
             if (!await SatisfactoryInstall.isGameRunning()) {
               try {
@@ -389,6 +461,14 @@ export default new Vuex.Store({
       commit('setExpandModInfoOnStart', value);
       saveSetting('expandModInfoOnStart', value);
     },
+    konami({ commit }) {
+      saveSetting('konami', true);
+      commit('konami');
+    },
+    launchButton({ commit }, value) {
+      saveSetting('launchButton', value);
+      commit('launchButton', value);
+    },
     async updateSingle({ state, commit, dispatch }, update) {
       const updateProgress = {
         id: update.item,
@@ -435,7 +515,7 @@ export default new Vuex.Store({
       return [...state.mods, ...state.hiddenInstalledMods];
     },
     canInstallMods(state) {
-      return state.selectedProfile.name !== 'vanilla' && !state.isGameRunning;
+      return state.selectedProfile.name !== 'vanilla' && state.modsEnabled && !state.isGameRunning;
     },
   },
 });

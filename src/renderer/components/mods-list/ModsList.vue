@@ -13,7 +13,7 @@
     />
     <v-virtual-scroll
       ref="modsList"
-      class="pt-3 ml-4 custom"
+      class="pt-3 ml-5 mr-3 custom"
       :items="mods"
       bench="20"
       item-height="51"
@@ -360,20 +360,23 @@ div {
   box-shadow: inset 0px -45px 20px -20px rgba(0,0,0,0.3);
 }
 
+::-webkit-scrollbar {
+  width: 25px;
+}
 ::-webkit-scrollbar-track {
-  background: var(--v-background-base);
-  border: solid 9px transparent;
+  background: black;
+  border: solid 10px transparent;
   background-clip: content-box;
-  border-radius: 100px;
+  border-radius: 0;
 }
 ::-webkit-scrollbar-thumb {
   background: var(--v-background-base);
-  border: solid 3.5px transparent;
+  border: solid 10px transparent;
   background-clip: content-box;
-  border-radius: 20px;
+  border-radius: 0;
 }
 ::-webkit-scrollbar-thumb:hover {
-  border: solid 3.5px transparent;
+  border: solid 10px transparent;
   background-clip: content-box;
 }
 </style>

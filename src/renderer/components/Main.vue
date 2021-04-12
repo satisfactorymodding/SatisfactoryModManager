@@ -17,6 +17,7 @@
         class="d-flex flex-column"
       >
         <MenuBar />
+        <AnnouncementsBar />
         <ControlArea
           style="user-select: none;"
           :filters.sync="filters"
@@ -31,15 +32,37 @@
           @set-available-sorting="availableSorting = $event"
         />
         <v-btn
+          class="flex-grow-0 flex-shrink-0"
           block
           tile
           color="primary"
           elevation="0"
-          style="font-size: 18px; height: 50px; min-height: 50px; max-height: 50px;"
+          style="font-size: 18px; min-height: 50px;"
+          :style="launchButton && selectedInstall && selectedInstall.launchPath && !isGameRunning ? 'height: 98px' : ''"
           :disabled="!!inProgress.length || isGameRunning || (selectedInstall && !selectedInstall.launchPath)"
-          @click="launchSatisfactory"
+          :ripple="!launchButton"
+          @click="launchButton ? launchSatisfactory : null"
         >
-          <b>{{ isGameRunning ? 'GAME IS RUNNING' : (selectedInstall && selectedInstall.launchPath ? 'LAUNCH GAME' : 'CANNOT LAUNCH THIS INSTALL') }}</b>
+          <template v-if="launchButton && selectedInstall && selectedInstall.launchPath && !isGameRunning">
+            <img
+              src="static/launch_fun.png"
+              draggable="false"
+            >
+            <img
+              :src="`static/launch_fun_button_${launchFunState}.png`"
+              style="position: absolute;"
+              :style="launchFunState === 'press' ? 'top: 1px' : ''"
+              draggable="false"
+              @click="launchFunPress"
+              @mousedown="launchFunState = 'press'"
+              @mouseup="launchFunState = 'over'"
+              @mouseenter="launchFunState = 'over'"
+              @mouseleave="launchFunState = 'normal'"
+            >
+          </template>
+          <span
+            v-else
+          >{{ isGameRunning ? 'Game is running' : (selectedInstall && selectedInstall.launchPath ? 'Launch Satisfactory' : 'Cannot launch this install') }}</span>
         </v-btn>
       </v-card>
       <ModDetails v-if="expandedModId" />
@@ -57,7 +80,8 @@
         <v-card-text style="white-space: pre-line;">
           <span>{{ error }}</span>
           <br>
-          <span>Seems wrong? <a @click="exportDebugData">Generate debug info</a> and send it over on <a @click="moddingDiscord">the modding discord</a> in #help-using-mods</span>
+          <span>Seems wrong? <a @click="exportDebugData">Generate debug info</a> and send it together with this error message
+            over on <a @click="moddingDiscord">the modding discord</a> in #help-using-mods</span>
         </v-card-text>
 
         <v-card-actions v-if="!errorPersistent">
@@ -84,7 +108,8 @@
         <v-card-text style="white-space: pre-line;">
           <span>{{ installSetupError }}</span>
           <br>
-          <span>Seems wrong? <a @click="exportDebugData">Generate debug info</a> and send it over on <a @click="moddingDiscord">the modding discord</a> in #help-using-mods</span>
+          <span>Seems wrong? <a @click="exportDebugData">Generate debug info</a> and send it together with this error message
+            over on <a @click="moddingDiscord">the modding discord</a> in #help-using-mods</span>
         </v-card-text>
 
         <v-card-actions>
@@ -223,6 +248,7 @@ import { lastElement, bytesToAppropriate } from '@/utils';
 import { getSetting } from '~/settings';
 import TitleBar from './TitleBar';
 import MenuBar from './menu-bar/MenuBar';
+import AnnouncementsBar from './AnnouncementsBar';
 import ControlArea from './ControlArea';
 import ModsList from './mods-list/ModsList';
 import ModDetails from './mod-details/ModDetails';
@@ -233,6 +259,7 @@ export default {
   components: {
     TitleBar,
     MenuBar,
+    AnnouncementsBar,
     ControlArea,
     ModsList,
     ModDetails,
@@ -250,6 +277,8 @@ export default {
       },
       availableFilters: [],
       availableSorting: [],
+      launchFunState: 'normal',
+      launchFun: 0,
     };
   },
   computed: {
@@ -262,6 +291,7 @@ export default {
         'installSetupError',
         'error',
         'errorPersistent',
+        'launchButton',
       ],
     ),
     errorDialog: {
@@ -298,6 +328,17 @@ export default {
     },
   },
   async mounted() {
+    const keyQueue = [];
+    const code = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
+    window.addEventListener('keydown', (event) => {
+      keyQueue.push(event.keyCode);
+      if (keyQueue.length > code.length) {
+        keyQueue.shift();
+      }
+      if (keyQueue.length === code.length && keyQueue.every((val, idx) => code[idx] === val)) {
+        this.$store.dispatch('konami');
+      }
+    });
     this.$electron.ipcRenderer.send('unexpand');
     this.$electron.ipcRenderer.on('installedMods', () => {
       this.$electron.ipcRenderer.send('installedMods', this.$store.state.installedMods);
@@ -401,6 +442,13 @@ export default {
     },
     moddingDiscord() {
       this.$root.$emit('moddingDiscord');
+    },
+    launchFunPress() {
+      this.launchFun += 1;
+      if (this.launchFun === 15) {
+        this.launchSatisfactory();
+        this.launchFun = 0;
+      }
     },
     lastElement,
   },

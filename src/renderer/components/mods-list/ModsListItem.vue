@@ -16,25 +16,28 @@
         style="cursor: pointer; user-select: none; padding: 0;"
         @click="expandClicked"
       >
-        <v-list-item-title :class="isCompatible || 'error--text'">
+        <v-list-item-title
+          :class="isCompatible ? 'text--text' : 'error--text'"
+          style="font-weight: 300"
+        >
           {{ mod.name }}
         </v-list-item-title>
         <v-list-item-subtitle v-if="!isModInProgress">
           <div
-            class="d-inline-flex align-center"
+            class="d-inline-flex align-center icon--text"
             style="width: 20%"
           >
             <v-icon
-              color="text"
+              color="icon"
               style="padding-right: 4px"
             >
               mdi-eye
             </v-icon>
             {{ mod.views.toLocaleString() }}
           </div>
-          <div class="d-inline-flex align-center">
+          <div class="d-inline-flex align-center icon--text">
             <v-icon
-              color="text"
+              color="icon"
               style="padding-right: 4px"
             >
               mdi-download
@@ -58,22 +61,11 @@
         </v-list-item-subtitle>
       </v-list-item-content>
       <v-list-item-action
-        :class="isFavorite ? 'active' : ''"
-        class="mod-button toggle custom"
-      >
-        <v-icon
-          class="icon"
-          color="warning"
-          @click="favoriteClicked"
-        >
-          mdi-star
-        </v-icon>
-      </v-list-item-action>
-      <v-list-item-action
-        class="custom mod-button"
+        class="custom mod-button d-inline-flex align-center justify-center"
+        style="width: 50px"
       >
         <v-tooltip
-          v-if="isInstalled && (isDependency || !canInstallMods || inProgress.length > 0)"
+          v-if="isInstalled && isDependency"
           color="background"
           left
         >
@@ -83,18 +75,56 @@
               v-bind="attrs"
               v-on="on"
             >
-              mdi-checkbox-marked
+              mdi-check-circle
             </v-icon>
           </template>
           <span>Dependency of {{ dependantsFriendly }}</span>
         </v-tooltip>
-        <v-icon
-          v-else-if="isInstalled"
-          color="green"
-          @click="switchInstalled"
+        <v-tooltip
+          v-if="isInstalled && !modsEnabled"
+          color="background"
+          left
         >
-          mdi-checkbox-marked
+          <template #activator="{ on, attrs }">
+            <v-icon
+              color="green"
+              v-bind="attrs"
+              v-on="on"
+            >
+              mdi-check-circle
+            </v-icon>
+          </template>
+          <span>Enable mods to be able to make changes</span>
+        </v-tooltip>
+        <v-icon
+          v-else-if="isInstalled && (!canInstallMods || inProgress.length > 0)"
+          color="green"
+        >
+          mdi-check-circle
         </v-icon>
+        <template v-else-if="isInstalled">
+          <v-hover v-slot="{ hover }">
+            <v-icon
+              v-if="!hover"
+              color="green"
+            >
+              mdi-check-circle
+            </v-icon>
+            <div
+              v-else
+              class="d-inline-flex align-center justify-center red"
+              style="height: 45px; width: 100%"
+            >
+              <v-icon
+                color="text"
+                style="background-color: unset !important"
+                @click="switchInstalled"
+              >
+                mdi-delete
+              </v-icon>
+            </div>
+          </v-hover>
+        </template>
         <v-icon
           v-else-if="!isCompatible"
           color="error"
@@ -107,19 +137,78 @@
         >
           mdi-sync
         </v-icon>
+        <v-tooltip
+          v-else-if="!modsEnabled"
+          color="background"
+          left
+        >
+          <template #activator="{ on, attrs }">
+            <v-icon
+              color="text"
+              v-bind="attrs"
+              v-on="on"
+            >
+              mdi-download
+            </v-icon>
+          </template>
+          <span>Enable mods to be able to make changes</span>
+        </v-tooltip>
         <v-icon
           v-else-if="!canInstallMods || inProgress.length > 0"
-          color="text"
+          color="icon"
         >
-          mdi-checkbox-blank-outline
+          mdi-download
         </v-icon>
-        <v-icon
+        <v-hover
           v-else
-          color="text"
-          @click="switchInstalled"
+          v-slot="{ hover }"
         >
-          mdi-checkbox-blank-outline
-        </v-icon>
+          <v-icon
+            v-if="!hover"
+            color="icon"
+          >
+            mdi-download
+          </v-icon>
+          <div
+            v-else
+            class="d-inline-flex align-center justify-center green"
+            style="height: 45px; width: 100%"
+            @click="switchInstalled"
+          >
+            <v-icon
+              color="text"
+              style="background-color: unset !important"
+            >
+              mdi-download
+            </v-icon>
+          </div>
+        </v-hover>
+      </v-list-item-action>
+      <v-list-item-action
+        class="mod-button custom d-inline-flex align-center justify-center"
+        style="width: 50px"
+      >
+        <v-hover v-slot="{ hover }">
+          <v-icon
+            v-if="!hover"
+            :color="isFavorite ? 'yellow' : 'icon'"
+          >
+            mdi-star
+          </v-icon>
+          <div
+            v-else
+            class="d-inline-flex align-center justify-center yellow"
+            style="height: 45px; width: 100%"
+            @click="favoriteClicked"
+          >
+            <v-icon
+              color="text"
+              style="background-color: unset !important"
+            >
+              mdi-star
+            </v-icon>
+          </div>
+        </v-hover>
       </v-list-item-action>
     </v-list-item>
     <v-list-item
@@ -161,6 +250,7 @@ export default {
       'favoriteModIds',
       'expandedModId',
       'inProgress',
+      'modsEnabled',
     ]),
     ...mapGetters([
       'canInstallMods',
@@ -275,12 +365,6 @@ export default {
 .mod-button.toggle:not(:hover):not(.active)>.v-icon {
   color: var(--v-backgroundModsList-lighten2) !important;
 }
-.mod-button.active {
-  opacity: 1 !important;
-}
-.mod-button:hover {
-  opacity: 0.65;
-}
 
 .mod, .mod * {
   background: var(--v-backgroundModsList-base) !important;
@@ -288,7 +372,7 @@ export default {
 .mod.in-progress, .mod.in-progress * {
   background: transparent !important;
 }
-.expanded, .expanded *{
+.expanded, .expanded * {
   background-color: var(--v-backgroundModsList-darken1) !important;
 }
 </style>

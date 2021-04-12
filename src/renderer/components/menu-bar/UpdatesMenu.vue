@@ -8,13 +8,13 @@
       <v-tooltip bottom>
         <template #activator="{ on: tooltipOn, attrs: tooltipAttrs }">
           <v-btn
-            style="min-width: 36px"
+            style="min-width: 28px; height: 28px"
             class="my-2 mx-1"
             v-bind="{ ...menuAttrs, ...tooltipAttrs}"
             v-on="{ ...menuOn, ...tooltipOn }"
           >
-            <v-icon style="font-size: 25px !important">
-              mdi-cog-clockwise
+            <v-icon style="font-size: 16px !important">
+              mdi-flip-h mdi-sync
             </v-icon>
           </v-btn>
         </template>

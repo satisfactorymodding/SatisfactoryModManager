@@ -14,7 +14,7 @@ export function lastElement(arr) {
 
 export function markdownAsElement(markdown) {
   const html = sanitizeHtml(marked(markdown), {
-    allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'video', 'details', 'summary', 'source', 'h1', 'h2']),
+    allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'video', 'details', 'summary', 'source', 'strike', 'blockquote']),
     allowedAttributes: Object.assign(sanitizeHtml.defaults.allowedAttributes, { img: ['src', 'width', 'height'], video: ['src', 'width', 'height', 'controls'], source: ['src', 'type'] }),
   });
   const el = document.createElement('html');

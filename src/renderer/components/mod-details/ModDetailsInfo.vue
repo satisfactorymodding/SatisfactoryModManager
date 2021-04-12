@@ -156,7 +156,9 @@
         >View on ficsit.app</a>
       </v-row>
       <v-spacer style="flex-basis: 100%" />
-      <v-row>
+      <v-row
+        class="pb-2"
+      >
         <v-btn
           color="backgroundModsList-darken1"
           raised
