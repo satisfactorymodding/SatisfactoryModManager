@@ -2,7 +2,7 @@ import marked from 'marked';
 import sanitizeHtml from 'sanitize-html';
 import originalFilenamify from 'filenamify';
 import {
-  valid, coerce, eq, validRange, satisfies, minVersion,
+  valid, coerce, eq, validRange, satisfies, minVersion, compare,
 } from 'semver';
 import gql from 'graphql-tag';
 import { getSetting, saveSetting } from '~/settings';
@@ -116,10 +116,17 @@ export async function isCompatibleFast(mod, gameVersion) {
       }
     `,
   })).data.getSMLVersions.sml_versions;
+  smlVersions.sort((a, b) => compare(a.version, b.version));
+  const versionConstraints = smlVersions.map((version, idx, arr) => ({
+    version: version.version,
+    satisfactory_version: idx !== arr.length - 1 ? `>=${valid(coerce(version.satisfactory_version))} <${valid(coerce(arr[idx + 1].satisfactory_version))}` : `>=${valid(coerce(version.satisfactory_version))}`,
+  }));
+  const compatibleSMLVersions = versionConstraints
+    .filter((versionConstraint) => satisfies(valid(coerce(gameVersion)), versionConstraint.satisfactory_version))
+    .map((versionConstraint) => versionConstraint.version);
   return mod.versions.some((ver) => (
     validRange(ver.sml_version)
     && satisfies(minVersion(ver.sml_version), '>=2.0.0')
-    && smlVersions.some((smlVer) => (
-      satisfies(valid(coerce(smlVer.version)), valid(coerce(ver.sml_version)))
-      && satisfies(valid(coerce(gameVersion)), `>=${valid(coerce(smlVer.satisfactory_version))}`)))));
+    && compatibleSMLVersions.some((smlVer) => satisfies(smlVer, validRange(ver.sml_version)))
+  ));
 }
