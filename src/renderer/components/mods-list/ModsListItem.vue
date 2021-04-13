@@ -81,7 +81,7 @@
           <span>Dependency of {{ dependantsFriendly }}</span>
         </v-tooltip>
         <v-tooltip
-          v-if="isInstalled && !modsEnabled"
+          v-else-if="isInstalled && !modsEnabled"
           color="background"
           left
         >
@@ -159,56 +159,35 @@
         >
           mdi-download
         </v-icon>
-        <v-hover
+        <div
           v-else
-          v-slot="{ hover }"
+          class="d-inline-flex align-center justify-center hover-green"
+          style="height: 45px; width: 100%"
+          @click="switchInstalled"
         >
           <v-icon
-            v-if="!hover"
-            color="icon"
+            class="icon"
           >
             mdi-download
           </v-icon>
-          <div
-            v-else
-            class="d-inline-flex align-center justify-center green"
-            style="height: 45px; width: 100%"
-            @click="switchInstalled"
-          >
-            <v-icon
-              color="text"
-              style="background-color: unset !important"
-            >
-              mdi-download
-            </v-icon>
-          </div>
-        </v-hover>
+        </div>
       </v-list-item-action>
       <v-list-item-action
         class="mod-button custom d-inline-flex align-center justify-center"
         style="width: 50px"
       >
-        <v-hover v-slot="{ hover }">
+        <div
+          class="d-inline-flex align-center justify-center hover-yellow"
+          style="height: 45px; width: 100%"
+          @click="favoriteClicked"
+        >
           <v-icon
-            v-if="!hover"
+            class="icon"
             :color="isFavorite ? 'yellow' : 'icon'"
           >
             mdi-star
           </v-icon>
-          <div
-            v-else
-            class="d-inline-flex align-center justify-center yellow"
-            style="height: 45px; width: 100%"
-            @click="favoriteClicked"
-          >
-            <v-icon
-              color="text"
-              style="background-color: unset !important"
-            >
-              mdi-star
-            </v-icon>
-          </div>
-        </v-hover>
+        </div>
       </v-list-item-action>
     </v-list-item>
     <v-list-item
@@ -374,5 +353,28 @@ export default {
 }
 .expanded, .expanded * {
   background-color: var(--v-backgroundModsList-darken1) !important;
+}
+
+.v-application .icon {
+  color: var(--v-icon-base);
+  background-color: unset !important;
+}
+
+.hover-green:hover {
+  background-color: #4caf50 !important;
+}
+.hover-green:hover .icon {
+  color: var(--v-text-base) !important;
+}
+
+.hover-yellow:hover {
+  background-color: #ffeb3b !important;
+}
+.hover-yellow:hover .icon {
+  color: var(--v-text-base) !important;
+}
+
+.hover-red:hover {
+  background-color: #f44336 !important;
 }
 </style>
