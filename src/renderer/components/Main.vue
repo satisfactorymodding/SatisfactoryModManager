@@ -41,7 +41,7 @@
           :style="launchButton && selectedInstall && selectedInstall.launchPath && !isGameRunning ? 'height: 98px' : ''"
           :disabled="!!inProgress.length || isGameRunning || (selectedInstall && !selectedInstall.launchPath)"
           :ripple="!launchButton"
-          @click="launchButton ? launchSatisfactory : null"
+          @click="() => !launchButton && launchSatisfactory()"
         >
           <template v-if="launchButton && selectedInstall && selectedInstall.launchPath && !isGameRunning">
             <img
