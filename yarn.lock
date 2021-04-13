@@ -8188,10 +8188,10 @@ sass@^1.32.8:
   dependencies:
     chokidar ">=2.0.0 <4.0.0"
 
-satisfactory-mod-manager-api@^2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/satisfactory-mod-manager-api/-/satisfactory-mod-manager-api-2.2.0.tgz#b6ab9617c919ebbadf960f8f8851129816cc31d6"
-  integrity sha512-eMJIqyrITfxtq2tmzSHKYBjtKjcR4UBD+cpFOLnE4yiJOfJsXODhCYYJwZnAk7PkXveWa74SlB11w3rLlIIlqA==
+satisfactory-mod-manager-api@^2.2.1:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/satisfactory-mod-manager-api/-/satisfactory-mod-manager-api-2.2.1.tgz#7f5ab3b433a89d8b53835b213c9eb088e64b092e"
+  integrity sha512-oDGmQCPJGuuUtT68VvPRXb6TB/jJCpNE+1tIt6WDnnkJ2e4gpU0baYFjg0vVuwU/k4We8VFt9h8g3xI0OB04sQ==
   dependencies:
     apollo-cache-inmemory "^1.6.5"
     apollo-client "^2.6.8"
