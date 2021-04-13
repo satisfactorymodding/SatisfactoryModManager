@@ -1,6 +1,6 @@
 <template>
   <div
-    class="py-4"
+    class="py-4 mods-list"
     style="position: relative;"
   >
     <div
@@ -23,6 +23,7 @@
         <ModsListItem
           :key="index"
           :mod="mod"
+          class="mod-list-item"
         />
       </template>
     </v-virtual-scroll>
@@ -360,7 +361,10 @@ export default {
 </script>
 
 <style scoped>
-div {
+.container {
+  background: var(--v-backgroundModsList-base) !important;
+}
+.mods-list {
   background: var(--v-backgroundModsList-base) !important;
 }
 

@@ -100,7 +100,7 @@
         >
           <template #selection="{ item }">
             <span>Profile:&nbsp;</span>
-            <span class="green--text">({{ item.name }})</span>
+            <span class="green--text">{{ item.name.length > 15 ? `${item.name.substr(0, 14)}...` : item.name }}</span>
           </template>
         </v-select>
       </v-col>
@@ -125,45 +125,47 @@
               </v-icon>
             </v-btn>
           </template>
-          <v-btn
-            text
-            :disabled="!!inProgress.length || isGameRunning"
-            @click="showCreateProfileDialog"
-          >
-            New&nbsp;
-            <v-icon
-              color="green"
-              class="icon"
+          <div class="background">
+            <v-btn
+              text
+              :disabled="!!inProgress.length || isGameRunning"
+              @click="showCreateProfileDialog"
             >
-              mdi-plus-circle
-            </v-icon>
-          </v-btn>
-          <v-btn
-            text
-            :disabled="!!inProgress.length || isGameRunning || selectedProfileModel.name === 'vanilla' || selectedProfileModel.name === 'modded' || selectedProfileModel.name === 'development'"
-            @click="showRenameProfileDialog"
-          >
-            Rename&nbsp;
-            <v-icon
-              color="yellow"
-              class="icon"
+              New&nbsp;
+              <v-icon
+                color="green"
+                class="icon no-bg"
+              >
+                mdi-plus-circle
+              </v-icon>
+            </v-btn>
+            <v-btn
+              text
+              :disabled="!!inProgress.length || isGameRunning || selectedProfileModel.name === 'vanilla' || selectedProfileModel.name === 'modded' || selectedProfileModel.name === 'development'"
+              @click="showRenameProfileDialog"
             >
-              mdi-pencil
-            </v-icon>
-          </v-btn>
-          <v-btn
-            text
-            :disabled="!!inProgress.length || isGameRunning || selectedProfileModel.name === 'vanilla' || selectedProfileModel.name === 'modded' || selectedProfileModel.name === 'development'"
-            @click="showDeleteProfileDialog"
-          >
-            Delete&nbsp;
-            <v-icon
-              color="red"
-              class="icon"
+              Rename&nbsp;
+              <v-icon
+                color="yellow"
+                class="icon no-bg"
+              >
+                mdi-pencil
+              </v-icon>
+            </v-btn>
+            <v-btn
+              text
+              :disabled="!!inProgress.length || isGameRunning || selectedProfileModel.name === 'vanilla' || selectedProfileModel.name === 'modded' || selectedProfileModel.name === 'development'"
+              @click="showDeleteProfileDialog"
             >
-              mdi-delete
-            </v-icon>
-          </v-btn>
+              Delete&nbsp;
+              <v-icon
+                color="red"
+                class="icon no-bg"
+              >
+                mdi-delete
+              </v-icon>
+            </v-btn>
+          </div>
         </v-menu>
       </v-col>
     </v-row>
@@ -519,6 +521,10 @@ export default {
 .v-list--dense .v-list-item .v-list-item__title {
   font-size: 0.9125rem !important;
 }
+
+.v-application .no-bg.v-icon {
+  background-color: unset !important;
+}
 </style>
 
 <style scoped>
@@ -554,7 +560,7 @@ export default {
   background-color: #2b2b2b;
 }
 
-div {
+.container {
   background-color: var(--v-backgroundMenuBar-base);
 }
 </style>

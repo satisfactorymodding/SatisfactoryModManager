@@ -1,7 +1,7 @@
 <template>
   <v-container
     fluid
-    class="py-0 mt-2 pb-2"
+    class="pt-2 pb-2"
   >
     <v-row
       class="px-4 pl-5"
@@ -122,14 +122,10 @@
       v-model="helpDialog"
     >
       <v-card>
-        <v-card-title
-          style="background-color: unset"
-        >
+        <v-card-title>
           Help
         </v-card-title>
-        <v-card-text
-          style="background-color: unset"
-        >
+        <v-card-text>
           <h3>General troubleshooting</h3>
           If something doesn't behave as expected, the first thing to try is
           <a @click="clearCache">clearing the cache</a><br>
@@ -165,9 +161,7 @@
           <h3>Your issue is not here</h3>
           Ask for help in the modding discord, #help-using-mods channel
         </v-card-text>
-        <v-card-actions
-          style="background-color: unset"
-        >
+        <v-card-actions>
           <v-btn
             color="primary"
             text
@@ -406,11 +400,8 @@ export default {
   background-color: var(--v-primary-base) !important;
   color: black !important;
 }
-div {
+.container {
   background-color: var(--v-backgroundMenuBar-base);
-}
-div.v-dialog__content {
-  background-color: unset;
 }
 .col {
   padding: 0;

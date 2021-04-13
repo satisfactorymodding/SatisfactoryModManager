@@ -18,7 +18,7 @@ export default {
 </script>
 
 <style scoped>
-div {
+.container {
   background: var(--v-background-base);
 }
 </style>
@@ -38,7 +38,7 @@ div {
   background-color: var(--v-background-base) !important;
 }
 
-div {
+.container {
   color: var(--v-text-base) !important;
 }
 
