@@ -92,7 +92,7 @@
     "node-stream-zip": "^1.13.2",
     "platform-folders": "^0.5.2",
     "sanitize-html": "^2.3.3",
-    "satisfactory-mod-manager-api": "^2.2.1",
+    "satisfactory-mod-manager-api": "^2.2.2",
     "semver": "^7.3.5",
     "socket.io": "^4.0.0",
     "vue": "^2.5.16",
