@@ -96,6 +96,22 @@
           </template>
           <span>Enable mods to be able to make changes</span>
         </v-tooltip>
+        <v-tooltip
+          v-else-if="isInstalled && isGameRunning"
+          color="background"
+          left
+        >
+          <template #activator="{ on, attrs }">
+            <v-icon
+              color="green"
+              v-bind="attrs"
+              v-on="on"
+            >
+              mdi-check-circle
+            </v-icon>
+          </template>
+          <span>Cannot uninstall mods while game is running</span>
+        </v-tooltip>
         <v-icon
           v-else-if="isInstalled && (!canInstallMods || inProgress.length > 0)"
           color="green"
@@ -152,6 +168,22 @@
             </v-icon>
           </template>
           <span>Enable mods to be able to make changes</span>
+        </v-tooltip>
+        <v-tooltip
+          v-else-if="isGameRunning"
+          color="background"
+          left
+        >
+          <template #activator="{ on, attrs }">
+            <v-icon
+              class="icon"
+              v-bind="attrs"
+              v-on="on"
+            >
+              mdi-download
+            </v-icon>
+          </template>
+          <span>Cannot install mods while game is running</span>
         </v-tooltip>
         <v-icon
           v-else-if="!canInstallMods || inProgress.length > 0"
@@ -230,6 +262,7 @@ export default {
       'expandedModId',
       'inProgress',
       'modsEnabled',
+      'isGameRunning',
     ]),
     ...mapGetters([
       'canInstallMods',
