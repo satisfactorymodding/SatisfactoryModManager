@@ -126,7 +126,7 @@ export async function isCompatibleFast(mod, gameVersion) {
     .map((versionConstraint) => versionConstraint.version);
   return mod.versions.some((ver) => (
     validRange(ver.sml_version)
-    && satisfies(minVersion(ver.sml_version), '>=2.0.0')
+    && satisfies(minVersion(ver.sml_version), gameVersion > smlVersions.find((smlVer) => smlVer.version === '3.0.0').satisfactory_version ? '>=3.0.0' : '>=2.0.0')
     && compatibleSMLVersions.some((smlVer) => satisfies(smlVer, validRange(ver.sml_version)))
   ));
 }
