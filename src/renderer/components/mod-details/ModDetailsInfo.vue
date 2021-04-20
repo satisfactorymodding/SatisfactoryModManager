@@ -155,7 +155,7 @@
           :href="`https://ficsit.app/mod/${mod.id}`"
         >View on ficsit.app</a>
       </v-row>
-      <v-spacer style="flex-basis: 100%" />
+      <v-row style="flex-basis: 100%" />
       <v-row
         class="pb-2"
       >
