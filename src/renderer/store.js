@@ -396,7 +396,10 @@ export default new Vuex.Store({
             appLoadProgress.progresses.push(installValidateProgress);
             const savedLocation = getSetting('selectedInstall');
             commit('setInstall', { newInstall: state.satisfactoryInstalls.find((install) => install.installLocation === savedLocation) || state.satisfactoryInstalls[0] });
-            const savedProfileName = getSetting('selectedProfile', {})[state.selectedInstall.installLocation] || 'modded';
+            let savedProfileName = getSetting('selectedProfile', {})[state.selectedInstall.installLocation] || 'modded';
+            if (savedProfileName === 'vanilla') {
+              savedProfileName = 'modded'; // Removed vanilla from profiles list
+            }
             commit('setProfile', { newProfile: state.profiles.find((conf) => conf.name.toLowerCase() === savedProfileName.toLowerCase()) });
             let savedModsEnabled = getSetting('modsEnabled', {})[state.selectedInstall.installLocation];
             if (savedModsEnabled === undefined) {
