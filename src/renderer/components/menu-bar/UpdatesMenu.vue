@@ -23,6 +23,22 @@
     </template>
     <v-card>
       <v-list class="menu">
+        <v-list-item @click="$emit('checkForUpdates')">
+          <v-list-item-action>
+            <v-icon color="text">
+              mdi-cog
+            </v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Check for updates</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
+        <v-divider
+          insert
+          class="custom"
+        />
+
         <v-list-item>
           <v-list-item-action>
             <v-icon color="text">

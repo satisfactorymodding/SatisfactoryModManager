@@ -92,6 +92,7 @@
           @addUpdateListener="addUpdateListener"
           @openSMMUpdateDialog="openSMMUpdateDialog"
           @openModUpdatesDialog="openModUpdatesDialog"
+          @checkForUpdates="manualCheckForUpdates"
         />
       </v-col>
     </v-row>
