@@ -365,7 +365,7 @@ export default new Vuex.Store({
         }
       });
       commit('setFavoriteModIds', { favoriteModIds: getSetting('favoriteMods', []) });
-      commit('setProfiles', { profiles: getProfiles() });
+      commit('setProfiles', { profiles: getProfiles().filter((profile) => profile.name !== 'vanilla') });
       commit('setExpandModInfoOnStart', getSetting('expandModInfoOnStart', false));
       if (getSetting('konami', false)) {
         commit('konami');
@@ -406,7 +406,11 @@ export default new Vuex.Store({
 
             if (!await SatisfactoryInstall.isGameRunning()) {
               try {
-                await state.selectedInstall.setProfile(savedProfileName);
+                if (savedModsEnabled) {
+                  await state.selectedInstall.setProfile(savedProfileName);
+                } else {
+                  await state.selectedInstall.setProfile('vanilla');
+                }
               } catch (e) {
                 commit('setProfile', { newProfile: state.selectedInstall.profile });
                 throw e;
