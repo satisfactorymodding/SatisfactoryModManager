@@ -412,7 +412,7 @@ export default new Vuex.Store({
                   await state.selectedInstall.setProfile('vanilla');
                 }
               } catch (e) {
-                commit('setProfile', { newProfile: state.selectedInstall.profile });
+                commit('setProfile', { newProfile: state.profiles.find((conf) => conf.name.toLowerCase() === state.selectedInstall.profile.toLowerCase()) });
                 throw e;
               }
             } else {
