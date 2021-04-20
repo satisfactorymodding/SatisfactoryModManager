@@ -26,7 +26,7 @@
         <v-list-item @click="$emit('checkForUpdates')">
           <v-list-item-action>
             <v-icon color="text">
-              mdi-cog
+              mdi-sync
             </v-icon>
           </v-list-item-action>
           <v-list-item-content>
