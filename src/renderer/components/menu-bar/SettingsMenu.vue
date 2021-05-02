@@ -687,14 +687,11 @@ export default {
           smlVersion: this.$store.state.selectedInstall?.smlVersion,
           bootstrapperVersion: this.$store.state.selectedInstall?.bootstrapperVersion,
           smmVersion: this.version,
+          modsEnabled: this.$store.state.modsEnabled,
         };
         debugDataZip.file('metadata.json', JSON.stringify(metadata, null, 4));
         addFileToZipIfExists(debugDataZip, getLogFilePath(), 'SatisfactoryModManager.log');
-        if (this.$store.state.selectedInstall) {
-          addFileToZipIfExists(debugDataZip, path.join(this.$store.state.selectedInstall.installLocation, 'pre-launch-debug.log'));
-          addFileToZipIfExists(debugDataZip, path.join(this.$store.state.selectedInstall.installLocation, 'SatisfactoryModLoader.log'));
-          addFileToZipIfExists(debugDataZip, path.join(getCacheFolder(), 'FactoryGame', 'Saved', 'Logs', 'FactoryGame.log'));
-        }
+        addFileToZipIfExists(debugDataZip, path.join(getCacheFolder(), 'FactoryGame', 'Saved', 'Logs', 'FactoryGame.log'));
 
         try {
           await new Promise((resolve, reject) => {
