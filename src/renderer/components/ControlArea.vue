@@ -39,49 +39,41 @@
       <v-col
         cols="6"
       >
-        <v-btn-toggle
-          v-model="modsEnabled"
-          mandatory
+        <div
           style="width: 100%; height: 28px;"
-          borderless
-          dense
+          class="v-input custom v-input--is-label-active v-input--is-dirty v-input--dense theme--dark v-text-field
+          v-text-field--single-line v-text-field--solo v-text-field--filled v-text-field--is-booted v-text-field--enclosed v-select"
         >
-          <v-btn
-            disabled
-            class="flex-grow-1 custom"
-            style="justify-content: left; height: 100%; color: unset !important; opacity: 1"
-          >
-            <span style="padding-left: 10.5px; padding-top: 4px">Mods</span>
-          </v-btn>
-
-          <v-btn
-            :value="false"
-            class="custom-btn"
-            style="height: 100%; opacity: 1"
-            :class="!modsEnabled ? 'red--text' : ''"
-          >
-            <span style="padding-top: 2px">
-              OFF&nbsp;
-            </span>
-            <v-icon style="color: unset">
-              mdi-window-close
-            </v-icon>
-          </v-btn>
-
-          <v-btn
-            :value="true"
-            class="custom-btn"
-            style="height: 100%; opacity: 1;"
-            :class="modsEnabled ? 'green--text' : ''"
-          >
-            <span style="padding-top: 2px">
-              ON&nbsp;
-            </span>
-            <v-icon style="color: unset">
-              mdi-check
-            </v-icon>
-          </v-btn>
-        </v-btn-toggle>
+          <div class="v-input__control">
+            <div class="v-input__slot">
+              <div class="v-select__slot">
+                Mods
+                <div
+                  style="right: 0; position: absolute; height: 100%; padding-top: 5px"
+                  class="d-flex"
+                >
+                  <span
+                    :class="!modsEnabled ? 'red--text' : ''"
+                  >
+                    OFF&nbsp;
+                  </span>
+                  <v-switch
+                    v-model="modsEnabled"
+                    dense
+                    class="ma-0 pa-0"
+                    style="margin-top: -1px !important"
+                    :color="modsEnabled ? 'green' : 'red'"
+                  />
+                  <span
+                    :class="modsEnabled ? 'green--text' : ''"
+                  >
+                    ON&nbsp;
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </v-col>
       <v-col
         class="pl-1 flex-grow-1"
@@ -524,6 +516,10 @@ export default {
 
 .v-application .no-bg.v-icon {
   background-color: unset !important;
+}
+
+.custom.v-text-field.v-text-field--solo .v-input__control {
+  min-height: 20px !important;
 }
 </style>
 
