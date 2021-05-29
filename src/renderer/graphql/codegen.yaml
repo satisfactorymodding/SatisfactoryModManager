@@ -1,0 +1,7 @@
+generates:
+  src/renderer/graphql/__generated__/graphql.schema.json:
+    plugins:
+      - "introspection"
+    config:
+      minify: true
+    schema: https://api.ficsit.app/v2/query

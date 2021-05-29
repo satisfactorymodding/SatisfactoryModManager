@@ -103,7 +103,7 @@ export async function isCompatibleFast(mod, gameVersion) {
   if (!mod || mod.versions.length === 0 || mod.hidden) {
     return false;
   }
-  const smlVersions = (await apolloClient.query({
+  const smlVersions = [...(await apolloClient.query({
     query: gql`
       query smlVersions {
         getSMLVersions(filter: {limit: 100}) {
@@ -115,7 +115,7 @@ export async function isCompatibleFast(mod, gameVersion) {
         }
       }
     `,
-  })).data.getSMLVersions.sml_versions;
+  })).data.getSMLVersions.sml_versions];
   smlVersions.sort((a, b) => compare(a.version, b.version));
   const versionConstraints = smlVersions.map((version, idx, arr) => ({
     version: version.version,
