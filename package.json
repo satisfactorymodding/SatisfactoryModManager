@@ -70,7 +70,8 @@
       "artifactName": "${productName}.${ext}"
     },
     "asarUnpack": [
-      "**/node_modules/exiftool-vendored.*/**/*"
+      "**/node_modules/exiftool-vendored.*/**/*",
+      "**/*.node"
     ]
   },
   "dependencies": {
