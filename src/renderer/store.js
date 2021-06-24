@@ -285,7 +285,7 @@ export default new Vuex.Store({
         if (version) {
           await state.selectedInstall.installSML(version);
         } else {
-          await state.selectedInstall.updateSML(); // this is fine because latest will be reinstalled as a dependency
+          await state.selectedInstall.uninstallSML(); // this is fine because latest will be reinstalled as a dependency
         }
         placeholderProgreess.progress = 1;
         commit('refreshInstalledMods');
