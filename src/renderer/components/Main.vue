@@ -62,7 +62,7 @@
           </template>
           <span
             v-else
-          >{{ isGameRunning ? 'Game is running' : (selectedInstall && selectedInstall.launchPath ? 'Launch Satisfactory' : 'Cannot launch this install') }}</span>
+          >{{ launchButtonText }}</span>
         </v-btn>
       </v-card>
       <ModDetails v-if="expandedModId" />
@@ -325,6 +325,18 @@ export default {
     },
     hasFrame() {
       return this.$electron.remote.getGlobal('frame');
+    },
+    launchButtonText() {
+      if (this.isGameRunning) {
+        return 'Game is running';
+      }
+      if (!this.selectedInstall) {
+        return 'Loading...';
+      }
+      if (this.selectedInstall.launchPath) {
+        return 'Launch Satisfactory';
+      }
+      return 'Cannot launch this install';
     },
   },
   async mounted() {
