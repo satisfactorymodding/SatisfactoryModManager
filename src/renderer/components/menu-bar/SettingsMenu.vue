@@ -491,6 +491,18 @@
                     />
                   </v-list-item-action>
                 </v-list-item>
+                <v-list-item>
+                  <v-list-item-action />
+                  <v-list-item-content>
+                    <v-list-item-title>Launch Nyan</v-list-item-title>
+                  </v-list-item-content>
+
+                  <v-list-item-action>
+                    <v-switch
+                      v-model="launchCat"
+                    />
+                  </v-list-item-action>
+                </v-list-item>
               </v-list>
             </v-card>
           </v-menu>
@@ -587,11 +599,19 @@ export default {
         this.$store.dispatch('launchButton', value);
       },
     },
+    launchCat: {
+      get() {
+        return this.$store.state.launchCat;
+      },
+      set(value) {
+        this.$store.dispatch('launchCat', value);
+      },
+    },
     installedSMLVersion() {
       return this.$store.state.installedMods.SML?.version;
     },
     manifestSMLVersion() {
-      return this.$store.state.manifestMods.SML;
+      return this.$store.state.manifestItems.find((item) => item.id === 'SML')?.version;
     },
   },
   apollo: {

@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex';
+import { mapState } from 'vuex';
 import { lastElement, setIntervalImmediately, isCompatibleFast } from '@/utils';
 import Fuse from 'fuse.js';
 import debounce from 'debounce';
@@ -83,16 +83,33 @@ export default {
         {
           name: 'Installed',
           filter(mods, vm) {
-            const installedMods = Object.keys(vm.$store.state.installedMods);
-            return mods.filter((mod) => installedMods.includes(mod.mod_reference));
+            return mods.filter((mod) => vm.$store.state.manifestItems.some((item) => item.id === mod.mod_reference));
           },
           mods: 0,
         },
         {
           name: 'Not installed',
           filter(mods, vm) {
+            return mods.filter((mod) => !vm.$store.state.manifestItems.some((item) => item.id === mod.mod_reference));
+          },
+          mods: 0,
+        },
+        {
+          name: 'Enabled',
+          filter(mods, vm) {
             const installedMods = Object.keys(vm.$store.state.installedMods);
-            return mods.filter((mod) => !installedMods.includes(mod.mod_reference));
+            return mods.filter((mod) => installedMods.includes(mod.mod_reference));
+          },
+          mods: 0,
+        },
+        {
+          name: 'Disabled',
+          filter(mods, vm) {
+            return mods.filter((mod) => {
+              const manifestItem = vm.$store.state.manifestItems.find((item) => item.id === mod.mod_reference);
+              if (!manifestItem) return false;
+              return !manifestItem.enabled;
+            });
           },
           mods: 0,
         },
@@ -145,16 +162,12 @@ export default {
       'installedMods',
       'selectedInstall',
     ]),
-    ...mapGetters([
-      'canInstallMods',
-    ]),
     search() {
       return this.filters.search;
     },
     hiddenInstalledModReferences() {
       return Object.keys(this.$store.state.installedMods)
-        .filter((modID) => !this.availableMods.some((mod) => mod.mod_reference === modID)) // not in the available mods list
-        .filter((modID) => this.$store.state.manifestMods[modID] !== undefined); // not dependency
+        .filter((modReference) => !this.availableMods.some((mod) => mod.mod_reference === modReference)); // not in the available mods list
     },
     allMods() {
       return [...this.availableMods, ...this.hiddenInstalledMods].filter((mod, idx, arr) => arr.findIndex((other) => other.mod_reference === mod.mod_reference) === idx);

@@ -31,27 +31,32 @@
           @set-available-filters="availableFilters = $event"
           @set-available-sorting="availableSorting = $event"
         />
-        <v-btn
-          class="flex-grow-0 flex-shrink-0"
-          block
-          tile
-          color="primary"
-          elevation="0"
-          style="font-size: 18px; min-height: 50px;"
-          :style="launchButton && selectedInstall && selectedInstall.launchPath && !isGameRunning ? 'height: 98px' : ''"
-          :disabled="!!inProgress.length || isGameRunning || (selectedInstall && !selectedInstall.launchPath)"
-          :ripple="!launchButton"
-          @click="() => !launchButton && launchSatisfactory()"
-        >
-          <template v-if="launchButton && selectedInstall && selectedInstall.launchPath && !isGameRunning">
+        <template v-if="(!launchButton && !launchCat) || !(selectedInstall && selectedInstall.launchPath && !isGameRunning)">
+          <v-btn
+            class="flex-grow-0 flex-shrink-0"
+            block
+            tile
+            color="primary"
+            elevation="0"
+            style="font-size: 18px; min-height: 50px;"
+            :style="launchButton && selectedInstall && selectedInstall.launchPath && !isGameRunning ? 'height: 98px' : ''"
+            :disabled="!!inProgress.length || isGameRunning || (selectedInstall && !selectedInstall.launchPath)"
+            :ripple="!launchButton"
+            @click="() => !launchButton && launchSatisfactory()"
+          >
+            {{ launchButtonText }}
+          </v-btn>
+        </template>
+        <template v-else-if="launchButton">
+          <div style="height: 98px">
             <img
-              src="static/launch_fun.png"
+              src="static/launch/fun/launch_fun.png"
               draggable="false"
             >
             <img
-              :src="`static/launch_fun_button_${launchFunState}.png`"
-              style="position: absolute;"
-              :style="launchFunState === 'press' ? 'top: 1px' : ''"
+              :src="`static/launch/fun/launch_fun_button_${launchFunState}.png`"
+              style="position: relative; left: 227px"
+              :style="launchFunState === 'press' ? 'top: -105px' : 'top: -106px'"
               draggable="false"
               @click="launchFunPress"
               @mousedown="launchFunState = 'press'"
@@ -59,11 +64,27 @@
               @mouseenter="launchFunState = 'over'"
               @mouseleave="launchFunState = 'normal'"
             >
-          </template>
-          <span
-            v-else
-          >{{ launchButtonText }}</span>
-        </v-btn>
+          </div>
+        </template>
+        <template v-else-if="launchCat">
+          <div
+            style="height: 60px"
+            @mouseup="catPressed = false"
+            @mousemove="catMouseMove"
+          >
+            <img
+              src="static/launch/cat/bg.png"
+              draggable="false"
+            >
+            <img
+              :src="`static/launch/cat/cat_full.png`"
+              style="position: relative; top: -61px"
+              :style="`left: calc(-450px + ${catPosition * 82}%)`"
+              draggable="false"
+              @mousedown="catMouseDown"
+            >
+          </div>
+        </template>
       </v-card>
       <ModDetails v-if="expandedModId" />
     </v-card>
@@ -279,6 +300,9 @@ export default {
       availableSorting: [],
       launchFunState: 'normal',
       launchFun: 0,
+      catPosition: 0,
+      catOffset: 0,
+      catPressed: false,
     };
   },
   computed: {
@@ -292,6 +316,7 @@ export default {
         'error',
         'errorPersistent',
         'launchButton',
+        'launchCat',
       ],
     ),
     errorDialog: {
@@ -460,6 +485,22 @@ export default {
       if (this.launchFun === 15) {
         this.launchSatisfactory();
         this.launchFun = 0;
+      }
+    },
+    catMouseDown(e) {
+      this.catOffset = 550 - e.offsetX;
+      this.catPressed = true;
+    },
+    catMouseMove(e) {
+      if (this.catPressed) {
+        this.catPosition = (e.clientX - 100 + this.catOffset) / 450;
+        this.catPosition = Math.min(1, Math.max(-0.1, this.catPosition));
+        if (this.catPosition === 1) {
+          this.catPressed = false;
+          setTimeout(() => {
+            this.launchSatisfactory();
+          }, 1000);
+        }
       }
     },
     lastElement,

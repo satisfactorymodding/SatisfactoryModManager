@@ -180,7 +180,7 @@
 
 <script>
 import { validAndEq, bytesToAppropriate } from '@/utils';
-import { mapState, mapGetters } from 'vuex';
+import { mapState } from 'vuex';
 
 export default {
   props: {
@@ -196,9 +196,6 @@ export default {
   computed: {
     ...mapState([
       'inProgress',
-    ]),
-    ...mapGetters([
-      'canInstallMods',
     ]),
     icon() {
       return this.mod.logo || 'https://ficsit.app/static/assets/images/no_image.png';
@@ -219,7 +216,7 @@ export default {
       }
     },
     manifestVersion() {
-      return this.$store.state.manifestMods[this.mod.mod_reference];
+      return this.$store.state.manifestItems.find((item) => item.id === this.mod.mod_reference)?.version;
     },
   },
   methods: {

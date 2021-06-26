@@ -41,9 +41,10 @@ export default new Vuex.Store({
     isLaunchingGame: false,
     expandModInfoOnStart: false,
     installedMods: {},
-    manifestMods: {},
+    manifestItems: [],
     konami: false,
     launchButton: false,
+    launchCat: false,
   },
   mutations: {
     setInstall(state, { newInstall }) {
@@ -65,7 +66,7 @@ export default new Vuex.Store({
       state.favoriteModIds = favoriteModIds;
     },
     refreshInstalledMods(state) {
-      state.manifestMods = readManifest(path.join(getProfileFolderPath(state.selectedProfile.name), 'manifest.json')).items.reduce((prev, mod) => Object.assign(prev, { [mod.id]: mod.version || null }), {});
+      state.manifestItems = readManifest(path.join(getProfileFolderPath(state.selectedProfile.name), 'manifest.json')).items;
       state.installedMods = readLockfile(path.join(getProfileFolderPath(state.selectedProfile.name), state.selectedInstall.lockfileName));
     },
     setExpandedMod(state, { modId }) {
@@ -101,6 +102,9 @@ export default new Vuex.Store({
     },
     launchButton(state, value) {
       state.launchButton = value;
+    },
+    launchCat(state, value) {
+      state.launchCat = value;
     },
   },
   actions: {
@@ -187,25 +191,56 @@ export default new Vuex.Store({
         }
       }
     },
-    async switchModInstalled({
+    async installMod({
       commit, dispatch, state,
     }, modId) {
-      if (state.inProgress.length > 0) {
-        dispatch('showError', `Another operation is currently in progress while trying to (un)install a mod: ${state.inProgress.map((progress) => progress.id)}`);
-        return;
+      if (!state.manifestItems.some((item) => item.id === modId)) {
+        if (state.inProgress.length > 0) {
+          dispatch('showError', `Another operation is currently in progress while trying to install a mod: ${state.inProgress.map((progress) => progress.id)}`);
+          return;
+        }
+        if (!state.modsEnabled) {
+          dispatch('showError', 'Enable mods to be able to make changes');
+          return;
+        }
+        commit('clearDownloadProgress');
+        const modProgress = { id: modId, progresses: [] };
+        state.inProgress.push(modProgress);
+        const placeholderProgreess = {
+          id: 'placeholder', progress: -1, message: '', fast: false,
+        };
+        modProgress.progresses.push(placeholderProgreess);
+        placeholderProgreess.message = 'Finding the best version to install';
+        try {
+          await state.selectedInstall.installMod(modId);
+          placeholderProgreess.progress = 1;
+          commit('refreshInstalledMods');
+        } catch (e) {
+          dispatch('showError', e);
+        } finally {
+          state.inProgress.remove(modProgress);
+        }
       }
-      if (!state.modsEnabled) {
-        dispatch('showError', 'Enable mods to be able to make changes');
-        return;
-      }
-      commit('clearDownloadProgress');
-      const modProgress = { id: modId, progresses: [] };
-      state.inProgress.push(modProgress);
-      const placeholderProgreess = {
-        id: 'placeholder', progress: -1, message: '', fast: false,
-      };
-      modProgress.progresses.push(placeholderProgreess);
-      if (state.installedMods[modId]) {
+    },
+    async uninstallMod({
+      commit, dispatch, state,
+    }, modId) {
+      if (state.manifestItems.some((item) => item.id === modId)) {
+        if (state.inProgress.length > 0) {
+          dispatch('showError', `Another operation is currently in progress while trying to uninstall a mod: ${state.inProgress.map((progress) => progress.id)}`);
+          return;
+        }
+        if (!state.modsEnabled) {
+          dispatch('showError', 'Enable mods to be able to make changes');
+          return;
+        }
+        commit('clearDownloadProgress');
+        const modProgress = { id: modId, progresses: [] };
+        state.inProgress.push(modProgress);
+        const placeholderProgreess = {
+          id: 'placeholder', progress: -1, message: '', fast: false,
+        };
+        modProgress.progresses.push(placeholderProgreess);
         placeholderProgreess.message = 'Checking for mods that are no longer needed';
         try {
           await state.selectedInstall.uninstallMod(modId);
@@ -216,10 +251,61 @@ export default new Vuex.Store({
         } finally {
           state.inProgress.remove(modProgress);
         }
-      } else {
+      }
+    },
+    async enableMod({
+      commit, dispatch, state,
+    }, modId) {
+      if (state.manifestItems.some((item) => item.id === modId)) {
+        if (state.inProgress.length > 0) {
+          dispatch('showError', `Another operation is currently in progress while trying to enable a mod: ${state.inProgress.map((progress) => progress.id)}`);
+          return;
+        }
+        if (!state.modsEnabled) {
+          dispatch('showError', 'Enable mods to be able to make changes');
+          return;
+        }
+        commit('clearDownloadProgress');
+        const modProgress = { id: modId, progresses: [] };
+        state.inProgress.push(modProgress);
+        const placeholderProgreess = {
+          id: 'placeholder', progress: -1, message: '', fast: false,
+        };
+        modProgress.progresses.push(placeholderProgreess);
         placeholderProgreess.message = 'Finding the best version to install';
         try {
-          await state.selectedInstall.installMod(modId);
+          await state.selectedInstall.enableMod(modId);
+          placeholderProgreess.progress = 1;
+          commit('refreshInstalledMods');
+        } catch (e) {
+          dispatch('showError', e);
+        } finally {
+          state.inProgress.remove(modProgress);
+        }
+      }
+    },
+    async disableMod({
+      commit, dispatch, state,
+    }, modId) {
+      if (state.installedMods[modId]) {
+        if (state.inProgress.length > 0) {
+          dispatch('showError', `Another operation is currently in progress while trying to disable a mod: ${state.inProgress.map((progress) => progress.id)}`);
+          return;
+        }
+        if (!state.modsEnabled) {
+          dispatch('showError', 'Enable mods to be able to make changes');
+          return;
+        }
+        commit('clearDownloadProgress');
+        const modProgress = { id: modId, progresses: [] };
+        state.inProgress.push(modProgress);
+        const placeholderProgreess = {
+          id: 'placeholder', progress: -1, message: '', fast: false,
+        };
+        modProgress.progresses.push(placeholderProgreess);
+        placeholderProgreess.message = 'Checking for mods that are no longer needed';
+        try {
+          await state.selectedInstall.disableMod(modId);
           placeholderProgreess.progress = 1;
           commit('refreshInstalledMods');
         } catch (e) {
@@ -359,7 +445,9 @@ export default new Vuex.Store({
         state.currentDownloadProgress[url].progress = progress.percent;
         if (progress.percent === 1) {
           setTimeout(() => {
-            state.inProgress[0].progresses.remove(state.currentDownloadProgress[url]);
+            if (state.inProgress.length > 0) {
+              state.inProgress[0].progresses.remove(state.currentDownloadProgress[url]);
+            }
             delete state.currentDownloadProgress[url];
           }, 100);
         }
@@ -371,6 +459,7 @@ export default new Vuex.Store({
         commit('konami');
       }
       commit('launchButton', getSetting('launchButton', false));
+      commit('launchCat', getSetting('launchCat', false));
 
       try {
         await Promise.all([
@@ -474,7 +563,15 @@ export default new Vuex.Store({
     },
     launchButton({ commit }, value) {
       saveSetting('launchButton', value);
+      saveSetting('launchCat', false);
       commit('launchButton', value);
+      commit('launchCat', false);
+    },
+    launchCat({ commit }, value) {
+      saveSetting('launchCat', value);
+      saveSetting('launchButton', false);
+      commit('launchCat', value);
+      commit('launchButton', false);
     },
     async updateSingle({ state, commit, dispatch }, update) {
       const updateProgress = {
@@ -487,7 +584,7 @@ export default new Vuex.Store({
       updateProgress.progresses.push(placeholderProgreess);
       state.inProgress.push(updateProgress);
       try {
-        await state.selectedInstall.manifestMutate([], [], [update.item]);
+        await state.selectedInstall.manifestMutate([], [], [], [], [update.item]);
         placeholderProgreess.progress = 1;
         commit('refreshInstalledMods');
       } catch (e) {
@@ -507,7 +604,7 @@ export default new Vuex.Store({
       updateProgress.progresses.push(placeholderProgreess);
       state.inProgress.push(updateProgress);
       try {
-        await state.selectedInstall.manifestMutate([], [], updates.map((update) => update.item));
+        await state.selectedInstall.manifestMutate([], [], [], [], updates.map((update) => update.item));
         placeholderProgreess.progress = 1;
         commit('refreshInstalledMods');
       } catch (e) {
@@ -515,14 +612,6 @@ export default new Vuex.Store({
       } finally {
         state.inProgress.remove(updateProgress);
       }
-    },
-  },
-  getters: {
-    allMods(state) {
-      return [...state.mods, ...state.hiddenInstalledMods];
-    },
-    canInstallMods(state) {
-      return state.selectedProfile.name !== 'vanilla' && state.modsEnabled && !state.isGameRunning;
     },
   },
 });

@@ -63,6 +63,7 @@
                     class="ma-0 pa-0"
                     style="margin-top: -1px !important"
                     :color="modsEnabled ? 'green' : 'red'"
+                    :disabled="isGameRunning"
                   />
                   <span
                     :class="modsEnabled ? 'green--text' : ''"

@@ -100,7 +100,7 @@ export function setIntervalImmediately(func, interval) {
 }
 
 export async function isCompatibleFast(mod, gameVersion) {
-  if (!mod || mod.versions.length === 0 || mod.hidden) {
+  if (!mod || mod.versions.length === 0) {
     return false;
   }
   const smlVersions = [...(await apolloClient.query({

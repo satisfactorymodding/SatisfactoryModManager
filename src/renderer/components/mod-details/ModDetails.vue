@@ -61,24 +61,81 @@
             </v-btn>
           </v-col>
           <v-col
-            v-if="isCompatible || isInstalled"
+            v-if="isCompatible"
             style="flex-grow: 0; padding-bottom: 0"
+            class="d-flex"
           >
             <v-btn
+              v-if="isEnabled"
               width="150px"
               raised
-              :disabled="!!inProgress.length || !canInstallMods"
-              @click="switchClicked"
+              :disabled="!!inProgress.length || isGameRunning || !modsEnabled"
+              @click="disable"
             >
               <span style="vertical-align: middle;">
-                {{ isInstalled ? 'Remove mod' : 'Install mod' }}
+                Disable mod
               </span>
               <v-spacer />
               <v-icon
                 right
-                :color="isInstalled ? 'red' : 'text'"
+                color="red"
               >
-                {{ isInstalled ? 'mdi-delete' : 'mdi-download' }}
+                mdi-close-circle
+              </v-icon>
+            </v-btn>
+            <template v-else-if="isInstalled">
+              <v-btn
+                width="150px"
+                raised
+                :disabled="!!inProgress.length || isGameRunning || !modsEnabled"
+                class="mr-2"
+                @click="uninstall"
+              >
+                <span style="vertical-align: middle;">
+                  Remove mod
+                </span>
+                <v-spacer />
+                <v-icon
+                  right
+                  color="red"
+                >
+                  mdi-delete
+                </v-icon>
+              </v-btn>
+              <v-btn
+                width="150px"
+                raised
+                :disabled="!!inProgress.length || isGameRunning || !modsEnabled"
+                @click="enable"
+              >
+                <span style="vertical-align: middle;">
+                  Enable mod
+                </span>
+                <v-spacer />
+                <v-icon
+                  right
+                  color="green"
+                >
+                  mdi-check-circle-outline
+                </v-icon>
+              </v-btn>
+            </template>
+            <v-btn
+              v-else
+              width="150px"
+              raised
+              :disabled="!!inProgress.length || isGameRunning || !modsEnabled"
+              @click="install"
+            >
+              <span style="vertical-align: middle;">
+                Install mod
+              </span>
+              <v-spacer />
+              <v-icon
+                right
+                color="green"
+              >
+                mdi-download
               </v-icon>
             </v-btn>
           </v-col>
@@ -89,7 +146,7 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex';
+import { mapState } from 'vuex';
 import gql from 'graphql-tag';
 import { markdownAsElement, isCompatibleFast } from '@/utils';
 import ModDetailsInfo from './ModDetailsInfo';
@@ -106,9 +163,8 @@ export default {
     ...mapState([
       'inProgress',
       'expandedModId',
-    ]),
-    ...mapGetters([
-      'canInstallMods',
+      'isGameRunning',
+      'modsEnabled',
     ]),
     isFavorite() {
       return this.$store.state.favoriteModIds.includes(this.expandedModId);
@@ -124,14 +180,27 @@ export default {
       }
       return el.innerHTML;
     },
+    manifestItem() {
+      return this.$store.state.manifestItems ? this.$store.state.manifestItems.find((item) => item.id === this.mod.mod_reference) : undefined;
+    },
     isInstalled() {
-      return !!this.$store.state.installedMods[this.expandedModId];
+      return !!this.manifestItem;
+    },
+    isEnabled() {
+      return !!this.$store.state.installedMods[this.mod.mod_reference];
+    },
+    dependants() {
+      return Object.entries(this.$store.state.installedMods || {}).filter(([, data]) => !!data.dependencies[this.mod.mod_reference]).map(([item]) => item);
+    },
+    isDependency() {
+      return this.dependants.length > 0;
     },
   },
   asyncComputed: {
     isCompatible: {
       get() {
         if (!this.$store.state.selectedInstall) return false;
+        if (this.mod?.hidden && !this.isDependency) return false;
         return isCompatibleFast(this.mod, this.$store.state.selectedInstall.version);
       },
       default: false,
@@ -181,8 +250,17 @@ export default {
     close() {
       this.$store.dispatch('unexpandMod');
     },
-    switchClicked() {
-      this.$store.dispatch('switchModInstalled', this.expandedModId);
+    install() {
+      this.$store.dispatch('installMod', this.expandedModId);
+    },
+    uninstall() {
+      this.$store.dispatch('uninstallMod', this.expandedModId);
+    },
+    enable() {
+      this.$store.dispatch('enableMod', this.expandedModId);
+    },
+    disable() {
+      this.$store.dispatch('disableMod', this.expandedModId);
     },
     favoriteClicked() {
       this.$store.dispatch('toggleModFavorite', this.expandedModId);
