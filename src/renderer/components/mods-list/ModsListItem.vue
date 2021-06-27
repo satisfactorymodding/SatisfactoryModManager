@@ -61,6 +61,7 @@
         </v-list-item-subtitle>
       </v-list-item-content>
       <v-list-item-action
+        v-if="isInstalled || isEnabled"
         class="custom mod-button d-inline-flex align-center justify-center"
         style="width: 50px"
       >

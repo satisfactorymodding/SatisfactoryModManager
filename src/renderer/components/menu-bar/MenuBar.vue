@@ -398,7 +398,8 @@ export default {
 
 <style scoped>
 .row.update-available, .row.update-available>* {
-  background-color: var(--v-primary-base) !important;
+  -webkit-animation: update-availabe-anim 2s linear infinite alternate both;
+          animation: update-availabe-anim 2s linear infinite alternate both;
   color: black !important;
 }
 .container {
@@ -409,4 +410,22 @@ export default {
   padding-top: 8px;
   padding-bottom: 8px;
 }
+
+@-webkit-keyframes update-availabe-anim {
+  0% {
+    background-color: var(--v-backgroundMenuBar-base);
+  }
+  100% {
+    background-color: var(--v-primary-base);
+  }
+}
+@keyframes update-availabe-anim {
+  0% {
+    background-color: var(--v-backgroundMenuBar-base);
+  }
+  100% {
+    background-color: var(--v-primary-base);
+  }
+}
+
 </style>
