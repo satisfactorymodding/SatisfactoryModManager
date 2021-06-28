@@ -287,7 +287,7 @@ if (app.requestSingleInstanceLock()) {
     });
   });
 
-  const wss = new socketio.Server(33642);
+  const wss = new socketio.Server(33642, { path: '/' });
   wss.on('connection', (socket) => {
     socket.on('installedMods', () => {
       ipcMain.once('installedMods', (event, installedMods) => {
