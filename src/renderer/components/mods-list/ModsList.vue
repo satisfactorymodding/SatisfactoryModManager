@@ -266,6 +266,7 @@ export default {
           `,
         })).data.availableMods.count;
         if (availableModsCount !== this.availableMods.length) {
+          const currentLength = this.availableMods.length;
           this.availableMods = (await Promise.all(Array.from({ length: Math.ceil(availableModsCount / MODS_PER_QUERY) }).map(async (_, page) => (await this.$apollo.query({
             query: gql`
               query getMods($limit: Int!, $offset: Int!) {
@@ -301,6 +302,9 @@ export default {
               offset: page * MODS_PER_QUERY,
             },
           })).data.availableMods.mods))).flat(1);
+          if (this.$store.state.expandModInfoOnStart && currentLength === 0) {
+            this.$store.dispatch('expandMod', this.filteredMods[0].mod_reference);
+          }
         }
       }, 5 * 60 * 1000);
     });
