@@ -256,6 +256,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <OutdatedModsDialog />
   </v-card>
 </template>
 
@@ -273,6 +274,7 @@ import AnnouncementsBar from './AnnouncementsBar';
 import ControlArea from './ControlArea';
 import ModsList from './mods-list/ModsList';
 import ModDetails from './mod-details/ModDetails';
+import OutdatedModsDialog from './OutdatedModsDialog';
 
 const SMLauncherUninstallerPath = path.join(getCacheFolder(), 'Programs', 'satisfactory-mod-launcher-gui', 'Uninstall Satisfactory Mod Launcher.exe');
 
@@ -284,6 +286,7 @@ export default {
     ControlArea,
     ModsList,
     ModDetails,
+    OutdatedModsDialog,
   },
   data() {
     return {

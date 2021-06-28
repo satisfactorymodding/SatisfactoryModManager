@@ -122,6 +122,22 @@
               </template>
               <span>Cannot install mods while game is running</span>
             </v-tooltip>
+            <v-tooltip
+              v-else-if="inProgress.length > 0"
+              color="background"
+              left
+            >
+              <template #activator="{ on, attrs }">
+                <v-icon
+                  color="text"
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  mdi-play
+                </v-icon>
+              </template>
+              <span>Another operation is in progress</span>
+            </v-tooltip>
             <div
               v-else
               class="d-inline-flex align-center justify-center"
@@ -176,6 +192,22 @@
                 </v-icon>
               </template>
               <span>Cannot install mods while game is running</span>
+            </v-tooltip>
+            <v-tooltip
+              v-else-if="inProgress.length > 0"
+              color="background"
+              left
+            >
+              <template #activator="{ on, attrs }">
+                <v-icon
+                  color="text"
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  mdi-pause
+                </v-icon>
+              </template>
+              <span>Another operation is in progress</span>
             </v-tooltip>
             <div
               v-else
@@ -260,6 +292,22 @@
               </template>
               <span>Cannot install mods while game is running</span>
             </v-tooltip>
+            <v-tooltip
+              v-else-if="inProgress.length > 0"
+              color="background"
+              left
+            >
+              <template #activator="{ on, attrs }">
+                <v-icon
+                  color="green"
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  mdi-check-circle
+                </v-icon>
+              </template>
+              <span>Another operation is in progress</span>
+            </v-tooltip>
             <div
               v-else
               class="d-inline-flex align-center justify-center red"
@@ -314,12 +362,22 @@
             </template>
             <span>Cannot install mods while game is running</span>
           </v-tooltip>
-          <v-icon
+          <v-tooltip
             v-else-if="inProgress.length > 0"
-            color="icon"
+            color="background"
+            left
           >
-            mdi-download
-          </v-icon>
+            <template #activator="{ on, attrs }">
+              <v-icon
+                class="icon"
+                v-bind="attrs"
+                v-on="on"
+              >
+                mdi-download
+              </v-icon>
+            </template>
+            <span>Another operation is in progress</span>
+          </v-tooltip>
           <div
             v-else
             class="d-inline-flex align-center justify-center hover-green"
