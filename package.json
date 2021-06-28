@@ -58,16 +58,18 @@
       "category": "Game"
     },
     "nsis": {
+      "include": "dist/nsis.nsh",
+      "allowElevation": true,
       "oneClick": false,
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
-      "artifactName": "${productName} Setup.${ext}"
+      "artifactName": "Satisfactory-Mod-Manager-Setup.${ext}"
     },
     "portable": {
-      "artifactName": "${productName} Portable.${ext}"
+      "artifactName": "Satisfactory-Mod-Manager-Portable.${ext}"
     },
     "appImage": {
-      "artifactName": "${productName}.${ext}"
+      "artifactName": "Satisfactory-Mod-Manager.${ext}"
     },
     "asarUnpack": [
       "**/node_modules/exiftool-vendored.*/**/*",

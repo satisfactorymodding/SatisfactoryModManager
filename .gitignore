@@ -3,7 +3,6 @@
 dist/electron/*
 dist/web/*
 build/*
-!build/installer.nsh
 node_modules/
 npm-debug.log
 npm-debug.log.*
