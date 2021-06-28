@@ -73,6 +73,23 @@
             >
               mdi-play
             </v-icon>
+            <template v-else-if="isDependency">
+              <v-tooltip
+                color="background"
+                left
+              >
+                <template #activator="{ on, attrs }">
+                  <v-icon
+                    color="text"
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    mdi-play
+                  </v-icon>
+                </template>
+                <span>Dependency of {{ dependantsFriendly }}</span>
+              </v-tooltip>
+            </template>
             <v-tooltip
               v-else-if="!modsEnabled"
               color="background"
