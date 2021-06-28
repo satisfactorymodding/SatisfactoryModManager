@@ -33,7 +33,8 @@ export default new Vuex.Store({
     expandedModId: '',
     favoriteModIds: [],
     inProgress: [], // { id: string, progresses: { id: string, progress: number, message: string, fast: boolean }[] }
-    currentDownloadProgress: {},
+    downloadProgress: {},
+    allDownloadProgress: null,
     installSetupError: '',
     error: '',
     errorPersistent: false,
@@ -434,21 +435,46 @@ export default new Vuex.Store({
       };
       state.inProgress.push(appLoadProgress);
       addDownloadProgressCallback((url, progress, name, version, elapsedTime) => {
-        if (!state.currentDownloadProgress[url]) {
-          state.currentDownloadProgress[url] = {
-            id: `download_${url}`, progress: 0, message: '', fast: true,
+        state.downloadProgress[url] = {
+          progress,
+          name,
+          version,
+          elapsedTime,
+          speed() {
+            return this.progress.transferred / (this.elapsedTime / 1000);
+          },
+          ETA() {
+            return (this.progress.total - this.progress.transferred) / this.speed();
+          },
+        };
+        if (!state.allDownloadProgress) {
+          state.allDownloadProgress = {
+            id: '__downloadingFiles__', progress: 0, message: '', fast: true,
           };
-          state.inProgress[0].progresses.push(state.currentDownloadProgress[url]);
+          state.inProgress[0].progresses.push(state.allDownloadProgress);
         }
-        const speed = progress.transferred / (elapsedTime / 1000);
-        state.currentDownloadProgress[url].message = `${limitDownloadNameLength(name)} v${version}: ${Math.round(progress.percent * 100)}% | ${bytesToAppropriate(progress.transferred)} / ${bytesToAppropriate(progress.total)} | ${bytesToAppropriate(speed)}/s | ${secondsToAppropriate((progress.total - progress.transferred) / speed)}`;
-        state.currentDownloadProgress[url].progress = progress.percent;
+        const speed = Object.values(state.downloadProgress)
+          .map((downloadProgress) => downloadProgress.speed())
+          .reduce((a, b) => a + b, 0);
+        const total = Object.values(state.downloadProgress)
+          .map((downloadProgress) => downloadProgress.progress.total)
+          .reduce((a, b) => a + b, 0);
+        const transferred = Object.values(state.downloadProgress)
+          .map((downloadProgress) => downloadProgress.progress.transferred)
+          .reduce((a, b) => a + b, 0);
+        const percent = transferred / total;
+        const ETA = (total - transferred) / speed;
+        state.allDownloadProgress.message = `${Object.keys(state.downloadProgress).length > 1 ? `${Object.keys(state.downloadProgress).length} files` : `${limitDownloadNameLength(name)} v${version}`}: ${Math.round(percent * 100)}% | ${bytesToAppropriate(transferred)} / ${bytesToAppropriate(total)} | ${bytesToAppropriate(speed)}/s | ${secondsToAppropriate(ETA)}`;
+        state.allDownloadProgress.progress = percent;
         if (progress.percent === 1) {
           setTimeout(() => {
-            if (state.inProgress.length > 0) {
-              state.inProgress[0].progresses.remove(state.currentDownloadProgress[url]);
+            if (total === transferred) {
+              if (state.inProgress.length > 0) {
+                state.inProgress[0].progresses.remove(state.allDownloadProgress);
+              }
+              state.allDownloadProgress = null;
+              state.downloadProgress = {};
             }
-            delete state.currentDownloadProgress[url];
           }, 100);
         }
       });

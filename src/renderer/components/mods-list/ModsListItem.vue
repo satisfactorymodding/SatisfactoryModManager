@@ -25,7 +25,7 @@
         <v-list-item-subtitle v-if="!isModInProgress">
           <div
             class="d-inline-flex align-center icon--text"
-            style="width: 25%"
+            style="width: 85px"
           >
             <v-icon
               color="icon"
