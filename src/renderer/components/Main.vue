@@ -89,6 +89,53 @@
       <ModDetails v-if="expandedModId" />
     </v-card>
     <v-dialog
+      v-model="uriInstallDialog"
+      max-width="550"
+    >
+      <v-card>
+        <div class="d-flex flex-no-wrap justify-space-between">
+          <div>
+            <v-card-title
+              class="text-h5"
+            >
+              {{ uriInstallModData ? uriInstallModData.name : '(Loading name...)' }}
+            </v-card-title>
+
+            <v-card-subtitle>
+              {{ uriInstallModData ? uriInstallModData.short_description : '(Loading description...)' }}
+            </v-card-subtitle>
+            <v-card-subtitle>
+              Version: {{ uriInstallModVersion || 'latest' }}
+            </v-card-subtitle>
+
+            <v-card-actions>
+              <v-btn
+                color="primary"
+                text
+                @click="uriInstallMod"
+              >
+                Install
+              </v-btn>
+              <v-btn
+                text
+                @click="uriInstallDialog = false"
+              >
+                Cancel
+              </v-btn>
+            </v-card-actions>
+          </div>
+
+          <v-avatar
+            class="ma-3"
+            size="125"
+            tile
+          >
+            <v-img :src="(uriInstallModData ? uriInstallModData.logo : null) || 'https://ficsit.app/static/assets/images/no_image.png'" />
+          </v-avatar>
+        </div>
+      </v-card>
+    </v-dialog>
+    <v-dialog
       v-model="errorDialog"
       :persistent="errorPersistent"
       max-width="550"
@@ -267,6 +314,7 @@ import { getCacheFolder } from 'platform-folders';
 import fs from 'fs';
 import path from 'path';
 import { lastElement, bytesToAppropriate } from '@/utils';
+import gql from 'graphql-tag';
 import { getSetting } from '~/settings';
 import TitleBar from './TitleBar';
 import MenuBar from './menu-bar/MenuBar';
@@ -290,6 +338,9 @@ export default {
   },
   data() {
     return {
+      uriInstallDialog: false,
+      uriInstallModReference: null,
+      uriInstallModVersion: null,
       smmUpdateDownloadProgress: {},
       updateDownloadFinished: false,
       showUpdateDownloadProgress: false,
@@ -367,6 +418,28 @@ export default {
       return 'Cannot launch this install';
     },
   },
+  apollo: {
+    uriInstallModData: {
+      query: gql`
+        query GetURIInstallMod($modReference: ModReference!){
+          uriInstallModData: getModByReference(modReference: $modReference) {
+            id,
+            name,
+            short_description,
+            logo
+          }
+        }
+      `,
+      variables() {
+        return {
+          modReference: this.uriInstallModReference,
+        };
+      },
+      skip() {
+        return !this.uriInstallModReference;
+      },
+    },
+  },
   async mounted() {
     const keyQueue = [];
     const code = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
@@ -402,9 +475,9 @@ export default {
       const parsed = new URL(url);
       const command = parsed.pathname.replace(/^\/+|\/+$/g, '');
       if (command === 'install') {
-        const modID = parsed.searchParams.get('modID');
-        const version = parsed.searchParams.get('version');
-        this.$store.dispatch('installModVersion', { modId: modID, version });
+        this.uriInstallModReference = parsed.searchParams.get('modID');
+        this.uriInstallVersion = parsed.searchParams.get('version') || null;
+        this.uriInstallDialog = true;
       }
     });
     this.$electron.ipcRenderer.on('autoUpdateError', (_, err) => {
@@ -464,6 +537,10 @@ export default {
     retryInstallSetup() {
       this.$store.dispatch('clearInstallSetupError');
       this.$store.dispatch('setupInstalls');
+    },
+    uriInstallMod() {
+      this.$store.dispatch('installModVersion', { modId: this.uriInstallModReference, version: this.uriInstallVersion });
+      this.uriInstallDialog = false;
     },
     async launchSatisfactory() {
       if (this.selectedInstall && !this.isGameRunning) {
