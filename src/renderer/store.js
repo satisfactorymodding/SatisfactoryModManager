@@ -411,8 +411,8 @@ export default new Vuex.Store({
         dispatch('selectProfile', state.profiles.find((profile) => profile.name === 'modded'));
       }
     },
-    renameProfile({ state }, { newProfile: newName }) {
-      const oldName = state.selectedProfile.name;
+    renameProfile({ state }, { profile, newName }) {
+      const oldName = profile.name;
       renameProfile(oldName, newName);
       const selectedProfile = getSetting('selectedProfile', {});
       Object.keys(selectedProfile).forEach((install) => {
@@ -421,8 +421,7 @@ export default new Vuex.Store({
         }
       });
       saveSetting('selectedProfile', selectedProfile);
-      const profile = state.profiles.find((p) => p.name === oldName);
-      profile.name = newName;
+      state.profiles.find((p) => p.name === profile.name).name = newName;
     },
     async initApp({
       commit, dispatch, state,
