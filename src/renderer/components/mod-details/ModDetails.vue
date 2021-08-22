@@ -33,6 +33,7 @@
       >
         <v-row style="flex-basis: 0; overflow: auto;">
           <div
+            ref="modDescription"
             class="mod-description"
             v-html="modDescription"
           />
@@ -142,6 +143,12 @@
         </v-row>
       </v-container>
     </v-card>
+    <v-dialog
+      v-model="enlargedImageDialog"
+      max-width="70%"
+    >
+      <v-img :src="enlargedImage" />
+    </v-dialog>
   </v-card>
 </template>
 
@@ -157,6 +164,7 @@ export default {
   },
   data() {
     return {
+      enlargedImage: '',
     };
   },
   computed: {
@@ -194,6 +202,16 @@ export default {
     },
     isDependency() {
       return this.dependants.length > 0;
+    },
+    enlargedImageDialog: {
+      get() {
+        return !!this.enlargedImage;
+      },
+      set(value) {
+        if (!value) {
+          this.enlargedImage = '';
+        }
+      },
     },
   },
   asyncComputed: {
@@ -244,6 +262,19 @@ export default {
         };
       },
       pollInterval: 5 * 60 * 1000,
+    },
+  },
+  watch: {
+    mod() {
+      this.$nextTick(() => {
+        const imgs = this.$refs.modDescription.getElementsByTagName('img');
+        for (let i = 0; i < imgs.length; i += 1) {
+          const img = imgs[i];
+          img.onclick = () => {
+            this.enlargedImage = img.src;
+          };
+        }
+      });
     },
   },
   methods: {
