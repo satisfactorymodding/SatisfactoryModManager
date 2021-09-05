@@ -219,7 +219,10 @@ export default new Vuex.Store({
         } catch (e) {
           dispatch('showError', e);
         } finally {
-          state.inProgress.remove(modProgress);
+          // Allow the UI to update properly
+          setTimeout(() => {
+            state.inProgress.remove(modProgress);
+          }, 500);
         }
       }
     },
@@ -250,7 +253,10 @@ export default new Vuex.Store({
         } catch (e) {
           dispatch('showError', e);
         } finally {
-          state.inProgress.remove(modProgress);
+          // Allow the UI to update properly
+          setTimeout(() => {
+            state.inProgress.remove(modProgress);
+          }, 500);
         }
       }
     },
@@ -281,7 +287,10 @@ export default new Vuex.Store({
         } catch (e) {
           dispatch('showError', e);
         } finally {
-          state.inProgress.remove(modProgress);
+          // Allow the UI to update properly
+          setTimeout(() => {
+            state.inProgress.remove(modProgress);
+          }, 500);
         }
       }
     },
@@ -312,7 +321,10 @@ export default new Vuex.Store({
         } catch (e) {
           dispatch('showError', e);
         } finally {
-          state.inProgress.remove(modProgress);
+          // Allow the UI to update properly
+          setTimeout(() => {
+            state.inProgress.remove(modProgress);
+          }, 500);
         }
       }
     },
@@ -346,7 +358,10 @@ export default new Vuex.Store({
       } catch (e) {
         dispatch('showError', e);
       } finally {
-        state.inProgress.remove(modProgress);
+        // Allow the UI to update properly
+        setTimeout(() => {
+          state.inProgress.remove(modProgress);
+        }, 500);
       }
     },
     async installSMLVersion({
@@ -379,7 +394,10 @@ export default new Vuex.Store({
       } catch (e) {
         dispatch('showError', e);
       } finally {
-        state.inProgress.remove(modProgress);
+        // Allow the UI to update properly
+        setTimeout(() => {
+          state.inProgress.remove(modProgress);
+        }, 500);
       }
     },
     expandMod({ commit }, modId) {
@@ -615,7 +633,10 @@ export default new Vuex.Store({
       } catch (e) {
         dispatch('showError', e);
       } finally {
-        state.inProgress.remove(updateProgress);
+        // Allow the UI to update properly
+        setTimeout(() => {
+          state.inProgress.remove(updateProgress);
+        }, 500);
       }
     },
     async updateMulti({ state, commit, dispatch }, updates) {
@@ -635,7 +656,10 @@ export default new Vuex.Store({
       } catch (e) {
         dispatch('showError', e);
       } finally {
-        state.inProgress.remove(updateProgress);
+        // Allow the UI to update properly
+        setTimeout(() => {
+          state.inProgress.remove(updateProgress);
+        }, 500);
       }
     },
   },

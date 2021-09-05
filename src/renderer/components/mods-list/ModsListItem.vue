@@ -65,164 +65,24 @@
         class="custom mod-button d-inline-flex align-center justify-center"
         style="width: 50px"
       >
-        <template v-if="isEnabled">
-          <v-hover v-slot="{ hover }">
-            <v-icon
-              v-if="!hover"
-              color="text"
-            >
-              mdi-play
-            </v-icon>
-            <template v-else-if="isDependency">
-              <v-tooltip
-                color="background"
-                left
-              >
-                <template #activator="{ on, attrs }">
-                  <v-icon
-                    color="text"
-                    v-bind="attrs"
-                    v-on="on"
-                  >
-                    mdi-play
-                  </v-icon>
-                </template>
-                <span>Dependency of {{ dependantsFriendly }}</span>
-              </v-tooltip>
+        <template v-if="(isEnabled || isInstalled) && !isModInProgress">
+          <ModActionButton
+            :disabled="isDependency || !modsEnabled || isGameRunning || inProgress.length > 0"
+            background-normal-class=""
+            background-hover-class="ficsitOrange"
+            icon-normal-color="text"
+            icon-hover-color="white"
+            :normal-icon="isEnabled ? 'mdi-play' : 'mdi-pause'"
+            :hover-icon="isEnabled ? 'mdi-pause' : 'mdi-play'"
+            @click="isEnabled ? disable() : enable()"
+          >
+            <template #tooltip>
+              <span v-if="isDependency">Dependency of {{ dependantsFriendly }}</span>
+              <span v-else-if="!modsEnabled">Enable mods to be able to make changes</span>
+              <span v-else-if="isGameRunning">Cannot install mods while game is running</span>
+              <span v-else-if="inProgress.length > 0">Another operation is in progress</span>
             </template>
-            <v-tooltip
-              v-else-if="!modsEnabled"
-              color="background"
-              left
-            >
-              <template #activator="{ on, attrs }">
-                <v-icon
-                  color="text"
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  mdi-play
-                </v-icon>
-              </template>
-              <span>Enable mods to be able to make changes</span>
-            </v-tooltip>
-            <v-tooltip
-              v-else-if="isGameRunning"
-              color="background"
-              left
-            >
-              <template #activator="{ on, attrs }">
-                <v-icon
-                  color="text"
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  mdi-play
-                </v-icon>
-              </template>
-              <span>Cannot install mods while game is running</span>
-            </v-tooltip>
-            <v-tooltip
-              v-else-if="inProgress.length > 0"
-              color="background"
-              left
-            >
-              <template #activator="{ on, attrs }">
-                <v-icon
-                  color="text"
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  mdi-play
-                </v-icon>
-              </template>
-              <span>Another operation is in progress</span>
-            </v-tooltip>
-            <div
-              v-else
-              class="d-inline-flex align-center justify-center"
-              style="height: 30px; width: 30px; background: var(--v-ficsitOrange-base) !important;"
-            >
-              <v-icon
-                color="white"
-                style="background-color: unset !important"
-                @click="disable"
-              >
-                mdi-pause
-              </v-icon>
-            </div>
-          </v-hover>
-        </template>
-        <template v-else-if="isInstalled">
-          <v-hover v-slot="{ hover }">
-            <v-icon
-              v-if="!hover"
-              color="text"
-            >
-              mdi-pause
-            </v-icon>
-            <v-tooltip
-              v-else-if="!modsEnabled"
-              color="background"
-              left
-            >
-              <template #activator="{ on, attrs }">
-                <v-icon
-                  color="text"
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  mdi-pause
-                </v-icon>
-              </template>
-              <span>Enable mods to be able to make changes</span>
-            </v-tooltip>
-            <v-tooltip
-              v-else-if="isGameRunning"
-              color="background"
-              left
-            >
-              <template #activator="{ on, attrs }">
-                <v-icon
-                  color="text"
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  mdi-pause
-                </v-icon>
-              </template>
-              <span>Cannot install mods while game is running</span>
-            </v-tooltip>
-            <v-tooltip
-              v-else-if="inProgress.length > 0"
-              color="background"
-              left
-            >
-              <template #activator="{ on, attrs }">
-                <v-icon
-                  color="text"
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  mdi-pause
-                </v-icon>
-              </template>
-              <span>Another operation is in progress</span>
-            </v-tooltip>
-            <div
-              v-else
-              class="d-inline-flex align-center justify-center primary"
-              style="height: 30px; width: 30px"
-            >
-              <v-icon
-                color="white"
-                style="background-color: unset !important"
-                @click="enable"
-              >
-                mdi-play
-              </v-icon>
-            </div>
-          </v-hover>
+          </ModActionButton>
         </template>
       </v-list-item-action>
       <v-list-item-action
@@ -235,162 +95,40 @@
         >
           mdi-sync
         </v-icon>
-        <template v-else-if="isEnabled && isDependency">
-          <v-tooltip
-            color="background"
-            left
-          >
-            <template #activator="{ on, attrs }">
-              <v-icon
-                color="green"
-                v-bind="attrs"
-                v-on="on"
-              >
-                mdi-check-circle
-              </v-icon>
-            </template>
-            <span>Dependency of {{ dependantsFriendly }}</span>
-          </v-tooltip>
-        </template>
-        <template v-else-if="isInstalled">
-          <v-hover v-slot="{ hover }">
+        <v-tooltip
+          v-else-if="!isCompatible"
+          color="background"
+          left
+        >
+          <template #activator="{ on, attrs }">
             <v-icon
-              v-if="!hover"
-              color="green"
+              v-bind="attrs"
+              color="error"
+              v-on="on"
             >
-              mdi-check-circle
+              mdi-alert
             </v-icon>
-            <v-tooltip
-              v-else-if="!modsEnabled"
-              color="background"
-              left
-            >
-              <template #activator="{ on, attrs }">
-                <v-icon
-                  color="green"
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  mdi-check-circle
-                </v-icon>
-              </template>
-              <span>Enable mods to be able to make changes</span>
-            </v-tooltip>
-            <v-tooltip
-              v-else-if="isGameRunning"
-              color="background"
-              left
-            >
-              <template #activator="{ on, attrs }">
-                <v-icon
-                  color="green"
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  mdi-check-circle
-                </v-icon>
-              </template>
-              <span>Cannot install mods while game is running</span>
-            </v-tooltip>
-            <v-tooltip
-              v-else-if="inProgress.length > 0"
-              color="background"
-              left
-            >
-              <template #activator="{ on, attrs }">
-                <v-icon
-                  color="green"
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  mdi-check-circle
-                </v-icon>
-              </template>
-              <span>Another operation is in progress</span>
-            </v-tooltip>
-            <div
-              v-else
-              class="d-inline-flex align-center justify-center red"
-              style="height: 30px; width: 30px"
-            >
-              <v-icon
-                color="text"
-                style="background-color: unset !important"
-                @click="uninstall"
-              >
-                mdi-delete
-              </v-icon>
-            </div>
-          </v-hover>
-        </template>
-        <template v-else>
-          <v-icon
-            v-if="!isCompatible"
-            color="error"
-          >
-            mdi-alert
-          </v-icon>
-          <v-tooltip
-            v-else-if="!modsEnabled"
-            color="background"
-            left
-          >
-            <template #activator="{ on, attrs }">
-              <v-icon
-                color="text"
-                v-bind="attrs"
-                v-on="on"
-              >
-                mdi-download
-              </v-icon>
-            </template>
-            <span>Enable mods to be able to make changes</span>
-          </v-tooltip>
-          <v-tooltip
-            v-else-if="isGameRunning"
-            color="background"
-            left
-          >
-            <template #activator="{ on, attrs }">
-              <v-icon
-                class="icon"
-                v-bind="attrs"
-                v-on="on"
-              >
-                mdi-download
-              </v-icon>
-            </template>
-            <span>Cannot install mods while game is running</span>
-          </v-tooltip>
-          <v-tooltip
-            v-else-if="inProgress.length > 0"
-            color="background"
-            left
-          >
-            <template #activator="{ on, attrs }">
-              <v-icon
-                class="icon"
-                v-bind="attrs"
-                v-on="on"
-              >
-                mdi-download
-              </v-icon>
-            </template>
-            <span>Another operation is in progress</span>
-          </v-tooltip>
-          <div
-            v-else
-            class="d-inline-flex align-center justify-center hover-green"
-            style="height: 30px; width: 30px"
-            @click="install"
-          >
-            <v-icon
-              class="icon"
-            >
-              mdi-download
-            </v-icon>
-          </div>
-        </template>
+          </template>
+          <span>This mod is incompatible with your game version</span>
+        </v-tooltip>
+        <ModActionButton
+          v-else
+          :disabled="isDependency || !modsEnabled || isGameRunning || inProgress.length > 0"
+          background-normal-class=""
+          :background-hover-class="isInstalled || isEnabled ? 'red' : 'green'"
+          :icon-normal-color="isInstalled || isEnabled ? 'green' : 'text'"
+          icon-hover-color="white"
+          :normal-icon="isInstalled || isEnabled ? 'mdi-check-circle' : 'mdi-download'"
+          :hover-icon="isInstalled ? 'mdi-delete' : 'mdi-download'"
+          @click="isInstalled ? uninstall() : install()"
+        >
+          <template #tooltip>
+            <span v-if="isDependency">Dependency of {{ dependantsFriendly }}</span>
+            <span v-else-if="!modsEnabled">Enable mods to be able to make changes</span>
+            <span v-else-if="isGameRunning">Cannot install mods while game is running</span>
+            <span v-else-if="inProgress.length > 0">Another operation is in progress</span>
+          </template>
+        </ModActionButton>
       </v-list-item-action>
       <v-list-item-action
         class="mod-button custom d-inline-flex align-center justify-center"
@@ -431,8 +169,12 @@
 import { mapState } from 'vuex';
 import { lastElement, isCompatibleFast } from '@/utils';
 import gql from 'graphql-tag';
+import ModActionButton from './ModActionButton';
 
 export default {
+  components: {
+    ModActionButton,
+  },
   props: {
     mod: {
       type: Object,
