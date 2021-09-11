@@ -30,6 +30,20 @@
               class="green--text"
             >&nbsp;-&nbsp;SML v{{ item.smlVersion }}</span>
           </template>
+          <template #item="{ item }">
+            <v-tooltip
+              bottom
+              open-delay="100"
+            >
+              <template #activator="{on, attrs}">
+                <span
+                  v-bind="attrs"
+                  v-on="on"
+                >{{ item.displayName }}</span>
+              </template>
+              Game location: {{ item.installLocation }}
+            </v-tooltip>
+          </template>
         </v-select>
       </v-col>
     </v-row>
