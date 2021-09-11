@@ -14,6 +14,7 @@
           :disabled="!!inProgress.length || isGameRunning"
           :items="satisfactoryInstalls"
           item-text="displayName"
+          item-value="installLocation"
           return-object
           dense
           filled
