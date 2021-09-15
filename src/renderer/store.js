@@ -6,6 +6,7 @@ import {
   createProfile,
   deleteProfile,
   renameProfile,
+  clearOutdatedCache,
 } from 'satisfactory-mod-manager-api';
 import path from 'path';
 import { ipcRenderer } from 'electron';
@@ -564,6 +565,9 @@ export default new Vuex.Store({
         commit('refreshInstalledMods');
         state.inProgress.remove(appLoadProgress);
       }
+
+      clearOutdatedCache(); // Clear outdated cached mods, SML versions, etc.
+
       setIntervalImmediately(async () => {
         state.isGameRunning = state.isLaunchingGame || await SatisfactoryInstall.isGameRunning();
       }, 5000);
