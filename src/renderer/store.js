@@ -15,6 +15,7 @@ import { saveSetting, getSetting } from '~/settings';
 
 Vue.use(Vuex);
 
+const DOWNLOAD_SPEED_AVG_TIME = 10 * 1000;
 const MAX_DOWNLOAD_NAME_LENGTH = 20;
 
 function limitDownloadNameLength(name) {
@@ -453,16 +454,30 @@ export default new Vuex.Store({
       };
       state.inProgress.push(appLoadProgress);
       addDownloadProgressCallback((url, progress, name, version, elapsedTime) => {
+        const downloadPastProgresses = new Map();
+        if (state.downloadProgress[url]) {
+          state.downloadProgress[url].downloadPastProgresses.forEach((prog, time) => {
+            if (elapsedTime - time <= DOWNLOAD_SPEED_AVG_TIME) {
+              downloadPastProgresses.set(time, prog);
+            }
+          });
+        }
+        downloadPastProgresses.set(elapsedTime, progress);
         state.downloadProgress[url] = {
           progress,
           name,
           version,
           elapsedTime,
+          downloadPastProgresses,
           speed() {
-            return this.progress.transferred / (this.elapsedTime / 1000);
+            const entries = Array.from(this.downloadPastProgresses.entries());
+            const first = entries[0];
+            const last = entries[entries.length - 1];
+            return (this.progress.transferred !== this.progress.total && first[0] !== last[0])
+              ? (last[1].transferred - first[1].transferred) / ((last[0] - first[0]) / 1000) : 0;
           },
           ETA() {
-            return (this.progress.total - this.progress.transferred) / this.speed();
+            return this.speed() !== 0 ? (this.progress.total - this.progress.transferred) / this.speed() : 0;
           },
         };
         if (!state.allDownloadProgress) {
