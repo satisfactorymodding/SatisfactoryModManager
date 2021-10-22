@@ -24,7 +24,11 @@
     },
     "files": [
       "dist/electron/**/*",
-      "icons/*"
+      "icons/*",
+      "!node_modules",
+      "node_modules/bindings/**/*",
+      "node_modules/file-uri-to-path/**/*",
+      "node_modules/satisfactory-mod-manager-api/**/*"
     ],
     "protocols": {
       "name": "Satisfactory Mod Manager",
@@ -72,7 +76,6 @@
       "artifactName": "Satisfactory-Mod-Manager.${ext}"
     },
     "asarUnpack": [
-      "**/node_modules/exiftool-vendored.*/**/*",
       "**/*.node"
     ]
   },
@@ -146,6 +149,7 @@
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.3.1",
     "listr": "^0.14.3",
+    "loader-utils": "^2.0.0",
     "mini-css-extract-plugin": "^1.3.9",
     "node-loader": "^2.0.0",
     "sass": "^1.39.2",

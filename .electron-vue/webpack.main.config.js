@@ -13,7 +13,7 @@ let mainConfig = {
     main: path.join(__dirname, '../src/main/index.js')
   },
   externals: [
-    ...Object.keys(dependencies || {})
+    'bindings'
   ],
   module: {
     rules: [
@@ -23,9 +23,19 @@ let mainConfig = {
         exclude: /node_modules/
       },
       {
+        test: /\.js$/,
+        use: path.resolve('webpack-loaders/bindings-loader'),
+      },
+      {
         test: /\.node$/,
-        use: 'node-loader'
-      }
+        use: {
+          loader: path.resolve('webpack-loaders/native-loader'),
+          options: {
+            name: process.env.NODE_ENV !== 'production' ? '[name].[ext]' : '[name]-[hash].[ext]', // Use original in dev
+            emit: process.env.NODE_ENV === 'production' // Do not emit in dev, needed when using linked packages
+          }
+        }
+      },
     ]
   },
   node: {

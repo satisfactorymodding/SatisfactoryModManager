@@ -1,0 +1,29 @@
+{
+  "title": "Node Loader options",
+  "type": "object",
+  "properties": {
+    "name": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "instanceof": "Function"
+        }
+      ],
+      "description": "Specifies a custom filename template for the target file(s).",
+      "link": "https://github.com/webpack-contrib/node-loader#name"
+    },
+    "flags": {
+      "type": "integer",
+      "description": "An integer value that allows to specify dlopen behavior.",
+      "link": "https://github.com/webpack-contrib/node-loader#flags"
+    },
+    "emit": {
+      "type": "boolean",
+      "description": "Whether to emit the native module file.",
+      "link": "https://github.com/webpack-contrib/node-loader"
+    }
+  },
+  "additionalProperties": false
+}

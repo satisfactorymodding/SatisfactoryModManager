@@ -3,7 +3,6 @@
 process.env.BABEL_ENV = 'renderer'
 
 const path = require('path')
-const { dependencies } = require('../package.json')
 const webpack = require('webpack')
 
 const TerserPlugin = require('terser-webpack-plugin');
@@ -13,22 +12,13 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const { VueLoaderPlugin } = require('vue-loader')
 const ESLintPlugin = require('eslint-webpack-plugin');
 
-/**
- * List of node_modules to include in webpack bundle
- *
- * Required for specific packages like Vue UI libraries
- * that provide pure *.vue files that need compiling
- * https://simulatedgreg.gitbooks.io/electron-vue/content/en/webpack-configurations.html#white-listing-externals
- */
-let whiteListedModules = ['vue', 'vuetify']
-
 let rendererConfig = {
   devtool: 'source-map',
   entry: {
     renderer: path.join(__dirname, '../src/renderer/main.js')
   },
   externals: [
-    ...Object.keys(dependencies || {}).filter(d => !whiteListedModules.includes(d))
+    'bindings',
   ],
   module: {
     rules: [
@@ -53,12 +43,6 @@ let rendererConfig = {
           'css-loader',
           {
             loader: 'sass-loader',
-            // Requires sass-loader@^7.0.0
-            options: {
-              implementation: require('sass'),
-              indentedSyntax: true // optional
-            },
-            // Requires sass-loader@^8.0.0
             options: {
               implementation: require('sass'),
               sassOptions: {
@@ -86,8 +70,18 @@ let rendererConfig = {
         exclude: /node_modules/
       },
       {
+        test: /\.js$/,
+        use: path.resolve('webpack-loaders/bindings-loader'),
+      },
+      {
         test: /\.node$/,
-        use: 'node-loader'
+        use: {
+          loader: path.resolve('webpack-loaders/native-loader'),
+          options: {
+            name: process.env.NODE_ENV !== 'production' ? '[name].[ext]' : '[name]-[hash].[ext]', // Use original in dev
+            emit: process.env.NODE_ENV === 'production' // Do not emit in dev, needed when using linked packages
+          }
+        }
       },
       {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
@@ -150,7 +144,6 @@ let rendererConfig = {
         ? path.resolve(__dirname, '../node_modules')
         : false
     }),
-    new webpack.HotModuleReplacementPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
     new ESLintPlugin({
       formatter: require('eslint-friendly-formatter')
@@ -165,9 +158,11 @@ let rendererConfig = {
     alias: {
       '@': path.join(__dirname, '../src/renderer'),
       '~': path.join(__dirname, '../src'),
-      'vue$': 'vue/dist/vue.esm.js'
+      'vue$': 'vue/dist/vue.esm.js',
+      'jszip': require.resolve('jszip/lib/index.js'), // https://github.com/Stuk/jszip/issues/663#issuecomment-675737399
     },
-    extensions: ['.js', '.vue', '.json', '.css', '.node']
+    extensions: ['.js', '.vue', '.json', '.css', '.node'],
+    symlinks: false,
   },
   target: 'electron-renderer',
   optimization: {},
@@ -180,7 +175,8 @@ if (process.env.NODE_ENV !== 'production') {
   rendererConfig.plugins.push(
     new webpack.DefinePlugin({
       '__static': `"${path.join(__dirname, '../static').replace(/\\/g, '\\\\')}"`
-    })
+    }),
+    new webpack.HotModuleReplacementPlugin()
   )
 }
 
@@ -196,6 +192,10 @@ if (process.env.NODE_ENV === 'production') {
         globOptions: {
           ignore: ['.*'],
         }
+      },
+      {
+        from: path.join(__dirname, '../node_modules/win-ca/lib/roots.exe'),
+        to: path.join(__dirname, '../dist/electron/roots.exe')
       }
     ]}),
     new webpack.DefinePlugin({
@@ -206,7 +206,13 @@ if (process.env.NODE_ENV === 'production') {
     })
   );
   rendererConfig.optimization.minimize = true;
-  rendererConfig.optimization.minimizer = [new TerserPlugin()];
+  rendererConfig.optimization.minimizer = [
+    new TerserPlugin({
+      terserOptions: {
+        sourceMap: true
+      }
+    })
+  ];
 }
 
 module.exports = rendererConfig

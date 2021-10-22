@@ -3,7 +3,7 @@ import {
 } from 'electron';
 import path from 'path';
 import { autoUpdater } from 'electron-updater';
-import socketio from 'socket.io';
+import { Server } from 'socket.io';
 import { getSetting, saveSetting } from '../settings';
 import './differentialUpdateProgress';
 
@@ -287,7 +287,7 @@ if (app.requestSingleInstanceLock()) {
     });
   });
 
-  const wss = new socketio.Server(33642, { path: '/' });
+  const wss = new Server(33642, { path: '/' });
   wss.on('connection', (socket) => {
     socket.on('installedMods', () => {
       ipcMain.once('installedMods', (event, installedMods) => {
