@@ -222,7 +222,7 @@ export default {
       return !!this.$store.state.installedMods[this.mod.mod_reference];
     },
     dependants() {
-      return Object.entries(this.$store.state.installedMods || {}).filter(([, data]) => !!data.dependencies[this.mod.mod_reference] && !data.id === this.mod.mod_reference).map(([item]) => item);
+      return Object.entries(this.$store.state.installedMods || {}).filter(([id, data]) => !!data.dependencies[this.mod.mod_reference] && id !== this.mod.mod_reference).map(([item]) => item);
     },
     isDependency() {
       return this.dependants.length > 0;
