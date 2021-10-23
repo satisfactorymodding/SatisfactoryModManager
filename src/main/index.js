@@ -86,7 +86,12 @@ function createWindow() {
       enableRemoteModule: true,
     },
     frame,
+    show: false,
     icon: process.platform === 'linux' ? path.join(__dirname, '../../icons/64x64.png') : undefined, // https://github.com/AppImage/AppImageKit/wiki/Bundling-Electron-apps
+  });
+
+  mainWindow.webContents.on('did-finish-load', () => {
+    mainWindow.show();
   });
 
   app.applicationMenu = null;
@@ -95,7 +100,7 @@ function createWindow() {
     mainWindow.maximize();
   }
 
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV !== 'production') {
     mainWindow.loadURL(mainURL);
   } else {
     mainWindow.loadFile(mainFile);
