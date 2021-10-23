@@ -48,7 +48,10 @@ function startRenderer () {
 
     const server = new WebpackDevServer(
       {
-        static: path.join(__dirname, '../'),
+        static: {
+          directory: path.join(__dirname, '../'),
+          watch: false,
+        },
         hot: true,
         port: 9080,
         client: {
