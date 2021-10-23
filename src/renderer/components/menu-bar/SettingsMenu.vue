@@ -534,10 +534,10 @@ import fs from 'fs';
 import path from 'path';
 import { getCacheFolder } from 'platform-folders';
 import StreamZip from 'node-stream-zip';
-import { filenameFriendlyDate, filenamify, validAndEq } from '@/utils';
 import gql from 'graphql-tag';
 import { satisfies } from 'semver';
 import { mapState } from 'vuex';
+import { filenameFriendlyDate, filenamify, validAndEq } from '@/utils';
 import { getSetting, saveSetting } from '~/settings';
 
 /**
@@ -566,13 +566,15 @@ export default {
       updateSMLVersionVal: 0,
     };
   },
+  asyncComputed: {
+    async version() {
+      return this.$electron.ipcRenderer.invoke('getVersion');
+    },
+  },
   computed: {
     ...mapState([
       'konami',
     ]),
-    version() {
-      return this.$electron.remote.app.getVersion();
-    },
     expandModInfoOnStart: {
       get() {
         return this.$store.state.expandModInfoOnStart;
@@ -688,7 +690,7 @@ export default {
       }
     },
     async exportDebugData() {
-      const result = this.$electron.remote.dialog.showSaveDialogSync(this.$electron.remote.getCurrentWindow(), {
+      const result = this.$electron.ipcRenderer.invoke('saveDialog', {
         title: 'Save debug data as',
         filters: [
           { name: 'SMM Debug Data', extensions: ['zip'] },
@@ -749,7 +751,7 @@ export default {
       }
     },
     async exportProfile() {
-      const result = this.$electron.remote.dialog.showSaveDialogSync(this.$electron.remote.getCurrentWindow(), {
+      const result = this.$electron.ipcRenderer.invoke('saveDialog', {
         title: 'Export profile as',
         filters: [
           { name: 'SMM Profile', extensions: ['smmprofile'] },

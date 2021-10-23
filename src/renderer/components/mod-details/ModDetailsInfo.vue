@@ -179,8 +179,8 @@
 </template>
 
 <script>
-import { validAndEq, bytesToAppropriate } from '@/utils';
 import { mapState } from 'vuex';
+import { validAndEq, bytesToAppropriate } from '@/utils';
 
 export default {
   props: {

@@ -178,10 +178,10 @@
 
 <script>
 import { mapState } from 'vuex';
+import gql from 'graphql-tag';
 import {
   ignoreUpdate, unignoreUpdate,
 } from '@/utils';
-import gql from 'graphql-tag';
 import SettingsMenu from './SettingsMenu';
 import UpdatesMenu from './UpdatesMenu';
 import ProfileImportProgressDialog from './dialogs/ProfileImportProgressDialog';

@@ -32,10 +32,10 @@
 
 <script>
 import { mapState } from 'vuex';
-import { lastElement, setIntervalImmediately, isCompatibleFast } from '@/utils';
 import Fuse from 'fuse.js';
 import debounce from 'debounce';
 import gql from 'graphql-tag';
+import { lastElement, setIntervalImmediately, isCompatibleFast } from '@/utils';
 import ModsListItem from './ModsListItem';
 import { getSetting, saveSetting } from '~/settings';
 

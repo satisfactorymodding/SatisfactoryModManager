@@ -313,8 +313,8 @@ import { exec } from 'child_process';
 import { getCacheFolder } from 'platform-folders';
 import fs from 'fs';
 import path from 'path';
-import { lastElement, bytesToAppropriate } from '@/utils';
 import gql from 'graphql-tag';
+import { lastElement, bytesToAppropriate } from '@/utils';
 import { getSetting } from '~/settings';
 import TitleBar from './TitleBar';
 import MenuBar from './menu-bar/MenuBar';
@@ -359,6 +359,14 @@ export default {
       catPressed: false,
     };
   },
+  asyncComputed: {
+    hasFrame: {
+      async get() {
+        return this.$electron.ipcRenderer.invoke('hasFrame');
+      },
+      default: true,
+    },
+  },
   computed: {
     ...mapState(
       [
@@ -401,9 +409,6 @@ export default {
     },
     currentUpdateDownloadProgress() {
       return lastElement(this.updateDownloadProgress.progresses);
-    },
-    hasFrame() {
-      return this.$electron.remote.getGlobal('frame');
     },
     launchButtonText() {
       if (this.isGameRunning) {
@@ -514,14 +519,14 @@ export default {
         this.$electron.ipcRenderer.on('updateDownloaded', () => {
           setInterval(() => {
             if (this.inProgress.length === 0) {
-              this.$electron.remote.getCurrentWindow().close();
+              this.$electron.ipcRenderer.invoke('close');
             }
           }, 100);
         });
       } else {
         setInterval(() => {
           if (this.inProgress.length === 0) {
-            this.$electron.remote.getCurrentWindow().close();
+            this.$electron.ipcRenderer.invoke('close');
           }
         }, 100);
       }

@@ -167,8 +167,8 @@
 
 <script>
 import { mapState } from 'vuex';
-import { lastElement, isCompatibleFast } from '@/utils';
 import gql from 'graphql-tag';
+import { lastElement, isCompatibleFast } from '@/utils';
 import ModActionButton from './ModActionButton';
 
 export default {

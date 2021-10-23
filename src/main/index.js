@@ -1,5 +1,5 @@
 import {
-  app, BrowserWindow, ipcMain, shell, screen, session,
+  app, BrowserWindow, ipcMain, shell, screen, session, dialog,
 } from 'electron';
 import path from 'path';
 import { autoUpdater } from 'electron-updater';
@@ -137,6 +137,18 @@ function createWindow() {
     event.preventDefault();
     shell.openExternal(url);
   });
+
+  ipcMain.handle('saveDialog', (event, options) => dialog.showSaveDialogSync(mainWindow, options));
+
+  ipcMain.handle('getVersion', () => app.getVersion());
+
+  ipcMain.handle('hasFrame', () => frame);
+
+  ipcMain.handle('minimize', () => mainWindow.minimize());
+  ipcMain.handle('maximize', () => mainWindow.maximize());
+  ipcMain.handle('unmaximize', () => mainWindow.unmaximize());
+  ipcMain.handle('isMaximized', () => mainWindow.isMaximized());
+  ipcMain.handle('close', () => mainWindow.close());
 }
 
 let isAutoUpdateTarget = true; // will be set to false if checkForUpdates errors
