@@ -121,8 +121,11 @@ export default new Vuex.Store({
           }],
         };
         state.inProgress.push(loadProgress);
-        const savedProfileName = getSetting('selectedProfile', {})[state.selectedInstall.installLocation] || 'modded';
-        commit('setProfile', { newProfile: state.profiles.find((conf) => conf.name.toLowerCase() === savedProfileName.toLowerCase()) });
+        let savedProfileName = getSetting('selectedProfile', {})[state.selectedInstall.installLocation] || 'modded';
+        if (!state.profiles.some((profile) => profile.name.toLowerCase() === savedProfileName.toLowerCase())) {
+          savedProfileName = 'modded'; // If profile is missing, default to modded
+        }
+        commit('setProfile', { newProfile: state.profiles.find((profile) => profile.name.toLowerCase() === savedProfileName.toLowerCase()) });
         const savedModsEnabled = getSetting('modsEnabled', {})[state.selectedInstall.installLocation] || true;
         commit('setModsEnabled', savedModsEnabled);
         try {
@@ -548,7 +551,10 @@ export default new Vuex.Store({
             if (savedProfileName === 'vanilla') {
               savedProfileName = 'modded'; // Removed vanilla from profiles list
             }
-            commit('setProfile', { newProfile: state.profiles.find((conf) => conf.name.toLowerCase() === savedProfileName.toLowerCase()) });
+            if (!state.profiles.some((profile) => profile.name.toLowerCase() === savedProfileName.toLowerCase())) {
+              savedProfileName = 'modded'; // If profile is missing, default to modded
+            }
+            commit('setProfile', { newProfile: state.profiles.find((profile) => profile.name.toLowerCase() === savedProfileName.toLowerCase()) });
             let savedModsEnabled = getSetting('modsEnabled', {})[state.selectedInstall.installLocation];
             if (savedModsEnabled === undefined) {
               savedModsEnabled = true;
