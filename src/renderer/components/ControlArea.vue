@@ -440,10 +440,14 @@ export default {
     showCreateProfileDialog() {
       this.newProfileDialog = true;
     },
-    createProfile() {
+    async createProfile() {
       if (this.$refs.newProfileForm.validate()) {
-        this.$store.dispatch('createProfile', { profileName: filenamify(this.newProfileName), copyCurrent: this.newProfileCopyCurrent });
-        this.cancelCreateProfile();
+        try {
+          await this.$store.dispatch('createProfile', { profileName: filenamify(this.newProfileName), copyCurrent: this.newProfileCopyCurrent });
+          this.cancelCreateProfile();
+        } catch(e) {
+          this.$store.dispatch('showError', e);
+        }
       }
     },
     cancelCreateProfile() {
@@ -455,9 +459,13 @@ export default {
       this.selectedDeleteProfile = profile;
       this.deleteProfileDialog = true;
     },
-    deleteProfile() {
-      this.$store.dispatch('deleteProfile', { profileName: this.selectedDeleteProfile.name });
-      this.cancelDeleteProfile();
+    async deleteProfile() {
+      try {
+        this.$store.dispatch('deleteProfile', { profileName: this.selectedDeleteProfile.name });
+        this.cancelDeleteProfile();
+      } catch(e) {
+        this.$store.dispatch('showError', e);
+      }
     },
     cancelDeleteProfile() {
       this.deleteProfileDialog = false;
