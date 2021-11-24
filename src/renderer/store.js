@@ -126,7 +126,10 @@ export default new Vuex.Store({
           savedProfileName = 'modded'; // If profile is missing, default to modded
         }
         commit('setProfile', { newProfile: state.profiles.find((profile) => profile.name.toLowerCase() === savedProfileName.toLowerCase()) });
-        const savedModsEnabled = getSetting('modsEnabled', {})[state.selectedInstall.installLocation] || true;
+        let savedModsEnabled = getSetting('modsEnabled', {})[state.selectedInstall.installLocation];
+        if (savedModsEnabled === undefined) {
+          savedModsEnabled = true;
+        }
         commit('setModsEnabled', savedModsEnabled);
         try {
           if (state.modsEnabled) {
