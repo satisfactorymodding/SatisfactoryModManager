@@ -62,7 +62,7 @@
             </v-btn>
           </v-col>
           <v-col
-            v-if="isCompatible"
+            v-if="isCompatible || isPossiblyCompatible"
             style="flex-grow: 0; padding-bottom: 0"
             class="d-flex"
           >
@@ -155,7 +155,7 @@
 <script>
 import { mapState } from 'vuex';
 import gql from 'graphql-tag';
-import { markdownAsElement, isCompatibleFast } from '@/utils';
+import { markdownAsElement, isCompatibleFast, COMPATIBILITY_LEVEL } from '@/utils';
 import ModDetailsInfo from './ModDetailsInfo';
 
 export default {
@@ -216,10 +216,18 @@ export default {
   },
   asyncComputed: {
     isCompatible: {
-      get() {
+      async get() {
         if (!this.$store.state.selectedInstall) return false;
         if (this.mod?.hidden && !this.isDependency) return false;
-        return isCompatibleFast(this.mod, this.$store.state.selectedInstall.version);
+        return (await isCompatibleFast(this.mod, this.$store.state.selectedInstall.version)) === COMPATIBILITY_LEVEL.COMPATIBLE;
+      },
+      default: false,
+    },
+    isPossiblyCompatible: {
+      async get() {
+        if (!this.$store.state.selectedInstall) return false;
+        if (this.mod?.hidden && !this.isDependency) return false;
+        return (await isCompatibleFast(this.mod, this.$store.state.selectedInstall.version)) === COMPATIBILITY_LEVEL.POSSIBLY_COMPATIBLE;
       },
       default: false,
     },

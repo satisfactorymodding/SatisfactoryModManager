@@ -62,7 +62,7 @@
 <script>
 import gql from 'graphql-tag';
 import { mapState } from 'vuex';
-import { isCompatibleFast } from '@/utils';
+import { isCompatibleFast, COMPATIBILITY_LEVEL } from '@/utils';
 
 export default {
   data() {
@@ -129,7 +129,7 @@ export default {
           return { modReference, name: mod.name, compatible: await isCompatibleFast(mod, this.$store.state.selectedInstall.version) };
         }));
         this.previousOutatedInstalledMods = this.outdatedInstalledMods;
-        this.outdatedInstalledMods = modStates.filter((modState) => !modState.compatible);
+        this.outdatedInstalledMods = modStates.filter((modState) => modState.compatible === COMPATIBILITY_LEVEL.INCOMPATIBLE);
         this.dialogVisible = this.updateReminder || this.outdatedInstalledMods.length > 0;
       }
     },

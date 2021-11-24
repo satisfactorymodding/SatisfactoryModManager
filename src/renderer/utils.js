@@ -99,6 +99,13 @@ export function setIntervalImmediately(func, interval) {
   return setInterval(func, interval);
 }
 
+export const COMPATIBILITY_LEVEL = {
+  INCOMPATIBLE: 'incompatible',
+  POSSIBLY_COMPATIBLE: 'possibly_compatible',
+  COMPATIBLE: 'compatible',
+};
+
+/* eslint-disable camelcase */
 export async function isCompatibleFast(mod, gameVersion) {
   if (!mod || mod.versions.length === 0) {
     return false;
@@ -124,9 +131,30 @@ export async function isCompatibleFast(mod, gameVersion) {
   const compatibleSMLVersions = versionConstraints
     .filter((versionConstraint) => satisfies(valid(coerce(gameVersion)), versionConstraint.satisfactory_version))
     .map((versionConstraint) => versionConstraint.version);
-  return mod.versions.some((ver) => (
+  const SML3_0_0_gameVersion = smlVersions.find((smlVer) => smlVer.version === '3.0.0').satisfactory_version;
+  const SML3_2_0_gameVersion = smlVersions.find((smlVer) => smlVer.version === '3.2.0').satisfactory_version;
+  let minSMLVersionForGame = '2.0.0';
+  if (gameVersion > SML3_2_0_gameVersion) {
+    minSMLVersionForGame = '3.2.0';
+  } else if (gameVersion > SML3_0_0_gameVersion) {
+    minSMLVersionForGame = '3.0.0';
+  }
+  const compatible = mod.versions.some((ver) => (
     validRange(ver.sml_version)
-    && satisfies(minVersion(ver.sml_version), gameVersion > smlVersions.find((smlVer) => smlVer.version === '3.0.0').satisfactory_version ? '>=3.0.0' : '>=2.0.0')
+    && satisfies(minVersion(ver.sml_version), `>=${minSMLVersionForGame}`)
     && compatibleSMLVersions.some((smlVer) => satisfies(smlVer, validRange(ver.sml_version)))
   ));
+  const possibleCompatible = mod.versions.some((ver) => (
+    validRange(ver.sml_version)
+    && satisfies(minVersion(ver.sml_version), '>=3.0.0')
+    && compatibleSMLVersions.some((smlVer) => satisfies(smlVer, validRange(ver.sml_version)))
+  ));
+  if (compatible) {
+    return COMPATIBILITY_LEVEL.COMPATIBLE;
+  }
+  if (possibleCompatible) {
+    return COMPATIBILITY_LEVEL.POSSIBLY_COMPATIBLE;
+  }
+  return COMPATIBILITY_LEVEL.INCOMPATIBLE;
 }
+/* eslint-enable camelcase */

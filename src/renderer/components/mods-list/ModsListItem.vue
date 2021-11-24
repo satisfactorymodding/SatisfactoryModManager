@@ -16,12 +16,19 @@
         style="cursor: pointer; user-select: none; padding: 0;"
         @click="expandClicked"
       >
-        <v-list-item-title
-          :class="isCompatible ? 'text--text' : 'error--text'"
-          style="font-weight: 300"
-        >
-          {{ mod.name }}
-        </v-list-item-title>
+        <v-tooltip top color="background" :disabled="!errorTooltip">
+          <template v-slot:activator="{ on, attrs }">
+            <v-list-item-title
+              :class="isCompatible ? 'text--text' : (isPossiblyCompatible ? 'warning--text' : 'error--text')"
+              style="font-weight: 300"
+              v-on="on"
+              v-bind="attrs"
+            >
+              {{ mod.name }}
+            </v-list-item-title>
+          </template>
+          {{ errorTooltip }}
+        </v-tooltip>
         <v-list-item-subtitle v-if="!isModInProgress">
           <div
             class="d-inline-flex align-center icon--text"
@@ -96,7 +103,7 @@
           mdi-sync
         </v-icon>
         <v-tooltip
-          v-else-if="!isCompatible"
+          v-else-if="!isCompatible && !isPossiblyCompatible"
           color="background"
           left
         >
@@ -168,7 +175,7 @@
 <script>
 import { mapState } from 'vuex';
 import gql from 'graphql-tag';
-import { lastElement, isCompatibleFast } from '@/utils';
+import { lastElement, isCompatibleFast, COMPATIBILITY_LEVEL } from '@/utils';
 import ModActionButton from './ModActionButton';
 
 export default {
@@ -230,12 +237,28 @@ export default {
   },
   asyncComputed: {
     isCompatible: {
-      get() {
+      async get() {
         if (!this.$store.state.selectedInstall) return false;
         if (this.mod.hidden && !this.isDependency) return false;
-        return isCompatibleFast(this.mod, this.$store.state.selectedInstall.version);
+        return (await isCompatibleFast(this.mod, this.$store.state.selectedInstall.version)) === COMPATIBILITY_LEVEL.COMPATIBLE;
       },
       default: true,
+    },
+    isPossiblyCompatible: {
+      async get() {
+        if (!this.$store.state.selectedInstall) return false;
+        if (this.mod.hidden && !this.isDependency) return false;
+        return (await isCompatibleFast(this.mod, this.$store.state.selectedInstall.version)) === COMPATIBILITY_LEVEL.POSSIBLY_COMPATIBLE;
+      },
+      default: false,
+    },
+    errorTooltip: {
+      get() {
+        if (this.isCompatible) return null;
+        if (this.isPossiblyCompatible) return 'This mod is likely incompatible with your game version and may cause crashes.';
+        return 'This mod is incompatible with your game version.';
+      },
+      default: null,
     },
     dependantsFriendly: {
       async get() {

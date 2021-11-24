@@ -35,7 +35,7 @@ import { mapState } from 'vuex';
 import Fuse from 'fuse.js';
 import debounce from 'debounce';
 import gql from 'graphql-tag';
-import { lastElement, setIntervalImmediately, isCompatibleFast } from '@/utils';
+import { lastElement, setIntervalImmediately, isCompatibleFast, COMPATIBILITY_LEVEL} from '@/utils';
 import ModsListItem from './ModsListItem';
 import { getSetting, saveSetting } from '~/settings';
 
@@ -365,12 +365,8 @@ export default {
         return;
       }
       const { version } = this.$store.state.selectedInstall;
-      this.compatibleMods = (await Promise.all(this.allMods.map(async (mod) => ((await isCompatibleFast(mod, version)) ? mod : null)))).filter((mod) => !!mod);
+      this.compatibleMods = (await Promise.all(this.allMods.map(async (mod) => ((await isCompatibleFast(mod, version)) === COMPATIBILITY_LEVEL.COMPATIBLE ? mod : null)))).filter((mod) => !!mod);
       this.availableFilters.forEach(async (filter) => { filter.mods = filter.filter(this.allMods, this).length; });
-    },
-    async isCompatible(mod) {
-      if (!this.$store.state.selectedInstall) return false;
-      return isCompatibleFast(mod, this.$store.state.selectedInstall.version);
     },
     lastElement,
   },
