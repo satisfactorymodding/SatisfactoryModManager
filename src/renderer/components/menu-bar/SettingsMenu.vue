@@ -690,7 +690,7 @@ export default {
       }
     },
     async exportDebugData() {
-      const result = this.$electron.ipcRenderer.invoke('saveDialog', {
+      const result = await this.$electron.ipcRenderer.invoke('saveDialog', {
         title: 'Save debug data as',
         filters: [
           { name: 'SMM Debug Data', extensions: ['zip'] },
@@ -751,7 +751,7 @@ export default {
       }
     },
     async exportProfile() {
-      const result = this.$electron.ipcRenderer.invoke('saveDialog', {
+      const result = await this.$electron.ipcRenderer.invoke('saveDialog', {
         title: 'Export profile as',
         filters: [
           { name: 'SMM Profile', extensions: ['smmprofile'] },
