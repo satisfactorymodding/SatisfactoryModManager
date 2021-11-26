@@ -89,6 +89,7 @@
           :filtered-mod-updates="filteredModUpdates"
           :show-ignored-updates.sync="showIgnoredUpdates"
           :update-check-mode.sync="updateCheckMode"
+          :update-check-in-progress="updateCheckInProgress"
           @addUpdateListener="addUpdateListener"
           @openSMMUpdateDialog="openSMMUpdateDialog"
           @openModUpdatesDialog="openModUpdatesDialog"
@@ -208,7 +209,7 @@ export default {
       availableSMMUpdate: null,
       modUpdates: [],
       nextCheckForUpdates: -1,
-      currentCheckForUpdates: -1,
+      updateCheckInProgress: false,
       viewChangelogUpdate: null,
       showIgnoredUpdates: false,
       ignoredUpdates: [],
@@ -293,19 +294,15 @@ export default {
       }
     },
     async checkForUpdates() {
-      this.currentCheckForUpdates += 1;
-      const thisCheckForUpdates = this.currentCheckForUpdates;
+      if (this.updateCheckInProgress) {
+        return;
+      }
+      this.updateCheckInProgress = true;
       clearTimeout(this.nextCheckForUpdates);
       // don't check for updates while something is in progress
       while (this.inProgress.length > 0) {
         // eslint-disable-next-line no-await-in-loop
         await new Promise((res) => setTimeout(() => res(), 500));
-        if (thisCheckForUpdates !== this.currentCheckForUpdates) {
-          return;
-        }
-      }
-      if (thisCheckForUpdates !== this.currentCheckForUpdates) {
-        return;
       }
       this.$electron.ipcRenderer.send('checkForUpdates');
       const modUpdates = await Promise.all((await this.$store.state.selectedInstall.checkForUpdates()).map(async (update) => Object.assign(update, {
@@ -323,10 +320,9 @@ export default {
           },
         })).data.mod?.name || update.item,
       })));
-      if (thisCheckForUpdates === this.currentCheckForUpdates) {
-        this.modUpdates = modUpdates;
-        this.nextCheckForUpdates = setTimeout(() => this.checkForUpdates(), UPDATE_CHECK_INTERVAL);
-      }
+      this.updateCheckInProgress = false;
+      this.modUpdates = modUpdates;
+      this.nextCheckForUpdates = setTimeout(() => this.checkForUpdates(), UPDATE_CHECK_INTERVAL);
     },
     updateSMMNow() {
       this.$root.$emit('downloadUpdate');
