@@ -2,6 +2,7 @@ import {
   app, BrowserWindow, ipcMain, shell, screen, session, dialog,
 } from 'electron';
 import path from 'path';
+import http from 'http';
 import { autoUpdater } from 'electron-updater';
 import { Server } from 'socket.io';
 import { getSetting, saveSetting } from '../settings';
@@ -304,7 +305,9 @@ if (app.requestSingleInstanceLock()) {
     });
   });
 
-  const wss = new Server(33642, { path: '/' });
+  const srv = http.createServer();
+  srv.listen(33642, '127.0.0.1');
+  const wss = new Server(srv, { path: '/' });
   wss.on('connection', (socket) => {
     socket.on('installedMods', () => {
       ipcMain.once('installedMods', (event, installedMods) => {
