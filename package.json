@@ -28,7 +28,8 @@
       "!node_modules",
       "node_modules/bindings/**/*",
       "node_modules/file-uri-to-path/**/*",
-      "node_modules/satisfactory-mod-manager-api/**/*"
+      "node_modules/satisfactory-mod-manager-api/**/*",
+      "node_modules/ps-list/**/*"
     ],
     "protocols": {
       "name": "Satisfactory Mod Manager",

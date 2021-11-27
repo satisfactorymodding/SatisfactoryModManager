@@ -19,6 +19,7 @@ let rendererConfig = {
   },
   externals: [
     'bindings',
+    'ps-list',
   ],
   module: {
     rules: [
