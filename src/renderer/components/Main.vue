@@ -32,20 +32,48 @@
           @set-available-sorting="availableSorting = $event"
         />
         <template v-if="(!launchButton && !launchCat) || !(selectedInstall && selectedInstall.launchPath && !isGameRunning)">
-          <v-btn
-            class="flex-grow-0 flex-shrink-0"
-            block
-            tile
-            color="primary"
-            elevation="0"
-            style="font-size: 18px; min-height: 50px;"
-            :style="launchButton && selectedInstall && selectedInstall.launchPath && !isGameRunning ? 'height: 98px' : ''"
-            :disabled="!!inProgress.length || isGameRunning || (selectedInstall && !selectedInstall.launchPath)"
-            :ripple="!launchButton"
-            @click="() => !launchButton && launchSatisfactory()"
+          <v-tooltip
+            top
+            color="background"
+            :disabled="incompatibleInstalledCount === 0 && possiblyCompatibleInstalledCount === 0"
           >
-            {{ launchButtonText }}
-          </v-btn>
+            <template #activator="{ on, attrs }">
+              <v-btn
+                class="flex-grow-0 flex-shrink-0"
+                block
+                tile
+                :color="buttonColor"
+                elevation="0"
+                style="font-size: 18px; min-height: 50px;"
+                :style="launchButton && selectedInstall && selectedInstall.launchPath && !isGameRunning ? 'height: 98px' : ''"
+                :disabled="!!inProgress.length || isGameRunning || (selectedInstall && !selectedInstall.launchPath)"
+                :ripple="!launchButton"
+                v-bind="attrs"
+                @click="() => !launchButton && launchSatisfactory()"
+                v-on="on"
+              >
+                {{ launchButtonText }}
+              </v-btn>
+            </template>
+            <span
+              v-if="incompatibleInstalledCount !== 0 && possiblyCompatibleInstalledCount !== 0"
+            >
+              You have {{ possiblyCompatibleInstalledCount }} mod{{ possiblyCompatibleInstalledCount > 1 ? 's' : '' }}
+              that {{ possiblyCompatibleInstalledCount > 1 ? 'are' : 'is' }} likely incompatible and
+              {{ incompatibleInstalledCount }} mod{{ incompatibleInstalledCount > 1 ? 's' : '' }} that are incompatible with your game.
+              These will either not load or crash your game.
+              Are you sure you want to launch?
+            </span>
+            <span v-else-if="incompatibleInstalledCount !== 0">
+              You have {{ incompatibleInstalledCount }} incompatible mod{{ incompatibleInstalledCount > 1 ? 's' : '' }} which will either not load or crash your game.
+              Are you sure you want to launch?
+            </span>
+            <span v-else>
+              You have {{ possiblyCompatibleInstalledCount }} mod{{ possiblyCompatibleInstalledCount > 1 ? 's' : '' }}
+              that {{ possiblyCompatibleInstalledCount > 1 ? 'are' : 'is' }} likely incompatible and can crash your game.
+              Are you sure you want to launch?
+            </span>
+          </v-tooltip>
         </template>
         <template v-else-if="launchButton">
           <div style="height: 98px">
@@ -314,7 +342,9 @@ import { getCacheFolder } from 'platform-folders';
 import fs from 'fs';
 import path from 'path';
 import gql from 'graphql-tag';
-import { lastElement, bytesToAppropriate } from '@/utils';
+import {
+  lastElement, bytesToAppropriate, isCompatibleFast, COMPATIBILITY_LEVEL,
+} from '@/utils';
 import { getSetting } from '~/settings';
 import TitleBar from './TitleBar';
 import MenuBar from './menu-bar/MenuBar';
@@ -366,11 +396,68 @@ export default {
       },
       default: true,
     },
+    modStates: {
+      async get() {
+        return Promise.all(Object.keys(this.installedMods).map(async (modReference) => {
+          if (modReference === 'SML' || modReference === 'bootstrapper') {
+            return { modReference, name: modReference, compatible: true };
+          }
+          const { mod } = (await this.$apollo.query({
+            query: gql`            
+              query checkOutdatedMod($modReference: ModReference!) {
+                mod: getModByReference(modReference: $modReference) {
+                  id,
+                  mod_reference,
+                  name,
+                  versions(filter: { limit: 100 }) {
+                    id,
+                    sml_version,
+                  }
+                }
+              }
+            `,
+            variables: {
+              modReference,
+            },
+          })).data;
+          if (!mod) {
+            return { modReference, name: modReference, compatible: false };
+          }
+          return { modReference, name: mod.name, compatible: await isCompatibleFast(mod, this.$store.state.selectedInstall.version) };
+        }));
+      },
+      default: [],
+    },
+    possiblyCompatibleInstalledCount: {
+      async get() {
+        return (await this.modStates).filter(({ compatible }) => compatible === COMPATIBILITY_LEVEL.POSSIBLY_COMPATIBLE).length;
+      },
+      default: 0,
+    },
+    incompatibleInstalledCount: {
+      async get() {
+        return (await this.modStates).filter(({ compatible }) => compatible === COMPATIBILITY_LEVEL.INCOMPATIBLE).length;
+      },
+      default: 0,
+    },
+    buttonColor: {
+      async get() {
+        if (this.incompatibleInstalledCount > 0) {
+          return 'error';
+        }
+        if (this.possiblyCompatibleInstalledCount > 0) {
+          return 'warning';
+        }
+        return 'primary';
+      },
+      default: 'primary',
+    },
   },
   computed: {
     ...mapState(
       [
         'selectedInstall',
+        'installedMods',
         'expandedModId',
         'inProgress',
         'isGameRunning',
