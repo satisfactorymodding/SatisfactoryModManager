@@ -32,20 +32,48 @@
           @set-available-sorting="availableSorting = $event"
         />
         <template v-if="(!launchButton && !launchCat) || !(selectedInstall && selectedInstall.launchPath && !isGameRunning)">
-          <v-btn
-            class="flex-grow-0 flex-shrink-0"
-            block
-            tile
-            color="primary"
-            elevation="0"
-            style="font-size: 18px; min-height: 50px;"
-            :style="launchButton && selectedInstall && selectedInstall.launchPath && !isGameRunning ? 'height: 98px' : ''"
-            :disabled="!!inProgress.length || isGameRunning || (selectedInstall && !selectedInstall.launchPath)"
-            :ripple="!launchButton"
-            @click="() => !launchButton && launchSatisfactory()"
+          <v-tooltip
+            top
+            color="background"
+            :disabled="incompatibleInstalledCount === 0 && possiblyCompatibleInstalledCount === 0"
           >
-            {{ launchButtonText }}
-          </v-btn>
+            <template #activator="{ on, attrs }">
+              <v-btn
+                class="flex-grow-0 flex-shrink-0"
+                block
+                tile
+                :color="buttonColor"
+                elevation="0"
+                style="font-size: 18px; min-height: 50px;"
+                :style="launchButton && selectedInstall && selectedInstall.launchPath && !isGameRunning ? 'height: 98px' : ''"
+                :disabled="!!inProgress.length || isGameRunning || (selectedInstall && !selectedInstall.launchPath)"
+                :ripple="!launchButton"
+                v-bind="attrs"
+                @click="() => !launchButton && launchSatisfactory()"
+                v-on="on"
+              >
+                {{ launchButtonText }}
+              </v-btn>
+            </template>
+            <span
+              v-if="incompatibleInstalledCount !== 0 && possiblyCompatibleInstalledCount !== 0"
+            >
+              You have {{ possiblyCompatibleInstalledCount }} mod{{ possiblyCompatibleInstalledCount > 1 ? 's' : '' }}
+              that {{ possiblyCompatibleInstalledCount > 1 ? 'are' : 'is' }} likely incompatible and
+              {{ incompatibleInstalledCount }} mod{{ incompatibleInstalledCount > 1 ? 's' : '' }} that are incompatible with your game.
+              These will either not load or crash your game.
+              Are you sure you want to launch?
+            </span>
+            <span v-else-if="incompatibleInstalledCount !== 0">
+              You have {{ incompatibleInstalledCount }} incompatible mod{{ incompatibleInstalledCount > 1 ? 's' : '' }} which will either not load or crash your game.
+              Are you sure you want to launch?
+            </span>
+            <span v-else>
+              You have {{ possiblyCompatibleInstalledCount }} mod{{ possiblyCompatibleInstalledCount > 1 ? 's' : '' }}
+              that {{ possiblyCompatibleInstalledCount > 1 ? 'are' : 'is' }} likely incompatible and can crash your game.
+              Are you sure you want to launch?
+            </span>
+          </v-tooltip>
         </template>
         <template v-else-if="launchButton">
           <div style="height: 98px">
@@ -88,6 +116,53 @@
       </v-card>
       <ModDetails v-if="expandedModId" />
     </v-card>
+    <v-dialog
+      v-model="uriInstallDialog"
+      max-width="550"
+    >
+      <v-card>
+        <div class="d-flex flex-no-wrap justify-space-between">
+          <div>
+            <v-card-title
+              class="text-h5"
+            >
+              {{ uriInstallModData ? uriInstallModData.name : '(Loading name...)' }}
+            </v-card-title>
+
+            <v-card-subtitle>
+              {{ uriInstallModData ? uriInstallModData.short_description : '(Loading description...)' }}
+            </v-card-subtitle>
+            <v-card-subtitle>
+              Version: {{ uriInstallModVersion || 'latest' }}
+            </v-card-subtitle>
+
+            <v-card-actions>
+              <v-btn
+                color="primary"
+                text
+                @click="uriInstallMod"
+              >
+                Install
+              </v-btn>
+              <v-btn
+                text
+                @click="uriInstallDialog = false"
+              >
+                Cancel
+              </v-btn>
+            </v-card-actions>
+          </div>
+
+          <v-avatar
+            class="ma-3"
+            size="125"
+            tile
+          >
+            <v-img :src="(uriInstallModData ? uriInstallModData.logo : null) || 'https://ficsit.app/static/assets/images/no_image.png'" />
+          </v-avatar>
+        </div>
+      </v-card>
+    </v-dialog>
     <v-dialog
       v-model="errorDialog"
       :persistent="errorPersistent"
@@ -266,7 +341,10 @@ import { exec } from 'child_process';
 import { getCacheFolder } from 'platform-folders';
 import fs from 'fs';
 import path from 'path';
-import { lastElement, bytesToAppropriate } from '@/utils';
+import gql from 'graphql-tag';
+import {
+  lastElement, bytesToAppropriate, isCompatibleFast, COMPATIBILITY_LEVEL,
+} from '@/utils';
 import { getSetting } from '~/settings';
 import TitleBar from './TitleBar';
 import MenuBar from './menu-bar/MenuBar';
@@ -290,6 +368,9 @@ export default {
   },
   data() {
     return {
+      uriInstallDialog: false,
+      uriInstallModReference: null,
+      uriInstallModVersion: null,
       smmUpdateDownloadProgress: {},
       updateDownloadFinished: false,
       showUpdateDownloadProgress: false,
@@ -308,10 +389,75 @@ export default {
       catPressed: false,
     };
   },
+  asyncComputed: {
+    hasFrame: {
+      async get() {
+        return this.$electron.ipcRenderer.invoke('hasFrame');
+      },
+      default: true,
+    },
+    modStates: {
+      async get() {
+        return Promise.all(Object.keys(this.installedMods).map(async (modReference) => {
+          if (modReference === 'SML' || modReference === 'bootstrapper') {
+            return { modReference, name: modReference, compatible: true };
+          }
+          const { mod } = (await this.$apollo.query({
+            query: gql`            
+              query checkOutdatedMod($modReference: ModReference!) {
+                mod: getModByReference(modReference: $modReference) {
+                  id,
+                  mod_reference,
+                  name,
+                  versions(filter: { limit: 100 }) {
+                    id,
+                    sml_version,
+                  }
+                }
+              }
+            `,
+            variables: {
+              modReference,
+            },
+          })).data;
+          if (!mod) {
+            return { modReference, name: modReference, compatible: false };
+          }
+          return { modReference, name: mod.name, compatible: await isCompatibleFast(mod, this.$store.state.selectedInstall.version) };
+        }));
+      },
+      default: [],
+    },
+    possiblyCompatibleInstalledCount: {
+      async get() {
+        return (await this.modStates).filter(({ compatible }) => compatible === COMPATIBILITY_LEVEL.POSSIBLY_COMPATIBLE).length;
+      },
+      default: 0,
+    },
+    incompatibleInstalledCount: {
+      async get() {
+        return (await this.modStates).filter(({ compatible }) => compatible === COMPATIBILITY_LEVEL.INCOMPATIBLE).length;
+      },
+      default: 0,
+    },
+    buttonColor: {
+      async get() {
+        if (this.incompatibleInstalledCount > 0) {
+          return 'error';
+        }
+        if (this.possiblyCompatibleInstalledCount > 0) {
+          return 'warning';
+        }
+        return 'primary';
+      },
+      default: 'primary',
+    },
+  },
   computed: {
     ...mapState(
       [
         'selectedInstall',
+        'installedMods',
         'expandedModId',
         'inProgress',
         'isGameRunning',
@@ -351,9 +497,6 @@ export default {
     currentUpdateDownloadProgress() {
       return lastElement(this.updateDownloadProgress.progresses);
     },
-    hasFrame() {
-      return this.$electron.remote.getGlobal('frame');
-    },
     launchButtonText() {
       if (this.isGameRunning) {
         return 'Game is running';
@@ -365,6 +508,28 @@ export default {
         return 'Launch Satisfactory';
       }
       return 'Cannot launch this install';
+    },
+  },
+  apollo: {
+    uriInstallModData: {
+      query: gql`
+        query GetURIInstallMod($modReference: ModReference!){
+          uriInstallModData: getModByReference(modReference: $modReference) {
+            id,
+            name,
+            short_description,
+            logo
+          }
+        }
+      `,
+      variables() {
+        return {
+          modReference: this.uriInstallModReference,
+        };
+      },
+      skip() {
+        return !this.uriInstallModReference;
+      },
     },
   },
   async mounted() {
@@ -402,9 +567,9 @@ export default {
       const parsed = new URL(url);
       const command = parsed.pathname.replace(/^\/+|\/+$/g, '');
       if (command === 'install') {
-        const modID = parsed.searchParams.get('modID');
-        const version = parsed.searchParams.get('version');
-        this.$store.dispatch('installModVersion', { modId: modID, version });
+        this.uriInstallModReference = parsed.searchParams.get('modID');
+        this.uriInstallVersion = parsed.searchParams.get('version') || null;
+        this.uriInstallDialog = true;
       }
     });
     this.$electron.ipcRenderer.on('autoUpdateError', (_, err) => {
@@ -441,14 +606,14 @@ export default {
         this.$electron.ipcRenderer.on('updateDownloaded', () => {
           setInterval(() => {
             if (this.inProgress.length === 0) {
-              this.$electron.remote.getCurrentWindow().close();
+              this.$electron.ipcRenderer.invoke('close');
             }
           }, 100);
         });
       } else {
         setInterval(() => {
           if (this.inProgress.length === 0) {
-            this.$electron.remote.getCurrentWindow().close();
+            this.$electron.ipcRenderer.invoke('close');
           }
         }, 100);
       }
@@ -464,6 +629,10 @@ export default {
     retryInstallSetup() {
       this.$store.dispatch('clearInstallSetupError');
       this.$store.dispatch('setupInstalls');
+    },
+    uriInstallMod() {
+      this.$store.dispatch('installModVersion', { modId: this.uriInstallModReference, version: this.uriInstallVersion });
+      this.uriInstallDialog = false;
     },
     async launchSatisfactory() {
       if (this.selectedInstall && !this.isGameRunning) {

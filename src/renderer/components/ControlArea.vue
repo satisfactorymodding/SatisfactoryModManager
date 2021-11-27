@@ -14,6 +14,7 @@
           :disabled="!!inProgress.length || isGameRunning"
           :items="satisfactoryInstalls"
           item-text="displayName"
+          item-value="installLocation"
           return-object
           dense
           filled
@@ -28,6 +29,20 @@
               v-if="item.smlVersion"
               class="green--text"
             >&nbsp;-&nbsp;SML v{{ item.smlVersion }}</span>
+          </template>
+          <template #item="{ item }">
+            <v-tooltip
+              bottom
+              open-delay="100"
+            >
+              <template #activator="{on, attrs}">
+                <span
+                  v-bind="attrs"
+                  v-on="on"
+                >{{ item.displayName }}</span>
+              </template>
+              Game location: {{ item.installLocation }}
+            </v-tooltip>
           </template>
         </v-select>
       </v-col>
@@ -95,71 +110,53 @@
             <span>Profile:&nbsp;</span>
             <span class="green--text">{{ item.name.length > 15 ? `${item.name.substr(0, 14)}...` : item.name }}</span>
           </template>
+          <template #item="{item, on, attrs}">
+            <v-list-item
+              v-bind="attrs"
+              class="pr-2"
+              v-on="on"
+            >
+              <v-list-item-content>
+                <v-list-item-title>{{ item.name.length > 20 ? `${item.name.substr(0, 19)}...` : item.name }}</v-list-item-title>
+              </v-list-item-content>
+              <v-list-item-action class="ml-4">
+                <v-icon
+                  color="yellow"
+                  @click.stop.prevent="showRenameProfileDialog(item)"
+                >
+                  mdi-pencil
+                </v-icon>
+              </v-list-item-action>
+              <v-list-item-action class="ml-0">
+                <v-icon
+                  color="red"
+                  @click.stop.prevent="showDeleteProfileDialog(item)"
+                >
+                  mdi-delete
+                </v-icon>
+              </v-list-item-action>
+            </v-list-item>
+          </template>
         </v-select>
       </v-col>
       <v-col
         cols="auto"
         class="buttons"
       >
-        <v-menu offset-y>
-          <template
-            #activator="{ on, attrs }"
+        <v-btn
+          class="custom"
+          style="min-width: 28px; height: 28px"
+          :disabled="!!inProgress.length || isGameRunning"
+          @click="showCreateProfileDialog"
+        >
+          <v-icon
+            color="green"
+            class="icon no-bg"
+            style="margin-top: 3px"
           >
-            <v-btn
-              v-bind="attrs"
-              class="custom"
-              style="min-width: 28px; height: 28px"
-              v-on="on"
-            >
-              <v-icon
-                style="color: unset; padding-top: 2px"
-              >
-                mdi-cog
-              </v-icon>
-            </v-btn>
-          </template>
-          <div class="background">
-            <v-btn
-              text
-              :disabled="!!inProgress.length || isGameRunning"
-              @click="showCreateProfileDialog"
-            >
-              New&nbsp;
-              <v-icon
-                color="green"
-                class="icon no-bg"
-              >
-                mdi-plus-circle
-              </v-icon>
-            </v-btn>
-            <v-btn
-              text
-              :disabled="!!inProgress.length || isGameRunning || selectedProfileModel.name === 'vanilla' || selectedProfileModel.name === 'modded' || selectedProfileModel.name === 'development'"
-              @click="showRenameProfileDialog"
-            >
-              Rename&nbsp;
-              <v-icon
-                color="yellow"
-                class="icon no-bg"
-              >
-                mdi-pencil
-              </v-icon>
-            </v-btn>
-            <v-btn
-              text
-              :disabled="!!inProgress.length || isGameRunning || selectedProfileModel.name === 'vanilla' || selectedProfileModel.name === 'modded' || selectedProfileModel.name === 'development'"
-              @click="showDeleteProfileDialog"
-            >
-              Delete&nbsp;
-              <v-icon
-                color="red"
-                class="icon no-bg"
-              >
-                mdi-delete
-              </v-icon>
-            </v-btn>
-          </div>
-        </v-menu>
+            mdi-plus-circle
+          </v-icon>
+        </v-btn>
       </v-col>
     </v-row>
     <v-row
@@ -294,8 +291,8 @@
           Rename profile
         </v-card-title>
 
-        <v-card-text>
-          <span>Current profile name: {{ selectedProfileModel.name }}</span>
+        <v-card-text v-if="selectedRenameProfile">
+          <span>Current profile name: {{ selectedRenameProfile.name }}</span>
           <v-form
             ref="renameProfileForm"
             v-model="newProfileFormValid"
@@ -337,8 +334,8 @@
           Delete profile
         </v-card-title>
 
-        <v-card-text>
-          <span>Are you sure you want to delete profile {{ selectedProfileModel.name }}</span>
+        <v-card-text v-if="selectedDeleteProfile">
+          <span>Are you sure you want to delete profile {{ selectedDeleteProfile.name }}</span>
         </v-card-text>
         <v-card-actions>
           <v-btn
@@ -389,6 +386,8 @@ export default {
       newProfileMessage: '',
       deleteProfileDialog: false,
       renameProfileDialog: false,
+      selectedRenameProfile: null,
+      selectedDeleteProfile: null,
     };
   },
   computed: {
@@ -441,10 +440,14 @@ export default {
     showCreateProfileDialog() {
       this.newProfileDialog = true;
     },
-    createProfile() {
+    async createProfile() {
       if (this.$refs.newProfileForm.validate()) {
-        this.$store.dispatch('createProfile', { profileName: filenamify(this.newProfileName), copyCurrent: this.newProfileCopyCurrent });
-        this.cancelCreateProfile();
+        try {
+          await this.$store.dispatch('createProfile', { profileName: filenamify(this.newProfileName), copyCurrent: this.newProfileCopyCurrent });
+          this.cancelCreateProfile();
+        } catch(e) {
+          this.$store.dispatch('showError', e);
+        }
       }
     },
     cancelCreateProfile() {
@@ -452,22 +455,28 @@ export default {
       this.newProfileCopyCurrent = false;
       this.newProfileDialog = false;
     },
-    showDeleteProfileDialog() {
+    showDeleteProfileDialog(profile) {
+      this.selectedDeleteProfile = profile;
       this.deleteProfileDialog = true;
     },
-    deleteProfile() {
-      this.$store.dispatch('deleteProfile', { profileName: this.$store.state.selectedProfile.name });
-      this.cancelDeleteProfile();
+    async deleteProfile() {
+      try {
+        this.$store.dispatch('deleteProfile', { profileName: this.selectedDeleteProfile.name });
+        this.cancelDeleteProfile();
+      } catch(e) {
+        this.$store.dispatch('showError', e);
+      }
     },
     cancelDeleteProfile() {
       this.deleteProfileDialog = false;
     },
-    showRenameProfileDialog() {
+    showRenameProfileDialog(profile) {
+      this.selectedRenameProfile = profile;
       this.renameProfileDialog = true;
     },
     renameProfile() {
       if (this.$refs.renameProfileForm.validate()) {
-        this.$store.dispatch('renameProfile', { newProfile: filenamify(this.newProfileName) });
+        this.$store.dispatch('renameProfile', { profile: this.selectedRenameProfile, newName: filenamify(this.newProfileName) });
         this.cancelRenameProfile();
       }
     },

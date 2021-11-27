@@ -78,30 +78,30 @@ export default {
     ]),
   },
   created() {
-    this.$electron.remote.getCurrentWindow().on('maximize', this.onMaximize);
-    this.$electron.remote.getCurrentWindow().on('unmaximize', this.onUnmaximize);
+    this.$electron.ipcRenderer.on('maximize', this.onMaximize);
+    this.$electron.ipcRenderer.on('unmaximize', this.onUnmaximize);
   },
-  mounted() {
-    this.isMaximized = this.$electron.remote.getCurrentWindow().isMaximized();
+  async mounted() {
+    this.isMaximized = await this.$electron.ipcRenderer.invoke('isMaximized');
   },
   destroyed() {
-    this.$electron.remote.getCurrentWindow().off('maximize', this.onMaximize);
-    this.$electron.remote.getCurrentWindow().off('unmaximize', this.onUnmaximize);
+    this.$electron.ipcRenderer.off('maximize', this.onMaximize);
+    this.$electron.ipcRenderer.off('unmaximize', this.onUnmaximize);
   },
   methods: {
     minimize() {
-      this.$electron.remote.getCurrentWindow().minimize();
+      this.$electron.ipcRenderer.invoke('minimize');
     },
     maximize() {
       if (!this.isMaximized) {
-        this.$electron.remote.getCurrentWindow().maximize();
+        this.$electron.ipcRenderer.invoke('maximize');
       } else {
-        this.$electron.remote.getCurrentWindow().unmaximize();
+        this.$electron.ipcRenderer.invoke('unmaximize');
       }
     },
     close() {
       if (this.inProgress.length === 0) {
-        this.$electron.remote.getCurrentWindow().close();
+        this.$electron.ipcRenderer.invoke('close');
       }
     },
     onMaximize() {

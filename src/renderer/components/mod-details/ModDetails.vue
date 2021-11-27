@@ -33,6 +33,7 @@
       >
         <v-row style="flex-basis: 0; overflow: auto;">
           <div
+            ref="modDescription"
             class="mod-description"
             v-html="modDescription"
           />
@@ -61,7 +62,7 @@
             </v-btn>
           </v-col>
           <v-col
-            v-if="isCompatible"
+            v-if="isCompatible || isPossiblyCompatible"
             style="flex-grow: 0; padding-bottom: 0"
             class="d-flex"
           >
@@ -142,13 +143,19 @@
         </v-row>
       </v-container>
     </v-card>
+    <v-dialog
+      v-model="enlargedImageDialog"
+      max-width="70%"
+    >
+      <v-img :src="enlargedImage" />
+    </v-dialog>
   </v-card>
 </template>
 
 <script>
 import { mapState } from 'vuex';
 import gql from 'graphql-tag';
-import { markdownAsElement, isCompatibleFast } from '@/utils';
+import { markdownAsElement, isCompatibleFast, COMPATIBILITY_LEVEL } from '@/utils';
 import ModDetailsInfo from './ModDetailsInfo';
 
 export default {
@@ -157,6 +164,7 @@ export default {
   },
   data() {
     return {
+      enlargedImage: '',
     };
   },
   computed: {
@@ -190,18 +198,36 @@ export default {
       return !!this.$store.state.installedMods[this.mod.mod_reference];
     },
     dependants() {
-      return Object.entries(this.$store.state.installedMods || {}).filter(([, data]) => !!data.dependencies[this.mod.mod_reference]).map(([item]) => item);
+      return Object.entries(this.$store.state.installedMods || {}).filter(([id, data]) => !!data.dependencies[this.mod.mod_reference] && id !== this.mod.mod_reference).map(([item]) => item);
     },
     isDependency() {
       return this.dependants.length > 0;
     },
+    enlargedImageDialog: {
+      get() {
+        return !!this.enlargedImage;
+      },
+      set(value) {
+        if (!value) {
+          this.enlargedImage = '';
+        }
+      },
+    },
   },
   asyncComputed: {
     isCompatible: {
-      get() {
+      async get() {
         if (!this.$store.state.selectedInstall) return false;
         if (this.mod?.hidden && !this.isDependency) return false;
-        return isCompatibleFast(this.mod, this.$store.state.selectedInstall.version);
+        return (await isCompatibleFast(this.mod, this.$store.state.selectedInstall.version)) === COMPATIBILITY_LEVEL.COMPATIBLE;
+      },
+      default: false,
+    },
+    isPossiblyCompatible: {
+      async get() {
+        if (!this.$store.state.selectedInstall) return false;
+        if (this.mod?.hidden && !this.isDependency) return false;
+        return (await isCompatibleFast(this.mod, this.$store.state.selectedInstall.version)) === COMPATIBILITY_LEVEL.POSSIBLY_COMPATIBLE;
       },
       default: false,
     },
@@ -244,6 +270,19 @@ export default {
         };
       },
       pollInterval: 5 * 60 * 1000,
+    },
+  },
+  watch: {
+    mod() {
+      this.$nextTick(() => {
+        const imgs = this.$refs.modDescription.getElementsByTagName('img');
+        for (let i = 0; i < imgs.length; i += 1) {
+          const img = imgs[i];
+          img.onclick = () => {
+            this.enlargedImage = img.src;
+          };
+        }
+      });
     },
   },
   methods: {

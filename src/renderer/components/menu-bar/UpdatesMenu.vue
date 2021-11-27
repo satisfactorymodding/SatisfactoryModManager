@@ -13,7 +13,10 @@
             v-bind="{ ...menuAttrs, ...tooltipAttrs}"
             v-on="{ ...menuOn, ...tooltipOn }"
           >
-            <v-icon style="font-size: 16px !important">
+            <v-icon
+              style="font-size: 16px !important"
+              :class="{ animRotate: updateCheckInProgress }"
+            >
               mdi-flip-h mdi-sync
             </v-icon>
           </v-btn>
@@ -25,8 +28,11 @@
       <v-list class="menu">
         <v-list-item @click="$emit('checkForUpdates')">
           <v-list-item-action>
-            <v-icon color="text">
-              mdi-sync
+            <v-icon
+              color="text"
+              :class="{ animRotate: updateCheckInProgress }"
+            >
+              mdi-flip-h mdi-sync
             </v-icon>
           </v-list-item-action>
           <v-list-item-content>
@@ -157,6 +163,10 @@ export default {
       type: String,
       default: '',
     },
+    updateCheckInProgress: {
+      type: Boolean,
+      default: false,
+    },
   },
   computed: {
     hasUpdate() {
@@ -187,3 +197,14 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.animRotate {
+  animation: spin 4s linear infinite;
+}
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+</style>

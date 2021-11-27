@@ -1,10 +1,10 @@
 import {
-  app, BrowserWindow, ipcMain, shell, screen, session,
+  app, BrowserWindow, ipcMain, shell, screen, session, dialog,
 } from 'electron';
 import path from 'path';
 import http from 'http';
 import { autoUpdater } from 'electron-updater';
-import socketio from 'socket.io';
+import { Server } from 'socket.io';
 import { getSetting, saveSetting } from '../settings';
 import './differentialUpdateProgress';
 
@@ -87,7 +87,12 @@ function createWindow() {
       enableRemoteModule: true,
     },
     frame,
+    show: false,
     icon: process.platform === 'linux' ? path.join(__dirname, '../../icons/64x64.png') : undefined, // https://github.com/AppImage/AppImageKit/wiki/Bundling-Electron-apps
+  });
+
+  mainWindow.webContents.on('did-finish-load', () => {
+    mainWindow.show();
   });
 
   app.applicationMenu = null;
@@ -96,7 +101,7 @@ function createWindow() {
     mainWindow.maximize();
   }
 
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV !== 'production') {
     mainWindow.loadURL(mainURL);
   } else {
     mainWindow.loadFile(mainFile);
@@ -138,6 +143,18 @@ function createWindow() {
     event.preventDefault();
     shell.openExternal(url);
   });
+
+  ipcMain.handle('saveDialog', (event, options) => dialog.showSaveDialogSync(mainWindow, options));
+
+  ipcMain.handle('getVersion', () => app.getVersion());
+
+  ipcMain.handle('hasFrame', () => frame);
+
+  ipcMain.handle('minimize', () => mainWindow.minimize());
+  ipcMain.handle('maximize', () => mainWindow.maximize());
+  ipcMain.handle('unmaximize', () => mainWindow.unmaximize());
+  ipcMain.handle('isMaximized', () => mainWindow.isMaximized());
+  ipcMain.handle('close', () => mainWindow.close());
 }
 
 let isAutoUpdateTarget = true; // will be set to false if checkForUpdates errors
@@ -290,7 +307,7 @@ if (app.requestSingleInstanceLock()) {
 
   const srv = http.createServer();
   srv.listen(33642, '127.0.0.1');
-  const wss = new socketio.Server(srv, { path: '/' });
+  const wss = new Server(srv, { path: '/' });
   wss.on('connection', (socket) => {
     socket.on('installedMods', () => {
       ipcMain.once('installedMods', (event, installedMods) => {

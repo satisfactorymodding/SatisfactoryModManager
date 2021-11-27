@@ -1,0 +1,62 @@
+name: Build for win and linux
+
+on:
+  push:
+
+jobs:
+  dist-win:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+          cache: yarn
+      
+      - name: Install dependencies
+        run: yarn install
+      
+      - name: Build project
+        run: yarn build
+      
+      - name: Package app
+        run: yarn electron-builder build -w nsis -p never
+        
+      - name: Release artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: SMM-win
+          path: |
+            build/Satisfactory-Mod-Manager-Setup.exe
+            build/Satisfactory-Mod-Manager-Setup.exe.blockmap
+            build/latest.yml
+      
+  dist-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+          cache: yarn
+      
+      - name: Install dependencies
+        run: yarn install
+      
+      - name: Build project
+        run: yarn build
+      
+      - name: Package app
+        run: yarn electron-builder build -l appImage -p never
+        
+      - name: Release artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: SMM-linux
+          path: |
+            build/Satisfactory-Mod-Manager.AppImage
+            build/latest-linux.yml

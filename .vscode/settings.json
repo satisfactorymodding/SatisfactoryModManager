@@ -1,9 +1,6 @@
 {
     "eslint.alwaysShowStatus": true,
     "eslint.lintTask.enable": true,
-    "eslint.options": {
-        "configFile": ".eslintrc.js"
-    },
     "eslint.validate": [
         "vue",
         "html",

@@ -6,6 +6,7 @@ import {
   createProfile,
   deleteProfile,
   renameProfile,
+  clearOutdatedCache,
 } from 'satisfactory-mod-manager-api';
 import path from 'path';
 import { ipcRenderer } from 'electron';
@@ -14,6 +15,7 @@ import { saveSetting, getSetting } from '~/settings';
 
 Vue.use(Vuex);
 
+const DOWNLOAD_SPEED_AVG_TIME = 10 * 1000;
 const MAX_DOWNLOAD_NAME_LENGTH = 20;
 
 function limitDownloadNameLength(name) {
@@ -119,9 +121,15 @@ export default new Vuex.Store({
           }],
         };
         state.inProgress.push(loadProgress);
-        const savedProfileName = getSetting('selectedProfile', {})[state.selectedInstall.installLocation] || 'modded';
-        commit('setProfile', { newProfile: state.profiles.find((conf) => conf.name.toLowerCase() === savedProfileName.toLowerCase()) });
-        const savedModsEnabled = getSetting('modsEnabled', {})[state.selectedInstall.installLocation] || true;
+        let savedProfileName = getSetting('selectedProfile', {})[state.selectedInstall.installLocation] || 'modded';
+        if (!state.profiles.some((profile) => profile.name.toLowerCase() === savedProfileName.toLowerCase())) {
+          savedProfileName = 'modded'; // If profile is missing, default to modded
+        }
+        commit('setProfile', { newProfile: state.profiles.find((profile) => profile.name.toLowerCase() === savedProfileName.toLowerCase()) });
+        let savedModsEnabled = getSetting('modsEnabled', {})[state.selectedInstall.installLocation];
+        if (savedModsEnabled === undefined) {
+          savedModsEnabled = true;
+        }
         commit('setModsEnabled', savedModsEnabled);
         try {
           if (state.modsEnabled) {
@@ -219,7 +227,10 @@ export default new Vuex.Store({
         } catch (e) {
           dispatch('showError', e);
         } finally {
-          state.inProgress.remove(modProgress);
+          // Allow the UI to update properly
+          setTimeout(() => {
+            state.inProgress.remove(modProgress);
+          }, 500);
         }
       }
     },
@@ -250,7 +261,10 @@ export default new Vuex.Store({
         } catch (e) {
           dispatch('showError', e);
         } finally {
-          state.inProgress.remove(modProgress);
+          // Allow the UI to update properly
+          setTimeout(() => {
+            state.inProgress.remove(modProgress);
+          }, 500);
         }
       }
     },
@@ -281,7 +295,10 @@ export default new Vuex.Store({
         } catch (e) {
           dispatch('showError', e);
         } finally {
-          state.inProgress.remove(modProgress);
+          // Allow the UI to update properly
+          setTimeout(() => {
+            state.inProgress.remove(modProgress);
+          }, 500);
         }
       }
     },
@@ -312,7 +329,10 @@ export default new Vuex.Store({
         } catch (e) {
           dispatch('showError', e);
         } finally {
-          state.inProgress.remove(modProgress);
+          // Allow the UI to update properly
+          setTimeout(() => {
+            state.inProgress.remove(modProgress);
+          }, 500);
         }
       }
     },
@@ -346,7 +366,10 @@ export default new Vuex.Store({
       } catch (e) {
         dispatch('showError', e);
       } finally {
-        state.inProgress.remove(modProgress);
+        // Allow the UI to update properly
+        setTimeout(() => {
+          state.inProgress.remove(modProgress);
+        }, 500);
       }
     },
     async installSMLVersion({
@@ -379,7 +402,10 @@ export default new Vuex.Store({
       } catch (e) {
         dispatch('showError', e);
       } finally {
-        state.inProgress.remove(modProgress);
+        // Allow the UI to update properly
+        setTimeout(() => {
+          state.inProgress.remove(modProgress);
+        }, 500);
       }
     },
     expandMod({ commit }, modId) {
@@ -411,8 +437,8 @@ export default new Vuex.Store({
         dispatch('selectProfile', state.profiles.find((profile) => profile.name === 'modded'));
       }
     },
-    renameProfile({ state }, { newProfile: newName }) {
-      const oldName = state.selectedProfile.name;
+    renameProfile({ state }, { profile, newName }) {
+      const oldName = profile.name;
       renameProfile(oldName, newName);
       const selectedProfile = getSetting('selectedProfile', {});
       Object.keys(selectedProfile).forEach((install) => {
@@ -421,8 +447,7 @@ export default new Vuex.Store({
         }
       });
       saveSetting('selectedProfile', selectedProfile);
-      const profile = state.profiles.find((p) => p.name === oldName);
-      profile.name = newName;
+      state.profiles.find((p) => p.name === profile.name).name = newName;
     },
     async initApp({
       commit, dispatch, state,
@@ -435,16 +460,30 @@ export default new Vuex.Store({
       };
       state.inProgress.push(appLoadProgress);
       addDownloadProgressCallback((url, progress, name, version, elapsedTime) => {
+        const downloadPastProgresses = new Map();
+        if (state.downloadProgress[url]) {
+          state.downloadProgress[url].downloadPastProgresses.forEach((prog, time) => {
+            if (elapsedTime - time <= DOWNLOAD_SPEED_AVG_TIME) {
+              downloadPastProgresses.set(time, prog);
+            }
+          });
+        }
+        downloadPastProgresses.set(elapsedTime, progress);
         state.downloadProgress[url] = {
           progress,
           name,
           version,
           elapsedTime,
+          downloadPastProgresses,
           speed() {
-            return this.progress.transferred / (this.elapsedTime / 1000);
+            const entries = Array.from(this.downloadPastProgresses.entries());
+            const first = entries[0];
+            const last = entries[entries.length - 1];
+            return (this.progress.transferred !== this.progress.total && first[0] !== last[0])
+              ? (last[1].transferred - first[1].transferred) / ((last[0] - first[0]) / 1000) : 0;
           },
           ETA() {
-            return (this.progress.total - this.progress.transferred) / this.speed();
+            return this.speed() !== 0 ? (this.progress.total - this.progress.transferred) / this.speed() : 0;
           },
         };
         if (!state.allDownloadProgress) {
@@ -515,7 +554,10 @@ export default new Vuex.Store({
             if (savedProfileName === 'vanilla') {
               savedProfileName = 'modded'; // Removed vanilla from profiles list
             }
-            commit('setProfile', { newProfile: state.profiles.find((conf) => conf.name.toLowerCase() === savedProfileName.toLowerCase()) });
+            if (!state.profiles.some((profile) => profile.name.toLowerCase() === savedProfileName.toLowerCase())) {
+              savedProfileName = 'modded'; // If profile is missing, default to modded
+            }
+            commit('setProfile', { newProfile: state.profiles.find((profile) => profile.name.toLowerCase() === savedProfileName.toLowerCase()) });
             let savedModsEnabled = getSetting('modsEnabled', {})[state.selectedInstall.installLocation];
             if (savedModsEnabled === undefined) {
               savedModsEnabled = true;
@@ -530,7 +572,7 @@ export default new Vuex.Store({
                   await state.selectedInstall.setProfile('vanilla');
                 }
               } catch (e) {
-                commit('setProfile', { newProfile: state.profiles.find((conf) => conf.name.toLowerCase() === state.selectedInstall.profile.toLowerCase()) });
+                state.selectedInstall._profile = savedProfileName;
                 throw e;
               }
             } else {
@@ -547,6 +589,9 @@ export default new Vuex.Store({
         commit('refreshInstalledMods');
         state.inProgress.remove(appLoadProgress);
       }
+
+      clearOutdatedCache(); // Clear outdated cached mods, SML versions, etc.
+
       setIntervalImmediately(async () => {
         state.isGameRunning = state.isLaunchingGame || await SatisfactoryInstall.isGameRunning();
       }, 5000);
@@ -616,7 +661,10 @@ export default new Vuex.Store({
       } catch (e) {
         dispatch('showError', e);
       } finally {
-        state.inProgress.remove(updateProgress);
+        // Allow the UI to update properly
+        setTimeout(() => {
+          state.inProgress.remove(updateProgress);
+        }, 500);
       }
     },
     async updateMulti({ state, commit, dispatch }, updates) {
@@ -636,7 +684,10 @@ export default new Vuex.Store({
       } catch (e) {
         dispatch('showError', e);
       } finally {
-        state.inProgress.remove(updateProgress);
+        // Allow the UI to update properly
+        setTimeout(() => {
+          state.inProgress.remove(updateProgress);
+        }, 500);
       }
     },
   },
