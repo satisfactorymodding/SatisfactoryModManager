@@ -16,13 +16,17 @@
         style="cursor: pointer; user-select: none; padding: 0;"
         @click="expandClicked"
       >
-        <v-tooltip top color="background" :disabled="!errorTooltip">
-          <template v-slot:activator="{ on, attrs }">
+        <v-tooltip
+          top
+          color="background"
+          :disabled="!errorTooltip"
+        >
+          <template #activator="{ on, attrs }">
             <v-list-item-title
               :class="isCompatible ? 'text--text' : (isPossiblyCompatible ? 'warning--text' : 'error--text')"
               style="font-weight: 300"
-              v-on="on"
               v-bind="attrs"
+              v-on="on"
             >
               {{ mod.name }}
             </v-list-item-title>
@@ -102,30 +106,14 @@
         >
           mdi-sync
         </v-icon>
-        <v-tooltip
-          v-else-if="!isCompatible && !isPossiblyCompatible"
-          color="background"
-          left
-        >
-          <template #activator="{ on, attrs }">
-            <v-icon
-              v-bind="attrs"
-              color="error"
-              v-on="on"
-            >
-              mdi-alert
-            </v-icon>
-          </template>
-          <span>This mod is incompatible with your game version</span>
-        </v-tooltip>
         <ModActionButton
           v-else
-          :disabled="isDependency || !modsEnabled || isGameRunning || inProgress.length > 0"
+          :disabled="(!isCompatible && !isPossiblyCompatible && !isInstalled) || isDependency || !modsEnabled || isGameRunning || inProgress.length > 0"
           background-normal-class=""
           :background-hover-class="isInstalled || isEnabled ? 'red' : 'green'"
-          :icon-normal-color="isInstalled || isEnabled ? 'green' : 'text'"
+          :icon-normal-color="!isCompatible && !isPossiblyCompatible ? 'error' : (isInstalled || isEnabled ? 'green' : 'text')"
           icon-hover-color="white"
-          :normal-icon="isInstalled || isEnabled ? 'mdi-check-circle' : 'mdi-download'"
+          :normal-icon="!isCompatible && !isPossiblyCompatible ? 'mdi-alert' : (isInstalled || isEnabled ? 'mdi-check-circle' : 'mdi-download')"
           :hover-icon="isInstalled ? 'mdi-delete' : 'mdi-download'"
           @click="isInstalled ? uninstall() : install()"
         >
@@ -134,6 +122,7 @@
             <span v-else-if="!modsEnabled">Enable mods to be able to make changes</span>
             <span v-else-if="isGameRunning">Cannot install mods while game is running</span>
             <span v-else-if="inProgress.length > 0">Another operation is in progress</span>
+            <span v-else-if="!isCompatible && !isPossiblyCompatible">This mod is incompatible with your game version</span>
           </template>
         </ModActionButton>
       </v-list-item-action>
