@@ -348,7 +348,7 @@ import {
 import { getSetting } from '~/settings';
 import TitleBar from './TitleBar';
 import MenuBar from './menu-bar/MenuBar';
-import AnnouncementsBar from './AnnouncementsBar';
+import AnnouncementsBar from './announcements-bar/AnnouncementsBar';
 import ControlArea from './ControlArea';
 import ModsList from './mods-list/ModsList';
 import ModDetails from './mod-details/ModDetails';
