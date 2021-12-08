@@ -298,6 +298,24 @@
         />
 
         <v-list-item>
+          <v-list-item-action />
+          <v-list-item-content>
+            <v-list-item-title>Disable download timeout</v-list-item-title>
+          </v-list-item-content>
+
+          <v-list-item-action>
+            <v-switch
+              v-model="disableDownloadTimeout"
+            />
+          </v-list-item-action>
+        </v-list-item>
+
+        <v-divider
+          class="custom"
+          inset
+        />
+
+        <v-list-item>
           <v-list-item-action>
             <v-icon color="text">
               mdi-information
@@ -527,7 +545,7 @@
 
 <script>
 import {
-  clearCache, getLogFilePath, setDebug, validAndGreater,
+  clearCache, getLogFilePath, setDebug, validAndGreater, setTimeoutEnabled,
 } from 'satisfactory-mod-manager-api';
 import JSZip from 'jszip';
 import fs from 'fs';
@@ -563,6 +581,7 @@ export default {
       importProfileVersions: false,
       importProfileMessages: ['', ''],
       cachedDebugMode: false,
+      cachedDisableDownloadTimeout: false,
       updateSMLVersionVal: 0,
     };
   },
@@ -581,6 +600,16 @@ export default {
       },
       set(value) {
         this.$store.dispatch('setExpandModInfoOnStart', value);
+      },
+    },
+    disableDownloadTimeout: {
+      get() {
+        return this.cachedDisableDownloadTimeout;
+      },
+      set(value) {
+        setTimeoutEnabled(!value);
+        saveSetting('disableDownloadTimeout', value);
+        this.cachedDisableDownloadTimeout = value;
       },
     },
     debugMode: {
@@ -667,6 +696,7 @@ export default {
   },
   mounted() {
     this.cachedDebugMode = getSetting('debugMode', false);
+    this.cachedDisableDownloadTimeout = getSetting('disableDownloadTimeout', false);
 
     if (this.debugMode) {
       setDebug(this.debugMode);
