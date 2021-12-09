@@ -445,7 +445,7 @@ export default {
         try {
           await this.$store.dispatch('createProfile', { profileName: filenamify(this.newProfileName), copyCurrent: this.newProfileCopyCurrent });
           this.cancelCreateProfile();
-        } catch(e) {
+        } catch (e) {
           this.$store.dispatch('showError', e);
         }
       }
@@ -463,7 +463,7 @@ export default {
       try {
         this.$store.dispatch('deleteProfile', { profileName: this.selectedDeleteProfile.name });
         this.cancelDeleteProfile();
-      } catch(e) {
+      } catch (e) {
         this.$store.dispatch('showError', e);
       }
     },
