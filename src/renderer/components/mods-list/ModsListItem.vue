@@ -343,7 +343,7 @@ export default {
   background: transparent !important;
 }
 
-.mod.disabled {
+.mod.disabled .v-avatar, .mod.disabled .v-list-item__content {
   opacity: 0.3;
   color: var(--v-backgroundModsList-lighten2) !important;
 }
