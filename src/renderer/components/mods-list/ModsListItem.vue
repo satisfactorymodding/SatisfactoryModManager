@@ -2,7 +2,7 @@
   <div style="margin-top: 6px; margin-bottom: 6px; user-select: none;">
     <v-list-item
       class="mod"
-      :class="(isExpanded ? 'expanded' : '') + ' ' + (isModInProgress ? 'in-progress' : '')"
+      :class="[isExpanded ? 'expanded' : '', isModInProgress ? 'in-progress' : '', [disabled && !isModInProgress ? 'disabled': '']]"
       style="min-height: 45px; margin-top: 0; margin-bottom: 0; border-radius: 5px; z-index: 1;"
       two-line
     >
@@ -223,6 +223,9 @@ export default {
     isDependency() {
       return this.dependants.length > 0;
     },
+    disabled() {
+      return !this.isEnabled;
+    },
   },
   asyncComputed: {
     isCompatible: {
@@ -339,6 +342,17 @@ export default {
 .mod.in-progress, .mod.in-progress * {
   background: transparent !important;
 }
+
+.mod.disabled {
+  opacity: 0.3;
+  color: var(--v-backgroundModsList-lighten2) !important;
+}
+
+.mod.disabled img {
+  filter: grayscale(1);
+  animation-play-state: paused !important;
+}
+
 .expanded, .expanded * {
   background-color: var(--v-backgroundModsList-darken1) !important;
 }
