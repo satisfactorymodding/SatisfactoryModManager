@@ -68,7 +68,7 @@
                   class="d-flex"
                 >
                   <span
-                    :class="!modsEnabled ? 'red--text' : ''"
+                    :class="{ 'red--text': !modsEnabled }"
                   >
                     OFF&nbsp;
                   </span>
@@ -81,7 +81,7 @@
                     :disabled="isGameRunning"
                   />
                   <span
-                    :class="modsEnabled ? 'green--text' : ''"
+                    :class="{ 'green--text': modsEnabled }"
                   >
                     ON&nbsp;
                   </span>

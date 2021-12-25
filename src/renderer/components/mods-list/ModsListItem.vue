@@ -2,7 +2,7 @@
   <div style="margin-top: 6px; margin-bottom: 6px; user-select: none;">
     <v-list-item
       class="mod"
-      :class="[isExpanded ? 'expanded' : '', isModInProgress ? 'in-progress' : '', [disabled && !isModInProgress ? 'disabled': '']]"
+      :class="{ 'expanded': isExpanded, 'in-progress': isModInProgress, 'disabled': disabled && !isModInProgress }"
       style="min-height: 45px; margin-top: 0; margin-bottom: 0; border-radius: 5px; z-index: 1;"
       two-line
     >
@@ -23,7 +23,7 @@
         >
           <template #activator="{ on, attrs }">
             <v-list-item-title
-              :class="isCompatible ? 'text--text' : (isPossiblyCompatible ? 'warning--text' : 'error--text')"
+              :class="{ 'text--text': isCompatible, 'warning--text': isPossiblyCompatible, 'error--text': !isCompatible && !isPossiblyCompatible }"
               style="font-weight: 300"
               v-bind="attrs"
               v-on="on"
@@ -150,7 +150,7 @@
     >
       <v-progress-linear
         :value="Math.round(currentModProgress.progress * 100)"
-        :class="currentModProgress.fast ? 'fast' : ''"
+        :class="{ 'fast': currentModProgress.fast }"
         color="mod-list-progress-bar"
         height="45"
         reactive

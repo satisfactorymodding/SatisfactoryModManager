@@ -45,7 +45,7 @@
                 :color="buttonColor"
                 elevation="0"
                 style="font-size: 18px; min-height: 50px;"
-                :style="launchButton && selectedInstall && selectedInstall.launchPath && !isGameRunning ? 'height: 98px' : ''"
+                :style="{ 'height: 98px' : launchButton && selectedInstall && selectedInstall.launchPath && !isGameRunning }"
                 :disabled="!!inProgress.length || isGameRunning || (selectedInstall && !selectedInstall.launchPath)"
                 :ripple="!launchButton"
                 v-bind="attrs"
@@ -247,7 +247,7 @@
         >
           <v-progress-linear
             :value="Math.round(currentLoadingAppProgress.progress * 100)"
-            :class="currentLoadingAppProgress.fast ? 'fast' : ''"
+            :class="{ 'fast': currentLoadingAppProgress.fast }"
             background-color="#000000"
             color="#5bb71d"
             height="2"
@@ -286,7 +286,7 @@
         >
           <v-progress-linear
             :value="Math.round(currentUpdateDownloadProgress.progress * 100)"
-            :class="currentUpdateDownloadProgress.fast ? 'fast' : ''"
+            :class="{ 'fast': currentUpdateDownloadProgress.fast }"
             background-color="#000000"
             color="#5bb71d"
             height="2"

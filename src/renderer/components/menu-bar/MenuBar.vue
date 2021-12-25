@@ -5,7 +5,7 @@
   >
     <v-row
       class="px-4 pl-5"
-      :class="hasUpdate ? 'update-available' : ''"
+      :class="{ 'update-available': hasUpdate }"
     >
       <v-col cols="auto">
         <SettingsMenu />

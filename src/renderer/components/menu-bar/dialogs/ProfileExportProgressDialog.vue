@@ -29,7 +29,7 @@
       >
         <v-progress-linear
           :value="Math.round(currentProfileExportProgress.progress * 100)"
-          :class="currentProfileExportProgress.fast ? 'fast' : ''"
+          :class="{ 'fast': currentProfileExportProgress.fast }"
           background-color="#000000"
           color="#5bb71d"
           height="2"

@@ -19,7 +19,7 @@
         <v-progress-linear
           v-if="isMultiModUpdateInProgress"
           :value="Math.round(currentMultiModUpdateProgress.progress * 100)"
-          :class="currentMultiModUpdateProgress.fast ? 'fast' : ''"
+          :class="{ 'fast': currentMultiModUpdateProgress.fast }"
           color="warning"
           height="49"
           reactive
@@ -39,7 +39,7 @@
               >
                 <v-progress-linear
                   :value="Math.round(currentModProgress(update.item).progress * 100)"
-                  :class="currentModProgress(update.item).fast ? 'fast' : ''"
+                  :class="{ 'fast': currentModProgress(update.item).fast }"
                   color="warning"
                   height="49"
                   reactive
