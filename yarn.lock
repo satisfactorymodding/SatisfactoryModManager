@@ -7494,10 +7494,10 @@ sass@^1.43.3:
   dependencies:
     chokidar ">=3.0.0 <4.0.0"
 
-satisfactory-mod-manager-api@^3.2.0:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/satisfactory-mod-manager-api/-/satisfactory-mod-manager-api-3.2.0.tgz#044f7e2615e7df3b846431bf6933efa4189d0649"
-  integrity sha512-hKDEM03ZylsiTPnV/4BfrZN3Lf8UY8e6XckQVw+dd/OL80zWBaHY/1n0LMM3yajmNsEtoekMb1rsllMhdbbfNQ==
+satisfactory-mod-manager-api@^3.2.1:
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/satisfactory-mod-manager-api/-/satisfactory-mod-manager-api-3.2.1.tgz#f63e32f45dc183f10b9e89dd510e37ef6f22682f"
+  integrity sha512-bocHU4UL9TnmPmKza6YtdEttmSQ1qlWKQhl+rhHkIw5W6zIsfokdlAL7Hds2R4EyFxL4ccYOADTEhZ80c/G0NA==
   dependencies:
     "@apollo/client" "^3.4.16"
     apollo-link-scalars "^3.0.0"
