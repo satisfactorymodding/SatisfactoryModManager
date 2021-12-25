@@ -19,7 +19,7 @@
         <v-tooltip
           top
           color="background"
-          :disabled="!errorTooltip"
+          :disabled="!errorTooltip && !disabled"
         >
           <template #activator="{ on, attrs }">
             <v-list-item-title
@@ -31,7 +31,8 @@
               {{ mod.name }}
             </v-list-item-title>
           </template>
-          {{ errorTooltip }}
+          <span v-if="errorTooltip">{{ errorTooltip }}</span>
+          <span v-if="disabled">This mod is disabled. Press the pause icon to enable it.</span>
         </v-tooltip>
         <v-list-item-subtitle v-if="!isModInProgress">
           <div
@@ -224,7 +225,7 @@ export default {
       return this.dependants.length > 0;
     },
     disabled() {
-      return !this.isEnabled;
+      return !this.isEnabled && this.isInstalled;
     },
   },
   asyncComputed: {
