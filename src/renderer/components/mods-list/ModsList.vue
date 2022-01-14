@@ -24,6 +24,7 @@
           :key="index"
           :mod="mod"
           class="mod-list-item"
+          :is-offline="!ficsitAppHealthCheck"
         />
       </template>
     </v-virtual-scroll>
@@ -35,6 +36,8 @@ import { mapState } from 'vuex';
 import Fuse from 'fuse.js';
 import debounce from 'debounce';
 import gql from 'graphql-tag';
+import { getCachedModVersions, getCachedMod } from 'satisfactory-mod-manager-api';
+import { compare } from 'semver';
 import {
   lastElement, setIntervalImmediately, isCompatibleFast, COMPATIBILITY_LEVEL,
 } from '@/utils';
@@ -59,6 +62,7 @@ export default {
       mods: [],
       availableMods: [],
       hiddenInstalledMods: [],
+      missingInstalledMods: [],
       compatibleMods: [],
       availableFilters: [
         {
@@ -171,8 +175,12 @@ export default {
       return Object.keys(this.$store.state.installedMods)
         .filter((modReference) => !this.availableMods.some((mod) => mod.mod_reference === modReference)); // not in the available mods list
     },
+    missingInstalledModReferences() {
+      return Object.keys(this.$store.state.installedMods)
+        .filter((modReference) => !this.availableMods.some((mod) => mod.mod_reference === modReference) && !this.hiddenInstalledMods.some((mod) => mod.mod_reference === modReference) && modReference !== 'SML'); // not in either mods list
+    },
     allMods() {
-      return [...this.availableMods, ...this.hiddenInstalledMods].filter((mod, idx, arr) => arr.findIndex((other) => other.mod_reference === mod.mod_reference) === idx);
+      return [...this.availableMods, ...this.hiddenInstalledMods, ...this.missingInstalledMods].filter((mod, idx, arr) => arr.findIndex((other) => other.mod_reference === mod.mod_reference) === idx);
     },
     filteredMods() {
       if (!this.filters.modFilters?.filter || !this.filters.sortBy?.sort) { return this.allMods; }
@@ -226,8 +234,29 @@ export default {
       },
       update: (data) => data.getMods.mods,
     },
+    ficsitAppHealthCheck: {
+      query: gql`
+        query ficsitAppHealthCheck {
+          getMods(filter: {limit: 1}) {
+            mods {
+              id
+            }
+          }
+        }
+      `,
+      fetchPolicy: 'no-cache',
+      update: (data) => !!data.getMods?.mods?.length,
+      pollInterval() {
+        return (this.ficsitAppHealthCheck ? 60 : 5) * 1000;
+      },
+    },
   },
   watch: {
+    ficsitAppHealthCheck(newVal, oldVal) {
+      if (newVal && !oldVal) {
+        this.fetchMods();
+      }
+    },
     search() {
       this.updateSearch();
     },
@@ -251,64 +280,56 @@ export default {
     favoriteModIds() {
       this.availableFilters.forEach(async (filter) => { filter.mods = filter.filter(this.allMods, this).length; });
     },
+    async missingInstalledModReferences() {
+      this.missingInstalledMods = await Promise.all(this.missingInstalledModReferences.map(async (modReference) => {
+        const versions = await getCachedModVersions(modReference);
+        if (versions.length === 0) {
+          return {
+            isMissing: true,
+            id: modReference,
+            name: modReference,
+            mod_reference: modReference,
+            short_description: '',
+            full_description: '',
+            authors: [],
+            downloads: 0,
+            views: 0,
+            popularity: 0,
+            hotness: 0,
+            logo: null,
+            hidden: false,
+            last_version_date: 0,
+            versions: [],
+          };
+        }
+        versions.sort((a, b) => -compare(a, b));
+        const cachedData = await getCachedMod(modReference, versions[0], true);
+        return {
+          isMissing: true,
+          id: modReference,
+          name: cachedData.name,
+          mod_reference: modReference,
+          short_description: '',
+          full_description: '',
+          authors: [],
+          downloads: 0,
+          views: 0,
+          popularity: 0,
+          hotness: 0,
+          logo: null,
+          hidden: false,
+          last_version_date: 0,
+          versions: [],
+        };
+      }));
+    },
   },
   mounted() {
     this.$emit('set-available-filters', this.availableFilters);
     this.$emit('set-available-sorting', this.availableSorting);
 
     this.$nextTick(() => {
-      setIntervalImmediately(async () => {
-        const availableModsCount = (await this.$apollo.query({
-          query: gql`
-            query getMods {
-              availableMods: getMods {
-                count
-              }
-            }
-          `,
-        })).data.availableMods.count;
-        if (availableModsCount !== this.availableMods.length) {
-          const currentLength = this.availableMods.length;
-          this.availableMods = (await Promise.all(Array.from({ length: Math.ceil(availableModsCount / MODS_PER_QUERY) }).map(async (_, page) => (await this.$apollo.query({
-            query: gql`
-              query getMods($limit: Int!, $offset: Int!) {
-                availableMods: getMods(filter: { limit: $limit, offset: $offset }) {
-                  mods {
-                    id,
-                    name,
-                    mod_reference,
-                    short_description,
-                    full_description,
-                    authors {
-                      user {
-                        username,
-                      }
-                    },
-                    downloads,
-                    views,
-                    popularity,
-                    hotness,
-                    logo,
-                    hidden,
-                    last_version_date,
-                    versions(filter: { limit: 100 }) {
-                      id,
-                      sml_version,
-                    }
-                  }
-                }
-              }
-            `,
-            variables: {
-              limit: MODS_PER_QUERY,
-              offset: page * MODS_PER_QUERY,
-            },
-          })).data.availableMods.mods))).flat(1);
-          if (this.$store.state.expandModInfoOnStart && currentLength === 0) {
-            this.$store.dispatch('expandMod', this.filteredMods[0].mod_reference);
-          }
-        }
-      }, 5 * 60 * 1000);
+      setIntervalImmediately(() => this.fetchMods(), 5 * 60 * 1000);
     });
 
     const savedFilters = getSetting('filters', { modFilters: this.availableFilters[1].name, sortBy: this.availableSorting[0].name }); // default Compatible, Last Updated
@@ -369,6 +390,58 @@ export default {
       const { version } = this.$store.state.selectedInstall;
       this.compatibleMods = (await Promise.all(this.allMods.map(async (mod) => ((await isCompatibleFast(mod, version)) === COMPATIBILITY_LEVEL.COMPATIBLE ? mod : null)))).filter((mod) => !!mod);
       this.availableFilters.forEach(async (filter) => { filter.mods = filter.filter(this.allMods, this).length; });
+    },
+    async fetchMods() {
+      const availableModsCount = (await this.$apollo.query({
+        query: gql`
+          query getMods {
+            availableMods: getMods {
+              count
+            }
+          }
+        `,
+      })).data.availableMods.count;
+      if (availableModsCount !== this.availableMods.length) {
+        const currentLength = this.availableMods.length;
+        this.availableMods = (await Promise.all(Array.from({ length: Math.ceil(availableModsCount / MODS_PER_QUERY) }).map(async (_, page) => (await this.$apollo.query({
+          query: gql`
+            query getMods($limit: Int!, $offset: Int!) {
+              availableMods: getMods(filter: { limit: $limit, offset: $offset }) {
+                mods {
+                  id,
+                  name,
+                  mod_reference,
+                  short_description,
+                  full_description,
+                  authors {
+                    user {
+                      username,
+                    }
+                  },
+                  downloads,
+                  views,
+                  popularity,
+                  hotness,
+                  logo,
+                  hidden,
+                  last_version_date,
+                  versions(filter: { limit: 100 }) {
+                    id,
+                    sml_version,
+                  }
+                }
+              }
+            }
+          `,
+          variables: {
+            limit: MODS_PER_QUERY,
+            offset: page * MODS_PER_QUERY,
+          },
+        })).data.availableMods.mods))).flat(1);
+        if (this.$store.state.expandModInfoOnStart && currentLength === 0) {
+          this.$store.dispatch('expandMod', this.filteredMods[0].mod_reference);
+        }
+      }
     },
     lastElement,
   },

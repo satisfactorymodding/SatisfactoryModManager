@@ -31,7 +31,8 @@
               {{ mod.name }}
             </v-list-item-title>
           </template>
-          <span v-if="errorTooltip">{{ errorTooltip }}</span>
+          <span v-if="errorTooltip && isOffline">You are currently offline.<br>A connection to ficsit.app is required to view details, install, or remove mods.</span>
+          <span v-else-if="errorTooltip">{{ errorTooltip }}</span>
           <span v-if="disabled">This mod is disabled. Press the pause icon to enable it.</span>
         </v-tooltip>
         <v-list-item-subtitle v-if="!isModInProgress">
@@ -176,6 +177,10 @@ export default {
     mod: {
       type: Object,
       default: () => ({}),
+    },
+    isOffline: {
+      type: Boolean,
+      required: true,
     },
   },
   data() {
