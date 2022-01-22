@@ -7,11 +7,13 @@ import {
   deleteProfile,
   renameProfile,
   clearOutdatedCache,
+  LogLevel,
 } from 'satisfactory-mod-manager-api';
 import path from 'path';
 import { ipcRenderer } from 'electron';
 import { bytesToAppropriate, secondsToAppropriate, setIntervalImmediately } from './utils';
 import { saveSetting, getSetting } from '~/settings';
+import { write as writeLog } from './logging';
 
 Vue.use(Vuex);
 
@@ -84,10 +86,12 @@ export default new Vuex.Store({
     showError(state, { e }) {
       state.error = typeof e === 'string' ? e : e.message;
       state.errorPersistent = false;
+      writeLog(LogLevel.ERROR, e);
     },
     showErrorPersistent(state, { e }) {
       state.error = typeof e === 'string' ? e : e.message;
       state.errorPersistent = true;
+      writeLog(LogLevel.ERROR, e);
     },
     launchGame(state) {
       state.isLaunchingGame = true;
