@@ -8,7 +8,26 @@
     style="padding: 0; box-shadow: inset 10px 0 10px -10px rgba(0,0,0,1); max-width: calc(100vw - 550px);"
   >
     <v-overlay
-      v-if="!mod || mod.mod_reference !== expandedModId"
+      v-if="!$apollo.queries.mod.loading && (!mod || mod.mod_reference !== expandedModId)"
+      absolute
+    >
+      <v-btn
+        color="backgroundModsList-darken1"
+        raised
+        width="100%"
+        @click="close"
+      >
+        <v-icon
+          left
+          dark
+        >
+          mdi-flip-h mdi-import
+        </v-icon>
+        <span>Offline</span>
+      </v-btn>
+    </v-overlay>
+    <v-overlay
+      v-else-if="!mod || mod.mod_reference !== expandedModId"
       absolute
     >
       Loading...

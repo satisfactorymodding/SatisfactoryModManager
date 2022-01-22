@@ -36,7 +36,7 @@ import { mapState } from 'vuex';
 import Fuse from 'fuse.js';
 import debounce from 'debounce';
 import gql from 'graphql-tag';
-import { getCachedModVersions, getCachedMod } from 'satisfactory-mod-manager-api';
+import { getCachedModVersions, getCachedMod, getOfflineMods } from 'satisfactory-mod-manager-api';
 import { compare } from 'semver';
 import {
   lastElement, setIntervalImmediately, isCompatibleFast, COMPATIBILITY_LEVEL,
@@ -63,6 +63,7 @@ export default {
       availableMods: [],
       hiddenInstalledMods: [],
       missingInstalledMods: [],
+      offlineMods: [],
       compatibleMods: [],
       availableFilters: [
         {
@@ -180,7 +181,12 @@ export default {
         .filter((modReference) => !this.availableMods.some((mod) => mod.mod_reference === modReference) && !this.hiddenInstalledMods.some((mod) => mod.mod_reference === modReference) && modReference !== 'SML'); // not in either mods list
     },
     allMods() {
-      return [...this.availableMods, ...this.hiddenInstalledMods, ...this.missingInstalledMods].filter((mod, idx, arr) => arr.findIndex((other) => other.mod_reference === mod.mod_reference) === idx);
+      return [
+        ...this.availableMods,
+        ...this.hiddenInstalledMods,
+        ...this.offlineMods,
+        ...this.missingInstalledMods,
+      ].filter((mod, idx, arr) => arr.findIndex((other) => other.mod_reference === mod.mod_reference) === idx);
     },
     filteredMods() {
       if (!this.filters.modFilters?.filter || !this.filters.sortBy?.sort) { return this.allMods; }
@@ -330,6 +336,7 @@ export default {
 
     this.$nextTick(() => {
       setIntervalImmediately(() => this.fetchMods(), 5 * 60 * 1000);
+      setIntervalImmediately(() => this.getCachedMods(), 30 * 1000);
     });
 
     const savedFilters = getSetting('filters', { modFilters: this.availableFilters[1].name, sortBy: this.availableSorting[0].name }); // default Compatible, Last Updated
@@ -442,6 +449,9 @@ export default {
           this.$store.dispatch('expandMod', this.filteredMods[0].mod_reference);
         }
       }
+    },
+    async getCachedMods() {
+      this.offlineMods = (await getOfflineMods()).map((mod) => ({ ...mod, isCached: true }));
     },
     lastElement,
   },
