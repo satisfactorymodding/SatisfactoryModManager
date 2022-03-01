@@ -572,6 +572,8 @@ import { mapState } from 'vuex';
 import { filenameFriendlyDate, filenamify, validAndEq } from '@/utils';
 import { getSetting, saveSetting } from '~/settings';
 
+const { clipboard } = require('electron');
+
 /**
  * @param {JSZip} zip The zip file to add to
  * @param {string} filePath The file to add to the zip
@@ -736,66 +738,62 @@ export default {
       }
     },
     async getFriendlyModName(modReference) {
-        const friendlyName = await this.$apollo.query({
-          query: gql`
+      const friendlyName = await this.$apollo.query({
+        query: gql`
             query getModName($modReference: ModReference!) {
               mod: getModByReference(modReference: $modReference) {
                 name
               }
             }
           `,
-          variables: {
-            modReference: modReference,
-          },
-        });
-        return friendlyName.data.mod.name;
+        variables: {
+          modReference,
+        },
+      });
+      return friendlyName.data.mod.name;
     },
     async copyModList() {
       const modListJson = this.$store.state.selectedInstall?.mods;
-      const modList = []; //('Friendly Name', 'Mod Reference', 'Version');
+      const modList = []; // ('Friendly Name', 'Mod Reference', 'Version');
 
-      //Generate mod entries
+      // Generate mod entries
       await Object.entries(modListJson).reduce(async (promise, [key, value]) => {
         await promise;
-        var friendlyName = await this.getFriendlyModName(key);
-        var modInfo = {
-          friendlyName: friendlyName,
+        const friendlyName = await this.getFriendlyModName(key);
+        const modInfo = {
+          friendlyName,
           modReference: key,
           version: value,
         };
         modList.push(modInfo);
-        }, Promise.resolve());
-        
-      //Sort by Friendly Name
-      modList.sort(function(a, b){
-        let x = a.friendlyName.toLowerCase();
-        let y = b.friendlyName.toLowerCase();
-        if (x < y) {return -1;}
-        if (x > y) {return 1;}
+      }, Promise.resolve());
+
+      // Sort by Friendly Name
+      modList.sort((a, b) => {
+        const x = a.friendlyName.toLowerCase();
+        const y = b.friendlyName.toLowerCase();
+        if (x < y) { return -1; }
+        if (x > y) { return 1; }
         return 0;
       });
 
-      //Get max lengths to use for padding
-      var longestFriendlyName = modList.reduce(
-        function (a, b) {
-            return a.friendlyName.length > b.friendlyName.length ? a : b;
-        }
+      // Get max lengths to use for padding
+      const longestFriendlyName = modList.reduce(
+        (a, b) => (a.friendlyName.length > b.friendlyName.length ? a : b),
       );
-      var longestModReference = modList.reduce(
-        function (a, b) {
-            return a.modReference.length > b.modReference.length ? a : b;
-        }
+      const longestModReference = modList.reduce(
+        (a, b) => (a.modReference.length > b.modReference.length ? a : b),
       );
-      
-      //Create header and add all mods to string
-      var modListString = 'Mod Name'.padEnd(longestFriendlyName.friendlyName.length + 1) + 'Mod Reference'.padEnd(longestModReference.modReference.length + 1) + 'Version' + '\n';
-      modList.forEach(mod => {
+
+      // Create header and add all mods to string
+      let modListString = `${'Mod Name'.padEnd(longestFriendlyName.friendlyName.length + 1) + 'Mod Reference'.padEnd(longestModReference.modReference.length + 1)}Version\n`;
+      modList.forEach((mod) => {
         mod.friendlyName = mod.friendlyName.padEnd(longestFriendlyName.friendlyName.length, ' ');
         mod.modReference = mod.modReference.padEnd(longestModReference.modReference.length, ' ');
         modListString += `${mod.friendlyName} ${mod.modReference} ${mod.version}\n`;
       });
-      
-      modListString = modListString.trim();
+
+      clipboard.writeText(modListString.trim());
     },
     async exportDebugData() {
       const result = await this.$electron.ipcRenderer.invoke('saveDialog', {
