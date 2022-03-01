@@ -260,6 +260,20 @@
                 inset
                 class="custom"
               />
+
+              <v-list-item
+                @click="copyModList"
+              >
+                <v-list-item-action />
+                <v-list-item-content>
+                  <v-list-item-title>Copy Mod List</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+
+              <v-divider
+                inset
+                class="custom"
+              />
             </v-list>
           </v-card>
         </v-menu>
@@ -705,6 +719,8 @@ export default {
     this.$root.$on('exportDebugData', this.exportDebugData);
     this.$root.$on('moddingDiscord', this.moddingDiscord);
     this.$root.$on('clearCache', this.clearCache);
+    this.$root.$on('copyModList', this.copyModList);
+    this.$root.$on('getFriendlyModName', this.getFriendlyModName);
   },
   methods: {
     moddingDiscord() {
@@ -718,6 +734,68 @@ export default {
       if (this.$store.state.selectedInstall) {
         this.$store.state.selectedInstall.clearCache();
       }
+    },
+    async getFriendlyModName(modReference) {
+        const friendlyName = await this.$apollo.query({
+          query: gql`
+            query getModName($modReference: ModReference!) {
+              mod: getModByReference(modReference: $modReference) {
+                name
+              }
+            }
+          `,
+          variables: {
+            modReference: modReference,
+          },
+        });
+        return friendlyName.data.mod.name;
+    },
+    async copyModList() {
+      const modListJson = this.$store.state.selectedInstall?.mods;
+      const modList = []; //('Friendly Name', 'Mod Reference', 'Version');
+
+      //Generate mod entries
+      await Object.entries(modListJson).reduce(async (promise, [key, value]) => {
+        await promise;
+        var friendlyName = await this.getFriendlyModName(key);
+        var modInfo = {
+          friendlyName: friendlyName,
+          modReference: key,
+          version: value,
+        };
+        modList.push(modInfo);
+        }, Promise.resolve());
+        
+      //Sort by Friendly Name
+      modList.sort(function(a, b){
+        let x = a.friendlyName.toLowerCase();
+        let y = b.friendlyName.toLowerCase();
+        if (x < y) {return -1;}
+        if (x > y) {return 1;}
+        return 0;
+      });
+
+      //Get max lengths to use for padding
+      var longestFriendlyName = modList.reduce(
+        function (a, b) {
+            return a.friendlyName.length > b.friendlyName.length ? a : b;
+        }
+      );
+      var longestModReference = modList.reduce(
+        function (a, b) {
+            return a.modReference.length > b.modReference.length ? a : b;
+        }
+      );
+      
+      //Create header and add all mods to string
+      var modListString = 'Mod Name'.padEnd(longestFriendlyName.friendlyName.length + 1) + 'Mod Reference'.padEnd(longestModReference.modReference.length + 1) + 'Version' + '\n';
+      modList.forEach(mod => {
+        mod.friendlyName = mod.friendlyName.padEnd(longestFriendlyName.friendlyName.length, ' ');
+        mod.modReference = mod.modReference.padEnd(longestModReference.modReference.length, ' ');
+        modListString += `${mod.friendlyName} ${mod.modReference} ${mod.version}\n`;
+      });
+      
+      modListString = modListString.trim();
     },
     async exportDebugData() {
       const result = await this.$electron.ipcRenderer.invoke('saveDialog', {
