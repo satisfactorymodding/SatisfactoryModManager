@@ -754,42 +754,29 @@ export default {
     },
     async copyModList() {
       const modListJson = this.$store.state.selectedInstall?.mods;
-      const modList = []; // ('Friendly Name', 'Mod Reference', 'Version');
+      const modReferenceList = Object.keys(modListJson);
 
       // Generate mod entries
-      await Object.entries(modListJson).reduce(async (promise, [key, value]) => {
-        await promise;
-        const friendlyName = await this.getFriendlyModName(key);
-        const modInfo = {
-          friendlyName,
-          modReference: key,
-          version: value,
-        };
-        modList.push(modInfo);
-      }, Promise.resolve());
+      const modList = await Promise.all(modReferenceList.map(async (modReference) => ({
+        friendlyName: await this.getFriendlyModName(modReference), modReference, version: modListJson[modReference],
+      })));
 
       // Sort by Friendly Name
       modList.sort((a, b) => {
         const x = a.friendlyName.toLowerCase();
         const y = b.friendlyName.toLowerCase();
-        if (x < y) { return -1; }
-        if (x > y) { return 1; }
-        return 0;
+        return x.localeCompare(y);
       });
 
       // Get max lengths to use for padding
-      const longestFriendlyName = modList.reduce(
-        (a, b) => (a.friendlyName.length > b.friendlyName.length ? a : b),
-      );
-      const longestModReference = modList.reduce(
-        (a, b) => (a.modReference.length > b.modReference.length ? a : b),
-      );
+      const maxFriendlyNameLen = Math.max(...modList.map((mod) => mod.friendlyName.length));
+      const maxModReferenceLen = Math.max(...modList.map((mod) => mod.modReference.length));
 
       // Create header and add all mods to string
-      let modListString = `${'Mod Name'.padEnd(longestFriendlyName.friendlyName.length + 1) + 'Mod Reference'.padEnd(longestModReference.modReference.length + 1)}Version\n`;
+      let modListString = `${'Mod Name'.padEnd(maxFriendlyNameLen + 1) + 'Mod Reference'.padEnd(maxModReferenceLen + 1)}Version\n`;
       modList.forEach((mod) => {
-        mod.friendlyName = mod.friendlyName.padEnd(longestFriendlyName.friendlyName.length, ' ');
-        mod.modReference = mod.modReference.padEnd(longestModReference.modReference.length, ' ');
+        mod.friendlyName = mod.friendlyName.padEnd(maxFriendlyNameLen, ' ');
+        mod.modReference = mod.modReference.padEnd(maxModReferenceLen, ' ');
         modListString += `${mod.friendlyName} ${mod.modReference} ${mod.version}\n`;
       });
 
