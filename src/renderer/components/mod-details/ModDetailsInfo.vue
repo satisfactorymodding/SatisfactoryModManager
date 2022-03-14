@@ -219,9 +219,9 @@ export default {
     manifestVersion() {
       return this.$store.state.manifestItems.find((item) => item.id === this.mod.mod_reference)?.version;
     },
-     installedVersion() {
-          return this.$store.state.selectedInstall?.mods[this.mod.mod_reference];
-      },
+    installedVersion() {
+      return this.$store.state.selectedInstall?.mods[this.mod.mod_reference];
+    },
   },
   methods: {
     searchByAuthor() {
