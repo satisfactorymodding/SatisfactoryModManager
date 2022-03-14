@@ -75,6 +75,7 @@
           Created: <span class="header">{{ mod.created_at.toLocaleDateString() }}</span><br>
           Updated: <span class="header">{{ mod.last_version_date ? mod.last_version_date.toLocaleString() : 'N/A' }}</span><br>
           Latest version: <span class="header">{{ mod.versions[0] ? mod.versions[0].version : 'N/A' }}</span><br>
+          Installed version: <span class="header">{{ installedVersion ? installedVersion : 'N/A' }}</span><br>
         </span>
       </v-row>
       <v-row
@@ -218,6 +219,9 @@ export default {
     manifestVersion() {
       return this.$store.state.manifestItems.find((item) => item.id === this.mod.mod_reference)?.version;
     },
+     installedVersion() {
+          return this.$store.state.selectedInstall?.mods[this.mod.mod_reference];
+      },
   },
   methods: {
     searchByAuthor() {
