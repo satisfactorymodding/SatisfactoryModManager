@@ -198,7 +198,7 @@ export default {
       return this.expandedModId === this.mod.mod_reference;
     },
     icon() {
-      return this.mod.logo || 'https://ficsit.app/static/assets/images/no_image.png';
+      return this.mod.logo || 'https://ficsit.app/images/no_image.webp';
     },
     isModInProgress() {
       return !!this.modProgress;
