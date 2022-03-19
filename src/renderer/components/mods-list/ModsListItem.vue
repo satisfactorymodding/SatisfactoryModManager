@@ -11,7 +11,7 @@
         style="margin-top: 0px; margin-bottom: 0px; margin-right: 8px; height: 45px; width: 45px;"
       >
         <img
-          v-if="!mod.isCached"
+          v-if="!mod.isCached || !isOffline"
           :src="icon"
         >
         <v-icon

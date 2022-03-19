@@ -41,8 +41,8 @@ import { compare } from 'semver';
 import {
   lastElement, setIntervalImmediately, isCompatibleFast, COMPATIBILITY_LEVEL,
 } from '@/utils';
-import ModsListItem from './ModsListItem';
 import { getSetting, saveSetting } from '~/settings';
+import ModsListItem from './ModsListItem';
 
 const MODS_PER_QUERY = 50;
 

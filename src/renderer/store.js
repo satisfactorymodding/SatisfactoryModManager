@@ -11,8 +11,8 @@ import {
 } from 'satisfactory-mod-manager-api';
 import path from 'path';
 import { ipcRenderer } from 'electron';
-import { bytesToAppropriate, secondsToAppropriate, setIntervalImmediately } from './utils';
 import { saveSetting, getSetting } from '~/settings';
+import { bytesToAppropriate, secondsToAppropriate, setIntervalImmediately } from './utils';
 import { write as writeLog } from './logging';
 
 Vue.use(Vuex);

@@ -1,4 +1,4 @@
-import marked from 'marked';
+import { marked } from 'marked';
 import sanitizeHtml from 'sanitize-html';
 import originalFilenamify from 'filenamify';
 import {

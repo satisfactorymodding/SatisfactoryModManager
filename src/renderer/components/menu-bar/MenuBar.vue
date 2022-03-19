@@ -183,6 +183,7 @@ import gql from 'graphql-tag';
 import {
   ignoreUpdate, unignoreUpdate,
 } from '@/utils';
+import { getSetting, saveSetting } from '~/settings';
 import SettingsMenu from './SettingsMenu';
 import UpdatesMenu from './UpdatesMenu';
 import ProfileImportProgressDialog from './dialogs/ProfileImportProgressDialog';
@@ -190,7 +191,6 @@ import ProfileExportProgressDialog from './dialogs/ProfileExportProgressDialog';
 import SMMUpdateDialog from './dialogs/SMMUpdateDialog';
 import ChangelogDialog from './dialogs/ChangelogDialog';
 import ModUpdatesDialog from './dialogs/ModUpdatesDialog';
-import { getSetting, saveSetting } from '~/settings';
 
 const UPDATE_CHECK_INTERVAL = 5 * 60 * 1000;
 
