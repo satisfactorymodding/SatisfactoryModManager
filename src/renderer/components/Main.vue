@@ -158,7 +158,7 @@
             size="125"
             tile
           >
-            <v-img :src="(uriInstallModData ? uriInstallModData.logo : null) || 'https://ficsit.app/static/assets/images/no_image.png'" />
+            <v-img :src="(uriInstallModData ? uriInstallModData.logo : null) || 'https://ficsit.app/images/no_image.webp'" />
           </v-avatar>
         </div>
       </v-card>
