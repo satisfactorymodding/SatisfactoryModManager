@@ -199,7 +199,7 @@ export default {
       'inProgress',
     ]),
     icon() {
-      return this.mod.logo || 'https://ficsit.app/static/assets/images/no_image.png';
+      return this.mod.logo || 'https://ficsit.app/images/no_image.webp';
     },
     multiplayerSupport() {
       return this.mod.multiplayer_support || 'N/A';
