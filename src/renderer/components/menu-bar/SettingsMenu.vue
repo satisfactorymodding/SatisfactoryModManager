@@ -260,6 +260,20 @@
                 inset
                 class="custom"
               />
+
+              <v-list-item
+                @click="copyModList"
+              >
+                <v-list-item-action />
+                <v-list-item-content>
+                  <v-list-item-title>Copy Mod List</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+
+              <v-divider
+                inset
+                class="custom"
+              />
             </v-list>
           </v-card>
         </v-menu>
@@ -559,6 +573,8 @@ import { filenameFriendlyDate, filenamify, validAndEq } from '@/utils';
 import { getSetting, saveSetting } from '~/settings';
 import { setDebug } from '@/logging';
 
+const { clipboard } = require('electron');
+
 /**
  * @param {JSZip} zip The zip file to add to
  * @param {string} filePath The file to add to the zip
@@ -706,6 +722,8 @@ export default {
     this.$root.$on('exportDebugData', this.exportDebugData);
     this.$root.$on('moddingDiscord', this.moddingDiscord);
     this.$root.$on('clearCache', this.clearCache);
+    this.$root.$on('copyModList', this.copyModList);
+    this.$root.$on('getFriendlyModName', this.getFriendlyModName);
   },
   methods: {
     moddingDiscord() {
@@ -719,6 +737,51 @@ export default {
       if (this.$store.state.selectedInstall) {
         this.$store.state.selectedInstall.clearCache();
       }
+    },
+    async getFriendlyModName(modReference) {
+      const friendlyName = await this.$apollo.query({
+        query: gql`
+            query getModName($modReference: ModReference!) {
+              mod: getModByReference(modReference: $modReference) {
+                name
+              }
+            }
+          `,
+        variables: {
+          modReference,
+        },
+      });
+      return friendlyName.data.mod.name;
+    },
+    async copyModList() {
+      const modListJson = this.$store.state.selectedInstall?.mods;
+      const modReferenceList = Object.keys(modListJson);
+
+      // Generate mod entries
+      const modList = await Promise.all(modReferenceList.map(async (modReference) => ({
+        friendlyName: await this.getFriendlyModName(modReference), modReference, version: modListJson[modReference],
+      })));
+
+      // Sort by Friendly Name
+      modList.sort((a, b) => {
+        const x = a.friendlyName.toLowerCase();
+        const y = b.friendlyName.toLowerCase();
+        return x.localeCompare(y);
+      });
+
+      // Get max lengths to use for padding
+      const maxFriendlyNameLen = Math.max(...modList.map((mod) => mod.friendlyName.length));
+      const maxModReferenceLen = Math.max(...modList.map((mod) => mod.modReference.length));
+
+      // Create header and add all mods to string
+      let modListString = `${'Mod Name'.padEnd(maxFriendlyNameLen + 1) + 'Mod Reference'.padEnd(maxModReferenceLen + 1)}Version\n`;
+      modList.forEach((mod) => {
+        mod.friendlyName = mod.friendlyName.padEnd(maxFriendlyNameLen, ' ');
+        mod.modReference = mod.modReference.padEnd(maxModReferenceLen, ' ');
+        modListString += `${mod.friendlyName} ${mod.modReference} ${mod.version}\n`;
+      });
+
+      clipboard.writeText(modListString.trim());
     },
     async exportDebugData() {
       const result = await this.$electron.ipcRenderer.invoke('saveDialog', {
