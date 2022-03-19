@@ -98,7 +98,7 @@
     "node-stream-zip": "^1.15.0",
     "platform-folders": "^0.5.3",
     "sanitize-html": "^2.5.2",
-    "satisfactory-mod-manager-api": "^3.2.1",
+    "satisfactory-mod-manager-api": "^4.0.0",
     "semver": "^7.3.5",
     "sha.js": "^2.4.11",
     "socket.io": "^4.3.1",
