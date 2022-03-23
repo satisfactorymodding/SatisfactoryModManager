@@ -571,7 +571,7 @@ import { satisfies } from 'semver';
 import { mapState } from 'vuex';
 import { filenameFriendlyDate, filenamify, validAndEq } from '@/utils';
 import { getSetting, saveSetting } from '~/settings';
-import { setDebug } from '@/logging';
+import { setDebug, getLogFilePath } from '@/logging';
 
 const { clipboard } = require('electron');
 
