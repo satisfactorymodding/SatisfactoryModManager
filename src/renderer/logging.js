@@ -118,3 +118,7 @@ export function write(level, message) {
 export function setDebug(value) {
   consoleLogger.minLevel = value ? LogLevel.DEBUG : LogLevel.INFO;
 }
+
+export function getLogFilePath() {
+  return path.join(fileLogger.dir, RollingFileLogger.formatLogFileName(fileLogger.fileNameFormat));
+}
