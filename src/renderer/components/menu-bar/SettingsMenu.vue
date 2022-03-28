@@ -559,7 +559,7 @@
 
 <script>
 import {
-  clearCache, getLogFilePath, validAndGreater, setTimeoutEnabled,
+  clearCache, validAndGreater, setTimeoutEnabled,
 } from 'satisfactory-mod-manager-api';
 import JSZip from 'jszip';
 import fs from 'fs';
