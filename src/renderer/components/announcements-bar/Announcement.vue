@@ -101,7 +101,7 @@ export default {
     },
   },
   mounted() {
-    this.isNew = true || !getSetting('viewedAnnouncements', []).includes(this.announcement.id);
+    this.isNew = !getSetting('viewedAnnouncements', []).includes(this.announcement.id);
     if (this.isNew) {
       setTimeout(() => {
         const viewedAnnouncements = getSetting('viewedAnnouncements', []);
@@ -151,17 +151,17 @@ export default {
   --colour2: hsl(var(--deg) 77% 24%);
   background-size: 200% 100% !important;
   background-color: var(--colour1);
-  animation: slide 6s linear infinite;
   will-change: background-position;
+  background-image: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 20px,
+      var(--colour2) 20px,
+      var(--colour2) 40px
+  );
 }
 
 .announcement-new.announcement-bg {
-  background-image: repeating-linear-gradient(
-    45deg,
-    transparent,
-    transparent 20px,
-    var(--colour2) 20px,
-    var(--colour2) 40px
-  );
+  animation: slide 6s linear infinite;
 }
 </style>
