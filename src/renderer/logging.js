@@ -120,5 +120,5 @@ export function setDebug(value) {
 }
 
 export function getLogFilePath() {
-  return path.join(fileLogger.dir, RollingFileLogger.formatLogFileName(fileLogger.fileNameFormat));
+  return fileLogger.getLogFilePath();
 }
