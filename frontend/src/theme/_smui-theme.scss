@@ -1,0 +1,23 @@
+@use 'sass:color';
+
+// Svelte Colors!
+@use '@material/theme/index' as theme with (
+  $primary: #249a20,
+  $secondary: #676778,
+  $surface: #212226,
+  $background: #212226,
+  $error: #e51c22
+);
+
+html,
+body {
+  background-color: theme.$surface;
+  color: theme.$on-surface;
+}
+
+a {
+  color: #40b3ff;
+}
+a:visited {
+  color: color.scale(#40b3ff, $lightness: -35%);
+}

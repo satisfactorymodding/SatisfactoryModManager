@@ -1,0 +1,227 @@
+@import '../../static/smui.css';
+
+@import 'https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible&family=Roboto&family=Roboto+Mono&family=Material+Icons&display=swap';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  font-family: 'Roboto', Helvetica Neue, sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+html.accessibility,
+body.accessibility {
+  font-family: 'Atkinson Hyperlegible', Helvetica Neue, sans-serif;
+}
+
+.markdown-content {
+  @apply text-base;
+
+  & img {
+    max-width: 100%;
+    display: inline;
+  }
+
+  & h1 {
+    @apply text-4xl my-4 font-bold;
+  }
+
+  & h2 {
+    @apply text-3xl my-4 font-bold;
+  }
+
+  & h3 {
+    @apply text-2xl my-4 font-bold;
+  }
+
+  & h4 {
+    @apply text-xl my-4 font-bold;
+  }
+
+  & h5 {
+    @apply text-lg my-4 font-bold;
+  }
+
+  & h6 {
+    @apply text-base my-4 font-bold;
+  }
+
+  & ul {
+    display: block;
+    list-style-type: disc;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    padding-inline-start: 40px;
+  }
+
+  & p {
+    @apply text-base my-5;
+  }
+
+  & a {
+    @apply text-yellow-500;
+    text-decoration: underline;
+  }
+
+  & pre {
+    font-family: Roboto Mono, monospace !important;
+    padding: 1em;
+    margin: 0.5em 0;
+    overflow: auto;
+    border-radius: 0.3em;
+    text-shadow: 0 1px rgba(0, 0, 0, 0.3);
+    font-size: 1em;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+    tab-size: 4;
+    hyphens: none;
+    background: #272822;
+  }
+
+  & ol {
+    display: block;
+    list-style-type: decimal;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    padding-inline-start: 40px;
+  }
+
+  & ol ul {
+    list-style-type: circle;
+  }
+
+  & blockquote {
+    display: block;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 40px;
+    margin-inline-end: 40px;
+  }
+
+  & dl {
+    display: block;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+  }
+
+  & dd {
+    display: block;
+    margin-inline-start: 40px;
+  }
+}
+
+@font-face {
+  font-family: Flow;
+  font-weight: 400;
+  font-style: normal;
+  src: url(/assets/fonts/flow-rounded.woff) format('woff');
+  font-display: swap;
+}
+
+.h-fit {
+  height: fit-content;
+}
+
+.markdownEditor {
+  padding: 1em;
+  margin: 0.5em 0;
+  overflow: auto;
+  border-radius: 0.3em;
+  color: #f8f8f2;
+  background: #272822;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 1em;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.5;
+  tab-size: 4;
+  hyphens: none;
+  caret-color: #f8f8f2;
+  width: 100%;
+}
+
+.mdc-notched-outline__notch {
+  border-left: none;
+  border-right: none;
+}
+
+.card-image-container {
+  max-width: 200px;
+  max-height: 200px;
+  width: 200px;
+  height: 200px;
+
+  & > img {
+    min-width: 200px;
+    min-height: 200px;
+  }
+}
+
+.vertical-textarea {
+  & > span {
+    resize: vertical;
+  }
+}
+
+.mod-inset {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-shadow: inset 0 0 70px 20px rgba(32, 15, 0, 0.75);
+}
+
+.mod-stripe {
+  box-shadow: 0 0 10px 5px rgba(32, 15, 0, 0.75);
+  z-index: 1;
+  width: 150%;
+  height: 44px;
+  position: absolute;
+  -webkit-backface-visibility: hidden;
+  left: -25%;
+  top: 60px;
+  transform: rotate(-15deg);
+  text-align: center;
+  vertical-align: middle;
+  font-weight: bold;
+  font-size: 34px;
+  color: black;
+  text-shadow: -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff;
+}
+
+.mod-own-risk {
+  user-select: none;
+  pointer-events: none;
+
+  & .mod-stripe {
+    background: repeating-linear-gradient(45deg, #ffffff, #ffffff 10px, #abae0f 10px, #abae0f 20px);
+  }
+}
+
+.mod-outdated {
+  user-select: none;
+  pointer-events: none;
+
+  & .mod-stripe {
+    background: repeating-linear-gradient(45deg, #ffffff, #ffffff 10px, #e25700 10px, #e25700 20px);
+  }
+}
+
+@media (min-width: 1279px) {
+  .grid-auto-max {
+    grid-template-columns: minmax(0, 100%) fit-content(30%);
+  }
+}
