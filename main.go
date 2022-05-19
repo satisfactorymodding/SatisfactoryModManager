@@ -19,11 +19,11 @@ func main() {
 	err := wails.Run(&options.App{
 		Title:     "SatisfactoryModManager",
 		Frameless: runtime.GOOS == "windows",
-		Width:     550,
-		Height:    850,
-		MaxWidth:  550,
-		MinWidth:  550,
-		MinHeight: 650,
+		Width:     unexpandedMinWidth,
+		Height:    unexpandedMinHeight,
+		MaxWidth:  unexpandedMinWidth,
+		MinWidth:  unexpandedMinWidth,
+		MinHeight: unexpandedMinHeight,
 		Assets:    assets,
 		OnStartup: app.startup,
 		Bind: []interface{}{

@@ -1,0 +1,128 @@
+<script lang="ts">
+  import { getClient } from '@urql/svelte';
+  import { GetModsDocument, GetModCountDocument } from '$lib/generated';
+  import ModsListItem from '$lib/components/mods-list/ModsListItem.svelte';
+  import _ from 'lodash';
+  import Fuse from 'fuse.js';
+  import ModListFilters from './ModsListFilters.svelte';
+  import { orderByOptions, type OrderBy, type PartialMod } from '$lib/components/mods-list/modFilters';
+
+  let mods: PartialMod[] = [];
+
+  const MODS_PER_PAGE = 50;
+
+  const urqlClient = getClient();
+
+  async function fetchAllMods() {
+    const result = await urqlClient.query(GetModCountDocument).toPromise();
+    const count = result.data?.getMods.count;
+    if (count) {
+      const pages = Math.ceil(count / MODS_PER_PAGE);
+
+      mods = (await Promise.all(Array.from({length: pages}).map(async (_, i) => {
+        const offset = i * MODS_PER_PAGE;
+        const result = await urqlClient.query(GetModsDocument, { offset, limit: MODS_PER_PAGE }).toPromise();
+        return result.data?.getMods.mods ?? [];
+      }))).flat();
+    }
+  }
+
+  fetchAllMods();
+
+  let searchString = '';
+  let order: OrderBy = orderByOptions[1];
+
+  $: filteredMods = () => {
+    const sortedMods = _.sortBy(mods, order.func) as PartialMod[];
+    if(!searchString) {
+      return sortedMods;
+    }
+    const fuse = new Fuse(sortedMods, {
+      keys: [
+        {
+          name: 'name',
+          weight: 2,
+        },
+        {
+          name: 'short_description',
+          weight: 1,
+        },
+        {
+          name: 'full_description',
+          weight: 0.75,
+        },
+        {
+          name: 'authors.user.username',
+          weight: 0.4,
+        },
+      ],
+      useExtendedSearch: true,
+      threshold: 0.2,
+      ignoreLocation: true,
+    });
+    return fuse.search(searchString).map((result) => result.item);
+  };
+
+  export let selectedMod: string | null = null;
+  export let compact: boolean;
+</script>
+
+<div class="h-full flex flex-col">
+  <div class="flex-none">
+    <ModListFilters bind:search={searchString} bind:order={order} bind:compact={compact} />
+  </div>
+  <div class="py-4 grow h-0 mods-list" style="position: relative;">
+    <!-- <div v-if="topShadow" class="list-shadow-top" />
+    <div v-if="bottomShadow" class="list-shadow-bottom" /> -->
+    <div class="ml-5 mr-3 overflow-y-scroll h-full">
+      {#each filteredMods() as mod}
+        <ModsListItem {mod} on:click={() => selectedMod = mod.mod_reference} bind:compact={compact} selected={selectedMod == mod.mod_reference}/>
+      {/each}
+    </div>
+  </div>
+</div>
+
+<style>
+  /* .list-shadow-top,
+  .list-shadow-bottom {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    z-index: 2;
+    background: transparent !important;
+    pointer-events: none;
+  }
+  .list-shadow-top {
+    box-shadow: inset 0px 45px 20px -20px rgba(0, 0, 0, 0.3);
+  }
+  .list-shadow-bottom {
+    box-shadow: inset 0px -45px 20px -20px rgba(0, 0, 0, 0.3);
+  } */
+  .mods-list {
+    background-color: #2B2B2B;
+  }
+  ::-webkit-scrollbar {
+    width: 25px;
+  }
+  ::-webkit-scrollbar-track {
+    background: black;
+    border: solid 10px transparent;
+    background-clip: content-box;
+    border-radius: 0;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #fff;
+    border: solid 10px transparent;
+    border-top-width: 0px;
+    border-bottom-width: 0px;
+    background-clip: content-box;
+    border-radius: 0;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    border: solid 10px transparent;
+    border-top-width: 0px;
+    border-bottom-width: 0px;
+    background-clip: content-box;
+  }
+</style>

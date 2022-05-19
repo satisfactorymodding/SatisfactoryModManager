@@ -8,12 +8,12 @@ module.exports = {
     postcssPresetEnv({
       stage: 4,
       features: {
-        'nesting-rules': true
-      }
+        'nesting-rules': true,
+      },
     }),
 
     importUrl({
-      modernBrowser: true
+      modernBrowser: true,
     }),
     tailwindCSSNesting(),
     tailwindCSS(),
