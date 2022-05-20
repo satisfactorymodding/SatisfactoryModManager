@@ -37,6 +37,9 @@
     if(!searchString) {
       return sortedMods;
     }
+    
+    const modifiedSearchString = searchString.replace(/(?:author:"(.+?)"|author:([^\s"]+))/g, '="$1$2"');
+    
     const fuse = new Fuse(sortedMods, {
       keys: [
         {
@@ -60,7 +63,7 @@
       threshold: 0.2,
       ignoreLocation: true,
     });
-    return fuse.search(searchString).map((result) => result.item);
+    return fuse.search(modifiedSearchString).map((result) => result.item);
   };
 
   export let selectedMod: string | null = null;
