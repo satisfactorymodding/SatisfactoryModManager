@@ -37,7 +37,7 @@
       windowExpanded = false;
       setTimeout(() => {
         UnexpandMod();
-      }, 200);
+      }, 100);
     }
   }
 
@@ -49,14 +49,14 @@
 <div class="flex flex-col h-screen w-screen">
   <TitleBar />
   <div class="flex grow h-0 select-none">
-    <div class="w-96">
+    <div class="left-bar">
       <LeftBar />
     </div>
     <div class:normal={!selectedModId || pendingExpand} class:compact={windowExpanded}>
       <ModsList bind:selectedMod={selectedModId} bind:compact={modsListCompact}/>
     </div>
     {#if selectedModId}
-      <div class="flex-1" class:pendingExpand>
+      <div class="grow">
         <ModDetails id={selectedModId} on:close={() => selectedModId = null}/>
       </div>
     {/if}
@@ -66,11 +66,17 @@
 <style>
   .normal {
     width: 610px !important;
+    min-width: 610px !important;
   }
   .compact {
     width: 470px;
+    min-width: 470px;
   }
-  .pendingExpand {
+  .left-bar {
+    width: 24rem;
+    min-width: 24rem;
+  }
+  /* .pendingExpand {
     display: none;
-  }
+  } */
 </style>
