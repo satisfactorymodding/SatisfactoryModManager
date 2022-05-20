@@ -51,8 +51,8 @@
       <span class="pt-2 font-light">A mod by:</span>
       <span class="font-medium color-primary">{mod?.authors[0].user.username}</span>
 
-      <div class="pt-2">
-        <Button variant="unelevated" color="secondary" on:mouseover={() => authorsMenu.setOpen(true)} on:mouseleave={() => authorsMenu.setOpen(false)}>
+      <div class="pt-2" on:mouseenter={() => authorsMenu.setOpen(true)} on:mouseleave={() => authorsMenu.setOpen(false)}>
+        <Button variant="unelevated" color="secondary" class="w-full">
           <Label>Contributors <span class="color-primary">({mod?.authors.length})</span></Label>
           <MDIIcon icon={mdiChevronDown}/>
         </Button>
