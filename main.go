@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"embed"
 	"runtime"
 
@@ -8,12 +9,13 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options"
 )
 
-//go:embed frontend/build
+// go:embed frontend/build
 var assets embed.FS
 
 func main() {
 	// Create an instance of the app structure
-	app := NewApp()
+	app := &App{}
+	ficsitCli := &FicsitCLI{}
 
 	// Create application with options
 	err := wails.Run(&options.App{
@@ -25,9 +27,13 @@ func main() {
 		MinWidth:  unexpandedMinWidth,
 		MinHeight: unexpandedMinHeight,
 		Assets:    assets,
-		OnStartup: app.startup,
+		OnStartup: func(ctx context.Context) {
+			app.startup(ctx)
+			ficsitCli.startup(ctx)
+		},
 		Bind: []interface{}{
 			app,
+			ficsitCli,
 		},
 	})
 

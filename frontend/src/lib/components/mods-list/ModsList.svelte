@@ -5,7 +5,8 @@
   import _ from 'lodash';
   import Fuse from 'fuse.js';
   import ModListFilters from './ModsListFilters.svelte';
-  import { orderByOptions, type OrderBy, type PartialMod } from '$lib/components/mods-list/modFilters';
+  import { filterOptions, orderByOptions, type Filter, type OrderBy, type PartialMod } from '$lib/components/mods-list/modFilters';
+import { lockfileMods, manifestMods } from '$lib/store';
 
   let mods: PartialMod[] = [];
 
@@ -31,9 +32,15 @@
 
   let searchString = '';
   let order: OrderBy = orderByOptions[1];
+  let filter: Filter = filterOptions[0];
 
   $: filteredMods = () => {
-    const sortedMods = _.sortBy(mods, order.func) as PartialMod[];
+    // Watch the required store states
+    $manifestMods;
+    $lockfileMods;
+    
+    const filteredMods = mods.filter(filter.func);
+    const sortedMods = _.sortBy(filteredMods, order.func) as PartialMod[];
     if(!searchString) {
       return sortedMods;
     }
@@ -72,7 +79,7 @@
 
 <div class="h-full flex flex-col">
   <div class="flex-none">
-    <ModListFilters bind:search={searchString} bind:order={order} bind:compact={compact} />
+    <ModListFilters bind:search={searchString} bind:order={order}  bind:filter={filter} bind:compact={compact} />
   </div>
   <div class="py-4 grow h-0 mods-list" style="position: relative;">
     <!-- <div v-if="topShadow" class="list-shadow-top" />

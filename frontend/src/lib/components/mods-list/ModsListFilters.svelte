@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { orderByOptions, type OrderBy } from '$lib/components/mods-list/modFilters';
+  import { filterOptions, orderByOptions, type Filter, type OrderBy } from '$lib/components/mods-list/modFilters';
   import Textfield, { Input, type InputComponentDev } from '@smui/textfield';
   import LineRipple, { type LineRippleComponentDev } from '@smui/line-ripple';
   import Select, { Option } from '@smui/select';
@@ -10,6 +10,7 @@
   export let compact: boolean;
   export let search: string;
   export let order: OrderBy;
+  export let filter: Filter;
 </script>
 
 <div class="px-5 py-2">
@@ -33,8 +34,8 @@
     <Select
       class="control-area-input w-1/3 max-w-56 pr-0.5"
       variant="filled"
-      bind:value={order}
-      placeholder="Order by"
+      bind:value={filter}
+      placeholder="Filter"
       ripple={false}
     >
       <span slot="leadingIcon" class="pl-3">
@@ -42,7 +43,7 @@
           View:&nbsp;
         {/if}
       </span>
-      {#each orderByOptions as option}
+      {#each filterOptions as option}
         <Option value={option}>{option.name}</Option>
       {/each}
     </Select>
