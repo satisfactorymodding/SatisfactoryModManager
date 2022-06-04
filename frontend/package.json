@@ -93,7 +93,7 @@
     "@smui/tooltip": "^6.0.0-beta.16",
     "@smui/top-app-bar": "^6.0.0-beta.16",
     "@smui/touch-target": "^6.0.0-beta.16",
-    "@sveltejs/adapter-auto": "next",
+    "@sveltejs/adapter-static": "next",
     "@sveltejs/kit": "next",
     "@types/cookie": "^0.4.1",
     "@types/lodash": "^4.14.182",

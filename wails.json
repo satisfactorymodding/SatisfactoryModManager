@@ -1,10 +1,9 @@
 {
   "name": "SatisfactoryModManager",
   "outputfilename": "SatisfactoryModManager",
-  "assetdir": "frontend/build",
   "frontend:install": "yarn install",
-  "frontend:build": "yarn run build",
-  "frontend:dev:watcher": "yarn run dev",
+  "frontend:build": "yarn build",
+  "frontend:dev:watcher": "yarn dev",
   "frontend:dev:serverUrl": "http://localhost:3000",
   "author": {
     "name": "mircearoata",
