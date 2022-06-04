@@ -9,6 +9,13 @@
   $error: #e51c22
 );
 
+@use '@material/linear-progress/index' as linear-progress;
+
+.mod-progress-bar {
+  @include linear-progress.bar-color(#171717);
+  @include linear-progress.buffer-color(#252525);
+}
+
 html,
 body {
   background-color: theme.$surface;

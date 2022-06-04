@@ -6,6 +6,7 @@
   import Button, { Group, GroupItem, Label } from '@smui/button';
   import Menu, { type MenuComponentDev } from '@smui/menu';
   import List, { Item, Text } from '@smui/list';
+  import LinearProgress from '@smui/linear-progress';
   import { lockfileMods, manifestMods, progress } from '$lib/store';
   import { InstallMod, RemoveMod } from '../../../../wailsjs/go/main/FicsitCLI';
   
@@ -45,60 +46,74 @@
   }
 </script>
 
-<div class="my-2 px-0 flex w-full" readonly class:selected>
-  <img src={renderedLogo} alt="{mod.name} Logo" class="logo h-24 w-24" on:click={click} />
-  <div class="ml-2 flex flex-col grow w-0">
-    <div on:click={click}>
-      <span class="text-xl font-medium">{mod.name}</span>
-      {#if !compact}
-        <span class="pl-1">by</span>
-        <span class="color-primary">{author}</span>
-      {/if}
+<div class="my-2 px-0 w-full">
+  {#if inProgress}
+    <div class="relative h-0">
+      <LinearProgress progress={$progress?.progress} class="mod-progress-bar h-24 w-full"/>
     </div>
-    <span class="truncate w-full" on:click={click}>{mod.short_description}</span>
-    <div class="flex grow">
-      <div class="grow w-0" on:click={click}>
-        <div>
-          #tags
-        </div>
-        <div class="flex">
-          <div class="w-24 flex">
-            <div class="pr-1 inline-flex items-center justify-items-center"><MDIIcon icon={mdiEye}/></div>{mod.views.toLocaleString()}
-          </div>
-          <div class="w-24 flex">
-            <div class="pr-1 inline-flex items-center justify-items-center"><MDIIcon icon={mdiDownload}/></div>{mod.downloads.toLocaleString()}
-          </div>
-        </div>
+  {/if}
+  <div class="flex relative" readonly class:selected>
+    <img src={renderedLogo} alt="{mod.name} Logo" class="logo h-24 w-24" on:click={click} />
+    <div class="ml-2 flex flex-col grow w-0">
+      <div on:click={click}>
+        <span class="text-xl font-medium">{mod.name}</span>
+        {#if !compact}
+          <span class="pl-1">by</span>
+          <span class="color-primary">{author}</span>
+        {/if}
       </div>
-      <div class="pr-2">
-        <Group variant="outlined">
-          <Button on:click={toggleModInstalled} variant="unelevated" disabled={buttonDisabled}>
-            <Label>{ buttonLabel }</Label>
-          </Button>
-          <div use:GroupItem>
-            <Button
-              on:click={() => installOptionsMenu.setOpen(true)}
-              disabled={buttonDisabled}
-              variant="unelevated"
-              style="padding: 0; min-width: 36px;"
-            >
-
-            </Button>
-            <Menu bind:this={installOptionsMenu} anchorCorner="TOP_LEFT">
-              <List>
-                <Item on:SMUI:action={toggleAddToQueue}>
-                  <Text>Queue { buttonLabel }</Text>
-                </Item>
-              </List>
-            </Menu>
+      <span class="truncate w-full" on:click={click}>{mod.short_description}</span>
+      <div class="flex grow">
+        {#if !inProgress}
+          <div class="grow w-0" on:click={click}>
+            <div>
+              #tags
+            </div>
+            <div class="flex">
+              <div class="w-24 flex">
+                <div class="pr-1 inline-flex items-center justify-items-center"><MDIIcon icon={mdiEye}/></div>{mod.views.toLocaleString()}
+              </div>
+              <div class="w-24 flex">
+                <div class="pr-1 inline-flex items-center justify-items-center"><MDIIcon icon={mdiDownload}/></div>{mod.downloads.toLocaleString()}
+              </div>
+            </div>
           </div>
-        </Group>
+          <div class="pr-2">
+            <Group variant="outlined">
+              <Button on:click={toggleModInstalled} variant="unelevated" disabled={buttonDisabled}>
+                <Label>{ buttonLabel }</Label>
+              </Button>
+              <div use:GroupItem>
+                <Button
+                  on:click={() => installOptionsMenu.setOpen(true)}
+                  disabled={buttonDisabled}
+                  variant="unelevated"
+                  style="padding: 0; min-width: 36px;"
+                >
+  
+                </Button>
+                <Menu bind:this={installOptionsMenu} anchorCorner="TOP_LEFT">
+                  <List>
+                    <Item on:SMUI:action={toggleAddToQueue}>
+                      <Text>Queue { buttonLabel }</Text>
+                    </Item>
+                  </List>
+                </Menu>
+              </div>
+            </Group>
+          </div>
+        {:else}
+          <span>{ $progress?.message }</span>
+        {/if}
       </div>
     </div>
   </div>
 </div>
 
 <style>
+  :global(.mdc-linear-progress__bar-inner) {
+    border-top-width: 100px;
+  }
   .selected {
     background-color: #1c1c1c;
     border-radius: 16px;

@@ -2,14 +2,12 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"os"
 	"path"
 	"path/filepath"
 	"runtime"
 	"sort"
 
-	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
@@ -169,7 +167,30 @@ func (f *FicsitCLI) InstallMod(mod string) {
 		Progress: -1,
 	})
 
-	installErr := installation.Installation.Install(f.ficsitCli)
+	installChannel := make(chan cli.InstallUpdate)
+
+	go func() {
+		for data := range installChannel {
+			if data.DownloadProgress < 1 {
+				f.SetProgress(&Progress{
+					Item:     mod,
+					Message:  "Downloading " + data.ModName,
+					Progress: data.DownloadProgress,
+				})
+			} else {
+				f.SetProgress(&Progress{
+					Item:     mod,
+					Message:  "Extracting " + data.ModName,
+					Progress: data.DownloadProgress,
+				})
+			}
+		}
+	}()
+
+	installErr := installation.Installation.Install(f.ficsitCli, installChannel)
+
+	close(installChannel)
+
 	if installErr != nil {
 		wailsRuntime.LogErrorf(f.ctx, "Failed to install mod: %v", installErr)
 		return
@@ -197,7 +218,30 @@ func (f *FicsitCLI) InstallModVersion(mod string, version string) {
 		Progress: -1,
 	})
 
-	installErr := installation.Installation.Install(f.ficsitCli)
+	installChannel := make(chan cli.InstallUpdate)
+
+	go func() {
+		for data := range installChannel {
+			if data.DownloadProgress < 1 {
+				f.SetProgress(&Progress{
+					Item:     mod,
+					Message:  "Downloading " + data.ModName,
+					Progress: data.DownloadProgress,
+				})
+			} else {
+				f.SetProgress(&Progress{
+					Item:     mod,
+					Message:  "Extracting " + data.ModName,
+					Progress: data.DownloadProgress,
+				})
+			}
+		}
+	}()
+
+	installErr := installation.Installation.Install(f.ficsitCli, installChannel)
+
+	close(installChannel)
+
 	if installErr != nil {
 		wailsRuntime.LogErrorf(f.ctx, "Failed to install mod: %v", installErr)
 		return
@@ -220,7 +264,30 @@ func (f *FicsitCLI) RemoveMod(mod string) {
 		Progress: -1,
 	})
 
-	installErr := installation.Installation.Install(f.ficsitCli)
+	installChannel := make(chan cli.InstallUpdate)
+
+	go func() {
+		for data := range installChannel {
+			if data.DownloadProgress < 1 {
+				f.SetProgress(&Progress{
+					Item:     mod,
+					Message:  "Downloading " + data.ModName,
+					Progress: data.DownloadProgress,
+				})
+			} else {
+				f.SetProgress(&Progress{
+					Item:     mod,
+					Message:  "Extracting " + data.ModName,
+					Progress: data.ExtractProgress,
+				})
+			}
+		}
+	}()
+
+	installErr := installation.Installation.Install(f.ficsitCli, installChannel)
+
+	close(installChannel)
+
 	if installErr != nil {
 		wailsRuntime.LogErrorf(f.ctx, "Failed to install mod: %v", installErr)
 		return
@@ -231,40 +298,17 @@ func (f *FicsitCLI) RemoveMod(mod string) {
 	f.SetProgress(nil)
 }
 
-func (f *FicsitCLI) GetLockfile(i *cli.Installation) (*cli.LockFile, error) {
-	platform, err := i.GetPlatform(f.ficsitCli)
-	if err != nil {
-		return nil, err
-	}
-
-	lockfilePath := path.Join(i.Path, platform.LockfilePath)
-
-	var lockFile *cli.LockFile
-	lockFileJSON, err := os.ReadFile(lockfilePath)
-	if err != nil {
-		if !os.IsNotExist(err) {
-			return nil, errors.Wrap(err, "failed reading lockfile")
-		}
-	} else {
-		if err := json.Unmarshal(lockFileJSON, &lockFile); err != nil {
-			return nil, errors.Wrap(err, "failed parsing lockfile")
-		}
-	}
-
-	return lockFile, nil
-}
-
 func (f *FicsitCLI) EmitModsChange() {
 	installation := f.GetInstallation(f.selectedInstallation.Info.Path)
 	profileName := installation.Installation.Profile
 	profile := f.GetProfile(profileName)
-	wailsRuntime.EventsEmit(f.ctx, "manifestMods", profile.Mods)
-	lockfile, err := f.GetLockfile(installation.Installation)
+	lockfile, err := installation.Installation.LockFile(f.ficsitCli)
 	if err != nil {
 		wailsRuntime.LogErrorf(f.ctx, "Failed read lockfile: %v", err)
 		return
 	}
 	wailsRuntime.EventsEmit(f.ctx, "lockfileMods", lockfile)
+	wailsRuntime.EventsEmit(f.ctx, "manifestMods", profile.Mods)
 }
 
 func (f *FicsitCLI) SetProgress(progress *Progress) {

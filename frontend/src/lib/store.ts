@@ -35,7 +35,6 @@ export const lockfileMods = readable({} as LockFile, typeof window !== 'undefine
 
 export const progress = readable(null as main.Progress | null, typeof window !== 'undefined' ? ((set) => {
   EventsOn('progress', (data) => {
-    console.log('progress', data);
     set(data);
   });
 
