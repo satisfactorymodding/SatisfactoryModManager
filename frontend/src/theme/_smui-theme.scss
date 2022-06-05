@@ -1,19 +1,57 @@
 @use 'sass:color';
+@use 'sass:math';
 
 // Svelte Colors!
 @use '@material/theme/index' as theme with (
   $primary: #249a20,
   $secondary: #676778,
   $surface: #1c1c1c,
+  $on-surface: #D6D6D6,
   $background: #1c1c1c,
   $error: #e51c22
 );
 
+$surface2: #2B2B2B;
+
 @use '@material/linear-progress/index' as linear-progress;
+
+@use '@material/select/index' as select;
+@use '@material/shape/mixins' as shape-mixins;
+
+@use '@material/button/index' as button;
 
 .mod-progress-bar {
   @include linear-progress.bar-color(#171717);
   @include linear-progress.buffer-color(#252525);
+}
+
+$left-bar-controls-height: 40px;
+
+.left-bar-select.mdc-select--filled {
+  @include select.filled-height($left-bar-controls-height);
+  @include select.filled-shape-radius(math.div($left-bar-controls-height, 5), 0);  
+  .mdc-select__anchor {
+    @include shape-mixins.radius(math.div($left-bar-controls-height, 10));
+  }
+}
+
+.mods-toggle-button.mdc-button--unelevated {
+  @include button.filled-accessible($surface2);
+  @include button.height($left-bar-controls-height);
+  &.mods-on {
+    @include button.filled-accessible(theme.$primary);
+  }
+  &.mods-off {
+    @include button.filled-accessible(theme.$error);
+  }
+}
+
+.mods-list {
+  background-color: $surface2;
+}
+
+.color-primary {
+  color: theme.$primary;
 }
 
 html,
@@ -28,8 +66,4 @@ a {
 }
 a:visited {
   color: color.scale(#40b3ff, $lightness: -35%);
-}
-
-.color-primary {
-  color: theme.$primary;
 }

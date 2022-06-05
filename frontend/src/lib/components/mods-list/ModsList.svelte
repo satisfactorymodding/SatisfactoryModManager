@@ -82,8 +82,6 @@ import { lockfileMods, manifestMods } from '$lib/store';
     <ModListFilters bind:search={searchString} bind:order={order}  bind:filter={filter} bind:compact={compact} />
   </div>
   <div class="py-4 grow h-0 mods-list" style="position: relative;">
-    <!-- <div v-if="topShadow" class="list-shadow-top" />
-    <div v-if="bottomShadow" class="list-shadow-bottom" /> -->
     <div class="ml-5 mr-3 overflow-y-scroll h-full">
       {#each filteredMods() as mod}
         <ModsListItem {mod} on:click={() => selectedMod = mod.mod_reference} bind:compact={compact} selected={selectedMod == mod.mod_reference}/>
@@ -93,25 +91,6 @@ import { lockfileMods, manifestMods } from '$lib/store';
 </div>
 
 <style>
-  /* .list-shadow-top,
-  .list-shadow-bottom {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    z-index: 2;
-    background: transparent !important;
-    pointer-events: none;
-  }
-  .list-shadow-top {
-    box-shadow: inset 0px 45px 20px -20px rgba(0, 0, 0, 0.3);
-  }
-  .list-shadow-bottom {
-    box-shadow: inset 0px -45px 20px -20px rgba(0, 0, 0, 0.3);
-  } */
-  .mods-list {
-    background-color: #2B2B2B;
-  }
   ::-webkit-scrollbar {
     width: 25px;
   }

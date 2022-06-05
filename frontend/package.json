@@ -14,7 +14,8 @@
     "format": "eslint --ignore-path .gitignore --fix .",
     "graphql-codegen": "graphql-codegen --config codegen.yml",
     "graphql-codegen:watch": "graphql-codegen --config codegen.yml --watch",
-    "smui-theme": "smui-theme compile static/smui.css -i src/theme -i ./node_modules"
+    "smui-theme": "smui-theme compile static/smui.css -i src/theme -i ./node_modules",
+    "smui-theme:watch": "nodemon -w src/theme -e scss --exec run-s smui-theme"
   },
   "dependencies": {
     "@fontsource/fira-mono": "^4.5.0",
@@ -27,6 +28,7 @@
     "@material/image-list": "^14.0.0",
     "@material/linear-progress": "^14.0.0",
     "@material/ripple": "^14.0.0",
+    "@material/select": "^14.0.0",
     "@material/shape": "^14.0.0",
     "@material/theme": "^14.0.0",
     "@material/top-app-bar": "^14.0.0",
