@@ -1,14 +1,10 @@
-package main
+package bindings
 
 import (
 	"context"
-	"os"
-	"path"
-	"path/filepath"
-	"runtime"
 	"sort"
 
-	"github.com/spf13/viper"
+	"github.com/pkg/errors"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
 	"github.com/satisfactorymodding/ficsit-cli/cli"
@@ -16,36 +12,6 @@ import (
 	"github.com/satisfactorymodding/SatisfactoryModManager/installFinders"
 	installFinderTypes "github.com/satisfactorymodding/SatisfactoryModManager/installFinders/types"
 )
-
-func InitFicsitCLI() (*cli.GlobalContext, error) {
-	var baseLocalDir string
-
-	switch runtime.GOOS {
-	case "windows":
-		baseLocalDir = os.Getenv("APPDATA")
-	case "linux":
-		baseLocalDir = path.Join(os.Getenv("HOME"), ".local", "share")
-	default:
-		panic("unsupported platform: " + runtime.GOOS)
-	}
-
-	viper.Set("base-local-dir", baseLocalDir)
-
-	baseCacheDir, err := os.UserCacheDir()
-	if err != nil {
-		panic(err)
-	}
-
-	viper.Set("log", "info")
-	viper.Set("cache-dir", filepath.Clean(filepath.Join(baseCacheDir, "SatisfactoryModManagerNEW")))
-	viper.Set("local-dir", filepath.Clean(filepath.Join(baseLocalDir, "SatisfactoryModManagerNEW")))
-	viper.Set("profiles-file", "profiles.json")
-	viper.Set("installations-file", "installations.json")
-	viper.Set("api-base", "https://api.ficsit.app")
-	viper.Set("graphql-api", "/v2/query")
-
-	return cli.InitCLI()
-}
 
 type FicsitCLI struct {
 	ctx                  context.Context
@@ -66,20 +32,25 @@ type Progress struct {
 	Progress float64 `json:"progress"`
 }
 
-func (f *FicsitCLI) startup(ctx context.Context) {
-	f.ctx = ctx
+func MakeFicsitCLI() (*FicsitCLI, error) {
+	f := &FicsitCLI{}
 
-	ficsitCli, err := InitFicsitCLI()
+	ficsitCli, err := cli.InitCLI()
 	if err != nil {
-		wailsRuntime.LogErrorf(ctx, "Failed to initialize CLI: %v", err)
-		return
+		return nil, errors.Wrap(err, "failed to initialize ficsit-cli")
 	}
 	f.ficsitCli = ficsitCli
 
-	f.InitInstallations()
+	f.initInstallations()
+
+	return f, nil
 }
 
-func (f *FicsitCLI) InitInstallations() {
+func (f *FicsitCLI) startup(ctx context.Context) {
+	f.ctx = ctx
+}
+
+func (f *FicsitCLI) initInstallations() {
 	installs, _, findErrors := installFinders.FindInstallations()
 
 	if len(findErrors) > 0 {
@@ -129,12 +100,12 @@ func (f *FicsitCLI) GetInstallation(path string) *InstallationInfo {
 
 func (f *FicsitCLI) SelectInstall(path string) {
 	f.selectedInstallation = f.GetInstallation(path)
-	f.EmitModsChange()
+	f.emitModsChange()
 }
 
 func (f *FicsitCLI) SetProfile(profile string) {
 	f.GetInstallation(f.selectedInstallation.Info.Path).Installation.SetProfile(f.ficsitCli, profile)
-	f.EmitModsChange()
+	f.emitModsChange()
 }
 
 func (f *FicsitCLI) GetProfiles() []string {
@@ -197,7 +168,7 @@ func (f *FicsitCLI) InstallMod(mod string) {
 	}
 
 	f.ficsitCli.Profiles.Save()
-	f.EmitModsChange()
+	f.emitModsChange()
 	f.SetProgress(nil)
 }
 
@@ -248,7 +219,7 @@ func (f *FicsitCLI) InstallModVersion(mod string, version string) {
 	}
 
 	f.ficsitCli.Profiles.Save()
-	f.EmitModsChange()
+	f.emitModsChange()
 	f.SetProgress(nil)
 }
 
@@ -294,11 +265,11 @@ func (f *FicsitCLI) RemoveMod(mod string) {
 	}
 
 	f.ficsitCli.Profiles.Save()
-	f.EmitModsChange()
+	f.emitModsChange()
 	f.SetProgress(nil)
 }
 
-func (f *FicsitCLI) EmitModsChange() {
+func (f *FicsitCLI) emitModsChange() {
 	installation := f.GetInstallation(f.selectedInstallation.Info.Path)
 	profileName := installation.Installation.Profile
 	profile := f.GetProfile(profileName)

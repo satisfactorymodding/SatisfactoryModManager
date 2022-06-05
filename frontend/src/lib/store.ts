@@ -2,6 +2,7 @@ import { get, readable, writable } from 'svelte/store';
 import { cli, bindings } from '$wailsjs/go/models';
 import { EventsOff, EventsOn } from '$wailsjs/runtime/runtime';
 import { GetInstallationsInfo, GetProfiles, SelectInstall, SetProfile } from '$wailsjs/go/bindings/FicsitCLI';
+import { GetFavouriteMods } from '$wailsjs/go/bindings/Settings';
 
 function readableBinding<T>(options: {
   defaultValue: T,
@@ -83,3 +84,5 @@ export type LockFile = Dictionary<string, LockedMod>;
 export const lockfileMods = readableBinding<LockFile>({ defaultValue: {}, allowNull: false, updateEvent: 'lockfileMods'});
 
 export const progress = readableBinding<bindings.Progress | null>({ defaultValue: null, updateEvent: 'progress'});
+
+export const favouriteMods = readableBinding<string[]>({ defaultValue: [], updateEvent: 'favouriteMods', initialGet: GetFavouriteMods});

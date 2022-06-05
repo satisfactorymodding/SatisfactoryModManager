@@ -7,8 +7,9 @@
   import Menu, { type MenuComponentDev } from '@smui/menu';
   import List, { Item, Text } from '@smui/list';
   import LinearProgress from '@smui/linear-progress';
-  import { lockfileMods, manifestMods, progress } from '$lib/store';
-  import { InstallMod, RemoveMod } from '../../../../wailsjs/go/main/FicsitCLI';
+  import { favouriteMods, lockfileMods, manifestMods, progress } from '$lib/store';
+  import { InstallMod, RemoveMod } from '$wailsjs/go/bindings/FicsitCLI';
+  import { FavouriteMod, GetFavouriteMods, UnFavouriteMod } from '$wailsjs/go/bindings/Settings';
   
   export let mod: PartialMod;
 
@@ -29,15 +30,26 @@
   $: isInstalled = mod.mod_reference in $manifestMods;
   $: isEnabled = mod.mod_reference in $lockfileMods;
   $: isDependency = !isInstalled && isEnabled;
-  $: buttonLabel = isDependency ? 'Dependency' : (isInstalled ? 'Remove' : 'Install');
+  $: installButtonLabel = isDependency ? 'Dependency' : (isInstalled ? 'Remove' : 'Install');
   $: buttonDisabled = isDependency || (!!$progress);
   $: inProgress = $progress?.item === mod.mod_reference;
+
+  $: isFavourite = $favouriteMods.includes(mod.mod_reference);
+  $: favouriteButtonLabel = isFavourite ? 'Unfavourite' : 'Favourite';
 
   function toggleModInstalled() {
     if(isInstalled) {
       RemoveMod(mod.mod_reference);
     } else {
       InstallMod(mod.mod_reference);
+    }
+  }
+
+  function toggleModFavourite() {
+    if(!isFavourite) {
+      FavouriteMod(mod.mod_reference);
+    } else {
+      UnFavouriteMod(mod.mod_reference);
     }
   }
 
@@ -81,7 +93,7 @@
           <div class="pr-2">
             <Group variant="outlined">
               <Button on:click={toggleModInstalled} variant="unelevated" disabled={buttonDisabled}>
-                <Label>{ buttonLabel }</Label>
+                <Label>{ installButtonLabel }</Label>
               </Button>
               <div use:GroupItem>
                 <Button
@@ -95,12 +107,15 @@
                 <Menu bind:this={installOptionsMenu} anchorCorner="TOP_LEFT">
                   <List>
                     <Item on:SMUI:action={toggleAddToQueue}>
-                      <Text>Queue { buttonLabel }</Text>
+                      <Text>Queue { installButtonLabel }</Text>
                     </Item>
                   </List>
                 </Menu>
               </div>
             </Group>
+            <Button on:click={toggleModFavourite} variant="unelevated">
+              <Label>{ favouriteButtonLabel }</Label>
+            </Button>
           </div>
         {:else}
           <span>{ $progress?.message }</span>
