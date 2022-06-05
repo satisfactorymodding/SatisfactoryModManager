@@ -4,9 +4,9 @@
   import ModsList from '$lib/components/mods-list/ModsList.svelte';
   import { initializeGraphQLClient } from '$lib/core/graphql';
   import { setClient } from '@urql/svelte';
-  import { Environment } from '../../wailsjs/runtime/runtime';
+  import { Environment } from '$wailsjs/runtime/runtime';
   import ModDetails from '$lib/components/mod-details/ModDetails.svelte';
-  import { ExpandMod, UnexpandMod } from '../../wailsjs/go/main/App';
+  import { ExpandMod, UnexpandMod } from '$wailsjs/go/bindings/App';
   import LeftBar from '$lib/components/LeftBar.svelte';
 
   if (typeof window !== 'undefined') {

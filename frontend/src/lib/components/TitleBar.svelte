@@ -1,7 +1,7 @@
 <script lang="ts">
   import MDIIcon from './MDIIcon.svelte';
   import { mdiWindowMinimize, mdiWindowRestore, mdiWindowMaximize, mdiWindowClose } from '@mdi/js';
-  import { Quit, WindowMinimise, WindowToggleMaximise } from '../../../wailsjs/runtime';
+  import { Quit, WindowMinimise, WindowToggleMaximise } from '$wailsjs/runtime';
 
   function minimize() {
     WindowMinimise();

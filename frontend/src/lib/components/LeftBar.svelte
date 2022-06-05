@@ -5,54 +5,7 @@
   import { mdiCheckCircle, mdiCloseCircle } from '@mdi/js';
   import MdiIcon from '$lib/components/MDIIcon.svelte';
   
-  import type { main } from '../../../wailsjs/go/models';
-  import { GetInstallationsInfo, GetProfiles, SelectInstall, SetProfile } from '../../../wailsjs/go/main/FicsitCLI';
-
-  let installs: main.InstallationInfo[] = [];
-  let selectedInstall: main.InstallationInfo | null = null;
-
-  let profiles: string[] = [];
-  let selectedProfile: string | null = null;
-  
-  if(typeof window !== 'undefined') {
-    Promise.all([
-      GetInstallationsInfo().then((installations) => {
-        installs = installations;
-      }),
-      GetProfiles().then((p) => {
-        profiles = p;
-      })
-    ]).then(() => {
-      selectedInstall = installs[0];
-    });
-  }
-
-  $: {
-    const path = selectedInstall?.info?.path;
-    if(path) {
-      SelectInstall(path);
-      updateSelectedProfile();
-    }
-  }
-
-  $: {
-    if(selectedProfile) {
-      SetProfile(selectedProfile);
-      updateInstallProfile();
-    }
-  }
-
-  function updateSelectedProfile() {
-    if(selectedInstall && selectedInstall.installation) {
-      selectedProfile = selectedInstall.installation.profile;
-    }
-  }
-
-  function updateInstallProfile() {
-    if(selectedInstall && selectedInstall.installation && selectedProfile) {
-      selectedInstall.installation.profile = selectedProfile;
-    }
-  }
+  import { installs, profiles, selectedInstall, selectedProfile } from '$lib/store';
 
   let modsEnabled = true;
 </script>
@@ -63,10 +16,10 @@
     <Select
       variant="filled"
       class="left-bar-select pt-2"
-      bind:value={selectedInstall}
+      bind:value={$selectedInstall}
       ripple={false}
     >
-      {#each installs as install}
+      {#each $installs as install}
         <Option value={install}>
           <Label>{install?.info?.branch} ({install?.info?.launcher}) - CL{install?.info?.version}</Label>
         </Option>
@@ -92,10 +45,10 @@
     <Select
       variant="filled"
       class="left-bar-select pt-2"
-      bind:value={selectedProfile}
+      bind:value={$selectedProfile}
       ripple={false}
     >
-      {#each profiles as profile}
+      {#each $profiles as profile}
         <Option value={profile}>
           <Label>{profile}</Label>
         </Option>
