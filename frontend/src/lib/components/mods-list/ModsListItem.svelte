@@ -46,13 +46,13 @@
   }
 </script>
 
-<div class="my-2 px-0 w-full">
+<div class="my-2 px-0 w-full" class:selected>
   {#if inProgress}
     <div class="relative h-0">
-      <LinearProgress progress={$progress?.progress} class="mod-progress-bar h-24 w-full"/>
+      <LinearProgress progress={$progress?.progress} class="mod-progress-bar h-24 w-full rounded-r-2xl"/>
     </div>
   {/if}
-  <div class="flex relative" readonly class:selected>
+  <div class="flex relative" readonly>
     <img src={renderedLogo} alt="{mod.name} Logo" class="logo h-24 w-24" on:click={click} />
     <div class="ml-2 flex flex-col grow w-0">
       <div on:click={click}>
