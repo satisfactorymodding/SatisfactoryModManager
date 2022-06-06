@@ -7,6 +7,8 @@ query GetMods($offset: Int!, $limit: Int!) {
       name
       logo
       short_description
+      popularity
+      hotness
       views
       downloads
       last_version_date
