@@ -1,12 +1,13 @@
 <script lang="ts">
   import { getClient } from '@urql/svelte';
   import { GetModsDocument, GetModCountDocument } from '$lib/generated';
+  import VirtualList from '$lib/components/mods-list/VirtualModList.svelte';
   import ModsListItem from '$lib/components/mods-list/ModsListItem.svelte';
   import _ from 'lodash';
   import Fuse from 'fuse.js';
   import ModListFilters from './ModsListFilters.svelte';
   import { filterOptions, orderByOptions, type Filter, type OrderBy, type PartialMod } from '$lib/components/mods-list/modFilters';
-import { lockfileMods, manifestMods } from '$lib/store';
+  import { lockfileMods, manifestMods } from '$lib/store';
 
   let mods: PartialMod[] = [];
 
@@ -82,36 +83,10 @@ import { lockfileMods, manifestMods } from '$lib/store';
     <ModListFilters bind:search={searchString} bind:order={order}  bind:filter={filter} bind:compact={compact} />
   </div>
   <div class="py-4 grow h-0 mods-list" style="position: relative;">
-    <div class="ml-5 mr-3 overflow-y-scroll h-full">
-      {#each filteredMods() as mod}
+    <div class="ml-5 mr-3 h-full">
+      <VirtualList items={filteredMods()} let:item={mod}>
         <ModsListItem {mod} on:click={() => selectedMod = mod.mod_reference} bind:compact={compact} selected={selectedMod == mod.mod_reference}/>
-      {/each}
+      </VirtualList>
     </div>
   </div>
 </div>
-
-<style>
-  ::-webkit-scrollbar {
-    width: 25px;
-  }
-  ::-webkit-scrollbar-track {
-    background: black;
-    border: solid 10px transparent;
-    background-clip: content-box;
-    border-radius: 0;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #fff;
-    border: solid 10px transparent;
-    border-top-width: 0px;
-    border-bottom-width: 0px;
-    background-clip: content-box;
-    border-radius: 0;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    border: solid 10px transparent;
-    border-top-width: 0px;
-    border-bottom-width: 0px;
-    background-clip: content-box;
-  }
-</style>
