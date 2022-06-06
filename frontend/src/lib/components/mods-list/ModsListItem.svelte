@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { mdiDownload, mdiEye } from '@mdi/js';
+  import { mdiDownload, mdiEye, mdiChevronDown, mdiStar, mdiCheckCircle } from '@mdi/js';
   import MDIIcon from '$lib/components/MDIIcon.svelte';
   import { createEventDispatcher } from 'svelte';
   import type { PartialMod } from './modFilters';
@@ -9,7 +9,7 @@
   import LinearProgress from '@smui/linear-progress';
   import { favouriteMods, lockfileMods, manifestMods, progress } from '$lib/store';
   import { InstallMod, RemoveMod } from '$wailsjs/go/bindings/FicsitCLI';
-  import { FavouriteMod, GetFavouriteMods, UnFavouriteMod } from '$wailsjs/go/bindings/Settings';
+  import { FavouriteMod, UnFavouriteMod } from '$wailsjs/go/bindings/Settings';
   
   export let mod: PartialMod;
 
@@ -30,12 +30,13 @@
   $: isInstalled = mod.mod_reference in $manifestMods;
   $: isEnabled = mod.mod_reference in $lockfileMods;
   $: isDependency = !isInstalled && isEnabled;
-  $: installButtonLabel = isDependency ? 'Dependency' : (isInstalled ? 'Remove' : 'Install');
-  $: buttonDisabled = isDependency || (!!$progress);
   $: inProgress = $progress?.item === mod.mod_reference;
 
+  $: installButtonLabel = isDependency ? 'Dependency' : (isInstalled ? 'Remove' : 'Install');
+  $: installButtonIcon = isDependency ? mdiCheckCircle : (isInstalled ? mdiCheckCircle : mdiDownload);
+  $: buttonDisabled = isDependency || (!!$progress);
+
   $: isFavourite = $favouriteMods.includes(mod.mod_reference);
-  $: favouriteButtonLabel = isFavourite ? 'Unfavourite' : 'Favourite';
 
   function toggleModInstalled() {
     if(isInstalled) {
@@ -90,10 +91,14 @@
               </div>
             </div>
           </div>
-          <div class="pr-2">
-            <Group variant="outlined">
-              <Button on:click={toggleModInstalled} variant="unelevated" disabled={buttonDisabled}>
-                <Label>{ installButtonLabel }</Label>
+          <div class="pr-2 flex">
+            <Group variant="outlined" class="mr-1">
+              <Button on:click={toggleModInstalled} variant="unelevated" disabled={buttonDisabled} class="{compact ? 'w-11 min-w-0 p-2.5' : 'w-32'} mod-install-button {isInstalled ? 'installed' : ''}">
+                {#if !compact}
+                  <Label>{ installButtonLabel }</Label>
+                {:else}
+                  <MDIIcon icon={ installButtonIcon }/>
+                {/if}
               </Button>
               <div use:GroupItem>
                 <Button
@@ -101,8 +106,9 @@
                   disabled={buttonDisabled}
                   variant="unelevated"
                   style="padding: 0; min-width: 36px;"
+                  class="mod-install-button {isInstalled ? 'installed' : ''}"
                 >
-  
+                  <MDIIcon icon={ mdiChevronDown }/>
                 </Button>
                 <Menu bind:this={installOptionsMenu} anchorCorner="TOP_LEFT">
                   <List>
@@ -113,8 +119,8 @@
                 </Menu>
               </div>
             </Group>
-            <Button on:click={toggleModFavourite} variant="unelevated">
-              <Label>{ favouriteButtonLabel }</Label>
+            <Button on:click={toggleModFavourite} variant="unelevated" class="w-12 min-w-0 p-3 mod-favourite-button {isFavourite ? 'favourite' : ''}">
+              <MDIIcon icon={ mdiStar }/>
             </Button>
           </div>
         {:else}

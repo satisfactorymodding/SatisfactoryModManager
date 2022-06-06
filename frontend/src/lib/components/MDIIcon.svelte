@@ -1,10 +1,9 @@
 <script lang="ts">
-  import { Icon } from '@smui/button';
-  import { Svg } from '@smui/common/elements';
-
   export let icon: string;
+  let clazz: string | undefined = undefined;
+  export {clazz as class};
 </script>
 
-<Icon component={Svg} style="width: 1.1em; height: auto;" viewBox="0 0 24 24">
+<svg viewBox="0 0 24 24" width="24" height="24" class="max-w-full max-h-full {clazz}">
   <path fill="currentColor" d={icon} />
-</Icon>
+</svg>

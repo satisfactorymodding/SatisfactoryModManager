@@ -50,6 +50,42 @@ $left-bar-controls-height: 40px;
   background-color: $surface2;
 }
 
+.mod-install-button.mdc-button--unelevated {
+  $install: #249a20;
+  $installed: #249a20;
+  $uninstall: #e51c22;
+  &:not(.installed) {
+    @include button.filled-accessible(theme.$secondary);
+    &:hover {
+      @include button.filled-accessible($install);
+    }
+  }
+  &.installed {
+    @include button.filled-accessible($installed);
+    &:hover {
+      @include button.filled-accessible($uninstall);
+    }
+  }
+}
+
+.mod-favourite-button.mdc-button--unelevated {
+  $favourite: #ffe600;
+  $unfavourite: theme.$secondary;
+  
+  &:not(.favourite) {
+    @include button.filled-accessible($unfavourite);
+    &:hover {
+      @include button.filled-accessible($favourite);
+    }
+  }
+  &.favourite {
+    @include button.filled-accessible($favourite);
+    &:hover {
+      @include button.filled-accessible($unfavourite);
+    }
+  }
+}
+
 .color-primary {
   color: theme.$primary;
 }

@@ -26,17 +26,17 @@
       {/each}
     </Select>
     <div class="flex w-full pt-2">
-      <Button variant="unelevated" class={'w-1/2 rounded-tr-none rounded-br-none mods-toggle-button ' + (modsEnabled ? '' : 'mods-off')} on:click={() => modsEnabled = false}>
+      <Button variant="unelevated" class="w-1/2 rounded-tr-none rounded-br-none mods-toggle-button {modsEnabled ? '' : 'mods-off'}" on:click={() => modsEnabled = false}>
         <Label>
           Mods off
         </Label>
-        <MdiIcon icon={mdiCloseCircle} />
+        <MdiIcon icon={mdiCloseCircle} class="ml-8 p-0.5" />
       </Button>
-      <Button variant="unelevated" class={'w-1/2 rounded-tl-none rounded-bl-none mods-toggle-button ' + (modsEnabled ? 'mods-on' : '')} on:click={() => modsEnabled = true}>
+      <Button variant="unelevated" class="w-1/2 rounded-tl-none rounded-bl-none mods-toggle-button {modsEnabled ? 'mods-on' : ''}" on:click={() => modsEnabled = true}>
         <Label>
           Mods on
         </Label>
-        <MdiIcon icon={mdiCheckCircle} />
+        <MdiIcon icon={mdiCheckCircle} class="ml-8 p-0.5" />
       </Button>
     </div>
   </div>

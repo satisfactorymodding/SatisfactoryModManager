@@ -27,17 +27,17 @@
       <span class="app-title">Satisfactory Mod Manager</span>
     </div>
     <div class="button minimize grid place-items-center" on:click={minimize}>
-      <MDIIcon icon={mdiWindowMinimize} />
+      <MDIIcon icon={mdiWindowMinimize}/>
     </div>
     <div class="button maximize grid place-items-center" on:click={toggleMaximize}>
       {#if isMaximized}
-        <MDIIcon icon={mdiWindowRestore} />
+        <MDIIcon icon={mdiWindowRestore}/>
       {:else}
-        <MDIIcon icon={mdiWindowMaximize} />
+        <MDIIcon icon={mdiWindowMaximize}/>
       {/if}
     </div>
     <div class="button close grid place-items-center" on:click={close}>
-      <MDIIcon icon={mdiWindowClose} />
+      <MDIIcon icon={mdiWindowClose}/>
     </div>
   </div>
 </div>
