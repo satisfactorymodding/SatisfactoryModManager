@@ -1,4 +1,3 @@
-
 <script lang="ts">
   import Drawer from '@smui/drawer';
   import { operationStore, query } from '@urql/svelte';
@@ -11,6 +10,7 @@
   import List, { Item, PrimaryText, SecondaryText, Text } from '@smui/list';
   import { bytesToAppropriate } from '$lib/utils/dataFormats';
   import { createEventDispatcher } from 'svelte';
+  import { lockfileMods } from '$lib/store';
 
   export let id: string | null = null;
 
@@ -28,9 +28,11 @@
   $: mod = $modQuery.data?.mod;
 
   $: renderedLogo = mod?.logo ?? 'https://ficsit.app/images/no_image.webp';
-  $: descriptionRendered = mod?.full_description ? markdown(mod.full_description) : 'Loading...';
+  $: descriptionRendered = mod?.full_description ? markdown(mod.full_description) : undefined;
 
-  $: size = bytesToAppropriate(mod?.versions[0].size ?? 0);
+  $: size = mod ? bytesToAppropriate(mod.versions[0]?.size ?? 0) : undefined;
+
+  $: installedVersion = $lockfileMods[mod?.mod_reference]?.version ?? 'Not installed';
 
   $: ficsitAppLink = `https://ficsit.app/mod/${id}`;
 
@@ -49,11 +51,11 @@
       <img src={renderedLogo} alt="{mod?.name} Logo" class="logo w-full" />
       <span class="pt-4 font-bold text-lg">{mod?.name ?? 'Loading...'}</span>
       <span class="pt-2 font-light">A mod by:</span>
-      <span class="font-medium color-primary">{mod?.authors[0].user.username}</span>
+      <span class="font-medium color-primary">{mod?.authors[0].user.username ?? 'Loading...'}</span>
 
       <div class="pt-2" on:mouseenter={() => authorsMenu.setOpen(true)} on:mouseleave={() => authorsMenu.setOpen(false)}>
         <Button variant="unelevated" color="secondary" class="w-full">
-          <Label>Contributors <span class="color-primary">({mod?.authors.length})</span></Label>
+          <Label>Contributors <span class="color-primary">({mod?.authors.length ?? 0})</span></Label>
           <MDIIcon icon={mdiChevronDown}/>
         </Button>
         <Menu bind:this={authorsMenu} class="w-full" anchorCorner="BOTTOM_LEFT">
@@ -73,16 +75,16 @@
 
       <div class="pt-4">
         <span>Mod info:</span><br>
-        <span>Size: </span><span class="font-bold">{size}</span><br>
-        <span>Created: </span><span class="font-bold">{new Date(mod?.created_at).toLocaleDateString()}</span><br>
-        <span>Updated: </span><span class="font-bold">{new Date(mod?.last_version_date).toLocaleString()}</span><br>
-        <span>Total downloads: </span><span class="font-bold">{mod?.downloads.toLocaleString()}</span><br>
-        <span>Views: </span><span class="font-bold">{mod?.views.toLocaleString()}</span><br>
+        <span>Size: </span><span class="font-bold">{size ?? 'Loading...'}</span><br>
+        <span>Created: </span><span class="font-bold">{mod ? new Date(mod.created_at).toLocaleDateString() : 'Loading...'}</span><br>
+        <span>Updated: </span><span class="font-bold">{mod ? new Date(mod.last_version_date).toLocaleString() : 'Loading...'}</span><br>
+        <span>Total downloads: </span><span class="font-bold">{mod?.downloads.toLocaleString() ?? 'Loading...'}</span><br>
+        <span>Views: </span><span class="font-bold">{mod?.views.toLocaleString() ?? 'Loading...'}</span><br>
       </div>
 
       <div class="pt-4">
-        <span>Latest version: </span><span class="font-bold">{mod?.versions[0].version}</span><br>
-        <span>Installed version: </span><!-- TODO --><br>
+        <span>Latest version: </span><span class="font-bold">{mod?.versions[0].version ?? 'Loading...'}</span><br>
+        <span>Installed version: </span><span class="font-bold">{ installedVersion ?? 'Loading...' }</span><br>
       </div>
 
       <div class="pt-4">
@@ -100,7 +102,11 @@
     </div>
   </Drawer>  
   <div class="markdown-content break-words flex-1 px-3 overflow-y-scroll">
-    <p>{@html descriptionRendered}</p>
+    {#if descriptionRendered}
+      <p>{@html descriptionRendered}</p>
+    {:else}
+      <p>Loading...</p>
+    {/if}
   </div>
 </div>
 
