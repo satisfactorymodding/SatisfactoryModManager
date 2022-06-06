@@ -21,7 +21,7 @@ type SettingsData struct {
 
 type Settings struct {
 	ctx  context.Context
-	data SettingsData
+	Data SettingsData
 }
 
 var SettingsFileName = "settings.json"
@@ -45,7 +45,7 @@ func (s *Settings) load() error {
 			return errors.Wrap(err, "failed to stat settings file")
 		}
 
-		s.data = SettingsData{
+		s.Data = SettingsData{
 			FavouriteMods:    []string{},
 			AppHeight:        utils.UnexpandedMinHeight,
 			ExpandedAppWidth: utils.UnexpandedMinWidth,
@@ -61,7 +61,7 @@ func (s *Settings) load() error {
 		return errors.Wrap(err, "failed to read settings")
 	}
 
-	if err := json.Unmarshal(settingsFile, &s.data); err != nil {
+	if err := json.Unmarshal(settingsFile, &s.Data); err != nil {
 		return errors.Wrap(err, "failed to unmarshal settings")
 	}
 
@@ -69,7 +69,7 @@ func (s *Settings) load() error {
 }
 
 func (s *Settings) save() error {
-	settingsFile, err := json.MarshalIndent(s.data, "", "  ")
+	settingsFile, err := json.MarshalIndent(s.Data, "", "  ")
 	if err != nil {
 		return errors.Wrap(err, "failed to marshal settings")
 	}
@@ -88,13 +88,13 @@ func (s *Settings) startup(ctx context.Context) {
 		for range sizeTicker.C {
 			w, h := wailsRuntime.WindowGetSize(s.ctx)
 			if BindingsInstance.App.isExpanded {
-				if w != s.data.ExpandedAppWidth {
-					s.data.ExpandedAppWidth = w
+				if w != s.Data.ExpandedAppWidth {
+					s.Data.ExpandedAppWidth = w
 					s.save()
 				}
 			}
-			if h != s.data.AppHeight {
-				s.data.AppHeight = h
+			if h != s.Data.AppHeight {
+				s.Data.AppHeight = h
 				s.save()
 			}
 		}
@@ -103,7 +103,7 @@ func (s *Settings) startup(ctx context.Context) {
 
 func (s *Settings) FavouriteMod(modReference string) bool {
 	idx := -1
-	for i, mod := range s.data.FavouriteMods {
+	for i, mod := range s.Data.FavouriteMods {
 		if mod == modReference {
 			idx = i
 			break
@@ -112,7 +112,7 @@ func (s *Settings) FavouriteMod(modReference string) bool {
 	if idx != -1 {
 		return false
 	}
-	s.data.FavouriteMods = append(s.data.FavouriteMods, modReference)
+	s.Data.FavouriteMods = append(s.Data.FavouriteMods, modReference)
 	s.save()
 	s.emitFavouriteMods()
 	return true
@@ -120,7 +120,7 @@ func (s *Settings) FavouriteMod(modReference string) bool {
 
 func (s *Settings) UnFavouriteMod(modReference string) bool {
 	idx := -1
-	for i, mod := range s.data.FavouriteMods {
+	for i, mod := range s.Data.FavouriteMods {
 		if mod == modReference {
 			idx = i
 			break
@@ -129,16 +129,16 @@ func (s *Settings) UnFavouriteMod(modReference string) bool {
 	if idx == -1 {
 		return false
 	}
-	s.data.FavouriteMods = append(s.data.FavouriteMods[:idx], s.data.FavouriteMods[idx+1:]...)
+	s.Data.FavouriteMods = append(s.Data.FavouriteMods[:idx], s.Data.FavouriteMods[idx+1:]...)
 	s.save()
 	s.emitFavouriteMods()
 	return true
 }
 
 func (s *Settings) GetFavouriteMods() []string {
-	return s.data.FavouriteMods
+	return s.Data.FavouriteMods
 }
 
 func (s *Settings) emitFavouriteMods() {
-	wailsRuntime.EventsEmit(s.ctx, "favouriteMods", s.data.FavouriteMods)
+	wailsRuntime.EventsEmit(s.ctx, "favouriteMods", s.Data.FavouriteMods)
 }

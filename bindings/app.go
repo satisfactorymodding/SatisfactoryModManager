@@ -25,7 +25,7 @@ func (a *App) ExpandMod() bool {
 	_, height := runtime.WindowGetSize(a.ctx)
 	runtime.WindowSetMinSize(a.ctx, utils.ExpandedMinWidth, utils.ExpandedMinHeight)
 	runtime.WindowSetMaxSize(a.ctx, -1, -1)
-	runtime.WindowSetSize(a.ctx, BindingsInstance.Settings.data.ExpandedAppWidth, height)
+	runtime.WindowSetSize(a.ctx, BindingsInstance.Settings.Data.ExpandedAppWidth, height)
 	a.isExpanded = true
 	return true
 }

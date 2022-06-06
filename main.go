@@ -28,7 +28,7 @@ func main() {
 		Title:     "SatisfactoryModManager",
 		Frameless: runtime.GOOS == "windows",
 		Width:     utils.UnexpandedMinWidth,
-		Height:    utils.UnexpandedMinHeight,
+		Height:    b.Settings.Data.AppHeight,
 		MinWidth:  utils.UnexpandedMinWidth,
 		MaxWidth:  utils.UnexpandedMinWidth,
 		MinHeight: utils.UnexpandedMinHeight,
