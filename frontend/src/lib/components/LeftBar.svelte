@@ -4,11 +4,12 @@
   import Dialog, { Title, Content, Actions } from '@smui/dialog';
   import TextField from '@smui/textfield'; 
 
-  import { mdiCheckCircle, mdiCloseCircle, mdiPencil, mdiPlusCircle, mdiSync, mdiTrashCan } from '@mdi/js';
+  import { mdiCheckCircle, mdiCloseCircle, mdiDiscord, mdiGithub, mdiHelpCircle, mdiPencil, mdiPlusCircle, mdiSync, mdiTrashCan, mdiTune, mdiWeb } from '@mdi/js';
   import MdiIcon from '$lib/components/MDIIcon.svelte';
   
   import { addProfile, checkForUpdates, deleteProfile, installs, profiles, progress, renameProfile, selectedInstall, selectedProfile, updateCheckInProgress, updates } from '$lib/ficsitCLIStore';
   import { UpdateAllMods } from '$wailsjs/go/bindings/FicsitCLI';
+  import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
 
   $: canInstall = !$progress;
 
@@ -141,6 +142,47 @@
       </Label>
       <div class="grow" />
       <MdiIcon icon={mdiSync} class="h-5 {$updateCheckInProgress ? 'update-check' : ''}" />
+    </Button>
+  </div>
+  <div class="flex flex-col mt-8">
+    <span class="pl-4">Other</span>
+    <Button variant="unelevated" class="w-full mt-2">
+      <Label>
+        SMM settings
+      </Label>
+      <div class="grow" />
+      <MdiIcon icon={mdiTune} class="h-5" />
+    </Button>
+    <Button variant="unelevated" class="w-full mt-2">
+      <Label>
+        Help
+      </Label>
+      <div class="grow" />
+      <MdiIcon icon={mdiHelpCircle} class="h-5" />
+    </Button>
+  </div>
+  <div class="flex flex-col mt-8">
+    <span class="pl-4">Links</span>
+    <Button variant="unelevated" class="w-full mt-2" on:click={() => BrowserOpenURL('https://ficsit.app')}>
+      <Label>
+        ficsit.app mod website
+      </Label>
+      <div class="grow" />
+      <MdiIcon icon={mdiWeb} class="h-5" />
+    </Button>
+    <Button variant="unelevated" class="w-full mt-2" on:click={() => BrowserOpenURL('https://discord.gg/xkVJ73E')}>
+      <Label>
+        Satisfactory Modding Discord
+      </Label>
+      <div class="grow" />
+      <MdiIcon icon={mdiDiscord} class="h-5" />
+    </Button>
+    <Button variant="unelevated" class="w-full mt-2" on:click={() => BrowserOpenURL('https://github.com/satisfactorymodding/SatisfactoryModManager')} >
+      <Label>
+        SMM Source
+      </Label>
+      <div class="grow" />
+      <MdiIcon icon={mdiGithub} class="h-5" />
     </Button>
   </div>
   <div class="grow"/>
