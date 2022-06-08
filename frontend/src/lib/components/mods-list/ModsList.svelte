@@ -7,7 +7,7 @@
   import Fuse from 'fuse.js';
   import ModListFilters from './ModsListFilters.svelte';
   import { filterOptions, orderByOptions, type Filter, type OrderBy, type PartialMod } from '$lib/components/mods-list/modFilters';
-  import { lockfileMods, manifestMods } from '$lib/store';
+  import { favouriteMods, lockfileMods, manifestMods } from '$lib/store';
 
   let mods: PartialMod[] = [];
 
@@ -39,6 +39,7 @@
     // Watch the required store states
     $manifestMods;
     $lockfileMods;
+    $favouriteMods;
     
     const filteredMods = mods.filter(filter.func);
     const sortedMods = _.sortBy(filteredMods, order.func) as PartialMod[];

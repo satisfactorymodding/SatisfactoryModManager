@@ -1,5 +1,5 @@
 import type { Mod } from '$lib/generated';
-import { lockfileMods, manifestMods } from '$lib/store';
+import { favouriteMods, lockfileMods, manifestMods } from '$lib/store';
 import { get } from 'svelte/store';
 
 export interface OrderBy {
@@ -23,6 +23,7 @@ export const orderByOptions: OrderBy[] = [
 
 export const filterOptions: Filter[] = [
   { name: 'All mods', func: () => true },
+  { name: 'Favourite', func: (mod: PartialMod) => get(favouriteMods).includes(mod.mod_reference) },
   { name: 'Installed', func: (mod: PartialMod) => mod.mod_reference in get(manifestMods) },
   { name: 'Not installed', func: (mod: PartialMod) => !(mod.mod_reference in get(manifestMods)) },
   { name: 'Enabled', func: (mod: PartialMod) => mod.mod_reference in get(lockfileMods) },
