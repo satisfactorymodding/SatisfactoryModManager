@@ -14,6 +14,7 @@
   import { search } from '$lib/modFiltersStore';
   import MdiIcon from '$lib/components/MDIIcon.svelte';
   import { InstallModVersion } from '$wailsjs/go/bindings/FicsitCLI';
+import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
 
   export let id: string | null = null;
 
@@ -131,7 +132,8 @@
       </div>
 
       <div class="pt-4">
-        <a href={ficsitAppLink} target="_blank" class="color-primary">View on ficsit.app</a>
+        <!-- svelte-ignore a11y-missing-attribute -->
+        <a on:click={() => BrowserOpenURL(ficsitAppLink)} class="color-primary">View on ficsit.app</a>
       </div>
 
       <div class="grow"></div>
