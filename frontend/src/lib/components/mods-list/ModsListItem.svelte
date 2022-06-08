@@ -105,8 +105,7 @@
                   on:click={() => installOptionsMenu.setOpen(true)}
                   disabled={buttonDisabled}
                   variant="unelevated"
-                  style="padding: 0; min-width: 36px;"
-                  class="mod-install-button {isInstalled ? 'installed' : ''}"
+                  class="mod-install-button min-w-0 pl-5 pr-1.5 {isInstalled ? 'installed' : ''}"
                 >
                   <MDIIcon icon={ mdiChevronDown }/>
                 </Button>
