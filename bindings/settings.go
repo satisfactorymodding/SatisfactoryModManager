@@ -13,10 +13,16 @@ import (
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
+type SavedModFilters struct {
+	Order  string `json:"order"`
+	Filter string `json:"filter"`
+}
+
 type SettingsData struct {
-	FavouriteMods    []string `json:"favouriteMods"`
-	AppHeight        int      `json:"appHeight"`
-	ExpandedAppWidth int      `json:"expandedAppWidth"`
+	FavouriteMods    []string        `json:"favouriteMods"`
+	ModFilters       SavedModFilters `json:"modFilters"`
+	AppHeight        int             `json:"appHeight"`
+	ExpandedAppWidth int             `json:"expandedAppWidth"`
 }
 
 type Settings struct {
@@ -137,6 +143,16 @@ func (s *Settings) UnFavouriteMod(modReference string) bool {
 
 func (s *Settings) GetFavouriteMods() []string {
 	return s.Data.FavouriteMods
+}
+
+func (s *Settings) GetModFilters() SavedModFilters {
+	return s.Data.ModFilters
+}
+
+func (s *Settings) SetModFilters(order string, filter string) {
+	s.Data.ModFilters.Order = order
+	s.Data.ModFilters.Filter = filter
+	s.save()
 }
 
 func (s *Settings) emitFavouriteMods() {

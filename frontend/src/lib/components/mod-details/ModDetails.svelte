@@ -11,6 +11,7 @@
   import { bytesToAppropriate } from '$lib/utils/dataFormats';
   import { createEventDispatcher } from 'svelte';
   import { lockfileMods } from '$lib/ficsitCLIStore';
+  import { search } from '$lib/modFiltersStore';
 
   export let id: string | null = null;
 
@@ -51,7 +52,7 @@
       <img src={renderedLogo} alt="{mod?.name} Logo" class="logo w-full" />
       <span class="pt-4 font-bold text-lg">{mod?.name ?? 'Loading...'}</span>
       <span class="pt-2 font-light">A mod by:</span>
-      <span class="font-medium color-primary">{mod?.authors[0].user.username ?? 'Loading...'}</span>
+      <span class="font-medium color-primary cursor-pointer" on:click={() => $search = `author:"${mod?.authors[0].user.username}"`}>{mod?.authors[0].user.username ?? 'Loading...'}</span>
 
       <div class="pt-2" on:mouseenter={() => authorsMenu.setOpen(true)} on:mouseleave={() => authorsMenu.setOpen(false)}>
         <Button variant="unelevated" color="secondary" class="w-full">
@@ -59,9 +60,9 @@
           <MDIIcon icon={mdiChevronDown}/>
         </Button>
         <Menu bind:this={authorsMenu} class="w-full" anchorCorner="BOTTOM_LEFT">
-          <List nonInteractive>
+          <List>
             {#each mod?.authors ?? [] as author}
-              <Item style="height: 80px">
+              <Item style="height: 80px" on:SMUI:action={() => $search = `author:"${author.user.username}"`}>
                 <img src={author.user.avatar} alt="{author.user.username} Avatar" class="avatar" />
                 <Text class="pl-2 -mt-3">
                   <PrimaryText class="text-base">{author.user.username}</PrimaryText>

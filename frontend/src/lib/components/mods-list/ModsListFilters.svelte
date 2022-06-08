@@ -1,16 +1,13 @@
 <script lang="ts">
-  import { filterOptions, orderByOptions, type Filter, type OrderBy } from '$lib/components/mods-list/modFilters';
+  import { filter, filterOptions, order, orderByOptions, search } from '$lib/modFiltersStore';
   import Textfield, { Input, type InputComponentDev } from '@smui/textfield';
   import LineRipple, { type LineRippleComponentDev } from '@smui/line-ripple';
   import Select, { Option } from '@smui/select';
-
+  
   let inputA: InputComponentDev;
   let lineRippleA: LineRippleComponentDev;
-  
+
   export let compact: boolean;
-  export let search: string;
-  export let order: OrderBy;
-  export let filter: Filter;
 </script>
 
 <div class="px-5 py-2">
@@ -23,7 +20,7 @@
     >
       <Input
         bind:this={inputA}
-        bind:value={search}
+        bind:value={$search}
         id="input-manual-a"
         aria-controls="helper-text-manual-a"
         aria-describedby="helper-text-manual-a"
@@ -34,7 +31,7 @@
     <Select
       class="control-area-input w-1/3 max-w-56 pr-0.5"
       variant="filled"
-      bind:value={filter}
+      bind:value={$filter}
       placeholder="Filter"
       ripple={false}
     >
@@ -50,7 +47,7 @@
     <Select
       class="control-area-input w-1/3 max-w-56 pl-0.5"
       variant="filled"
-      bind:value={order}
+      bind:value={$order}
       placeholder="Order by"
       ripple={false}
     >

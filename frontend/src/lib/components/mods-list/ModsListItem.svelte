@@ -2,7 +2,7 @@
   import { mdiDownload, mdiEye, mdiChevronDown, mdiStar, mdiCheckCircle } from '@mdi/js';
   import MDIIcon from '$lib/components/MDIIcon.svelte';
   import { createEventDispatcher } from 'svelte';
-  import type { PartialMod } from './modFilters';
+  import { search, type PartialMod } from '$lib/modFiltersStore';
   import Button, { Group, GroupItem, Label } from '@smui/button';
   import Menu, { type MenuComponentDev } from '@smui/menu';
   import List, { Item, Text } from '@smui/list';
@@ -59,26 +59,26 @@
   }
 </script>
 
-<div class="my-1 px-0 w-full" class:rounded-lg={selected} class:selected>
+<div class="my-1 px-0 w-full" class:rounded-lg={selected} class:selected on:click={click}>
   {#if inProgress}
     <div class="relative h-0">
       <LinearProgress progress={$progress?.progress} class="mod-progress-bar h-24 w-full rounded-lg"/>
     </div>
   {/if}
   <div class="flex relative" readonly>
-    <img src={renderedLogo} alt="{mod.name} Logo" class="logo h-24 w-24" on:click={click} />
+    <img src={renderedLogo} alt="{mod.name} Logo" class="logo h-24 w-24" />
     <div class="ml-2 flex flex-col grow w-0">
-      <div on:click={click}>
+      <div>
         <span class="text-xl font-medium">{mod.name}</span>
         {#if !compact}
           <span class="pl-1">by</span>
-          <span class="color-primary">{author}</span>
+          <span class="color-primary" on:click|stopPropagation={() => $search = `author:"${author}"`}>{author}</span>
         {/if}
       </div>
-      <span class="truncate w-full" on:click={click}>{mod.short_description}</span>
+      <span class="truncate w-full">{mod.short_description}</span>
       <div class="flex grow">
         {#if !inProgress}
-          <div class="grow w-0" on:click={click}>
+          <div class="grow w-0">
             <div>
               #tags
             </div>
@@ -91,7 +91,7 @@
               </div>
             </div>
           </div>
-          <div class="pr-2 flex">
+          <div class="pr-2 flex" on:click|stopPropagation={null}>
             <Group variant="outlined" class="mr-1">
               <Button on:click={toggleModInstalled} variant="unelevated" disabled={buttonDisabled} class="{compact ? 'min-w-0 pl-5 pr-1.5' : 'w-32'} mod-install-button {isInstalled ? 'installed' : ''}">
                 {#if !compact}

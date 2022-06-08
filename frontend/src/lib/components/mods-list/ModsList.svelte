@@ -6,7 +6,7 @@
   import _ from 'lodash';
   import Fuse from 'fuse.js';
   import ModListFilters from './ModsListFilters.svelte';
-  import { filterOptions, orderByOptions, type Filter, type OrderBy, type PartialMod } from '$lib/components/mods-list/modFilters';
+  import { filter, order, search, type PartialMod } from '$lib/modFiltersStore';
   import { favouriteMods, lockfileMods, manifestMods } from '$lib/ficsitCLIStore';
 
   let mods: PartialMod[] = [];
@@ -31,23 +31,19 @@
 
   fetchAllMods();
 
-  let searchString = '';
-  let order: OrderBy = orderByOptions[1];
-  let filter: Filter = filterOptions[0];
-
   $: filteredMods = () => {
     // Watch the required store states
     $manifestMods;
     $lockfileMods;
     $favouriteMods;
     
-    const filteredMods = mods.filter(filter.func);
-    const sortedMods = _.sortBy(filteredMods, order.func) as PartialMod[];
-    if(!searchString) {
+    const filteredMods = mods.filter($filter.func);
+    const sortedMods = _.sortBy(filteredMods, $order.func) as PartialMod[];
+    if(!$search) {
       return sortedMods;
     }
     
-    const modifiedSearchString = searchString.replace(/(?:author:"(.+?)"|author:([^\s"]+))/g, '="$1$2"');
+    const modifiedSearchString = $search.replace(/(?:author:"(.+?)"|author:([^\s"]+))/g, '="$1$2"');
     
     const fuse = new Fuse(sortedMods, {
       keys: [
@@ -81,7 +77,7 @@
 
 <div class="h-full flex flex-col">
   <div class="flex-none">
-    <ModListFilters bind:search={searchString} bind:order={order}  bind:filter={filter} bind:compact={compact} />
+    <ModListFilters bind:compact />
   </div>
   <div class="py-4 grow h-0 mods-list" style="position: relative;">
     <div class="ml-5 mr-3 h-full">
