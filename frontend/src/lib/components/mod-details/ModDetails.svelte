@@ -5,13 +5,15 @@
   import { markdown } from '$lib/utils/markdown';
   import Button, { Label } from '@smui/button';
   import MDIIcon from '$lib/components/MDIIcon.svelte';
-  import { mdiChevronDown, mdiImport } from '@mdi/js';
+  import { mdiCheck, mdiChevronDown, mdiImport } from '@mdi/js';
   import Menu, { type MenuComponentDev } from '@smui/menu';
   import List, { Item, PrimaryText, SecondaryText, Text } from '@smui/list';
   import { bytesToAppropriate } from '$lib/utils/dataFormats';
   import { createEventDispatcher } from 'svelte';
-  import { lockfileMods } from '$lib/ficsitCLIStore';
+  import { lockfileMods, manifestMods, progress } from '$lib/ficsitCLIStore';
   import { search } from '$lib/modFiltersStore';
+  import MdiIcon from '$lib/components/MDIIcon.svelte';
+  import { InstallModVersion } from '$wailsjs/go/bindings/FicsitCLI';
 
   export let id: string | null = null;
 
@@ -37,7 +39,15 @@
 
   $: ficsitAppLink = `https://ficsit.app/mod/${id}`;
 
+  $: canInstall = !$progress;
+
   let authorsMenu: MenuComponentDev;
+
+  let versionsMenu: MenuComponentDev;
+  $: manifestVersionAny = $manifestMods[mod?.mod_reference]?.version === '>=0.0.0';
+  function installVersion(version: string | null) {
+    InstallModVersion(mod?.mod_reference, version ?? '>=0.0.0');
+  }
 
   const dispatch = createEventDispatcher();
 
@@ -59,12 +69,12 @@
           <Label>Contributors <span class="color-primary">({mod?.authors.length ?? 0})</span></Label>
           <MDIIcon icon={mdiChevronDown}/>
         </Button>
-        <Menu bind:this={authorsMenu} class="w-full" anchorCorner="BOTTOM_LEFT">
+        <Menu bind:this={authorsMenu} class="w-full max-h-[32rem]" anchorCorner="BOTTOM_LEFT">
           <List>
             {#each mod?.authors ?? [] as author}
               <Item style="height: 80px" on:SMUI:action={() => $search = `author:"${author.user.username}"`}>
                 <img src={author.user.avatar} alt="{author.user.username} Avatar" class="avatar" />
-                <Text class="pl-2 -mt-3">
+                <Text class="pl-2 h-full flex flex-col content-center -mb-4">
                   <PrimaryText class="text-base">{author.user.username}</PrimaryText>
                   <SecondaryText class="text-base">{author.role}</SecondaryText>
                 </Text>
@@ -86,6 +96,38 @@
       <div class="pt-4">
         <span>Latest version: </span><span class="font-bold">{mod?.versions[0].version ?? 'Loading...'}</span><br>
         <span>Installed version: </span><span class="font-bold">{ installedVersion ?? 'Loading...' }</span><br>
+        <div class="pt-2" on:mouseenter={() => canInstall && versionsMenu.setOpen(true)} on:mouseleave={() => versionsMenu.setOpen(false)}>
+          <Button variant="unelevated" color="secondary" class="w-full" disabled={!canInstall}>
+            <Label>Change version</Label>
+            <MDIIcon icon={mdiChevronDown}/>
+          </Button>
+          <Menu bind:this={versionsMenu} class="w-full max-h-[32rem]" anchorCorner="BOTTOM_LEFT">
+            <List>
+              <Item on:SMUI:action={() => installVersion(null)} disabled={!canInstall}>
+                {#if manifestVersionAny}
+                  <MdiIcon icon={mdiCheck} class="h-5" />
+                {:else}
+                  <div class="w-7"/>
+                {/if}
+                <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
+                  <PrimaryText class="text-base">Any</PrimaryText>
+                </Text>
+              </Item>
+              {#each mod?.versions ?? [] as version}
+                <Item on:SMUI:action={() => installVersion(version.version)} disabled={!canInstall}>
+                  {#if !manifestVersionAny && installedVersion === version.version}
+                    <MdiIcon icon={mdiCheck} class="h-5" />
+                  {:else}
+                    <div class="w-7"/>
+                  {/if}
+                  <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
+                    <PrimaryText class="text-base">{version.version}</PrimaryText>
+                  </Text>
+                </Item>
+              {/each}
+            </List>
+          </Menu>
+        </div>
       </div>
 
       <div class="pt-4">

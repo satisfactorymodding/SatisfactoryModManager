@@ -1,5 +1,12 @@
-import { readable, writable } from 'svelte/store';
+import { readable, writable, type Readable, type Writable } from 'svelte/store';
 import { EventsOff, EventsOn } from '$wailsjs/runtime/runtime';
+
+interface ReadableBinding<T> extends Readable<T> {
+  isInit: boolean;
+}
+interface WritableBinding<T> extends Writable<T> {
+  isInit: boolean;
+}
 
 export function readableBinding<T>(defaultValue: T,
   options: {
@@ -33,7 +40,7 @@ export function readableBinding<T>(defaultValue: T,
         EventsOff(updateEvent);
       };
     }) : undefined)
-  };
+  } as ReadableBinding<T>;
 
   return store;
 }
@@ -54,7 +61,7 @@ export function writableBinding<T>(defaultValue: T,
         initialGet().then(set).then(() => store.isInit = true);
       }
     }) : undefined)
-  };
+  } as WritableBinding<T>;
 
   return store;
 }

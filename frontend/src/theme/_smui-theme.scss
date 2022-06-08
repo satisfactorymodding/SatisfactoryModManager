@@ -25,40 +25,52 @@ $surface2: #2B2B2B;
   @include linear-progress.buffer-color(#252525);
 }
 
+$left-bar-controls-background: #232323;
 $left-bar-controls-height: 40px;
 
-.left-bar-select.mdc-select--filled {
-  @include select.filled-height($left-bar-controls-height);
-  @include select.filled-shape-radius(math.div($left-bar-controls-height, 5), 0);  
-  .mdc-select__anchor {
-    @include shape-mixins.radius(math.div($left-bar-controls-height, 10));
+.left-bar {
+  .mdc-button {
+    @include button.height($left-bar-controls-height);
+    @include button.container-fill-color($left-bar-controls-background);
+    @include button.ink-color(theme.$on-surface);
   }
-}
-
-.mods-toggle-button.mdc-button--unelevated {
-  @include button.filled-accessible($surface2);
-  @include button.height($left-bar-controls-height);
-  &.mods-on {
-    @include button.filled-accessible(theme.$primary);
+  .mdc-select {
+    @include select.container-fill-color($left-bar-controls-background);
+    @include select.filled-height($left-bar-controls-height);
+    @include select.filled-shape-radius(math.div($left-bar-controls-height, 5), 0);  
+    .mdc-select__anchor {
+      @include shape-mixins.radius(math.div($left-bar-controls-height, 10));
+    }
   }
-  &.mods-off {
-    @include button.filled-accessible(theme.$error);
+
+  .mods-toggle-button {
+    @include button.container-fill-color($left-bar-controls-background);
+    &.mods-on {
+      @include button.container-fill-color(theme.$primary);
+    }
+    &.mods-off {
+      @include button.container-fill-color(theme.$error);
+    }
   }
-}
 
-.profile-add.mdc-button {
-  @include button.ink-color(theme.$on-surface);
-  @include button.icon-color(#249a20);
-}
+  .profile-add {
+    @include button.icon-color(#249a20);
+  }
+  
+  .profile-edit {
+    @include button.icon-color(#ffe600);
+  }
+  
+  .profile-delete {
+    @include button.icon-color(#e51c22);
+  }
 
-.profile-edit.mdc-button {
-  @include button.ink-color(theme.$on-surface);
-  @include button.icon-color(#ffe600);
-}
-
-.profile-delete.mdc-button {
-  @include button.ink-color(theme.$on-surface);
-  @include button.icon-color(#e51c22);
+  .update-button {
+    @include button.container-fill-color($left-bar-controls-background);
+    &.has-update {
+      @include button.container-fill-color(theme.$primary);
+    }
+  }
 }
 
 .mods-list {

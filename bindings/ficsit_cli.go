@@ -168,6 +168,7 @@ func (f *FicsitCLI) InstallMod(mod string) error {
 	installErr := f.validateInstall(installation, mod)
 
 	if installErr != nil {
+		f.SetProgress(nil)
 		return errors.Wrapf(installErr, "Failed to install mod: %s@latest", mod)
 	}
 
@@ -197,6 +198,7 @@ func (f *FicsitCLI) InstallModVersion(mod string, version string) error {
 	installErr := f.validateInstall(installation, mod)
 
 	if installErr != nil {
+		f.SetProgress(nil)
 		return errors.Wrapf(installErr, "Failed to install mod: %s@%s", mod, version)
 	}
 
@@ -223,6 +225,7 @@ func (f *FicsitCLI) RemoveMod(mod string) error {
 	installErr := f.validateInstall(installation, mod)
 
 	if installErr != nil {
+		f.SetProgress(nil)
 		return errors.Wrapf(installErr, "Failed to remove mod: %s", mod)
 	}
 
@@ -249,6 +252,7 @@ func (f *FicsitCLI) EnableMod(mod string) error {
 	installErr := f.validateInstall(installation, mod)
 
 	if installErr != nil {
+		f.SetProgress(nil)
 		return errors.Wrapf(installErr, "Failed to enable mod: %s", mod)
 	}
 
@@ -275,6 +279,7 @@ func (f *FicsitCLI) DisableMod(mod string) error {
 	installErr := f.validateInstall(installation, mod)
 
 	if installErr != nil {
+		f.SetProgress(nil)
 		return errors.Wrapf(installErr, "Failed to disable mod: %s", mod)
 	}
 
@@ -329,6 +334,102 @@ func (f *FicsitCLI) DeleteProfile(name string) error {
 			install.Installation.Profile = cli.DefaultProfileName
 		}
 	}
+
+	return nil
+}
+
+type Update struct {
+	Item           string `json:"item"`
+	CurrentVersion string `json:"currentVersion"`
+	NewVersion     string `json:"newVersion"`
+}
+
+func (f *FicsitCLI) CheckForUpdates() ([]Update, error) {
+	currentLockfile, err := f.selectedInstallation.Installation.LockFile(f.ficsitCli)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to get current lockfile")
+	}
+
+	if currentLockfile == nil {
+		return nil, nil
+	}
+
+	profile := f.GetProfile(f.selectedInstallation.Installation.Profile)
+
+	resolver := cli.NewDependencyResolver(f.ficsitCli.APIClient)
+
+	gameVersion, err := f.selectedInstallation.Installation.GetGameVersion(f.ficsitCli)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to detect game version")
+	}
+
+	updateProfile := &cli.Profile{
+		Name: "Update temp",
+		Mods: make(map[string]cli.ProfileMod),
+	}
+	for modReference, modData := range profile.Mods {
+		updateProfile.Mods[modReference] = cli.ProfileMod{
+			Enabled: modData.Enabled,
+			Version: ">=0.0.0",
+		}
+	}
+	newLockfile, err := updateProfile.Resolve(resolver, nil, gameVersion)
+	if err != nil {
+		return nil, errors.Wrap(err, "error resolving dependencies")
+	}
+
+	updates := []Update{}
+
+	for modReference, newLockedMod := range newLockfile {
+		if prevLockedMod, ok := (*currentLockfile)[modReference]; ok {
+			if newLockedMod.Version != prevLockedMod.Version {
+				updates = append(updates, Update{
+					Item:           modReference,
+					CurrentVersion: prevLockedMod.Version,
+					NewVersion:     newLockedMod.Version,
+				})
+			}
+		}
+	}
+
+	return updates, nil
+}
+
+func (f *FicsitCLI) UpdateAllMods() error {
+
+	previousLockfile, err := f.selectedInstallation.Installation.LockFile(f.ficsitCli)
+	if err != nil {
+		return errors.Wrap(err, "Failed to get current lockfile")
+	}
+
+	profile := f.GetProfile(f.selectedInstallation.Installation.Profile)
+	for modReference, modData := range profile.Mods {
+		profile.Mods[modReference] = cli.ProfileMod{
+			Enabled: modData.Enabled,
+			Version: ">=0.0.0",
+		}
+	}
+
+	f.selectedInstallation.Installation.WriteLockFile(f.ficsitCli, cli.LockFile{})
+
+	f.SetProgress(&Progress{
+		Item:     "__update__",
+		Message:  "Updating...",
+		Progress: -1,
+	})
+
+	err = f.validateInstall(f.selectedInstallation, "__update__")
+
+	if err != nil {
+		f.selectedInstallation.Installation.WriteLockFile(f.ficsitCli, *previousLockfile)
+		f.SetProgress(nil)
+		return errors.Wrap(err, "Failed to update mods")
+	}
+
+	f.ficsitCli.Profiles.Save()
+	f.emitModsChange()
+	f.SetProgress(nil)
 
 	return nil
 }

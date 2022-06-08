@@ -1,6 +1,6 @@
 import { get, writable } from 'svelte/store';
 import { cli, bindings } from '$wailsjs/go/models';
-import { AddProfile, DeleteProfile, GetInstallationsInfo, GetProfiles, RenameProfile, SelectInstall, SetProfile } from '$wailsjs/go/bindings/FicsitCLI';
+import { AddProfile, CheckForUpdates, DeleteProfile, GetInstallationsInfo, GetProfiles, RenameProfile, SelectInstall, SetProfile } from '$wailsjs/go/bindings/FicsitCLI';
 import { GetFavouriteMods } from '$wailsjs/go/bindings/Settings';
 import { readableBinding, writableBinding } from '$lib/utils/wailsStoreBindings';
 
@@ -25,6 +25,7 @@ selectedInstall.subscribe((i) => {
     if(i.installation) {
       selectedProfile.set(i.installation.profile);
     }
+    checkForUpdates();
   }
 });
 
@@ -35,6 +36,7 @@ selectedProfile.subscribe((p) => {
     if(install && install.installation) {
       install.installation.profile = p;
     }
+    checkForUpdates();
   }
 });
 
@@ -102,3 +104,18 @@ export const lockfileMods = readableBinding<LockFile>({}, { allowNull: false, up
 export const progress = readableBinding<bindings.Progress | null>(null, { updateEvent: 'progress'});
 
 export const favouriteMods = readableBinding<string[]>([], { updateEvent: 'favouriteMods', initialGet: GetFavouriteMods});
+
+export const updates = writable<bindings.Update[]>([]);
+export const updateCheckInProgress = writable(false);
+
+export async function checkForUpdates() {
+  updateCheckInProgress.set(true);
+  const result = await CheckForUpdates();
+  updateCheckInProgress.set(false);
+  if(result instanceof Error) {
+    throw result;
+  }
+  updates.set(result ?? []);
+}
+
+setInterval(checkForUpdates, 1000 * 60 * 5); // Check for updates every 5 minutes
