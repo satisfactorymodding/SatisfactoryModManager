@@ -95,7 +95,7 @@
 <div
   bind:this={viewport}
   on:scroll={onScroll}
-  class="relative overflow-y-auto h-full {clazz}"
+  class="relative overflow-y-scroll h-full {clazz}"
 >
   <div
     bind:this={container}
