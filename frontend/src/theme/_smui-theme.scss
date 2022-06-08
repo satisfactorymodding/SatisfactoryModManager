@@ -46,6 +46,21 @@ $left-bar-controls-height: 40px;
   }
 }
 
+.profile-add.mdc-button {
+  @include button.ink-color(theme.$on-surface);
+  @include button.icon-color(#249a20);
+}
+
+.profile-edit.mdc-button {
+  @include button.ink-color(theme.$on-surface);
+  @include button.icon-color(#ffe600);
+}
+
+.profile-delete.mdc-button {
+  @include button.ink-color(theme.$on-surface);
+  @include button.icon-color(#e51c22);
+}
+
 .mods-list {
   background-color: $surface2;
 }

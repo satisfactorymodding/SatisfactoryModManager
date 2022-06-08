@@ -1,7 +1,7 @@
 import { get, readable, writable } from 'svelte/store';
 import { cli, bindings } from '$wailsjs/go/models';
 import { EventsOff, EventsOn } from '$wailsjs/runtime/runtime';
-import { GetInstallationsInfo, GetProfiles, SelectInstall, SetProfile } from '$wailsjs/go/bindings/FicsitCLI';
+import { AddProfile, DeleteProfile, GetInstallationsInfo, GetProfiles, RenameProfile, SelectInstall, SetProfile } from '$wailsjs/go/bindings/FicsitCLI';
 import { GetFavouriteMods } from '$wailsjs/go/bindings/Settings';
 
 function readableBinding<T>(options: {
@@ -34,11 +34,24 @@ function readableBinding<T>(options: {
     };
   }) : undefined);
 }
+function writableBinding<T>(options: {
+  defaultValue: T,
+  initialGet?: () => Promise<T>
+}) {
+  const { defaultValue, initialGet } = {
+    ...options
+  };
+  return writable(defaultValue, typeof window !== 'undefined' ? ((set) => {
+    if(initialGet) {
+      initialGet().then(set);
+    }
+  }) : undefined);
+}
 
 export const installs = readableBinding<bindings.InstallationInfo[]>({ defaultValue: [], initialGet: GetInstallationsInfo});
 export const selectedInstall = writable(null as bindings.InstallationInfo | null);
 
-export const profiles = readableBinding<string[]>({ defaultValue: [], initialGet: GetProfiles});
+export const profiles = writableBinding<string[]>({ defaultValue: [], initialGet: GetProfiles});
 export const selectedProfile = writable(null as string | null);
 
 const installsLoadDone = installs.subscribe((i) => {
@@ -67,6 +80,52 @@ selectedProfile.subscribe((p) => {
     }
   }
 });
+
+export async function addProfile(name: string) {
+  const err = await AddProfile(name);
+  if(err) {
+    throw err;
+  }
+  const newProfiles = get(profiles);
+  if(!newProfiles.includes(name)) {
+    newProfiles.push(name);
+    profiles.set(newProfiles);
+  }
+}
+
+export async function renameProfile(oldName: string, newName: string) {
+  const err = await RenameProfile(oldName, newName);
+  if(err) {
+    throw err;
+  }
+  const newProfiles = get(profiles);
+  if(newProfiles.includes(oldName)) {
+    const idx = newProfiles.indexOf(oldName);
+    newProfiles[idx] = newName;
+    profiles.set(newProfiles);
+  }
+  get(installs).forEach((i) => { if(i.installation.profile === oldName) { i.installation.profile = newName; } });
+  if(get(selectedProfile) === oldName) {
+    selectedProfile.set(newName);
+  }
+}
+
+export async function deleteProfile(name: string) {
+  const err = await DeleteProfile(name);
+  if(err) {
+    throw err;
+  }
+  const newProfiles = get(profiles);
+  if(newProfiles.includes(name)) {
+    const idx = newProfiles.indexOf(name);
+    newProfiles.splice(idx, 1);
+    profiles.set(newProfiles);
+  }
+  get(installs).forEach((i) => { if(i.installation.profile === name) { i.installation.profile = 'Default'; } });
+  if(get(selectedProfile) === name) {
+    selectedProfile.set('Default');
+  }
+}
 
 export type ProfileMods = Dictionary<string, cli.ProfileMod>;
 

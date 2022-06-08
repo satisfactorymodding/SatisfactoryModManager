@@ -93,7 +93,7 @@
           </div>
           <div class="pr-2 flex">
             <Group variant="outlined" class="mr-1">
-              <Button on:click={toggleModInstalled} variant="unelevated" disabled={buttonDisabled} class="{compact ? 'w-11 min-w-0 p-2.5' : 'w-32'} mod-install-button {isInstalled ? 'installed' : ''}">
+              <Button on:click={toggleModInstalled} variant="unelevated" disabled={buttonDisabled} class="{compact ? 'min-w-0 pl-5 pr-1.5' : 'w-32'} mod-install-button {isInstalled ? 'installed' : ''}">
                 {#if !compact}
                   <Label>{ installButtonLabel }</Label>
                 {:else}
@@ -119,7 +119,7 @@
                 </Menu>
               </div>
             </Group>
-            <Button on:click={toggleModFavourite} variant="unelevated" class="w-12 min-w-0 p-3 mod-favourite-button {isFavourite ? 'favourite' : ''}">
+            <Button on:click={toggleModFavourite} variant="unelevated" class="min-w-0 pl-5 pr-1.5 mod-favourite-button {isFavourite ? 'favourite' : ''}">
               <MDIIcon icon={ mdiStar }/>
             </Button>
           </div>
