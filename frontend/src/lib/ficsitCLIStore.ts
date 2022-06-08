@@ -1,57 +1,14 @@
-import { get, readable, writable } from 'svelte/store';
+import { get, writable } from 'svelte/store';
 import { cli, bindings } from '$wailsjs/go/models';
-import { EventsOff, EventsOn } from '$wailsjs/runtime/runtime';
 import { AddProfile, DeleteProfile, GetInstallationsInfo, GetProfiles, RenameProfile, SelectInstall, SetProfile } from '$wailsjs/go/bindings/FicsitCLI';
 import { GetFavouriteMods } from '$wailsjs/go/bindings/Settings';
+import { readableBinding, writableBinding } from '$lib/utils/wailsStoreBindings';
 
-function readableBinding<T>(options: {
-  defaultValue: T,
-  updateEvent?: string,
-  allowNull?: boolean,
-  initialGet?: () => Promise<T>
-}) {
-  const { defaultValue, updateEvent, allowNull, initialGet } = {
-    allowNull: true,
-    ...options
-  };
-  return readable(defaultValue, typeof window !== 'undefined' ? ((set) => {
-    const setData = (data) => {
-      if(data === null && !allowNull) {
-        set(defaultValue);
-      } else {
-        set(data);
-      }
-    };
 
-    EventsOn(updateEvent, setData);
-
-    if(initialGet) {
-      initialGet().then(setData);
-    }
-
-    return () => {
-      EventsOff(updateEvent);
-    };
-  }) : undefined);
-}
-function writableBinding<T>(options: {
-  defaultValue: T,
-  initialGet?: () => Promise<T>
-}) {
-  const { defaultValue, initialGet } = {
-    ...options
-  };
-  return writable(defaultValue, typeof window !== 'undefined' ? ((set) => {
-    if(initialGet) {
-      initialGet().then(set);
-    }
-  }) : undefined);
-}
-
-export const installs = readableBinding<bindings.InstallationInfo[]>({ defaultValue: [], initialGet: GetInstallationsInfo});
+export const installs = readableBinding<bindings.InstallationInfo[]>([], { initialGet: GetInstallationsInfo});
 export const selectedInstall = writable(null as bindings.InstallationInfo | null);
 
-export const profiles = writableBinding<string[]>({ defaultValue: [], initialGet: GetProfiles});
+export const profiles = writableBinding<string[]>([], { initialGet: GetProfiles});
 export const selectedProfile = writable(null as string | null);
 
 const installsLoadDone = installs.subscribe((i) => {
@@ -129,7 +86,7 @@ export async function deleteProfile(name: string) {
 
 export type ProfileMods = Dictionary<string, cli.ProfileMod>;
 
-export const manifestMods = readableBinding<ProfileMods>({ defaultValue: {}, allowNull: false, updateEvent: 'manifestMods'}); // Event will be
+export const manifestMods = readableBinding<ProfileMods>({}, { allowNull: false, updateEvent: 'manifestMods'}); // Event will be
 
 export interface LockedMod {
   version: string;
@@ -140,8 +97,8 @@ export interface LockedMod {
 
 export type LockFile = Dictionary<string, LockedMod>;
 
-export const lockfileMods = readableBinding<LockFile>({ defaultValue: {}, allowNull: false, updateEvent: 'lockfileMods'});
+export const lockfileMods = readableBinding<LockFile>({}, { allowNull: false, updateEvent: 'lockfileMods'});
 
-export const progress = readableBinding<bindings.Progress | null>({ defaultValue: null, updateEvent: 'progress'});
+export const progress = readableBinding<bindings.Progress | null>(null, { updateEvent: 'progress'});
 
-export const favouriteMods = readableBinding<string[]>({ defaultValue: [], updateEvent: 'favouriteMods', initialGet: GetFavouriteMods});
+export const favouriteMods = readableBinding<string[]>([], { updateEvent: 'favouriteMods', initialGet: GetFavouriteMods});

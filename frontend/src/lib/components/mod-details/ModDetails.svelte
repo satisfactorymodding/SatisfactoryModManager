@@ -10,7 +10,7 @@
   import List, { Item, PrimaryText, SecondaryText, Text } from '@smui/list';
   import { bytesToAppropriate } from '$lib/utils/dataFormats';
   import { createEventDispatcher } from 'svelte';
-  import { lockfileMods } from '$lib/store';
+  import { lockfileMods } from '$lib/ficsitCLIStore';
 
   export let id: string | null = null;
 

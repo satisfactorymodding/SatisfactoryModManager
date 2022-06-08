@@ -7,7 +7,7 @@
   import { mdiCheckCircle, mdiCloseCircle, mdiPencil, mdiPlusCircle, mdiTrashCan } from '@mdi/js';
   import MdiIcon from '$lib/components/MDIIcon.svelte';
   
-  import { addProfile, deleteProfile, installs, profiles, renameProfile, selectedInstall, selectedProfile } from '$lib/store';
+  import { addProfile, deleteProfile, installs, profiles, renameProfile, selectedInstall, selectedProfile } from '$lib/ficsitCLIStore';
 
   let modsEnabled = true;
 

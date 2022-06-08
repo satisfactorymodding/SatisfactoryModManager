@@ -7,7 +7,7 @@
   import Menu, { type MenuComponentDev } from '@smui/menu';
   import List, { Item, Text } from '@smui/list';
   import LinearProgress from '@smui/linear-progress';
-  import { favouriteMods, lockfileMods, manifestMods, progress } from '$lib/store';
+  import { favouriteMods, lockfileMods, manifestMods, progress } from '$lib/ficsitCLIStore';
   import { InstallMod, RemoveMod } from '$wailsjs/go/bindings/FicsitCLI';
   import { FavouriteMod, UnFavouriteMod } from '$wailsjs/go/bindings/Settings';
   

@@ -7,7 +7,7 @@
   import Fuse from 'fuse.js';
   import ModListFilters from './ModsListFilters.svelte';
   import { filterOptions, orderByOptions, type Filter, type OrderBy, type PartialMod } from '$lib/components/mods-list/modFilters';
-  import { favouriteMods, lockfileMods, manifestMods } from '$lib/store';
+  import { favouriteMods, lockfileMods, manifestMods } from '$lib/ficsitCLIStore';
 
   let mods: PartialMod[] = [];
 
