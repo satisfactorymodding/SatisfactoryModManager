@@ -59,10 +59,10 @@
   }
 </script>
 
-<div class="my-2 px-0 w-full" class:selected>
+<div class="my-1 px-0 w-full" class:rounded-lg={selected} class:selected>
   {#if inProgress}
     <div class="relative h-0">
-      <LinearProgress progress={$progress?.progress} class="mod-progress-bar h-24 w-full rounded-r-2xl"/>
+      <LinearProgress progress={$progress?.progress} class="mod-progress-bar h-24 w-full rounded-lg"/>
     </div>
   {/if}
   <div class="flex relative" readonly>
@@ -82,7 +82,7 @@
             <div>
               #tags
             </div>
-            <div class="flex">
+            <div class="flex h-5">
               <div class="w-24 flex">
                 <div class="pr-1 inline-flex items-center justify-items-center"><MDIIcon icon={mdiEye}/></div>{mod.views.toLocaleString()}
               </div>
@@ -137,6 +137,5 @@
   }
   .selected {
     background-color: #1c1c1c;
-    border-radius: 16px;
   }
 </style>
