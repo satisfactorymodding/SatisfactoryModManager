@@ -34,6 +34,7 @@
       bind:value={$filter}
       placeholder="Filter"
       ripple={false}
+      selectedText$class="color-primary"
     >
       <span slot="leadingIcon" class="pl-3">
         {#if !compact}
@@ -50,6 +51,7 @@
       bind:value={$order}
       placeholder="Order by"
       ripple={false}
+      selectedText$class="color-primary"
     >
       <span slot="leadingIcon" class="pl-3">
         {#if !compact}

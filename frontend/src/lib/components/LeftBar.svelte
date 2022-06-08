@@ -187,8 +187,9 @@
   </div>
   <div class="grow"/>
   <center>
-    <Button variant="unelevated" class="h-12 w-full" disabled={!canInstall}>
-      <Label>Launch Satisfactory</Label>
+    <Button variant="unelevated" class="h-12 w-full launch-game" disabled={!canInstall}>
+      <Label>Play Satisfactory</Label>
+      <div class="grow" />
     </Button>
   </center>
 </div>

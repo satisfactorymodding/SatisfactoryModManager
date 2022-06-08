@@ -1,17 +1,38 @@
 @use 'sass:color';
 @use 'sass:math';
 
-// Svelte Colors!
+$ficsit-orange: #e59445;
+$ficsit-blue: #5dafc5;
+$grey-light: #666666;
+$grey-dark: #575757;
+$grey-darker: #2b2b2b;
+$grey-darkest: #1d1d1d;
+$almost-black: #0d0d0d;
+$yellow: #ffcc00;
+$red-bright: #ff0000;
+$red-normal: #bb2828;
+$red-darker: #691a1a;
+$green-bright: #00ff00;
+$green-normal: #5bb71d;
+$green-darker: #354f24;
+$white-bright: #ffffff;
+$white-normal: #efefef;
+
 @use '@material/theme/index' as theme with (
-  $primary: #249a20,
-  $secondary: #676778,
-  $surface: #1c1c1c,
-  $on-surface: #D6D6D6,
-  $background: #1c1c1c,
-  $error: #e51c22
+  $primary: $green-normal,
+  $secondary: $grey-light,
+  $surface: $grey-darkest,
+  $on-surface: $white-normal,
+  $background: $grey-darkest,
+  $error: $red-bright,
 );
 
-$surface2: #2B2B2B;
+@use '@material/typography/index' with (
+  $styles-button: (
+    text-transform: none,
+    font-weight: 400,
+  )
+);
 
 @use '@material/linear-progress/index' as linear-progress;
 
@@ -21,11 +42,11 @@ $surface2: #2B2B2B;
 @use '@material/button/index' as button;
 
 .mod-progress-bar {
-  @include linear-progress.bar-color(#171717);
-  @include linear-progress.buffer-color(#252525);
+  @include linear-progress.bar-color($grey-darkest);
+  @include linear-progress.buffer-color($grey-darker);
 }
 
-$left-bar-controls-background: #232323;
+$left-bar-controls-background: $grey-darker;
 $left-bar-controls-height: 40px;
 
 .left-bar {
@@ -46,23 +67,23 @@ $left-bar-controls-height: 40px;
   .mods-toggle-button {
     @include button.container-fill-color($left-bar-controls-background);
     &.mods-on {
-      @include button.container-fill-color(theme.$primary);
+      @include button.container-fill-color($green-darker);
     }
     &.mods-off {
-      @include button.container-fill-color(theme.$error);
+      @include button.container-fill-color($red-darker);
     }
   }
 
   .profile-add {
-    @include button.icon-color(#249a20);
+    @include button.icon-color($green-normal);
   }
   
   .profile-edit {
-    @include button.icon-color(#ffe600);
+    @include button.icon-color($yellow);
   }
   
   .profile-delete {
-    @include button.icon-color(#e51c22);
+    @include button.icon-color($red-normal);
   }
 
   .update-button {
@@ -71,50 +92,65 @@ $left-bar-controls-height: 40px;
       @include button.container-fill-color(theme.$primary);
     }
   }
+
+  .launch-game {
+    @include button.container-fill-color($grey-light);
+  }
 }
 
 .mods-list {
-  background-color: $surface2;
+  background-color: $grey-darker;
 }
 
 .mod-install-button.mdc-button--unelevated {
-  $install: #249a20;
-  $installed: #249a20;
-  $uninstall: #e51c22;
+  @include button.ink-color(theme.$on-surface);
   &:not(.installed) {
-    @include button.filled-accessible(theme.$secondary);
+    @include button.container-fill-color($green-darker);
     &:hover {
-      @include button.filled-accessible($install);
+      @include button.container-fill-color($green-normal);
     }
   }
   &.installed {
-    @include button.filled-accessible($installed);
+    @include button.container-fill-color($green-normal);
     &:hover {
-      @include button.filled-accessible($uninstall);
+      @include button.container-fill-color($red-normal);
+    }
+  }
+}
+
+.mod-enable-button.mdc-button--unelevated {
+  @include button.ink-color(theme.$on-surface);
+  &:not(.enabled) {
+    @include button.container-fill-color($grey-dark);
+    &:hover {
+      @include button.container-fill-color($green-normal);
+    }
+  }
+  &.enabled {
+    @include button.container-fill-color($green-normal);
+    &:hover {
+      @include button.container-fill-color($grey-dark);
     }
   }
 }
 
 .mod-favourite-button.mdc-button--unelevated {
-  $favourite: #ffe600;
-  $unfavourite: theme.$secondary;
-  
   &:not(.favourite) {
-    @include button.filled-accessible($unfavourite);
+    @include button.filled-accessible($grey-darkest);
     &:hover {
-      @include button.filled-accessible($favourite);
+      @include button.filled-accessible($yellow);
     }
   }
   &.favourite {
-    @include button.filled-accessible($favourite);
+    @include button.filled-accessible($yellow);
     &:hover {
-      @include button.filled-accessible($unfavourite);
+      @include button.filled-accessible($grey-darkest);
     }
   }
 }
 
 .color-primary {
-  color: theme.$primary;
+  color: theme.$primary !important;
 }
 
 html,
