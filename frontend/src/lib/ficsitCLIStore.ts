@@ -118,4 +118,6 @@ export async function checkForUpdates() {
   updates.set(result ?? []);
 }
 
-setInterval(checkForUpdates, 1000 * 60 * 5); // Check for updates every 5 minutes
+if(typeof window !== 'undefined') {
+  setInterval(checkForUpdates, 1000 * 60 * 5); // Check for updates every 5 minutes
+}
