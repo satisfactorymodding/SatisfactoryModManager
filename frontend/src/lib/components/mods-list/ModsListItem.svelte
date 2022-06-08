@@ -1,14 +1,12 @@
 <script lang="ts">
-  import { mdiDownload, mdiEye, mdiChevronDown, mdiStar, mdiCheckCircle } from '@mdi/js';
+  import { mdiDownload, mdiEye, mdiStar, mdiCheckCircle, mdiPlusBoxMultiple, mdiPlay, mdiPause } from '@mdi/js';
   import MDIIcon from '$lib/components/MDIIcon.svelte';
   import { createEventDispatcher } from 'svelte';
   import { search, type PartialMod } from '$lib/modFiltersStore';
   import Button, { Group, GroupItem, Label } from '@smui/button';
-  import Menu, { type MenuComponentDev } from '@smui/menu';
-  import List, { Item, Text } from '@smui/list';
   import LinearProgress from '@smui/linear-progress';
   import { favouriteMods, lockfileMods, manifestMods, progress } from '$lib/ficsitCLIStore';
-  import { InstallMod, RemoveMod } from '$wailsjs/go/bindings/FicsitCLI';
+  import { DisableMod, EnableMod, InstallMod, RemoveMod } from '$wailsjs/go/bindings/FicsitCLI';
   import { FavouriteMod, UnFavouriteMod } from '$wailsjs/go/bindings/Settings';
   
   export let mod: PartialMod;
@@ -18,8 +16,6 @@
   function click() {
     dispatch('click');
   }
-
-  let installOptionsMenu: MenuComponentDev;
   
   export let compact: boolean;
   export let selected: boolean;
@@ -34,7 +30,11 @@
 
   $: installButtonLabel = isDependency ? 'Dependency' : (isInstalled ? 'Remove' : 'Install');
   $: installButtonIcon = isDependency ? mdiCheckCircle : (isInstalled ? mdiCheckCircle : mdiDownload);
+  $: enableButtonIcon = isInstalled ? (isEnabled ? mdiPlay : mdiPause) : '';
+  $: enableButtonIconHover = isInstalled ? (isEnabled ? mdiPause : mdiPlay) : '';
   $: buttonDisabled = isDependency || (!!$progress);
+
+  let isEnableButtonHovered = false;
 
   $: isFavourite = $favouriteMods.includes(mod.mod_reference);
 
@@ -46,6 +46,14 @@
     }
   }
 
+  function toggleModEnabled() {
+    if(isEnabled) {
+      DisableMod(mod.mod_reference);
+    } else {
+      EnableMod(mod.mod_reference);
+    }
+  }
+
   function toggleModFavourite() {
     if(!isFavourite) {
       FavouriteMod(mod.mod_reference);
@@ -54,7 +62,7 @@
     }
   }
 
-  function toggleAddToQueue() {
+  function toggleModQueueInstall() {
     console.log('test');
   }
 </script>
@@ -65,7 +73,7 @@
       <LinearProgress progress={$progress?.progress} class="mod-progress-bar h-24 w-full rounded-lg"/>
     </div>
   {/if}
-  <div class="flex relative" readonly>
+  <div class="flex relative" readonly class:disabled={isInstalled && !isEnabled}>
     <img src={renderedLogo} alt="{mod.name} Logo" class="logo h-24 w-24" />
     <div class="ml-2 flex flex-col grow w-0">
       <div>
@@ -93,7 +101,7 @@
           </div>
           <div class="pr-2 flex" on:click|stopPropagation={null}>
             <Group variant="outlined" class="mr-1">
-              <Button on:click={toggleModInstalled} variant="unelevated" disabled={buttonDisabled} class="{compact ? 'min-w-0 pl-5 pr-1.5' : 'w-32'} mod-install-button {isInstalled ? 'installed' : ''}">
+              <Button on:click={toggleModInstalled} variant="unelevated" disabled={buttonDisabled} class="{compact ? 'min-w-0 pl-5 pr-1.5' : 'w-28'} mod-install-button {isInstalled ? 'installed' : ''}">
                 {#if !compact}
                   <Label>{ installButtonLabel }</Label>
                 {:else}
@@ -102,20 +110,15 @@
               </Button>
               <div use:GroupItem>
                 <Button
-                  on:click={() => installOptionsMenu.setOpen(true)}
+                  on:click={ isInstalled ? toggleModEnabled : toggleModQueueInstall }
+                  on:mouseover={() => isEnableButtonHovered = true}
+                  on:mouseleave={() => isEnableButtonHovered = false}
                   disabled={buttonDisabled}
                   variant="unelevated"
-                  class="mod-install-button min-w-0 pl-5 pr-1.5 {isInstalled ? 'installed' : ''}"
+                  class="min-w-0 pl-5 pr-1.5 {isInstalled ? ('mod-enable-button ' + (isEnabled ? 'enabled' : '')) : 'mod-install-button'}"
                 >
-                  <MDIIcon icon={ mdiChevronDown }/>
+                  <MDIIcon icon={ isInstalled ? (isEnableButtonHovered ? enableButtonIconHover : enableButtonIcon) : mdiPlusBoxMultiple }/>
                 </Button>
-                <Menu bind:this={installOptionsMenu} anchorCorner="TOP_LEFT">
-                  <List>
-                    <Item on:SMUI:action={toggleAddToQueue}>
-                      <Text>Queue { installButtonLabel }</Text>
-                    </Item>
-                  </List>
-                </Menu>
               </div>
             </Group>
             <Button on:click={toggleModFavourite} variant="unelevated" class="min-w-0 pl-5 pr-1.5 mod-favourite-button {isFavourite ? 'favourite' : ''}">
@@ -136,5 +139,12 @@
   }
   .selected {
     background-color: #1c1c1c;
+  }
+  .disabled {
+    opacity: 0.3;
+  }
+  .disabled img {
+    filter: grayscale(1);
+    animation-play-state: paused !important;
   }
 </style>
