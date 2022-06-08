@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/andygrunwald/vdf v1.0.1-0.20220412055542-fff83b263c6b
 	github.com/pkg/errors v0.9.1
-	github.com/satisfactorymodding/ficsit-cli v0.0.12
+	github.com/satisfactorymodding/ficsit-cli v0.0.23
 	github.com/spf13/viper v1.12.0
 	github.com/wailsapp/wails/v2 v2.0.0-beta.37
 	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a
@@ -54,6 +54,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/satisfactorymodding/ficsit-cli v0.0.12 => github.com/vilsol/ficsit-cli v0.0.0-20220604195717-7bc95bdf62ee
+replace github.com/satisfactorymodding/ficsit-cli v0.0.23 => github.com/vilsol/ficsit-cli v0.0.23
 
 replace github.com/Masterminds/semver/v3 v3.1.1 => github.com/Vilsol/semver/v3 v3.1.2-0.20220414201711-64ef71d40f9a
