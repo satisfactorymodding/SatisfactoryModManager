@@ -3,11 +3,9 @@
   "version": "0.0.1",
   "license": "GPL-3.0",
   "scripts": {
-    "dev": "svelte-kit dev",
-    "build": "svelte-kit build",
-    "package": "svelte-kit package",
-    "preview": "svelte-kit preview",
-    "prepare": "svelte-kit sync && run-s smui-theme",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch",
     "lint": "eslint --ignore-path .gitignore .",
@@ -95,8 +93,7 @@
     "@smui/tooltip": "^6.0.0-beta.16",
     "@smui/top-app-bar": "^6.0.0-beta.16",
     "@smui/touch-target": "^6.0.0-beta.16",
-    "@sveltejs/adapter-static": "next",
-    "@sveltejs/kit": "next",
+    "@sveltejs/vite-plugin-svelte": "^1.0.0-next.30",
     "@types/cookie": "^0.4.1",
     "@types/lodash": "^4.14.182",
     "@typescript-eslint/eslint-plugin": "^5.10.1",
@@ -117,7 +114,8 @@
     "svelte-preprocess": "^4.10.1",
     "tailwindcss": "^3.0.24",
     "tslib": "^2.3.1",
-    "typescript": "~4.6.2"
+    "typescript": "~4.6.2",
+    "vite": "^2.9.5"
   },
   "type": "module"
 }

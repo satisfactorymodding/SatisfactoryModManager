@@ -1,5 +1,5 @@
 {
-  "extends": "./.svelte-kit/tsconfig.json",
+  "extends": "@tsconfig/svelte/tsconfig.json",
   "compilerOptions": {
     "allowJs": true,
     "checkJs": true,
@@ -11,16 +11,16 @@
     "strict": true,
 		"paths": {
 			"$lib": [
-				"src/lib"
+				"./src/lib"
 			],
 			"$lib/*": [
-				"src/lib/*"
+				"./src/lib/*"
 			],
 			"$wailsjs": [
-				"wailsjs"
+				"./wailsjs"
 			],
 			"$wailsjs/*": [
-				"wailsjs/*"
+				"./wailsjs/*"
 			]
 		},
   }
