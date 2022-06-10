@@ -1,0 +1,67 @@
+name: Build for win and linux
+
+on:
+  push:
+
+jobs:
+  linux:
+    name: Build (Linux)
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.18
+        
+      - name: Setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+
+      - name: Install Dependencies
+        run: |
+          sudo apt -y install libgtk-3-dev libwebkit2gtk-4.0-dev
+        
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+        
+      - name: Build
+        run: wails build
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux
+          path: build/bin/*
+  
+  windows:
+    name: Build (Windows)
+    runs-on: windows-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.18
+        
+      - name: Setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+        
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+        
+      - name: Build
+        run: wails build -nsis
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows
+          path: build/bin/*
