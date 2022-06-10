@@ -1,6 +1,4 @@
-wailsjs
 build
-!build/keep
 package.json.md5
 
 # VS Code
