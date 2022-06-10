@@ -4,8 +4,9 @@
   "license": "GPL-3.0",
   "scripts": {
     "dev": "vite",
-    "build": "run-s smui-theme && vite build",
+    "build": "vite build",
     "preview": "vite preview",
+    "postinstall": "run-s smui-theme graphql-codegen",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch",
     "lint": "eslint --ignore-path .gitignore .",
