@@ -2,12 +2,14 @@ package main
 
 import (
 	"embed"
+	"encoding/json"
 	"os"
 	"path"
 	"path/filepath"
 	"runtime"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/bindings"
+	"github.com/satisfactorymodding/SatisfactoryModManager/project_file"
 	"github.com/satisfactorymodding/SatisfactoryModManager/utils"
 	"github.com/spf13/viper"
 	"github.com/wailsapp/wails/v2"
@@ -17,7 +19,19 @@ import (
 //go:embed all:frontend/build
 var assets embed.FS
 
+//go:embed wails.json
+var projectFile []byte
+
+func loadProjectFile() error {
+	return json.Unmarshal(projectFile, &project_file.ProjectFile)
+}
+
 func main() {
+	err := loadProjectFile()
+	if err != nil {
+		panic(err)
+	}
+
 	b, err := bindings.MakeBindings()
 	if err != nil {
 		panic(err)

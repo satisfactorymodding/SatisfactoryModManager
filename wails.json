@@ -1,6 +1,6 @@
 {
-  "name": "SatisfactoryModManager",
-  "outputfilename": "SatisfactoryModManager",
+  "name": "Satisfactory Mod Manager",
+  "outputfilename": "Satisfactory Mod Manager",
   "frontend:install": "yarn install",
   "frontend:build": "yarn build",
   "frontend:dev:watcher": "yarn dev",
@@ -8,5 +8,8 @@
   "author": {
     "name": "mircearoata",
     "email": "mircearoatapalade@gmail.com"
+  },
+  "Info": {
+    "ProductVersion": "3.0.0"
   }
 }
