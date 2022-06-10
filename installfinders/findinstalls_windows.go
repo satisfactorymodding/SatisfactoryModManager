@@ -1,8 +1,8 @@
-package installFinders
+package installfinders
 
 import (
-	"github.com/satisfactorymodding/SatisfactoryModManager/installFinders/types"
-	"github.com/satisfactorymodding/SatisfactoryModManager/installFinders/windows"
+	"github.com/satisfactorymodding/SatisfactoryModManager/installfinders/types"
+	"github.com/satisfactorymodding/SatisfactoryModManager/installfinders/wininstalls"
 )
 
 func FindInstallations() ([]*types.Installation, []string, []error) {
@@ -10,12 +10,12 @@ func FindInstallations() ([]*types.Installation, []string, []error) {
 	invalidInstalls := []string{}
 	findErrors := []error{}
 
-	epicInstalls, epicInvalidInstalls, epicFindErrors := windows.FindInstallationsEpic()
+	epicInstalls, epicInvalidInstalls, epicFindErrors := wininstalls.FindInstallationsEpic()
 	installs = append(installs, epicInstalls...)
 	invalidInstalls = append(invalidInstalls, epicInvalidInstalls...)
 	findErrors = append(findErrors, epicFindErrors...)
 
-	steamInstalls, steamInvalidInstalls, steamFindErrors := windows.FindInstallationsSteam()
+	steamInstalls, steamInvalidInstalls, steamFindErrors := wininstalls.FindInstallationsSteam()
 	installs = append(installs, steamInstalls...)
 	invalidInstalls = append(invalidInstalls, steamInvalidInstalls...)
 	findErrors = append(findErrors, steamFindErrors...)

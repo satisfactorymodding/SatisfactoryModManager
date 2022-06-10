@@ -9,8 +9,8 @@ import (
 
 	"github.com/satisfactorymodding/ficsit-cli/cli"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/installFinders"
-	installFinderTypes "github.com/satisfactorymodding/SatisfactoryModManager/installFinders/types"
+	"github.com/satisfactorymodding/SatisfactoryModManager/installfinders"
+	installFinderTypes "github.com/satisfactorymodding/SatisfactoryModManager/installfinders/types"
 )
 
 type FicsitCLI struct {
@@ -51,7 +51,7 @@ func (f *FicsitCLI) startup(ctx context.Context) {
 }
 
 func (f *FicsitCLI) initInstallations() {
-	installs, _, findErrors := installFinders.FindInstallations()
+	installs, _, findErrors := installfinders.FindInstallations()
 
 	if len(findErrors) > 0 {
 		for _, err := range findErrors {

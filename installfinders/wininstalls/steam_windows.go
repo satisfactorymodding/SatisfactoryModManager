@@ -1,4 +1,4 @@
-package windows
+package wininstalls
 
 import (
 	"encoding/json"
@@ -11,7 +11,7 @@ import (
 	"github.com/pkg/errors"
 	"golang.org/x/sys/windows/registry"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/installFinders/types"
+	"github.com/satisfactorymodding/SatisfactoryModManager/installfinders/types"
 )
 
 func FindInstallationsSteam() ([]*types.Installation, []string, []error) {

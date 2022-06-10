@@ -1,4 +1,4 @@
-package windows
+package wininstalls
 
 import (
 	"encoding/json"
@@ -9,7 +9,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/installFinders/types"
+	"github.com/satisfactorymodding/SatisfactoryModManager/installfinders/types"
 )
 
 var EpicManifestsFolder = path.Join(os.Getenv("PROGRAMDATA"), "Epic", "EpicGamesLauncher", "Data", "Manifests")
