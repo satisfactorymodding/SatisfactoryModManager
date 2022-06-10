@@ -124,6 +124,8 @@ func (f *FicsitCLI) GetProfile(profile string) *cli.Profile {
 func (f *FicsitCLI) validateInstall(installation *InstallationInfo, progressItem string) error {
 	installChannel := make(chan cli.InstallUpdate)
 
+	defer f.SetProgress(f.progress)
+
 	go func() {
 		for data := range installChannel {
 			if data.DownloadProgress < 1 {
@@ -165,16 +167,16 @@ func (f *FicsitCLI) InstallMod(mod string) error {
 		Progress: -1,
 	})
 
+	defer f.SetProgress(nil)
+
 	installErr := f.validateInstall(installation, mod)
 
 	if installErr != nil {
-		f.SetProgress(nil)
 		return errors.Wrapf(installErr, "Failed to install mod: %s@latest", mod)
 	}
 
 	f.ficsitCli.Profiles.Save()
 	f.emitModsChange()
-	f.SetProgress(nil)
 
 	return nil
 }
@@ -195,16 +197,16 @@ func (f *FicsitCLI) InstallModVersion(mod string, version string) error {
 		Progress: -1,
 	})
 
+	defer f.SetProgress(nil)
+
 	installErr := f.validateInstall(installation, mod)
 
 	if installErr != nil {
-		f.SetProgress(nil)
 		return errors.Wrapf(installErr, "Failed to install mod: %s@%s", mod, version)
 	}
 
 	f.ficsitCli.Profiles.Save()
 	f.emitModsChange()
-	f.SetProgress(nil)
 
 	return nil
 }
@@ -222,16 +224,16 @@ func (f *FicsitCLI) RemoveMod(mod string) error {
 		Progress: -1,
 	})
 
+	defer f.SetProgress(nil)
+
 	installErr := f.validateInstall(installation, mod)
 
 	if installErr != nil {
-		f.SetProgress(nil)
 		return errors.Wrapf(installErr, "Failed to remove mod: %s", mod)
 	}
 
 	f.ficsitCli.Profiles.Save()
 	f.emitModsChange()
-	f.SetProgress(nil)
 
 	return nil
 }
@@ -249,16 +251,16 @@ func (f *FicsitCLI) EnableMod(mod string) error {
 		Progress: -1,
 	})
 
+	defer f.SetProgress(nil)
+
 	installErr := f.validateInstall(installation, mod)
 
 	if installErr != nil {
-		f.SetProgress(nil)
 		return errors.Wrapf(installErr, "Failed to enable mod: %s", mod)
 	}
 
 	f.ficsitCli.Profiles.Save()
 	f.emitModsChange()
-	f.SetProgress(nil)
 
 	return nil
 }
@@ -276,16 +278,16 @@ func (f *FicsitCLI) DisableMod(mod string) error {
 		Progress: -1,
 	})
 
+	defer f.SetProgress(nil)
+
 	installErr := f.validateInstall(installation, mod)
 
 	if installErr != nil {
-		f.SetProgress(nil)
 		return errors.Wrapf(installErr, "Failed to disable mod: %s", mod)
 	}
 
 	f.ficsitCli.Profiles.Save()
 	f.emitModsChange()
-	f.SetProgress(nil)
 
 	return nil
 }
@@ -419,17 +421,17 @@ func (f *FicsitCLI) UpdateAllMods() error {
 		Progress: -1,
 	})
 
+	defer f.SetProgress(nil)
+
 	err = f.validateInstall(f.selectedInstallation, "__update__")
 
 	if err != nil {
 		f.selectedInstallation.Installation.WriteLockFile(f.ficsitCli, *previousLockfile)
-		f.SetProgress(nil)
 		return errors.Wrap(err, "Failed to update mods")
 	}
 
 	f.ficsitCli.Profiles.Save()
 	f.emitModsChange()
-	f.SetProgress(nil)
 
 	return nil
 }
