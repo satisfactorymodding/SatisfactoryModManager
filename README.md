@@ -25,6 +25,13 @@ Just choose a compatible mod and click install. SMM will take care of everything
 If you have any questions or run into issues, you can ask in the [Satisfactory Modding discord](https://discord.gg/TShj39G) for quicker responses than the GitHub issues. If there is any error message, please include it along with the generated debug info zip.
 
 ### Development
+Because of this you need to use Node V14 for building and not V16:
+
+```
+Update [April 13th, 2021] -- Fibers is not compatible with nodejs v16.0.0 or later. 
+Unfortunately, v8 commit dacc2fee0f is a breaking change and workarounds are non-trivial.
+```
+
 ``` bash
 # install dependencies
 yarn install
@@ -39,3 +46,4 @@ yarn dist
 yarn lint
 
 ```
+
