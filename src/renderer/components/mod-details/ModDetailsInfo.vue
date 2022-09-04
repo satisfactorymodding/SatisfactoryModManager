@@ -160,7 +160,7 @@
                 >mdi-rocket-launch</v-icon>
               </template>
               <!-- eslint-disable-next-line vue/no-v-html -->
-              Early Access: {{ mod.compatibility.EA.state }} <span v-if="mod.compatibility.EA.note"> - <span v-html="markdownWithLinks(mod.compatibility.EA.note)" /></span>
+              Early Access: {{ mod.compatibility.EA.state }} <span v-if="mod.compatibility.EA.note"> - <span v-html="markdownAsHtmlText(mod.compatibility.EA.note)" /></span>
             </v-tooltip>
             <v-tooltip
               top
@@ -174,7 +174,7 @@
                 >mdi-test-tube</v-icon>
               </template>
               <!-- eslint-disable-next-line vue/no-v-html -->
-              Experimental: {{ mod.compatibility.EXP.state }} <span v-if="mod.compatibility.EXP.note"> - <span v-html="markdownWithLinks(mod.compatibility.EXP.note)" /></span>
+              Experimental: {{ mod.compatibility.EXP.state }} <span v-if="mod.compatibility.EXP.note"> - <span v-html="markdownAsHtmlText(mod.compatibility.EXP.note)" /></span>
             </v-tooltip>
           </span>
           <span

@@ -241,7 +241,7 @@ export default {
     versionCompatibility: {
       async get() {
         if (!this.$store.state.selectedInstall) return COMPATIBILITY_LEVEL.INCOMPATIBLE;
-        if (this.mod.hidden && !this.isDependency) return COMPATIBILITY_LEVEL.INCOMPATIBLE;
+        if (this.mod && this.mod.hidden && !this.isDependency) return COMPATIBILITY_LEVEL.INCOMPATIBLE;
         return isCompatibleFast(this.mod, this.$store.state.selectedInstall.version);
       },
       default: COMPATIBILITY_LEVEL.COMPATIBLE,
