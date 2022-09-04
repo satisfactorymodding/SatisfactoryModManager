@@ -32,7 +32,12 @@
         >
           <template #activator="{ on, attrs }">
             <v-list-item-title
-              :class="{ 'text--text': isCompatible, 'warning--text': isPossiblyCompatible, 'error--text': !isCompatible && !isPossiblyCompatible }"
+              :class="{
+                'text--text': compatibility === COMPATIBILITY_LEVEL.COMPATIBLE && (reportedCompatibility === COMPATIBILITY_LEVEL.COMPATIBLE || reportedCompatibility === null),
+                'warning--text': (compatibility === COMPATIBILITY_LEVEL.POSSIBLY_COMPATIBLE && reportedCompatibility !== COMPATIBILITY_LEVEL.INCOMPATIBLE)
+                  || (reportedCompatibility === COMPATIBILITY_LEVEL.POSSIBLY_COMPATIBLE && compatibility !== COMPATIBILITY_LEVEL.INCOMPATIBLE),
+                'error--text': compatibility === COMPATIBILITY_LEVEL.INCOMPATIBLE || reportedCompatibility === COMPATIBILITY_LEVEL.INCOMPATIBLE,
+              }"
               style="font-weight: 300"
               v-bind="attrs"
               v-on="on"
@@ -40,9 +45,11 @@
               {{ mod.name }}
             </v-list-item-title>
           </template>
-          <span v-if="errorTooltip && isOffline">You are currently offline.<br>A connection to ficsit.app is required to view details and install new mods.</span>
-          <span v-else-if="errorTooltip">{{ errorTooltip }}</span>
-          <span v-if="disabled">This mod is disabled. Press the pause icon to enable it.</span>
+          <div style="white-space: pre-line;">
+            <span v-if="errorTooltip && isOffline">You are currently offline.<br>A connection to ficsit.app is required to view details and install new mods.</span>
+            <span v-else-if="errorTooltip">{{ errorTooltip }}<br></span>
+            <span v-if="disabled">This mod is disabled. Press the pause icon to enable it.<br></span>
+          </div>
         </v-tooltip>
         <v-list-item-subtitle v-if="!isModInProgress">
           <div
@@ -119,12 +126,12 @@
         </v-icon>
         <ModActionButton
           v-else
-          :disabled="(!isCompatible && !isPossiblyCompatible && !isInstalled) || isDependency || !modsEnabled || isGameRunning || inProgress.length > 0"
+          :disabled="(compatibility === COMPATIBILITY_LEVEL.INCOMPATIBLE && !isInstalled) || isDependency || !modsEnabled || isGameRunning || inProgress.length > 0"
           background-normal-class=""
           :background-hover-class="isInstalled || isEnabled ? 'red' : 'green'"
-          :icon-normal-color="!isCompatible && !isPossiblyCompatible ? 'error' : (isInstalled || isEnabled ? 'green' : 'text')"
+          :icon-normal-color="compatibility === COMPATIBILITY_LEVEL.INCOMPATIBLE ? 'error' : (isInstalled || isEnabled ? 'green' : 'text')"
           icon-hover-color="white"
-          :normal-icon="!isCompatible && !isPossiblyCompatible ? 'mdi-alert' : (isInstalled || isEnabled ? 'mdi-check-circle' : 'mdi-download')"
+          :normal-icon="compatibility === COMPATIBILITY_LEVEL.INCOMPATIBLE ? 'mdi-alert' : (isInstalled || isEnabled ? 'mdi-check-circle' : 'mdi-download')"
           :hover-icon="isInstalled ? 'mdi-delete' : 'mdi-download'"
           @click="isInstalled ? uninstall() : install()"
         >
@@ -133,7 +140,7 @@
             <span v-else-if="!modsEnabled">Enable mods to be able to make changes</span>
             <span v-else-if="isGameRunning">Cannot install mods while game is running</span>
             <span v-else-if="inProgress.length > 0">Another operation is in progress</span>
-            <span v-else-if="!isCompatible && !isPossiblyCompatible">This mod is incompatible with your game version</span>
+            <span v-else-if="compatibility === COMPATIBILITY_LEVEL.INCOMPATIBLE">This mod is incompatible with your game version</span>
           </template>
         </ModActionButton>
       </v-list-item-action>
@@ -194,7 +201,7 @@ export default {
   },
   data() {
     return {
-
+      COMPATIBILITY_LEVEL,
     };
   },
   computed: {
@@ -241,29 +248,63 @@ export default {
     disabled() {
       return !this.isEnabled && this.isInstalled;
     },
+    branch() {
+      if (!this.$store.state.selectedInstall) return null;
+      if (this.$store.state.selectedInstall.branch === 'EA') {
+        return 'EA';
+      }
+      return 'EXP';
+    },
+    reportedCompatibility() {
+      if (!this.branch) return null;
+      if (!this.mod.compatibility) return null;
+      if (!this.mod.compatibility[this.branch]) return null;
+      switch (this.mod.compatibility[this.branch].state) {
+        case 'Works':
+          return COMPATIBILITY_LEVEL.COMPATIBLE;
+        case 'Damaged':
+          return COMPATIBILITY_LEVEL.POSSIBLY_COMPATIBLE;
+        case 'Broken':
+          return COMPATIBILITY_LEVEL.INCOMPATIBLE;
+        default:
+          return null;
+      }
+    },
   },
   asyncComputed: {
-    isCompatible: {
+    compatibility: {
       async get() {
-        if (!this.$store.state.selectedInstall) return false;
-        if (this.mod.hidden && !this.isDependency) return false;
-        return (await isCompatibleFast(this.mod, this.$store.state.selectedInstall.version)) === COMPATIBILITY_LEVEL.COMPATIBLE;
+        if (!this.$store.state.selectedInstall) return COMPATIBILITY_LEVEL.INCOMPATIBLE;
+        if (this.mod.hidden && !this.isDependency) return COMPATIBILITY_LEVEL.INCOMPATIBLE;
+        return isCompatibleFast(this.mod, this.$store.state.selectedInstall.version);
       },
-      default: true,
-    },
-    isPossiblyCompatible: {
-      async get() {
-        if (!this.$store.state.selectedInstall) return false;
-        if (this.mod.hidden && !this.isDependency) return false;
-        return (await isCompatibleFast(this.mod, this.$store.state.selectedInstall.version)) === COMPATIBILITY_LEVEL.POSSIBLY_COMPATIBLE;
-      },
-      default: false,
+      default: COMPATIBILITY_LEVEL.COMPATIBLE,
     },
     errorTooltip: {
       get() {
-        if (this.isCompatible) return null;
-        if (this.isPossiblyCompatible) return 'This mod is likely incompatible with your game version and may cause crashes.';
-        return 'This mod is incompatible with your game version.';
+        if (this.branch && this.reportedCompatibility) {
+          switch (this.reportedCompatibility) {
+            case COMPATIBILITY_LEVEL.INCOMPATIBLE:
+              return `This mod has been reported as broken on this game version:\n${this.mod.compatibility[this.branch].note}`;
+            case COMPATIBILITY_LEVEL.POSSIBLY_COMPATIBLE:
+              return `This mod has been reported as partially broken on this game version:\n${this.mod.compatibility[this.branch].note}`;
+            default:
+              break;
+          }
+        }
+        switch (this.compatibility) {
+          case COMPATIBILITY_LEVEL.COMPATIBLE:
+            return null;
+          case COMPATIBILITY_LEVEL.POSSIBLY_COMPATIBLE:
+            return 'This mod is likely incompatible with your game version and may cause crashes.';
+          case COMPATIBILITY_LEVEL.INCOMPATIBLE:
+            if (!this.isDependency && this.mod.hidden) {
+              return 'This mod was hidden by the author.';
+            }
+            return 'This mod is incompatible with your game version.';
+          default:
+            return null;
+        }
       },
       default: null,
     },

@@ -218,6 +218,16 @@ export default {
                   username,
                 }
               },
+              compatibility {
+                EA {
+                  state,
+                  note,
+                },
+                EXP {
+                  state,
+                  note,
+                },
+              },
               downloads,
               views,
               popularity,
@@ -424,6 +434,16 @@ export default {
                     user {
                       username,
                     }
+                  },
+                  compatibility {
+                    EA {
+                      state,
+                      note,
+                    },
+                    EXP {
+                      state,
+                      note,
+                    },
                   },
                   downloads,
                   views,
