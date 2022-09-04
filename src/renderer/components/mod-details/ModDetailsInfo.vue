@@ -153,7 +153,7 @@
           class="primary--text"
           style="font-weight: 600"
           target="_blank"
-          :href="`https://ficsit.app/mod/${mod.id}`"
+          :href="`https://ficsit.app/mod/${mod.mod_reference}`"
         >View on ficsit.app</a>
       </v-row>
       <v-row style="flex-basis: 100%" />
