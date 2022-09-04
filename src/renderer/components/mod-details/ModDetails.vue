@@ -174,7 +174,7 @@
 <script>
 import { mapState } from 'vuex';
 import gql from 'graphql-tag';
-import { markdownAsElement, isCompatibleFast, COMPATIBILITY_LEVEL } from '@/utils';
+import { markdownAsHtmlText, isCompatibleFast, COMPATIBILITY_LEVEL } from '@/utils';
 import ModDetailsInfo from './ModDetailsInfo';
 
 export default {
@@ -196,16 +196,8 @@ export default {
     isFavorite() {
       return this.$store.state.favoriteModIds.includes(this.expandedModId);
     },
-    descriptionAsElement() {
-      return markdownAsElement(this.mod.full_description || '');
-    },
     modDescription() {
-      const el = this.descriptionAsElement;
-      const links = el.getElementsByTagName('a');
-      for (let i = 0; i < links.length; i += 1) {
-        links[i].target = '_blank';
-      }
-      return el.innerHTML;
+      return markdownAsHtmlText(this.mod.full_description || '');
     },
     manifestItem() {
       return this.$store.state.manifestItems ? this.$store.state.manifestItems.find((item) => item.id === this.mod.mod_reference) : undefined;

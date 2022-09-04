@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { markdownAsElement } from '@/utils';
+import { markdownAsHtmlText } from '@/utils';
 
 export default {
   props: {
@@ -43,16 +43,8 @@ export default {
     };
   },
   methods: {
-    changelogElement(release) {
-      return markdownAsElement(release.changelog);
-    },
     changelogHTML(release) {
-      const el = this.changelogElement(release);
-      const links = el.getElementsByTagName('a');
-      for (let i = 0; i < links.length; i += 1) {
-        links[i].target = '_blank';
-      }
-      return el.innerHTML;
+      return markdownAsHtmlText(release.changelog);
     },
   },
 };

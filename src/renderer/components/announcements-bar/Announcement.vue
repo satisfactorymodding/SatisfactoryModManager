@@ -86,16 +86,8 @@ export default {
           return 'white';
       }
     },
-    announcementMessageElement() {
-      return markdownAsElement(this.announcement.message);
-    },
     announcementMessageHTML() {
-      const el = this.announcementMessageElement;
-      const links = el.getElementsByTagName('a');
-      for (let i = 0; i < links.length; i += 1) {
-        links[i].target = '_blank';
-        links[i].style += ';color: unset;';
-      }
+      const el = markdownAsElement(this.announcement.message);
       // get content from inside paragraph
       return el.children[1].children[0].innerHTML;
     },

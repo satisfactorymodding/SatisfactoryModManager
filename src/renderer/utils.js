@@ -19,7 +19,16 @@ export function markdownAsElement(markdown) {
   });
   const el = document.createElement('html');
   el.innerHTML = html;
+  const links = el.getElementsByTagName('a');
+  for (let i = 0; i < links.length; i += 1) {
+    links[i].target = '_blank';
+    links[i].style += ';color: unset;';
+  }
   return el;
+}
+
+export function markdownAsHtmlText(markdown) {
+  return markdownAsElement(markdown).innerHTML;
 }
 
 export function ignoreUpdate(item, version) {
