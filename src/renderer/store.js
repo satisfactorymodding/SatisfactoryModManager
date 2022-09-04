@@ -695,4 +695,16 @@ export default new Vuex.Store({
       }
     },
   },
+  getters: {
+    branch({ selectedInstall }) {
+      if (!selectedInstall) return null;
+      if (selectedInstall.branch === 'EA') {
+        return 'EA';
+      }
+      return 'EXP';
+    },
+    gameVersion({ selectedInstall }) {
+      return selectedInstall?.version;
+    },
+  },
 });

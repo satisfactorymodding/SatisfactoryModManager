@@ -81,7 +81,7 @@
             </v-btn>
           </v-col>
           <v-col
-            v-if="isCompatible || isPossiblyCompatible"
+            v-if="versionCompatibility === COMPATIBILITY_LEVEL.COMPATIBLE || versionCompatibility === COMPATIBILITY_LEVEL.POSSIBLY_COMPATIBLE"
             style="flex-grow: 0; padding-bottom: 0"
             class="d-flex"
           >
@@ -174,7 +174,9 @@
 <script>
 import { mapState } from 'vuex';
 import gql from 'graphql-tag';
-import { markdownAsHtmlText, isCompatibleFast, COMPATIBILITY_LEVEL } from '@/utils';
+import {
+  markdownAsHtmlText, isCompatibleFast, COMPATIBILITY_LEVEL, smrCompatibilityToCompatibilityLevel,
+} from '@/utils';
 import ModDetailsInfo from './ModDetailsInfo';
 
 export default {
@@ -184,6 +186,7 @@ export default {
   data() {
     return {
       enlargedImage: '',
+      COMPATIBILITY_LEVEL,
     };
   },
   computed: {
@@ -224,23 +227,24 @@ export default {
         }
       },
     },
+    reportedCompatibility() {
+      if (!this.branch) return null;
+      if (!this.mod.compatibility) return null;
+      if (!this.mod.compatibility[this.branch]) return null;
+      return smrCompatibilityToCompatibilityLevel(this.mod.compatibility[this.branch].state);
+    },
+    compatibility() {
+      return this.reportedCompatibility ?? this.versionCompatibility;
+    },
   },
   asyncComputed: {
-    isCompatible: {
+    versionCompatibility: {
       async get() {
-        if (!this.$store.state.selectedInstall) return false;
-        if (this.mod?.hidden && !this.isDependency) return false;
-        return (await isCompatibleFast(this.mod, this.$store.state.selectedInstall.version)) === COMPATIBILITY_LEVEL.COMPATIBLE;
+        if (!this.$store.state.selectedInstall) return COMPATIBILITY_LEVEL.INCOMPATIBLE;
+        if (this.mod.hidden && !this.isDependency) return COMPATIBILITY_LEVEL.INCOMPATIBLE;
+        return isCompatibleFast(this.mod, this.$store.state.selectedInstall.version);
       },
-      default: false,
-    },
-    isPossiblyCompatible: {
-      async get() {
-        if (!this.$store.state.selectedInstall) return false;
-        if (this.mod?.hidden && !this.isDependency) return false;
-        return (await isCompatibleFast(this.mod, this.$store.state.selectedInstall.version)) === COMPATIBILITY_LEVEL.POSSIBLY_COMPATIBLE;
-      },
-      default: false,
+      default: COMPATIBILITY_LEVEL.COMPATIBLE,
     },
   },
   apollo: {
@@ -265,6 +269,16 @@ export default {
                 avatar
               }
               role
+            },
+            compatibility {
+              EA {
+                state,
+                note,
+              },
+              EXP {
+                state,
+                note,
+              },
             },
             versions(filter: {limit: 100}) {
               id,

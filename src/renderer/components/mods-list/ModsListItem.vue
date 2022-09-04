@@ -26,17 +26,20 @@
         @click="expandClicked"
       >
         <v-tooltip
+          ref="tooltip"
+          v-model="tooltipShow"
           top
           color="background"
+          :close-delay="100"
           :disabled="!errorTooltip && !disabled"
+          content-class="mod-compatibility-tooltip"
         >
           <template #activator="{ on, attrs }">
             <v-list-item-title
               :class="{
-                'text--text': compatibility === COMPATIBILITY_LEVEL.COMPATIBLE && (reportedCompatibility === COMPATIBILITY_LEVEL.COMPATIBLE || reportedCompatibility === null),
-                'warning--text': (compatibility === COMPATIBILITY_LEVEL.POSSIBLY_COMPATIBLE && reportedCompatibility !== COMPATIBILITY_LEVEL.INCOMPATIBLE)
-                  || (reportedCompatibility === COMPATIBILITY_LEVEL.POSSIBLY_COMPATIBLE && compatibility !== COMPATIBILITY_LEVEL.INCOMPATIBLE),
-                'error--text': compatibility === COMPATIBILITY_LEVEL.INCOMPATIBLE || reportedCompatibility === COMPATIBILITY_LEVEL.INCOMPATIBLE,
+                'text--text': compatibility === COMPATIBILITY_LEVEL.COMPATIBLE,
+                'warning--text': compatibility === COMPATIBILITY_LEVEL.POSSIBLY_COMPATIBLE,
+                'error--text': compatibility === COMPATIBILITY_LEVEL.INCOMPATIBLE,
               }"
               style="font-weight: 300"
               v-bind="attrs"
@@ -45,9 +48,13 @@
               {{ mod.name }}
             </v-list-item-title>
           </template>
-          <div style="white-space: pre-line;">
+          <div
+            @mouseenter="keepTooltipOpen = true; $refs.tooltip.clearDelay()"
+            @mouseleave="keepTooltipOpen = false; $refs.tooltip.runDelay('close')"
+          >
             <span v-if="errorTooltip && isOffline">You are currently offline.<br>A connection to ficsit.app is required to view details and install new mods.</span>
-            <span v-else-if="errorTooltip">{{ errorTooltip }}<br></span>
+            <!-- eslint-disable-next-line vue/no-v-html -->
+            <span v-else-if="errorTooltip"><span v-html="errorTooltip" /></span>
             <span v-if="disabled">This mod is disabled. Press the pause icon to enable it.<br></span>
           </div>
         </v-tooltip>
@@ -126,12 +133,12 @@
         </v-icon>
         <ModActionButton
           v-else
-          :disabled="(compatibility === COMPATIBILITY_LEVEL.INCOMPATIBLE && !isInstalled) || isDependency || !modsEnabled || isGameRunning || inProgress.length > 0"
+          :disabled="(versionCompatibility === COMPATIBILITY_LEVEL.INCOMPATIBLE && !isInstalled) || isDependency || !modsEnabled || isGameRunning || inProgress.length > 0"
           background-normal-class=""
           :background-hover-class="isInstalled || isEnabled ? 'red' : 'green'"
-          :icon-normal-color="compatibility === COMPATIBILITY_LEVEL.INCOMPATIBLE ? 'error' : (isInstalled || isEnabled ? 'green' : 'text')"
+          :icon-normal-color="versionCompatibility === COMPATIBILITY_LEVEL.INCOMPATIBLE ? 'error' : (isInstalled || isEnabled ? 'green' : 'text')"
           icon-hover-color="white"
-          :normal-icon="compatibility === COMPATIBILITY_LEVEL.INCOMPATIBLE ? 'mdi-alert' : (isInstalled || isEnabled ? 'mdi-check-circle' : 'mdi-download')"
+          :normal-icon="versionCompatibility === COMPATIBILITY_LEVEL.INCOMPATIBLE ? 'mdi-alert' : (isInstalled || isEnabled ? 'mdi-check-circle' : 'mdi-download')"
           :hover-icon="isInstalled ? 'mdi-delete' : 'mdi-download'"
           @click="isInstalled ? uninstall() : install()"
         >
@@ -140,7 +147,7 @@
             <span v-else-if="!modsEnabled">Enable mods to be able to make changes</span>
             <span v-else-if="isGameRunning">Cannot install mods while game is running</span>
             <span v-else-if="inProgress.length > 0">Another operation is in progress</span>
-            <span v-else-if="compatibility === COMPATIBILITY_LEVEL.INCOMPATIBLE">This mod is incompatible with your game version</span>
+            <span v-else-if="versionCompatibility === COMPATIBILITY_LEVEL.INCOMPATIBLE">This mod is incompatible with your game version</span>
           </template>
         </ModActionButton>
       </v-list-item-action>
@@ -180,9 +187,11 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import gql from 'graphql-tag';
-import { lastElement, isCompatibleFast, COMPATIBILITY_LEVEL } from '@/utils';
+import {
+  lastElement, isCompatibleFast, COMPATIBILITY_LEVEL, smrCompatibilityToCompatibilityLevel, markdownAsHtmlText,
+} from '@/utils';
 import ModActionButton from './ModActionButton';
 
 export default {
@@ -202,6 +211,8 @@ export default {
   data() {
     return {
       COMPATIBILITY_LEVEL,
+      tooltipShow: false,
+      keepTooltipOpen: false,
     };
   },
   computed: {
@@ -211,6 +222,9 @@ export default {
       'inProgress',
       'modsEnabled',
       'isGameRunning',
+    ]),
+    ...mapGetters([
+      'branch',
     ]),
     isFavorite() {
       return this.favoriteModIds.includes(this.mod.mod_reference);
@@ -248,31 +262,18 @@ export default {
     disabled() {
       return !this.isEnabled && this.isInstalled;
     },
-    branch() {
-      if (!this.$store.state.selectedInstall) return null;
-      if (this.$store.state.selectedInstall.branch === 'EA') {
-        return 'EA';
-      }
-      return 'EXP';
-    },
     reportedCompatibility() {
       if (!this.branch) return null;
       if (!this.mod.compatibility) return null;
       if (!this.mod.compatibility[this.branch]) return null;
-      switch (this.mod.compatibility[this.branch].state) {
-        case 'Works':
-          return COMPATIBILITY_LEVEL.COMPATIBLE;
-        case 'Damaged':
-          return COMPATIBILITY_LEVEL.POSSIBLY_COMPATIBLE;
-        case 'Broken':
-          return COMPATIBILITY_LEVEL.INCOMPATIBLE;
-        default:
-          return null;
-      }
+      return smrCompatibilityToCompatibilityLevel(this.mod.compatibility[this.branch].state);
+    },
+    compatibility() {
+      return this.reportedCompatibility ?? this.versionCompatibility;
     },
   },
   asyncComputed: {
-    compatibility: {
+    versionCompatibility: {
       async get() {
         if (!this.$store.state.selectedInstall) return COMPATIBILITY_LEVEL.INCOMPATIBLE;
         if (this.mod.hidden && !this.isDependency) return COMPATIBILITY_LEVEL.INCOMPATIBLE;
@@ -285,14 +286,20 @@ export default {
         if (this.branch && this.reportedCompatibility) {
           switch (this.reportedCompatibility) {
             case COMPATIBILITY_LEVEL.INCOMPATIBLE:
-              return `This mod has been reported as broken on this game version:\n${this.mod.compatibility[this.branch].note}`;
+              if (this.mod.compatibility[this.branch].note) {
+                return `This mod has been reported as Broken on this game version:<br>${markdownAsHtmlText(this.mod.compatibility[this.branch].note)}`;
+              }
+              return 'This mod has been reported as Broken on this game version.';
             case COMPATIBILITY_LEVEL.POSSIBLY_COMPATIBLE:
-              return `This mod has been reported as partially broken on this game version:\n${this.mod.compatibility[this.branch].note}`;
+              if (this.mod.compatibility[this.branch].note) {
+                return `This mod has been reported as Damaged on this game version:<br>${markdownAsHtmlText(this.mod.compatibility[this.branch].note)}`;
+              }
+              return 'This mod has been reported as Damaged on this game version.';
             default:
               break;
           }
         }
-        switch (this.compatibility) {
+        switch (this.versionCompatibility) {
           case COMPATIBILITY_LEVEL.COMPATIBLE:
             return null;
           case COMPATIBILITY_LEVEL.POSSIBLY_COMPATIBLE:
@@ -368,6 +375,12 @@ export default {
 .mod-list-progress-bar {
   background-color: var(--v-backgroundModsList-darken1) !important;
   border-color: var(--v-backgroundModsList-darken1) !important;
+}
+.mod-compatibility-tooltip {
+  pointer-events: auto !important;
+}
+.mod-compatibility-tooltip p {
+  margin-bottom: 0px !important;
 }
 </style>
 

@@ -32,14 +32,14 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import Fuse from 'fuse.js';
 import debounce from 'debounce';
 import gql from 'graphql-tag';
 import { getCachedModVersions, getCachedMod, getOfflineMods } from 'satisfactory-mod-manager-api';
 import { compare } from 'semver';
 import {
-  lastElement, setIntervalImmediately, isCompatibleFast, COMPATIBILITY_LEVEL,
+  lastElement, setIntervalImmediately, getModCompatibilityState, COMPATIBILITY_LEVEL,
 } from '@/utils';
 import { getSetting, saveSetting } from '~/settings';
 import ModsListItem from './ModsListItem';
@@ -168,6 +168,10 @@ export default {
       'inProgress',
       'installedMods',
       'selectedInstall',
+    ]),
+    ...mapGetters([
+      'branch',
+      'gameVersion',
     ]),
     search() {
       return this.filters.search;
@@ -404,8 +408,12 @@ export default {
         this.compatibleMods = [];
         return;
       }
-      const { version } = this.$store.state.selectedInstall;
-      this.compatibleMods = (await Promise.all(this.allMods.map(async (mod) => ((await isCompatibleFast(mod, version)) === COMPATIBILITY_LEVEL.COMPATIBLE ? mod : null)))).filter((mod) => !!mod);
+      this.compatibleMods = (await Promise.all(this.allMods
+        .map(async (mod) => {
+          const state = await getModCompatibilityState(mod.mod_reference, this.branch, this.gameVersion);
+          return state.compatible !== COMPATIBILITY_LEVEL.INCOMPATIBLE ? mod : null;
+        })))
+        .filter((mod) => !!mod);
       this.availableFilters.forEach(async (filter) => { filter.mods = filter.filter(this.allMods, this).length; });
     },
     async fetchMods() {

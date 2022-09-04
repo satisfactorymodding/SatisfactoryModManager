@@ -167,3 +167,75 @@ export async function isCompatibleFast(mod, gameVersion) {
   return COMPATIBILITY_LEVEL.INCOMPATIBLE;
 }
 /* eslint-enable camelcase */
+
+const compatibilityValue = {
+  [COMPATIBILITY_LEVEL.INCOMPATIBLE]: 0,
+  [COMPATIBILITY_LEVEL.POSSIBLY_COMPATIBLE]: 1,
+  [COMPATIBILITY_LEVEL.COMPATIBLE]: 2,
+};
+
+export function minCompatibility(compatibilityA, compatibilityB) {
+  if (!compatibilityA) { return compatibilityB; }
+  if (!compatibilityB) { return compatibilityA; }
+  if (compatibilityValue[compatibilityA] < compatibilityValue[compatibilityB]) {
+    return compatibilityA;
+  }
+  return compatibilityB;
+}
+
+export function smrCompatibilityToCompatibilityLevel(smrCompatibility) {
+  switch (smrCompatibility) {
+    case 'Works':
+      return COMPATIBILITY_LEVEL.COMPATIBLE;
+    case 'Damaged':
+      return COMPATIBILITY_LEVEL.POSSIBLY_COMPATIBLE;
+    case 'Broken':
+      return COMPATIBILITY_LEVEL.INCOMPATIBLE;
+    default:
+      return null;
+  }
+}
+
+export async function getModCompatibilityState(modReference, branch, gameVersion) {
+  if (modReference === 'SML' || modReference === 'bootstrapper') {
+    return { modReference, name: modReference, compatible: true };
+  }
+  const { mod } = (await apolloClient.query({
+    query: gql`            
+      query GetModCompatibilityState($modReference: ModReference!) {
+        mod: getModByReference(modReference: $modReference) {
+          id,
+          mod_reference,
+          name,
+          versions(filter: { limit: 100 }) {
+            id,
+            sml_version,
+          }
+          compatibility {
+            EA {
+              state
+            }
+            EXP {
+              state
+            }
+          }
+        }
+      }
+    `,
+    variables: {
+      modReference,
+    },
+    fetchPolicy: 'no-cache',
+  })).data;
+  if (!mod) {
+    return { modReference, name: modReference, compatible: false };
+  }
+  let reportedCompatibility = null;
+  if (branch && mod.compatibility && mod.compatibility[branch]) {
+    reportedCompatibility = smrCompatibilityToCompatibilityLevel(mod.compatibility[branch].state);
+  }
+  const versionCompatibility = await isCompatibleFast(mod, gameVersion);
+  return {
+    modReference, name: mod.name, compatible: reportedCompatibility ?? versionCompatibility, reported: !!reportedCompatibility,
+  };
+}

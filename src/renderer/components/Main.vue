@@ -35,7 +35,7 @@
           <v-tooltip
             top
             color="background"
-            :disabled="incompatibleInstalledCount === 0 && possiblyCompatibleInstalledCount === 0"
+            :disabled="versionIncompatibleCount === 0 && versionPossiblyCompatibleCount === 0 && reportedIncompatibleCount === 0 && reportedPossiblyCompatibleCount === 0"
           >
             <template #activator="{ on, attrs }">
               <v-btn
@@ -55,24 +55,30 @@
                 {{ launchButtonText }}
               </v-btn>
             </template>
-            <span
-              v-if="incompatibleInstalledCount !== 0 && possiblyCompatibleInstalledCount !== 0"
+            <div
+              v-if="versionIncompatibleCount > 0 || versionPossiblyCompatibleCount > 0 || reportedIncompatibleCount > 0 || reportedPossiblyCompatibleCount > 0"
             >
-              You have {{ possiblyCompatibleInstalledCount }} mod{{ possiblyCompatibleInstalledCount > 1 ? 's' : '' }}
-              that {{ possiblyCompatibleInstalledCount > 1 ? 'are' : 'is' }} likely incompatible and
-              {{ incompatibleInstalledCount }} mod{{ incompatibleInstalledCount > 1 ? 's' : '' }} that are incompatible with your game.
-              These will either not load or crash your game.
+              You have:
+              <ul>
+                <li v-if="versionIncompatibleCount > 0">
+                  {{ versionIncompatibleCount }} incompatible mod{{ versionIncompatibleCount > 1 ? 's' : '' }} which will either not load or crash your game
+                </li>
+                <li v-if="reportedIncompatibleCount > 0">
+                  {{ reportedIncompatibleCount }} mod{{ reportedIncompatibleCount > 1 ? 's' : '' }} that {{ reportedIncompatibleCount > 1 ? 'are' : 'is' }} reported as Broken on this game version.
+                  Read the mod{{ reportedIncompatibleCount > 1 ? 's\'' : '\'s' }} description or compatibility notes for more information.
+                </li>
+                <li v-if="versionPossiblyCompatibleCount > 0">
+                  {{ versionPossiblyCompatibleCount }} mod{{ versionPossiblyCompatibleCount > 1 ? 's' : '' }}
+                  that {{ versionPossiblyCompatibleCount > 1 ? 'are' : 'is' }} likely incompatible with your game
+                </li>
+                <li v-if="reportedPossiblyCompatibleCount > 0">
+                  {{ reportedPossiblyCompatibleCount }} mod{{ reportedPossiblyCompatibleCount > 1 ? 's' : '' }}
+                  that {{ reportedPossiblyCompatibleCount > 1 ? 'are' : 'is' }} reported as Damaged on this game version.
+                  Read the mod{{ reportedPossiblyCompatibleCount > 1 ? 's\'' : '\'s' }} description or compatibility notes for more information.
+                </li>
+              </ul>
               Are you sure you want to launch?
-            </span>
-            <span v-else-if="incompatibleInstalledCount !== 0">
-              You have {{ incompatibleInstalledCount }} incompatible mod{{ incompatibleInstalledCount > 1 ? 's' : '' }} which will either not load or crash your game.
-              Are you sure you want to launch?
-            </span>
-            <span v-else>
-              You have {{ possiblyCompatibleInstalledCount }} mod{{ possiblyCompatibleInstalledCount > 1 ? 's' : '' }}
-              that {{ possiblyCompatibleInstalledCount > 1 ? 'are' : 'is' }} likely incompatible and can crash your game.
-              Are you sure you want to launch?
-            </span>
+            </div>
           </v-tooltip>
         </template>
         <template v-else-if="launchButton">
@@ -336,14 +342,14 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import { exec } from 'child_process';
 import { getCacheFolder } from 'platform-folders';
 import fs from 'fs';
 import path from 'path';
 import gql from 'graphql-tag';
 import {
-  lastElement, bytesToAppropriate, isCompatibleFast, COMPATIBILITY_LEVEL,
+  lastElement, bytesToAppropriate, getModCompatibilityState, COMPATIBILITY_LEVEL,
 } from '@/utils';
 import { getSetting } from '~/settings';
 import TitleBar from './TitleBar';
@@ -398,54 +404,40 @@ export default {
     },
     modStates: {
       async get() {
-        return Promise.all(Object.keys(this.installedMods).map(async (modReference) => {
-          if (modReference === 'SML' || modReference === 'bootstrapper') {
-            return { modReference, name: modReference, compatible: true };
-          }
-          const { mod } = (await this.$apollo.query({
-            query: gql`            
-              query checkOutdatedMod($modReference: ModReference!) {
-                mod: getModByReference(modReference: $modReference) {
-                  id,
-                  mod_reference,
-                  name,
-                  versions(filter: { limit: 100 }) {
-                    id,
-                    sml_version,
-                  }
-                }
-              }
-            `,
-            variables: {
-              modReference,
-            },
-          })).data;
-          if (!mod) {
-            return { modReference, name: modReference, compatible: false };
-          }
-          return { modReference, name: mod.name, compatible: await isCompatibleFast(mod, this.$store.state.selectedInstall.version) };
-        }));
+        return Promise.all(Object.keys(this.installedMods).map((modReference) => getModCompatibilityState(modReference, this.branch, this.gameVersion)));
       },
       default: [],
     },
-    possiblyCompatibleInstalledCount: {
+    versionPossiblyCompatibleCount: {
       async get() {
-        return (await this.modStates).filter(({ compatible }) => compatible === COMPATIBILITY_LEVEL.POSSIBLY_COMPATIBLE).length;
+        return (await this.modStates).filter(({ compatible, reported }) => !reported && compatible === COMPATIBILITY_LEVEL.POSSIBLY_COMPATIBLE).length;
       },
       default: 0,
     },
-    incompatibleInstalledCount: {
+    versionIncompatibleCount: {
       async get() {
-        return (await this.modStates).filter(({ compatible }) => compatible === COMPATIBILITY_LEVEL.INCOMPATIBLE).length;
+        return (await this.modStates).filter(({ compatible, reported }) => !reported && compatible === COMPATIBILITY_LEVEL.INCOMPATIBLE).length;
+      },
+      default: 0,
+    },
+    reportedPossiblyCompatibleCount: {
+      async get() {
+        return (await this.modStates).filter(({ compatible, reported }) => reported && compatible === COMPATIBILITY_LEVEL.POSSIBLY_COMPATIBLE).length;
+      },
+      default: 0,
+    },
+    reportedIncompatibleCount: {
+      async get() {
+        return (await this.modStates).filter(({ compatible, reported }) => reported && compatible === COMPATIBILITY_LEVEL.INCOMPATIBLE).length;
       },
       default: 0,
     },
     buttonColor: {
       async get() {
-        if (this.incompatibleInstalledCount > 0) {
+        if (this.versionIncompatibleCount > 0 || this.reportedIncompatibleCount > 0) {
           return 'error';
         }
-        if (this.possiblyCompatibleInstalledCount > 0) {
+        if (this.versionPossiblyCompatibleCount > 0 || this.reportedPossiblyCompatibleCount > 0) {
           return 'warning';
         }
         return 'primary';
@@ -468,6 +460,10 @@ export default {
         'launchCat',
       ],
     ),
+    ...mapGetters([
+      'branch',
+      'gameVersion',
+    ]),
     errorDialog: {
       get() {
         return !!this.error;

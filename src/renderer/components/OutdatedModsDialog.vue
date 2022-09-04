@@ -7,7 +7,7 @@
   >
     <v-card color="loadingBackground !important">
       <v-card-title class="loading-text-main">
-        Outdated installed mods
+        Broken installed mods
       </v-card-title>
 
       <v-card-text v-if="!allLeftover && updateReminder">
@@ -15,7 +15,7 @@
       </v-card-text>
 
       <v-card-text v-else-if="!allLeftover">
-        Some of your mods are outdated. Do you want to disable them?
+        Some of your mods are broken. Do you want to disable them?
         <ul>
           <li
             v-for="mod in outdatedInstalledMods"
@@ -44,7 +44,7 @@
           text
           @click="disableOutdatedMods(true)"
         >
-          <span v-if="!updateReminder">Disable outdated mods &amp; update</span>
+          <span v-if="!updateReminder">Disable broken mods &amp; update</span>
           <span v-else>Update mods</span>
         </v-btn>
         <v-btn
@@ -60,9 +60,8 @@
 </template>
 
 <script>
-import gql from 'graphql-tag';
-import { mapState } from 'vuex';
-import { isCompatibleFast, COMPATIBILITY_LEVEL } from '@/utils';
+import { mapGetters, mapState } from 'vuex';
+import { getModCompatibilityState, COMPATIBILITY_LEVEL } from '@/utils';
 
 export default {
   data() {
@@ -83,6 +82,10 @@ export default {
         'selectedProfile',
       ],
     ),
+    ...mapGetters([
+      'branch',
+      'gameVersion',
+    ]),
     allLeftover() {
       return this.outdatedInstalledMods.length > 0 && this.outdatedInstalledMods.every((mod) => this.previousOutatedInstalledMods.some((prevMod) => prevMod.modReference === mod.modReference));
     },
@@ -101,39 +104,13 @@ export default {
   methods: {
     async checkOutdated() {
       if (this.modsEnabled) {
-        const modStates = await Promise.all(Object.keys(this.installedMods).map(async (modReference) => {
-          if (modReference === 'SML' || modReference === 'bootstrapper') {
-            return { modReference, name: modReference, compatible: true };
-          }
-          const { mod } = (await this.$apollo.query({
-            query: gql`            
-              query checkOutdatedMod($modReference: ModReference!) {
-                mod: getModByReference(modReference: $modReference) {
-                  id,
-                  mod_reference,
-                  name,
-                  versions(filter: { limit: 100 }) {
-                    id,
-                    sml_version,
-                  }
-                }
-              }
-            `,
-            variables: {
-              modReference,
-            },
-          })).data;
-          if (!mod) {
-            return { modReference, name: modReference, compatible: false };
-          }
-          return { modReference, name: mod.name, compatible: await isCompatibleFast(mod, this.$store.state.selectedInstall.version) };
-        }));
-        this.previousOutatedInstalledMods = this.outdatedInstalledMods;
+        const modStates = await Promise.all(Object.keys(this.installedMods).map((modReference) => getModCompatibilityState(modReference, this.branch, this.gameVersion)));
         this.outdatedInstalledMods = modStates.filter((modState) => modState.compatible === COMPATIBILITY_LEVEL.INCOMPATIBLE);
         this.dialogVisible = this.updateReminder || this.outdatedInstalledMods.length > 0;
       }
     },
     async disableOutdatedMods(update = false) {
+      this.previousOutatedInstalledMods = this.outdatedInstalledMods;
       this.inProgress = true;
       this.dialogVisible = false;
 
@@ -142,7 +119,7 @@ export default {
         progresses: [],
       };
       const placeholderProgreess = {
-        id: '', progress: -1, message: `Disabling outdated mods${update ? ', updating all' : ''}`, fast: false,
+        id: '', progress: -1, message: `Disabling broken mods${update ? ', updating all' : ''}`, fast: false,
       };
       if (this.outdatedInstalledMods.length === 0) {
         placeholderProgreess.message = 'Updating mods';

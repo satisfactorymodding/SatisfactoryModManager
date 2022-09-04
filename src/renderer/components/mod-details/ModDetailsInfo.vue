@@ -144,6 +144,43 @@
           >{{ multiplayerSupport }}</span><br>-->
           Total downloads: <span class="header">{{ mod.downloads.toLocaleString() }}</span><br>
           Views: <span class="header">{{ mod.views.toLocaleString() }}</span><br>
+          Compatibility: <span
+            v-if="mod.compatibility"
+            class="header"
+          >
+            <v-tooltip
+              top
+              color="background"
+            >
+              <template #activator="{on, attrs}">
+                <v-icon
+                  :color="eaCompatibilityColor"
+                  v-bind="attrs"
+                  v-on="on"
+                >mdi-rocket-launch</v-icon>
+              </template>
+              <!-- eslint-disable-next-line vue/no-v-html -->
+              Early Access: {{ mod.compatibility.EA.state }} <span v-if="mod.compatibility.EA.note"> - <span v-html="markdownWithLinks(mod.compatibility.EA.note)" /></span>
+            </v-tooltip>
+            <v-tooltip
+              top
+              color="background"
+            >
+              <template #activator="{on, attrs}">
+                <v-icon
+                  :color="expCompatibilityColor"
+                  v-bind="attrs"
+                  v-on="on"
+                >mdi-test-tube</v-icon>
+              </template>
+              <!-- eslint-disable-next-line vue/no-v-html -->
+              Experimental: {{ mod.compatibility.EXP.state }} <span v-if="mod.compatibility.EXP.note"> - <span v-html="markdownWithLinks(mod.compatibility.EXP.note)" /></span>
+            </v-tooltip>
+          </span>
+          <span
+            v-else
+            class="header"
+          >Unknown</span><br>
           <!--Tags:<br>
           <span class="header">{{ mod.tags ? mod.tags.map((tag) => `#${tag}`).join(' ') : 'N/A' }}</span><br>-->
         </span>
@@ -181,7 +218,7 @@
 
 <script>
 import { mapState } from 'vuex';
-import { validAndEq, bytesToAppropriate } from '@/utils';
+import { validAndEq, bytesToAppropriate, markdownAsHtmlText } from '@/utils';
 
 export default {
   props: {
@@ -216,6 +253,32 @@ export default {
           return 'red';
       }
     },
+    eaCompatibilityColor() {
+      if (!this.mod.compatibility) return null;
+      switch (this.mod.compatibility.EA.state) {
+        case 'Broken':
+          return 'red';
+        case 'Damaged':
+          return 'yellow';
+        case 'Works':
+          return 'green';
+        default:
+          return null;
+      }
+    },
+    expCompatibilityColor() {
+      if (!this.mod.compatibility) return null;
+      switch (this.mod.compatibility.EXP.state) {
+        case 'Broken':
+          return 'red';
+        case 'Damaged':
+          return 'yellow';
+        case 'Works':
+          return 'green';
+        default:
+          return null;
+      }
+    },
     manifestVersion() {
       return this.$store.state.manifestItems.find((item) => item.id === this.mod.mod_reference)?.version;
     },
@@ -227,6 +290,7 @@ export default {
     searchByAuthor() {
       this.$root.$emit('updateSearch', `author:"${this.mod.authors[0].user.username}"`);
     },
+    markdownAsHtmlText,
     validAndEq,
     bytesToAppropriate,
   },
