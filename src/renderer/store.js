@@ -549,7 +549,7 @@ export default new Vuex.Store({
               state.inProgress.remove(appLoadProgress);
               return;
             }
-            commit('setInstalls', { installs });
+            commit('setInstalls', { installs: installs.filter((install) => install.branch !== 'DedicatedServer') });
             const installValidateProgress = { id: 'validatingInstall', progress: -1, message: 'Validating mod install' };
             appLoadProgress.progresses.push(installValidateProgress);
             const savedLocation = getSetting('selectedInstall');
