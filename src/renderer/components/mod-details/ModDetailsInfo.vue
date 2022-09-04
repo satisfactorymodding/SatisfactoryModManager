@@ -24,7 +24,7 @@
             class="primary--text"
             style="font-weight: 600"
             @click="searchByAuthor"
-          >{{ mod.authors[0].user.username }}</span>
+          >{{ mod.authors.filter((author) => author.role === 'creator')[0].user.username }}</span>
         </span>
       </v-row>
       <v-row
@@ -288,7 +288,7 @@ export default {
   },
   methods: {
     searchByAuthor() {
-      this.$root.$emit('updateSearch', `author:"${this.mod.authors[0].user.username}"`);
+      this.$root.$emit('updateSearch', `author:"${this.mod.authors.filter((author) => author.role === 'creator').user.username}"`);
     },
     markdownAsHtmlText,
     validAndEq,
