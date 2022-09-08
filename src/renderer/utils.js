@@ -225,7 +225,6 @@ export async function getModCompatibilityState(modReference, branch, gameVersion
     variables: {
       modReference,
     },
-    fetchPolicy: 'no-cache',
   })).data;
   if (!mod) {
     return { modReference, name: modReference, compatible: false };
