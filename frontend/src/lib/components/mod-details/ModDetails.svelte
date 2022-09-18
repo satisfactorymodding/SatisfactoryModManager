@@ -14,7 +14,8 @@
   import { search } from '$lib/modFiltersStore';
   import MdiIcon from '$lib/components/MDIIcon.svelte';
   import { InstallModVersion } from '$wailsjs/go/bindings/FicsitCLI';
-import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
+  import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
+  import Dialog from '@smui/dialog';
 
   export let id: string | null = null;
 
@@ -54,6 +55,38 @@ import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
 
   function close() {
     dispatch('close');
+  }
+
+  let imageViewSrc: string | null = null;
+
+  let imageViewDialog = false;
+
+  $: if(!imageViewDialog) {
+    imageViewSrc = null;
+  }
+
+  function handleElementClick(element: HTMLElement) {
+    if(element instanceof HTMLAnchorElement) {
+      BrowserOpenURL(element.href);
+      return true;
+    }
+    if(element instanceof HTMLImageElement) {
+      imageViewSrc = element.src;
+      imageViewDialog = true;
+      return true;
+    }
+    return false;
+  }
+
+  function handleDescriptionClick(event: MouseEvent) {
+    let element: HTMLElement | null = event.target as HTMLElement;
+    while(element) {
+      if(handleElementClick(element)) {
+        event.preventDefault();
+        return;
+      }
+      element = element.parentElement;
+    }
   }
 </script>
 
@@ -146,16 +179,26 @@ import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
       </Button>
     </div>
   </Drawer>  
-  <div class="markdown-content break-words flex-1 px-3 overflow-y-scroll">
+  <div class="markdown-content break-words overflow-wrap-anywhere flex-1 px-3 overflow-y-scroll overflow-x-hidden w-0">
     {#if descriptionRendered}
-      <p>{@html descriptionRendered}</p>
+      <p on:click={handleDescriptionClick}>{@html descriptionRendered}</p>
     {:else}
       <p>Loading...</p>
     {/if}
   </div>
 </div>
 
+<Dialog
+  bind:open={imageViewDialog}
+  surface$style="max-height: calc(100vh - 128px); max-width: calc(100vw - 128px);"
+>
+  <img src={imageViewSrc} alt="Dialog" />
+</Dialog>
+
 <style>
+  .overflow-wrap-anywhere {
+    overflow-wrap: anywhere;
+  }
   .mods-details {
     background-color: #2B2B2B;
   }
