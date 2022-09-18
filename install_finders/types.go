@@ -1,4 +1,4 @@
-package types
+package install_finders
 
 type Installation struct {
 	Path       string `json:"path"`
@@ -6,6 +6,19 @@ type Installation struct {
 	Branch     string `json:"branch"`
 	Launcher   string `json:"launcher"`
 	LaunchPath string `json:"launchPath"`
+}
+
+type InstallFindError struct {
+	Inner error  `json:"cause"`
+	Path  string `json:"path"`
+}
+
+func (e InstallFindError) Error() string {
+	return e.Path + ": " + e.Inner.Error()
+}
+
+func (e InstallFindError) Causes() error {
+	return e.Inner
 }
 
 type GameVersionFile struct {

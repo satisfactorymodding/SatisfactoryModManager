@@ -11,16 +11,14 @@ export namespace bindings {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.item = source['item'];
-	        this.currentVersion = source['currentVersion'];
-	        this.newVersion = source['newVersion'];
+	        this.item = source["item"];
+	        this.currentVersion = source["currentVersion"];
+	        this.newVersion = source["newVersion"];
 	    }
 	}
 	export class InstallationInfo {
-	    // Go type: cli.Installation
-	    installation?: any;
-	    // Go type: types.Installation
-	    info?: any;
+	    installation?: cli.Installation;
+	    info?: install_finders.Installation;
 	
 	    static createFrom(source: any = {}) {
 	        return new InstallationInfo(source);
@@ -28,17 +26,17 @@ export namespace bindings {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.installation = this.convertValues(source['installation'], null);
-	        this.info = this.convertValues(source['info'], null);
+	        this.installation = this.convertValues(source["installation"], cli.Installation);
+	        this.info = this.convertValues(source["info"], install_finders.Installation);
 	    }
 	
-	  convertValues(a: any, classs: any, asMap = false): any {
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
 		    if (!a) {
 		        return a;
 		    }
 		    if (a.slice) {
 		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ('object' === typeof a) {
+		    } else if ("object" === typeof a) {
 		        if (asMap) {
 		            for (const key of Object.keys(a)) {
 		                a[key] = new classs(a[key]);
@@ -48,7 +46,7 @@ export namespace bindings {
 		        return new classs(a);
 		    }
 		    return a;
-	  }
+		}
 	}
 	export class Progress {
 	    item: string;
@@ -61,9 +59,9 @@ export namespace bindings {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.item = source['item'];
-	        this.message = source['message'];
-	        this.progress = source['progress'];
+	        this.item = source["item"];
+	        this.message = source["message"];
+	        this.progress = source["progress"];
 	    }
 	}
 	export class SavedModFilters {
@@ -76,8 +74,8 @@ export namespace bindings {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.order = source['order'];
-	        this.filter = source['filter'];
+	        this.order = source["order"];
+	        this.filter = source["filter"];
 	    }
 	}
 
@@ -85,6 +83,20 @@ export namespace bindings {
 
 export namespace cli {
 	
+	export class Installation {
+	    path: string;
+	    profile: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Installation(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.profile = source["profile"];
+	    }
+	}
 	export class ProfileMod {
 	    version: string;
 	    enabled: boolean;
@@ -95,8 +107,8 @@ export namespace cli {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.version = source['version'];
-	        this.enabled = source['enabled'];
+	        this.version = source["version"];
+	        this.enabled = source["enabled"];
 	    }
 	}
 	export class Profile {
@@ -109,17 +121,17 @@ export namespace cli {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.name = source['name'];
-	        this.mods = this.convertValues(source['mods'], ProfileMod, true);
+	        this.name = source["name"];
+	        this.mods = this.convertValues(source["mods"], ProfileMod, true);
 	    }
 	
-	  convertValues(a: any, classs: any, asMap = false): any {
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
 		    if (!a) {
 		        return a;
 		    }
 		    if (a.slice) {
 		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ('object' === typeof a) {
+		    } else if ("object" === typeof a) {
 		        if (asMap) {
 		            for (const key of Object.keys(a)) {
 		                a[key] = new classs(a[key]);
@@ -129,7 +141,7 @@ export namespace cli {
 		        return new classs(a);
 		    }
 		    return a;
-	  }
+		}
 	}
 
 }
@@ -149,12 +161,13 @@ export namespace install_finders {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.path = source['path'];
-	        this.version = source['version'];
-	        this.branch = source['branch'];
-	        this.launcher = source['launcher'];
-	        this.launchPath = source['launchPath'];
+	        this.path = source["path"];
+	        this.version = source["version"];
+	        this.branch = source["branch"];
+	        this.launcher = source["launcher"];
+	        this.launchPath = source["launchPath"];
 	    }
 	}
 
 }
+

@@ -1,33 +1,28 @@
-package wininstalls
+package install_finders
 
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 
 	"github.com/pkg/errors"
-
-	"github.com/satisfactorymodding/SatisfactoryModManager/installfinders/types"
 )
 
 var EpicManifestsFolder = path.Join(os.Getenv("PROGRAMDATA"), "Epic", "EpicGamesLauncher", "Data", "Manifests")
-var UEInstalledManifest = path.Join(os.Getenv("PROGRAMDATA"), "Epic", "UnrealEngineLauncher", "LauncherInstalled.dat")
 
-func FindInstallationsEpic() ([]*types.Installation, []string, []error) {
+func FindInstallationsWindowsEpic() ([]*Installation, []error) {
 	if _, err := os.Stat(EpicManifestsFolder); os.IsNotExist(err) {
-		return nil, nil, []error{errors.New("Epic is not installed")}
+		return nil, []error{errors.New("Epic is not installed")}
 	}
 
-	manifests, err := ioutil.ReadDir(EpicManifestsFolder)
+	manifests, err := os.ReadDir(EpicManifestsFolder)
 	if err != nil {
-		return nil, nil, []error{errors.Wrap(err, "Failed to list Epic manifests")}
+		return nil, []error{errors.Wrap(err, "Failed to list Epic manifests")}
 	}
 
-	installs := []*types.Installation{}
-	invalidInstalls := []string{}
-	findErrors := []error{}
+	var installs []*Installation
+	var findErrors []error
 
 	for _, manifest := range manifests {
 		manifestName := manifest.Name()
@@ -43,7 +38,7 @@ func FindInstallationsEpic() ([]*types.Installation, []string, []error) {
 			continue
 		}
 
-		var epicManifest types.EpicManifest
+		var epicManifest EpicManifest
 		if err := json.Unmarshal(manifestData, &epicManifest); err != nil {
 			findErrors = append(findErrors, errors.Wrapf(err, "Failed to parse Epic manifest %s", manifestName))
 			continue
@@ -61,7 +56,7 @@ func FindInstallationsEpic() ([]*types.Installation, []string, []error) {
 			continue
 		}
 
-		var epicGameManifest types.EpicGameManifest
+		var epicGameManifest EpicGameManifest
 		if err := json.Unmarshal(gameManifestData, &epicGameManifest); err != nil {
 			findErrors = append(findErrors, errors.Wrapf(err, "Failed to parse Epic game manifest %s", gameManifestName))
 			continue
@@ -70,7 +65,10 @@ func FindInstallationsEpic() ([]*types.Installation, []string, []error) {
 		if epicGameManifest.CatalogNamespace != epicManifest.CatalogNamespace ||
 			epicGameManifest.CatalogItemId != epicManifest.CatalogItemId ||
 			epicGameManifest.AppName != epicManifest.MainGameAppName {
-			invalidInstalls = append(invalidInstalls, epicManifest.InstallLocation)
+			findErrors = append(findErrors, InstallFindError{
+				Path:  epicManifest.InstallLocation,
+				Inner: errors.New("Mismatching manifest data"),
+			})
 			continue
 		}
 
@@ -88,7 +86,10 @@ func FindInstallationsEpic() ([]*types.Installation, []string, []error) {
 
 		versionFilePath := path.Join(epicManifest.InstallLocation, "Engine", "Binaries", "Win64", "FactoryGame-Win64-Shipping.version")
 		if _, err := os.Stat(versionFilePath); os.IsNotExist(err) {
-			invalidInstalls = append(invalidInstalls, epicManifest.InstallLocation)
+			findErrors = append(findErrors, InstallFindError{
+				Path:  epicManifest.InstallLocation,
+				Inner: errors.Wrap(err, "failed to read game version"),
+			})
 			continue
 		}
 
@@ -98,7 +99,7 @@ func FindInstallationsEpic() ([]*types.Installation, []string, []error) {
 			continue
 		}
 
-		var versionData types.GameVersionFile
+		var versionData GameVersionFile
 		if err := json.Unmarshal(versionFile, &versionData); err != nil {
 			findErrors = append(findErrors, errors.Wrapf(err, "Failed to parse version file %s", versionFilePath))
 			continue
@@ -110,11 +111,14 @@ func FindInstallationsEpic() ([]*types.Installation, []string, []error) {
 		} else if epicManifest.MainGameAppName == "CrabTest" {
 			branch = "Experimental"
 		} else {
-			invalidInstalls = append(invalidInstalls, epicManifest.InstallLocation)
+			findErrors = append(findErrors, InstallFindError{
+				Path:  epicManifest.InstallLocation,
+				Inner: errors.New("Invalid branch " + epicManifest.MainGameAppName),
+			})
 			continue
 		}
 
-		installs = append(installs, &types.Installation{
+		installs = append(installs, &Installation{
 			Path:       epicManifest.InstallLocation,
 			Version:    versionData.Changelist,
 			Branch:     branch,
@@ -123,5 +127,5 @@ func FindInstallationsEpic() ([]*types.Installation, []string, []error) {
 		})
 	}
 
-	return installs, invalidInstalls, findErrors
+	return installs, findErrors
 }

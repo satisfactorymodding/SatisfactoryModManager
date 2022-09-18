@@ -1,4 +1,4 @@
-package wininstalls
+package install_finders
 
 import (
 	"encoding/json"
@@ -10,14 +10,12 @@ import (
 	"github.com/andygrunwald/vdf"
 	"github.com/pkg/errors"
 	"golang.org/x/sys/windows/registry"
-
-	"github.com/satisfactorymodding/SatisfactoryModManager/installfinders/types"
 )
 
-func FindInstallationsSteam() ([]*types.Installation, []string, []error) {
+func FindInstallationsWindowsSteam() ([]*Installation, []error) {
 	key, err := registry.OpenKey(registry.CURRENT_USER, `Software\Valve\Steam`, registry.QUERY_VALUE)
 	if err != nil {
-		return nil, nil, []error{errors.Wrap(err, "Failed to open Steam registry key")}
+		return nil, []error{errors.Wrap(err, "Failed to open Steam registry key")}
 	}
 	defer key.Close()
 
@@ -32,13 +30,13 @@ func FindInstallationsSteam() ([]*types.Installation, []string, []error) {
 
 	libraryFoldersF, err := os.Open(libraryFoldersManifestPath)
 	if err != nil {
-		return nil, nil, []error{errors.Wrap(err, "Failed to open library folders manifest")}
+		return nil, []error{errors.Wrap(err, "Failed to open library folders manifest")}
 	}
 
 	parser := vdf.NewParser(libraryFoldersF)
 	libraryFoldersManifest, err := parser.Parse()
 	if err != nil {
-		return nil, nil, []error{errors.Wrap(err, "Failed to parse library folders manifest")}
+		return nil, []error{errors.Wrap(err, "Failed to parse library folders manifest")}
 	}
 
 	var libraryFoldersList map[string]interface{}
@@ -48,7 +46,7 @@ func FindInstallationsSteam() ([]*types.Installation, []string, []error) {
 	} else if _, ok := libraryFoldersManifest["libraryfolders"]; ok {
 		libraryFoldersList = libraryFoldersManifest["libraryfolders"].(map[string]interface{})
 	} else {
-		return nil, nil, []error{errors.New("Failed to find library folders in manifest")}
+		return nil, []error{errors.New("Failed to find library folders in manifest")}
 	}
 
 	libraryFolders := []string{
@@ -64,9 +62,8 @@ func FindInstallationsSteam() ([]*types.Installation, []string, []error) {
 		libraryFolders = append(libraryFolders, libraryFolderData["path"].(string))
 	}
 
-	installs := []*types.Installation{}
-	invalidInstalls := []string{}
-	findErrors := []error{}
+	var installs []*Installation
+	var findErrors []error
 
 	for _, libraryFolder := range libraryFolders {
 		manifestPath := path.Join(libraryFolder, "steamapps", "appmanifest_526870.acf")
@@ -97,13 +94,19 @@ func FindInstallationsSteam() ([]*types.Installation, []string, []error) {
 
 		gameExe := path.Join(fullInstallationPath, "FactoryGame.exe")
 		if _, err := os.Stat(gameExe); os.IsNotExist(err) {
-			invalidInstalls = append(invalidInstalls, fullInstallationPath)
+			findErrors = append(findErrors, InstallFindError{
+				Path:  fullInstallationPath,
+				Inner: errors.Wrap(err, "Missing game executable"),
+			})
 			continue
 		}
 
 		versionFilePath := path.Join(fullInstallationPath, "Engine", "Binaries", "Win64", "FactoryGame-Win64-Shipping.version")
 		if _, err := os.Stat(versionFilePath); os.IsNotExist(err) {
-			invalidInstalls = append(invalidInstalls, fullInstallationPath)
+			findErrors = append(findErrors, InstallFindError{
+				Path:  fullInstallationPath,
+				Inner: errors.Wrap(err, "Missing game version file"),
+			})
 			continue
 		}
 
@@ -113,7 +116,7 @@ func FindInstallationsSteam() ([]*types.Installation, []string, []error) {
 			continue
 		}
 
-		var versionData types.GameVersionFile
+		var versionData GameVersionFile
 		if err := json.Unmarshal(versionFile, &versionData); err != nil {
 			findErrors = append(findErrors, errors.Wrapf(err, "Failed to parse version file %s", versionFilePath))
 			continue
@@ -132,7 +135,7 @@ func FindInstallationsSteam() ([]*types.Installation, []string, []error) {
 			}
 		}
 
-		installs = append(installs, &types.Installation{
+		installs = append(installs, &Installation{
 			Path:       fullInstallationPath,
 			Version:    versionData.Changelist,
 			Branch:     branch,
@@ -141,5 +144,5 @@ func FindInstallationsSteam() ([]*types.Installation, []string, []error) {
 		})
 	}
 
-	return installs, invalidInstalls, findErrors
+	return installs, findErrors
 }

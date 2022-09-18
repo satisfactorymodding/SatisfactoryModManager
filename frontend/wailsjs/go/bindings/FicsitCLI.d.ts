@@ -3,36 +3,38 @@
 import {bindings} from '../models';
 import {cli} from '../models';
 
-export function SelectInstall(arg1:string):void;
-
-export function SetProfile(arg1:string):void;
-
-export function SetProgress(arg1:bindings.Progress):void;
-
 export function AddProfile(arg1:string):Promise<Error>;
+
+export function CheckForUpdates():Promise<Array<bindings.Update>>;
 
 export function DeleteProfile(arg1:string):Promise<Error>;
 
-export function InstallMod(arg1:string):Promise<Error>;
-
-export function GetProfiles():Promise<Array<string>>;
-
-export function InstallModVersion(arg1:string,arg2:string):Promise<Error>;
-
-export function UpdateAllMods():Promise<Error>;
-
-export function CheckForUpdates():Promise<Array<bindings.Update>|Error>;
-
 export function DisableMod(arg1:string):Promise<Error>;
+
+export function EnableMod(arg1:string):Promise<Error>;
 
 export function GetInstallation(arg1:string):Promise<bindings.InstallationInfo>;
 
 export function GetInstallationsInfo():Promise<Array<bindings.InstallationInfo>>;
 
-export function RenameProfile(arg1:string,arg2:string):Promise<Error>;
-
-export function EnableMod(arg1:string):Promise<Error>;
+export function GetInvalidInstalls():Promise<Array<string>>;
 
 export function GetProfile(arg1:string):Promise<cli.Profile>;
 
+export function GetProfiles():Promise<Array<string>>;
+
+export function InstallMod(arg1:string):Promise<Error>;
+
+export function InstallModVersion(arg1:string,arg2:string):Promise<Error>;
+
 export function RemoveMod(arg1:string):Promise<Error>;
+
+export function RenameProfile(arg1:string,arg2:string):Promise<Error>;
+
+export function SelectInstall(arg1:string):Promise<void>;
+
+export function SetProfile(arg1:string):Promise<void>;
+
+export function SetProgress(arg1:bindings.Progress):Promise<void>;
+
+export function UpdateAllMods():Promise<Error>;

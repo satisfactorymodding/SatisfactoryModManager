@@ -8,6 +8,9 @@
   import ModDetails from '$lib/components/mod-details/ModDetails.svelte';
   import { ExpandMod, UnexpandMod } from '$wailsjs/go/bindings/App';
   import LeftBar from '$lib/components/LeftBar.svelte';
+  import { installs, invalidInstalls } from '$lib/ficsitCLIStore';
+  import Dialog, { Actions, Content, Title } from '@smui/dialog';
+  import Button, { Label } from '@smui/button';
 
   Environment().then((env) => {
     if (env.buildType !== 'dev') {
@@ -21,20 +24,24 @@
 
   let windowExpanded = false;
 
-  $: if(typeof window !== 'undefined') { 
-    if (selectedModId) {
-      ExpandMod().then(() => { windowExpanded = true; });
-    } else {
-      windowExpanded = false;
-      setTimeout(() => {
-        UnexpandMod();
-      }, 100);
-    }
+  function GenerateDebugInfo() {
+    // TODO: Placeholder
   }
 
   $: pendingExpand = selectedModId && !windowExpanded;
 
   $: modsListCompact = windowExpanded;
+
+  let invalidInstallsDialog = false;
+  let noInstallsDialog = false;
+
+  $: if(installs.isInit && $installs.length === 0) {
+    if($invalidInstalls.length > 0) {
+      invalidInstallsDialog = true;
+    } else {
+      noInstallsDialog = true;
+    }
+  }
 </script>
 
 <div class="flex flex-col h-screen w-screen">
@@ -54,6 +61,44 @@
   </div>
 </div>
 
+<Dialog
+  bind:open={invalidInstallsDialog}  
+  scrimClickAction=""
+  escapeKeyAction=""
+  surface$style="width: 500px; max-width: calc(100vw - 32px);"
+>
+  <Title>{ $invalidInstalls.length } invalid Satisfactory installs found</Title>
+  <Content>
+    {#each $invalidInstalls as invalidInstall}
+      <span>"{ invalidInstall }"</span><br>
+    {/each}
+    <br>
+    Seems wrong? Click the button below and send the generated zip file on the modding discord in #help-using-mods.
+  </Content>
+  <Actions>
+    <Button action="" on:click={GenerateDebugInfo}>
+      <Label>Generate debug info</Label>
+    </Button>
+  </Actions>
+</Dialog>
+
+<Dialog
+  bind:open={noInstallsDialog}  
+  scrimClickAction=""
+  escapeKeyAction=""
+  surface$style="width: 500px; max-width: calc(100vw - 32px);"
+>
+  <Title>No Satisfactory installs found</Title>
+  <Content>
+    Seems wrong? Click the button below and send the generated zip file on the modding discord in #help-using-mods.
+  </Content>
+  <Actions>
+    <Button action="" on:click={GenerateDebugInfo}>
+      <Label>Generate debug info</Label>
+    </Button>
+  </Actions>
+</Dialog>
+
 <style>
   .normal {
     width: 610px !important;
@@ -67,7 +112,4 @@
     width: 24rem;
     min-width: 24rem;
   }
-  /* .pendingExpand {
-    display: none;
-  } */
 </style>

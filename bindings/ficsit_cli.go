@@ -9,21 +9,21 @@ import (
 
 	"github.com/satisfactorymodding/ficsit-cli/cli"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/installfinders"
-	installFinderTypes "github.com/satisfactorymodding/SatisfactoryModManager/installfinders/types"
+	"github.com/satisfactorymodding/SatisfactoryModManager/install_finders"
 )
 
 type FicsitCLI struct {
 	ctx                  context.Context
 	ficsitCli            *cli.GlobalContext
 	installations        []*InstallationInfo
+	installFindErrors    []error
 	selectedInstallation *InstallationInfo
 	progress             *Progress
 }
 
 type InstallationInfo struct {
-	Installation *cli.Installation                `json:"installation"`
-	Info         *installFinderTypes.Installation `json:"info"`
+	Installation *cli.Installation             `json:"installation"`
+	Info         *install_finders.Installation `json:"info"`
 }
 
 type Progress struct {
@@ -41,24 +41,19 @@ func MakeFicsitCLI() (*FicsitCLI, error) {
 	}
 	f.ficsitCli = ficsitCli
 
-	f.initInstallations()
-
 	return f, nil
 }
 
 func (f *FicsitCLI) startup(ctx context.Context) {
 	f.ctx = ctx
+
+	f.initInstallations()
 }
 
 func (f *FicsitCLI) initInstallations() {
-	installs, _, findErrors := installfinders.FindInstallations()
+	installs, findErrors := install_finders.FindInstallations()
 
-	if len(findErrors) > 0 {
-		for _, err := range findErrors {
-			wailsRuntime.LogDebugf(f.ctx, "Failed to find installations: %v", err)
-		}
-	}
-
+	f.installFindErrors = findErrors
 	f.installations = []*InstallationInfo{}
 	f.ficsitCli.Installations.Installations = []*cli.Installation{}
 
@@ -86,6 +81,16 @@ func (f *FicsitCLI) initInstallations() {
 
 func (f *FicsitCLI) GetInstallationsInfo() []*InstallationInfo {
 	return f.installations
+}
+
+func (f *FicsitCLI) GetInvalidInstalls() []string {
+	var result []string
+	for _, err := range f.installFindErrors {
+		if casted, ok := err.(install_finders.InstallFindError); ok {
+			result = append(result, casted.Path)
+		}
+	}
+	return result
 }
 
 func (f *FicsitCLI) GetInstallation(path string) *InstallationInfo {
