@@ -14,3 +14,7 @@ type Project struct {
 }
 
 var ProjectFile Project
+
+func Version() string {
+	return ProjectFile.Info.ProductVersion
+}

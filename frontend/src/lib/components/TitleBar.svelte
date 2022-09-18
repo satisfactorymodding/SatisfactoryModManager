@@ -2,7 +2,7 @@
   import MDIIcon from './MDIIcon.svelte';
   import { mdiWindowMinimize, mdiWindowRestore, mdiWindowMaximize, mdiWindowClose } from '@mdi/js';
   import { Quit, WindowMinimise, WindowToggleMaximise } from '$wailsjs/runtime';
-  import { GetProjectFile } from '$wailsjs/go/bindings/ProjectFile';
+  import { GetVersion } from '$wailsjs/go/bindings/App';
 
   function minimize() {
     WindowMinimise();
@@ -17,8 +17,8 @@
   }
 
   let version = '0.0.0';
-  GetProjectFile().then((projectFile) => {
-    version = projectFile.info.productVersion;
+  GetVersion().then((v) => {
+    version = v;
   });
 
   let isMaximized = false;

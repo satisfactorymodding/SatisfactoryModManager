@@ -2,9 +2,12 @@ package bindings
 
 import (
 	"context"
+	"fmt"
+	"github.com/satisfactorymodding/SatisfactoryModManager/project_file"
+	"time"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/utils"
-	"github.com/wailsapp/wails/v2/pkg/runtime"
+	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 // App struct
@@ -22,19 +25,24 @@ func (a *App) startup(ctx context.Context) {
 }
 
 func (a *App) ExpandMod() bool {
-	_, height := runtime.WindowGetSize(a.ctx)
-	runtime.WindowSetMinSize(a.ctx, utils.ExpandedMinWidth, utils.ExpandedMinHeight)
-	runtime.WindowSetMaxSize(a.ctx, -1, -1)
-	runtime.WindowSetSize(a.ctx, BindingsInstance.Settings.Data.ExpandedAppWidth, height)
+	_, height := wailsRuntime.WindowGetSize(a.ctx)
+	wailsRuntime.WindowSetMinSize(a.ctx, utils.ExpandedMinWidth, utils.ExpandedMinHeight)
+	wailsRuntime.WindowSetMaxSize(a.ctx, -1, -1)
+	wailsRuntime.WindowSetSize(a.ctx, BindingsInstance.Settings.Data.ExpandedAppWidth, height)
 	a.isExpanded = true
 	return true
 }
 
 func (a *App) UnexpandMod() bool {
-	_, height := runtime.WindowGetSize(a.ctx)
-	runtime.WindowSetMinSize(a.ctx, utils.UnexpandedMinWidth, utils.UnexpandedMinHeight)
-	runtime.WindowSetMaxSize(a.ctx, utils.UnexpandedMinWidth, -1)
-	runtime.WindowSetSize(a.ctx, utils.UnexpandedMinWidth, height)
+	_, height := wailsRuntime.WindowGetSize(a.ctx)
+	wailsRuntime.WindowSetMinSize(a.ctx, utils.UnexpandedMinWidth, utils.UnexpandedMinHeight)
+	wailsRuntime.WindowSetMaxSize(a.ctx, utils.UnexpandedMinWidth, -1)
+	wailsRuntime.WindowSetSize(a.ctx, utils.UnexpandedMinWidth, height)
 	a.isExpanded = false
 	return true
 }
+
+func (a *App) GetVersion() string {
+	return project_file.Version()
+}
+

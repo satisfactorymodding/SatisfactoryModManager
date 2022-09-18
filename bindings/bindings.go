@@ -7,10 +7,9 @@ import (
 )
 
 type Bindings struct {
-	App         *App
-	FicsitCLI   *FicsitCLI
-	Settings    *Settings
-	ProjectFile *ProjectFile
+	App       *App
+	FicsitCLI *FicsitCLI
+	Settings  *Settings
 }
 
 var BindingsInstance *Bindings
@@ -29,16 +28,11 @@ func MakeBindings() (*Bindings, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to make settings bindings")
 	}
-	projectFile, err := MakeProjectFile()
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to make project file bindings")
-	}
 
 	BindingsInstance = &Bindings{
-		App:         app,
-		FicsitCLI:   ficsitCLI,
-		Settings:    settings,
-		ProjectFile: projectFile,
+		App:       app,
+		FicsitCLI: ficsitCLI,
+		Settings:  settings,
 	}
 
 	return BindingsInstance, nil
@@ -48,7 +42,6 @@ func (b *Bindings) Startup(ctx context.Context) {
 	b.App.startup(ctx)
 	b.FicsitCLI.startup(ctx)
 	b.Settings.startup(ctx)
-	b.ProjectFile.startup(ctx)
 }
 
 func (b *Bindings) GetBindings() []interface{} {
@@ -56,6 +49,5 @@ func (b *Bindings) GetBindings() []interface{} {
 		b.App,
 		b.FicsitCLI,
 		b.Settings,
-		b.ProjectFile,
 	}
 }
