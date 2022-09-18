@@ -17,6 +17,7 @@ query GetMods($offset: Int!, $limit: Int!) {
           id
           username
         }
+        role
       }
     }
   }

@@ -1,4 +1,4 @@
-import type { Mod } from '$lib/generated';
+import type { GetModsQuery } from '$lib/generated';
 import { favouriteMods, lockfileMods, manifestMods } from '$lib/ficsitCLIStore';
 import { get, writable } from 'svelte/store';
 import { writableBinding } from './utils/wailsStoreBindings';
@@ -32,7 +32,7 @@ export const filterOptions: Filter[] = [
   { name: 'Disabled', func: (mod: PartialMod) => mod.mod_reference in get(manifestMods) && !(mod.mod_reference in get(lockfileMods)) },
 ];
 
-export type PartialMod = Pick<Mod, 'id' | 'mod_reference' | 'name' | 'logo' | 'short_description' | 'views' | 'downloads' | 'last_version_date'> & { authors: { user: Pick<User, 'username'> }[] };
+export type PartialMod = GetModsQuery['getMods']['mods'][number];
 
 export const search = writable('');
 export const order = writableBinding(orderByOptions[1], { 

@@ -16,6 +16,7 @@
   import { InstallModVersion } from '$wailsjs/go/bindings/FicsitCLI';
   import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
   import Dialog from '@smui/dialog';
+  import { getAuthor } from '$lib/utils/getModAuthor';
 
   export let id: string | null = null;
 
@@ -96,7 +97,7 @@
       <img src={renderedLogo} alt="{mod?.name} Logo" class="logo w-full" />
       <span class="pt-4 font-bold text-lg">{mod?.name ?? 'Loading...'}</span>
       <span class="pt-2 font-light">A mod by:</span>
-      <span class="font-medium color-primary cursor-pointer" on:click={() => $search = `author:"${mod?.authors[0].user.username}"`}>{mod?.authors[0].user.username ?? 'Loading...'}</span>
+      <span class="font-medium color-primary cursor-pointer" on:click={() => $search = `author:"${getAuthor(mod)}"`}>{getAuthor(mod) ?? 'Loading...'}</span>
 
       <div class="pt-2" on:mouseenter={() => authorsMenu.setOpen(true)} on:mouseleave={() => authorsMenu.setOpen(false)}>
         <Button variant="unelevated" color="secondary" class="w-full">

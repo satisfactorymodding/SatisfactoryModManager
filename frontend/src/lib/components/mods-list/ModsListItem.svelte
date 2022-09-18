@@ -8,6 +8,7 @@
   import { favouriteMods, lockfileMods, manifestMods, progress } from '$lib/ficsitCLIStore';
   import { DisableMod, EnableMod, InstallMod, RemoveMod } from '$wailsjs/go/bindings/FicsitCLI';
   import { FavouriteMod, UnFavouriteMod } from '$wailsjs/go/bindings/Settings';
+  import { getAuthor } from '$lib/utils/getModAuthor';
   
   export let mod: PartialMod;
 
@@ -21,7 +22,7 @@
   export let selected: boolean;
 
   $: renderedLogo = mod.logo || 'https://ficsit.app/images/no_image.webp';
-  $: author = mod.authors[0].user.username;
+  $: author = getAuthor(mod);
 
   $: isInstalled = mod.mod_reference in $manifestMods;
   $: isEnabled = mod.mod_reference in $lockfileMods;
