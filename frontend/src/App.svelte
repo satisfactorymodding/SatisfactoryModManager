@@ -9,16 +9,11 @@
   import { ExpandMod, UnexpandMod } from '$wailsjs/go/bindings/App';
   import LeftBar from '$lib/components/LeftBar.svelte';
 
-  if (typeof window !== 'undefined') {
-    Environment().then((env) => {
-      // Wails has wrong type definition for this (buildType vs buildtype)
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      if (env.buildtype !== 'dev') {
-        document.addEventListener('contextmenu', (event) => event.preventDefault());
-      }
-    });
-  }
+  Environment().then((env) => {
+    if (env.buildType !== 'dev') {
+      document.addEventListener('contextmenu', (event) => event.preventDefault());
+    }
+  });
 
   setClient(initializeGraphQLClient());
 

@@ -305,19 +305,13 @@ func (f *FicsitCLI) AddProfile(name string) error {
 }
 
 func (f *FicsitCLI) RenameProfile(oldName string, newName string) error {
-	err := f.ficsitCli.Profiles.RenameProfile(oldName, newName)
+	err := f.ficsitCli.Profiles.RenameProfile(f.ficsitCli, oldName, newName)
 
 	if err != nil {
 		return errors.Wrapf(err, "Failed to rename profile: %s -> %s", oldName, newName)
 	}
 
 	f.ficsitCli.Profiles.Save()
-
-	for _, install := range f.installations {
-		if install.Installation.Profile == oldName {
-			install.Installation.Profile = newName
-		}
-	}
 
 	return nil
 }

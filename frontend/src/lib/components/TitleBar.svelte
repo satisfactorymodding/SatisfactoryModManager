@@ -24,9 +24,9 @@
   let isMaximized = false;
 </script>
 
-<div class="flex items-center h-9">
+<div class="dragregion flex items-center h-9">
   <img src="/images/smm_icon_small.png" class="h-7 pl-4 pr-2" alt="SMM Icon" />
-  <div class="dragregion" data-wails-drag>
+  <div>
     <span class="app-title pt-3">Satisfactory Mod Manager v{version}</span>
   </div>
 
@@ -49,7 +49,8 @@
 
 <style scoped>
   .dragregion {
-    -webkit-app-region: drag;
+    --webkit-app-region: drag;
+    --wails-draggable: drag;
   }
   .button:hover {
     background-color: gray;
