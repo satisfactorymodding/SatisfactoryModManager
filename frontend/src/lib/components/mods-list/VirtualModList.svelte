@@ -73,6 +73,8 @@
   ::-webkit-scrollbar-track {
     background: black;
     border: solid 10px transparent;
+    border-top-width: 0px;
+    border-bottom-width: 0px;
     background-clip: content-box;
     border-radius: 0;
   }

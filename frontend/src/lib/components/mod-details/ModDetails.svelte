@@ -180,7 +180,7 @@
       </Button>
     </div>
   </Drawer>  
-  <div class="markdown-content break-words overflow-wrap-anywhere flex-1 px-3 overflow-y-scroll overflow-x-hidden w-0">
+  <div class="markdown-content break-words overflow-wrap-anywhere flex-1 px-3 my-4 overflow-y-scroll overflow-x-hidden w-0">
     {#if descriptionRendered}
       <p on:click={handleDescriptionClick}>{@html descriptionRendered}</p>
     {:else}
@@ -217,6 +217,8 @@
   ::-webkit-scrollbar-track {
     background: black;
     border: solid 10px transparent;
+    border-top-width: 0px;
+    border-bottom-width: 0px;
     background-clip: content-box;
     border-radius: 0;
   }
