@@ -48,16 +48,14 @@ export const filter = writableBinding(filterOptions[0], {
   }
 });
 
-if(typeof window !== 'undefined') {
-  order.subscribe((o) => {
-    if(order.isInit) {
-      SetModFilters(o.name, get(filter).name);
-    }
-  });
+order.subscribe((o) => {
+  if(order.isInit) {
+    SetModFilters(o.name, get(filter).name);
+  }
+});
 
-  filter.subscribe((f) => {
-    if(filter.isInit) {
-      SetModFilters(get(order).name, f.name);
-    }
-  });
-}
+filter.subscribe((f) => {
+  if(filter.isInit) {
+    SetModFilters(get(order).name, f.name);
+  }
+});
