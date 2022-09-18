@@ -6,16 +6,16 @@ import { readableBinding, writableBinding } from '$lib/utils/wailsStoreBindings'
 
 export const invalidInstalls = readableBinding<(Error & {path?: string})[]>([], { initialGet: GetInvalidInstalls });
 
-export const installs = readableBinding<bindings.InstallationInfo[]>([], { initialGet: GetInstallationsInfo});
+export const installs = readableBinding<bindings.InstallationInfo[]>([], { initialGet: GetInstallationsInfo });
 export const selectedInstall = writable(null as bindings.InstallationInfo | null);
 
-export const profiles = writableBinding<string[]>([], { initialGet: GetProfiles});
+export const profiles = writableBinding<string[]>([], { initialGet: GetProfiles });
 export const selectedProfile = writable(null as string | null);
 
-const installsLoadDone = installs.subscribe((i) => {
+Promise.all([installs.waitForInit, profiles.waitForInit]).then(() => {
+  const i = get(installs);
   if(i.length > 0) {
-    selectedInstall.set(i[0]);
-    installsLoadDone();
+    selectedInstall.set(get(installs)[0]);
   }
 });
 
