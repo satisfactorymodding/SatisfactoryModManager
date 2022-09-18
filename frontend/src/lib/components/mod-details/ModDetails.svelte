@@ -31,7 +31,7 @@ import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
 
   $: mod = $modQuery.data?.mod;
 
-  $: renderedLogo = mod?.logo ?? 'https://ficsit.app/images/no_image.webp';
+  $: renderedLogo = mod?.logo || 'https://ficsit.app/images/no_image.webp';
   $: descriptionRendered = mod?.full_description ? markdown(mod.full_description) : undefined;
 
   $: size = mod ? bytesToAppropriate(mod.versions[0]?.size ?? 0) : undefined;
