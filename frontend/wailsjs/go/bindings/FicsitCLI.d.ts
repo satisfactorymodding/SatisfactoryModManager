@@ -13,6 +13,8 @@ export function DisableMod(arg1:string):Promise<Error>;
 
 export function EnableMod(arg1:string):Promise<Error>;
 
+export function GetCurrentLockfile(arg1:bindings.InstallationInfo):Promise<cli.LockFile>;
+
 export function GetInstallation(arg1:string):Promise<bindings.InstallationInfo>;
 
 export function GetInstallationsInfo():Promise<Array<bindings.InstallationInfo>>;
@@ -22,6 +24,10 @@ export function GetInvalidInstalls():Promise<Array<string>>;
 export function GetProfile(arg1:string):Promise<cli.Profile>;
 
 export function GetProfiles():Promise<Array<string>>;
+
+export function GetSelectedInstall():Promise<bindings.InstallationInfo>;
+
+export function GetSelectedProfile():Promise<any>;
 
 export function InstallMod(arg1:string):Promise<Error>;
 

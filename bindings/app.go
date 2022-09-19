@@ -2,10 +2,8 @@ package bindings
 
 import (
 	"context"
-	"fmt"
-	"github.com/satisfactorymodding/SatisfactoryModManager/project_file"
-	"time"
 
+	"github.com/satisfactorymodding/SatisfactoryModManager/project_file"
 	"github.com/satisfactorymodding/SatisfactoryModManager/utils"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -45,4 +43,3 @@ func (a *App) UnexpandMod() bool {
 func (a *App) GetVersion() string {
 	return project_file.Version()
 }
-

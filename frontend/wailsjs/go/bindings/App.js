@@ -6,7 +6,6 @@ export function ExpandMod() {
   return window['go']['bindings']['App']['ExpandMod']();
 }
 
-
 export function GetVersion() {
   return window['go']['bindings']['App']['GetVersion']();
 }

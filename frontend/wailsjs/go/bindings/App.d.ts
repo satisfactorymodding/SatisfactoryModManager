@@ -3,7 +3,6 @@
 
 export function ExpandMod():Promise<boolean>;
 
-
 export function GetVersion():Promise<string>;
 
 export function UnexpandMod():Promise<boolean>;

@@ -108,9 +108,20 @@ func (f *FicsitCLI) SelectInstall(path string) {
 	f.emitModsChange()
 }
 
+func (f *FicsitCLI) GetSelectedInstall() *InstallationInfo {
+	return f.selectedInstallation
+}
+
 func (f *FicsitCLI) SetProfile(profile string) {
 	f.GetInstallation(f.selectedInstallation.Info.Path).Installation.SetProfile(f.ficsitCli, profile)
 	f.emitModsChange()
+}
+
+func (f *FicsitCLI) GetSelectedProfile() *string {
+	if f.selectedInstallation == nil {
+		return nil
+	}
+	return &f.selectedInstallation.Installation.Profile
 }
 
 func (f *FicsitCLI) GetProfiles() []string {
@@ -433,6 +444,15 @@ func (f *FicsitCLI) UpdateAllMods() error {
 	f.emitModsChange()
 
 	return nil
+}
+
+func (f *FicsitCLI) GetCurrentLockfile(install *InstallationInfo) (*cli.LockFile, error) {
+	lockfile, err := install.Installation.LockFile(f.ficsitCli)
+	if err != nil {
+		wailsRuntime.LogErrorf(f.ctx, "Failed read lockfile: %v", err)
+		return nil, err
+	}
+	return lockfile, nil
 }
 
 func (f *FicsitCLI) emitModsChange() {

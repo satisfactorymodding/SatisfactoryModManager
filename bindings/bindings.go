@@ -10,6 +10,7 @@ type Bindings struct {
 	App       *App
 	FicsitCLI *FicsitCLI
 	Settings  *Settings
+	DebugInfo *DebugInfo
 }
 
 var BindingsInstance *Bindings
@@ -28,11 +29,13 @@ func MakeBindings() (*Bindings, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to make settings bindings")
 	}
+	debugInfo := MakeDebugInfo()
 
 	BindingsInstance = &Bindings{
 		App:       app,
 		FicsitCLI: ficsitCLI,
 		Settings:  settings,
+		DebugInfo: debugInfo,
 	}
 
 	return BindingsInstance, nil
@@ -42,6 +45,7 @@ func (b *Bindings) Startup(ctx context.Context) {
 	b.App.startup(ctx)
 	b.FicsitCLI.startup(ctx)
 	b.Settings.startup(ctx)
+	b.DebugInfo.startup(ctx)
 }
 
 func (b *Bindings) GetBindings() []interface{} {
@@ -49,5 +53,6 @@ func (b *Bindings) GetBindings() []interface{} {
 		b.App,
 		b.FicsitCLI,
 		b.Settings,
+		b.DebugInfo,
 	}
 }

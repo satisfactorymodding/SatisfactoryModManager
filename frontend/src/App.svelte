@@ -11,6 +11,7 @@
   import { installs, invalidInstalls } from '$lib/ficsitCLIStore';
   import Dialog, { Actions, Content, Title } from '@smui/dialog';
   import Button, { Label } from '@smui/button';
+  import { GenerateDebugInfo } from '$wailsjs/go/bindings/DebugInfo';
 
   Environment().then((env) => {
     if (env.buildType !== 'dev') {
@@ -23,10 +24,6 @@
   let selectedModId: string | null = null;
 
   let windowExpanded = false;
-
-  function GenerateDebugInfo() {
-    // TODO: Placeholder
-  }
 
   $: pendingExpand = selectedModId && !windowExpanded;
 
