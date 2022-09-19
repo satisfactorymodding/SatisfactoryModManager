@@ -5,10 +5,12 @@ go 1.18
 require (
 	github.com/andygrunwald/vdf v1.0.1-0.20220412055542-fff83b263c6b
 	github.com/pkg/errors v0.9.1
+	github.com/rs/zerolog v1.26.1
 	github.com/satisfactorymodding/ficsit-cli v0.1.2
 	github.com/spf13/viper v1.12.0
 	github.com/wailsapp/wails/v2 v2.0.0-rc.1.1
 	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a
+	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )
 
 require (
@@ -38,7 +40,6 @@ require (
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/rogpeppe/go-internal v1.8.1 // indirect
-	github.com/rs/zerolog v1.26.1 // indirect
 	github.com/spf13/afero v1.8.2 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect

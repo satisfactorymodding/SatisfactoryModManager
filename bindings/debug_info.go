@@ -15,6 +15,7 @@ import (
 	"github.com/satisfactorymodding/SatisfactoryModManager/project_file"
 	"github.com/satisfactorymodding/SatisfactoryModManager/utils"
 	ficsitCli "github.com/satisfactorymodding/ficsit-cli/cli"
+	"github.com/spf13/viper"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
@@ -152,7 +153,10 @@ func (d *DebugInfo) generateAndSaveDebugInfo(filename string) error {
 		return errors.Wrap(err, "Failed to add metadata to debuginfo zip")
 	}
 
-	// TODO: SMM logs
+	err = utils.AddFileToZip(writer, viper.GetString("log-file"), "SatisfactoryModManager.log")
+	if err != nil {
+		return errors.Wrap(err, "Failed to add SatisfactoryModManager.log to debuginfo zip")
+	}
 
 	return nil
 }
