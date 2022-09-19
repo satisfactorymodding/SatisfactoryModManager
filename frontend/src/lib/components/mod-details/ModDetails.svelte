@@ -84,7 +84,6 @@
     while(element) {
       if(handleElementClick(element)) {
         event.preventDefault();
-        return;
       }
       element = element.parentElement;
     }
