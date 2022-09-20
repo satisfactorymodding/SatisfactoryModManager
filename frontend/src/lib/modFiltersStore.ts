@@ -1,8 +1,8 @@
 import type { GetModsQuery } from '$lib/generated';
 import { favouriteMods, lockfileMods, manifestMods } from '$lib/ficsitCLIStore';
 import { get, writable } from 'svelte/store';
-import { writableBinding } from './utils/wailsStoreBindings';
-import { GetModFilters, SetModFilters } from '$wailsjs/go/bindings/Settings';
+import { writableBindingSync } from './utils/wailsStoreBindings';
+import { GetModFiltersOrder, GetModFiltersFilter, SetModFiltersOrder, SetModFiltersFilter } from '$wailsjs/go/bindings/Settings';
 
 export interface OrderBy {
   name: string;
@@ -35,27 +35,11 @@ export const filterOptions: Filter[] = [
 export type PartialMod = GetModsQuery['getMods']['mods'][number];
 
 export const search = writable('');
-export const order = writableBinding(orderByOptions[1], { 
-  initialGet: async () => {
-    const { order } = await GetModFilters();
-    return orderByOptions.find(o => o.name === order) || orderByOptions[1];
-  }
+export const order = writableBindingSync(orderByOptions[1], { 
+  initialGet: async () => GetModFiltersOrder().then((i) => orderByOptions.find((o) => o.name === i) || orderByOptions[1]),
+  updateFunction: async (o) => SetModFiltersOrder(o.name),
 });
-export const filter = writableBinding(filterOptions[0], { 
-  initialGet: async () => {
-    const { filter } = await GetModFilters();
-    return filterOptions.find(o => o.name === filter) || filterOptions[0];
-  }
-});
-
-order.subscribe((o) => {
-  if(order.isInit) {
-    SetModFilters(o.name, get(filter).name);
-  }
-});
-
-filter.subscribe((f) => {
-  if(filter.isInit) {
-    SetModFilters(get(order).name, f.name);
-  }
+export const filter = writableBindingSync(filterOptions[0], {
+  initialGet: async () => GetModFiltersFilter().then((i) => filterOptions.find((o) => o.name === i) || filterOptions[0]),
+  updateFunction: async (f) => SetModFiltersFilter(f.name),
 });

@@ -8,6 +8,7 @@
   import ModListFilters from './ModsListFilters.svelte';
   import { filter, order, search, type PartialMod } from '$lib/modFiltersStore';
   import { favouriteMods, lockfileMods, manifestMods } from '$lib/ficsitCLIStore';
+  import { startView } from '$lib/settingsStore';
 
   let mods: PartialMod[] = [];
 
@@ -70,6 +71,17 @@
     });
     return fuse.search(modifiedSearchString).map((result) => result.item);
   };
+
+  let hasCheckedStartView = false;
+  $: if($startView && mods.length > 0 && !hasCheckedStartView) {
+    hasCheckedStartView = true;
+    if($startView === 'expanded') {
+      const filtered = filteredMods();
+      if(filtered.length > 0) {
+        selectedMod = filtered[0].mod_reference;
+      }
+    }
+  }
 
   export let selectedMod: string | null = null;
   export let compact: boolean;

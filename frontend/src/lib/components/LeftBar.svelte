@@ -4,19 +4,20 @@
   import Dialog, { Title, Content, Actions } from '@smui/dialog';
   import TextField from '@smui/textfield'; 
 
-  import { mdiBug, mdiCheckCircle, mdiChevronRight, mdiClipboard, mdiCloseCircle, mdiDiscord, mdiDownload, mdiGithub, mdiHelpCircle, mdiPencil, mdiPlusCircle, mdiSync, mdiTrashCan, mdiTune, mdiWeb } from '@mdi/js';
+  import { mdiBug, mdiCheck, mdiCheckCircle, mdiChevronRight, mdiClipboard, mdiCloseCircle, mdiCog, mdiDiscord, mdiDownload, mdiGithub, mdiHelpCircle, mdiPencil, mdiPlusCircle, mdiSync, mdiTrashCan, mdiTune, mdiWeb } from '@mdi/js';
   import MdiIcon from '$lib/components/MDIIcon.svelte';
   
   import { addProfile, checkForUpdates, deleteProfile, installs, profiles, progress, renameProfile, selectedInstall, selectedProfile, updateCheckInProgress, updates } from '$lib/ficsitCLIStore';
   import { UpdateAllMods } from '$wailsjs/go/bindings/FicsitCLI';
   import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
-  import Menu, { type MenuComponentDev } from '@smui/menu';
-  import List, { Item, PrimaryText, Text } from '@smui/list';
+  import Menu, { SelectionGroup, SelectionGroupIcon, type MenuComponentDev } from '@smui/menu';
+  import List, { Item, PrimaryText, Separator, Text } from '@smui/list';
   import { GenerateDebugInfo } from '$wailsjs/go/bindings/DebugInfo';
 
   import { manifestMods, lockfileMods } from '$lib/ficsitCLIStore';
   import { GetModNameDocument } from '$lib/generated';
   import { getClient } from '@urql/svelte';
+  import { startView, type View } from '$lib/settingsStore';
 
   $: canInstall = !$progress;
 
@@ -95,7 +96,19 @@
   }
 
   let settingsMenu: MenuComponentDev;
-  let debugMenu: MenuComponentDev;
+  let startViewMenu: MenuComponentDev;
+
+  let views: {id: View, name: string}[] = [
+    {
+      id: 'compact',
+      name: 'Compact',
+    },
+    {
+      id: 'expanded',
+      name: 'Expanded',
+    },
+  ]; 
+
 </script>
 
 <div class="flex flex-col h-full p-4 left-bar w-[24rem] min-w-[24rem] ">
@@ -205,35 +218,68 @@
       </Button>
       <Menu bind:this={settingsMenu} class="w-full max-h-[32rem] overflow-visible" anchorCorner="TOP_RIGHT">
         <List>
+          <Item nonInteractive>
+            <MdiIcon icon={mdiBug} class="h-5" />
+            <!-- <div class="w-7"/> -->
+            <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
+              <PrimaryText class="text-base">Debug</PrimaryText>
+            </Text>
+            <div class="grow" />
+          </Item>
+          <Separator insetLeading insetTrailing />
+          <Item on:click={() => GenerateDebugInfo()}>
+            <div class="w-7"/>
+            <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
+              <PrimaryText class="text-base">Generate debug info</PrimaryText>
+            </Text>
+            <div class="grow" />
+            <MdiIcon icon={mdiDownload} class="h-5" />
+          </Item>
+          <Separator insetLeading insetTrailing insetPadding />
+          <Item on:click={() => copyModList()}>
+            <div class="w-7"/>
+            <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
+              <PrimaryText class="text-base">Copy mods list</PrimaryText>
+            </Text>
+            <div class="grow" />
+            <MdiIcon icon={mdiClipboard} class="h-5" />
+          </Item>
+          <Separator insetLeading insetTrailing insetPadding />
+          <Item nonInteractive>
+            <MdiIcon icon={mdiCog} class="h-5" />
+            <!-- <div class="w-7"/> -->
+            <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
+              <PrimaryText class="text-base">Settings</PrimaryText>
+            </Text>
+            <div class="grow" />
+          </Item>
+          <Separator insetLeading insetTrailing />
           <div>
-            <Item on:click={() => debugMenu.setOpen(true)}>
-              <MdiIcon icon={mdiBug} class="h-5" />
-              <!-- <div class="w-7"/> -->
+            <Item on:click={() => startViewMenu.setOpen(true)}>
+              <div class="w-7"/>
               <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
-                <PrimaryText class="text-base">Debug</PrimaryText>
+                <PrimaryText class="text-base">Start view</PrimaryText>
               </Text>
               <div class="grow" />
+              <Text class="pr-2 h-full flex flex-col content-center mb-1.5">
+                <PrimaryText class="text-base">{views.find((v) => v.id === $startView)?.name ?? ''}</PrimaryText>
+              </Text>
               <MdiIcon icon={mdiChevronRight} class="h-5" />
             </Item>
-            <Menu bind:this={debugMenu} class="w-full max-h-[32rem] overflow-visible" anchorCorner="TOP_RIGHT">
-              <List>
-                <Item on:click={() => GenerateDebugInfo()}>
-                  <MdiIcon icon={mdiDownload} class="h-5" />
-                  <!-- <div class="w-7"/> -->
-                  <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
-                    <PrimaryText class="text-base">Generate debug info</PrimaryText>
-                  </Text>
-                  <div class="grow" />
-                </Item>
-                <Item on:click={() => copyModList()}>
-                  <MdiIcon icon={mdiClipboard} class="h-5" />
-                  <!-- <div class="w-7"/> -->
-                  <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
-                    <PrimaryText class="text-base">Copy mods list</PrimaryText>
-                  </Text>
-                  <div class="grow" />
-                </Item>
-              </List>
+            <Menu bind:this={startViewMenu} class="w-full max-h-[32rem] overflow-visible" anchorCorner="TOP_RIGHT">
+              <SelectionGroup>
+                {#each views as view}
+                  <Item
+                    on:SMUI:action={() => ($startView = view.id)}
+                    selected={$startView === view.id}
+                  >
+                    <SelectionGroupIcon>
+                      <MdiIcon icon={mdiCheck} class="h-5" />
+                    </SelectionGroupIcon>
+                    <Text>{view.name}</Text>
+                  </Item>
+                {/each}
+              </SelectionGroup>
             </Menu>
           </div>
         </List>

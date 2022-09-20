@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/pkg/errors"
 	"github.com/satisfactorymodding/SatisfactoryModManager/utils"
@@ -18,11 +17,17 @@ type SavedModFilters struct {
 	Filter string `json:"filter"`
 }
 
+var (
+	VIEW_COMPACT  = "compact"
+	VIEW_EXPANDED = "expanded"
+)
+
 type SettingsData struct {
 	FavouriteMods    []string        `json:"favouriteMods"`
 	ModFilters       SavedModFilters `json:"modFilters"`
 	AppHeight        int             `json:"appHeight"`
 	ExpandedAppWidth int             `json:"expandedAppWidth"`
+	StartView        string          `json:"startView"`
 }
 
 type Settings struct {
@@ -53,8 +58,10 @@ func (s *Settings) load() error {
 
 		s.Data = SettingsData{
 			FavouriteMods:    []string{},
+			ModFilters:       SavedModFilters{Order: "Last updated", Filter: "Compatible"},
 			AppHeight:        utils.UnexpandedMinHeight,
 			ExpandedAppWidth: utils.UnexpandedMinWidth,
+			StartView:        VIEW_COMPACT,
 		}
 		err = s.save()
 		if err != nil {
@@ -89,22 +96,6 @@ func (s *Settings) save() error {
 
 func (s *Settings) startup(ctx context.Context) {
 	s.ctx = ctx
-	sizeTicker := time.NewTicker(100 * time.Millisecond)
-	go func() {
-		for range sizeTicker.C {
-			w, h := wailsRuntime.WindowGetSize(s.ctx)
-			if BindingsInstance.App.isExpanded {
-				if w != s.Data.ExpandedAppWidth {
-					s.Data.ExpandedAppWidth = w
-					s.save()
-				}
-			}
-			if h != s.Data.AppHeight {
-				s.Data.AppHeight = h
-				s.save()
-			}
-		}
-	}()
 }
 
 func (s *Settings) FavouriteMod(modReference string) bool {
@@ -145,16 +136,33 @@ func (s *Settings) GetFavouriteMods() []string {
 	return s.Data.FavouriteMods
 }
 
-func (s *Settings) GetModFilters() SavedModFilters {
-	return s.Data.ModFilters
+func (s *Settings) GetModFiltersOrder() string {
+	return s.Data.ModFilters.Order
 }
 
-func (s *Settings) SetModFilters(order string, filter string) {
+func (s *Settings) GetModFiltersFilter() string {
+	return s.Data.ModFilters.Filter
+}
+
+func (s *Settings) SetModFiltersOrder(order string) {
 	s.Data.ModFilters.Order = order
+	s.save()
+}
+
+func (s *Settings) SetModFiltersFilter(filter string) {
 	s.Data.ModFilters.Filter = filter
 	s.save()
 }
 
 func (s *Settings) emitFavouriteMods() {
 	wailsRuntime.EventsEmit(s.ctx, "favouriteMods", s.Data.FavouriteMods)
+}
+
+func (s *Settings) GetStartView() string {
+	return s.Data.StartView
+}
+
+func (s *Settings) SetStartView(view string) {
+	s.Data.StartView = view
+	s.save()
 }

@@ -64,20 +64,6 @@ export namespace bindings {
 	        this.progress = source["progress"];
 	    }
 	}
-	export class SavedModFilters {
-	    order: string;
-	    filter: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new SavedModFilters(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.order = source["order"];
-	        this.filter = source["filter"];
-	    }
-	}
 
 }
 

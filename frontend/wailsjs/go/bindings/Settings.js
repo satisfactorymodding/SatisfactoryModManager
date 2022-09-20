@@ -10,12 +10,28 @@ export function GetFavouriteMods() {
   return window['go']['bindings']['Settings']['GetFavouriteMods']();
 }
 
-export function GetModFilters() {
-  return window['go']['bindings']['Settings']['GetModFilters']();
+export function GetModFiltersFilter() {
+  return window['go']['bindings']['Settings']['GetModFiltersFilter']();
 }
 
-export function SetModFilters(arg1, arg2) {
-  return window['go']['bindings']['Settings']['SetModFilters'](arg1, arg2);
+export function GetModFiltersOrder() {
+  return window['go']['bindings']['Settings']['GetModFiltersOrder']();
+}
+
+export function GetStartView() {
+  return window['go']['bindings']['Settings']['GetStartView']();
+}
+
+export function SetModFiltersFilter(arg1) {
+  return window['go']['bindings']['Settings']['SetModFiltersFilter'](arg1);
+}
+
+export function SetModFiltersOrder(arg1) {
+  return window['go']['bindings']['Settings']['SetModFiltersOrder'](arg1);
+}
+
+export function SetStartView(arg1) {
+  return window['go']['bindings']['Settings']['SetStartView'](arg1);
 }
 
 export function UnFavouriteMod(arg1) {

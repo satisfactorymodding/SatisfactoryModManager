@@ -56,6 +56,14 @@ $left-bar-controls-height: 40px;
     @include list.deprecated-single-line-density(-2);
   }
 
+  .mdc-menu {
+    .mdc-deprecated-list-divider {
+      margin-top: 0px;
+      margin-bottom: 0px;
+    }
+    @include list.deprecated-divider-insets(47.5px, 16px);
+  }
+
   .mdc-button {
     @include button.height($left-bar-controls-height);
     @include button.container-fill-color($left-bar-controls-background);

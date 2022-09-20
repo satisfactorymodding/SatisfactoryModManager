@@ -2,6 +2,7 @@ package bindings
 
 import (
 	"context"
+	"time"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/project_file"
 	"github.com/satisfactorymodding/SatisfactoryModManager/utils"
@@ -20,6 +21,23 @@ func MakeApp() *App {
 
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+
+	sizeTicker := time.NewTicker(100 * time.Millisecond)
+	go func() {
+		for range sizeTicker.C {
+			w, h := wailsRuntime.WindowGetSize(a.ctx)
+			if BindingsInstance.App.isExpanded {
+				if w != BindingsInstance.Settings.Data.ExpandedAppWidth {
+					BindingsInstance.Settings.Data.ExpandedAppWidth = w
+					BindingsInstance.Settings.save()
+				}
+			}
+			if h != BindingsInstance.Settings.Data.AppHeight {
+				BindingsInstance.Settings.Data.AppHeight = h
+				BindingsInstance.Settings.save()
+			}
+		}
+	}()
 }
 
 func (a *App) ExpandMod() bool {

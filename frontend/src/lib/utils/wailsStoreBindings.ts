@@ -99,3 +99,43 @@ export function writableBinding<T>(defaultValue: T,
 
   return store;
 }
+
+export function writableBindingSync<T>(defaultValue: T,
+  options: {
+    initialGet?: () => Promise<T>,
+    updateFunction: (value: T) => Promise<void>
+  }
+) {
+  const { initialGet } = {
+    ...options
+  };
+  
+  const initCallbacks: InitCallback[] = [];
+  let resolveInit: () => void = () => {/* empty */};
+  const initPromise = new Promise<void>((resolve) => {
+    resolveInit = resolve;
+  });
+
+  const store = {
+    isInit: false,
+    ...writable(defaultValue, (set) => {
+      if(initialGet) {
+        initialGet().then(set).then(() => store.isInit = true).then(() => initCallbacks.forEach((cb) => cb())).then(resolveInit);
+      }
+    }),
+    waitForInit: initPromise,
+    subscribeInit(callback: () => void) {
+      if(this.isInit) {
+        callback();
+      } else {
+        initCallbacks.push(callback);
+      }
+    }
+  } as WritableBinding<T>;
+
+  store.subscribe((value) => {
+    options.updateFunction(value);
+  });
+
+  return store;
+}
