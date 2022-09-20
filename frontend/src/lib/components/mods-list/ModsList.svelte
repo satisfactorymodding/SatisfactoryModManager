@@ -23,8 +23,8 @@
 
       mods = (await Promise.all(Array.from({length: pages}).map(async (_, i) => {
         const offset = i * MODS_PER_PAGE;
-        const result = await urqlClient.query(GetModsDocument, { offset, limit: MODS_PER_PAGE }).toPromise();
-        return result.data?.getMods.mods ?? [];
+        const modsPage = await urqlClient.query(GetModsDocument, { offset, limit: MODS_PER_PAGE }).toPromise();
+        return modsPage.data?.getMods.mods ?? [];
       }))).flat();
     }
   }
