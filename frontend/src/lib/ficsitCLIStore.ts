@@ -87,7 +87,7 @@ export async function deleteProfile(name: string) {
   }
 }
 
-export type ProfileMods = Dictionary<string, cli.ProfileMod>;
+export type ProfileMods = { [name: string]: cli.ProfileMod };
 
 export const manifestMods = readableBinding<ProfileMods>({}, { allowNull: false, updateEvent: 'manifestMods'}); // Event will be
 
@@ -95,10 +95,10 @@ export interface LockedMod {
   version: string;
   hash: string;
   link: string;
-  dependencies: Dictionary<string, string>;
+  dependencies: { [id: string]: string };
 }
 
-export type LockFile = Dictionary<string, LockedMod>;
+export type LockFile = { [name: string]: LockedMod };
 
 export const lockfileMods = readableBinding<LockFile>({}, { allowNull: false, updateEvent: 'lockfileMods'});
 

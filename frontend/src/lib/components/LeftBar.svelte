@@ -4,12 +4,19 @@
   import Dialog, { Title, Content, Actions } from '@smui/dialog';
   import TextField from '@smui/textfield'; 
 
-  import { mdiCheckCircle, mdiCloseCircle, mdiDiscord, mdiGithub, mdiHelpCircle, mdiPencil, mdiPlusCircle, mdiSync, mdiTrashCan, mdiTune, mdiWeb } from '@mdi/js';
+  import { mdiBug, mdiCheckCircle, mdiChevronRight, mdiClipboard, mdiCloseCircle, mdiDiscord, mdiDownload, mdiGithub, mdiHelpCircle, mdiPencil, mdiPlusCircle, mdiSync, mdiTrashCan, mdiTune, mdiWeb } from '@mdi/js';
   import MdiIcon from '$lib/components/MDIIcon.svelte';
   
   import { addProfile, checkForUpdates, deleteProfile, installs, profiles, progress, renameProfile, selectedInstall, selectedProfile, updateCheckInProgress, updates } from '$lib/ficsitCLIStore';
   import { UpdateAllMods } from '$wailsjs/go/bindings/FicsitCLI';
   import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
+  import Menu, { type MenuComponentDev } from '@smui/menu';
+  import List, { Item, PrimaryText, Text } from '@smui/list';
+  import { GenerateDebugInfo } from '$wailsjs/go/bindings/DebugInfo';
+
+  import { manifestMods, lockfileMods } from '$lib/ficsitCLIStore';
+  import { GetModNameDocument } from '$lib/generated';
+  import { getClient } from '@urql/svelte';
 
   $: canInstall = !$progress;
 
@@ -47,9 +54,51 @@
       }
     }
   }
+  
+  const urqlClient = getClient();
+
+  async function copyModList() {
+    // Generate mod entries
+    const modList = await Promise.all(Object.keys($manifestMods).map(async (modReference) => {
+      let modName = modReference;
+      if(modReference === 'SML') {
+        modName = 'Satisfactory Mod Loader';
+      } else {
+        const result = await urqlClient.query(GetModNameDocument, { modReference }).toPromise();
+        if(result?.data?.getModByReference?.name) {
+          modName = result.data.getModByReference.name;
+        }
+      }
+      return {
+        friendlyName: modName,
+        modReference,
+        version: $lockfileMods[modReference].version,
+      };
+    }));
+      // Sort by Friendly Name
+    modList.sort((a, b) => {
+      const x = a.friendlyName.toLowerCase();
+      const y = b.friendlyName.toLowerCase();
+      return x.localeCompare(y);
+    });
+    // Get max lengths to use for padding
+    const maxFriendlyNameLen = Math.max(...modList.map((mod) => mod.friendlyName.length));
+    const maxModReferenceLen = Math.max(...modList.map((mod) => mod.modReference.length));
+    // Create header and add all mods to string
+    let modListString = `${'Mod Name'.padEnd(maxFriendlyNameLen + 1) + 'Mod Reference'.padEnd(maxModReferenceLen + 1)}Version\n`;
+    modList.forEach((mod) => {
+      mod.friendlyName = mod.friendlyName.padEnd(maxFriendlyNameLen, ' ');
+      mod.modReference = mod.modReference.padEnd(maxModReferenceLen, ' ');
+      modListString += `${mod.friendlyName} ${mod.modReference} ${mod.version}\n`;
+    });
+    navigator.clipboard.writeText(modListString.trim());
+  }
+
+  let settingsMenu: MenuComponentDev;
+  let debugMenu: MenuComponentDev;
 </script>
 
-<div class="flex flex-col h-full p-4 left-bar">
+<div class="flex flex-col h-full p-4 left-bar w-[24rem] min-w-[24rem] ">
   <div class="flex flex-col">
     <span class="pl-4">Game version</span>
     <Select
@@ -146,13 +195,50 @@
   </div>
   <div class="flex flex-col mt-8">
     <span class="pl-4">Other</span>
-    <Button variant="unelevated" class="w-full mt-2">
-      <Label>
-        SMM settings
-      </Label>
-      <div class="grow" />
-      <MdiIcon icon={mdiTune} class="h-5" />
-    </Button>
+    <div>
+      <Button variant="unelevated" class="w-full mt-2" on:click={() => settingsMenu.setOpen(true)}>
+        <Label>
+          SMM settings
+        </Label>
+        <div class="grow" />
+        <MdiIcon icon={mdiTune} class="h-5" />
+      </Button>
+      <Menu bind:this={settingsMenu} class="w-full max-h-[32rem] overflow-visible" anchorCorner="TOP_RIGHT">
+        <List>
+          <div>
+            <Item on:click={() => debugMenu.setOpen(true)}>
+              <MdiIcon icon={mdiBug} class="h-5" />
+              <!-- <div class="w-7"/> -->
+              <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
+                <PrimaryText class="text-base">Debug</PrimaryText>
+              </Text>
+              <div class="grow" />
+              <MdiIcon icon={mdiChevronRight} class="h-5" />
+            </Item>
+            <Menu bind:this={debugMenu} class="w-full max-h-[32rem] overflow-visible" anchorCorner="TOP_RIGHT">
+              <List>
+                <Item on:click={() => GenerateDebugInfo()}>
+                  <MdiIcon icon={mdiDownload} class="h-5" />
+                  <!-- <div class="w-7"/> -->
+                  <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
+                    <PrimaryText class="text-base">Generate debug info</PrimaryText>
+                  </Text>
+                  <div class="grow" />
+                </Item>
+                <Item on:click={() => copyModList()}>
+                  <MdiIcon icon={mdiClipboard} class="h-5" />
+                  <!-- <div class="w-7"/> -->
+                  <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
+                    <PrimaryText class="text-base">Copy mods list</PrimaryText>
+                  </Text>
+                  <div class="grow" />
+                </Item>
+              </List>
+            </Menu>
+          </div>
+        </List>
+      </Menu>
+    </div>
     <Button variant="unelevated" class="w-full mt-2">
       <Label>
         Help
