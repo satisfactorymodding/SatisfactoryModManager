@@ -12,7 +12,15 @@ export function initializeGraphQLClient(): Client {
         schema,
         keys: {
           GetMods: () => null,
+          GetSMLVersions: () => null,
+          LatestVersions: () => null,
           UserMod: () => null,
+          GetGuides: () => null,
+          OAuthOptions: () => null,
+          UserRoles: () => null,
+          Compatibility: () => null,
+          CompatibilityInfo: () => null,
+          VersionDependency: () => null,
         },
       }),
       persistedFetchExchange({

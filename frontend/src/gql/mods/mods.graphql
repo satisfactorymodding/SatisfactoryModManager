@@ -7,6 +7,7 @@ query GetMods($offset: Int!, $limit: Int!) {
       name
       logo
       short_description
+      hidden
       popularity
       hotness
       views
@@ -18,6 +19,16 @@ query GetMods($offset: Int!, $limit: Int!) {
           username
         }
         role
+      }
+      compatibility {
+        EA {
+          state
+          note
+        }
+        EXP {
+          state
+          note
+        }
       }
     }
   }

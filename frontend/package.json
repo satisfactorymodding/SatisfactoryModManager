@@ -41,7 +41,7 @@
     "graphql": "^16.2.0",
     "lodash": "^4.17.21",
     "marked": "^4.0.10",
-    "semver": "^7.3.5",
+    "semver": "^7.3.7",
     "urql": "^2.2.0"
   },
   "devDependencies": {
@@ -97,6 +97,7 @@
     "@sveltejs/vite-plugin-svelte": "^1.0.0-next.30",
     "@types/cookie": "^0.4.1",
     "@types/lodash": "^4.14.182",
+    "@types/semver": "^7.3.12",
     "@typescript-eslint/eslint-plugin": "^5.10.1",
     "@typescript-eslint/parser": "^5.10.1",
     "eslint": "^8.12.0",

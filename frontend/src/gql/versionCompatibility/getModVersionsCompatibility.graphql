@@ -1,0 +1,13 @@
+query ModVersionsCompatibility($modReference: ModReference!) {
+  getModByReference(modReference: $modReference) {
+    id
+    versions {
+      id
+      version
+      dependencies {
+        mod_id
+        condition
+      }
+    }
+  }
+}

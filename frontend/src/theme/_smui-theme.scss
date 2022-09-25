@@ -42,6 +42,7 @@ $white-normal: #efefef;
 @use '@material/button/index' as button;
 
 @use '@material/list/index' as list;
+@use '@material/tooltip/index' as tooltip;
 
 .mod-progress-bar {
   @include linear-progress.bar-color($grey-darkest);
@@ -125,6 +126,7 @@ $left-bar-controls-height: 40px;
 
 .mods-list {
   background-color: $grey-darker;
+  @include tooltip.fill-color($almost-black);
 }
 
 .mod-install-button.mdc-button--unelevated {
@@ -176,6 +178,14 @@ $left-bar-controls-height: 40px;
 
 .color-primary {
   color: theme.$primary !important;
+}
+
+.error {
+  color: $red-normal;
+}
+
+.warning {
+  color: $yellow;
 }
 
 html,

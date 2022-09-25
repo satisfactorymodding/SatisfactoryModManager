@@ -1,7 +1,7 @@
 <script lang="ts">
   import Drawer from '@smui/drawer';
   import { operationStore, query } from '@urql/svelte';
-  import { GetModDetailsDocument } from '$lib/generated';
+  import { CompatibilityState, GetModDetailsDocument, type Compatibility } from '$lib/generated';
   import { markdown } from '$lib/utils/markdown';
   import Button, { Label } from '@smui/button';
   import MDIIcon from '$lib/components/MDIIcon.svelte';
@@ -17,6 +17,9 @@
   import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
   import Dialog from '@smui/dialog';
   import { getAuthor } from '$lib/utils/getModAuthor';
+  import { selectedInstall } from '$lib/store/ficsitCLIStore';
+  import { getReportedCompatibility, getVersionCompatibility } from '$lib/utils/modCompatibility';
+  import type { GameBranch } from '$lib/wailsTypesExtensions';
 
   export let id: string | null = null;
 
@@ -35,6 +38,12 @@
 
   $: renderedLogo = mod?.logo || 'https://ficsit.app/images/no_image.webp';
   $: descriptionRendered = mod?.full_description ? markdown(mod.full_description) : undefined;
+  $: author = getAuthor(mod);
+
+  $: isInstalled = mod?.mod_reference in $manifestMods;
+  $: isEnabled = mod?.mod_reference in $lockfileMods;
+  $: isDependency = !isInstalled && isEnabled;
+  $: inProgress = $progress?.item === mod?.mod_reference;
 
   $: size = mod ? bytesToAppropriate(mod.versions[0]?.size ?? 0) : undefined;
 
@@ -43,6 +52,32 @@
   $: ficsitAppLink = `https://ficsit.app/mod/${id}`;
 
   $: canInstall = !$progress;
+
+  let reportedCompatibility: Compatibility | undefined = { state: CompatibilityState.Works };
+  let versionCompatibility: Compatibility = { state: CompatibilityState.Works };
+  $: {
+    if(mod && $selectedInstall && $selectedInstall.info) {
+      reportedCompatibility = getReportedCompatibility(mod, $selectedInstall.info.branch as GameBranch);
+      if(reportedCompatibility) {
+        reportedCompatibility = {
+          state: reportedCompatibility.state,
+          note: reportedCompatibility.note 
+            ? `This mod has been reported as ${reportedCompatibility.state} on this game version.<br>${markdown(reportedCompatibility.note)}` 
+            : `This mod has been reported as ${reportedCompatibility.state} on this game version.`
+        };
+      }
+      if (mod.hidden && !isDependency) {
+        versionCompatibility = { state: CompatibilityState.Broken, note: 'This mod was hidden by the author.' };
+      }
+      else {
+        getVersionCompatibility(mod.mod_reference, $selectedInstall.info.version).then((compatibility) => {
+          versionCompatibility = compatibility;
+        });
+      }
+    }
+  }
+
+  $: compatibility = reportedCompatibility ?? versionCompatibility;
 
   let authorsMenu: MenuComponentDev;
 
@@ -96,7 +131,7 @@
       <img src={renderedLogo} alt="{mod?.name} Logo" class="logo w-full" />
       <span class="pt-4 font-bold text-lg">{mod?.name ?? 'Loading...'}</span>
       <span class="pt-2 font-light">A mod by:</span>
-      <span class="font-medium color-primary cursor-pointer" on:click={() => $search = `author:"${getAuthor(mod)}"`}>{getAuthor(mod) ?? 'Loading...'}</span>
+      <span class="font-medium color-primary cursor-pointer" on:click={() => $search = `author:"${author}"`}>{author ?? 'Loading...'}</span>
 
       <div class="pt-2" on:mouseenter={() => authorsMenu.setOpen(true)} on:mouseleave={() => authorsMenu.setOpen(false)}>
         <Button variant="unelevated" color="secondary" class="w-full">

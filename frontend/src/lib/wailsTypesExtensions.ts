@@ -1,0 +1,1 @@
+export type GameBranch = 'Early Access' | 'Experimental';
