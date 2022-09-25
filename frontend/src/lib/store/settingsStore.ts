@@ -1,5 +1,5 @@
 import { GetStartView, SetStartView } from '$wailsjs/go/bindings/Settings';
-import { writableBindingSync } from './utils/wailsStoreBindings';
+import { writableBindingSync } from './wailsStoreBindings';
 
 export type View = 'compact' | 'expanded';
 

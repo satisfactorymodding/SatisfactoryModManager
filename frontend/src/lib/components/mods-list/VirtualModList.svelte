@@ -1,7 +1,7 @@
 <script lang="ts">
   import { tick } from 'svelte';
 
-  import type { PartialMod } from '$lib/modFiltersStore';
+  import type { PartialMod } from '$lib/store/modFiltersStore';
 
   export let items: PartialMod[];
   export let itemHeight: number | undefined = undefined;

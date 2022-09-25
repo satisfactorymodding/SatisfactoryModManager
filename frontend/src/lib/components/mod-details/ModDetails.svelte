@@ -10,8 +10,8 @@
   import List, { Item, PrimaryText, SecondaryText, Text } from '@smui/list';
   import { bytesToAppropriate } from '$lib/utils/dataFormats';
   import { createEventDispatcher } from 'svelte';
-  import { lockfileMods, manifestMods, progress } from '$lib/ficsitCLIStore';
-  import { search } from '$lib/modFiltersStore';
+  import { lockfileMods, manifestMods, progress } from '$lib/store/ficsitCLIStore';
+  import { search } from '$lib/store/modFiltersStore';
   import MdiIcon from '$lib/components/MDIIcon.svelte';
   import { InstallModVersion } from '$wailsjs/go/bindings/FicsitCLI';
   import { BrowserOpenURL } from '$wailsjs/runtime/runtime';

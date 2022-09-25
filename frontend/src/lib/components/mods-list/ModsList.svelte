@@ -6,9 +6,9 @@
   import _ from 'lodash';
   import Fuse from 'fuse.js';
   import ModListFilters from './ModsListFilters.svelte';
-  import { filter, order, search, type PartialMod } from '$lib/modFiltersStore';
-  import { favouriteMods, lockfileMods, manifestMods } from '$lib/ficsitCLIStore';
-  import { startView } from '$lib/settingsStore';
+  import { filter, order, search, type PartialMod } from '$lib/store/modFiltersStore';
+  import { favouriteMods, lockfileMods, manifestMods } from '$lib/store/ficsitCLIStore';
+  import { startView } from '$lib/store/settingsStore';
 
   let mods: PartialMod[] = [];
 

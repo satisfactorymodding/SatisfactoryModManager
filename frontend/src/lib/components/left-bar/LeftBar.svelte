@@ -7,7 +7,7 @@
   import { mdiCheckCircle, mdiCloseCircle, mdiDiscord, mdiGithub, mdiHelpCircle, mdiPencil, mdiPlusCircle, mdiTrashCan, mdiWeb } from '@mdi/js';
   import MdiIcon from '$lib/components/MDIIcon.svelte';
   
-  import { addProfile, deleteProfile, installs, profiles, progress, renameProfile, selectedInstall, selectedProfile } from '$lib/ficsitCLIStore';
+  import { addProfile, deleteProfile, installs, profiles, progress, renameProfile, selectedInstall, selectedProfile } from '$lib/store/ficsitCLIStore';
   import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
 
   import Settings from './Settings.svelte';

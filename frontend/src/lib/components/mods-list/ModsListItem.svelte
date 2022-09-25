@@ -2,10 +2,10 @@
   import { mdiDownload, mdiEye, mdiStar, mdiCheckCircle, mdiPlusBoxMultiple, mdiPlay, mdiPause } from '@mdi/js';
   import MDIIcon from '$lib/components/MDIIcon.svelte';
   import { createEventDispatcher } from 'svelte';
-  import { search, type PartialMod } from '$lib/modFiltersStore';
+  import { search, type PartialMod } from '$lib/store/modFiltersStore';
   import Button, { Group, GroupItem, Label } from '@smui/button';
   import LinearProgress from '@smui/linear-progress';
-  import { favouriteMods, lockfileMods, manifestMods, progress } from '$lib/ficsitCLIStore';
+  import { favouriteMods, lockfileMods, manifestMods, progress } from '$lib/store/ficsitCLIStore';
   import { DisableMod, EnableMod, InstallMod, RemoveMod } from '$wailsjs/go/bindings/FicsitCLI';
   import { FavouriteMod, UnFavouriteMod } from '$wailsjs/go/bindings/Settings';
   import { getAuthor } from '$lib/utils/getModAuthor';

@@ -1,7 +1,7 @@
 import type { GetModsQuery } from '$lib/generated';
-import { favouriteMods, lockfileMods, manifestMods } from '$lib/ficsitCLIStore';
+import { favouriteMods, lockfileMods, manifestMods } from '$lib/store/ficsitCLIStore';
 import { get, writable } from 'svelte/store';
-import { writableBindingSync } from './utils/wailsStoreBindings';
+import { writableBindingSync } from './wailsStoreBindings';
 import { GetModFiltersOrder, GetModFiltersFilter, SetModFiltersOrder, SetModFiltersFilter } from '$wailsjs/go/bindings/Settings';
 
 export interface OrderBy {

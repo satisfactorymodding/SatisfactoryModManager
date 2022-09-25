@@ -2,7 +2,7 @@ import { get, writable } from 'svelte/store';
 import { cli, bindings } from '$wailsjs/go/models';
 import { AddProfile, CheckForUpdates, DeleteProfile, GetInstallationsInfo, GetInvalidInstalls, GetProfiles, RenameProfile, SelectInstall, SetProfile } from '$wailsjs/go/bindings/FicsitCLI';
 import { GetFavouriteMods } from '$wailsjs/go/bindings/Settings';
-import { readableBinding, writableBinding } from '$lib/utils/wailsStoreBindings';
+import { readableBinding, writableBinding } from './wailsStoreBindings';
 
 export const invalidInstalls = readableBinding<(Error & {path?: string})[]>([], { initialGet: GetInvalidInstalls });
 

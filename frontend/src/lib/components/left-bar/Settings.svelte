@@ -9,8 +9,8 @@
   
   import { GenerateDebugInfo } from '$wailsjs/go/bindings/DebugInfo';
   
-  import { startView, type View } from '$lib/settingsStore';
-  import { manifestMods, lockfileMods } from '$lib/ficsitCLIStore';
+  import { startView, type View } from '$lib/store/settingsStore';
+  import { manifestMods, lockfileMods } from '$lib/store/ficsitCLIStore';
   import { GetModNameDocument } from '$lib/generated';
   
   import { getClient } from '@urql/svelte';

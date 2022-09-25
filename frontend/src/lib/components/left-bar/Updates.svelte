@@ -1,9 +1,9 @@
 <script lang="ts">
   import Button, { Label } from '@smui/button';
   import MdiIcon from '$lib/components/MDIIcon.svelte';
-  import { mdiCheckCircle, mdiSync, mdiUpdate, mdiUpload } from '@mdi/js';
+  import { mdiCheckCircle, mdiSync, mdiUpload } from '@mdi/js';
 
-  import { checkForUpdates, progress, updates, updateCheckInProgress } from '$lib/ficsitCLIStore';
+  import { checkForUpdates, progress, updates, updateCheckInProgress } from '$lib/store/ficsitCLIStore';
   import Dialog, { Actions, Content, Title } from '@smui/dialog';
   import { UpdateAllMods } from '$wailsjs/go/bindings/FicsitCLI';
   import List, { Item, PrimaryText, SecondaryText, Text } from '@smui/list';

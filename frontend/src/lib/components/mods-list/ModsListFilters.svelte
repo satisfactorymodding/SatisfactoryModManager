@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { filter, filterOptions, order, orderByOptions, search } from '$lib/modFiltersStore';
+  import { filter, filterOptions, order, orderByOptions, search } from '$lib/store/modFiltersStore';
   import Textfield, { Input, type InputComponentDev } from '@smui/textfield';
   import LineRipple, { type LineRippleComponentDev } from '@smui/line-ripple';
   import Select, { Option } from '@smui/select';

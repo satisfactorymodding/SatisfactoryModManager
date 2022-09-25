@@ -7,8 +7,8 @@
   import { Environment } from '$wailsjs/runtime/runtime';
   import ModDetails from '$lib/components/mod-details/ModDetails.svelte';
   import { ExpandMod, UnexpandMod } from '$wailsjs/go/bindings/App';
-  import LeftBar from '$lib/components/LeftBar.svelte';
-  import { installs, invalidInstalls } from '$lib/ficsitCLIStore';
+  import LeftBar from '$lib/components/left-bar/LeftBar.svelte';
+  import { installs, invalidInstalls } from '$lib/store/ficsitCLIStore';
   import Dialog, { Actions, Content, Title } from '@smui/dialog';
   import Button, { Label } from '@smui/button';
   import { GenerateDebugInfo } from '$wailsjs/go/bindings/DebugInfo';
