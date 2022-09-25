@@ -27,7 +27,7 @@ $white-normal: #efefef;
   $error: $red-bright,
 );
 
-@use '@material/typography/index' with (
+@use '@material/typography/index' as typography with (
   $styles-button: (
     text-transform: none,
     font-weight: 400,
@@ -52,8 +52,19 @@ $left-bar-controls-background: $grey-darker;
 $left-bar-controls-height: 40px;
 
 .left-bar {
-  .mdc-deprecated-list {
-    @include list.deprecated-single-line-density(-2);
+  .settings-menu {
+    .mdc-deprecated-list {
+      @include list.deprecated-single-line-density(-2);
+    }
+  }
+  .updates-dialog {
+    .mdc-deprecated-list-item__primary-text {
+      @include typography.text-baseline(
+        $top: 22px,
+        $bottom: 22px,
+        $display: block
+      );
+    }
   }
 
   .mdc-menu {
