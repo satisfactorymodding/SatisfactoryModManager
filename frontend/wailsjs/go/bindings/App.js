@@ -10,6 +10,10 @@ export function GetVersion() {
   return window['go']['bindings']['App']['GetVersion']();
 }
 
+export function OpenFileDialog(arg1) {
+  return window['go']['bindings']['App']['OpenFileDialog'](arg1);
+}
+
 export function UnexpandMod() {
   return window['go']['bindings']['App']['UnexpandMod']();
 }

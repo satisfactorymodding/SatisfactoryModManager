@@ -22,6 +22,10 @@ export function EnableMod(arg1) {
   return window['go']['bindings']['FicsitCLI']['EnableMod'](arg1);
 }
 
+export function ExportCurrentProfile() {
+  return window['go']['bindings']['FicsitCLI']['ExportCurrentProfile']();
+}
+
 export function GetCurrentLockfile(arg1) {
   return window['go']['bindings']['FicsitCLI']['GetCurrentLockfile'](arg1);
 }
@@ -54,12 +58,20 @@ export function GetSelectedProfile() {
   return window['go']['bindings']['FicsitCLI']['GetSelectedProfile']();
 }
 
+export function ImportProfile(arg1, arg2) {
+  return window['go']['bindings']['FicsitCLI']['ImportProfile'](arg1, arg2);
+}
+
 export function InstallMod(arg1) {
   return window['go']['bindings']['FicsitCLI']['InstallMod'](arg1);
 }
 
 export function InstallModVersion(arg1, arg2) {
   return window['go']['bindings']['FicsitCLI']['InstallModVersion'](arg1, arg2);
+}
+
+export function ReadExportedProfileMetadata(arg1) {
+  return window['go']['bindings']['FicsitCLI']['ReadExportedProfileMetadata'](arg1);
 }
 
 export function RemoveMod(arg1) {

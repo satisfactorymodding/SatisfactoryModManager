@@ -4,14 +4,18 @@
   import Dialog, { Title, Content, Actions } from '@smui/dialog';
   import TextField from '@smui/textfield'; 
 
-  import { mdiCheckCircle, mdiCloseCircle, mdiDiscord, mdiGithub, mdiHelpCircle, mdiPencil, mdiPlusCircle, mdiTrashCan, mdiWeb } from '@mdi/js';
+  import { mdiCheckCircle, mdiCloseCircle, mdiDiscord, mdiDownload, mdiGithub, mdiHelpCircle, mdiPencil, mdiPlusCircle, mdiTrashCan, mdiUpload, mdiWeb } from '@mdi/js';
   import MdiIcon from '$lib/components/MDIIcon.svelte';
   
-  import { addProfile, deleteProfile, installs, profiles, progress, renameProfile, selectedInstall, selectedProfile } from '$lib/store/ficsitCLIStore';
+  import { addProfile, deleteProfile, importProfile, installs, profiles, progress, renameProfile, selectedInstall, selectedProfile } from '$lib/store/ficsitCLIStore';
   import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
+  import { OpenFileDialog } from '$wailsjs/go/bindings/App';
 
   import Settings from './Settings.svelte';
   import Updates from './Updates.svelte';
+  import { bindings } from '$wailsjs/go/models';
+  import HelperText from '@smui/textfield/helper-text';
+  import { ExportCurrentProfile, ReadExportedProfileMetadata } from '$wailsjs/go/bindings/FicsitCLI';
 
   $: canInstall = !$progress;
 
@@ -41,6 +45,52 @@
     deleteProfileName = '';
   }
 
+  let importProfileDialog = false;
+  let importProfileName = '';
+  let importProfileFilepath = '';
+  let importProfileError = '';
+  let fileDialogOpen = false;
+  let importProfileMetadata: bindings.ExportedProfileMetadata | null = null;
+  async function pickImportProfileFile() {
+    if(fileDialogOpen) {
+      return;
+    }
+    fileDialogOpen = true;
+    try {
+      importProfileFilepath = await OpenFileDialog(bindings.OpenDialogOptions.createFrom({
+        filters: [
+          bindings.FileFilter.createFrom({
+            displayName: 'SMM Profile (*.smmprofile)',
+            pattern: '*.smmprofile',
+          }),
+        ]
+      }));
+      importProfileMetadata = await ReadExportedProfileMetadata(importProfileFilepath);
+    } catch (e) {
+      fileDialogOpen = false;
+      if(e instanceof Error) {
+        importProfileError = e.message;
+      } else if (typeof e === 'string') {
+        importProfileError = e;
+      } else {
+        importProfileError = 'Unknown error';
+      }
+    }
+    fileDialogOpen = false;
+  }
+  async function finishImportProfile() {
+    try {
+      await importProfile(importProfileName, importProfileFilepath);
+    } catch(e) {
+      if(e instanceof Error) {
+        importProfileError = e.message;
+      } else if (typeof e === 'string') {
+        importProfileError = e;
+      } else {
+        importProfileError = 'Unknown error';
+      }
+    }
+  }
 </script>
 
 <div class="flex flex-col h-full p-4 left-bar w-[24rem] min-w-[24rem] ">
@@ -114,6 +164,22 @@
         </Label>
         <div class="grow"/>
         <MdiIcon icon={mdiTrashCan} />
+      </Button>
+    </div>
+    <div class="flex w-full mt-2">
+      <Button class="w-1/2 pr-2 pl-5 mr-1 profile-import" on:click={() => importProfileDialog = true} disabled={!canInstall}>
+        <Label>
+          Import
+        </Label>
+        <div class="grow"/>
+        <MdiIcon icon={mdiDownload} />
+      </Button>
+      <Button class="w-1/2 pr-2 pl-4 ml-1 profile-export" on:click={() => { ExportCurrentProfile(); }} disabled={!canInstall}>
+        <Label>
+          Export
+        </Label>
+        <div class="grow"/>
+        <MdiIcon icon={mdiUpload} />
       </Button>
     </div>
   </div>
@@ -234,6 +300,41 @@
     </Button>
     <Button on:click={finishDeleteProfile}>
       <Label>Delete</Label>
+    </Button>
+  </Actions>
+</Dialog>
+
+<Dialog
+  bind:open={importProfileDialog}
+  surface$style="width: 500px; max-width: calc(100vw - 32px);"
+>
+  <Title>Import profile</Title>
+  <Content>
+    <TextField
+      bind:value={importProfileName}
+      label="Profile name"
+      class="w-full"
+    />
+    <TextField
+      bind:value={importProfileFilepath}
+      invalid={!!importProfileError}
+      label="Profile file"
+      class="w-full"
+      input$readonly
+      error
+      on:click={() => pickImportProfileFile()}
+    >
+      <HelperText validationMsg slot="helper">
+        { importProfileError }
+      </HelperText>
+    </TextField>
+  </Content>
+  <Actions>
+    <Button on:click={() => importProfileDialog = false}>
+      <Label>Cancel</Label>
+    </Button>
+    <Button on:click={finishImportProfile}>
+      <Label>Import</Label>
     </Button>
   </Actions>
 </Dialog>

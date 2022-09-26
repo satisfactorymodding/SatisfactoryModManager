@@ -1,8 +1,9 @@
 import { get, writable } from 'svelte/store';
 import { cli, bindings } from '$wailsjs/go/models';
-import { AddProfile, CheckForUpdates, DeleteProfile, GetInstallationsInfo, GetInvalidInstalls, GetProfiles, RenameProfile, SelectInstall, SetProfile } from '$wailsjs/go/bindings/FicsitCLI';
+import { AddProfile, CheckForUpdates, DeleteProfile, GetInstallationsInfo, GetInvalidInstalls, GetProfiles, ImportProfile, RenameProfile, SelectInstall, SetProfile } from '$wailsjs/go/bindings/FicsitCLI';
 import { GetFavouriteMods } from '$wailsjs/go/bindings/Settings';
 import { readableBinding, writableBinding } from './wailsStoreBindings';
+import { tick } from 'svelte';
 
 export const invalidInstalls = readableBinding<(Error & {path?: string})[]>([], { initialGet: GetInvalidInstalls });
 
@@ -84,6 +85,21 @@ export async function deleteProfile(name: string) {
   get(installs).forEach((i) => { if(i.installation.profile === name) { i.installation.profile = 'Default'; } });
   if(get(selectedProfile) === name) {
     selectedProfile.set('Default');
+  }
+}
+
+export async function importProfile(name: string, filepath: string) {
+  const err = await ImportProfile(name, filepath);
+  if(err) {
+    throw err;
+  }
+  const newProfiles = get(profiles);
+  if(!newProfiles.includes(name)) {
+    newProfiles.push(name);
+    profiles.set(newProfiles);
+    tick().then(() => {
+      selectedProfile.set(name);
+    });
   }
 }
 

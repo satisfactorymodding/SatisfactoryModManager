@@ -2,7 +2,11 @@ package bindings
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"os"
 	"sort"
+	"time"
 
 	"github.com/pkg/errors"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
@@ -350,6 +354,128 @@ func (f *FicsitCLI) DeleteProfile(name string) error {
 	return nil
 }
 
+type ExportedProfile struct {
+	Profile  *cli.Profile             `json:"profile"`
+	LockFile *cli.LockFile            `json:"lockfile"`
+	Metadata *ExportedProfileMetadata `json:"metadata"`
+}
+
+type ExportedProfileMetadata struct {
+	GameVersion int `json:"gameVersion"`
+}
+
+func (f *FicsitCLI) ExportCurrentProfile() error {
+	selectedInstall := f.GetSelectedInstall()
+	if selectedInstall == nil {
+		return errors.New("No installation selected")
+	}
+
+	profileName := f.GetSelectedProfile()
+	if profileName == nil {
+		return errors.New("No profile selected")
+	}
+
+	profile := f.GetProfile(*profileName)
+	if profile == nil {
+		return errors.New("No profile selected")
+	}
+	lockfile, err := f.GetCurrentLockfile(selectedInstall)
+	if err != nil {
+		return errors.Wrap(err, "Failed to get lockfile")
+	}
+	metadata := &ExportedProfileMetadata{
+		GameVersion: selectedInstall.Info.Version,
+	}
+
+	exportedProfile := &ExportedProfile{
+		Profile:  profile,
+		LockFile: lockfile,
+		Metadata: metadata,
+	}
+
+	defaultFileName := fmt.Sprintf("%s-%s.smmprofile", profile.Name, time.Now().UTC().Format("2006-01-02-15-04-05"))
+	filename, err := wailsRuntime.SaveFileDialog(f.ctx, wailsRuntime.SaveDialogOptions{
+		DefaultFilename: defaultFileName,
+		Filters: []wailsRuntime.FileFilter{
+			{
+				Pattern:     "*.smmprofile",
+				DisplayName: "SMM Profile (*.smmprofile)",
+			},
+		},
+	})
+	if err != nil {
+		return errors.Wrap(err, "Failed to open save dialog")
+	}
+
+	exportedProfileJson, err := json.MarshalIndent(exportedProfile, "", "  ")
+	if err != nil {
+		return errors.Wrap(err, "failed to marshal exported profile")
+	}
+	err = os.WriteFile(filename, exportedProfileJson, 0755)
+	if err != nil {
+		return errors.Wrap(err, "failed to write exported profile")
+	}
+
+	if err != nil {
+		return errors.Wrapf(err, "Failed to save exported profile: %s", *profileName)
+	}
+
+	return nil
+}
+
+func (f *FicsitCLI) ReadExportedProfileMetadata(file string) (*ExportedProfileMetadata, error) {
+	fileBytes, err := os.ReadFile(file)
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to read exported profile")
+	}
+
+	var exportedProfile ExportedProfile
+	err = json.Unmarshal(fileBytes, &exportedProfile)
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to unmarshal exported profile")
+	}
+
+	return exportedProfile.Metadata, nil
+}
+
+func (f *FicsitCLI) ImportProfile(name string, file string) error {
+	selectedInstall := f.GetSelectedInstall()
+	if selectedInstall == nil {
+		return errors.New("No installation selected")
+	}
+
+	profileData, err := os.ReadFile(file)
+	if err != nil {
+		return errors.Wrap(err, "Failed to read profile file")
+	}
+
+	var exportedProfile ExportedProfile
+	err = json.Unmarshal(profileData, &exportedProfile)
+	if err != nil {
+		return errors.Wrap(err, "Failed to unmarshal profile file")
+	}
+
+	profile, err := f.ficsitCli.Profiles.AddProfile(name)
+	if err != nil {
+		return errors.Wrap(err, "Failed to add profile")
+	}
+
+	profile.Mods = exportedProfile.Profile.Mods
+
+	selectedInstall.Installation.SetProfile(f.ficsitCli, name)
+
+	err = selectedInstall.Installation.WriteLockFile(f.ficsitCli, *exportedProfile.LockFile)
+	if err != nil {
+		f.ficsitCli.Profiles.DeleteProfile(name)
+		return errors.Wrap(err, "Failed to write lockfile")
+	}
+
+	f.ficsitCli.Profiles.Save()
+	f.emitModsChange()
+
+	return nil
+}
+
 type Update struct {
 	Item           string `json:"item"`
 	CurrentVersion string `json:"currentVersion"`
@@ -466,6 +592,7 @@ func (f *FicsitCLI) emitModsChange() {
 	}
 	wailsRuntime.EventsEmit(f.ctx, "lockfileMods", lockfile)
 	wailsRuntime.EventsEmit(f.ctx, "manifestMods", profile.Mods)
+	wailsRuntime.EventsEmit(f.ctx, "selectedProfile", profileName)
 }
 
 func (f *FicsitCLI) SetProgress(progress *Progress) {

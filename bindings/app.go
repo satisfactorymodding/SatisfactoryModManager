@@ -61,3 +61,40 @@ func (a *App) UnexpandMod() bool {
 func (a *App) GetVersion() string {
 	return project_file.Version()
 }
+
+type FileFilter struct {
+	DisplayName string `json:"displayName"`
+	Pattern     string `json:"pattern"`
+}
+
+type OpenDialogOptions struct {
+	DefaultDirectory           string       `json:"defaultDirectory"`
+	DefaultFilename            string       `json:"defaultFilename"`
+	Title                      string       `json:"title"`
+	Filters                    []FileFilter `json:"filters"`
+	ShowHiddenFiles            bool         `json:"showHiddenFiles"`
+	CanCreateDirectories       bool         `json:"canCreateDirectories"`
+	ResolvesAliases            bool         `json:"resolvesAliases"`
+	TreatPackagesAsDirectories bool         `json:"treatPackagesAsDirectories"`
+}
+
+func (a *App) OpenFileDialog(options OpenDialogOptions) (string, error) {
+	wailsFilters := make([]wailsRuntime.FileFilter, len(options.Filters))
+	for i, filter := range options.Filters {
+		wailsFilters[i] = wailsRuntime.FileFilter{
+			DisplayName: filter.DisplayName,
+			Pattern:     filter.Pattern,
+		}
+	}
+	wailsOptions := wailsRuntime.OpenDialogOptions{
+		DefaultDirectory:           options.DefaultDirectory,
+		DefaultFilename:            options.DefaultFilename,
+		Title:                      options.Title,
+		Filters:                    wailsFilters,
+		ShowHiddenFiles:            options.ShowHiddenFiles,
+		CanCreateDirectories:       options.CanCreateDirectories,
+		ResolvesAliases:            options.ResolvesAliases,
+		TreatPackagesAsDirectories: options.TreatPackagesAsDirectories,
+	}
+	return wailsRuntime.OpenFileDialog(a.ctx, wailsOptions)
+}
