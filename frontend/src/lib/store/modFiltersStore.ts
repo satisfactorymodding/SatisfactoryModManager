@@ -1,8 +1,9 @@
-import type { GetModsQuery } from '$lib/generated';
-import { favouriteMods, lockfileMods, manifestMods } from '$lib/store/ficsitCLIStore';
+import { CompatibilityState, type GetModsQuery } from '$lib/generated';
+import { favouriteMods, lockfileMods, manifestMods, selectedInstall } from '$lib/store/ficsitCLIStore';
 import { get, writable } from 'svelte/store';
 import { writableBindingSync } from './wailsStoreBindings';
 import { GetModFiltersOrder, GetModFiltersFilter, SetModFiltersOrder, SetModFiltersFilter } from '$wailsjs/go/bindings/Settings';
+import { getReportedCompatibility, getVersionCompatibility } from '$lib/utils/modCompatibility';
 
 export interface OrderBy {
   name: string;
@@ -11,7 +12,7 @@ export interface OrderBy {
 
 export interface Filter {
   name: string;
-  func: (mod: PartialMod) => boolean,
+  func: (mod: PartialMod) => Promise<boolean> | boolean,
 }
 
 export const orderByOptions: OrderBy[] = [
@@ -25,8 +26,24 @@ export const orderByOptions: OrderBy[] = [
 
 export const filterOptions: Filter[] = [
   { name: 'All mods', func: () => true },
+  { 
+    name: 'Compatible',
+    func: async (mod: PartialMod) => { 
+      const installInfo = get(selectedInstall)?.info;
+      if(!installInfo) {
+        return false;
+      }
+      const reportedCompatibility = getReportedCompatibility(mod, installInfo.branch);
+      if(!reportedCompatibility) {
+        const versionCompatibility = await getVersionCompatibility(mod.mod_reference, installInfo.version);
+        return versionCompatibility.state !== CompatibilityState.Broken;
+      }
+      return reportedCompatibility.state !== CompatibilityState.Broken;
+    } 
+  },
   { name: 'Favourite', func: (mod: PartialMod) => get(favouriteMods).includes(mod.mod_reference) },
   { name: 'Installed', func: (mod: PartialMod) => mod.mod_reference in get(manifestMods) },
+  { name: 'Dependency', func: (mod: PartialMod) => !(mod.mod_reference in get(manifestMods)) && mod.mod_reference in get(lockfileMods) },
   { name: 'Not installed', func: (mod: PartialMod) => !(mod.mod_reference in get(manifestMods)) },
   { name: 'Enabled', func: (mod: PartialMod) => mod.mod_reference in get(lockfileMods) },
   { name: 'Disabled', func: (mod: PartialMod) => mod.mod_reference in get(manifestMods) && !(mod.mod_reference in get(lockfileMods)) },

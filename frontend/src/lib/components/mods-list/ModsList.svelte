@@ -32,53 +32,68 @@
 
   fetchAllMods();
 
-  $: filteredMods = () => {
+  let filteredMods: PartialMod[] = [];
+  $: {
     // Watch the required store states
     $manifestMods;
     $lockfileMods;
     $favouriteMods;
     
-    const filteredMods = mods.filter($filter.func);
-    const sortedMods = _.sortBy(filteredMods, $order.func) as PartialMod[];
-    if(!$search) {
-      return sortedMods;
-    }
-    
-    const modifiedSearchString = $search.replace(/(?:author:"(.+?)"|author:([^\s"]+))/g, '="$1$2"');
-    
-    const fuse = new Fuse(sortedMods, {
-      keys: [
-        {
-          name: 'name',
-          weight: 2,
-        },
-        {
-          name: 'short_description',
-          weight: 1,
-        },
-        {
-          name: 'full_description',
-          weight: 0.75,
-        },
-        {
-          name: 'authors.user.username',
-          weight: 0.4,
-        },
-      ],
-      useExtendedSearch: true,
-      threshold: 0.2,
-      ignoreLocation: true,
+    Promise.all(mods.map($filter.func)).then((results) => {
+      filteredMods = mods.filter((_, i) => results[i]);
     });
-    return fuse.search(modifiedSearchString).map((result) => result.item);
-  };
+  }
+
+  let sortedMods: PartialMod[] = [];
+  $: {
+    // Watch the required store states
+    $manifestMods;
+    $lockfileMods;
+    $favouriteMods;
+    
+    sortedMods = _.sortBy(filteredMods, $order.func) as PartialMod[];
+  }
+
+  let displayMods: PartialMod[] = [];
+  $: {
+    if(!$search) {
+      displayMods = sortedMods;
+    } else {
+      const modifiedSearchString = $search.replace(/(?:author:"(.+?)"|author:([^\s"]+))/g, '="$1$2"');
+    
+      const fuse = new Fuse(sortedMods, {
+        keys: [
+          {
+            name: 'name',
+            weight: 2,
+          },
+          {
+            name: 'short_description',
+            weight: 1,
+          },
+          {
+            name: 'full_description',
+            weight: 0.75,
+          },
+          {
+            name: 'authors.user.username',
+            weight: 0.4,
+          },
+        ],
+        useExtendedSearch: true,
+        threshold: 0.2,
+        ignoreLocation: true,
+      });
+      displayMods = fuse.search(modifiedSearchString).map((result) => result.item);
+    }
+  }
 
   let hasCheckedStartView = false;
   $: if($startView && mods.length > 0 && !hasCheckedStartView) {
     hasCheckedStartView = true;
     if($startView === 'expanded') {
-      const filtered = filteredMods();
-      if(filtered.length > 0) {
-        selectedMod = filtered[0].mod_reference;
+      if(displayMods.length > 0) {
+        selectedMod = displayMods[0].mod_reference;
       }
     }
   }
@@ -93,7 +108,7 @@
   </div>
   <div class="py-4 grow h-0 mods-list" style="position: relative;">
     <div class="ml-5 mr-3 h-full">
-      <VirtualList items={filteredMods()} let:item={mod}>
+      <VirtualList items={displayMods} let:item={mod}>
         <ModsListItem {mod} on:click={() => selectedMod = mod.mod_reference} bind:compact={compact} selected={selectedMod == mod.mod_reference}/>
       </VirtualList>
     </div>
