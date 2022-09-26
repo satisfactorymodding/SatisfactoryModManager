@@ -9,6 +9,7 @@
   import { filter, order, search, type PartialMod } from '$lib/store/modFiltersStore';
   import { favouriteMods, lockfileMods, manifestMods } from '$lib/store/ficsitCLIStore';
   import { startView } from '$lib/store/settingsStore';
+  import { expandedMod } from '$lib/store/generalStore';
 
   let mods: PartialMod[] = [];
 
@@ -93,12 +94,11 @@
     hasCheckedStartView = true;
     if($startView === 'expanded') {
       if(displayMods.length > 0) {
-        selectedMod = displayMods[0].mod_reference;
+        $expandedMod = displayMods[0].mod_reference;
       }
     }
   }
 
-  export let selectedMod: string | null = null;
   export let compact: boolean;
 </script>
 
@@ -109,7 +109,7 @@
   <div class="py-4 grow h-0 mods-list" style="position: relative;">
     <div class="ml-5 mr-3 h-full">
       <VirtualList items={displayMods} let:item={mod}>
-        <ModsListItem {mod} on:click={() => selectedMod = mod.mod_reference} bind:compact={compact} selected={selectedMod == mod.mod_reference}/>
+        <ModsListItem {mod} on:click={() => $expandedMod = mod.mod_reference} bind:compact={compact} selected={$expandedMod == mod.mod_reference}/>
       </VirtualList>
     </div>
   </div>

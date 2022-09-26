@@ -20,16 +20,15 @@
   import { selectedInstall } from '$lib/store/ficsitCLIStore';
   import { getReportedCompatibility, getVersionCompatibility } from '$lib/utils/modCompatibility';
   import type { GameBranch } from '$lib/wailsTypesExtensions';
-
-  export let id: string | null = null;
+  import { expandedMod } from '$lib/store/generalStore';
 
   const modQuery = operationStore(
     GetModDetailsDocument,
-    { modReference: id }
+    { modReference: $expandedMod }
   );
   
   $: modQuery.variables = {
-    modReference: id
+    modReference: $expandedMod
   };
 
   query(modQuery);
@@ -49,7 +48,7 @@
 
   $: installedVersion = $lockfileMods[mod?.mod_reference]?.version ?? 'Not installed';
 
-  $: ficsitAppLink = `https://ficsit.app/mod/${id}`;
+  $: ficsitAppLink = `https://ficsit.app/mod/${$expandedMod}`;
 
   $: canInstall = !$progress;
 

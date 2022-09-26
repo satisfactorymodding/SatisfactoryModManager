@@ -9,6 +9,7 @@
   import { ExpandMod, UnexpandMod } from '$wailsjs/go/bindings/App';
   import LeftBar from '$lib/components/left-bar/LeftBar.svelte';
   import { installs, invalidInstalls } from '$lib/store/ficsitCLIStore';
+  import { expandedMod } from '$lib/store/generalStore';
   import Dialog, { Actions, Content, Title } from '@smui/dialog';
   import Button, { Label } from '@smui/button';
   import { GenerateDebugInfo } from '$wailsjs/go/bindings/DebugInfo';
@@ -21,11 +22,9 @@
 
   setClient(initializeGraphQLClient());
 
-  let selectedModId: string | null = null;
-
   let windowExpanded = false;
 
-  $: if (selectedModId) {
+  $: if ($expandedMod) {
     ExpandMod().then(() => { windowExpanded = true; });
   } else {
     windowExpanded = false;
@@ -34,7 +33,7 @@
     }, 100);
   }
 
-  $: pendingExpand = selectedModId && !windowExpanded;
+  $: pendingExpand = $expandedMod && !windowExpanded;
 
   $: modsListCompact = windowExpanded;
 
@@ -54,12 +53,12 @@
   <TitleBar />
   <div class="flex grow h-0 select-none">
     <LeftBar />
-    <div class:normal={!selectedModId || pendingExpand} class:compact={windowExpanded}>
-      <ModsList bind:selectedMod={selectedModId} bind:compact={modsListCompact}/>
+    <div class:normal={!$expandedMod || pendingExpand} class:compact={windowExpanded}>
+      <ModsList bind:compact={modsListCompact}/>
     </div>
-    {#if selectedModId}
+    {#if $expandedMod}
       <div class="grow">
-        <ModDetails id={selectedModId} on:close={() => selectedModId = null}/>
+        <ModDetails />
       </div>
     {/if}
   </div>
