@@ -1,5 +1,6 @@
 build
 package.json.md5
+wailsjs
 
 # VS Code
 .vscode/*
