@@ -176,6 +176,20 @@ $left-bar-controls-height: 40px;
   }
 }
 
+.mods-details {
+  .mdc-deprecated-list {
+    @include list.deprecated-single-line-density(-2);
+  }
+
+  .mdc-menu {
+    .mdc-deprecated-list-divider {
+      margin-top: 0px;
+      margin-bottom: 0px;
+    }
+    @include list.deprecated-divider-insets(47.5px, 16px);
+  }
+}
+
 .color-primary {
   color: theme.$primary !important;
 }

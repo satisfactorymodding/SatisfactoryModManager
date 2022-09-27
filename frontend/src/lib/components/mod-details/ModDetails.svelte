@@ -1,5 +1,4 @@
 <script lang="ts">
-  import Drawer from '@smui/drawer';
   import { operationStore, query } from '@urql/svelte';
   import { CompatibilityState, GetModDetailsDocument, type Compatibility } from '$lib/generated';
   import { markdown } from '$lib/utils/markdown';
@@ -7,7 +6,7 @@
   import MDIIcon from '$lib/components/MDIIcon.svelte';
   import { mdiCheck, mdiChevronDown, mdiImport } from '@mdi/js';
   import Menu, { type MenuComponentDev } from '@smui/menu';
-  import List, { Item, PrimaryText, SecondaryText, Text } from '@smui/list';
+  import List, { Item, PrimaryText, SecondaryText, Separator, Text } from '@smui/list';
   import { bytesToAppropriate } from '$lib/utils/dataFormats';
   import { createEventDispatcher } from 'svelte';
   import { lockfileMods, manifestMods, progress } from '$lib/store/ficsitCLIStore';
@@ -21,6 +20,7 @@
   import { getReportedCompatibility, getVersionCompatibility } from '$lib/utils/modCompatibility';
   import type { GameBranch } from '$lib/wailsTypesExtensions';
   import { expandedMod } from '$lib/store/generalStore';
+  import { minVersion, valid, validRange } from 'semver';
 
   const modQuery = operationStore(
     GetModDetailsDocument,
@@ -81,7 +81,8 @@
   let authorsMenu: MenuComponentDev;
 
   let versionsMenu: MenuComponentDev;
-  $: manifestVersionAny = $manifestMods[mod?.mod_reference]?.version === '>=0.0.0';
+
+  $: manifestVersion = $manifestMods[mod?.mod_reference]?.version;
   function installVersion(version: string | null) {
     InstallModVersion(mod?.mod_reference, version ?? '>=0.0.0');
   }
@@ -125,94 +126,104 @@
 </script>
 
 <div class="h-full flex mods-details">
-  <Drawer class="w-64">
-    <div class="px-4 py-4 flex flex-col w-full h-full mods-details">
-      <img src={renderedLogo} alt="{mod?.name} Logo" class="logo w-full" />
-      <span class="pt-4 font-bold text-lg">{mod?.name ?? 'Loading...'}</span>
-      <span class="pt-2 font-light">A mod by:</span>
-      <span class="font-medium color-primary cursor-pointer" on:click={() => $search = `author:"${author}"`}>{author ?? 'Loading...'}</span>
+  <div class="w-64 px-4 py-4 flex flex-col w-full h-full mods-details" style="border-right-color: rgba(239, 239, 239, 0.12);">
+    <img src={renderedLogo} alt="{mod?.name} Logo" class="logo w-full" />
+    <span class="pt-4 font-bold text-lg">{mod?.name ?? 'Loading...'}</span>
+    <span class="pt-2 font-light">A mod by:</span>
+    <span class="font-medium color-primary cursor-pointer" on:click={() => $search = `author:"${author}"`}>{author ?? 'Loading...'}</span>
 
-      <div class="pt-2" on:mouseenter={() => authorsMenu.setOpen(true)} on:mouseleave={() => authorsMenu.setOpen(false)}>
-        <Button variant="unelevated" color="secondary" class="w-full">
-          <Label>Contributors <span class="color-primary">({mod?.authors.length ?? 0})</span></Label>
+    <div class="pt-2" on:mouseenter={() => authorsMenu.setOpen(true)} on:mouseleave={() => authorsMenu.setOpen(false)}>
+      <Button variant="unelevated" color="secondary" class="w-full">
+        <Label>Contributors <span class="color-primary">({mod?.authors.length ?? 0})</span></Label>
+        <MDIIcon icon={mdiChevronDown}/>
+      </Button>
+      <Menu bind:this={authorsMenu} class="w-full max-h-[32rem]" anchorCorner="BOTTOM_LEFT">
+        <List>
+          {#each mod?.authors ?? [] as author}
+            <Item style="height: 80px" on:SMUI:action={() => $search = `author:"${author.user.username}"`}>
+              <img src={author.user.avatar} alt="{author.user.username} Avatar" class="avatar" />
+              <Text class="pl-2 h-full flex flex-col content-center -mb-4">
+                <PrimaryText class="text-base">{author.user.username}</PrimaryText>
+                <SecondaryText class="text-base">{author.role}</SecondaryText>
+              </Text>
+            </Item>
+          {/each}
+        </List>
+      </Menu>
+    </div>
+
+    <div class="pt-4">
+      <span>Mod info:</span><br>
+      <span>Size: </span><span class="font-bold">{size ?? 'Loading...'}</span><br>
+      <span>Created: </span><span class="font-bold">{mod ? new Date(mod.created_at).toLocaleDateString() : 'Loading...'}</span><br>
+      <span>Updated: </span><span class="font-bold">{mod ? new Date(mod.last_version_date).toLocaleString() : 'Loading...'}</span><br>
+      <span>Total downloads: </span><span class="font-bold">{mod?.downloads.toLocaleString() ?? 'Loading...'}</span><br>
+      <span>Views: </span><span class="font-bold">{mod?.views.toLocaleString() ?? 'Loading...'}</span><br>
+    </div>
+
+    <div class="pt-4">
+      <span>Latest version: </span><span class="font-bold">{mod?.versions[0].version ?? 'Loading...'}</span><br>
+      <span>Installed version: </span><span class="font-bold">{ installedVersion ?? 'Loading...' }</span><br>
+      <div class="pt-2" on:mouseenter={() => canInstall && versionsMenu.setOpen(true)} on:mouseleave={() => versionsMenu.setOpen(false)}>
+        <Button variant="unelevated" color="secondary" class="w-full" disabled={!canInstall}>
+          <Label>Change version</Label>
           <MDIIcon icon={mdiChevronDown}/>
         </Button>
-        <Menu bind:this={authorsMenu} class="w-full max-h-[32rem]" anchorCorner="BOTTOM_LEFT">
+        <Menu bind:this={versionsMenu} class="w-full max-h-[32rem] overflow-x-visible" anchorCorner="TOP_LEFT">
           <List>
-            {#each mod?.authors ?? [] as author}
-              <Item style="height: 80px" on:SMUI:action={() => $search = `author:"${author.user.username}"`}>
-                <img src={author.user.avatar} alt="{author.user.username} Avatar" class="avatar" />
-                <Text class="pl-2 h-full flex flex-col content-center -mb-4">
-                  <PrimaryText class="text-base">{author.user.username}</PrimaryText>
-                  <SecondaryText class="text-base">{author.role}</SecondaryText>
+            <Item on:SMUI:action={() => installVersion(null)} disabled={!canInstall}>
+              {#if manifestVersion === '>=0.0.0'}
+                <MdiIcon icon={mdiCheck} class="h-5" />
+              {:else}
+                <div class="w-7"/>
+              {/if}
+              <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
+                <PrimaryText class="text-base">Any</PrimaryText>
+              </Text>
+            </Item>
+            {#each mod?.versions ?? [] as version}
+              <Separator insetLeading insetTrailing />
+              <Item on:SMUI:action={() => installVersion(version.version)} disabled={!canInstall}>
+                {#if validRange(manifestVersion) && manifestVersion === version.version }
+                  <MdiIcon icon={mdiCheck} class="h-5" />
+                {:else}
+                  <div class="w-7"/>
+                {/if}
+                <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
+                  <PrimaryText class="text-base">{version.version}</PrimaryText>
+                </Text>
+              </Item>
+              <Separator insetLeading insetTrailing insetPadding />
+              <Item on:SMUI:action={() => installVersion(`>=${version.version}`)} disabled={!canInstall}>
+                {#if validRange(manifestVersion) && !valid(manifestVersion) && minVersion(manifestVersion)?.format() === version.version}
+                  <MdiIcon icon={mdiCheck} class="h-5" />
+                {:else}
+                  <div class="w-7"/>
+                {/if}
+                <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
+                  <PrimaryText class="text-base">{version.version} or newer</PrimaryText>
                 </Text>
               </Item>
             {/each}
           </List>
         </Menu>
       </div>
-
-      <div class="pt-4">
-        <span>Mod info:</span><br>
-        <span>Size: </span><span class="font-bold">{size ?? 'Loading...'}</span><br>
-        <span>Created: </span><span class="font-bold">{mod ? new Date(mod.created_at).toLocaleDateString() : 'Loading...'}</span><br>
-        <span>Updated: </span><span class="font-bold">{mod ? new Date(mod.last_version_date).toLocaleString() : 'Loading...'}</span><br>
-        <span>Total downloads: </span><span class="font-bold">{mod?.downloads.toLocaleString() ?? 'Loading...'}</span><br>
-        <span>Views: </span><span class="font-bold">{mod?.views.toLocaleString() ?? 'Loading...'}</span><br>
-      </div>
-
-      <div class="pt-4">
-        <span>Latest version: </span><span class="font-bold">{mod?.versions[0].version ?? 'Loading...'}</span><br>
-        <span>Installed version: </span><span class="font-bold">{ installedVersion ?? 'Loading...' }</span><br>
-        <div class="pt-2" on:mouseenter={() => canInstall && versionsMenu.setOpen(true)} on:mouseleave={() => versionsMenu.setOpen(false)}>
-          <Button variant="unelevated" color="secondary" class="w-full" disabled={!canInstall}>
-            <Label>Change version</Label>
-            <MDIIcon icon={mdiChevronDown}/>
-          </Button>
-          <Menu bind:this={versionsMenu} class="w-full max-h-[32rem]" anchorCorner="BOTTOM_LEFT">
-            <List>
-              <Item on:SMUI:action={() => installVersion(null)} disabled={!canInstall}>
-                {#if manifestVersionAny}
-                  <MdiIcon icon={mdiCheck} class="h-5" />
-                {:else}
-                  <div class="w-7"/>
-                {/if}
-                <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
-                  <PrimaryText class="text-base">Any</PrimaryText>
-                </Text>
-              </Item>
-              {#each mod?.versions ?? [] as version}
-                <Item on:SMUI:action={() => installVersion(version.version)} disabled={!canInstall}>
-                  {#if !manifestVersionAny && installedVersion === version.version}
-                    <MdiIcon icon={mdiCheck} class="h-5" />
-                  {:else}
-                    <div class="w-7"/>
-                  {/if}
-                  <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
-                    <PrimaryText class="text-base">{version.version}</PrimaryText>
-                  </Text>
-                </Item>
-              {/each}
-            </List>
-          </Menu>
-        </div>
-      </div>
-
-      <div class="pt-4">
-        <!-- svelte-ignore a11y-missing-attribute -->
-        <a on:click={() => BrowserOpenURL(ficsitAppLink)} class="color-primary">View on ficsit.app</a>
-      </div>
-
-      <div class="grow"></div>
-
-      <Button variant="unelevated" color="secondary" on:click={close}>
-        <div class="-scale-x-100">
-          <MDIIcon icon={mdiImport}/>
-        </div>
-        <Label class="pl-4">Close</Label>
-      </Button>
     </div>
-  </Drawer>  
+
+    <div class="pt-4">
+      <!-- svelte-ignore a11y-missing-attribute -->
+      <a on:click={() => BrowserOpenURL(ficsitAppLink)} class="color-primary">View on ficsit.app</a>
+    </div>
+
+    <div class="grow"></div>
+
+    <Button variant="unelevated" color="secondary" on:click={close}>
+      <div class="-scale-x-100">
+        <MDIIcon icon={mdiImport}/>
+      </div>
+      <Label class="pl-4">Close</Label>
+    </Button>
+  </div>
   <div class="markdown-content break-words overflow-wrap-anywhere flex-1 px-3 my-4 overflow-y-scroll overflow-x-hidden w-0">
     {#if descriptionRendered}
       <p on:click={handleDescriptionClick}>{@html descriptionRendered}</p>
