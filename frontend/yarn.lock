@@ -2256,7 +2256,7 @@
     "@smui/ripple" "^6.1.0"
     svelte2tsx "^0.5.12"
 
-"@smui/checkbox@^6.0.0-beta.16", "@smui/checkbox@^6.1.0":
+"@smui/checkbox@^6.1.0":
   version "6.1.0"
   resolved "https://registry.yarnpkg.com/@smui/checkbox/-/checkbox-6.1.0.tgz#3e1f3e506be77555f1525f5149002cb0fbf57bcb"
   integrity sha512-hx3cDWF2vCbuLieJnQRJXZYNX41KmSLzRYFrs397lEmxjVw89+IythC8Tnzkqy7FCyaux1wm11k3K31eiyhkVA==

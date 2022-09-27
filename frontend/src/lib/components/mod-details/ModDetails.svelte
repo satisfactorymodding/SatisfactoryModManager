@@ -3,6 +3,7 @@
   import { CompatibilityState, GetModDetailsDocument, type Compatibility } from '$lib/generated';
   import { markdown } from '$lib/utils/markdown';
   import Button, { Label } from '@smui/button';
+  import Checkbox from '@smui/checkbox';
   import MDIIcon from '$lib/components/MDIIcon.svelte';
   import { mdiCheck, mdiChevronDown, mdiImport } from '@mdi/js';
   import Menu, { type MenuComponentDev } from '@smui/menu';
@@ -169,7 +170,7 @@
           <Label>Change version</Label>
           <MDIIcon icon={mdiChevronDown}/>
         </Button>
-        <Menu bind:this={versionsMenu} class="w-full max-h-[32rem] overflow-x-visible" anchorCorner="TOP_LEFT">
+        <Menu bind:this={versionsMenu} class="min-w-[20rem] max-h-[32rem] overflow-x-visible" anchorCorner="TOP_LEFT">
           <List>
             <Item on:SMUI:action={() => installVersion(null)} disabled={!canInstall}>
               {#if manifestVersion === '>=0.0.0'}
@@ -184,7 +185,7 @@
             {#each mod?.versions ?? [] as version}
               <Separator insetLeading insetTrailing />
               <Item on:SMUI:action={() => installVersion(version.version)} disabled={!canInstall}>
-                {#if validRange(manifestVersion) && manifestVersion === version.version }
+                {#if validRange(manifestVersion) && minVersion(manifestVersion)?.format() === version.version }
                   <MdiIcon icon={mdiCheck} class="h-5" />
                 {:else}
                   <div class="w-7"/>
@@ -192,18 +193,30 @@
                 <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
                   <PrimaryText class="text-base">{version.version}</PrimaryText>
                 </Text>
-              </Item>
-              <Separator insetLeading insetTrailing insetPadding />
-              <Item on:SMUI:action={() => installVersion(`>=${version.version}`)} disabled={!canInstall}>
-                {#if validRange(manifestVersion) && !valid(manifestVersion) && minVersion(manifestVersion)?.format() === version.version}
-                  <MdiIcon icon={mdiCheck} class="h-5" />
-                {:else}
-                  <div class="w-7"/>
-                {/if}
-                <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
-                  <PrimaryText class="text-base">{version.version} or newer</PrimaryText>
+                <div class="grow"/>
+                <Text class="pl-2 h-full flex flex-col content-center mb-1.5 shrink-0">
+                  <PrimaryText class="text-base">or newer</PrimaryText>
                 </Text>
+                <div on:click|stopPropagation={() => installVersion(`>=${version.version}`)}>
+                  <Checkbox 
+                    input$onclick="return false;"
+                    checked={!!validRange(manifestVersion) && !valid(manifestVersion) && minVersion(manifestVersion)?.format() === version.version}
+                  />
+                </div>
               </Item>
+              <!-- {#if validRange(manifestVersion) && minVersion(manifestVersion)?.format() === version.version}
+                <Separator insetLeading insetTrailing insetPadding />
+                <Item on:SMUI:action={() => installVersion(`>=${version.version}`)} disabled={!canInstall}>
+                  {#if validRange(manifestVersion) && !valid(manifestVersion) && minVersion(manifestVersion)?.format() === version.version}
+                    <MdiIcon icon={mdiCheck} class="h-5" />
+                  {:else}
+                    <div class="w-7"/>
+                  {/if}
+                  <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
+                    <PrimaryText class="text-base">{version.version} or newer</PrimaryText>
+                  </Text>
+                </Item>
+              {/if} -->
             {/each}
           </List>
         </Menu>
