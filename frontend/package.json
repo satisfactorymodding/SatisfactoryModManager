@@ -14,7 +14,8 @@
     "graphql-codegen": "graphql-codegen --config codegen.yml",
     "graphql-codegen:watch": "graphql-codegen --config codegen.yml --watch",
     "smui-theme": "smui-theme compile static/smui.css -i src/theme -i ./node_modules",
-    "smui-theme:watch": "nodemon -w src/theme -e scss --exec run-s smui-theme"
+    "smui-theme:watch": "nodemon -w src/theme -e scss --exec run-s smui-theme",
+    "generate:watch": "run-p smui-theme:watch graphql-codegen:watch"
   },
   "dependencies": {
     "@fontsource/fira-mono": "^4.5.0",
