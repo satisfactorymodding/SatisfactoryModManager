@@ -1,7 +1,7 @@
 package main
 
 import (
-	"embed"
+	_ "embed"
 	"encoding/json"
 	"io"
 	"os"
@@ -20,9 +20,6 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
-
-//go:embed all:frontend/build
-var assets embed.FS
 
 //go:embed wails.json
 var projectFile []byte
