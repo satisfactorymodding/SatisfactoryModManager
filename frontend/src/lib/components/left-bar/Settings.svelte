@@ -126,19 +126,21 @@
           <MdiIcon icon={mdiChevronRight} class="h-5" />
         </Item>
         <Menu bind:this={startViewMenu} class="w-full max-h-[32rem] overflow-visible" anchorCorner="TOP_RIGHT">
-          <SelectionGroup>
-            {#each views as view}
-              <Item
-                on:SMUI:action={() => ($startView = view.id)}
-                selected={$startView === view.id}
-              >
-                <SelectionGroupIcon>
-                  <MdiIcon icon={mdiCheck} class="h-5" />
-                </SelectionGroupIcon>
-                <Text>{view.name}</Text>
-              </Item>
-            {/each}
-          </SelectionGroup>
+          <List>
+            <SelectionGroup>
+              {#each views as view}
+                <Item
+                  on:SMUI:action={() => ($startView = view.id)}
+                  selected={$startView === view.id}
+                >
+                  <SelectionGroupIcon>
+                    <MdiIcon icon={mdiCheck} class="h-5" />
+                  </SelectionGroupIcon>
+                  <Text>{view.name}</Text>
+                </Item>
+              {/each}
+            </SelectionGroup>
+          </List>
         </Menu>
       </div>
     </List>
