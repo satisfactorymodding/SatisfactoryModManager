@@ -214,6 +214,9 @@ export default new Vuex.Store({
       if (!state.manifestItems.some((item) => item.id === modId)) {
         if (state.inProgress.length > 0) {
           commit('addToQueue', modId);
+          if (state.inProgress.length === 0 && state.downloadQueue.length > 0) {
+            dispatch('installMod', state.downloadQueue.shift());
+          }
           return;
         }
         if (!state.modsEnabled) {
