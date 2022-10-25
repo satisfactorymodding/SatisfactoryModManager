@@ -38,6 +38,7 @@ export default new Vuex.Store({
     favoriteModIds: [],
     inProgress: [], // { id: string, progresses: { id: string, progress: number, message: string, fast: boolean }[] }
     downloadProgress: {},
+    downloadQueue: [],
     allDownloadProgress: null,
     installSetupError: '',
     error: '',
@@ -69,6 +70,9 @@ export default new Vuex.Store({
     },
     setFavoriteModIds(state, { favoriteModIds }) {
       state.favoriteModIds = favoriteModIds;
+    },
+    addToQueue(state, modId) {
+      state.downloadQueue.push(modId);
     },
     refreshInstalledMods(state) {
       state.manifestItems = readManifest(path.join(getProfileFolderPath(state.selectedProfile.name), 'manifest.json')).items;
@@ -209,7 +213,7 @@ export default new Vuex.Store({
     }, modId) {
       if (!state.manifestItems.some((item) => item.id === modId)) {
         if (state.inProgress.length > 0) {
-          dispatch('showError', `Another operation is currently in progress while trying to install a mod: ${state.inProgress.map((progress) => progress.id)}`);
+          commit('addToQueue', modId);
           return;
         }
         if (!state.modsEnabled) {
@@ -231,10 +235,14 @@ export default new Vuex.Store({
         } catch (e) {
           dispatch('showError', e);
         } finally {
-          // Allow the UI to update properly
-          setTimeout(() => {
-            state.inProgress.remove(modProgress);
-          }, 500);
+          if (state.downloadQueue.length > 0) {
+            state.inProgress = [];
+            dispatch('installMod', state.downloadQueue.shift());
+          } else {
+            setTimeout(() => {
+              state.inProgress.remove(modProgress);
+            }, 500);
+          }
         }
       }
     },

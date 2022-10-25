@@ -133,20 +133,20 @@
         </v-icon>
         <ModActionButton
           v-else
-          :disabled="(versionCompatibility === COMPATIBILITY_LEVEL.INCOMPATIBLE && !isInstalled) || isDependency || !modsEnabled || isGameRunning || inProgress.length > 0"
+          :disabled="(versionCompatibility === COMPATIBILITY_LEVEL.INCOMPATIBLE && !isInstalled) || isDependency || !modsEnabled || isGameRunning "
           background-normal-class=""
           :background-hover-class="isInstalled || isEnabled ? 'red' : 'green'"
           :icon-normal-color="versionCompatibility === COMPATIBILITY_LEVEL.INCOMPATIBLE ? 'error' : (isInstalled || isEnabled ? 'green' : 'text')"
           icon-hover-color="white"
-          :normal-icon="versionCompatibility === COMPATIBILITY_LEVEL.INCOMPATIBLE ? 'mdi-alert' : (isInstalled || isEnabled ? 'mdi-check-circle' : 'mdi-download')"
-          :hover-icon="isInstalled ? 'mdi-delete' : 'mdi-download'"
+          :normal-icon="versionCompatibility === COMPATIBILITY_LEVEL.INCOMPATIBLE ? 'mdi-alert' : (isInstalled || isEnabled ? 'mdi-check-circle' : isInQueue ? 'mdi-tray-full' : 'mdi-download')"
+          :hover-icon="isInstalled ? 'mdi-delete' : isInQueue ? 'mdi-tray-full' : isModBeingDownloaded ? 'mdi-tray-plus' : 'mdi-download'"
           @click="isInstalled ? uninstall() : install()"
         >
           <template #tooltip>
-            <span v-if="isDependency">Dependency of {{ dependantsFriendly }}</span>
+            <span v-if="isInQueue">Add to Download Queue</span>
+            <span v-else-if="isDependency">Dependency of {{ dependantsFriendly }}</span>
             <span v-else-if="!modsEnabled">Enable mods to be able to make changes</span>
             <span v-else-if="isGameRunning">Cannot install mods while game is running</span>
-            <span v-else-if="inProgress.length > 0">Another operation is in progress</span>
             <span v-else-if="versionCompatibility === COMPATIBILITY_LEVEL.INCOMPATIBLE">This mod is incompatible with your game version</span>
           </template>
         </ModActionButton>
@@ -249,6 +249,12 @@ export default {
     },
     isInstalled() {
       return !!this.manifestItem;
+    },
+    isInQueue() {
+      return this.$store.state.downloadQueue.includes(this.mod.mod_reference);
+    },
+    isModBeingDownloaded() {
+      return this.$store.state.inProgress.length > 0
     },
     isEnabled() {
       return !!this.$store.state.installedMods[this.mod.mod_reference];
