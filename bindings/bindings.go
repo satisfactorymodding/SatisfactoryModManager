@@ -25,10 +25,7 @@ func MakeBindings() (*Bindings, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to make ficsitCLI bindings")
 	}
-	settings, err := MakeSettings()
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to make settings bindings")
-	}
+	settings := MakeSettings()
 	debugInfo := MakeDebugInfo()
 
 	BindingsInstance = &Bindings{

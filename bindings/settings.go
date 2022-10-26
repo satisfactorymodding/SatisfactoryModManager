@@ -2,122 +2,47 @@ package bindings
 
 import (
 	"context"
-	"encoding/json"
-	"os"
-	"path/filepath"
 
-	"github.com/pkg/errors"
-	"github.com/satisfactorymodding/SatisfactoryModManager/utils"
-	"github.com/spf13/viper"
+	"github.com/satisfactorymodding/SatisfactoryModManager/settings"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
-type SavedModFilters struct {
-	Order  string `json:"order"`
-	Filter string `json:"filter"`
-}
-
-var (
-	VIEW_COMPACT  = "compact"
-	VIEW_EXPANDED = "expanded"
-)
-
-type SettingsData struct {
-	FavouriteMods    []string        `json:"favouriteMods"`
-	ModFilters       SavedModFilters `json:"modFilters"`
-	AppHeight        int             `json:"appHeight"`
-	ExpandedAppWidth int             `json:"expandedAppWidth"`
-	StartView        string          `json:"startView"`
-}
-
 type Settings struct {
-	ctx  context.Context
-	Data SettingsData
+	ctx context.Context
 }
 
-var SettingsFileName = "settings.json"
-
-func MakeSettings() (*Settings, error) {
+func MakeSettings() *Settings {
 	s := &Settings{}
-
-	if err := s.load(); err != nil {
-		return nil, errors.Wrap(err, "failed to load settings")
-	}
-
-	return s, nil
-}
-
-func (s *Settings) load() error {
-	settingsFilePath := filepath.Join(viper.GetString("local-dir"), SettingsFileName)
-
-	_, err := os.Stat(settingsFilePath)
-	if err != nil {
-		if !os.IsNotExist(err) {
-			return errors.Wrap(err, "failed to stat settings file")
-		}
-
-		s.Data = SettingsData{
-			FavouriteMods:    []string{},
-			ModFilters:       SavedModFilters{Order: "Last updated", Filter: "Compatible"},
-			AppHeight:        utils.UnexpandedMinHeight,
-			ExpandedAppWidth: utils.UnexpandedMinWidth,
-			StartView:        VIEW_COMPACT,
-		}
-		err = s.save()
-		if err != nil {
-			return errors.Wrap(err, "failed to save default settings")
-		}
-	}
-
-	settingsFile, err := os.ReadFile(filepath.Join(viper.GetString("local-dir"), SettingsFileName))
-	if err != nil {
-		return errors.Wrap(err, "failed to read settings")
-	}
-
-	if err := json.Unmarshal(settingsFile, &s.Data); err != nil {
-		return errors.Wrap(err, "failed to unmarshal settings")
-	}
-
-	return nil
-}
-
-func (s *Settings) save() error {
-	settingsFile, err := json.MarshalIndent(s.Data, "", "  ")
-	if err != nil {
-		return errors.Wrap(err, "failed to marshal settings")
-	}
-	err = os.WriteFile(filepath.Join(viper.GetString("local-dir"), SettingsFileName), settingsFile, 0755)
-	if err != nil {
-		return errors.Wrap(err, "failed to write settings")
-	}
-
-	return nil
+	return s
 }
 
 func (s *Settings) startup(ctx context.Context) {
 	s.ctx = ctx
 }
 
-func (s *Settings) FavouriteMod(modReference string) bool {
+func (s *Settings) FavouriteMod(modReference string) (bool, error) {
 	idx := -1
-	for i, mod := range s.Data.FavouriteMods {
+	for i, mod := range settings.Settings.FavouriteMods {
 		if mod == modReference {
 			idx = i
 			break
 		}
 	}
 	if idx != -1 {
-		return false
+		return false, nil
 	}
-	s.Data.FavouriteMods = append(s.Data.FavouriteMods, modReference)
-	s.save()
+	settings.Settings.FavouriteMods = append(settings.Settings.FavouriteMods, modReference)
+	err := settings.SaveSettings()
+	if err != nil {
+		return false, err
+	}
 	s.emitFavouriteMods()
-	return true
+	return true, nil
 }
 
 func (s *Settings) UnFavouriteMod(modReference string) bool {
 	idx := -1
-	for i, mod := range s.Data.FavouriteMods {
+	for i, mod := range settings.Settings.FavouriteMods {
 		if mod == modReference {
 			idx = i
 			break
@@ -126,43 +51,43 @@ func (s *Settings) UnFavouriteMod(modReference string) bool {
 	if idx == -1 {
 		return false
 	}
-	s.Data.FavouriteMods = append(s.Data.FavouriteMods[:idx], s.Data.FavouriteMods[idx+1:]...)
-	s.save()
+	settings.Settings.FavouriteMods = append(settings.Settings.FavouriteMods[:idx], settings.Settings.FavouriteMods[idx+1:]...)
+	settings.SaveSettings()
 	s.emitFavouriteMods()
 	return true
 }
 
 func (s *Settings) GetFavouriteMods() []string {
-	return s.Data.FavouriteMods
+	return settings.Settings.FavouriteMods
 }
 
 func (s *Settings) GetModFiltersOrder() string {
-	return s.Data.ModFilters.Order
+	return settings.Settings.ModFilters.Order
 }
 
 func (s *Settings) GetModFiltersFilter() string {
-	return s.Data.ModFilters.Filter
+	return settings.Settings.ModFilters.Filter
 }
 
 func (s *Settings) SetModFiltersOrder(order string) {
-	s.Data.ModFilters.Order = order
-	s.save()
+	settings.Settings.ModFilters.Order = order
+	settings.SaveSettings()
 }
 
 func (s *Settings) SetModFiltersFilter(filter string) {
-	s.Data.ModFilters.Filter = filter
-	s.save()
+	settings.Settings.ModFilters.Filter = filter
+	settings.SaveSettings()
 }
 
 func (s *Settings) emitFavouriteMods() {
-	wailsRuntime.EventsEmit(s.ctx, "favouriteMods", s.Data.FavouriteMods)
+	wailsRuntime.EventsEmit(s.ctx, "favouriteMods", settings.Settings.FavouriteMods)
 }
 
 func (s *Settings) GetStartView() string {
-	return s.Data.StartView
+	return settings.Settings.StartView
 }
 
 func (s *Settings) SetStartView(view string) {
-	s.Data.StartView = view
-	s.save()
+	settings.Settings.StartView = view
+	settings.SaveSettings()
 }

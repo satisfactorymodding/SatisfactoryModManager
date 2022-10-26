@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/project_file"
+	"github.com/satisfactorymodding/SatisfactoryModManager/settings"
 	"github.com/satisfactorymodding/SatisfactoryModManager/utils"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -27,14 +28,14 @@ func (a *App) startup(ctx context.Context) {
 		for range sizeTicker.C {
 			w, h := wailsRuntime.WindowGetSize(a.ctx)
 			if BindingsInstance.App.isExpanded {
-				if w != BindingsInstance.Settings.Data.ExpandedAppWidth {
-					BindingsInstance.Settings.Data.ExpandedAppWidth = w
-					BindingsInstance.Settings.save()
+				if w != settings.Settings.ExpandedAppWidth {
+					settings.Settings.ExpandedAppWidth = w
+					settings.SaveSettings()
 				}
 			}
-			if h != BindingsInstance.Settings.Data.AppHeight {
-				BindingsInstance.Settings.Data.AppHeight = h
-				BindingsInstance.Settings.save()
+			if h != settings.Settings.AppHeight {
+				settings.Settings.AppHeight = h
+				settings.SaveSettings()
 			}
 		}
 	}()
@@ -44,7 +45,7 @@ func (a *App) ExpandMod() bool {
 	_, height := wailsRuntime.WindowGetSize(a.ctx)
 	wailsRuntime.WindowSetMinSize(a.ctx, utils.ExpandedMinWidth, utils.ExpandedMinHeight)
 	wailsRuntime.WindowSetMaxSize(a.ctx, -1, -1)
-	wailsRuntime.WindowSetSize(a.ctx, BindingsInstance.Settings.Data.ExpandedAppWidth, height)
+	wailsRuntime.WindowSetSize(a.ctx, settings.Settings.ExpandedAppWidth, height)
 	a.isExpanded = true
 	return true
 }

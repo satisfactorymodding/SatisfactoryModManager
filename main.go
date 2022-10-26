@@ -14,6 +14,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/satisfactorymodding/SatisfactoryModManager/bindings"
 	"github.com/satisfactorymodding/SatisfactoryModManager/project_file"
+	"github.com/satisfactorymodding/SatisfactoryModManager/settings"
 	"github.com/satisfactorymodding/SatisfactoryModManager/utils"
 	"github.com/spf13/viper"
 	"github.com/wailsapp/wails/v2"
@@ -34,6 +35,11 @@ func main() {
 		panic(err)
 	}
 
+	err = settings.LoadSettings()
+	if err != nil {
+		panic(err)
+	}
+
 	b, err := bindings.MakeBindings()
 	if err != nil {
 		panic(err)
@@ -44,7 +50,7 @@ func main() {
 		Title:     "SatisfactoryModManager",
 		Frameless: runtime.GOOS == "windows",
 		Width:     utils.UnexpandedMinWidth,
-		Height:    b.Settings.Data.AppHeight,
+		Height:    settings.Settings.AppHeight,
 		MinWidth:  utils.UnexpandedMinWidth,
 		MaxWidth:  utils.UnexpandedMinWidth,
 		MinHeight: utils.UnexpandedMinHeight,
