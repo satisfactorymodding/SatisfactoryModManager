@@ -16,6 +16,7 @@ import (
 	"github.com/satisfactorymodding/SatisfactoryModManager/project_file"
 	"github.com/satisfactorymodding/SatisfactoryModManager/settings"
 	"github.com/satisfactorymodding/SatisfactoryModManager/utils"
+	"github.com/satisfactorymodding/SatisfactoryModManager/wails_logging"
 	"github.com/spf13/viper"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -57,6 +58,7 @@ func main() {
 		Assets:    assets,
 		OnStartup: b.Startup,
 		Bind:      b.GetBindings(),
+		Logger:    wails_logging.WailsZeroLogLogger{},
 	})
 
 	if err != nil {
