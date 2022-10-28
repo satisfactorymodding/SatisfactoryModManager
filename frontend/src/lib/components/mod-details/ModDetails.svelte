@@ -9,7 +9,6 @@
   import Menu, { type MenuComponentDev } from '@smui/menu';
   import List, { Item, PrimaryText, SecondaryText, Separator, Text } from '@smui/list';
   import { bytesToAppropriate } from '$lib/utils/dataFormats';
-  import { createEventDispatcher } from 'svelte';
   import { canModify, lockfileMods, manifestMods, progress } from '$lib/store/ficsitCLIStore';
   import { search } from '$lib/store/modFiltersStore';
   import MdiIcon from '$lib/components/MDIIcon.svelte';
@@ -86,10 +85,8 @@
     InstallModVersion(mod?.mod_reference, version ?? '>=0.0.0');
   }
 
-  const dispatch = createEventDispatcher();
-
   function close() {
-    dispatch('close');
+    $expandedMod = null;
   }
 
   let imageViewSrc: string | null = null;
