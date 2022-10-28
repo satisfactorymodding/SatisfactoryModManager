@@ -119,11 +119,19 @@ func FindInstallationsWindowsEpic() ([]*Installation, []error) {
 		}
 
 		installs = append(installs, &Installation{
-			Path:       epicManifest.InstallLocation,
-			Version:    versionData.Changelist,
-			Branch:     branch,
-			Launcher:   "Epic Games",
-			LaunchPath: fmt.Sprintf(`start "" "com.epicgames.launcher://apps/%s?action=launch&silent=true"`, epicManifest.MainGameAppName),
+			Path:     epicManifest.InstallLocation,
+			Version:  versionData.Changelist,
+			Branch:   branch,
+			Launcher: "Epic Games",
+			LaunchPath: []string{
+				"cmd",
+				"/C",
+				`start`,
+				``,
+				// The extra space at the end is required for exec to escape the argument with double quotes
+				// Otherwise, the & is interpreted as a command sequence
+				`com.epicgames.launcher://apps/` + epicManifest.MainGameAppName + `?action=launch&silent=true `,
+			},
 		})
 	}
 

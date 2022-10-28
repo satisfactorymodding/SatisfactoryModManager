@@ -5,5 +5,5 @@ export type View = 'compact' | 'expanded';
 
 export const startView = writableBindingSync<View | null>(null, { 
   initialGet: GetStartView,
-  updateFunction: SetStartView
+  updateFunction: (value) => value ? SetStartView(value) : Promise.resolve(),
 });

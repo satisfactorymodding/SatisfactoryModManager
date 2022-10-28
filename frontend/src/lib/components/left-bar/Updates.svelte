@@ -3,13 +3,11 @@
   import MdiIcon from '$lib/components/MDIIcon.svelte';
   import { mdiCheckCircle, mdiSync, mdiUpload } from '@mdi/js';
 
-  import { checkForUpdates, progress, updates, updateCheckInProgress } from '$lib/store/ficsitCLIStore';
+  import { checkForUpdates, canModify, progress, updates, updateCheckInProgress } from '$lib/store/ficsitCLIStore';
   import Dialog, { Actions, Content, Title } from '@smui/dialog';
   import { UpdateAllMods } from '$wailsjs/go/bindings/FicsitCLI';
   import List, { Item, PrimaryText, SecondaryText, Text } from '@smui/list';
   import type { bindings } from '$wailsjs/go/models';
-
-  $: canInstall = !$progress;
 
   let updatesDialog = false;
 
@@ -43,7 +41,7 @@
   };
 </script>
 
-<Button variant="unelevated" class="w-full mt-2 update-button {$updates.length > 0 ? 'has-update' : ''}" on:click={() => updatesDialog = true} disabled={!canInstall}>
+<Button variant="unelevated" class="w-full mt-2 update-button {$updates.length > 0 ? 'has-update' : ''}" on:click={() => updatesDialog = true}>
   <Label>
     {#if $updates.length === 0}
       No updates right now
@@ -54,7 +52,7 @@
   <div class="grow" />
   <MdiIcon icon={mdiCheckCircle} class="h-5" />
 </Button>
-<Button variant="unelevated" class="w-full mt-2" on:click={checkForUpdates} disabled={!canInstall}>
+<Button variant="unelevated" class="w-full mt-2" on:click={checkForUpdates} disabled={$progress || $updateCheckInProgress}>
   <Label>
     Check for updates
   </Label>
@@ -88,10 +86,10 @@
     </List>
   </Content>
   <Actions>
-    <Button on:click={() => updateAll()}>
+    <Button on:click={() => updateAll()} disabled={!$canModify || $updateCheckInProgress}>
       <Label>Update All</Label>
     </Button>
-    <Button on:click={() => updateSelected()}>
+    <Button on:click={() => updateSelected()} disabled={!$canModify || $updateCheckInProgress}>
       <Label>Update Selected</Label>
     </Button>
   </Actions>

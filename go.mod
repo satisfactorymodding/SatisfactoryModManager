@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/andygrunwald/vdf v1.0.1-0.20220412055542-fff83b263c6b
+	github.com/mitchellh/go-ps v1.0.0
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.28.0
 	github.com/satisfactorymodding/ficsit-cli v0.1.3

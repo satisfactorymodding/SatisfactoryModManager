@@ -136,11 +136,17 @@ func FindInstallationsWindowsSteam() ([]*Installation, []error) {
 		}
 
 		installs = append(installs, &Installation{
-			Path:       fullInstallationPath,
-			Version:    versionData.Changelist,
-			Branch:     branch,
-			Launcher:   "Steam",
-			LaunchPath: `start "" "steam://rungameid/526870"`,
+			Path:     fullInstallationPath,
+			Version:  versionData.Changelist,
+			Branch:   branch,
+			Launcher: "Steam",
+			LaunchPath: []string{
+				"cmd",
+				"/C",
+				`start`,
+				``,
+				`steam://rungameid/526870`,
+			},
 		})
 	}
 

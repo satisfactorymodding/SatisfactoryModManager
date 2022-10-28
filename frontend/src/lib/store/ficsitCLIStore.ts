@@ -1,4 +1,4 @@
-import { get, writable } from 'svelte/store';
+import { get, readable, writable } from 'svelte/store';
 import { cli, bindings } from '$wailsjs/go/models';
 import { AddProfile, CheckForUpdates, DeleteProfile, GetInstallationsInfo, GetInvalidInstalls, GetProfiles, ImportProfile, RenameProfile, SelectInstall, SetProfile } from '$wailsjs/go/bindings/FicsitCLI';
 import { GetFavouriteMods } from '$wailsjs/go/bindings/Settings';
@@ -121,6 +121,21 @@ export const lockfileMods = readableBinding<LockFile>({}, { allowNull: false, up
 export const progress = readableBinding<bindings.Progress | null>(null, { updateEvent: 'progress'});
 
 export const favouriteMods = readableBinding<string[]>([], { updateEvent: 'favouriteMods', initialGet: GetFavouriteMods});
+
+export const isGameRunning = readableBinding(false, { updateEvent: 'isGameRunning', allowNull: false });
+
+export const canModify = readable(true, (set) => {
+  const update = () => {
+    set(!get(isGameRunning) && !get(progress));
+  };
+  const unsubGameRunning = isGameRunning.subscribe(update);
+  const unsubProgress = progress.subscribe(update);
+  return () => {
+    unsubGameRunning();
+    unsubProgress();
+  };
+
+});
 
 export const updates = writable<bindings.Update[]>([]);
 export const updateCheckInProgress = writable(false);

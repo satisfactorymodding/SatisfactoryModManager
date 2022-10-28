@@ -72,19 +72,27 @@
 
   $: compatibility = reportedCompatibility ?? versionCompatibility;
 
-  function toggleModInstalled() {
-    if(isInstalled) {
-      RemoveMod(mod.mod_reference);
-    } else {
-      InstallMod(mod.mod_reference);
+  async function toggleModInstalled() {
+    try {
+      if(isInstalled) {
+        await RemoveMod(mod.mod_reference);
+      } else {
+        await InstallMod(mod.mod_reference);
+      }
+    } catch(e) {
+      console.error(e);
     }
   }
 
-  function toggleModEnabled() {
-    if(isEnabled) {
-      DisableMod(mod.mod_reference);
-    } else {
-      EnableMod(mod.mod_reference);
+  async function toggleModEnabled() {
+    try {
+      if(isEnabled) {
+        await DisableMod(mod.mod_reference);
+      } else {
+        await EnableMod(mod.mod_reference);
+      }
+    } catch(e) {
+      console.error(e);
     }
   }
 

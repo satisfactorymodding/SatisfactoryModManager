@@ -1,11 +1,11 @@
 package install_finders
 
 type Installation struct {
-	Path       string `json:"path"`
-	Version    int    `json:"version"`
-	Branch     string `json:"branch"`
-	Launcher   string `json:"launcher"`
-	LaunchPath string `json:"launchPath"`
+	Path       string   `json:"path"`
+	Version    int      `json:"version"`
+	Branch     string   `json:"branch"`
+	Launcher   string   `json:"launcher"`
+	LaunchPath []string `json:"launchPath"`
 }
 
 type InstallFindError struct {

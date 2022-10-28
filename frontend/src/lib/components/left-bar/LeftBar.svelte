@@ -7,7 +7,7 @@
   import { mdiCheckCircle, mdiCloseCircle, mdiDiscord, mdiDownload, mdiGithub, mdiHelpCircle, mdiPencil, mdiPlusCircle, mdiTrashCan, mdiUpload, mdiWeb } from '@mdi/js';
   import MdiIcon from '$lib/components/MDIIcon.svelte';
   
-  import { addProfile, deleteProfile, importProfile, installs, profiles, progress, renameProfile, selectedInstall, selectedProfile } from '$lib/store/ficsitCLIStore';
+  import { addProfile, deleteProfile, importProfile, installs, isGameRunning, profiles, progress, canModify, renameProfile, selectedInstall, selectedProfile } from '$lib/store/ficsitCLIStore';
   import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
   import { OpenFileDialog } from '$wailsjs/go/bindings/App';
 
@@ -15,9 +15,7 @@
   import Updates from './Updates.svelte';
   import { bindings } from '$wailsjs/go/models';
   import HelperText from '@smui/textfield/helper-text';
-  import { ExportCurrentProfile, ReadExportedProfileMetadata } from '$wailsjs/go/bindings/FicsitCLI';
-
-  $: canInstall = !$progress;
+  import { ExportCurrentProfile, ReadExportedProfileMetadata, LaunchGame } from '$wailsjs/go/bindings/FicsitCLI';
 
   let modsEnabled = true;
 
@@ -102,7 +100,7 @@
       menu$class="max-h-[32rem]"
       bind:value={$selectedInstall}
       ripple={false}
-      disabled={!canInstall}
+      disabled={!$canModify}
     >
       {#each $installs as install}
         <Option value={install}>
@@ -111,14 +109,14 @@
       {/each}
     </Select>
     <div class="flex w-full mt-2">
-      <Button variant="unelevated" class="w-1/2 rounded-tr-none rounded-br-none mods-toggle-button {modsEnabled ? '' : 'mods-off'}" on:click={() => modsEnabled = false} disabled={!canInstall}>
+      <Button variant="unelevated" class="w-1/2 rounded-tr-none rounded-br-none mods-toggle-button {modsEnabled ? '' : 'mods-off'}" on:click={() => modsEnabled = false} disabled={!$canModify}>
         <Label>
           Mods off
         </Label>
         <div class="grow"/>
         <MdiIcon icon={mdiCloseCircle} class="h-5" />
       </Button>
-      <Button variant="unelevated" class="w-1/2 rounded-tl-none rounded-bl-none mods-toggle-button {modsEnabled ? 'mods-on' : ''}" on:click={() => modsEnabled = true} disabled={!canInstall}>
+      <Button variant="unelevated" class="w-1/2 rounded-tl-none rounded-bl-none mods-toggle-button {modsEnabled ? 'mods-on' : ''}" on:click={() => modsEnabled = true} disabled={!$canModify}>
         <Label>
           Mods on
         </Label>
@@ -135,7 +133,7 @@
       menu$class="max-h-[32rem]"
       bind:value={$selectedProfile}
       ripple={false}
-      disabled={!canInstall}
+      disabled={!$canModify}
     >
       {#each $profiles as profile}
         <Option value={profile}>
@@ -144,21 +142,21 @@
       {/each}
     </Select>
     <div class="flex w-full mt-2">
-      <Button class="w-1/3 pr-2 pl-5 profile-add" on:click={() => addProfileDialog = true} disabled={!canInstall}>
+      <Button class="w-1/3 pr-2 pl-5 profile-add" on:click={() => addProfileDialog = true} disabled={!$canModify}>
         <Label>
           Add
         </Label>
         <div class="grow"/>
         <MdiIcon icon={mdiPlusCircle} />
       </Button>
-      <Button class="w-1/3 mx-2 pr-0 profile-edit" on:click={() => { renameOldProfileName = $selectedProfile ?? ''; renameProfileDialog = true; }} disabled={!canInstall}>
+      <Button class="w-1/3 mx-2 pr-0 profile-edit" on:click={() => { renameOldProfileName = $selectedProfile ?? ''; renameProfileDialog = true; }} disabled={!$canModify}>
         <Label>
           Rename
         </Label>
         <div class="grow"/>
         <MdiIcon icon={mdiPencil} />
       </Button>
-      <Button class="w-1/3 pr-2 pl-4 profile-delete" on:click={() => { deleteProfileName = $selectedProfile ?? ''; deleteProfileDialog = true; }} disabled={!canInstall}>
+      <Button class="w-1/3 pr-2 pl-4 profile-delete" on:click={() => { deleteProfileName = $selectedProfile ?? ''; deleteProfileDialog = true; }} disabled={!$canModify}>
         <Label>
           Delete
         </Label>
@@ -167,14 +165,14 @@
       </Button>
     </div>
     <div class="flex w-full mt-2">
-      <Button class="w-1/2 pr-2 pl-5 mr-1 profile-import" on:click={() => importProfileDialog = true} disabled={!canInstall}>
+      <Button class="w-1/2 pr-2 pl-5 mr-1 profile-import" on:click={() => importProfileDialog = true} disabled={!$canModify}>
         <Label>
           Import
         </Label>
         <div class="grow"/>
         <MdiIcon icon={mdiDownload} />
       </Button>
-      <Button class="w-1/2 pr-2 pl-4 ml-1 profile-export" on:click={() => { ExportCurrentProfile(); }} disabled={!canInstall}>
+      <Button class="w-1/2 pr-2 pl-4 ml-1 profile-export" on:click={() => { ExportCurrentProfile(); }} disabled={!$canModify}>
         <Label>
           Export
         </Label>
@@ -224,7 +222,7 @@
   </div>
   <div class="grow"/>
   <center>
-    <Button variant="unelevated" class="h-12 w-full launch-game" disabled={!canInstall}>
+    <Button variant="unelevated" class="h-12 w-full launch-game" disabled={$progress || $isGameRunning} on:click={() => LaunchGame()}>
       <Label>Play Satisfactory</Label>
       <div class="grow" />
     </Button>

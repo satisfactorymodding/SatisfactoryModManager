@@ -10,7 +10,7 @@
   import List, { Item, PrimaryText, SecondaryText, Separator, Text } from '@smui/list';
   import { bytesToAppropriate } from '$lib/utils/dataFormats';
   import { createEventDispatcher } from 'svelte';
-  import { lockfileMods, manifestMods, progress } from '$lib/store/ficsitCLIStore';
+  import { canModify, lockfileMods, manifestMods, progress } from '$lib/store/ficsitCLIStore';
   import { search } from '$lib/store/modFiltersStore';
   import MdiIcon from '$lib/components/MDIIcon.svelte';
   import { InstallModVersion } from '$wailsjs/go/bindings/FicsitCLI';
@@ -50,8 +50,6 @@
   $: installedVersion = $lockfileMods[mod?.mod_reference]?.version ?? 'Not installed';
 
   $: ficsitAppLink = `https://ficsit.app/mod/${$expandedMod}`;
-
-  $: canInstall = !$progress;
 
   let reportedCompatibility: Compatibility | undefined = { state: CompatibilityState.Works };
   let versionCompatibility: Compatibility = { state: CompatibilityState.Works };
@@ -165,14 +163,14 @@
     <div class="pt-4">
       <span>Latest version: </span><span class="font-bold">{mod?.versions[0].version ?? 'Loading...'}</span><br>
       <span>Installed version: </span><span class="font-bold">{ installedVersion ?? 'Loading...' }</span><br>
-      <div class="pt-2" on:mouseenter={() => canInstall && versionsMenu.setOpen(true)} on:mouseleave={() => versionsMenu.setOpen(false)}>
-        <Button variant="unelevated" color="secondary" class="w-full" disabled={!canInstall}>
+      <div class="pt-2" on:mouseenter={() => $canModify && versionsMenu.setOpen(true)} on:mouseleave={() => versionsMenu.setOpen(false)}>
+        <Button variant="unelevated" color="secondary" class="w-full" disabled={!$canModify}>
           <Label>Change version</Label>
           <MDIIcon icon={mdiChevronDown}/>
         </Button>
         <Menu bind:this={versionsMenu} class="min-w-[20rem] max-h-[32rem] overflow-x-visible" anchorCorner="TOP_LEFT">
           <List>
-            <Item on:SMUI:action={() => installVersion(null)} disabled={!canInstall}>
+            <Item on:SMUI:action={() => installVersion(null)} disabled={!$canModify}>
               {#if manifestVersion === '>=0.0.0'}
                 <MdiIcon icon={mdiCheck} class="h-5" />
               {:else}
@@ -184,7 +182,7 @@
             </Item>
             {#each mod?.versions ?? [] as version}
               <Separator insetLeading insetTrailing />
-              <Item on:SMUI:action={() => installVersion(version.version)} disabled={!canInstall}>
+              <Item on:SMUI:action={() => installVersion(version.version)} disabled={!$canModify}>
                 {#if validRange(manifestVersion) && minVersion(manifestVersion)?.format() === version.version }
                   <MdiIcon icon={mdiCheck} class="h-5" />
                 {:else}
@@ -206,7 +204,7 @@
               </Item>
               <!-- {#if validRange(manifestVersion) && minVersion(manifestVersion)?.format() === version.version}
                 <Separator insetLeading insetTrailing insetPadding />
-                <Item on:SMUI:action={() => installVersion(`>=${version.version}`)} disabled={!canInstall}>
+                <Item on:SMUI:action={() => installVersion(`>=${version.version}`)} disabled={!$canModify}>
                   {#if validRange(manifestVersion) && !valid(manifestVersion) && minVersion(manifestVersion)?.format() === version.version}
                     <MdiIcon icon={mdiCheck} class="h-5" />
                   {:else}

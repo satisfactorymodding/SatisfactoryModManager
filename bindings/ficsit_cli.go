@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"sort"
 	"time"
 
+	"github.com/mitchellh/go-ps"
 	"github.com/pkg/errors"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
@@ -23,6 +25,7 @@ type FicsitCLI struct {
 	installFindErrors    []error
 	selectedInstallation *InstallationInfo
 	progress             *Progress
+	isGameRunning        bool
 }
 
 type InstallationInfo struct {
@@ -52,6 +55,40 @@ func (f *FicsitCLI) startup(ctx context.Context) {
 	f.ctx = ctx
 
 	f.initInstallations()
+
+	gameRunningTIcker := time.NewTicker(5 * time.Second)
+	go func() {
+		for range gameRunningTIcker.C {
+			processes, err := ps.Processes()
+			if err != nil {
+				wailsRuntime.LogErrorf(f.ctx, "Failed to get processes: %v", err)
+				continue
+			}
+			f.isGameRunning = false
+			for _, process := range processes {
+				if process.Executable() == "FactoryGame-Win64-Shipping.exe" || process.Executable() == "FactoryGame-Win64-Shipping" {
+					f.isGameRunning = true
+					break
+				}
+			}
+			wailsRuntime.EventsEmit(f.ctx, "isGameRunning", f.isGameRunning)
+		}
+	}()
+}
+
+func (f *FicsitCLI) LaunchGame() {
+	if f.selectedInstallation == nil {
+		wailsRuntime.LogErrorf(f.ctx, "No installation selected")
+		return
+	}
+	cmd := exec.Command(f.selectedInstallation.Info.LaunchPath[0], f.selectedInstallation.Info.LaunchPath[1:]...)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		wailsRuntime.LogErrorf(f.ctx, "Failed to launch game (%s): error: %v, output: %s", cmd, err, out)
+		return
+	}
+	f.isGameRunning = true
+	wailsRuntime.EventsEmit(f.ctx, "isGameRunning", f.isGameRunning)
 }
 
 func (f *FicsitCLI) initInstallations() {
