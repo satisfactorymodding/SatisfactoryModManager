@@ -152,7 +152,7 @@
               </div>
             </div>
           </div>
-          <div class="pr-2 flex" on:click|stopPropagation={null}>
+          <div class="pr-2 flex" on:click|stopPropagation={() => { /* empty */ }}>
               <Group variant="outlined" class="mr-1">
                 <Button
                   on:click={toggleModInstalled}
