@@ -39,7 +39,7 @@ type Progress struct {
 func MakeFicsitCLI() (*FicsitCLI, error) {
 	f := &FicsitCLI{}
 
-	ficsitCli, err := cli.InitCLI()
+	ficsitCli, err := cli.InitCLI(false)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to initialize ficsit-cli")
 	}
