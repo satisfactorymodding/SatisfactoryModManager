@@ -21,11 +21,13 @@ var (
 )
 
 type SettingsData struct {
-	FavouriteMods    []string        `json:"favouriteMods"`
-	ModFilters       SavedModFilters `json:"modFilters"`
-	AppHeight        int             `json:"appHeight"`
-	ExpandedAppWidth int             `json:"expandedAppWidth"`
-	StartView        string          `json:"startView"`
+	FavouriteMods    []string          `json:"favouriteMods"`
+	ModFilters       SavedModFilters   `json:"modFilters"`
+	AppHeight        int               `json:"appHeight"`
+	ExpandedAppWidth int               `json:"expandedAppWidth"`
+	StartView        string            `json:"startView"`
+	SelectedInstall  string            `json:"selectedInstall"`
+	SelectedProfile  map[string]string `json:"selectedProfile"`
 }
 
 var Settings SettingsData
@@ -46,6 +48,8 @@ func LoadSettings() error {
 			AppHeight:        utils.UnexpandedMinHeight,
 			ExpandedAppWidth: utils.UnexpandedMinWidth,
 			StartView:        VIEW_COMPACT,
+			SelectedInstall:  "",
+			SelectedProfile:  map[string]string{},
 		}
 		err = SaveSettings()
 		if err != nil {
@@ -62,7 +66,39 @@ func LoadSettings() error {
 		return errors.Wrap(err, "failed to unmarshal settings")
 	}
 
+	setDefaults()
+
 	return nil
+}
+
+func setDefaults() {
+	if Settings.FavouriteMods == nil {
+		Settings.FavouriteMods = []string{}
+	}
+
+	if Settings.ModFilters.Order == "" {
+		Settings.ModFilters.Order = "Last updated"
+	}
+
+	if Settings.ModFilters.Filter == "" {
+		Settings.ModFilters.Filter = "Compatible"
+	}
+
+	if Settings.AppHeight == 0 {
+		Settings.AppHeight = utils.UnexpandedMinHeight
+	}
+
+	if Settings.ExpandedAppWidth == 0 {
+		Settings.ExpandedAppWidth = utils.UnexpandedMinWidth
+	}
+
+	if Settings.StartView == "" {
+		Settings.StartView = VIEW_COMPACT
+	}
+
+	if Settings.SelectedProfile == nil {
+		Settings.SelectedProfile = map[string]string{}
+	}
 }
 
 func SaveSettings() error {

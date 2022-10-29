@@ -16,6 +16,7 @@ import (
 	"github.com/satisfactorymodding/ficsit-cli/cli"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/install_finders"
+	"github.com/satisfactorymodding/SatisfactoryModManager/settings"
 )
 
 type FicsitCLI struct {
@@ -117,7 +118,27 @@ func (f *FicsitCLI) initInstallations() {
 		return f.installations[i].Info.Branch < f.installations[j].Info.Branch
 	})
 
+	for _, install := range f.installations {
+		savedSelectedProfile, ok := settings.Settings.SelectedProfile[install.Info.Path]
+		if ok {
+			err := install.Installation.SetProfile(f.ficsitCli, savedSelectedProfile)
+			if err != nil {
+				wailsRuntime.LogErrorf(f.ctx, "Failed to set saved profile: %v", err)
+			}
+		}
+	}
+
 	f.selectedInstallation = f.installations[0]
+
+	savedSelectedInstall := settings.Settings.SelectedInstall
+	if savedSelectedInstall != "" {
+		for _, install := range f.installations {
+			if install.Info.Path == savedSelectedInstall {
+				f.selectedInstallation = install
+				break
+			}
+		}
+	}
 }
 
 func (f *FicsitCLI) GetInstallationsInfo() []*InstallationInfo {
@@ -145,8 +166,15 @@ func (f *FicsitCLI) GetInstallation(path string) *InstallationInfo {
 }
 
 func (f *FicsitCLI) SelectInstall(path string) {
-	f.selectedInstallation = f.GetInstallation(path)
+	installation := f.GetInstallation(path)
+	if installation == nil {
+		wailsRuntime.LogErrorf(f.ctx, "Failed to find installation %s", path)
+		return
+	}
+	f.selectedInstallation = installation
 	f.emitModsChange()
+	settings.Settings.SelectedInstall = installation.Info.Path
+	settings.SaveSettings()
 }
 
 func (f *FicsitCLI) GetSelectedInstall() *InstallationInfo {
@@ -154,8 +182,18 @@ func (f *FicsitCLI) GetSelectedInstall() *InstallationInfo {
 }
 
 func (f *FicsitCLI) SetProfile(profile string) {
-	f.GetInstallation(f.selectedInstallation.Info.Path).Installation.SetProfile(f.ficsitCli, profile)
+	if f.selectedInstallation == nil {
+		wailsRuntime.LogErrorf(f.ctx, "No installation selected")
+		return
+	}
+	err := f.selectedInstallation.Installation.SetProfile(f.ficsitCli, profile)
+	if err != nil {
+		wailsRuntime.LogErrorf(f.ctx, "Failed to set profile: %v", err)
+		return
+	}
 	f.emitModsChange()
+	settings.Settings.SelectedProfile[f.selectedInstallation.Info.Path] = profile
+	settings.SaveSettings()
 }
 
 func (f *FicsitCLI) GetSelectedProfile() *string {
