@@ -13,6 +13,10 @@ query GetMods($offset: Int!, $limit: Int!) {
       views
       downloads
       last_version_date
+      tags {
+        id
+        name
+      }
       authors {
         user {
           id

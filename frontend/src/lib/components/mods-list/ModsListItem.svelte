@@ -163,8 +163,11 @@
       <div class="flex grow">
         {#if !inProgress}
           <div class="grow w-0">
-            <div>
-              #tags
+            <div class="truncate">
+              {#each mod?.tags ?? [] as tag}
+                <span class="pr-1">#{tag.name}</span>
+              {/each}
+              &nbsp; <!-- keep div height even when no tags are available -->
             </div>
             <div class="flex h-5">
               <div class="w-24 flex">
