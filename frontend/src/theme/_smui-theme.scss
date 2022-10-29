@@ -215,3 +215,29 @@ a {
 a:visited {
   color: color.scale(#40b3ff, $lightness: -35%);
 }
+
+::-webkit-scrollbar {
+  width: 25px;
+}
+::-webkit-scrollbar-track {
+  background: black;
+  border: solid 10px transparent;
+  border-top-width: 5px;
+  border-bottom-width: 5px;
+  background-clip: content-box;
+  border-radius: 0;
+}
+::-webkit-scrollbar-thumb {
+  background: #fff;
+  border: solid 10px transparent;
+  border-top-width: 5px;
+  border-bottom-width: 5px;
+  background-clip: content-box;
+  border-radius: 0;
+}
+::-webkit-scrollbar-thumb:hover {
+  border: solid 10px transparent;
+  border-top-width: 5px;
+  border-bottom-width: 5px;
+  background-clip: content-box;
+}
