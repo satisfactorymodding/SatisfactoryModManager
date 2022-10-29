@@ -4,6 +4,7 @@
   import { mdiCheckCircle, mdiSync, mdiUpload } from '@mdi/js';
 
   import { checkForUpdates, canModify, progress, updates, updateCheckInProgress } from '$lib/store/ficsitCLIStore';
+  import { error } from '$lib/store/generalStore';
   import Dialog, { Actions, Content, Title } from '@smui/dialog';
   import { UpdateAllMods } from '$wailsjs/go/bindings/FicsitCLI';
   import List, { Item, PrimaryText, SecondaryText, Text } from '@smui/list';
@@ -13,9 +14,17 @@
 
   async function updateAll() {
     if($updates.length > 0) {
-      const err = await UpdateAllMods();
-      if(!err) {
+      try {
+        await UpdateAllMods();
         $updates = [];
+      } catch(e) {
+        if (e instanceof Error) {
+          $error = e.message;
+        } else if (typeof e === 'string') {
+          $error = e;
+        } else {
+          $error = 'Unknown error';
+        }
       }
     }
   }

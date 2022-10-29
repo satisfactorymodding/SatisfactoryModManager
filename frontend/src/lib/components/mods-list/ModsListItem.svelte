@@ -7,6 +7,7 @@
   import LinearProgress from '@smui/linear-progress';
   import Tooltip, { Wrapper } from '@smui/tooltip';
   import { favouriteMods, lockfileMods, manifestMods, progress, selectedInstall } from '$lib/store/ficsitCLIStore';
+  import { error } from '$lib/store/generalStore';
   import { DisableMod, EnableMod, InstallMod, RemoveMod } from '$wailsjs/go/bindings/FicsitCLI';
   import { FavouriteMod, UnFavouriteMod } from '$wailsjs/go/bindings/Settings';
   import { getAuthor } from '$lib/utils/getModAuthor';
@@ -80,7 +81,13 @@
         await InstallMod(mod.mod_reference);
       }
     } catch(e) {
-      console.error(e);
+      if (e instanceof Error) {
+        $error = e.message;
+      } else if (typeof e === 'string') {
+        $error = e;
+      } else {
+        $error = 'Unknown error';
+      }
     }
   }
 
@@ -92,15 +99,31 @@
         await EnableMod(mod.mod_reference);
       }
     } catch(e) {
-      console.error(e);
+      if (e instanceof Error) {
+        $error = e.message;
+      } else if (typeof e === 'string') {
+        $error = e;
+      } else {
+        $error = 'Unknown error';
+      }
     }
   }
 
-  function toggleModFavourite() {
-    if(!isFavourite) {
-      FavouriteMod(mod.mod_reference);
-    } else {
-      UnFavouriteMod(mod.mod_reference);
+  async function toggleModFavourite() {
+    try {
+      if(!isFavourite) {
+        await FavouriteMod(mod.mod_reference);
+      } else {
+        await UnFavouriteMod(mod.mod_reference);
+      }
+    } catch(e) {
+      if (e instanceof Error) {
+        $error = e.message;
+      } else if (typeof e === 'string') {
+        $error = e;
+      } else {
+        $error = 'Unknown error';
+      }
     }
   }
 

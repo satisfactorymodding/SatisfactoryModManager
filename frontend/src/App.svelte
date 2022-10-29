@@ -9,7 +9,7 @@
   import { ExpandMod, UnexpandMod } from '$wailsjs/go/bindings/App';
   import LeftBar from '$lib/components/left-bar/LeftBar.svelte';
   import { installs, invalidInstalls } from '$lib/store/ficsitCLIStore';
-  import { expandedMod } from '$lib/store/generalStore';
+  import { expandedMod, error } from '$lib/store/generalStore';
   import Dialog, { Actions, Content, Title } from '@smui/dialog';
   import Button, { Label } from '@smui/button';
   import { GenerateDebugInfo } from '$wailsjs/go/bindings/DebugInfo';
@@ -96,6 +96,27 @@
     Seems wrong? Click the button below and send the generated zip file on the modding discord in #help-using-mods.
   </Content>
   <Actions>
+    <Button action="" on:click={GenerateDebugInfo}>
+      <Label>Generate debug info</Label>
+    </Button>
+  </Actions>
+</Dialog>
+
+<Dialog
+  open={!!$error}  
+  scrimClickAction=""
+  escapeKeyAction=""
+  surface$style="width: 500px; max-width: calc(100vw - 32px);"
+>
+  <Title>Error</Title>
+  <Content>
+    <p>{ $error }</p>
+    <p class="pt-4">Seems wrong? Click the button below and send the generated zip file on the modding discord in #help-using-mods.</p>
+  </Content>
+  <Actions>
+    <Button action="" on:click={() => $error = null}>
+      <Label>Close</Label>
+    </Button>
     <Button action="" on:click={GenerateDebugInfo}>
       <Label>Generate debug info</Label>
     </Button>

@@ -8,6 +8,7 @@
   import MdiIcon from '$lib/components/MDIIcon.svelte';
   
   import { addProfile, deleteProfile, importProfile, installs, isGameRunning, profiles, progress, canModify, renameProfile, selectedInstall, selectedProfile } from '$lib/store/ficsitCLIStore';
+  import { error } from '$lib/store/generalStore';
   import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
   import { OpenFileDialog } from '$wailsjs/go/bindings/App';
 
@@ -22,25 +23,69 @@
   let addProfileDialog = false;
   let newProfileName = '';
   async function finishAddProfile() {
-    await addProfile(newProfileName);
-    selectedProfile.set(newProfileName);
-    newProfileName = '';
+    try {
+      await addProfile(newProfileName);
+      selectedProfile.set(newProfileName);
+      newProfileName = '';
+    } catch(e) {
+      if (e instanceof Error) {
+        $error = e.message;
+      } else if (typeof e === 'string') {
+        $error = e;
+      } else {
+        $error = 'Unknown error';
+      }
+    }
   }
 
   let renameProfileDialog = false;
   let renameOldProfileName = '';
   let renameNewProfileName = '';
   async function finishRenameProfile() {
-    await renameProfile(renameOldProfileName, renameNewProfileName);
-    renameOldProfileName = '';
-    renameNewProfileName = '';
+    try {
+      await renameProfile(renameOldProfileName, renameNewProfileName);
+      renameOldProfileName = '';
+      renameNewProfileName = '';
+    } catch(e) {
+      if (e instanceof Error) {
+        $error = e.message;
+      } else if (typeof e === 'string') {
+        $error = e;
+      } else {
+        $error = 'Unknown error';
+      }
+    }
   }
 
   let deleteProfileDialog = false;
   let deleteProfileName = '';
   async function finishDeleteProfile() {
-    await deleteProfile(deleteProfileName);
-    deleteProfileName = '';
+    try {
+      await deleteProfile(deleteProfileName);
+      deleteProfileName = '';
+    } catch(e) {
+      if (e instanceof Error) {
+        $error = e.message;
+      } else if (typeof e === 'string') {
+        $error = e;
+      } else {
+        $error = 'Unknown error';
+      }
+    }
+  }
+
+  async function exportCurrentProfile() {
+    try {
+      await ExportCurrentProfile();
+    } catch(e) {
+      if (e instanceof Error) {
+        $error = e.message;
+      } else if (typeof e === 'string') {
+        $error = e;
+      } else {
+        $error = 'Unknown error';
+      }
+    }
   }
 
   let importProfileDialog = false;
@@ -172,7 +217,7 @@
         <div class="grow"/>
         <MdiIcon icon={mdiDownload} />
       </Button>
-      <Button class="w-1/2 pr-2 pl-4 ml-1 profile-export" on:click={() => { ExportCurrentProfile(); }} disabled={!$canModify}>
+      <Button class="w-1/2 pr-2 pl-4 ml-1 profile-export" on:click={() => { exportCurrentProfile(); }} disabled={!$canModify}>
         <Label>
           Export
         </Label>

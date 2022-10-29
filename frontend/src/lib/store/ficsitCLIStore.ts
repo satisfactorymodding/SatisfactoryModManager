@@ -43,10 +43,7 @@ selectedProfile.subscribe((p) => {
 });
 
 export async function addProfile(name: string) {
-  const err = await AddProfile(name);
-  if(err) {
-    throw err;
-  }
+  await AddProfile(name);
   const newProfiles = get(profiles);
   if(!newProfiles.includes(name)) {
     newProfiles.push(name);
@@ -55,10 +52,7 @@ export async function addProfile(name: string) {
 }
 
 export async function renameProfile(oldName: string, newName: string) {
-  const err = await RenameProfile(oldName, newName);
-  if(err) {
-    throw err;
-  }
+  await RenameProfile(oldName, newName);
   const newProfiles = get(profiles);
   if(newProfiles.includes(oldName)) {
     const idx = newProfiles.indexOf(oldName);
@@ -72,10 +66,7 @@ export async function renameProfile(oldName: string, newName: string) {
 }
 
 export async function deleteProfile(name: string) {
-  const err = await DeleteProfile(name);
-  if(err) {
-    throw err;
-  }
+  await DeleteProfile(name);
   const newProfiles = get(profiles);
   if(newProfiles.includes(name)) {
     const idx = newProfiles.indexOf(name);
@@ -89,10 +80,7 @@ export async function deleteProfile(name: string) {
 }
 
 export async function importProfile(name: string, filepath: string) {
-  const err = await ImportProfile(name, filepath);
-  if(err) {
-    throw err;
-  }
+  await ImportProfile(name, filepath);
   const newProfiles = get(profiles);
   if(!newProfiles.includes(name)) {
     newProfiles.push(name);

@@ -10,6 +10,7 @@
   import List, { Item, PrimaryText, SecondaryText, Separator, Text } from '@smui/list';
   import { bytesToAppropriate } from '$lib/utils/dataFormats';
   import { canModify, lockfileMods, manifestMods, progress } from '$lib/store/ficsitCLIStore';
+  import { error } from '$lib/store/generalStore';
   import { search } from '$lib/store/modFiltersStore';
   import MdiIcon from '$lib/components/MDIIcon.svelte';
   import { InstallModVersion } from '$wailsjs/go/bindings/FicsitCLI';
@@ -20,7 +21,7 @@
   import { getReportedCompatibility, getVersionCompatibility } from '$lib/utils/modCompatibility';
   import type { GameBranch } from '$lib/wailsTypesExtensions';
   import { expandedMod } from '$lib/store/generalStore';
-  import { minVersion, valid, validRange } from 'semver';
+  import { minVersion, valid, validRange, sort } from 'semver';
 
   const modQuery = operationStore(
     GetModDetailsDocument,
@@ -46,6 +47,7 @@
 
   $: size = mod ? bytesToAppropriate(mod.versions[0]?.size ?? 0) : undefined;
 
+  $: latestVersion = mod?.versions?.length ? sort(mod.versions.map((v) => v.version)).reverse()[0] : 'N/A';
   $: installedVersion = $lockfileMods[mod?.mod_reference]?.version ?? 'Not installed';
 
   $: ficsitAppLink = `https://ficsit.app/mod/${$expandedMod}`;
@@ -81,8 +83,18 @@
   let versionsMenu: MenuComponentDev;
 
   $: manifestVersion = $manifestMods[mod?.mod_reference]?.version;
-  function installVersion(version: string | null) {
-    InstallModVersion(mod?.mod_reference, version ?? '>=0.0.0');
+  async function installVersion(version: string | null) {
+    try {
+      await InstallModVersion(mod?.mod_reference, version ?? '>=0.0.0');
+    } catch(e) {
+      if (e instanceof Error) {
+        $error = e.message;
+      } else if (typeof e === 'string') {
+        $error = e;
+      } else {
+        $error = 'Unknown error';
+      }
+    }
   }
 
   function close() {
@@ -158,7 +170,7 @@
     </div>
 
     <div class="pt-4">
-      <span>Latest version: </span><span class="font-bold">{mod?.versions[0].version ?? 'Loading...'}</span><br>
+      <span>Latest version: </span><span class="font-bold">{ latestVersion ?? 'Loading...' }</span><br>
       <span>Installed version: </span><span class="font-bold">{ installedVersion ?? 'Loading...' }</span><br>
       <div class="pt-2" on:mouseenter={() => $canModify && versionsMenu.setOpen(true)} on:mouseleave={() => versionsMenu.setOpen(false)}>
         <Button variant="unelevated" color="secondary" class="w-full" disabled={!$canModify}>
