@@ -9,6 +9,7 @@
   import { ExpandMod, UnexpandMod } from '$wailsjs/go/bindings/App';
   import LeftBar from '$lib/components/left-bar/LeftBar.svelte';
   import { installs, invalidInstalls } from '$lib/store/ficsitCLIStore';
+  import { konami } from '$lib/store/settingsStore';
   import { expandedMod, error } from '$lib/store/generalStore';
   import Dialog, { Actions, Content, Title } from '@smui/dialog';
   import Button, { Label } from '@smui/button';
@@ -47,6 +48,19 @@
       noInstallsDialog = true;
     }
   }
+  
+  const code = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
+  const keyQueue: number[] = [];
+  window.addEventListener('keydown', (event) => {
+    keyQueue.push(event.keyCode);
+    if (keyQueue.length > code.length) {
+      keyQueue.shift();
+    }
+    if (keyQueue.length === code.length && keyQueue.every((val, idx) => code[idx] === val)) {
+      $konami = !$konami;
+    }
+    console.log(keyQueue);
+  });
 </script>
 
 <div class="flex flex-col h-screen w-screen">

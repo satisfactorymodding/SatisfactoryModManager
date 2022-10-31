@@ -91,3 +91,21 @@ func (s *Settings) SetStartView(view string) {
 	settings.Settings.StartView = view
 	settings.SaveSettings()
 }
+
+func (s *Settings) GetKonami() bool {
+	return settings.Settings.Konami
+}
+
+func (s *Settings) SetKonami(value bool) {
+	settings.Settings.Konami = value
+	settings.SaveSettings()
+}
+
+func (s *Settings) GetLaunchButton() string {
+	return settings.Settings.LaunchButton
+}
+
+func (s *Settings) SetLaunchButton(value string) {
+	settings.Settings.LaunchButton = value
+	settings.SaveSettings()
+}

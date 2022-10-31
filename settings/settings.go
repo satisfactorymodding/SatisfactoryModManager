@@ -28,6 +28,8 @@ type SettingsData struct {
 	StartView        string            `json:"startView"`
 	SelectedInstall  string            `json:"selectedInstall"`
 	SelectedProfile  map[string]string `json:"selectedProfile"`
+	Konami           bool              `json:"konami"`
+	LaunchButton     string            `json:"launchButton"`
 }
 
 var Settings SettingsData
@@ -98,6 +100,10 @@ func setDefaults() {
 
 	if Settings.SelectedProfile == nil {
 		Settings.SelectedProfile = map[string]string{}
+	}
+
+	if Settings.LaunchButton == "" {
+		Settings.LaunchButton = "normal"
 	}
 }
 
