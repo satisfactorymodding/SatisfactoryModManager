@@ -45,7 +45,9 @@ func MakeFicsitCLI() (*FicsitCLI, error) {
 
 	ficsitCli, err := cli.InitCLI(false)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to initialize ficsit-cli")
+		err = errors.Wrap(err, "failed to initialize ficsit-cli")
+		wailsRuntime.LogError(f.ctx, err.Error())
+		return nil, err
 	}
 	f.ficsitCli = ficsitCli
 
@@ -253,7 +255,9 @@ func (f *FicsitCLI) InstallMod(mod string) error {
 
 	profileErr := profile.AddMod(mod, ">=0.0.0")
 	if profileErr != nil {
-		return errors.Wrapf(profileErr, "Failed to add mod: %s@latest", mod)
+		profileErr := errors.Wrapf(profileErr, "Failed to add mod: %s@latest", mod)
+		wailsRuntime.LogError(f.ctx, profileErr.Error())
+		return profileErr
 	}
 
 	f.SetProgress(&Progress{
@@ -267,7 +271,9 @@ func (f *FicsitCLI) InstallMod(mod string) error {
 	installErr := f.validateInstall(installation, mod)
 
 	if installErr != nil {
-		return errors.Wrapf(installErr, "Failed to install mod: %s@latest", mod)
+		installErr := errors.Wrapf(installErr, "Failed to install mod: %s@latest", mod)
+		wailsRuntime.LogError(f.ctx, installErr.Error())
+		return installErr
 	}
 
 	f.ficsitCli.Profiles.Save()
@@ -283,7 +289,9 @@ func (f *FicsitCLI) InstallModVersion(mod string, version string) error {
 
 	profileErr := profile.AddMod(mod, version)
 	if profileErr != nil {
-		return errors.Wrapf(profileErr, "Failed to add mod: %s@%s", mod, version)
+		profileErr := errors.Wrapf(profileErr, "Failed to add mod: %s@%s", mod, version)
+		wailsRuntime.LogError(f.ctx, profileErr.Error())
+		return profileErr
 	}
 
 	f.SetProgress(&Progress{
@@ -297,7 +305,9 @@ func (f *FicsitCLI) InstallModVersion(mod string, version string) error {
 	installErr := f.validateInstall(installation, mod)
 
 	if installErr != nil {
-		return errors.Wrapf(installErr, "Failed to install mod: %s@%s", mod, version)
+		installErr := errors.Wrapf(installErr, "Failed to install mod: %s@%s", mod, version)
+		wailsRuntime.LogError(f.ctx, installErr.Error())
+		return installErr
 	}
 
 	f.ficsitCli.Profiles.Save()
@@ -324,7 +334,9 @@ func (f *FicsitCLI) RemoveMod(mod string) error {
 	installErr := f.validateInstall(installation, mod)
 
 	if installErr != nil {
-		return errors.Wrapf(installErr, "Failed to remove mod: %s", mod)
+		installErr := errors.Wrapf(installErr, "Failed to remove mod: %s", mod)
+		wailsRuntime.LogError(f.ctx, installErr.Error())
+		return installErr
 	}
 
 	f.ficsitCli.Profiles.Save()
@@ -351,7 +363,9 @@ func (f *FicsitCLI) EnableMod(mod string) error {
 	installErr := f.validateInstall(installation, mod)
 
 	if installErr != nil {
-		return errors.Wrapf(installErr, "Failed to enable mod: %s", mod)
+		installErr := errors.Wrapf(installErr, "Failed to enable mod: %s", mod)
+		wailsRuntime.LogError(f.ctx, installErr.Error())
+		return installErr
 	}
 
 	f.ficsitCli.Profiles.Save()
@@ -378,7 +392,9 @@ func (f *FicsitCLI) DisableMod(mod string) error {
 	installErr := f.validateInstall(installation, mod)
 
 	if installErr != nil {
-		return errors.Wrapf(installErr, "Failed to disable mod: %s", mod)
+		installErr := errors.Wrapf(installErr, "Failed to disable mod: %s", mod)
+		wailsRuntime.LogError(f.ctx, installErr.Error())
+		return installErr
 	}
 
 	f.ficsitCli.Profiles.Save()
@@ -391,7 +407,9 @@ func (f *FicsitCLI) AddProfile(name string) error {
 	_, err := f.ficsitCli.Profiles.AddProfile(name)
 
 	if err != nil {
-		return errors.Wrapf(err, "Failed to add profile: %s", name)
+		err := errors.Wrapf(err, "Failed to add profile: %s", name)
+		wailsRuntime.LogError(f.ctx, err.Error())
+		return err
 	}
 
 	f.ficsitCli.Profiles.Save()
@@ -403,7 +421,9 @@ func (f *FicsitCLI) RenameProfile(oldName string, newName string) error {
 	err := f.ficsitCli.Profiles.RenameProfile(f.ficsitCli, oldName, newName)
 
 	if err != nil {
-		return errors.Wrapf(err, "Failed to rename profile: %s -> %s", oldName, newName)
+		err := errors.Wrapf(err, "Failed to rename profile: %s -> %s", oldName, newName)
+		wailsRuntime.LogError(f.ctx, err.Error())
+		return err
 	}
 
 	f.ficsitCli.Profiles.Save()
@@ -415,7 +435,9 @@ func (f *FicsitCLI) DeleteProfile(name string) error {
 	err := f.ficsitCli.Profiles.DeleteProfile(name)
 
 	if err != nil {
-		return errors.Wrapf(err, "Failed to delete profile: %s", name)
+		err := errors.Wrapf(err, "Failed to delete profile: %s", name)
+		wailsRuntime.LogError(f.ctx, err.Error())
+		return err
 	}
 
 	f.ficsitCli.Profiles.Save()
@@ -442,21 +464,29 @@ type ExportedProfileMetadata struct {
 func (f *FicsitCLI) ExportCurrentProfile() error {
 	selectedInstall := f.GetSelectedInstall()
 	if selectedInstall == nil {
-		return errors.New("No installation selected")
+		err := errors.New("No installation selected")
+		wailsRuntime.LogError(f.ctx, err.Error())
+		return err
 	}
 
 	profileName := f.GetSelectedProfile()
 	if profileName == nil {
-		return errors.New("No profile selected")
+		err := errors.New("No profile selected")
+		wailsRuntime.LogError(f.ctx, err.Error())
+		return err
 	}
 
 	profile := f.GetProfile(*profileName)
 	if profile == nil {
-		return errors.New("No profile selected")
+		err := errors.New("No profile selected")
+		wailsRuntime.LogError(f.ctx, err.Error())
+		return err
 	}
 	lockfile, err := f.GetCurrentLockfile(selectedInstall)
 	if err != nil {
-		return errors.Wrap(err, "Failed to get lockfile")
+		err = errors.Wrap(err, "Failed to get lockfile")
+		wailsRuntime.LogError(f.ctx, err.Error())
+		return err
 	}
 	metadata := &ExportedProfileMetadata{
 		GameVersion: selectedInstall.Info.Version,
@@ -479,20 +509,28 @@ func (f *FicsitCLI) ExportCurrentProfile() error {
 		},
 	})
 	if err != nil {
-		return errors.Wrap(err, "Failed to open save dialog")
+		err = errors.Wrap(err, "Failed to open save dialog")
+		wailsRuntime.LogError(f.ctx, err.Error())
+		return err
 	}
 
 	exportedProfileJson, err := json.MarshalIndent(exportedProfile, "", "  ")
 	if err != nil {
-		return errors.Wrap(err, "failed to marshal exported profile")
+		err = errors.Wrap(err, "failed to marshal exported profile")
+		wailsRuntime.LogError(f.ctx, err.Error())
+		return err
 	}
 	err = os.WriteFile(filename, exportedProfileJson, 0755)
 	if err != nil {
-		return errors.Wrap(err, "failed to write exported profile")
+		err = errors.Wrap(err, "failed to write exported profile")
+		wailsRuntime.LogError(f.ctx, err.Error())
+		return err
 	}
 
 	if err != nil {
-		return errors.Wrapf(err, "Failed to save exported profile: %s", *profileName)
+		err := errors.Wrapf(err, "Failed to save exported profile: %s", *profileName)
+		wailsRuntime.LogError(f.ctx, err.Error())
+		return err
 	}
 
 	return nil
@@ -501,13 +539,17 @@ func (f *FicsitCLI) ExportCurrentProfile() error {
 func (f *FicsitCLI) ReadExportedProfileMetadata(file string) (*ExportedProfileMetadata, error) {
 	fileBytes, err := os.ReadFile(file)
 	if err != nil {
-		return nil, errors.Wrap(err, "Failed to read exported profile")
+		err = errors.Wrap(err, "Failed to read exported profile")
+		wailsRuntime.LogError(f.ctx, err.Error())
+		return nil, err
 	}
 
 	var exportedProfile ExportedProfile
 	err = json.Unmarshal(fileBytes, &exportedProfile)
 	if err != nil {
-		return nil, errors.Wrap(err, "Failed to unmarshal exported profile")
+		err = errors.Wrap(err, "Failed to unmarshal exported profile")
+		wailsRuntime.LogError(f.ctx, err.Error())
+		return nil, err
 	}
 
 	return exportedProfile.Metadata, nil
@@ -516,23 +558,31 @@ func (f *FicsitCLI) ReadExportedProfileMetadata(file string) (*ExportedProfileMe
 func (f *FicsitCLI) ImportProfile(name string, file string) error {
 	selectedInstall := f.GetSelectedInstall()
 	if selectedInstall == nil {
-		return errors.New("No installation selected")
+		err := errors.New("No installation selected")
+		wailsRuntime.LogError(f.ctx, err.Error())
+		return err
 	}
 
 	profileData, err := os.ReadFile(file)
 	if err != nil {
-		return errors.Wrap(err, "Failed to read profile file")
+		err = errors.Wrap(err, "Failed to read profile file")
+		wailsRuntime.LogError(f.ctx, err.Error())
+		return err
 	}
 
 	var exportedProfile ExportedProfile
 	err = json.Unmarshal(profileData, &exportedProfile)
 	if err != nil {
-		return errors.Wrap(err, "Failed to unmarshal profile file")
+		err = errors.Wrap(err, "Failed to unmarshal profile file")
+		wailsRuntime.LogError(f.ctx, err.Error())
+		return err
 	}
 
 	profile, err := f.ficsitCli.Profiles.AddProfile(name)
 	if err != nil {
-		return errors.Wrap(err, "Failed to add profile")
+		err = errors.Wrap(err, "Failed to add profile")
+		wailsRuntime.LogError(f.ctx, err.Error())
+		return err
 	}
 
 	profile.Mods = exportedProfile.Profile.Mods
@@ -542,7 +592,9 @@ func (f *FicsitCLI) ImportProfile(name string, file string) error {
 	err = selectedInstall.Installation.WriteLockFile(f.ficsitCli, *exportedProfile.LockFile)
 	if err != nil {
 		f.ficsitCli.Profiles.DeleteProfile(name)
-		return errors.Wrap(err, "Failed to write lockfile")
+		err = errors.Wrap(err, "Failed to write lockfile")
+		wailsRuntime.LogError(f.ctx, err.Error())
+		return err
 	}
 
 	f.ficsitCli.Profiles.Save()
@@ -561,7 +613,9 @@ func (f *FicsitCLI) CheckForUpdates() ([]Update, error) {
 	currentLockfile, err := f.selectedInstallation.Installation.LockFile(f.ficsitCli)
 
 	if err != nil {
-		return nil, errors.Wrap(err, "Failed to get current lockfile")
+		err = errors.Wrap(err, "Failed to get current lockfile")
+		wailsRuntime.LogError(f.ctx, err.Error())
+		return nil, err
 	}
 
 	if currentLockfile == nil {
@@ -574,7 +628,9 @@ func (f *FicsitCLI) CheckForUpdates() ([]Update, error) {
 
 	gameVersion, err := f.selectedInstallation.Installation.GetGameVersion(f.ficsitCli)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to detect game version")
+		err = errors.Wrap(err, "failed to detect game version")
+		wailsRuntime.LogError(f.ctx, err.Error())
+		return nil, err
 	}
 
 	updateProfile := &cli.Profile{
@@ -589,7 +645,9 @@ func (f *FicsitCLI) CheckForUpdates() ([]Update, error) {
 	}
 	newLockfile, err := updateProfile.Resolve(resolver, nil, gameVersion)
 	if err != nil {
-		return nil, errors.Wrap(err, "error resolving dependencies")
+		err = errors.Wrap(err, "error resolving dependencies")
+		wailsRuntime.LogError(f.ctx, err.Error())
+		return nil, err
 	}
 
 	updates := []Update{}
@@ -613,7 +671,9 @@ func (f *FicsitCLI) UpdateAllMods() error {
 
 	previousLockfile, err := f.selectedInstallation.Installation.LockFile(f.ficsitCli)
 	if err != nil {
-		return errors.Wrap(err, "Failed to get current lockfile")
+		err = errors.Wrap(err, "Failed to get current lockfile")
+		wailsRuntime.LogError(f.ctx, err.Error())
+		return err
 	}
 
 	profile := f.GetProfile(f.selectedInstallation.Installation.Profile)
@@ -638,7 +698,9 @@ func (f *FicsitCLI) UpdateAllMods() error {
 
 	if err != nil {
 		f.selectedInstallation.Installation.WriteLockFile(f.ficsitCli, *previousLockfile)
-		return errors.Wrap(err, "Failed to update mods")
+		err = errors.Wrap(err, "Failed to update mods")
+		wailsRuntime.LogError(f.ctx, err.Error())
+		return err
 	}
 
 	f.ficsitCli.Profiles.Save()
