@@ -8,7 +8,7 @@
   import MdiIcon from '$lib/components/MDIIcon.svelte';
   
   import { addProfile, deleteProfile, importProfile, installs, isGameRunning, profiles, progress, canModify, renameProfile, selectedInstall, selectedProfile } from '$lib/store/ficsitCLIStore';
-  import { error } from '$lib/store/generalStore';
+  import { error, isLaunchingGame } from '$lib/store/generalStore';
   import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
   import { OpenFileDialog } from '$wailsjs/go/bindings/App';
 
@@ -133,6 +133,12 @@
         importProfileError = 'Unknown error';
       }
     }
+  }
+
+  function launchGame() {
+    $isLaunchingGame = true;
+    LaunchGame();
+    setTimeout(() => $isLaunchingGame = false, 10000);
   }
 </script>
 

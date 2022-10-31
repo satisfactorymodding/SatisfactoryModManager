@@ -4,6 +4,7 @@ import { AddProfile, CheckForUpdates, DeleteProfile, GetInstallationsInfo, GetIn
 import { GetFavouriteMods } from '$wailsjs/go/bindings/Settings';
 import { readableBinding, writableBinding } from './wailsStoreBindings';
 import { tick } from 'svelte';
+import { isLaunchingGame } from './generalStore';
 
 export const invalidInstalls = readableBinding<(Error & {path?: string})[]>([], { initialGet: GetInvalidInstalls });
 
@@ -114,13 +115,15 @@ export const isGameRunning = readableBinding(false, { updateEvent: 'isGameRunnin
 
 export const canModify = readable(true, (set) => {
   const update = () => {
-    set(!get(isGameRunning) && !get(progress));
+    set(!get(isGameRunning) && !get(progress) && !get(isLaunchingGame));
   };
   const unsubGameRunning = isGameRunning.subscribe(update);
   const unsubProgress = progress.subscribe(update);
+  const unsubLaunchingGame = isLaunchingGame.subscribe(update);
   return () => {
     unsubGameRunning();
     unsubProgress();
+    unsubLaunchingGame();
   };
 
 });
