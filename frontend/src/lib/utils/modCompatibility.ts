@@ -1,4 +1,5 @@
 import { CompatibilityState, ModVersionsCompatibilityDocument, SmlVersionsCompatibilityDocument, type Compatibility, type Mod } from '$lib/generated';
+import type { GameBranch } from '$lib/wailsTypesExtensions';
 import { getClient } from '@urql/svelte';
 import { coerce, compare, minVersion, satisfies } from 'semver';
 
@@ -6,7 +7,7 @@ function gameVersionToSemver(version: number): string | null {
   return coerce(version)?.format();
 }
 
-export function getReportedCompatibility(mod: Pick<Mod, 'compatibility' | 'mod_reference'>, gameBranch: GameBranch): Compatibility | undefined {
+export function getReportedCompatibility(mod: Pick<Mod, 'compatibility'>, gameBranch: GameBranch): Compatibility | undefined {
   if(mod.compatibility) {
     switch(gameBranch) {
     case 'EA':

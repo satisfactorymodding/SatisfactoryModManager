@@ -122,14 +122,14 @@ func FindInstallationsWindowsSteam() ([]*Installation, []error) {
 			continue
 		}
 
-		var branch string
+		var branch GameBranch
 		userConfig := manifest["AppState"].(map[string]interface{})["UserConfig"].(map[string]interface{})
 		betakey, ok := userConfig["betakey"]
 		if !ok {
-			branch = "Early Access"
+			branch = BRANCH_EARLY_ACCESS
 		} else {
 			if betakey == "experimental" {
-				branch = "Experimental"
+				branch = BRANCH_EXPERIMENTAL
 			} else {
 				findErrors = append(findErrors, errors.New(fmt.Sprintf("Unknown beta key %s", betakey)))
 			}

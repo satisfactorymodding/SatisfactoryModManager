@@ -1,11 +1,18 @@
 package install_finders
 
+type GameBranch string
+
+var (
+	BRANCH_EARLY_ACCESS GameBranch = "Early Access"
+	BRANCH_EXPERIMENTAL GameBranch = "Experimental"
+)
+
 type Installation struct {
-	Path       string   `json:"path"`
-	Version    int      `json:"version"`
-	Branch     string   `json:"branch"`
-	Launcher   string   `json:"launcher"`
-	LaunchPath []string `json:"launchPath"`
+	Path       string     `json:"path"`
+	Version    int        `json:"version"`
+	Branch     GameBranch `json:"branch"`
+	Launcher   string     `json:"launcher"`
+	LaunchPath []string   `json:"launchPath"`
 }
 
 type InstallFindError struct {

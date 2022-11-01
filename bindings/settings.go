@@ -83,11 +83,11 @@ func (s *Settings) emitFavouriteMods() {
 	wailsRuntime.EventsEmit(s.ctx, "favouriteMods", settings.Settings.FavouriteMods)
 }
 
-func (s *Settings) GetStartView() string {
+func (s *Settings) GetStartView() settings.View {
 	return settings.Settings.StartView
 }
 
-func (s *Settings) SetStartView(view string) {
+func (s *Settings) SetStartView(view settings.View) {
 	settings.Settings.StartView = view
 	settings.SaveSettings()
 }

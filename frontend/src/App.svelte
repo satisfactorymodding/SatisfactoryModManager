@@ -59,7 +59,6 @@
     if (keyQueue.length === code.length && keyQueue.every((val, idx) => code[idx] === val)) {
       $konami = !$konami;
     }
-    console.log(keyQueue);
   });
 </script>
 

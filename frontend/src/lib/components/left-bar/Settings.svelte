@@ -9,16 +9,17 @@
   
   import { GenerateDebugInfo } from '$wailsjs/go/bindings/DebugInfo';
   
-  import { startView, type View, konami, launchButton, type LaunchButton } from '$lib/store/settingsStore';
+  import { startView, konami, launchButton } from '$lib/store/settingsStore';
   import { manifestMods, lockfileMods } from '$lib/store/ficsitCLIStore';
   import { GetModNameDocument } from '$lib/generated';
   
   import { getClient } from '@urql/svelte';
+  import type { LaunchButtonType, ViewType } from '$lib/wailsTypesExtensions';
 
   let settingsMenu: MenuComponentDev;
   let startViewMenu: MenuComponentDev;
 
-  let views: {id: View, name: string}[] = [
+  let views: {id: ViewType, name: string}[] = [
     {
       id: 'compact',
       name: 'Compact',
@@ -31,7 +32,7 @@
 
   let launchButtonMenu: MenuComponentDev;
 
-  let launchButtons: {id: LaunchButton, name: string}[] = [
+  let launchButtons: {id: LaunchButtonType, name: string}[] = [
     {
       id: 'normal',
       name: 'Normal',

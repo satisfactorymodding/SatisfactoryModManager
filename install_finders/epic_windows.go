@@ -105,11 +105,11 @@ func FindInstallationsWindowsEpic() ([]*Installation, []error) {
 			continue
 		}
 
-		var branch string
+		var branch GameBranch
 		if epicManifest.MainGameAppName == "CrabEA" {
-			branch = "Early Access"
+			branch = BRANCH_EARLY_ACCESS
 		} else if epicManifest.MainGameAppName == "CrabTest" {
-			branch = "Experimental"
+			branch = BRANCH_EXPERIMENTAL
 		} else {
 			findErrors = append(findErrors, InstallFindError{
 				Path:  epicManifest.InstallLocation,

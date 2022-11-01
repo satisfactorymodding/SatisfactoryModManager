@@ -15,9 +15,11 @@ type SavedModFilters struct {
 	Filter string `json:"filter"`
 }
 
+type View string
+
 var (
-	VIEW_COMPACT  = "compact"
-	VIEW_EXPANDED = "expanded"
+	VIEW_COMPACT  View = "compact"
+	VIEW_EXPANDED View = "expanded"
 )
 
 type SettingsData struct {
@@ -25,7 +27,7 @@ type SettingsData struct {
 	ModFilters       SavedModFilters   `json:"modFilters"`
 	AppHeight        int               `json:"appHeight"`
 	ExpandedAppWidth int               `json:"expandedAppWidth"`
-	StartView        string            `json:"startView"`
+	StartView        View              `json:"startView"`
 	SelectedInstall  string            `json:"selectedInstall"`
 	SelectedProfile  map[string]string `json:"selectedProfile"`
 	Konami           bool              `json:"konami"`
