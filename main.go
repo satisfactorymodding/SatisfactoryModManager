@@ -101,7 +101,7 @@ func init() {
 	viper.Set("api-base", "https://api.ficsit.app")
 	viper.Set("graphql-api", "/v2/query")
 
-	viper.Set("log", "info")
+	viper.Set("log", "debug")
 	viper.Set("log-file", filepath.Join(cacheDir, "logs", "SatisfactoryModManager.log"))
 
 	writers := make([]io.Writer, 0)
