@@ -109,3 +109,12 @@ func (s *Settings) SetLaunchButton(value string) {
 	settings.Settings.LaunchButton = value
 	settings.SaveSettings()
 }
+
+func (s *Settings) GetQueueAutoStart() bool {
+	return settings.Settings.QueueAutoStart
+}
+
+func (s *Settings) SetQueueAutoStart(value bool) {
+	settings.Settings.QueueAutoStart = value
+	settings.SaveSettings()
+}

@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { mdiDownload, mdiEye, mdiStar, mdiCheckCircle, mdiPlusBoxMultiple, mdiPlay, mdiPause, mdiTrashCan } from '@mdi/js';
+  import { mdiDownload, mdiEye, mdiStar, mdiCheckCircle, mdiPlay, mdiPause, mdiTrashCan, mdiTrayFull, mdiTrayMinus } from '@mdi/js';
   import MDIIcon from '$lib/components/MDIIcon.svelte';
   import { createEventDispatcher } from 'svelte';
   import { search, type PartialMod } from '$lib/store/modFiltersStore';
   import Button, { Group, GroupItem, Label } from '@smui/button';
   import LinearProgress from '@smui/linear-progress';
   import Tooltip, { Wrapper } from '@smui/tooltip';
-  import { favouriteMods, lockfileMods, manifestMods, progress, selectedInstall } from '$lib/store/ficsitCLIStore';
+  import { addQueuedModAction, queuedMods, favouriteMods, lockfileMods, manifestMods, progress, selectedInstall, removeQueuedModAction } from '$lib/store/ficsitCLIStore';
   import { error } from '$lib/store/generalStore';
   import { DisableMod, EnableMod, InstallMod, RemoveMod } from '$wailsjs/go/bindings/FicsitCLI';
   import { FavouriteMod, UnFavouriteMod } from '$wailsjs/go/bindings/Settings';
@@ -34,13 +34,78 @@
   $: isEnabled = mod.mod_reference in $lockfileMods;
   $: isDependency = !isInstalled && isEnabled;
   $: inProgress = $progress?.item === mod.mod_reference;
+  $: queued = $queuedMods.some((q) => q.mod === mod.mod_reference);
+  $: queuedInstall = $queuedMods.some((q) => q.mod === mod.mod_reference && (q.action === 'install' || q.action === 'remove'));
+  $: queuedEnable = $queuedMods.some((q) => q.mod === mod.mod_reference && (q.action === 'enable' || q.action === 'disable'));
 
-  $: installButtonLabel = isDependency ? 'Dependency' : (isInstalled ? 'Remove' : 'Install');
-  $: installButtonIcon = isDependency ? mdiCheckCircle : (isInstalled ? mdiCheckCircle : mdiDownload);
-  $: installButtonIconHover = isDependency ? mdiCheckCircle : (isInstalled ? mdiTrashCan : mdiDownload);
-  $: enableButtonIcon = isInstalled ? (isEnabled ? mdiPlay : mdiPause) : '';
-  $: enableButtonIconHover = isInstalled ? (isEnabled ? mdiPause : mdiPlay) : '';
-  $: buttonDisabled = isDependency || (!!$progress) || (versionCompatibility.state === CompatibilityState.Broken && !isInstalled);
+  $: installButtonLabel = (() => {
+    if (isDependency) {
+      return 'Dependency';
+    }
+    let prefix = '';
+    if (queuedInstall) {
+      prefix = 'Queued ';
+    }
+    if (isInstalled) {
+      return `${prefix}Remove`;
+    }
+    return `${prefix}Install`;
+  })();
+  
+  $: installButtonLabelHover = (() => {
+    if (queuedInstall) {
+      return 'Unqueue';
+    }
+    return installButtonLabel;
+  })();
+  
+  $: installButtonIcon = (() => {
+    if (isDependency) {
+      return mdiCheckCircle;
+    }
+    if (queuedInstall) {
+      return mdiTrayFull;
+    }
+    if (isInstalled) {
+      return mdiTrashCan;
+    }
+    return mdiDownload;
+  })();
+  
+  $: installButtonIconHover = (() => {
+    if (isDependency) {
+      return mdiCheckCircle;
+    }
+    if (queuedInstall) {
+      return mdiTrayMinus;
+    }
+    if (isInstalled) {
+      return mdiTrashCan;
+    }
+    return mdiDownload;
+  })();
+  
+  $: enableButtonIcon = (() => {
+    if (queuedEnable) {
+      return mdiTrayFull;
+    }
+    if (isEnabled) {
+      return mdiPlay;
+    }
+    return mdiPause;
+  })();
+  
+  $: enableButtonIconHover = (() => {
+    if (queuedEnable) {
+      return mdiTrayMinus;
+    }
+    if (isEnabled) {
+      return mdiPause;
+    }
+    return mdiPlay;
+  })();
+
+  $: buttonDisabled = isDependency || (versionCompatibility.state === CompatibilityState.Broken && !isInstalled);
 
   let isInstallButtonHovered = false;
   let isEnableButtonHovered = false;
@@ -74,39 +139,35 @@
   $: compatibility = reportedCompatibility ?? versionCompatibility;
 
   async function toggleModInstalled() {
-    try {
-      if(isInstalled) {
-        await RemoveMod(mod.mod_reference);
-      } else {
-        await InstallMod(mod.mod_reference);
-      }
-    } catch(e) {
-      if (e instanceof Error) {
-        $error = e.message;
-      } else if (typeof e === 'string') {
-        $error = e;
-      } else {
-        $error = 'Unknown error';
-      }
+    // Svelte does not recreate the component, but reuse it, so the associated mod reference might change
+    const modReference = mod.mod_reference;
+    const action = isInstalled ? async () => RemoveMod(modReference) : async () => InstallMod(modReference);
+    const actionName = isInstalled ? 'remove' : 'install';
+    if(queued) {
+      removeQueuedModAction(modReference);
+      return;
     }
+    return addQueuedModAction(
+      modReference,
+      actionName,
+      action,
+    );
   }
 
   async function toggleModEnabled() {
-    try {
-      if(isEnabled) {
-        await DisableMod(mod.mod_reference);
-      } else {
-        await EnableMod(mod.mod_reference);
-      }
-    } catch(e) {
-      if (e instanceof Error) {
-        $error = e.message;
-      } else if (typeof e === 'string') {
-        $error = e;
-      } else {
-        $error = 'Unknown error';
-      }
+    // Svelte does not recreate the component, but reuse it, so the associated mod reference might change
+    const modReference = mod.mod_reference;
+    const action = isEnabled ? async () => DisableMod(modReference) : async () => EnableMod(modReference);
+    const actionName = isEnabled ? 'disable' : 'enable';
+    if(queued) {
+      removeQueuedModAction(modReference);
+      return;
     }
+    return addQueuedModAction(
+      modReference,
+      actionName,
+      action,
+    );
   }
 
   async function toggleModFavourite() {
@@ -125,11 +186,6 @@
         $error = 'Unknown error';
       }
     }
-  }
-
-  function toggleModQueueInstall() {
-    // TODO
-    console.log('test');
   }
 </script>
 
@@ -180,33 +236,36 @@
             </div>
           </div>
           <div class="pr-2 flex" on:click|stopPropagation={() => { /* empty */ }}>
-              <Group variant="outlined" class="mr-1">
-                <Button
-                  on:click={toggleModInstalled}
-                  on:mouseover={() => isInstallButtonHovered = true}
-                  on:mouseleave={() => isInstallButtonHovered = false}
-                  variant="unelevated"
-                  disabled={buttonDisabled}
-                  class="{compact ? 'min-w-0 pl-5 pr-1.5' : 'w-28'} mod-install-button {isInstalled ? 'installed' : ''}">
-                  {#if !compact}
-                    <Label>{ installButtonLabel }</Label>
-                  {:else}
-                    <MDIIcon icon={ isInstallButtonHovered ? installButtonIconHover : installButtonIcon }/>
-                  {/if}
-                </Button>
+            <Group variant="outlined" class="mr-1">
+              <Button
+                on:click={toggleModInstalled}
+                on:mouseover={() => isInstallButtonHovered = true}
+                on:mouseleave={() => isInstallButtonHovered = false}
+                variant="unelevated"
+                disabled={buttonDisabled || queuedEnable}
+                class="{compact ? ((isInstalled ? 'min-w-0' : 'w-[85px]') + ' pl-5 pr-1.5') : (isInstalled ? 'w-24' : 'w-36')} mod-install-button {isInstalled ? 'installed' : ''}">
+                {#if !compact}
+                  <Label>{ isInstallButtonHovered ? installButtonLabelHover : installButtonLabel }</Label>
+                {:else}
+                  <MDIIcon icon={ isInstallButtonHovered ? installButtonIconHover : installButtonIcon }/>
+                {/if}
+                <div class="grow" />
+              </Button>
+              {#if isInstalled && !isDependency}
                 <div use:GroupItem>
                   <Button
-                    on:click={ isInstalled ? toggleModEnabled : toggleModQueueInstall }
+                    on:click={ toggleModEnabled }
                     on:mouseover={() => isEnableButtonHovered = true}
                     on:mouseleave={() => isEnableButtonHovered = false}
-                    disabled={buttonDisabled}
+                    disabled={buttonDisabled || queuedInstall}
                     variant="unelevated"
-                    class="min-w-0 pl-5 pr-1.5 {isInstalled ? ('mod-enable-button ' + (isEnabled ? 'enabled' : '')) : 'mod-install-button'}"
+                    class="min-w-0 pl-5 pr-1.5 mod-enable-button {isEnabled ? 'enabled' : ''}"
                   >
-                    <MDIIcon icon={ isInstalled ? (isEnableButtonHovered ? enableButtonIconHover : enableButtonIcon) : mdiPlusBoxMultiple }/>
+                    <MDIIcon icon={ isEnableButtonHovered ? enableButtonIconHover : enableButtonIcon }/>
                   </Button>
                 </div>
-              </Group>
+              {/if}
+            </Group>
             <Button on:click={toggleModFavourite} variant="unelevated" class="min-w-0 pl-5 pr-1.5 mod-favourite-button {isFavourite ? 'favourite' : ''}">
               <MDIIcon icon={ mdiStar }/>
             </Button>

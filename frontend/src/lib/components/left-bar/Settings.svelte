@@ -9,7 +9,7 @@
   
   import { GenerateDebugInfo } from '$wailsjs/go/bindings/DebugInfo';
   
-  import { startView, konami, launchButton } from '$lib/store/settingsStore';
+  import { startView, konami, launchButton, queueAutoStart } from '$lib/store/settingsStore';
   import { manifestMods, lockfileMods } from '$lib/store/ficsitCLIStore';
   import { GetModNameDocument } from '$lib/generated';
   
@@ -27,6 +27,19 @@
     {
       id: 'expanded',
       name: 'Expanded',
+    },
+  ];
+
+  let queueModeMenu: MenuComponentDev;
+
+  let queueModes: {id: boolean, name: string}[] = [
+    {
+      id: true,
+      name: 'Start immediately',
+    },
+    {
+      id: false,
+      name: 'Start manually',
     },
   ];
 
@@ -107,29 +120,61 @@
       </Item>
       <Separator insetLeading insetTrailing />
       <Item on:click={() => GenerateDebugInfo()}>
-        <MdiIcon icon={mdiDownload} class="h-5" />
+        <div class="w-7"/>
         <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
           <PrimaryText class="text-base">Generate debug info</PrimaryText>
         </Text>
         <div class="grow" />
+        <MdiIcon icon={mdiDownload} class="h-5" />
       </Item>
       <Separator insetLeading insetTrailing insetPadding />
       <Item on:click={() => copyModList()}>
-        <MdiIcon icon={mdiClipboard} class="h-5" />
+        <div class="w-7"/>
         <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
           <PrimaryText class="text-base">Copy mods list</PrimaryText>
         </Text>
         <div class="grow" />
+        <MdiIcon icon={mdiClipboard} class="h-5" />
       </Item>
       <Separator insetLeading insetTrailing insetPadding />
       <Item nonInteractive>
         <MdiIcon icon={mdiCog} class="h-5" />
-        <!-- <div class="w-7"/> -->
         <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
           <PrimaryText class="text-base">Settings</PrimaryText>
         </Text>
         <div class="grow" />
       </Item>
+      <Separator insetLeading insetTrailing />
+      <div>
+        <Item on:click={() => queueModeMenu.setOpen(true)}>
+          <div class="w-7"/>
+          <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
+            <PrimaryText class="text-base">Queue</PrimaryText>
+          </Text>
+          <div class="grow" />
+          <Text class="pr-2 h-full flex flex-col content-center mb-1.5">
+            <PrimaryText class="text-base">{queueModes.find((v) => v.id === $queueAutoStart)?.name ?? ''}</PrimaryText>
+          </Text>
+          <MdiIcon icon={mdiChevronRight} class="h-5" />
+        </Item>
+        <Menu bind:this={queueModeMenu} class="w-full max-h-[32rem] overflow-visible" anchorCorner="TOP_RIGHT">
+          <List>
+            <SelectionGroup>
+              {#each queueModes as queueMode}
+                <Item
+                  on:SMUI:action={() => ($queueAutoStart = queueMode.id)}
+                  selected={$queueAutoStart === queueMode.id}
+                >
+                  <SelectionGroupIcon>
+                    <MdiIcon icon={mdiCheck} class="h-5" />
+                  </SelectionGroupIcon>
+                  <Text>{queueMode.name}</Text>
+                </Item>
+              {/each}
+            </SelectionGroup>
+          </List>
+        </Menu>
+      </div>
       <Separator insetLeading insetTrailing />
       <div>
         <Item on:click={() => startViewMenu.setOpen(true)}>

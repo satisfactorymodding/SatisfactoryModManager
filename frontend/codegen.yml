@@ -19,3 +19,7 @@ generates:
   ./graphql.schema.json:
     plugins:
       - 'introspection'
+config:
+  scalars:
+    ModID: string
+    ModReference: string

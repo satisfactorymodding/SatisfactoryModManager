@@ -28,6 +28,7 @@ type SettingsData struct {
 	AppHeight        int               `json:"appHeight"`
 	ExpandedAppWidth int               `json:"expandedAppWidth"`
 	StartView        View              `json:"startView"`
+	QueueAutoStart   bool              `json:"queueAutoStart"`
 	SelectedInstall  string            `json:"selectedInstall"`
 	SelectedProfile  map[string]string `json:"selectedProfile"`
 	Konami           bool              `json:"konami"`
@@ -61,6 +62,8 @@ func LoadSettings() error {
 		}
 	}
 
+	setDefaults()
+
 	settingsFile, err := os.ReadFile(filepath.Join(viper.GetString("local-dir"), settingsFileName))
 	if err != nil {
 		return errors.Wrap(err, "failed to read settings")
@@ -70,43 +73,19 @@ func LoadSettings() error {
 		return errors.Wrap(err, "failed to unmarshal settings")
 	}
 
-	setDefaults()
-
 	return nil
 }
 
 func setDefaults() {
-	if Settings.FavouriteMods == nil {
-		Settings.FavouriteMods = []string{}
-	}
-
-	if Settings.ModFilters.Order == "" {
-		Settings.ModFilters.Order = "Last updated"
-	}
-
-	if Settings.ModFilters.Filter == "" {
-		Settings.ModFilters.Filter = "Compatible"
-	}
-
-	if Settings.AppHeight == 0 {
-		Settings.AppHeight = utils.UnexpandedMinHeight
-	}
-
-	if Settings.ExpandedAppWidth == 0 {
-		Settings.ExpandedAppWidth = utils.UnexpandedMinWidth
-	}
-
-	if Settings.StartView == "" {
-		Settings.StartView = VIEW_COMPACT
-	}
-
-	if Settings.SelectedProfile == nil {
-		Settings.SelectedProfile = map[string]string{}
-	}
-
-	if Settings.LaunchButton == "" {
-		Settings.LaunchButton = "normal"
-	}
+	Settings.FavouriteMods = []string{}
+	Settings.ModFilters.Order = "Last updated"
+	Settings.ModFilters.Filter = "Compatible"
+	Settings.AppHeight = utils.UnexpandedMinHeight
+	Settings.ExpandedAppWidth = utils.UnexpandedMinWidth
+	Settings.StartView = VIEW_COMPACT
+	Settings.QueueAutoStart = true
+	Settings.SelectedProfile = map[string]string{}
+	Settings.LaunchButton = "normal"
 }
 
 func SaveSettings() error {

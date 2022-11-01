@@ -1,7 +1,7 @@
 <script lang="ts">
   import Tooltip, { Wrapper } from '@smui/tooltip';
-  import { selectedInstall, isGameRunning, lockfileMods, progress } from '$lib/store/ficsitCLIStore';
-  import { launchButton } from '$lib/store/settingsStore';
+  import { selectedInstall, isGameRunning, lockfileMods, progress, queuedMods, startQueue } from '$lib/store/ficsitCLIStore';
+  import { launchButton, queueAutoStart } from '$lib/store/settingsStore';
   import { isLaunchingGame } from '$lib/store/generalStore';
   import { LaunchGame } from '$wailsjs/go/bindings/FicsitCLI';
   import Button, { Label } from '@smui/button';
@@ -9,7 +9,7 @@
   import { CompatibilityState, ModReportedCompatibilityDocument, type Compatibility } from '$lib/generated';
   import { getReportedCompatibility, getVersionCompatibility } from '$lib/utils/modCompatibility';
   import type { GameBranch } from '$lib/wailsTypesExtensions';
-  import { mdiOpenInNew } from '@mdi/js';
+  import { mdiCheckCircleOutline, mdiOpenInNew } from '@mdi/js';
   import MDIIcon from '$lib/components/MDIIcon.svelte';
 
   const client = getClient();
@@ -95,12 +95,18 @@
 
 <Wrapper>
   <center>
-    {#if $launchButton === 'normal' || $isGameRunning || $isLaunchingGame }
-    <Button variant="unelevated" class="h-12 w-full launch-game {launchButtonColor}" disabled={$progress || $isGameRunning || $isLaunchingGame} on:click={() => launchGame()}>
-      <Label>Play Satisfactory</Label>
-      <div class="grow" />
-      <MDIIcon icon={ mdiOpenInNew }/>
-    </Button>
+    {#if !$queueAutoStart && $queuedMods.length > 0}
+      <Button variant="unelevated" class="h-12 w-full launch-game error" on:click={() => startQueue()}>
+        <Label>Apply {$queuedMods.length} changes</Label>
+        <div class="grow" />
+        <MDIIcon icon={ mdiCheckCircleOutline }/>
+      </Button>
+    {:else if $launchButton === 'normal' || $isGameRunning || $isLaunchingGame }
+      <Button variant="unelevated" class="h-12 w-full launch-game {launchButtonColor}" disabled={$progress || $isGameRunning || $isLaunchingGame} on:click={() => launchGame()}>
+        <Label>Play Satisfactory</Label>
+        <div class="grow" />
+        <MDIIcon icon={ mdiOpenInNew }/>
+      </Button>
     {:else if $launchButton === 'cat' }
       <div
         style="height: 32px"

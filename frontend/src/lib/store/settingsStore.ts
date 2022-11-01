@@ -1,5 +1,5 @@
 import type { LaunchButtonType, ViewType } from '$lib/wailsTypesExtensions';
-import { GetStartView, SetStartView, GetKonami, SetKonami, GetLaunchButton, SetLaunchButton } from '$wailsjs/go/bindings/Settings';
+import { GetStartView, SetStartView, GetKonami, SetKonami, GetLaunchButton, SetLaunchButton, GetQueueAutoStart, SetQueueAutoStart } from '$wailsjs/go/bindings/Settings';
 import { writableBindingSync } from './wailsStoreBindings';
 
 export const startView = writableBindingSync<ViewType | null>(null, { 
@@ -10,3 +10,5 @@ export const startView = writableBindingSync<ViewType | null>(null, {
 export const konami = writableBindingSync(false, { initialGet: GetKonami, updateFunction: SetKonami });
 
 export const launchButton = writableBindingSync<LaunchButtonType>('normal', { initialGet: GetLaunchButton, updateFunction: SetLaunchButton });
+
+export const queueAutoStart = writableBindingSync(true, { initialGet: GetQueueAutoStart, updateFunction: SetQueueAutoStart });

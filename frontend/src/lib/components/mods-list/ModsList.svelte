@@ -7,7 +7,7 @@
   import Fuse from 'fuse.js';
   import ModListFilters from './ModsListFilters.svelte';
   import { filter, order, search, type PartialMod } from '$lib/store/modFiltersStore';
-  import { favouriteMods, lockfileMods, manifestMods } from '$lib/store/ficsitCLIStore';
+  import { favouriteMods, lockfileMods, manifestMods, queuedMods } from '$lib/store/ficsitCLIStore';
   import { startView } from '$lib/store/settingsStore';
   import { expandedMod } from '$lib/store/generalStore';
 
@@ -39,6 +39,7 @@
     $manifestMods;
     $lockfileMods;
     $favouriteMods;
+    $queuedMods;
     
     Promise.all(mods.map($filter.func)).then((results) => {
       filteredMods = mods.filter((_, i) => results[i]);
@@ -51,6 +52,7 @@
     $manifestMods;
     $lockfileMods;
     $favouriteMods;
+    $queuedMods;
     
     sortedMods = _.sortBy(filteredMods, $order.func) as PartialMod[];
   }

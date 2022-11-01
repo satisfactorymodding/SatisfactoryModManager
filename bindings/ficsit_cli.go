@@ -249,6 +249,10 @@ func (f *FicsitCLI) validateInstall(installation *InstallationInfo, progressItem
 }
 
 func (f *FicsitCLI) InstallMod(mod string) error {
+	if f.progress != nil {
+		return errors.New("Another operaion in progress")
+	}
+
 	installation := f.GetInstallation(f.selectedInstallation.Info.Path)
 	profileName := installation.Installation.Profile
 	profile := f.GetProfile(profileName)
@@ -283,6 +287,10 @@ func (f *FicsitCLI) InstallMod(mod string) error {
 }
 
 func (f *FicsitCLI) InstallModVersion(mod string, version string) error {
+	if f.progress != nil {
+		return errors.New("Another operaion in progress")
+	}
+
 	installation := f.GetInstallation(f.selectedInstallation.Info.Path)
 	profileName := installation.Installation.Profile
 	profile := f.GetProfile(profileName)
@@ -317,6 +325,10 @@ func (f *FicsitCLI) InstallModVersion(mod string, version string) error {
 }
 
 func (f *FicsitCLI) RemoveMod(mod string) error {
+	if f.progress != nil {
+		return errors.New("Another operaion in progress")
+	}
+
 	installation := f.GetInstallation(f.selectedInstallation.Info.Path)
 	profileName := installation.Installation.Profile
 	profile := f.GetProfile(profileName)
@@ -346,6 +358,10 @@ func (f *FicsitCLI) RemoveMod(mod string) error {
 }
 
 func (f *FicsitCLI) EnableMod(mod string) error {
+	if f.progress != nil {
+		return errors.New("Another operaion in progress")
+	}
+
 	installation := f.GetInstallation(f.selectedInstallation.Info.Path)
 	profileName := installation.Installation.Profile
 	profile := f.GetProfile(profileName)
@@ -375,6 +391,10 @@ func (f *FicsitCLI) EnableMod(mod string) error {
 }
 
 func (f *FicsitCLI) DisableMod(mod string) error {
+	if f.progress != nil {
+		return errors.New("Another operaion in progress")
+	}
+
 	installation := f.GetInstallation(f.selectedInstallation.Info.Path)
 	profileName := installation.Installation.Profile
 	profile := f.GetProfile(profileName)
@@ -668,6 +688,9 @@ func (f *FicsitCLI) CheckForUpdates() ([]Update, error) {
 }
 
 func (f *FicsitCLI) UpdateAllMods() error {
+	if f.progress != nil {
+		return errors.New("Another operaion in progress")
+	}
 
 	previousLockfile, err := f.selectedInstallation.Installation.LockFile(f.ficsitCli)
 	if err != nil {
