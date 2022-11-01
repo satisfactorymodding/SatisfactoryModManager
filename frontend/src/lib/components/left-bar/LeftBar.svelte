@@ -7,9 +7,8 @@
   import { mdiCheckCircle, mdiCloseCircle, mdiDiscord, mdiDownload, mdiGithub, mdiHelpCircle, mdiPencil, mdiPlusCircle, mdiTrashCan, mdiUpload, mdiWeb } from '@mdi/js';
   import MdiIcon from '$lib/components/MDIIcon.svelte';
   
-  import { addProfile, deleteProfile, importProfile, installs, isGameRunning, profiles, progress, canModify, renameProfile, selectedInstall, selectedProfile } from '$lib/store/ficsitCLIStore';
-  import { error, isLaunchingGame } from '$lib/store/generalStore';
-  import { launchButton } from '$lib/store/settingsStore';
+  import { addProfile, deleteProfile, importProfile, installs, profiles, canModify, renameProfile, selectedInstall, selectedProfile } from '$lib/store/ficsitCLIStore';
+  import { error } from '$lib/store/generalStore';
   import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
   import { OpenFileDialog } from '$wailsjs/go/bindings/App';
 
@@ -17,7 +16,8 @@
   import Updates from './Updates.svelte';
   import { bindings } from '$wailsjs/go/models';
   import HelperText from '@smui/textfield/helper-text';
-  import { ExportCurrentProfile, ReadExportedProfileMetadata, LaunchGame } from '$wailsjs/go/bindings/FicsitCLI';
+  import { ExportCurrentProfile, ReadExportedProfileMetadata } from '$wailsjs/go/bindings/FicsitCLI';
+  import LaunchButton from './LaunchButton.svelte';
 
   let modsEnabled = true;
 
@@ -132,51 +132,6 @@
         importProfileError = e;
       } else {
         importProfileError = 'Unknown error';
-      }
-    }
-  }
-
-  function launchGame() {
-    $isLaunchingGame = true;
-    LaunchGame();
-    setTimeout(() => $isLaunchingGame = false, 10000);
-  }
-
-  let launchButtonState: 'press' | 'over' | 'normal' = 'normal';
-  let launchButtonPressCount = 0;
-  function launchButtonPressed() {
-    launchButtonPressCount++;
-    setTimeout(() => {
-      if(launchButtonPressCount > 0) {
-        launchButtonPressCount--;
-      }
-    }, 3000);
-    if(launchButtonPressCount >= 15) {
-      launchButtonPressCount = 0;
-      launchGame();
-    }
-  }
-
-  let catPressed = false;
-  let catPosition = 0;
-  let mouseDownX = 0;
-  let mouseDownCatPosition = 0;
-  
-  function catMouseDown(e: MouseEvent) {
-    mouseDownX = e.clientX;
-    mouseDownCatPosition = catPosition;
-    catPressed = true;
-  }
-
-  function catMouseMove(e: MouseEvent) {
-    if (catPressed) {
-      catPosition = (e.clientX - mouseDownX) / 270 + mouseDownCatPosition;
-      catPosition = Math.min(1, Math.max(-0.05, catPosition));
-      if (catPosition === 1) {
-        catPressed = false;
-        setTimeout(() => {
-          launchGame();
-        }, 1000);
       }
     }
   }
@@ -312,55 +267,7 @@
     </Button>
   </div>
   <div class="grow"/>
-  <center>
-    {#if $launchButton === 'normal' || $isGameRunning || $isLaunchingGame }
-    <Button variant="unelevated" class="h-12 w-full launch-game" disabled={$progress || $isGameRunning || $isLaunchingGame} on:click={() => launchGame()}>
-      <Label>Play Satisfactory</Label>
-      <div class="grow" />
-    </Button>
-    {:else if $launchButton === 'cat' }
-      <div
-        style="height: 32px"
-        class="overflow-hidden"
-        on:mouseup={() => catPressed = false}
-        on:mousemove={catMouseMove}
-      >
-        <img
-          src="/images/launch/cat/bg.png"
-          draggable="false"
-          alt="Nyan background"
-        >
-        <img
-          src="/images/launch/cat/cat_full.png"
-          style="position: relative; top: -57px; zoom: 0.55"
-          style:left={`calc(-480px + ${catPosition * 87}%)`}
-          draggable="false"
-          on:mousedown={catMouseDown}
-          alt="Nyan"
-        >
-      </div>
-    {:else if $launchButton === 'button' }
-      <div style="height: 50px">
-        <img
-          src="/images/launch/fun/launch_fun.png"
-          draggable="false"
-          alt="Launch Button Background"
-        >
-        <img
-          src={`/images/launch/fun/launch_fun_button_${launchButtonState}.png`}
-          style="position: relative; zoom: 0.56"
-          style:top={launchButtonState === 'press' ? '-97.5px' : '-98px'}
-          draggable="false"
-          on:click={() => launchButtonPressed()}
-          on:mousedown={() => launchButtonState = 'press'}
-          on:mouseup={() => launchButtonState = 'over'}
-          on:mouseenter={() => launchButtonState = 'over'}
-          on:mouseleave={() => launchButtonState = 'normal'}
-          alt="Launch Button"
-        >
-      </div>
-    {/if}
-  </center>
+  <LaunchButton />
 </div>
 
 <Dialog

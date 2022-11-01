@@ -120,11 +120,17 @@ $left-bar-controls-height: 40px;
   }
 
   .launch-game {
-    @include button.container-fill-color($grey-light);
+    @include button.container-fill-color($green-darker);
+    &.warning {
+      @include button.container-fill-color($yellow);
+    }
+    &.error {
+      @include button.container-fill-color($red-normal);
+    }
   }
 }
 
-.mods-list {
+.mods-list, .launch-button-tooltip {
   background-color: $grey-darker;
   @include tooltip.fill-color($almost-black);
 }

@@ -1,0 +1,15 @@
+query ModReportedCompatibility($modReference: ModReference!) {
+  getModByReference(modReference: $modReference) {
+    id
+    compatibility {
+      EA {
+        state
+        note
+      }
+      EXP {
+        state
+        note
+      }
+    }
+  }
+}
