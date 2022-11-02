@@ -62,9 +62,9 @@
   });
 </script>
 
-<div class="flex flex-col h-screen w-screen">
+<div class="flex flex-col h-screen w-screen select-none">
   <TitleBar />
-  <div class="flex grow h-0 select-none">
+  <div class="flex grow h-0">
     <LeftBar />
     <div class:normal={!$expandedMod || pendingExpand} class:compact={windowExpanded}>
       <ModsList bind:compact={modsListCompact}/>

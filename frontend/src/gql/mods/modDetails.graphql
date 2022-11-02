@@ -10,6 +10,16 @@ query GetModDetails($modReference: ModReference!) {
     downloads
     views
     hidden
+    compatibility {
+      EA {
+        state
+        note
+      }
+      EXP {
+        state
+        note
+      }
+    }
     authors {
       user {
         id

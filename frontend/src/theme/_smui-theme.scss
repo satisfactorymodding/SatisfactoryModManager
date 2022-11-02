@@ -130,8 +130,11 @@ $left-bar-controls-height: 40px;
   }
 }
 
-.mods-list, .launch-button-tooltip {
+.mods-list {
   background-color: $grey-darker;
+}
+
+div.mdc-tooltip {
   @include tooltip.fill-color($almost-black);
 }
 
@@ -206,6 +209,10 @@ $left-bar-controls-height: 40px;
 
 .warning {
   color: $yellow;
+}
+
+.success {
+  color: $green-normal;
 }
 
 html,

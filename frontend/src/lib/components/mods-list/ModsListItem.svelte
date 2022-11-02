@@ -207,11 +207,11 @@
           {/if}
         </div>
         {#if isInstalled && !isEnabled}
-          <Tooltip class="mods-list" surface$class="max-w-lg text-base">
+          <Tooltip surface$class="max-w-lg text-base">
             This mod is disabled. Press the pause icon to enable it. 
           </Tooltip>
         {:else if compatibility.state !== CompatibilityState.Works}
-          <Tooltip class="mods-list" surface$class="max-w-lg text-base">
+          <Tooltip surface$class="max-w-lg text-base">
             { @html compatibility.note }
           </Tooltip>
         {/if}

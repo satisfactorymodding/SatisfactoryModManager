@@ -151,7 +151,7 @@
     {/if}
   </center>
   {#if versionIncompatible.length > 0 || versionPossiblyCompatible.length > 0 || reportedIncompatible.length > 0 || reportedPossiblyCompatible.length > 0}
-  <Tooltip class="launch-button-tooltip" surface$class="max-w-lg text-base">
+  <Tooltip surface$class="max-w-lg text-base">
       You have:
       <ul class="list-disc pl-5">
         {#if versionIncompatible.length > 0}

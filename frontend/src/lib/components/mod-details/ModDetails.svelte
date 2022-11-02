@@ -5,7 +5,7 @@
   import Button, { Label } from '@smui/button';
   import Checkbox from '@smui/checkbox';
   import MDIIcon from '$lib/components/MDIIcon.svelte';
-  import { mdiCheck, mdiChevronDown, mdiImport } from '@mdi/js';
+  import { mdiCheck, mdiChevronDown, mdiImport, mdiRocketLaunch, mdiTestTube } from '@mdi/js';
   import Menu, { type MenuComponentDev } from '@smui/menu';
   import List, { Item, PrimaryText, SecondaryText, Separator, Text } from '@smui/list';
   import { bytesToAppropriate } from '$lib/utils/dataFormats';
@@ -21,38 +21,41 @@
   import { getReportedCompatibility, getVersionCompatibility } from '$lib/utils/modCompatibility';
   import type { GameBranch } from '$lib/wailsTypesExtensions';
   import { expandedMod } from '$lib/store/generalStore';
-  import { minVersion, valid, validRange, sort } from 'semver';
+  import { minVersion, valid, validRange, sort, coerce, SemVer } from 'semver';
+  import Tooltip, { Wrapper } from '@smui/tooltip';
 
   const modQuery = operationStore(
     GetModDetailsDocument,
-    { modReference: $expandedMod }
+    { modReference: '' }
   );
   
-  $: modQuery.variables = {
-    modReference: $expandedMod
-  };
+  $: if($expandedMod) {
+    modQuery.variables = {
+      modReference: $expandedMod
+    };
+  }
 
   query(modQuery);
 
-  $: mod = $modQuery.data?.mod;
+  $: mod = $modQuery.fetching ? null : $modQuery.data?.mod;
 
   $: renderedLogo = mod?.logo || 'https://ficsit.app/images/no_image.webp';
   $: descriptionRendered = mod?.full_description ? markdown(mod.full_description) : undefined;
   $: author = getAuthor(mod);
 
-  $: isInstalled = mod?.mod_reference in $manifestMods;
-  $: isEnabled = mod?.mod_reference in $lockfileMods;
+  $: isInstalled = mod && mod.mod_reference in $manifestMods;
+  $: isEnabled = mod && mod.mod_reference in $lockfileMods;
   $: isDependency = !isInstalled && isEnabled;
   $: inProgress = $progress?.item === mod?.mod_reference;
 
   $: size = mod ? bytesToAppropriate(mod.versions[0]?.size ?? 0) : undefined;
 
-  $: latestVersion = mod?.versions?.length ? sort(mod.versions.map((v) => v.version)).reverse()[0] : 'N/A';
-  $: installedVersion = $lockfileMods[mod?.mod_reference]?.version ?? 'Not installed';
+  $: latestVersion = mod?.versions?.length ? sort(mod.versions.map((v) => coerce(v.version)).filter((v) => !!v) as SemVer[]).reverse()[0] : 'N/A';
+  $: installedVersion = (mod && $lockfileMods[mod.mod_reference]?.version) ?? 'Not installed';
 
   $: ficsitAppLink = `https://ficsit.app/mod/${$expandedMod}`;
 
-  let reportedCompatibility: Compatibility | undefined = { state: CompatibilityState.Works };
+  let reportedCompatibility: Compatibility | undefined;
   let versionCompatibility: Compatibility = { state: CompatibilityState.Works };
   $: {
     if(mod && $selectedInstall && $selectedInstall.info) {
@@ -76,16 +79,31 @@
     }
   }
 
+  function colorForCompatibilityState(state?: CompatibilityState) {
+    switch(state) {
+    case CompatibilityState.Broken:
+      return 'error';
+    case CompatibilityState.Damaged:
+      return 'warning';
+    case CompatibilityState.Works:
+      return 'success';
+    }
+    return '';
+  }
+
   $: compatibility = reportedCompatibility ?? versionCompatibility;
 
   let authorsMenu: MenuComponentDev;
 
   let versionsMenu: MenuComponentDev;
 
-  $: manifestVersion = $manifestMods[mod?.mod_reference]?.version;
+  $: manifestVersion = mod && $manifestMods[mod.mod_reference]?.version;
   async function installVersion(version: string | null) {
+    if(!mod) {
+      return;
+    }
     try {
-      await InstallModVersion(mod?.mod_reference, version ?? '>=0.0.0');
+      await InstallModVersion(mod.mod_reference, version ?? '>=0.0.0');
     } catch(e) {
       if (e instanceof Error) {
         $error = e.message;
@@ -167,12 +185,39 @@
       <span>Updated: </span><span class="font-bold">{mod ? new Date(mod.last_version_date).toLocaleString() : 'Loading...'}</span><br>
       <span>Total downloads: </span><span class="font-bold">{mod?.downloads.toLocaleString() ?? 'Loading...'}</span><br>
       <span>Views: </span><span class="font-bold">{mod?.views.toLocaleString() ?? 'Loading...'}</span><br>
+      <div class="flex h-5">
+        <span>Compatibility: </span>
+        {#if mod?.compatibility}
+          <div class="flex pl-1">
+            <Wrapper>
+              <MdiIcon icon={mdiRocketLaunch} class="{colorForCompatibilityState(mod.compatibility.EA.state)}" />
+              <Tooltip surface$class="max-w-lg text-base">
+                This mod has been reported as {mod.compatibility.EA.state} on Early Access.
+                {#if mod.compatibility.EA.note}
+                  {@html markdown(mod.compatibility.EA.note)}
+                {/if}
+              </Tooltip>
+            </Wrapper>
+            <Wrapper>
+              <MdiIcon icon={mdiTestTube} class="{colorForCompatibilityState(mod.compatibility.EXP.state)} -ml-1" />
+              <Tooltip surface$class="max-w-lg text-base">
+                This mod has been reported as {mod.compatibility.EXP.state} on Experimental.
+                {#if mod.compatibility.EXP.note}
+                  {@html markdown(mod.compatibility.EXP.note)}
+                {/if}
+              </Tooltip>
+            </Wrapper>
+          </div>
+        {:else}
+          <span class="font-bold">N/A</span>
+        {/if}
+      </div>
     </div>
 
     <div class="pt-4">
       <span>Latest version: </span><span class="font-bold">{ latestVersion ?? 'Loading...' }</span><br>
       <span>Installed version: </span><span class="font-bold">{ installedVersion ?? 'Loading...' }</span><br>
-      <div class="pt-2" on:mouseenter={() => $canModify && versionsMenu.setOpen(true)} on:mouseleave={() => versionsMenu.setOpen(false)}>
+      <div class="pt-2" on:click={() => $canModify && versionsMenu.setOpen(!versionsMenu.isOpen())}>
         <Button variant="unelevated" color="secondary" class="w-full" disabled={!$canModify}>
           <Label>Change version</Label>
           <MDIIcon icon={mdiChevronDown}/>
@@ -192,7 +237,7 @@
             {#each mod?.versions ?? [] as version}
               <Separator insetLeading insetTrailing />
               <Item on:SMUI:action={() => installVersion(version.version)} disabled={!$canModify}>
-                {#if validRange(manifestVersion) && minVersion(manifestVersion)?.format() === version.version }
+                {#if manifestVersion && validRange(manifestVersion) && minVersion(manifestVersion)?.format() === version.version }
                   <MdiIcon icon={mdiCheck} class="h-5" />
                 {:else}
                   <div class="w-7"/>
@@ -207,7 +252,7 @@
                 <div on:click|stopPropagation={() => installVersion(`>=${version.version}`)}>
                   <Checkbox 
                     input$onclick="return false;"
-                    checked={!!validRange(manifestVersion) && !valid(manifestVersion) && minVersion(manifestVersion)?.format() === version.version}
+                    checked={!!manifestVersion && !!validRange(manifestVersion) && !valid(manifestVersion) && minVersion(manifestVersion)?.format() === version.version}
                   />
                 </div>
               </Item>
