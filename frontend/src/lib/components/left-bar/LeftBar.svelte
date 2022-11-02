@@ -260,7 +260,7 @@
     </Button>
     <Button variant="unelevated" class="w-full mt-2" on:click={() => BrowserOpenURL('https://github.com/satisfactorymodding/SatisfactoryModManager')} >
       <Label>
-        SMM Source
+        SMM GitHub
       </Label>
       <div class="grow" />
       <MdiIcon icon={mdiGithub} class="h-5" />
