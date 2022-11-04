@@ -15,6 +15,7 @@ import (
 	"github.com/satisfactorymodding/SatisfactoryModManager/bindings"
 	"github.com/satisfactorymodding/SatisfactoryModManager/project_file"
 	"github.com/satisfactorymodding/SatisfactoryModManager/settings"
+	"github.com/satisfactorymodding/SatisfactoryModManager/singleinstance"
 	"github.com/satisfactorymodding/SatisfactoryModManager/utils"
 	"github.com/satisfactorymodding/SatisfactoryModManager/wails_logging"
 	"github.com/spf13/viper"
@@ -31,6 +32,14 @@ func loadProjectFile() error {
 }
 
 func main() {
+	if !singleinstance.RequestSingleInstanceLock() {
+		return
+	}
+	singleinstance.OnSecondInstance = func(args []string) {
+		log.Info().Strs("args", args).Msg("Second instance started")
+	}
+	go singleinstance.ListenForSecondInstance()
+
 	err := loadProjectFile()
 	if err != nil {
 		panic(err)

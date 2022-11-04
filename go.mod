@@ -3,7 +3,9 @@ module github.com/satisfactorymodding/SatisfactoryModManager
 go 1.18
 
 require (
+	bitbucket.org/avd/go-ipc v0.6.1
 	github.com/andygrunwald/vdf v1.0.1-0.20220412055542-fff83b263c6b
+	github.com/juju/fslock v0.0.0-20160525022230-4d5c94c67b4b
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.28.0
