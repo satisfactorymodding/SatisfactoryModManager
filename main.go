@@ -20,6 +20,7 @@ import (
 	"github.com/satisfactorymodding/SatisfactoryModManager/uri_handler"
 	"github.com/satisfactorymodding/SatisfactoryModManager/utils"
 	"github.com/satisfactorymodding/SatisfactoryModManager/wails_logging"
+	"github.com/satisfactorymodding/SatisfactoryModManager/websocket"
 	"github.com/spf13/viper"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -46,6 +47,8 @@ func main() {
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to set as default handler")
 	}
+
+	go websocket.ListenAndServeWebsocket()
 
 	err = loadProjectFile()
 	if err != nil {
@@ -113,6 +116,8 @@ func init() {
 	localDir := filepath.Clean(filepath.Join(baseLocalDir, "SatisfactoryModManagerNEW"))
 	utils.EnsureDirExists(localDir)
 	viper.Set("local-dir", localDir)
+
+	viper.Set("websocket-port", 33642)
 
 	// ficsit-cli config
 	viper.Set("profiles-file", "profiles.json")
