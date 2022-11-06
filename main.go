@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	_ "embed"
 	"encoding/json"
 	"io"
@@ -16,6 +17,7 @@ import (
 	"github.com/satisfactorymodding/SatisfactoryModManager/project_file"
 	"github.com/satisfactorymodding/SatisfactoryModManager/settings"
 	"github.com/satisfactorymodding/SatisfactoryModManager/singleinstance"
+	"github.com/satisfactorymodding/SatisfactoryModManager/uri_handler"
 	"github.com/satisfactorymodding/SatisfactoryModManager/utils"
 	"github.com/satisfactorymodding/SatisfactoryModManager/wails_logging"
 	"github.com/spf13/viper"
@@ -36,11 +38,16 @@ func main() {
 		return
 	}
 	singleinstance.OnSecondInstance = func(args []string) {
-		log.Info().Strs("args", args).Msg("Second instance started")
+		processArguments(args)
 	}
 	go singleinstance.ListenForSecondInstance()
 
-	err := loadProjectFile()
+	err := uri_handler.SetAsDefaultHandler("smmanager")
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to set as default handler")
+	}
+
+	err = loadProjectFile()
 	if err != nil {
 		panic(err)
 	}
@@ -66,8 +73,11 @@ func main() {
 		MinHeight: utils.UnexpandedMinHeight,
 		Assets:    assets,
 		OnStartup: b.Startup,
-		Bind:      b.GetBindings(),
-		Logger:    wails_logging.WailsZeroLogLogger{},
+		OnDomReady: func(ctx context.Context) {
+			processArguments(os.Args)
+		},
+		Bind:   b.GetBindings(),
+		Logger: wails_logging.WailsZeroLogLogger{},
 	})
 
 	if err != nil {

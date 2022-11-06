@@ -14,6 +14,7 @@
   import Dialog, { Actions, Content, Title } from '@smui/dialog';
   import Button, { Label } from '@smui/button';
   import { GenerateDebugInfo } from '$wailsjs/go/bindings/DebugInfo';
+  import ExternalInstallMod from '$lib/components/ExternalInstallMod.svelte';
 
   Environment().then((env) => {
     if (env.buildType !== 'dev') {
@@ -76,6 +77,8 @@
     {/if}
   </div>
 </div>
+
+<ExternalInstallMod />
 
 <Dialog
   bind:open={invalidInstallsDialog}  

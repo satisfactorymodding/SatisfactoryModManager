@@ -99,3 +99,7 @@ func (a *App) OpenFileDialog(options OpenDialogOptions) (string, error) {
 	}
 	return wailsRuntime.OpenFileDialog(a.ctx, wailsOptions)
 }
+
+func (a *App) ExternalInstallMod(modId, version string) {
+	wailsRuntime.EventsEmit(a.ctx, "externalInstallMod", modId, version)
+}
