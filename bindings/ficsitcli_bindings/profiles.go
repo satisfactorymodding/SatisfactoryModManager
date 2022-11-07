@@ -19,12 +19,36 @@ func (f *FicsitCLI) SetProfile(profile string) error {
 		log.Error().Str("profile", profile).Msg("No installation selected")
 		return errors.New("No installation selected")
 	}
+	if f.selectedInstallation.Installation.Profile == profile {
+		return nil
+	}
 	err := f.selectedInstallation.Installation.SetProfile(f.ficsitCli, profile)
 	if err != nil {
 		log.Error().Err(err).Str("profile", profile).Msg("Failed to set profile")
 		return errors.Wrap(err, "Failed to set profile")
 	}
+
+	f.progress = &Progress{
+		Item:     "__select_profile__",
+		Message:  "Validating install",
+		Progress: -1,
+	}
+
+	f.setProgress(f.progress)
+
+	defer f.setProgress(nil)
+
 	f.emitModsChange()
+
+	installErr := f.validateInstall(f.selectedInstallation, "__select_profile__")
+
+	f.emitModsChange()
+
+	if installErr != nil {
+		log.Error().Err(installErr).Str("profile", profile).Msg("Failed to validate install")
+		return errors.Wrap(installErr, "Failed to validate install")
+	}
+
 	settings.Settings.SelectedProfile[f.selectedInstallation.Info.Path] = profile
 	settings.SaveSettings()
 	return nil

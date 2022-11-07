@@ -86,13 +86,37 @@ func (f *FicsitCLI) GetInstallation(path string) *InstallationInfo {
 }
 
 func (f *FicsitCLI) SelectInstall(path string) error {
+	if f.selectedInstallation != nil && f.selectedInstallation.Info.Path == path {
+		return nil
+	}
 	installation := f.GetInstallation(path)
 	if installation == nil {
 		log.Error().Str("path", path).Msg("Failed to find installation")
 		return errors.New("Installation \"" + path + "\" not found")
 	}
 	f.selectedInstallation = installation
+
+	f.progress = &Progress{
+		Item:     "__select_install__",
+		Message:  "Validating install",
+		Progress: -1,
+	}
+
+	f.setProgress(f.progress)
+
+	defer f.setProgress(nil)
+
 	f.emitModsChange()
+
+	installErr := f.validateInstall(installation, "__select_install__")
+
+	f.emitModsChange()
+
+	if installErr != nil {
+		log.Error().Err(installErr).Str("install", installation.Info.Path).Msg("Failed to validate install")
+		return errors.Wrap(installErr, "Failed to validate install")
+	}
+
 	settings.Settings.SelectedInstall = installation.Info.Path
 	settings.SaveSettings()
 	return nil
