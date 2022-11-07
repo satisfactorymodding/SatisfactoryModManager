@@ -24,7 +24,7 @@ func (f *FicsitCLI) validateInstall(installation *InstallationInfo, progressItem
 				f.setProgress(&Progress{
 					Item:     progressItem,
 					Message:  "Extracting " + data.ModName,
-					Progress: data.DownloadProgress,
+					Progress: data.ExtractProgress,
 				})
 			}
 		}
