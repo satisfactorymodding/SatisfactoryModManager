@@ -14,9 +14,9 @@
 
   import Settings from './Settings.svelte';
   import Updates from './Updates.svelte';
-  import { bindings } from '$wailsjs/go/models';
+  import { bindings, ficsitcli_bindings } from '$wailsjs/go/models';
   import HelperText from '@smui/textfield/helper-text';
-  import { ExportCurrentProfile, ReadExportedProfileMetadata } from '$wailsjs/go/bindings/FicsitCLI';
+  import { ExportCurrentProfile, ReadExportedProfileMetadata } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
   import LaunchButton from './LaunchButton.svelte';
 
   let modsEnabled = true;
@@ -94,7 +94,7 @@
   let importProfileFilepath = '';
   let importProfileError = '';
   let fileDialogOpen = false;
-  let importProfileMetadata: bindings.ExportedProfileMetadata | null = null;
+  let importProfileMetadata: ficsitcli_bindings.ExportedProfileMetadata | null = null;
   async function pickImportProfileFile() {
     if(fileDialogOpen) {
       return;

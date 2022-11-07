@@ -3,14 +3,14 @@ package bindings
 import (
 	"context"
 
-	"github.com/pkg/errors"
+	"github.com/satisfactorymodding/SatisfactoryModManager/bindings/ficsitcli_bindings"
 )
 
 type Bindings struct {
 	App       *App
-	FicsitCLI *FicsitCLI
-	Settings  *Settings
-	DebugInfo *DebugInfo
+	FicsitCLI *ficsitcli_bindings.FicsitCLI
+	settings  *Settings
+	debugInfo *DebugInfo
 }
 
 var BindingsInstance *Bindings
@@ -21,9 +21,9 @@ func MakeBindings() (*Bindings, error) {
 	}
 
 	app := MakeApp()
-	ficsitCLI, err := MakeFicsitCLI()
+	ficsitCLI, err := ficsitcli_bindings.MakeFicsitCLI()
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to make ficsitCLI bindings")
+		return nil, err
 	}
 	settings := MakeSettings()
 	debugInfo := MakeDebugInfo()
@@ -31,8 +31,8 @@ func MakeBindings() (*Bindings, error) {
 	BindingsInstance = &Bindings{
 		App:       app,
 		FicsitCLI: ficsitCLI,
-		Settings:  settings,
-		DebugInfo: debugInfo,
+		settings:  settings,
+		debugInfo: debugInfo,
 	}
 
 	return BindingsInstance, nil
@@ -40,16 +40,16 @@ func MakeBindings() (*Bindings, error) {
 
 func (b *Bindings) Startup(ctx context.Context) {
 	b.App.startup(ctx)
-	b.FicsitCLI.startup(ctx)
-	b.Settings.startup(ctx)
-	b.DebugInfo.startup(ctx)
+	b.FicsitCLI.Startup(ctx)
+	b.settings.startup(ctx)
+	b.debugInfo.startup(ctx)
 }
 
 func (b *Bindings) GetBindings() []interface{} {
 	return []interface{}{
 		b.App,
 		b.FicsitCLI,
-		b.Settings,
-		b.DebugInfo,
+		b.settings,
+		b.debugInfo,
 	}
 }

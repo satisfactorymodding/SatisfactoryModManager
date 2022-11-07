@@ -3,7 +3,7 @@
   import { selectedInstall, isGameRunning, lockfileMods, progress, queuedMods, startQueue } from '$lib/store/ficsitCLIStore';
   import { launchButton, queueAutoStart } from '$lib/store/settingsStore';
   import { isLaunchingGame } from '$lib/store/generalStore';
-  import { LaunchGame } from '$wailsjs/go/bindings/FicsitCLI';
+  import { LaunchGame } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
   import Button, { Label } from '@smui/button';
   import { getClient } from '@urql/svelte';
   import { CompatibilityState, ModReportedCompatibilityDocument, type Compatibility } from '$lib/generated';

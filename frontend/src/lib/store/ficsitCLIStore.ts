@@ -1,6 +1,6 @@
 import { get, readable, writable } from 'svelte/store';
-import { cli, bindings } from '$wailsjs/go/models';
-import { AddProfile, CheckForUpdates, DeleteProfile, GetInstallationsInfo, GetInvalidInstalls, GetProfiles, ImportProfile, RenameProfile, SelectInstall, SetProfile } from '$wailsjs/go/bindings/FicsitCLI';
+import { cli, ficsitcli_bindings } from '$wailsjs/go/models';
+import { AddProfile, CheckForUpdates, DeleteProfile, GetInstallationsInfo, GetInvalidInstalls, GetProfiles, ImportProfile, RenameProfile, SelectInstall, SetProfile } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
 import { GetFavouriteMods } from '$wailsjs/go/bindings/Settings';
 import { readableBinding, writableBinding } from './wailsStoreBindings';
 import { tick } from 'svelte';
@@ -10,8 +10,8 @@ import { queueAutoStart } from './settingsStore';
 
 export const invalidInstalls = readableBinding<(Error & {path?: string})[]>([], { initialGet: GetInvalidInstalls });
 
-export const installs = readableBinding<bindings.InstallationInfo[]>([], { initialGet: GetInstallationsInfo });
-export const selectedInstall = writable(null as bindings.InstallationInfo | null);
+export const installs = readableBinding<ficsitcli_bindings.InstallationInfo[]>([], { initialGet: GetInstallationsInfo });
+export const selectedInstall = writable(null as ficsitcli_bindings.InstallationInfo | null);
 
 export const profiles = writableBinding<string[]>([], { initialGet: GetProfiles });
 export const selectedProfile = writable(null as string | null);
@@ -109,7 +109,7 @@ export type LockFile = { [name: string]: LockedMod };
 
 export const lockfileMods = readableBinding<LockFile>({}, { allowNull: false, updateEvent: 'lockfileMods'});
 
-export const progress = readableBinding<bindings.Progress | null>(null, { updateEvent: 'progress'});
+export const progress = readableBinding<ficsitcli_bindings.Progress | null>(null, { updateEvent: 'progress'});
 
 export const favouriteMods = readableBinding<string[]>([], { updateEvent: 'favouriteMods', initialGet: GetFavouriteMods});
 
@@ -130,7 +130,7 @@ export const canModify = readable(true, (set) => {
 
 });
 
-export const updates = writable<bindings.Update[]>([]);
+export const updates = writable<ficsitcli_bindings.Update[]>([]);
 export const updateCheckInProgress = writable(false);
 
 export async function checkForUpdates() {

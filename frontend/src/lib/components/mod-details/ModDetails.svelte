@@ -13,7 +13,7 @@
   import { error } from '$lib/store/generalStore';
   import { search } from '$lib/store/modFiltersStore';
   import MdiIcon from '$lib/components/MDIIcon.svelte';
-  import { InstallModVersion } from '$wailsjs/go/bindings/FicsitCLI';
+  import { InstallModVersion } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
   import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
   import Dialog from '@smui/dialog';
   import { getAuthor } from '$lib/utils/getModAuthor';

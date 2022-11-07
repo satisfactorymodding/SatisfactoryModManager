@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/rs/zerolog/log"
 	"github.com/satisfactorymodding/SatisfactoryModManager/install_finders"
 	"github.com/satisfactorymodding/SatisfactoryModManager/project_file"
 	"github.com/satisfactorymodding/SatisfactoryModManager/utils"
@@ -92,7 +93,7 @@ func addMetadata(writer *zip.Writer) error {
 		metadataProfiles = append(metadataProfiles, p)
 	}
 
-	lockfile, err := BindingsInstance.FicsitCLI.GetCurrentLockfile(selectedFicsitCliInstall)
+	lockfile, err := BindingsInstance.FicsitCLI.GetLockFile(selectedFicsitCliInstall)
 	if err != nil {
 		return errors.Wrap(err, "Failed to get lockfile")
 	}
@@ -173,7 +174,7 @@ func (d *DebugInfo) GenerateDebugInfo() bool {
 		},
 	})
 	if err != nil {
-		wailsRuntime.LogErrorf(d.ctx, "Failed to get file name: %v", err)
+		log.Error().Err(err).Msg("Failed to open save dialog")
 		return false
 	}
 	if filename == "" {
@@ -182,7 +183,7 @@ func (d *DebugInfo) GenerateDebugInfo() bool {
 
 	err = d.generateAndSaveDebugInfo(filename)
 	if err != nil {
-		wailsRuntime.LogErrorf(d.ctx, "Failed to generate debug info: %v", err)
+		log.Error().Err(err).Msg("Failed to generate debuginfo")
 		return false
 	}
 

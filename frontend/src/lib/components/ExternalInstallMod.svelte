@@ -1,7 +1,7 @@
 <script lang="ts">
   import { GetModSummaryDocument } from '$lib/generated';
   import { addQueuedModAction, manifestMods, queuedMods, removeQueuedModAction } from '$lib/store/ficsitCLIStore';
-  import { InstallMod } from '$wailsjs/go/bindings/FicsitCLI';
+  import { InstallMod } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
   import { EventsOn } from '$wailsjs/runtime/runtime';
   import Button from '@smui/button';
   import { Actions, Content } from '@smui/dialog';
