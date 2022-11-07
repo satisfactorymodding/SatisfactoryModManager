@@ -96,7 +96,7 @@ export async function importProfile(name: string, filepath: string) {
 
 export type ProfileMods = { [name: string]: cli.ProfileMod };
 
-export const manifestMods = readableBinding<ProfileMods>({}, { allowNull: false, updateEvent: 'manifestMods'}); // Event will be
+export const manifestMods = readableBinding<ProfileMods>({}, { allowNull: false, updateEvent: 'manifestMods' });
 
 export interface LockedMod {
   version: string;
@@ -107,9 +107,15 @@ export interface LockedMod {
 
 export type LockFile = { [name: string]: LockedMod };
 
-export const lockfileMods = readableBinding<LockFile>({}, { allowNull: false, updateEvent: 'lockfileMods'});
+export const lockfileMods = readableBinding<LockFile>({}, { allowNull: false, updateEvent: 'lockfileMods' });
 
-export const progress = readableBinding<ficsitcli_bindings.Progress | null>(null, { updateEvent: 'progress'});
+export interface Progress {
+  item: string;
+  progress: number;
+  message: string;
+}
+
+export const progress = readableBinding<Progress | null>(null, { updateEvent: 'progress' });
 
 export const favouriteMods = readableBinding<string[]>([], { updateEvent: 'favouriteMods', initialGet: GetFavouriteMods});
 
