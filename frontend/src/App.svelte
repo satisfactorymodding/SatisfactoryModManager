@@ -4,17 +4,18 @@
   import ModsList from '$lib/components/mods-list/ModsList.svelte';
   import { initializeGraphQLClient } from '$lib/core/graphql';
   import { setClient } from '@urql/svelte';
-  import { Environment } from '$wailsjs/runtime/runtime';
+  import { Environment } from '$wailsjs/runtime';
   import ModDetails from '$lib/components/mod-details/ModDetails.svelte';
   import { ExpandMod, UnexpandMod } from '$wailsjs/go/bindings/App';
   import LeftBar from '$lib/components/left-bar/LeftBar.svelte';
-  import { installs, invalidInstalls } from '$lib/store/ficsitCLIStore';
+  import { installs, invalidInstalls, progress, selectedInstall, selectedProfile } from '$lib/store/ficsitCLIStore';
   import { konami } from '$lib/store/settingsStore';
   import { expandedMod, error } from '$lib/store/generalStore';
   import Dialog, { Actions, Content, Title } from '@smui/dialog';
   import Button, { Label } from '@smui/button';
   import { GenerateDebugInfo } from '$wailsjs/go/bindings/DebugInfo';
   import ExternalInstallMod from '$lib/components/ExternalInstallMod.svelte';
+  import LinearProgress from '@smui/linear-progress';
 
   Environment().then((env) => {
     if (env.buildType !== 'dev') {
@@ -49,6 +50,9 @@
       noInstallsDialog = true;
     }
   }
+
+  $: installProgress = $progress?.item === '__select_install__';
+  $: profileProgress = $progress?.item === '__select_profile__';
   
   const code = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
   const keyQueue: number[] = [];
@@ -79,6 +83,36 @@
 </div>
 
 <ExternalInstallMod />
+
+<Dialog
+  bind:open={installProgress}  
+  scrimClickAction=""
+  escapeKeyAction=""
+  surface$style="width: 500px; max-width: calc(100vw - 32px);"
+>
+  <Title>Checking install {$selectedInstall?.info?.branch} ({$selectedInstall?.info?.launcher}) - CL{$selectedInstall?.info?.version}</Title>
+  <Content>
+    {#if $progress}
+      <p>{$progress.message}</p>
+      <LinearProgress progress={$progress.progress} indeterminate={$progress.progress === -1} class="h-4 w-full rounded-lg"/>
+    {/if}
+  </Content>
+</Dialog>
+
+<Dialog
+  bind:open={profileProgress}  
+  scrimClickAction=""
+  escapeKeyAction=""
+  surface$style="width: 500px; max-width: calc(100vw - 32px);"
+>
+  <Title>Selecting profile {$selectedProfile}</Title>
+  <Content>
+    {#if $progress}
+      <p>{$progress.message}</p>
+      <LinearProgress progress={$progress.progress} indeterminate={$progress.progress === -1} class="h-4 w-full rounded-lg"/>
+    {/if}
+  </Content>
+</Dialog>
 
 <Dialog
   bind:open={invalidInstallsDialog}  
