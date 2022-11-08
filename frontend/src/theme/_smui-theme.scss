@@ -17,6 +17,7 @@ $green-normal: #5bb71d;
 $green-darker: #354f24;
 $white-bright: #ffffff;
 $white-normal: #efefef;
+$white-darker: #d5d5d5;
 
 @use '@material/theme/index' as theme with (
   $primary: $green-normal,
@@ -49,8 +50,13 @@ $white-normal: #efefef;
   @include linear-progress.buffer-color($grey-darker);
 }
 
+$md: 825px;
+$lg: 900px;
+
 $left-bar-controls-background: $grey-darker;
-$left-bar-controls-height: 40px;
+$left-bar-controls-height-sm: 27px;
+$left-bar-controls-height-md: 35px;
+$left-bar-controls-height-lg: 40px;
 
 .left-bar {
   .settings-menu {
@@ -77,16 +83,36 @@ $left-bar-controls-height: 40px;
   }
 
   .mdc-button {
-    @include button.height($left-bar-controls-height);
+    @include button.height($left-bar-controls-height-sm);
+    @media (min-height: $md) {
+      @include button.height($left-bar-controls-height-md);
+    }
+    @media (min-height: $lg) {
+      @include button.height($left-bar-controls-height-lg);
+    }
     @include button.container-fill-color($left-bar-controls-background);
     @include button.ink-color(theme.$on-surface);
   }
   .mdc-select {
     @include select.container-fill-color($left-bar-controls-background);
-    @include select.filled-height($left-bar-controls-height);
-    @include select.filled-shape-radius(math.div($left-bar-controls-height, 5), 0);  
+    @include select.filled-height($left-bar-controls-height-sm);
+    @include select.filled-shape-radius(math.div($left-bar-controls-height-sm, 5), 0);
     .mdc-select__anchor {
-      @include shape-mixins.radius(math.div($left-bar-controls-height, 10));
+      @include shape-mixins.radius(math.div($left-bar-controls-height-sm, 10));
+    }
+    @media (min-height: $md) {
+      @include select.filled-height($left-bar-controls-height-md);
+      @include select.filled-shape-radius(math.div($left-bar-controls-height-md, 5), 0);
+      .mdc-select__anchor {
+        @include shape-mixins.radius(math.div($left-bar-controls-height-md, 10));
+      }
+    }
+    @media (min-height: $lg) {
+      @include select.filled-height($left-bar-controls-height-lg);
+      @include select.filled-shape-radius(math.div($left-bar-controls-height-lg, 5), 0);
+      .mdc-select__anchor {
+        @include shape-mixins.radius(math.div($left-bar-controls-height-lg, 10));
+      }
     }
   }
 
@@ -138,49 +164,49 @@ div.mdc-tooltip {
   @include tooltip.fill-color($almost-black);
 }
 
-.mod-install-button.mdc-button--unelevated {
+.mod-install-button.mdc-button {
   @include button.ink-color(theme.$on-surface);
   &:not(.installed) {
-    @include button.container-fill-color($green-darker);
+    @include button.ink-color($white-darker);
     &:hover {
-      @include button.container-fill-color($green-normal);
+      @include button.ink-color($green-normal);
     }
   }
   &.installed {
-    @include button.container-fill-color($green-normal);
+    @include button.ink-color($green-normal);
     &:hover {
-      @include button.container-fill-color($red-normal);
+      @include button.ink-color($red-normal);
     }
   }
 }
 
-.mod-enable-button.mdc-button--unelevated {
-  @include button.ink-color(theme.$on-surface);
+.mod-enable-button.mdc-button {
+  @include button.ink-color($white-darker);
   &:not(.enabled) {
-    @include button.container-fill-color($grey-dark);
+    @include button.ink-color($white-darker);
     &:hover {
-      @include button.container-fill-color($green-normal);
+      @include button.ink-color($green-normal);
     }
   }
   &.enabled {
-    @include button.container-fill-color($green-normal);
+    @include button.ink-color($white-darker);
     &:hover {
-      @include button.container-fill-color($grey-dark);
+      @include button.ink-color($white-darker);
     }
   }
 }
 
-.mod-favourite-button.mdc-button--unelevated {
+.mod-favourite-button.mdc-button {
   &:not(.favourite) {
-    @include button.filled-accessible($grey-darkest);
+    @include button.ink-color($white-darker);
     &:hover {
-      @include button.filled-accessible($yellow);
+      @include button.ink-color($yellow);
     }
   }
   &.favourite {
-    @include button.filled-accessible($yellow);
+    @include button.ink-color($yellow);
     &:hover {
-      @include button.filled-accessible($grey-darkest);
+      @include button.ink-color($white-darker);
     }
   }
 }

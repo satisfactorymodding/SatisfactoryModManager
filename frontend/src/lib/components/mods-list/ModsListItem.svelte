@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { mdiDownload, mdiEye, mdiStar, mdiCheckCircle, mdiPlay, mdiPause, mdiTrashCan, mdiTrayFull, mdiTrayMinus } from '@mdi/js';
+  import { mdiDownload, mdiEye, mdiStar, mdiCheckCircle, mdiPlay, mdiPause, mdiTrashCan, mdiTrayFull, mdiTrayMinus, mdiSync } from '@mdi/js';
   import MDIIcon from '$lib/components/SVGIcon.svelte';
   import { createEventDispatcher } from 'svelte';
   import { search, type PartialMod } from '$lib/store/modFiltersStore';
-  import Button, { Group, GroupItem, Label } from '@smui/button';
+  import Button from '@smui/button';
   import LinearProgress from '@smui/linear-progress';
   import Tooltip, { Wrapper } from '@smui/tooltip';
   import { addQueuedModAction, queuedMods, favouriteMods, lockfileMods, manifestMods, progress, selectedInstall, removeQueuedModAction } from '$lib/store/ficsitCLIStore';
@@ -24,7 +24,6 @@
     dispatch('click');
   }
   
-  export let compact: boolean;
   export let selected: boolean;
 
   $: renderedLogo = mod.logo || 'https://ficsit.app/images/no_image.webp';
@@ -37,37 +36,19 @@
   $: queued = $queuedMods.some((q) => q.mod === mod.mod_reference);
   $: queuedInstall = $queuedMods.some((q) => q.mod === mod.mod_reference && (q.action === 'install' || q.action === 'remove'));
   $: queuedEnable = $queuedMods.some((q) => q.mod === mod.mod_reference && (q.action === 'enable' || q.action === 'disable'));
-
-  $: installButtonLabel = (() => {
-    if (isDependency) {
-      return 'Dependency';
-    }
-    let prefix = '';
-    if (queuedInstall) {
-      prefix = 'Queued ';
-    }
-    if (isInstalled) {
-      return `${prefix}Remove`;
-    }
-    return `${prefix}Install`;
-  })();
-  
-  $: installButtonLabelHover = (() => {
-    if (queuedInstall) {
-      return 'Unqueue';
-    }
-    return installButtonLabel;
-  })();
   
   $: installButtonIcon = (() => {
     if (isDependency) {
       return mdiCheckCircle;
     }
+    if (inProgress) {
+      return mdiSync;
+    }
     if (queuedInstall) {
       return mdiTrayFull;
     }
     if (isInstalled) {
-      return mdiTrashCan;
+      return mdiCheckCircle;
     }
     return mdiDownload;
   })();
@@ -75,6 +56,9 @@
   $: installButtonIconHover = (() => {
     if (isDependency) {
       return mdiCheckCircle;
+    }
+    if (inProgress) {
+      return mdiSync;
     }
     if (queuedInstall) {
       return mdiTrayMinus;
@@ -189,22 +173,24 @@
   }
 </script>
 
-<div class="my-1 px-0 w-full" class:rounded-lg={selected} class:selected on:click={click}>
+<div class="my-1 px-0 lg:h-24 md:h-[5.5rem] h-[4.25rem]" class:rounded-lg={selected} class:selected on:click={click}>
   {#if inProgress}
     <div class="relative h-0">
-      <LinearProgress progress={$progress?.progress} class="mod-progress-bar h-24 w-full rounded-lg"/>
+      <LinearProgress progress={$progress?.progress} class="mod-progress-bar h-full rounded-lg"/>
     </div>
   {/if}
-  <div class="flex relative" readonly class:disabled={isInstalled && !isEnabled}>
-    <img src={renderedLogo} alt="{mod.name} Logo" class="logo h-24 w-24" />
+  <div class="flex relative h-full" readonly class:disabled={isInstalled && !isEnabled}>
+    <img src={renderedLogo} alt="{mod.name} Logo" class="logo h-full lg:w-24 md:w-[5.5rem] w-[4.25rem]" />
     <div class="ml-2 flex flex-col grow w-0">
       <Wrapper>
-        <div>
-          <span class="text-xl font-medium" class:error={compatibility.state === CompatibilityState.Broken} class:warning={compatibility.state === CompatibilityState.Damaged}>{mod.name}</span>
-          {#if !compact}
+        <div class="flex items-center">
+          <div class="shrink min-w-0 truncate">
+            <span class="lg:text-xl text-lg font-medium min-w-0 w-full" class:error={compatibility.state === CompatibilityState.Broken} class:warning={compatibility.state === CompatibilityState.Damaged}>{mod.name}</span>
+          </div>
+          <div class="shrink-0">
             <span class="pl-1">by</span>
-            <span class="color-primary" on:click|stopPropagation={() => $search = `author:"${author}"`}>{author}</span>
-          {/if}
+            <span class="color-primary whitespace-nowrap" on:click|stopPropagation={() => $search = `author:"${author}"`}>{author}</span>
+          </div>
         </div>
         {#if isInstalled && !isEnabled}
           <Tooltip surface$class="max-w-lg text-base">
@@ -216,64 +202,66 @@
           </Tooltip>
         {/if}
       </Wrapper>
-      <span class="truncate w-full">{mod.short_description}</span>
-      <div class="flex grow">
+      <div class="truncate md:text-base text-sm hidden md:block">{mod.short_description}</div>
+      <div class="flex">
         {#if !inProgress}
-          <div class="grow w-0">
-            <div class="truncate">
+          <div class="grow w-0 lg:text-base text-sm">
+            <div class="truncate text-base md:text-sm block md:hidden">{mod.short_description}</div>
+            <div class="truncate hidden md:block">
               {#each mod?.tags ?? [] as tag}
                 <span class="pr-1">#{tag.name}</span>
               {/each}
               &nbsp; <!-- keep div height even when no tags are available -->
             </div>
-            <div class="flex h-5">
-              <div class="w-24 flex">
-                <div class="pr-1 inline-flex items-center justify-items-center"><MDIIcon icon={mdiEye} class=""/></div>{mod.views.toLocaleString()}
+            <div class="flex h-5 md:h-4.5">
+              <div class="w-24 flex items-center">
+                <div class="pr-1 inline-flex items-center justify-items-center lg:w-7 w-6"><MDIIcon icon={mdiEye} class=""/></div><span>{mod.views.toLocaleString()}</span>
               </div>
-              <div class="w-24 flex">
-                <div class="pr-1 inline-flex items-center justify-items-center"><MDIIcon icon={mdiDownload} class=""/></div>{mod.downloads.toLocaleString()}
+              <div class="w-24 flex items-center">
+                <div class="pr-1 inline-flex items-center justify-items-center lg:w-7 w-6"><MDIIcon icon={mdiDownload} class=""/></div><span>{mod.downloads.toLocaleString()}</span>
               </div>
             </div>
-          </div>
-          <div class="pr-2 flex" on:click|stopPropagation={() => { /* empty */ }}>
-            <Group variant="outlined" class="mr-1">
-              <Button
-                on:click={toggleModInstalled}
-                on:mouseover={() => isInstallButtonHovered = true}
-                on:mouseleave={() => isInstallButtonHovered = false}
-                variant="unelevated"
-                disabled={buttonDisabled || queuedEnable}
-                class="{compact ? ((isInstalled ? 'min-w-0' : 'w-[85px]') + ' pl-5 pr-1.5') : (isInstalled ? 'w-24' : 'w-36')} mod-install-button {isInstalled ? 'installed' : ''}">
-                {#if !compact}
-                  <Label>{ isInstallButtonHovered ? installButtonLabelHover : installButtonLabel }</Label>
-                {:else}
-                  <MDIIcon icon={ isInstallButtonHovered ? installButtonIconHover : installButtonIcon }/>
-                {/if}
-                <div class="grow" />
-              </Button>
-              {#if isInstalled && !isDependency}
-                <div use:GroupItem>
-                  <Button
-                    on:click={ toggleModEnabled }
-                    on:mouseover={() => isEnableButtonHovered = true}
-                    on:mouseleave={() => isEnableButtonHovered = false}
-                    disabled={buttonDisabled || queuedInstall}
-                    variant="unelevated"
-                    class="min-w-0 pl-5 pr-1.5 mod-enable-button {isEnabled ? 'enabled' : ''}"
-                  >
-                    <MDIIcon icon={ isEnableButtonHovered ? enableButtonIconHover : enableButtonIcon }/>
-                  </Button>
-                </div>
-              {/if}
-            </Group>
-            <Button on:click={toggleModFavourite} variant="unelevated" class="min-w-0 pl-5 pr-1.5 mod-favourite-button {isFavourite ? 'favourite' : ''}">
-              <MDIIcon icon={ mdiStar }/>
-            </Button>
           </div>
         {:else}
           <span>{ $progress?.message }</span>
         {/if}
       </div>
+    </div>
+    <div class="pr-2 flex h-full items-center" on:click|stopPropagation={() => { /* empty */ }}>
+      {#if isInstalled && !isDependency}
+        <Button
+          on:click={ toggleModEnabled }
+          on:mouseover={() => isEnableButtonHovered = true}
+          on:mouseleave={() => isEnableButtonHovered = false}
+          disabled={buttonDisabled || queuedInstall || inProgress}
+          ripple={false}
+          variant="text"
+          class="min-w-0 w-12 h-12 mod-enable-button {isEnabled || queued ? 'enabled' : ''} "
+        >
+          <MDIIcon icon={ isEnableButtonHovered ? enableButtonIconHover : enableButtonIcon } class="!p-1 !m-0 !w-full !h-full"/>
+        </Button>
+      {:else}
+        <div class="min-w-0 w-12 h-12"/>
+      {/if}
+      <Button
+        on:click={toggleModInstalled}
+        on:mouseover={() => isInstallButtonHovered = true}
+        on:mouseleave={() => isInstallButtonHovered = false}
+        variant="text"
+        disabled={buttonDisabled || queuedEnable || inProgress}
+        ripple={false}
+        class="min-w-0 w-12 h-12 mod-install-button {isInstalled || queued ? 'installed' : ''}"
+      >
+        <MDIIcon icon={ isInstallButtonHovered ? installButtonIconHover : installButtonIcon } class="!p-1 !m-0 !w-full !h-full"/>
+      </Button>
+      <Button
+        on:click={toggleModFavourite}
+        variant="text"
+        ripple={false}
+        class="min-w-0 w-12 h-12 mod-favourite-button {isFavourite ? 'favourite' : ''}"
+      >
+        <MDIIcon icon={ mdiStar } class="!p-1 !m-0 !w-full !h-full"/>
+      </Button>
     </div>
   </div>
 </div>

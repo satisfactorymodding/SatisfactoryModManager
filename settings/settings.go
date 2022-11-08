@@ -23,16 +23,16 @@ var (
 )
 
 type SettingsData struct {
-	FavouriteMods    []string          `json:"favouriteMods"`
-	ModFilters       SavedModFilters   `json:"modFilters"`
-	AppHeight        int               `json:"appHeight"`
-	ExpandedAppWidth int               `json:"expandedAppWidth"`
-	StartView        View              `json:"startView"`
-	QueueAutoStart   bool              `json:"queueAutoStart"`
-	SelectedInstall  string            `json:"selectedInstall"`
-	SelectedProfile  map[string]string `json:"selectedProfile"`
-	Konami           bool              `json:"konami"`
-	LaunchButton     string            `json:"launchButton"`
+	FavouriteMods   []string          `json:"favouriteMods"`
+	ModFilters      SavedModFilters   `json:"modFilters"`
+	UnexpandedSize  utils.Size        `json:"unexpandedSize"`
+	ExpandedSize    utils.Size        `json:"expandedSize"`
+	StartView       View              `json:"startView"`
+	QueueAutoStart  bool              `json:"queueAutoStart"`
+	SelectedInstall string            `json:"selectedInstall"`
+	SelectedProfile map[string]string `json:"selectedProfile"`
+	Konami          bool              `json:"konami"`
+	LaunchButton    string            `json:"launchButton"`
 }
 
 var Settings SettingsData
@@ -48,13 +48,13 @@ func LoadSettings() error {
 		}
 
 		Settings = SettingsData{
-			FavouriteMods:    []string{},
-			ModFilters:       SavedModFilters{Order: "Last updated", Filter: "Compatible"},
-			AppHeight:        utils.UnexpandedMinHeight,
-			ExpandedAppWidth: utils.UnexpandedMinWidth,
-			StartView:        VIEW_COMPACT,
-			SelectedInstall:  "",
-			SelectedProfile:  map[string]string{},
+			FavouriteMods:   []string{},
+			ModFilters:      SavedModFilters{Order: "Last updated", Filter: "Compatible"},
+			UnexpandedSize:  utils.UnexpandedDefault,
+			ExpandedSize:    utils.ExpandedDefault,
+			StartView:       VIEW_COMPACT,
+			SelectedInstall: "",
+			SelectedProfile: map[string]string{},
 		}
 		err = SaveSettings()
 		if err != nil {
@@ -80,8 +80,8 @@ func setDefaults() {
 	Settings.FavouriteMods = []string{}
 	Settings.ModFilters.Order = "Last updated"
 	Settings.ModFilters.Filter = "Compatible"
-	Settings.AppHeight = utils.UnexpandedMinHeight
-	Settings.ExpandedAppWidth = utils.UnexpandedMinWidth
+	Settings.UnexpandedSize = utils.UnexpandedDefault
+	Settings.ExpandedSize = utils.ExpandedDefault
 	Settings.StartView = VIEW_COMPACT
 	Settings.QueueAutoStart = true
 	Settings.SelectedProfile = map[string]string{}

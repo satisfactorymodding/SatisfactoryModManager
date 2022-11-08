@@ -3,20 +3,29 @@
   import Textfield, { Input } from '@smui/textfield';
   import LineRipple from '@smui/line-ripple';
   import Select, { Option } from '@smui/select';
+  import SvgIcon from '../SVGIcon.svelte';
+  import { mdiFilter, mdiSort } from '@mdi/js';
   
   let inputA: Input;
   let lineRippleA: LineRipple;
 
-  export let compact: boolean;
+  let container!: HTMLDivElement;
+
+  let compact = false;
+
+  $: if(container) {
+    new ResizeObserver(() => {
+      compact = container.clientWidth < 500;
+    }).observe(container);
+  }
 </script>
 
-<div class="px-5 py-2">
-  <div class="flex">
+<div class="px-5 py-2 flex" bind:this={container}>
+  <div class="grow mr-2">
     <Textfield
       bind:input={inputA}
       bind:lineRipple={lineRippleA}
-      style="height: 30px"
-      class="flex-1"
+      class="w-full h-[30px]"
     >
       <Input
         bind:this={inputA}
@@ -28,36 +37,44 @@
       />
       <LineRipple bind:this={lineRippleA} slot="ripple" />
     </Textfield>
+  </div>
+  <div class="flex grow shrink-0" class:min-w-[140px]={compact} class:min-w-[24rem]={!compact} class:w-0={compact}>
     <Select
-      class="control-area-input w-1/3 max-w-56 pr-0.5"
+      class="control-area-input {compact ? 'w-20' : 'w-1/2'} pr-0.5"
       variant="filled"
       bind:value={$filter}
       placeholder="Filter"
       ripple={false}
       selectedText$class="color-primary"
+      selectedTextContainer$class="{compact ? '!hidden' : ''}"
+      dropdownIcon$class="ml-0"
+      anchor$class="!items-center w-0"
     >
-      <span slot="leadingIcon" class="pl-3">
-        {#if !compact}
-          View:&nbsp;
-        {/if}
-      </span>
+      <div slot="leadingIcon" class="pl-3 pr-1">
+        <div class="h-5">
+          <SvgIcon icon={mdiFilter} />
+        </div>
+      </div>
       {#each filterOptions as option}
         <Option value={option}>{option.name}</Option>
       {/each}
     </Select>
     <Select
-      class="control-area-input w-1/3 max-w-56 pl-0.5"
+      class="control-area-input {compact ? 'w-20' : 'w-1/2'} pl-0.5"
       variant="filled"
       bind:value={$order}
       placeholder="Order by"
       ripple={false}
       selectedText$class="color-primary"
+      selectedTextContainer$class="{compact ? '!hidden' : ''}"
+      dropdownIcon$class="ml-0"
+      anchor$class="!items-center w-0"
     >
-      <span slot="leadingIcon" class="pl-3">
-        {#if !compact}
-          Sort:&nbsp;
-        {/if}
-      </span>
+      <div slot="leadingIcon" class="pl-3 pr-1">
+        <div class="h-5">
+          <SvgIcon icon={mdiSort} />
+        </div>
+      </div>
       {#each orderByOptions as option}
         <Option value={option}>{option.name}</Option>
       {/each}

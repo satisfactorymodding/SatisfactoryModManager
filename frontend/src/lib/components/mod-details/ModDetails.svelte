@@ -151,13 +151,13 @@
   }
 </script>
 
-<div class="h-full flex mods-details">
-  <div class="w-64 px-4 py-4 flex flex-col h-full mods-details" style="border-right-color: rgba(239, 239, 239, 0.12);">
+<div class="h-full flex mods-details min-w-[545px] w-md:text-base text-sm">
+  <div class="px-4 py-4 flex flex-col h-full w-md:w-64 w-52 mods-details" style="border-right-color: rgba(239, 239, 239, 0.12);">
     <img src={renderedLogo} alt="{mod?.name} Logo" class="logo w-full" />
-    <span class="pt-4 font-bold text-lg">{mod?.name ?? 'Loading...'}</span>
+    <span class="pt-4 font-bold w-md:text-lg text-base">{mod?.name ?? 'Loading...'}</span>
     <span class="pt-2 font-light">A mod by:</span>
     <span class="font-medium color-primary cursor-pointer" on:click={() => $search = `author:"${author}"`}>{author ?? 'Loading...'}</span>
-
+    
     <div class="pt-2" on:mouseenter={() => authorsMenu.setOpen(true)} on:mouseleave={() => authorsMenu.setOpen(false)}>
       <Button variant="unelevated" color="secondary" class="w-full">
         <Label>Contributors <span class="color-primary">({mod?.authors.length ?? 0})</span></Label>

@@ -100,18 +100,16 @@
       }
     }
   }
-
-  export let compact: boolean;
 </script>
 
 <div class="h-full flex flex-col">
   <div class="flex-none">
-    <ModListFilters bind:compact />
+    <ModListFilters />
   </div>
   <div class="py-4 grow h-0 mods-list" style="position: relative;">
     <div class="ml-5 mr-3 h-full">
       <VirtualList items={displayMods} let:item={mod}>
-        <ModsListItem {mod} on:click={() => $expandedMod = mod.mod_reference} bind:compact={compact} selected={$expandedMod == mod.mod_reference}/>
+        <ModsListItem {mod} on:click={() => $expandedMod = mod.mod_reference} selected={$expandedMod == mod.mod_reference}/>
       </VirtualList>
     </div>
   </div>

@@ -28,7 +28,11 @@
   let windowExpanded = false;
 
   $: if ($expandedMod) {
-    ExpandMod().then(() => { windowExpanded = true; });
+    ExpandMod().then(() => {
+      setTimeout(() => {
+        windowExpanded = true;
+      }, 100);
+    });
   } else {
     windowExpanded = false;
     setTimeout(() => {
@@ -37,8 +41,6 @@
   }
 
   $: pendingExpand = $expandedMod && !windowExpanded;
-
-  $: modsListCompact = windowExpanded;
 
   let invalidInstallsDialog = false;
   let noInstallsDialog = false;
@@ -71,11 +73,11 @@
   <TitleBar />
   <div class="flex grow h-0">
     <LeftBar />
-    <div class:normal={!$expandedMod || pendingExpand} class:compact={windowExpanded}>
-      <ModsList bind:compact={modsListCompact}/>
+    <div class="grow w-1/2 min-w-[400px] md:min-w-[420px] lg:min-w-[445px] {$expandedMod ? 'max-w-[600px]' : ''}">
+      <ModsList />
     </div>
     {#if $expandedMod}
-      <div class="grow">
+      <div class:grow={!pendingExpand} class:w-0={pendingExpand}>
         <ModDetails />
       </div>
     {/if}
@@ -85,7 +87,7 @@
 <ExternalInstallMod />
 
 <Dialog
-  bind:open={installProgress}  
+  bind:open={installProgress}
   scrimClickAction=""
   escapeKeyAction=""
   surface$style="width: 500px; max-width: calc(100vw - 32px);"
@@ -100,7 +102,7 @@
 </Dialog>
 
 <Dialog
-  bind:open={profileProgress}  
+  bind:open={profileProgress}
   scrimClickAction=""
   escapeKeyAction=""
   surface$style="width: 500px; max-width: calc(100vw - 32px);"
@@ -115,7 +117,7 @@
 </Dialog>
 
 <Dialog
-  bind:open={invalidInstallsDialog}  
+  bind:open={invalidInstallsDialog}
   scrimClickAction=""
   escapeKeyAction=""
   surface$style="width: 500px; max-width: calc(100vw - 32px);"
@@ -136,7 +138,7 @@
 </Dialog>
 
 <Dialog
-  bind:open={noInstallsDialog}  
+  bind:open={noInstallsDialog}
   scrimClickAction=""
   escapeKeyAction=""
   surface$style="width: 500px; max-width: calc(100vw - 32px);"
@@ -153,7 +155,7 @@
 </Dialog>
 
 <Dialog
-  open={!!$error}  
+  open={!!$error}
   scrimClickAction=""
   escapeKeyAction=""
   surface$style="width: 500px; max-width: calc(100vw - 32px);"
@@ -172,14 +174,3 @@
     </Button>
   </Actions>
 </Dialog>
-
-<style>
-  .normal {
-    width: 610px !important;
-    min-width: 610px !important;
-  }
-  .compact {
-    width: 470px;
-    min-width: 470px;
-  }
-</style>

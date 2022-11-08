@@ -143,7 +143,7 @@
   });
 </script>
 
-<div class="flex flex-col h-full p-4 left-bar w-[24rem] min-w-[24rem] ">
+<div class="flex flex-col h-full p-4 left-bar w-[22rem] min-w-[22rem] ">
   <div class="flex flex-col">
     <span class="pl-4">Game version</span>
     <Select
@@ -156,7 +156,7 @@
     >
       {#each $installs as install}
         <Option value={install}>
-          <Label>{install?.info?.branch} ({install?.info?.launcher}) - CL{install?.info?.version}</Label>
+          <Label>{install?.info?.branch} ({install?.info?.launcher})</Label>
         </Option>
       {/each}
     </Select>

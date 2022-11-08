@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/rs/zerolog/log"
 	"github.com/satisfactorymodding/SatisfactoryModManager/project_file"
 	"github.com/satisfactorymodding/SatisfactoryModManager/settings"
 	"github.com/satisfactorymodding/SatisfactoryModManager/utils"
@@ -27,15 +28,31 @@ func (a *App) startup(ctx context.Context) {
 	go func() {
 		for range sizeTicker.C {
 			w, h := wailsRuntime.WindowGetSize(a.ctx)
+			changed := false
 			if BindingsInstance.App.isExpanded {
-				if w != settings.Settings.ExpandedAppWidth {
-					settings.Settings.ExpandedAppWidth = w
-					settings.SaveSettings()
+				if w != settings.Settings.ExpandedSize.Width {
+					settings.Settings.ExpandedSize.Width = w
+					changed = true
+				}
+			} else {
+				if w != settings.Settings.UnexpandedSize.Width {
+					settings.Settings.UnexpandedSize.Width = w
+					changed = true
 				}
 			}
-			if h != settings.Settings.AppHeight {
-				settings.Settings.AppHeight = h
-				settings.SaveSettings()
+			if h != settings.Settings.ExpandedSize.Height {
+				settings.Settings.ExpandedSize.Height = h
+				changed = true
+			}
+			if h != settings.Settings.UnexpandedSize.Height {
+				settings.Settings.UnexpandedSize.Height = h
+				changed = true
+			}
+			if changed {
+				err := settings.SaveSettings()
+				if err != nil {
+					log.Error().Err(err).Msg("Failed to save settings")
+				}
 			}
 		}
 	}()
@@ -43,9 +60,9 @@ func (a *App) startup(ctx context.Context) {
 
 func (a *App) ExpandMod() bool {
 	_, height := wailsRuntime.WindowGetSize(a.ctx)
-	wailsRuntime.WindowSetMinSize(a.ctx, utils.ExpandedMinWidth, utils.ExpandedMinHeight)
-	wailsRuntime.WindowSetMaxSize(a.ctx, 0, 0)
-	wailsRuntime.WindowSetSize(a.ctx, settings.Settings.ExpandedAppWidth, height)
+	wailsRuntime.WindowSetMinSize(a.ctx, utils.ExpandedMin.Width, utils.ExpandedMin.Height)
+	wailsRuntime.WindowSetMaxSize(a.ctx, utils.ExpandedMax.Width, utils.ExpandedMax.Height)
+	wailsRuntime.WindowSetSize(a.ctx, settings.Settings.ExpandedSize.Width, height)
 	a.isExpanded = true
 	return true
 }
@@ -53,9 +70,9 @@ func (a *App) ExpandMod() bool {
 func (a *App) UnexpandMod() bool {
 	a.isExpanded = false
 	_, height := wailsRuntime.WindowGetSize(a.ctx)
-	wailsRuntime.WindowSetMinSize(a.ctx, utils.UnexpandedMinWidth, utils.UnexpandedMinHeight)
-	wailsRuntime.WindowSetMaxSize(a.ctx, utils.UnexpandedMinWidth, 0)
-	wailsRuntime.WindowSetSize(a.ctx, utils.UnexpandedMinWidth, height)
+	wailsRuntime.WindowSetMinSize(a.ctx, utils.UnexpandedMin.Width, utils.UnexpandedMin.Height)
+	wailsRuntime.WindowSetMaxSize(a.ctx, utils.UnexpandedMax.Width, utils.UnexpandedMax.Height)
+	wailsRuntime.WindowSetSize(a.ctx, settings.Settings.UnexpandedSize.Width, height)
 	return true
 }
 
