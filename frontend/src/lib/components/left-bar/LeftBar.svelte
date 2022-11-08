@@ -10,7 +10,7 @@
   
   import { addProfile, deleteProfile, importProfile, installs, profiles, canModify, renameProfile, selectedInstall, selectedProfile } from '$lib/store/ficsitCLIStore';
   import { error } from '$lib/store/generalStore';
-  import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
+  import { BrowserOpenURL, EventsOn } from '$wailsjs/runtime/runtime';
   import { OpenFileDialog } from '$wailsjs/go/bindings/App';
 
   import Settings from './Settings.svelte';
@@ -136,6 +136,11 @@
       }
     }
   }
+  EventsOn('externalImportProfile', async (path: string) => {
+    importProfileFilepath = path;
+    importProfileMetadata = await ReadExportedProfileMetadata(importProfileFilepath);
+    importProfileDialog = true;
+  });
 </script>
 
 <div class="flex flex-col h-full p-4 left-bar w-[24rem] min-w-[24rem] ">
@@ -287,7 +292,7 @@
     <Button on:click={() => addProfileDialog = false}>
       <Label>Cancel</Label>
     </Button>
-    <Button on:click={finishAddProfile}>
+    <Button on:click={finishAddProfile} disabled={!newProfileName}>
       <Label>Add</Label>
     </Button>
   </Actions>
@@ -315,7 +320,7 @@
     <Button on:click={() => renameProfileDialog = false}>
       <Label>Cancel</Label>
     </Button>
-    <Button on:click={finishRenameProfile}>
+    <Button on:click={finishRenameProfile} disabled={!renameNewProfileName}>
       <Label>Rename</Label>
     </Button>
   </Actions>
@@ -372,7 +377,7 @@
     <Button on:click={() => importProfileDialog = false}>
       <Label>Cancel</Label>
     </Button>
-    <Button on:click={finishImportProfile}>
+    <Button on:click={finishImportProfile} disabled={!importProfileName || !importProfileFilepath || !!importProfileError}>
       <Label>Import</Label>
     </Button>
   </Actions>

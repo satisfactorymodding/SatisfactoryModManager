@@ -14,10 +14,10 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/satisfactorymodding/SatisfactoryModManager/bindings"
+	"github.com/satisfactorymodding/SatisfactoryModManager/file_scheme_association"
 	"github.com/satisfactorymodding/SatisfactoryModManager/project_file"
 	"github.com/satisfactorymodding/SatisfactoryModManager/settings"
 	"github.com/satisfactorymodding/SatisfactoryModManager/singleinstance"
-	"github.com/satisfactorymodding/SatisfactoryModManager/uri_handler"
 	"github.com/satisfactorymodding/SatisfactoryModManager/utils"
 	"github.com/satisfactorymodding/SatisfactoryModManager/wails_logging"
 	"github.com/satisfactorymodding/SatisfactoryModManager/websocket"
@@ -43,9 +43,14 @@ func main() {
 	}
 	go singleinstance.ListenForSecondInstance()
 
-	err := uri_handler.SetAsDefaultHandler("smmanager")
+	err := file_scheme_association.SetAsDefaultSchemeHandler("smmanager")
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to set as default handler")
+		log.Error().Err(err).Msg("Failed to set as default scheme handler")
+	}
+
+	err = file_scheme_association.SetAsDefaultFileHandler(".smmprofile")
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to set as default file extension handler")
 	}
 
 	go websocket.ListenAndServeWebsocket()

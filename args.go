@@ -19,8 +19,10 @@ func processArguments(args []string) {
 		if err != nil {
 			log.Error().Err(err).Str("uri", uri).Msg("Failed to handle smmanager:// URI")
 		}
-		// TODO make window flash/bring to front
+	} else {
+		handleFile(args[1])
 	}
+	// TODO make window flash/bring to front
 }
 
 func handleURI(uri string) error {
@@ -36,4 +38,13 @@ func handleURI(uri string) error {
 		return nil
 	}
 	return errors.New("unknown URI action " + u.Host)
+}
+
+func handleFile(path string) error {
+	if strings.HasSuffix(path, ".smmprofile") {
+		println(path)
+		bindings.BindingsInstance.App.ExternalImportProfile(path)
+		return nil
+	}
+	return errors.New("unknown file type " + path)
 }

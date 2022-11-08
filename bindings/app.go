@@ -103,3 +103,7 @@ func (a *App) OpenFileDialog(options OpenDialogOptions) (string, error) {
 func (a *App) ExternalInstallMod(modId, version string) {
 	wailsRuntime.EventsEmit(a.ctx, "externalInstallMod", modId, version)
 }
+
+func (a *App) ExternalImportProfile(path string) {
+	wailsRuntime.EventsEmit(a.ctx, "externalImportProfile", path)
+}

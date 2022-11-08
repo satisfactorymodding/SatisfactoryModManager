@@ -1,4 +1,4 @@
-package uri_handler
+package file_scheme_association
 
 import (
 	"os"
