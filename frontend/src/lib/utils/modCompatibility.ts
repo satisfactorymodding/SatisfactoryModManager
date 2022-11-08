@@ -1,6 +1,6 @@
 import { CompatibilityState, ModVersionsCompatibilityDocument, SmlVersionsCompatibilityDocument, type Compatibility, type Mod } from '$lib/generated';
 import type { GameBranch } from '$lib/wailsTypesExtensions';
-import { getClient } from '@urql/svelte';
+import { getContextClient } from '@urql/svelte';
 import { coerce, compare, minVersion, satisfies } from 'semver';
 
 function gameVersionToSemver(version: number): string | null {
@@ -24,7 +24,7 @@ export function getReportedCompatibility(mod: Pick<Mod, 'compatibility'>, gameBr
 }
 
 export async function getVersionCompatibility(modReference: string, gameVersion: number): Promise<Compatibility> {
-  const urqlclient = getClient();
+  const urqlclient = getContextClient();
 
   const smlVersionsQuery = await urqlclient.query(SmlVersionsCompatibilityDocument).toPromise();
   const versions = smlVersionsQuery.data?.getSMLVersions.sml_versions;

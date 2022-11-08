@@ -5,7 +5,9 @@ module.exports = {
   plugins: ['svelte3', '@typescript-eslint'],
   overrides: [{ files: ['*.svelte'], processor: 'svelte3/svelte3' }],
   settings: {
-    'svelte3/typescript': () => require('typescript')
+    'svelte3/typescript': () => require('typescript'),
+    'svelte3/ignore-warnings': ({code}) => 
+      ['a11y-click-events-have-key-events'].includes(code),
   },
   parserOptions: {
     sourceType: 'module',

@@ -1,11 +1,11 @@
 <script lang="ts">
   import Button, { Label } from '@smui/button';
-  import Menu, { type MenuComponentDev, SelectionGroup, SelectionGroupIcon } from '@smui/menu';
+  import Menu, { SelectionGroup, SelectionGroupIcon } from '@smui/menu';
   import List, { Item, PrimaryText, Text, Separator } from '@smui/list';
   
   import { mdiBug, mdiCheck, mdiChevronRight, mdiClipboard, mdiCog, mdiDownload, mdiTune } from '@mdi/js';
   
-  import MdiIcon from '$lib/components/MDIIcon.svelte';
+  import MdiIcon from '$lib/components/SVGIcon.svelte';
   
   import { GenerateDebugInfo } from '$wailsjs/go/bindings/DebugInfo';
   
@@ -13,11 +13,11 @@
   import { manifestMods, lockfileMods } from '$lib/store/ficsitCLIStore';
   import { GetModNameDocument } from '$lib/generated';
   
-  import { getClient } from '@urql/svelte';
+  import { getContextClient } from '@urql/svelte';
   import type { LaunchButtonType, ViewType } from '$lib/wailsTypesExtensions';
 
-  let settingsMenu: MenuComponentDev;
-  let startViewMenu: MenuComponentDev;
+  let settingsMenu: Menu;
+  let startViewMenu: Menu;
 
   let views: {id: ViewType, name: string}[] = [
     {
@@ -30,7 +30,7 @@
     },
   ];
 
-  let queueModeMenu: MenuComponentDev;
+  let queueModeMenu: Menu;
 
   let queueModes: {id: boolean, name: string}[] = [
     {
@@ -43,7 +43,7 @@
     },
   ];
 
-  let launchButtonMenu: MenuComponentDev;
+  let launchButtonMenu: Menu;
 
   let launchButtons: {id: LaunchButtonType, name: string}[] = [
     {
@@ -60,7 +60,7 @@
     }
   ];
   
-  const urqlClient = getClient();
+  const urqlClient = getContextClient();
 
   async function copyModList() {
     // Generate mod entries

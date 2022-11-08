@@ -5,14 +5,14 @@
   import { isLaunchingGame } from '$lib/store/generalStore';
   import { LaunchGame } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
   import Button, { Label } from '@smui/button';
-  import { getClient } from '@urql/svelte';
+  import { getContextClient } from '@urql/svelte';
   import { CompatibilityState, ModReportedCompatibilityDocument, type Compatibility } from '$lib/generated';
   import { getReportedCompatibility, getVersionCompatibility } from '$lib/utils/modCompatibility';
   import type { GameBranch } from '$lib/wailsTypesExtensions';
   import { mdiCheckCircleOutline, mdiOpenInNew } from '@mdi/js';
-  import MDIIcon from '$lib/components/MDIIcon.svelte';
+  import MDIIcon from '$lib/components/SVGIcon.svelte';
 
-  const client = getClient();
+  const client = getContextClient();
 
   let reportedCompatibilities: Record<string, Compatibility | undefined> = {};
   $: {
@@ -102,7 +102,7 @@
         <MDIIcon icon={ mdiCheckCircleOutline }/>
       </Button>
     {:else if $launchButton === 'normal' || $isGameRunning || $isLaunchingGame }
-      <Button variant="unelevated" class="h-12 w-full launch-game {launchButtonColor}" disabled={$progress || $isGameRunning || $isLaunchingGame} on:click={() => launchGame()}>
+      <Button variant="unelevated" class="h-12 w-full launch-game {launchButtonColor}" disabled={!!$progress || $isGameRunning || $isLaunchingGame} on:click={() => launchGame()}>
         <Label>Play Satisfactory</Label>
         <div class="grow" />
         <MDIIcon icon={ mdiOpenInNew }/>

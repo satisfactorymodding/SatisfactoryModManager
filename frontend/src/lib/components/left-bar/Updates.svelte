@@ -1,6 +1,6 @@
 <script lang="ts">
   import Button, { Label } from '@smui/button';
-  import MdiIcon from '$lib/components/MDIIcon.svelte';
+  import MdiIcon from '$lib/components/SVGIcon.svelte';
   import { mdiCheckCircle, mdiSync, mdiUpload } from '@mdi/js';
 
   import { checkForUpdates, canModify, progress, updates, updateCheckInProgress } from '$lib/store/ficsitCLIStore';
@@ -61,7 +61,7 @@
   <div class="grow" />
   <MdiIcon icon={mdiCheckCircle} class="h-5" />
 </Button>
-<Button variant="unelevated" class="w-full mt-2" on:click={checkForUpdates} disabled={$progress || $updateCheckInProgress}>
+<Button variant="unelevated" class="w-full mt-2" on:click={checkForUpdates} disabled={!!$progress || $updateCheckInProgress}>
   <Label>
     Check for updates
   </Label>

@@ -4,8 +4,9 @@
   import Dialog, { Title, Content, Actions } from '@smui/dialog';
   import TextField from '@smui/textfield'; 
 
-  import { mdiCheckCircle, mdiCloseCircle, mdiDiscord, mdiDownload, mdiGithub, mdiHelpCircle, mdiPencil, mdiPlusCircle, mdiTrashCan, mdiUpload, mdiWeb } from '@mdi/js';
-  import MdiIcon from '$lib/components/MDIIcon.svelte';
+  import { mdiCheckCircle, mdiCloseCircle, mdiDownload, mdiHelpCircle, mdiPencil, mdiPlusCircle, mdiTrashCan, mdiUpload, mdiWeb } from '@mdi/js';
+  import { siDiscord, siGithub } from 'simple-icons/icons';
+  import MdiIcon from '$lib/components/SVGIcon.svelte';
   
   import { addProfile, deleteProfile, importProfile, installs, profiles, canModify, renameProfile, selectedInstall, selectedProfile } from '$lib/store/ficsitCLIStore';
   import { error } from '$lib/store/generalStore';
@@ -256,14 +257,14 @@
         Satisfactory Modding Discord
       </Label>
       <div class="grow" />
-      <MdiIcon icon={mdiDiscord} class="h-5" />
+      <MdiIcon icon={siDiscord.path} class="h-5" />
     </Button>
     <Button variant="unelevated" class="w-full mt-2" on:click={() => BrowserOpenURL('https://github.com/satisfactorymodding/SatisfactoryModManager')} >
       <Label>
         SMM GitHub
       </Label>
       <div class="grow" />
-      <MdiIcon icon={mdiGithub} class="h-5" />
+      <MdiIcon icon={siGithub.path} class="h-5" />
     </Button>
   </div>
   <div class="grow"/>
@@ -360,7 +361,6 @@
       label="Profile file"
       class="w-full"
       input$readonly
-      error
       on:click={() => pickImportProfileFile()}
     >
       <HelperText validationMsg slot="helper">

@@ -1,18 +1,18 @@
 <script lang="ts">
-  import { operationStore, query } from '@urql/svelte';
+  import { getContextClient, queryStore } from '@urql/svelte';
   import { CompatibilityState, GetModDetailsDocument, type Compatibility } from '$lib/generated';
   import { markdown } from '$lib/utils/markdown';
   import Button, { Label } from '@smui/button';
   import Checkbox from '@smui/checkbox';
-  import MDIIcon from '$lib/components/MDIIcon.svelte';
+  import MDIIcon from '$lib/components/SVGIcon.svelte';
   import { mdiCheck, mdiChevronDown, mdiImport, mdiRocketLaunch, mdiTestTube } from '@mdi/js';
-  import Menu, { type MenuComponentDev } from '@smui/menu';
+  import Menu from '@smui/menu';
   import List, { Item, PrimaryText, SecondaryText, Separator, Text } from '@smui/list';
   import { bytesToAppropriate } from '$lib/utils/dataFormats';
   import { canModify, lockfileMods, manifestMods, progress } from '$lib/store/ficsitCLIStore';
   import { error } from '$lib/store/generalStore';
   import { search } from '$lib/store/modFiltersStore';
-  import MdiIcon from '$lib/components/MDIIcon.svelte';
+  import MdiIcon from '$lib/components/SVGIcon.svelte';
   import { InstallModVersion } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
   import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
   import Dialog from '@smui/dialog';
@@ -24,18 +24,18 @@
   import { minVersion, valid, validRange, sort, coerce, SemVer } from 'semver';
   import Tooltip, { Wrapper } from '@smui/tooltip';
 
-  const modQuery = operationStore(
-    GetModDetailsDocument,
-    { modReference: '' }
-  );
-  
-  $: if($expandedMod) {
-    modQuery.variables = {
-      modReference: $expandedMod
-    };
-  }
+  const client = getContextClient();
 
-  query(modQuery);
+  $: modQuery = queryStore(
+    {
+      query: GetModDetailsDocument,
+      client,
+      pause: !$expandedMod,
+      variables: {
+        modReference: $expandedMod ?? '',
+      }
+    }
+  );
 
   $: mod = $modQuery.fetching ? null : $modQuery.data?.mod;
 
@@ -93,9 +93,9 @@
 
   $: compatibility = reportedCompatibility ?? versionCompatibility;
 
-  let authorsMenu: MenuComponentDev;
+  let authorsMenu: Menu;
 
-  let versionsMenu: MenuComponentDev;
+  let versionsMenu: Menu;
 
   $: manifestVersion = mod && $manifestMods[mod.mod_reference]?.version;
   async function installVersion(version: string | null) {
@@ -152,7 +152,7 @@
 </script>
 
 <div class="h-full flex mods-details">
-  <div class="w-64 px-4 py-4 flex flex-col w-full h-full mods-details" style="border-right-color: rgba(239, 239, 239, 0.12);">
+  <div class="w-64 px-4 py-4 flex flex-col h-full mods-details" style="border-right-color: rgba(239, 239, 239, 0.12);">
     <img src={renderedLogo} alt="{mod?.name} Logo" class="logo w-full" />
     <span class="pt-4 font-bold text-lg">{mod?.name ?? 'Loading...'}</span>
     <span class="pt-2 font-light">A mod by:</span>
@@ -199,7 +199,7 @@
               </Tooltip>
             </Wrapper>
             <Wrapper>
-              <MdiIcon icon={mdiTestTube} class="{colorForCompatibilityState(mod.compatibility.EXP.state)} -ml-1" />
+              <MdiIcon icon={mdiTestTube} class="{colorForCompatibilityState(mod.compatibility.EXP.state)}" />
               <Tooltip surface$class="max-w-lg text-base">
                 This mod has been reported as {mod.compatibility.EXP.state} on Experimental.
                 {#if mod.compatibility.EXP.note}
@@ -251,7 +251,7 @@
                 </Text>
                 <div on:click|stopPropagation={() => installVersion(`>=${version.version}`)}>
                   <Checkbox 
-                    input$onclick="return false;"
+                    input$onclick={() => false}
                     checked={!!manifestVersion && !!validRange(manifestVersion) && !valid(manifestVersion) && minVersion(manifestVersion)?.format() === version.version}
                   />
                 </div>
@@ -302,7 +302,7 @@
   bind:open={imageViewDialog}
   surface$style="max-height: calc(100vh - 128px); max-width: calc(100vw - 128px);"
 >
-  <img src={imageViewSrc} alt="Dialog" />
+  <img src={imageViewSrc} alt="Dialog" style="max-height: calc(100vh - 128px); max-width: calc(100vw - 128px);"/>
 </Dialog>
 
 <style>

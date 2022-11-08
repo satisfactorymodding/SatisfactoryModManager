@@ -4,7 +4,19 @@ import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [svelte({hot: true})],
+  plugins: [
+    svelte({
+      hot: true,
+      onwarn: (warning, defaultHandler) => {
+        if (warning.code === 'a11y-click-events-have-key-events') {
+          return;
+        }
+        if (defaultHandler) {
+          defaultHandler(warning);
+        }
+      },
+    })
+  ],
   optimizeDeps: {
     exclude: ['@urql/svelte'],
   },
@@ -17,5 +29,9 @@ export default defineConfig({
   },
   build: {
     outDir: 'build'
+  },
+  server: {
+    port: 3000,
+    strictPort: true,
   }
 });

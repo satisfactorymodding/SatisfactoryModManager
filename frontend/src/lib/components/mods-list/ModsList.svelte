@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getClient } from '@urql/svelte';
+  import { getContextClient } from '@urql/svelte';
   import { GetModsDocument, GetModCountDocument } from '$lib/generated';
   import VirtualList from '$lib/components/mods-list/VirtualModList.svelte';
   import ModsListItem from '$lib/components/mods-list/ModsListItem.svelte';
@@ -15,10 +15,10 @@
 
   const MODS_PER_PAGE = 50;
 
-  const urqlClient = getClient();
+  const urqlClient = getContextClient();
 
   async function fetchAllMods() {
-    const result = await urqlClient.query(GetModCountDocument).toPromise();
+    const result = await urqlClient.query(GetModCountDocument, {}).toPromise();
     const count = result.data?.getMods.count;
     if (count) {
       const pages = Math.ceil(count / MODS_PER_PAGE);

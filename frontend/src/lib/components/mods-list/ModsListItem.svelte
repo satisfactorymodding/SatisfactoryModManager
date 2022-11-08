@@ -1,6 +1,6 @@
 <script lang="ts">
   import { mdiDownload, mdiEye, mdiStar, mdiCheckCircle, mdiPlay, mdiPause, mdiTrashCan, mdiTrayFull, mdiTrayMinus } from '@mdi/js';
-  import MDIIcon from '$lib/components/MDIIcon.svelte';
+  import MDIIcon from '$lib/components/SVGIcon.svelte';
   import { createEventDispatcher } from 'svelte';
   import { search, type PartialMod } from '$lib/store/modFiltersStore';
   import Button, { Group, GroupItem, Label } from '@smui/button';
@@ -228,10 +228,10 @@
             </div>
             <div class="flex h-5">
               <div class="w-24 flex">
-                <div class="pr-1 inline-flex items-center justify-items-center"><MDIIcon icon={mdiEye}/></div>{mod.views.toLocaleString()}
+                <div class="pr-1 inline-flex items-center justify-items-center"><MDIIcon icon={mdiEye} class=""/></div>{mod.views.toLocaleString()}
               </div>
               <div class="w-24 flex">
-                <div class="pr-1 inline-flex items-center justify-items-center"><MDIIcon icon={mdiDownload}/></div>{mod.downloads.toLocaleString()}
+                <div class="pr-1 inline-flex items-center justify-items-center"><MDIIcon icon={mdiDownload} class=""/></div>{mod.downloads.toLocaleString()}
               </div>
             </div>
           </div>

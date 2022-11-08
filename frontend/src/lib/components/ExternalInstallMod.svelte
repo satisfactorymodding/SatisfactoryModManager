@@ -6,28 +6,28 @@
   import Button from '@smui/button';
   import { Actions, Content } from '@smui/dialog';
   import Dialog from '@smui/dialog/src/Dialog.svelte';
-  import { operationStore, query } from '@urql/svelte';
+  import { getContextClient, queryStore } from '@urql/svelte';
 
   let modId: string | undefined;
   let version: string | undefined;
 
-  const modQuery = operationStore(
-    GetModSummaryDocument,
-    { modReference: '' }
+  const client = getContextClient();
+
+  $: modQuery = queryStore(
+    {
+      query: GetModSummaryDocument,
+      client,
+      pause: !modId,
+      variables: {
+        modReference: modId ?? '',
+      }
+    }
   );
-
-  $: if(modId) {
-    modQuery.variables = {
-      modReference: modId
-    };
-  }
-
-  query(modQuery);
 
   $: mod = $modQuery.fetching ? null : $modQuery.data?.mod;
   
   $: queued = $queuedMods.some((q) => q.mod === modId);
-  $: isInstalled = modId && modId in $manifestMods;
+  $: isInstalled = !!modId && modId in $manifestMods;
 
   EventsOn('externalInstallMod', (m: string, v: string) => {
     modId = m ? m : undefined;
