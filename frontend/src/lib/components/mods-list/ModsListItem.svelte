@@ -1,6 +1,6 @@
 <script lang="ts">
   import { mdiDownload, mdiEye, mdiStar, mdiCheckCircle, mdiPlay, mdiPause, mdiTrashCan, mdiTrayFull, mdiTrayMinus, mdiSync } from '@mdi/js';
-  import MDIIcon from '$lib/components/SVGIcon.svelte';
+  import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { createEventDispatcher } from 'svelte';
   import { search, type PartialMod } from '$lib/store/modFiltersStore';
   import Button from '@smui/button';
@@ -215,10 +215,10 @@
             </div>
             <div class="flex h-5 md:h-4.5">
               <div class="w-24 flex items-center">
-                <div class="pr-1 inline-flex items-center justify-items-center lg:w-7 w-6"><MDIIcon icon={mdiEye} class=""/></div><span>{mod.views.toLocaleString()}</span>
+                <div class="pr-1 inline-flex items-center justify-items-center lg:w-7 w-6"><SvgIcon icon={mdiEye} class=""/></div><span>{mod.views.toLocaleString()}</span>
               </div>
               <div class="w-24 flex items-center">
-                <div class="pr-1 inline-flex items-center justify-items-center lg:w-7 w-6"><MDIIcon icon={mdiDownload} class=""/></div><span>{mod.downloads.toLocaleString()}</span>
+                <div class="pr-1 inline-flex items-center justify-items-center lg:w-7 w-6"><SvgIcon icon={mdiDownload} class=""/></div><span>{mod.downloads.toLocaleString()}</span>
               </div>
             </div>
           </div>
@@ -238,7 +238,7 @@
           variant="text"
           class="min-w-0 w-12 h-12 mod-enable-button {isEnabled || queued ? 'enabled' : ''} "
         >
-          <MDIIcon icon={ isEnableButtonHovered ? enableButtonIconHover : enableButtonIcon } class="!p-1 !m-0 !w-full !h-full"/>
+          <SvgIcon icon={ isEnableButtonHovered ? enableButtonIconHover : enableButtonIcon } class="!p-1 !m-0 !w-full !h-full"/>
         </Button>
       {:else}
         <div class="min-w-0 w-12 h-12"/>
@@ -252,7 +252,7 @@
         ripple={false}
         class="min-w-0 w-12 h-12 mod-install-button {isInstalled || queued ? 'installed' : ''}"
       >
-        <MDIIcon icon={ isInstallButtonHovered ? installButtonIconHover : installButtonIcon } class="!p-1 !m-0 !w-full !h-full"/>
+        <SvgIcon icon={ isInstallButtonHovered ? installButtonIconHover : installButtonIcon } class="!p-1 !m-0 !w-full !h-full"/>
       </Button>
       <Button
         on:click={toggleModFavourite}
@@ -260,7 +260,7 @@
         ripple={false}
         class="min-w-0 w-12 h-12 mod-favourite-button {isFavourite ? 'favourite' : ''}"
       >
-        <MDIIcon icon={ mdiStar } class="!p-1 !m-0 !w-full !h-full"/>
+        <SvgIcon icon={ mdiStar } class="!p-1 !m-0 !w-full !h-full"/>
       </Button>
     </div>
   </div>

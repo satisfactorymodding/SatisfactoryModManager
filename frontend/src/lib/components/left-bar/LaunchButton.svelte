@@ -10,7 +10,7 @@
   import { getReportedCompatibility, getVersionCompatibility } from '$lib/utils/modCompatibility';
   import type { GameBranch } from '$lib/wailsTypesExtensions';
   import { mdiCheckCircleOutline, mdiOpenInNew } from '@mdi/js';
-  import MDIIcon from '$lib/components/SVGIcon.svelte';
+  import SvgIcon from '$lib/components/SVGIcon.svelte';
 
   const client = getContextClient();
 
@@ -99,13 +99,13 @@
       <Button variant="unelevated" class="h-12 w-full launch-game error" on:click={() => startQueue()}>
         <Label>Apply {$queuedMods.length} changes</Label>
         <div class="grow" />
-        <MDIIcon icon={ mdiCheckCircleOutline }/>
+        <SvgIcon icon={ mdiCheckCircleOutline }/>
       </Button>
     {:else if $launchButton === 'normal' || $isGameRunning || $isLaunchingGame }
       <Button variant="unelevated" class="h-12 w-full launch-game {launchButtonColor}" disabled={!!$progress || $isGameRunning || $isLaunchingGame} on:click={() => launchGame()}>
         <Label>Play Satisfactory</Label>
         <div class="grow" />
-        <MDIIcon icon={ mdiOpenInNew }/>
+        <SvgIcon icon={ mdiOpenInNew }/>
       </Button>
     {:else if $launchButton === 'cat' }
       <div

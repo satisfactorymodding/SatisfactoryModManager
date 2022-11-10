@@ -4,7 +4,7 @@
   import { markdown } from '$lib/utils/markdown';
   import Button, { Label } from '@smui/button';
   import Checkbox from '@smui/checkbox';
-  import MDIIcon from '$lib/components/SVGIcon.svelte';
+  import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { mdiCheck, mdiChevronDown, mdiImport, mdiRocketLaunch, mdiTestTube } from '@mdi/js';
   import Menu from '@smui/menu';
   import List, { Item, PrimaryText, SecondaryText, Separator, Text } from '@smui/list';
@@ -12,7 +12,6 @@
   import { canModify, lockfileMods, manifestMods, progress } from '$lib/store/ficsitCLIStore';
   import { error } from '$lib/store/generalStore';
   import { search } from '$lib/store/modFiltersStore';
-  import MdiIcon from '$lib/components/SVGIcon.svelte';
   import { InstallModVersion } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
   import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
   import Dialog from '@smui/dialog';
@@ -161,7 +160,7 @@
     <div class="pt-2" on:mouseenter={() => authorsMenu.setOpen(true)} on:mouseleave={() => authorsMenu.setOpen(false)}>
       <Button variant="unelevated" color="secondary" class="w-full">
         <Label>Contributors <span class="color-primary">({mod?.authors.length ?? 0})</span></Label>
-        <MDIIcon icon={mdiChevronDown}/>
+        <SvgIcon icon={mdiChevronDown}/>
       </Button>
       <Menu bind:this={authorsMenu} class="w-full max-h-[32rem]" anchorCorner="BOTTOM_LEFT">
         <List>
@@ -190,7 +189,7 @@
         {#if mod?.compatibility}
           <div class="flex pl-1">
             <Wrapper>
-              <MdiIcon icon={mdiRocketLaunch} class="{colorForCompatibilityState(mod.compatibility.EA.state)}" />
+              <SvgIcon icon={mdiRocketLaunch} class="{colorForCompatibilityState(mod.compatibility.EA.state)}" />
               <Tooltip surface$class="max-w-lg text-base">
                 This mod has been reported as {mod.compatibility.EA.state} on Early Access.
                 {#if mod.compatibility.EA.note}
@@ -199,7 +198,7 @@
               </Tooltip>
             </Wrapper>
             <Wrapper>
-              <MdiIcon icon={mdiTestTube} class="{colorForCompatibilityState(mod.compatibility.EXP.state)}" />
+              <SvgIcon icon={mdiTestTube} class="{colorForCompatibilityState(mod.compatibility.EXP.state)}" />
               <Tooltip surface$class="max-w-lg text-base">
                 This mod has been reported as {mod.compatibility.EXP.state} on Experimental.
                 {#if mod.compatibility.EXP.note}
@@ -220,13 +219,13 @@
       <div class="pt-2" on:click={() => $canModify && versionsMenu.setOpen(!versionsMenu.isOpen())}>
         <Button variant="unelevated" color="secondary" class="w-full" disabled={!$canModify}>
           <Label>Change version</Label>
-          <MDIIcon icon={mdiChevronDown}/>
+          <SvgIcon icon={mdiChevronDown}/>
         </Button>
         <Menu bind:this={versionsMenu} class="min-w-[20rem] max-h-[32rem] overflow-x-visible" anchorCorner="TOP_LEFT">
           <List>
             <Item on:SMUI:action={() => installVersion(null)} disabled={!$canModify}>
               {#if manifestVersion === '>=0.0.0'}
-                <MdiIcon icon={mdiCheck} class="h-5" />
+                <SvgIcon icon={mdiCheck} class="h-5 w-5" />
               {:else}
                 <div class="w-7"/>
               {/if}
@@ -238,7 +237,7 @@
               <Separator insetLeading insetTrailing />
               <Item on:SMUI:action={() => installVersion(version.version)} disabled={!$canModify}>
                 {#if manifestVersion && validRange(manifestVersion) && minVersion(manifestVersion)?.format() === version.version }
-                  <MdiIcon icon={mdiCheck} class="h-5" />
+                  <SvgIcon icon={mdiCheck} class="h-5 w-5" />
                 {:else}
                   <div class="w-7"/>
                 {/if}
@@ -260,7 +259,7 @@
                 <Separator insetLeading insetTrailing insetPadding />
                 <Item on:SMUI:action={() => installVersion(`>=${version.version}`)} disabled={!$canModify}>
                   {#if validRange(manifestVersion) && !valid(manifestVersion) && minVersion(manifestVersion)?.format() === version.version}
-                    <MdiIcon icon={mdiCheck} class="h-5" />
+                    <SvgIcon icon={mdiCheck} class="h-5" />
                   {:else}
                     <div class="w-7"/>
                   {/if}
@@ -284,7 +283,7 @@
 
     <Button variant="unelevated" color="secondary" on:click={close}>
       <div class="-scale-x-100">
-        <MDIIcon icon={mdiImport}/>
+        <SvgIcon icon={mdiImport}/>
       </div>
       <Label class="pl-4">Close</Label>
     </Button>

@@ -5,7 +5,7 @@
   
   import { mdiBug, mdiCheck, mdiChevronRight, mdiClipboard, mdiCog, mdiDownload, mdiTune } from '@mdi/js';
   
-  import MdiIcon from '$lib/components/SVGIcon.svelte';
+  import SvgIcon from '$lib/components/SVGIcon.svelte';
   
   import { GenerateDebugInfo } from '$wailsjs/go/bindings/DebugInfo';
   
@@ -106,12 +106,12 @@
       SMM settings
     </Label>
     <div class="grow" />
-    <MdiIcon icon={mdiTune} class="h-5" />
+    <SvgIcon icon={mdiTune} class="h-5 w-5" />
   </Button>
   <Menu bind:this={settingsMenu} class="w-full max-h-[32rem] overflow-visible" anchorCorner="TOP_RIGHT">
     <List>
       <Item nonInteractive>
-        <MdiIcon icon={mdiBug} class="h-5" />
+        <SvgIcon icon={mdiBug} class="h-5 w-5" />
         <!-- <div class="w-7"/> -->
         <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
           <PrimaryText class="text-base">Debug</PrimaryText>
@@ -125,7 +125,7 @@
           <PrimaryText class="text-base">Generate debug info</PrimaryText>
         </Text>
         <div class="grow" />
-        <MdiIcon icon={mdiDownload} class="h-5" />
+        <SvgIcon icon={mdiDownload} class="h-5 w-5" />
       </Item>
       <Separator insetLeading insetTrailing insetPadding />
       <Item on:click={() => copyModList()}>
@@ -134,11 +134,11 @@
           <PrimaryText class="text-base">Copy mods list</PrimaryText>
         </Text>
         <div class="grow" />
-        <MdiIcon icon={mdiClipboard} class="h-5" />
+        <SvgIcon icon={mdiClipboard} class="h-5 w-5" />
       </Item>
       <Separator insetLeading insetTrailing insetPadding />
       <Item nonInteractive>
-        <MdiIcon icon={mdiCog} class="h-5" />
+        <SvgIcon icon={mdiCog} class="h-5 w-5" />
         <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
           <PrimaryText class="text-base">Settings</PrimaryText>
         </Text>
@@ -155,7 +155,7 @@
           <Text class="pr-2 h-full flex flex-col content-center mb-1.5">
             <PrimaryText class="text-base">{queueModes.find((v) => v.id === $queueAutoStart)?.name ?? ''}</PrimaryText>
           </Text>
-          <MdiIcon icon={mdiChevronRight} class="h-5" />
+          <SvgIcon icon={mdiChevronRight} class="h-5 w-5" />
         </Item>
         <Menu bind:this={queueModeMenu} class="w-full max-h-[32rem] overflow-visible" anchorCorner="TOP_RIGHT">
           <List>
@@ -166,7 +166,7 @@
                   selected={$queueAutoStart === queueMode.id}
                 >
                   <SelectionGroupIcon>
-                    <MdiIcon icon={mdiCheck} class="h-5" />
+                    <SvgIcon icon={mdiCheck} class="h-5 w-5" />
                   </SelectionGroupIcon>
                   <Text>{queueMode.name}</Text>
                 </Item>
@@ -186,7 +186,7 @@
           <Text class="pr-2 h-full flex flex-col content-center mb-1.5">
             <PrimaryText class="text-base">{views.find((v) => v.id === $startView)?.name ?? ''}</PrimaryText>
           </Text>
-          <MdiIcon icon={mdiChevronRight} class="h-5" />
+          <SvgIcon icon={mdiChevronRight} class="h-5 w-5" />
         </Item>
         <Menu bind:this={startViewMenu} class="w-full max-h-[32rem] overflow-visible" anchorCorner="TOP_RIGHT">
           <List>
@@ -197,7 +197,7 @@
                   selected={$startView === view.id}
                 >
                   <SelectionGroupIcon>
-                    <MdiIcon icon={mdiCheck} class="h-5" />
+                    <SvgIcon icon={mdiCheck} class="h-5 w-5" />
                   </SelectionGroupIcon>
                   <Text>{view.name}</Text>
                 </Item>
@@ -209,7 +209,7 @@
       {#if $konami}
       <Separator insetLeading insetTrailing insetPadding />
       <Item nonInteractive>
-        <MdiIcon icon={mdiCog} class="h-5" />
+        <SvgIcon icon={mdiCog} class="h-5 w-5" />
         <!-- <div class="w-7"/> -->
         <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
           <PrimaryText class="text-base">Secret settings</PrimaryText>
@@ -227,7 +227,7 @@
           <Text class="pr-2 h-full flex flex-col content-center mb-1.5">
             <PrimaryText class="text-base">{launchButtons.find((l) => l.id === $launchButton)?.name ?? ''}</PrimaryText>
           </Text>
-          <MdiIcon icon={mdiChevronRight} class="h-5" />
+          <SvgIcon icon={mdiChevronRight} class="h-5 w-5" />
         </Item>
         <Menu bind:this={launchButtonMenu} class="w-full max-h-[32rem] overflow-visible" anchorCorner="TOP_RIGHT">
           <List>
@@ -238,7 +238,7 @@
                   selected={$launchButton === launch.id}
                 >
                   <SelectionGroupIcon>
-                    <MdiIcon icon={mdiCheck} class="h-5" />
+                    <SvgIcon icon={mdiCheck} class="h-5 w-5" />
                   </SelectionGroupIcon>
                   <Text>{launch.name}</Text>
                 </Item>

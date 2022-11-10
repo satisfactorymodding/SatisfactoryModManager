@@ -1,5 +1,5 @@
 <script lang="ts">
-  import MDIIcon from './SVGIcon.svelte';
+  import SvgIcon from './SVGIcon.svelte';
   import { mdiWindowMinimize, mdiWindowRestore, mdiWindowMaximize, mdiWindowClose } from '@mdi/js';
   import { Quit, WindowMinimise, WindowToggleMaximise } from '$wailsjs/runtime';
   import { GetVersion } from '$wailsjs/go/bindings/App';
@@ -33,17 +33,17 @@
   </div>
 
   <div class="hover:bg-gray-500 p-1.5 w-11 cursor-default grid justify-center items-center h-full" on:click={minimize}>
-    <MDIIcon icon={mdiWindowMinimize}/>
+    <SvgIcon icon={mdiWindowMinimize}/>
   </div>
   <div class="hover:bg-gray-500 p-1.5 w-11 cursor-default grid justify-center items-center h-full" on:click={toggleMaximize}>
     {#if isMaximized}
-      <MDIIcon icon={mdiWindowRestore}/>
+      <SvgIcon icon={mdiWindowRestore}/>
     {:else}
-      <MDIIcon icon={mdiWindowMaximize}/>
+      <SvgIcon icon={mdiWindowMaximize}/>
     {/if}
   </div>
   <div class="hover:bg-red-600 p-1.5 w-11 cursor-default grid justify-center items-center h-full" on:click={close}>
-    <MDIIcon icon={mdiWindowClose}/>
+    <SvgIcon icon={mdiWindowClose}/>
   </div>
 </div>
 
