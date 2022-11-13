@@ -35,7 +35,21 @@ type SettingsData struct {
 	LaunchButton    string            `json:"launchButton"`
 }
 
-var Settings SettingsData
+var Settings SettingsData = SettingsData{
+	FavouriteMods: []string{},
+	ModFilters: SavedModFilters{
+		Order:  "Last updated",
+		Filter: "Compatible",
+	},
+	UnexpandedSize:  utils.UnexpandedDefault,
+	ExpandedSize:    utils.ExpandedDefault,
+	StartView:       VIEW_COMPACT,
+	QueueAutoStart:  true,
+	SelectedInstall: "",
+	SelectedProfile: map[string]string{},
+	Konami:          false,
+	LaunchButton:    "normal",
+}
 var settingsFileName = "settings.json"
 
 func LoadSettings() error {
@@ -47,22 +61,11 @@ func LoadSettings() error {
 			return errors.Wrap(err, "failed to stat settings file")
 		}
 
-		Settings = SettingsData{
-			FavouriteMods:   []string{},
-			ModFilters:      SavedModFilters{Order: "Last updated", Filter: "Compatible"},
-			UnexpandedSize:  utils.UnexpandedDefault,
-			ExpandedSize:    utils.ExpandedDefault,
-			StartView:       VIEW_COMPACT,
-			SelectedInstall: "",
-			SelectedProfile: map[string]string{},
-		}
 		err = SaveSettings()
 		if err != nil {
 			return errors.Wrap(err, "failed to save default settings")
 		}
 	}
-
-	setDefaults()
 
 	settingsFile, err := os.ReadFile(filepath.Join(viper.GetString("local-dir"), settingsFileName))
 	if err != nil {
@@ -74,18 +77,6 @@ func LoadSettings() error {
 	}
 
 	return nil
-}
-
-func setDefaults() {
-	Settings.FavouriteMods = []string{}
-	Settings.ModFilters.Order = "Last updated"
-	Settings.ModFilters.Filter = "Compatible"
-	Settings.UnexpandedSize = utils.UnexpandedDefault
-	Settings.ExpandedSize = utils.ExpandedDefault
-	Settings.StartView = VIEW_COMPACT
-	Settings.QueueAutoStart = true
-	Settings.SelectedProfile = map[string]string{}
-	Settings.LaunchButton = "normal"
 }
 
 func SaveSettings() error {
