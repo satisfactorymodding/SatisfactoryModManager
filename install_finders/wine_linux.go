@@ -5,20 +5,23 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/pkg/errors"
 )
 
-var EpicManifestsFolder = filepath.Join(os.Getenv("PROGRAMDATA"), "Epic", "EpicGamesLauncher", "Data", "Manifests")
+var epicManifestRelativePath = filepath.Join("Epic", "EpicGamesLauncher", "Data", "Manifests")
 
-func FindInstallationsWindowsEpic() ([]*Installation, []error) {
-	if _, err := os.Stat(EpicManifestsFolder); os.IsNotExist(err) {
-		return nil, []error{errors.New("Epic is not installed")}
+func findInstallationsWineEpic(winePrefix string, launcher string, launchPath []string) ([]*Installation, []error) {
+	wineWindowsRoot := filepath.Join(winePrefix, "dosdevices")
+	epicManifestsPath := filepath.Join(wineWindowsRoot, "c:", "ProgramData", epicManifestRelativePath)
+	if _, err := os.Stat(epicManifestsPath); os.IsNotExist(err) {
+		return nil, []error{errors.New("Epic is not installed in " + winePrefix)}
 	}
 
-	manifests, err := os.ReadDir(EpicManifestsFolder)
+	manifests, err := os.ReadDir(epicManifestsPath)
 	if err != nil {
-		return nil, []error{errors.Wrap(err, "Failed to list Epic manifests")}
+		return nil, []error{errors.Wrap(err, "Failed to list Epic manifests in "+winePrefix)}
 	}
 
 	var installs []*Installation
@@ -26,7 +29,7 @@ func FindInstallationsWindowsEpic() ([]*Installation, []error) {
 
 	for _, manifest := range manifests {
 		manifestName := manifest.Name()
-		manifestPath := filepath.Join(EpicManifestsFolder, manifestName)
+		manifestPath := filepath.Join(epicManifestsPath, manifestName)
 
 		if fileInfo, err := os.Stat(manifestPath); os.IsNotExist(err) || fileInfo.IsDir() {
 			continue
@@ -48,9 +51,14 @@ func FindInstallationsWindowsEpic() ([]*Installation, []error) {
 			continue
 		}
 
+		linuxInstallLocation := strings.ToLower(epicManifest.InstallLocation[0:1]) + strings.ReplaceAll(epicManifest.InstallLocation[1:], "\\", "/")
+		wineInstallLocation := filepath.Join(wineWindowsRoot, linuxInstallLocation)
+
 		gameManifestName := fmt.Sprintf("%s.mancpn", epicManifest.InstallationGuid)
 		gameManifestPath := filepath.Join(epicManifest.ManifestLocation, gameManifestName)
-		gameManifestData, err := os.ReadFile(gameManifestPath)
+		linuxGameManifestPath := strings.ToLower(gameManifestPath[0:1]) + strings.ReplaceAll(gameManifestPath[1:], "\\", "/")
+		wineGameManifestPath := filepath.Join(wineWindowsRoot, linuxGameManifestPath)
+		gameManifestData, err := os.ReadFile(wineGameManifestPath)
 		if err != nil {
 			findErrors = append(findErrors, errors.Wrapf(err, "Failed to read Epic game manifest %s", gameManifestName))
 			continue
@@ -66,7 +74,7 @@ func FindInstallationsWindowsEpic() ([]*Installation, []error) {
 			epicGameManifest.CatalogItemId != epicManifest.CatalogItemId ||
 			epicGameManifest.AppName != epicManifest.MainGameAppName {
 			findErrors = append(findErrors, InstallFindError{
-				Path:  epicManifest.InstallLocation,
+				Path:  wineInstallLocation,
 				Inner: errors.New("Mismatching manifest data"),
 			})
 			continue
@@ -74,7 +82,7 @@ func FindInstallationsWindowsEpic() ([]*Installation, []error) {
 
 		existingIdx := -1
 		for i := range installs {
-			if installs[i].Path == epicManifest.InstallLocation {
+			if installs[i].Path == wineInstallLocation {
 				existingIdx = i
 				break
 			}
@@ -84,10 +92,10 @@ func FindInstallationsWindowsEpic() ([]*Installation, []error) {
 			continue
 		}
 
-		versionFilePath := filepath.Join(epicManifest.InstallLocation, "Engine", "Binaries", "Win64", "FactoryGame-Win64-Shipping.version")
+		versionFilePath := filepath.Join(wineInstallLocation, "Engine", "Binaries", "Win64", "FactoryGame-Win64-Shipping.version")
 		if _, err := os.Stat(versionFilePath); os.IsNotExist(err) {
 			findErrors = append(findErrors, InstallFindError{
-				Path:  epicManifest.InstallLocation,
+				Path:  wineInstallLocation,
 				Inner: errors.Wrap(err, "failed to read game version"),
 			})
 			continue
@@ -112,26 +120,18 @@ func FindInstallationsWindowsEpic() ([]*Installation, []error) {
 			branch = BRANCH_EXPERIMENTAL
 		} else {
 			findErrors = append(findErrors, InstallFindError{
-				Path:  epicManifest.InstallLocation,
+				Path:  wineInstallLocation,
 				Inner: errors.New("Invalid branch " + epicManifest.MainGameAppName),
 			})
 			continue
 		}
 
 		installs = append(installs, &Installation{
-			Path:     epicManifest.InstallLocation,
-			Version:  versionData.Changelist,
-			Branch:   branch,
-			Launcher: "Epic Games",
-			LaunchPath: []string{
-				"cmd",
-				"/C",
-				`start`,
-				``,
-				// The extra space at the end is required for exec to escape the argument with double quotes
-				// Otherwise, the & is interpreted as a command sequence
-				`com.epicgames.launcher://apps/` + epicManifest.MainGameAppName + `?action=launch&silent=true `,
-			},
+			Path:       wineInstallLocation,
+			Version:    versionData.Changelist,
+			Branch:     branch,
+			Launcher:   launcher,
+			LaunchPath: launchPath,
 		})
 	}
 

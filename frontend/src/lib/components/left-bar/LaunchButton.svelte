@@ -12,6 +12,8 @@
   import { mdiCheckCircleOutline, mdiOpenInNew } from '@mdi/js';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
 
+  $: isInstallLaunchable = !$selectedInstall?.info || !!$selectedInstall.info.launchPath;
+
   const client = getContextClient();
 
   let reportedCompatibilities: Record<string, Compatibility | undefined> = {};
@@ -101,6 +103,11 @@
         <div class="grow" />
         <SvgIcon icon={ mdiCheckCircleOutline }/>
       </Button>
+    {:else if !isInstallLaunchable}    
+      <Button variant="unelevated" class="h-12 w-full launch-game bg-grey-500" disabled>
+        <Label>SMM cannot launch this install</Label>
+        <div class="grow" />
+      </Button>
     {:else if $launchButton === 'normal' || $isGameRunning || $isLaunchingGame }
       <Button variant="unelevated" class="h-12 w-full launch-game {launchButtonColor}" disabled={!!$progress || $isGameRunning || $isLaunchingGame} on:click={() => launchGame()}>
         <Label>Play Satisfactory</Label>
@@ -180,6 +187,10 @@
         {/if}
       </ul>
       Are you sure you want to launch?
+    </Tooltip>
+    {:else if !isInstallLaunchable}
+    <Tooltip surface$class="max-w-lg text-base">
+      You can still launch Satisfactory using your game launcher.
     </Tooltip>
     {/if}
 </Wrapper>

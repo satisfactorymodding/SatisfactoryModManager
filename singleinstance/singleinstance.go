@@ -47,7 +47,7 @@ func ListenForSecondInstance() {
 				data = make([]byte, 2*len(data)) // double the size hoping to fit the message
 				continue
 			}
-			if !mq.IsTemporary(err) {
+			if !mq.IsTemporary(err) && err.Error() != "MSGRCV: no message of desired type" {
 				panic(err)
 			}
 		}
