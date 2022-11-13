@@ -46,7 +46,9 @@ func (f *FicsitCLI) initInstallations() error {
 		}
 	}
 
-	f.selectedInstallation = f.installations[0]
+	if len(f.installations) > 0 {
+		f.selectedInstallation = f.installations[0]
+	}
 
 	savedSelectedInstall := settings.Settings.SelectedInstall
 	if savedSelectedInstall != "" {
@@ -66,7 +68,7 @@ func (f *FicsitCLI) GetInstallationsInfo() []*InstallationInfo {
 }
 
 func (f *FicsitCLI) GetInvalidInstalls() []string {
-	var result []string
+	result := []string{}
 	for _, err := range f.installFindErrors {
 		if casted, ok := err.(install_finders.InstallFindError); ok {
 			result = append(result, casted.Path)
