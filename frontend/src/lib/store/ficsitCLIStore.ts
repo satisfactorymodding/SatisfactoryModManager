@@ -1,7 +1,7 @@
 import { get, readable, writable } from 'svelte/store';
 import { cli, ficsitcli_bindings } from '$wailsjs/go/models';
 import { AddProfile, CheckForUpdates, DeleteProfile, GetInstallationsInfo, GetInvalidInstalls, GetProfiles, ImportProfile, RenameProfile, SelectInstall, SetProfile } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
-import { GetFavouriteMods } from '$wailsjs/go/bindings/Settings';
+import { GetFavoriteMods } from '$wailsjs/go/bindings/Settings';
 import { readableBinding, writableBinding } from './wailsStoreBindings';
 import { tick } from 'svelte';
 import { isLaunchingGame } from './generalStore';
@@ -117,7 +117,7 @@ export interface Progress {
 
 export const progress = readableBinding<Progress | null>(null, { updateEvent: 'progress' });
 
-export const favouriteMods = readableBinding<string[]>([], { updateEvent: 'favouriteMods', initialGet: GetFavouriteMods});
+export const favoriteMods = readableBinding<string[]>([], { updateEvent: 'favoriteMods', initialGet: GetFavoriteMods});
 
 export const isGameRunning = readableBinding(false, { updateEvent: 'isGameRunning', allowNull: false });
 

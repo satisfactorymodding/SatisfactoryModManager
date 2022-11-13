@@ -196,14 +196,14 @@ div.mdc-tooltip {
   }
 }
 
-.mod-favourite-button.mdc-button {
-  &:not(.favourite) {
+.mod-favorite-button.mdc-button {
+  &:not(.favorite) {
     @include button.ink-color($white-darker);
     &:hover {
       @include button.ink-color($yellow);
     }
   }
-  &.favourite {
+  &.favorite {
     @include button.ink-color($yellow);
     &:hover {
       @include button.ink-color($white-darker);

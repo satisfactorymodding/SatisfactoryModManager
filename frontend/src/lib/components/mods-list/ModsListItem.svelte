@@ -6,10 +6,10 @@
   import Button from '@smui/button';
   import LinearProgress from '@smui/linear-progress';
   import Tooltip, { Wrapper } from '@smui/tooltip';
-  import { addQueuedModAction, queuedMods, favouriteMods, lockfileMods, manifestMods, progress, selectedInstall, removeQueuedModAction } from '$lib/store/ficsitCLIStore';
+  import { addQueuedModAction, queuedMods, favoriteMods, lockfileMods, manifestMods, progress, selectedInstall, removeQueuedModAction } from '$lib/store/ficsitCLIStore';
   import { error } from '$lib/store/generalStore';
   import { DisableMod, EnableMod, InstallMod, RemoveMod } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
-  import { FavouriteMod, UnFavouriteMod } from '$wailsjs/go/bindings/Settings';
+  import { FavoriteMod, UnFavoriteMod } from '$wailsjs/go/bindings/Settings';
   import { getAuthor } from '$lib/utils/getModAuthor';
   import { getReportedCompatibility, getVersionCompatibility } from '$lib/utils/modCompatibility';
   import type { GameBranch } from '$lib/wailsTypesExtensions';
@@ -94,7 +94,7 @@
   let isInstallButtonHovered = false;
   let isEnableButtonHovered = false;
 
-  $: isFavourite = $favouriteMods.includes(mod.mod_reference);
+  $: isFavorite = $favoriteMods.includes(mod.mod_reference);
 
   let reportedCompatibility: Compatibility | undefined = { state: CompatibilityState.Works };
   let versionCompatibility: Compatibility = { state: CompatibilityState.Works };
@@ -154,12 +154,12 @@
     );
   }
 
-  async function toggleModFavourite() {
+  async function toggleModFavorite() {
     try {
-      if(!isFavourite) {
-        await FavouriteMod(mod.mod_reference);
+      if(!isFavorite) {
+        await FavoriteMod(mod.mod_reference);
       } else {
-        await UnFavouriteMod(mod.mod_reference);
+        await UnFavoriteMod(mod.mod_reference);
       }
     } catch(e) {
       if (e instanceof Error) {
@@ -255,10 +255,10 @@
         <SvgIcon icon={ isInstallButtonHovered ? installButtonIconHover : installButtonIcon } class="!p-1 !m-0 !w-full !h-full"/>
       </Button>
       <Button
-        on:click={toggleModFavourite}
+        on:click={toggleModFavorite}
         variant="text"
         ripple={false}
-        class="min-w-0 w-12 h-12 mod-favourite-button {isFavourite ? 'favourite' : ''}"
+        class="min-w-0 w-12 h-12 mod-favorite-button {isFavorite ? 'favorite' : ''}"
       >
         <SvgIcon icon={ mdiStar } class="!p-1 !m-0 !w-full !h-full"/>
       </Button>

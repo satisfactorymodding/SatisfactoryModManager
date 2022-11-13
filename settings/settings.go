@@ -23,7 +23,7 @@ var (
 )
 
 type SettingsData struct {
-	FavouriteMods   []string          `json:"favouriteMods"`
+	FavoriteMods    []string          `json:"favoriteMods"`
 	ModFilters      SavedModFilters   `json:"modFilters"`
 	UnexpandedSize  utils.Size        `json:"unexpandedSize"`
 	ExpandedSize    utils.Size        `json:"expandedSize"`
@@ -36,7 +36,7 @@ type SettingsData struct {
 }
 
 var Settings SettingsData = SettingsData{
-	FavouriteMods: []string{},
+	FavoriteMods: []string{},
 	ModFilters: SavedModFilters{
 		Order:  "Last updated",
 		Filter: "Compatible",

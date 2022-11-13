@@ -1,5 +1,5 @@
 import { CompatibilityState, type GetModsQuery } from '$lib/generated';
-import { favouriteMods, lockfileMods, manifestMods, queuedMods, selectedInstall } from '$lib/store/ficsitCLIStore';
+import { favoriteMods, lockfileMods, manifestMods, queuedMods, selectedInstall } from '$lib/store/ficsitCLIStore';
 import { get, writable } from 'svelte/store';
 import { writableBindingSync } from './wailsStoreBindings';
 import { GetModFiltersOrder, GetModFiltersFilter, SetModFiltersOrder, SetModFiltersFilter } from '$wailsjs/go/bindings/Settings';
@@ -41,7 +41,7 @@ export const filterOptions: Filter[] = [
       return reportedCompatibility.state !== CompatibilityState.Broken;
     } 
   },
-  { name: 'Favourite', func: (mod: PartialMod) => get(favouriteMods).includes(mod.mod_reference) },
+  { name: 'Favorite', func: (mod: PartialMod) => get(favoriteMods).includes(mod.mod_reference) },
   { name: 'Queued', func: (mod: PartialMod) => get(queuedMods).some((q) => q.mod === mod.mod_reference) },
   { name: 'Installed', func: (mod: PartialMod) => mod.mod_reference in get(manifestMods) },
   { name: 'Dependency', func: (mod: PartialMod) => !(mod.mod_reference in get(manifestMods)) && mod.mod_reference in get(lockfileMods) },

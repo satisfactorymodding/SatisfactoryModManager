@@ -20,9 +20,9 @@ func (s *Settings) startup(ctx context.Context) {
 	s.ctx = ctx
 }
 
-func (s *Settings) FavouriteMod(modReference string) (bool, error) {
+func (s *Settings) FavoriteMod(modReference string) (bool, error) {
 	idx := -1
-	for i, mod := range settings.Settings.FavouriteMods {
+	for i, mod := range settings.Settings.FavoriteMods {
 		if mod == modReference {
 			idx = i
 			break
@@ -31,18 +31,18 @@ func (s *Settings) FavouriteMod(modReference string) (bool, error) {
 	if idx != -1 {
 		return false, nil
 	}
-	settings.Settings.FavouriteMods = append(settings.Settings.FavouriteMods, modReference)
+	settings.Settings.FavoriteMods = append(settings.Settings.FavoriteMods, modReference)
 	err := settings.SaveSettings()
 	if err != nil {
 		return false, err
 	}
-	s.emitFavouriteMods()
+	s.emitFavoriteMods()
 	return true, nil
 }
 
-func (s *Settings) UnFavouriteMod(modReference string) bool {
+func (s *Settings) UnFavoriteMod(modReference string) bool {
 	idx := -1
-	for i, mod := range settings.Settings.FavouriteMods {
+	for i, mod := range settings.Settings.FavoriteMods {
 		if mod == modReference {
 			idx = i
 			break
@@ -51,14 +51,14 @@ func (s *Settings) UnFavouriteMod(modReference string) bool {
 	if idx == -1 {
 		return false
 	}
-	settings.Settings.FavouriteMods = append(settings.Settings.FavouriteMods[:idx], settings.Settings.FavouriteMods[idx+1:]...)
+	settings.Settings.FavoriteMods = append(settings.Settings.FavoriteMods[:idx], settings.Settings.FavoriteMods[idx+1:]...)
 	settings.SaveSettings()
-	s.emitFavouriteMods()
+	s.emitFavoriteMods()
 	return true
 }
 
-func (s *Settings) GetFavouriteMods() []string {
-	return settings.Settings.FavouriteMods
+func (s *Settings) GetFavoriteMods() []string {
+	return settings.Settings.FavoriteMods
 }
 
 func (s *Settings) GetModFiltersOrder() string {
@@ -79,8 +79,8 @@ func (s *Settings) SetModFiltersFilter(filter string) {
 	settings.SaveSettings()
 }
 
-func (s *Settings) emitFavouriteMods() {
-	wailsRuntime.EventsEmit(s.ctx, "favouriteMods", settings.Settings.FavouriteMods)
+func (s *Settings) emitFavoriteMods() {
+	wailsRuntime.EventsEmit(s.ctx, "favoriteMods", settings.Settings.FavoriteMods)
 }
 
 func (s *Settings) GetStartView() settings.View {
