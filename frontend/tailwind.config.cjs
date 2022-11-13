@@ -8,7 +8,7 @@ module.exports = {
       screens: {
         md: { raw: '(min-height: 825px)' },
         lg: { raw: '(min-height: 900px)' },
-        'w-md': { raw: '(min-width: 1400px)' },
+        'w-md': { raw: '(min-width: 1500px)' },
       },
     },
   },

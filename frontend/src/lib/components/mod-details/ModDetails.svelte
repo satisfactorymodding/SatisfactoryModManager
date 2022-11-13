@@ -189,7 +189,7 @@
         {#if mod?.compatibility}
           <div class="flex pl-1">
             <Wrapper>
-              <SvgIcon icon={mdiRocketLaunch} class="{colorForCompatibilityState(mod.compatibility.EA.state)}" />
+              <SvgIcon icon={mdiRocketLaunch} class="{colorForCompatibilityState(mod.compatibility.EA.state)} w-5" />
               <Tooltip surface$class="max-w-lg text-base">
                 This mod has been reported as {mod.compatibility.EA.state} on Early Access.
                 {#if mod.compatibility.EA.note}
@@ -198,7 +198,7 @@
               </Tooltip>
             </Wrapper>
             <Wrapper>
-              <SvgIcon icon={mdiTestTube} class="{colorForCompatibilityState(mod.compatibility.EXP.state)}" />
+              <SvgIcon icon={mdiTestTube} class="{colorForCompatibilityState(mod.compatibility.EXP.state)} w-5" />
               <Tooltip surface$class="max-w-lg text-base">
                 This mod has been reported as {mod.compatibility.EXP.state} on Experimental.
                 {#if mod.compatibility.EXP.note}

@@ -51,7 +51,7 @@
       anchor$class="!items-center w-0"
     >
       <div slot="leadingIcon" class="pl-3 pr-1">
-        <div class="h-5">
+        <div class="h-5 w-5">
           <SvgIcon icon={mdiFilter} />
         </div>
       </div>
@@ -71,7 +71,7 @@
       anchor$class="!items-center w-0"
     >
       <div slot="leadingIcon" class="pl-3 pr-1">
-        <div class="h-5">
+        <div class="h-5 w-5">
           <SvgIcon icon={mdiSort} />
         </div>
       </div>
