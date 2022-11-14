@@ -33,6 +33,7 @@ query GetModDetails($modReference: ModReference!) {
       version
       sml_version
       size
+      changelog
     }
   }
 }

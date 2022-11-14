@@ -9,6 +9,7 @@
   import { UpdateAllMods } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
   import List, { Item, PrimaryText, SecondaryText, Text } from '@smui/list';
   import type { ficsitcli_bindings } from '$wailsjs/go/models';
+  import UpdateChangelog from './UpdateChangelog.svelte';
 
   let updatesDialog = false;
 
@@ -48,6 +49,8 @@
     $updates;
     selectedUpdates = [];
   };
+
+  let changelogUpdate: ficsitcli_bindings.Update | null = null;
 </script>
 
 <Button variant="unelevated" class="w-full mt-2 update-button {$updates.length > 0 ? 'has-update' : ''}" on:click={() => updatesDialog = true}>
@@ -84,12 +87,16 @@
           {#if selectedUpdates.includes(update)}
             <SvgIcon icon={mdiUpload} class="h-5 w-5" />
           {:else}
-            <div class="w-7"/>
+            <div class="w-5"/>
           {/if}
           <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
             <PrimaryText class="text-base">{ update.item }</PrimaryText>
             <SecondaryText>{ update.currentVersion } -> { update.newVersion }</SecondaryText>
           </Text>
+          <div class="grow" />
+          <div on:click|stopPropagation={() => { /* empty */}}>
+            <Button on:click={() => changelogUpdate = update}>Changelog</Button>
+          </div>
         </Item>
       {/each}
     </List>
@@ -103,3 +110,5 @@
     </Button>
   </Actions>
 </Dialog>
+
+<UpdateChangelog bind:update={changelogUpdate} />

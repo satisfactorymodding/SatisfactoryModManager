@@ -1,6 +1,6 @@
 <script lang="ts">
   import { getContextClient, queryStore } from '@urql/svelte';
-  import { CompatibilityState, GetModDetailsDocument, type Compatibility } from '$lib/generated';
+  import { CompatibilityState, GetModDetailsDocument, type Compatibility, type Version } from '$lib/generated';
   import { markdown } from '$lib/utils/markdown';
   import Button, { Label } from '@smui/button';
   import Checkbox from '@smui/checkbox';
@@ -14,7 +14,7 @@
   import { search } from '$lib/store/modFiltersStore';
   import { InstallModVersion } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
   import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
-  import Dialog from '@smui/dialog';
+  import Dialog, { Content, Title } from '@smui/dialog';
   import { getAuthor } from '$lib/utils/getModAuthor';
   import { selectedInstall } from '$lib/store/ficsitCLIStore';
   import { getReportedCompatibility, getVersionCompatibility } from '$lib/utils/modCompatibility';
@@ -95,6 +95,10 @@
   let authorsMenu: Menu;
 
   let versionsMenu: Menu;
+  
+  let changelogsMenu: Menu;
+
+  let changelogVersion: Pick<Version, 'version' | 'changelog'>;
 
   $: manifestVersion = mod && $manifestMods[mod.mod_reference]?.version;
   async function installVersion(version: string | null) {
@@ -216,8 +220,8 @@
     <div class="pt-4">
       <span>Latest version: </span><span class="font-bold">{ latestVersion ?? 'Loading...' }</span><br>
       <span>Installed version: </span><span class="font-bold">{ installedVersion ?? 'Loading...' }</span><br>
-      <div class="pt-2" on:click={() => $canModify && versionsMenu.setOpen(!versionsMenu.isOpen())}>
-        <Button variant="unelevated" color="secondary" class="w-full" disabled={!$canModify}>
+      <div class="pt-2">
+        <Button variant="unelevated" color="secondary" class="w-full" disabled={!$canModify} on:click={() => $canModify && versionsMenu.setOpen(!versionsMenu.isOpen())}>
           <Label>Change version</Label>
           <SvgIcon icon={mdiChevronDown}/>
         </Button>
@@ -272,6 +276,24 @@
           </List>
         </Menu>
       </div>
+      <div class="pt-2">
+        <Button variant="unelevated" color="secondary" class="w-full" disabled={!$canModify} on:click={() => $canModify && changelogsMenu.setOpen(!changelogsMenu.isOpen())}>
+          <Label>Changelogs</Label>
+          <SvgIcon icon={mdiChevronDown}/>
+        </Button>
+        <Menu bind:this={changelogsMenu} class="min-w-[10rem] max-h-[32rem] overflow-x-visible" anchorCorner="TOP_LEFT">
+          <List>
+            {#each mod?.versions ?? [] as version}
+              <Item on:SMUI:action={() => { changelogVersion = version; changelogsMenu.setOpen(false); }}>
+                <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
+                  <PrimaryText class="text-base">{version.version}</PrimaryText>
+                </Text>
+              </Item>
+              <Separator insetLeading insetTrailing />
+            {/each}
+          </List>
+        </Menu>
+      </div>
     </div>
 
     <div class="pt-4">
@@ -302,6 +324,13 @@
   surface$style="max-height: calc(100vh - 128px); max-width: calc(100vw - 128px);"
 >
   <img src={imageViewSrc} alt="Dialog" style="max-height: calc(100vh - 128px); max-width: calc(100vw - 128px);"/>
+</Dialog>
+
+<Dialog open={!!changelogVersion}>
+  <Title>{mod?.name} v{changelogVersion?.version}</Title>
+  <Content>
+    {changelogVersion?.changelog}
+  </Content>
 </Dialog>
 
 <style>

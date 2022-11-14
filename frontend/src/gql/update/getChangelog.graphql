@@ -1,0 +1,10 @@
+query GetChangelog($modReference: ModReference!) {
+  getModByReference(modReference: $modReference) {
+    id
+    versions {
+      id
+      version
+      changelog
+    }
+  }
+}
