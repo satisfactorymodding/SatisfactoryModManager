@@ -1,0 +1,7 @@
+query GetAnnouncements {
+  getAnnouncements {
+    id
+    message
+    importance
+  }
+}

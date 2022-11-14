@@ -45,6 +45,7 @@
     "marked": "^4.2.2",
     "semver": "^7.3.8",
     "simple-icons": "^7.19.0",
+    "svelte-carousel": "^1.0.20",
     "urql": "^3.0.3"
   },
   "devDependencies": {

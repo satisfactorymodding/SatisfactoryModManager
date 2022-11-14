@@ -19,6 +19,7 @@ export default defineConfig({
   ],
   optimizeDeps: {
     exclude: ['@urql/svelte'],
+    include: ['lodash.get', 'lodash.isequal', 'lodash.clonedeep']
   },
   publicDir: 'static',
   resolve: {

@@ -10,6 +10,7 @@
   import { favoriteMods, lockfileMods, manifestMods, queuedMods } from '$lib/store/ficsitCLIStore';
   import { startView } from '$lib/store/settingsStore';
   import { expandedMod } from '$lib/store/generalStore';
+  import AnnouncementsBar from '../announcements/AnnouncementsBar.svelte';
 
   let mods: PartialMod[] = [];
 
@@ -106,6 +107,7 @@
   <div class="flex-none">
     <ModListFilters />
   </div>
+  <AnnouncementsBar />
   <div class="py-4 grow h-0 mods-list" style="position: relative;">
     <div class="ml-5 mr-3 h-full">
       <VirtualList items={displayMods} let:item={mod}>
