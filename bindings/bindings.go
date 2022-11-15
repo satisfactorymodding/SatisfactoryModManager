@@ -8,6 +8,7 @@ import (
 
 type Bindings struct {
 	App       *App
+	Update    *Update
 	FicsitCLI *ficsitcli_bindings.FicsitCLI
 	settings  *Settings
 	debugInfo *DebugInfo
@@ -20,19 +21,17 @@ func MakeBindings() (*Bindings, error) {
 		return BindingsInstance, nil
 	}
 
-	app := MakeApp()
 	ficsitCLI, err := ficsitcli_bindings.MakeFicsitCLI()
 	if err != nil {
 		return nil, err
 	}
-	settings := MakeSettings()
-	debugInfo := MakeDebugInfo()
 
 	BindingsInstance = &Bindings{
-		App:       app,
+		App:       MakeApp(),
+		Update:    MakeUpdate(),
 		FicsitCLI: ficsitCLI,
-		settings:  settings,
-		debugInfo: debugInfo,
+		settings:  MakeSettings(),
+		debugInfo: MakeDebugInfo(),
 	}
 
 	return BindingsInstance, nil
@@ -40,6 +39,7 @@ func MakeBindings() (*Bindings, error) {
 
 func (b *Bindings) Startup(ctx context.Context) {
 	b.App.startup(ctx)
+	b.Update.startup(ctx)
 	b.FicsitCLI.Startup(ctx)
 	b.settings.startup(ctx)
 	b.debugInfo.startup(ctx)
@@ -48,6 +48,7 @@ func (b *Bindings) Startup(ctx context.Context) {
 func (b *Bindings) GetBindings() []interface{} {
 	return []interface{}{
 		b.App,
+		b.Update,
 		b.FicsitCLI,
 		b.settings,
 		b.debugInfo,

@@ -13,6 +13,7 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/satisfactorymodding/SatisfactoryModManager/autoupdate"
 	"github.com/satisfactorymodding/SatisfactoryModManager/bindings"
 	"github.com/satisfactorymodding/SatisfactoryModManager/file_scheme_association"
 	"github.com/satisfactorymodding/SatisfactoryModManager/project_file"
@@ -38,6 +39,17 @@ func main() {
 	if !singleinstance.RequestSingleInstanceLock() {
 		return
 	}
+
+	autoupdate.Init(autoupdate.AutoUpdateConfig{
+		UpdateFoundCallback: func(latestVersion string, changelogs map[string]string) {
+			bindings.BindingsInstance.Update.UpdateAvailable(latestVersion, changelogs)
+		},
+		DownloadProgressCallback: func(bytesDownloaded, totalBytes int64) {
+			bindings.BindingsInstance.Update.UpdateDownloadProgress(bytesDownloaded, totalBytes)
+		},
+		UpdateReadyCallback: func() { bindings.BindingsInstance.Update.UpdateReady() },
+	})
+
 	singleinstance.OnSecondInstance = func(args []string) {
 		processArguments(args)
 	}
@@ -54,11 +66,6 @@ func main() {
 	}
 
 	go websocket.ListenAndServeWebsocket()
-
-	err = loadProjectFile()
-	if err != nil {
-		panic(err)
-	}
 
 	err = settings.LoadSettings()
 	if err != nil {
@@ -84,17 +91,28 @@ func main() {
 		OnStartup: b.Startup,
 		OnDomReady: func(ctx context.Context) {
 			processArguments(os.Args)
+			autoupdate.CheckInterval(5 * time.Minute)
 		},
 		Bind:   b.GetBindings(),
 		Logger: wails_logging.WailsZeroLogLogger{},
 	})
 
 	if err != nil {
-		println("Error:", err)
+		log.Error().Err(err).Msg("Failed to start application")
+	}
+
+	err = autoupdate.OnExit(bindings.BindingsInstance.Update.Restart)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to apply update on exit")
 	}
 }
 
 func init() {
+	err := loadProjectFile()
+	if err != nil {
+		panic(err)
+	}
+
 	// general config
 
 	var baseLocalDir string
@@ -124,6 +142,9 @@ func init() {
 	viper.Set("local-dir", localDir)
 
 	viper.Set("websocket-port", 33642)
+
+	viper.Set("version", project_file.ProjectFile.Info.ProductVersion)
+	viper.Set("github-release-repo", "satisfactorymodding/SatisfactoryModManager")
 
 	// ficsit-cli config
 	viper.Set("profiles-file", "profiles.json")

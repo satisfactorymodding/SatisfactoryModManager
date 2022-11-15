@@ -10,6 +10,9 @@
   import List, { Item, PrimaryText, SecondaryText, Text } from '@smui/list';
   import type { ficsitcli_bindings } from '$wailsjs/go/models';
   import UpdateChangelog from './UpdateChangelog.svelte';
+  import SMMUpdateDialog from './SMMUpdateDialog.svelte';
+  import { CheckForUpdates as CheckForSMMUpdates } from '$wailsjs/go/bindings/Update';
+  import { smmUpdate, smmUpdateReady } from '$lib/store/smmUpdateStore';
 
   let updatesDialog = false;
 
@@ -51,20 +54,39 @@
   };
 
   let changelogUpdate: ficsitcli_bindings.Update | null = null;
+
+  function checkForAllUpdates() {
+    checkForUpdates();
+    if(!$smmUpdate || $smmUpdateReady) {
+      CheckForSMMUpdates();
+    }
+  }
+
+  let smmUpdateDialog: SMMUpdateDialog;
+
+  function showUpdateDialog() {
+    if($smmUpdate) {
+      smmUpdateDialog.show();
+    } else {
+      updatesDialog = true;
+    }
+  }
 </script>
 
-<Button variant="unelevated" class="w-full mt-2 update-button {$updates.length > 0 ? 'has-update' : ''}" on:click={() => updatesDialog = true}>
+<Button variant="unelevated" class="w-full mt-2 update-button {$smmUpdate || $updates.length > 0 ? 'has-update' : ''}" on:click={() => showUpdateDialog()}>
   <Label>
-    {#if $updates.length === 0}
-      No updates right now
-    {:else}
+    {#if $smmUpdate}
+      SMM update available
+    {:else if $updates.length > 0}
       {$updates.length} updates available
+    {:else}
+      No updates right now
     {/if}
   </Label>
   <div class="grow" />
   <SvgIcon icon={mdiCheckCircle} class="h-5 w-5" />
 </Button>
-<Button variant="unelevated" class="w-full mt-2" on:click={checkForUpdates} disabled={!!$progress || $updateCheckInProgress}>
+<Button variant="unelevated" class="w-full mt-2" on:click={checkForAllUpdates} disabled={!!$progress || $updateCheckInProgress}>
   <Label>
     Check for updates
   </Label>
@@ -112,3 +134,5 @@
 </Dialog>
 
 <UpdateChangelog bind:update={changelogUpdate} />
+
+<SMMUpdateDialog bind:this={smmUpdateDialog} />

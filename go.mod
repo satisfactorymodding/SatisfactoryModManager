@@ -4,8 +4,10 @@ go 1.18
 
 require (
 	bitbucket.org/avd/go-ipc v0.6.1
+	github.com/Masterminds/semver/v3 v3.1.1
 	github.com/andygrunwald/vdf v1.0.1-0.20220412055542-fff83b263c6b
 	github.com/juju/fslock v0.0.0-20160525022230-4d5c94c67b4b
+	github.com/minio/selfupdate v0.5.0
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.28.0
@@ -20,7 +22,6 @@ require (
 
 require (
 	github.com/Khan/genqlient v0.5.0 // indirect
-	github.com/Masterminds/semver/v3 v3.1.1 // indirect
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/bep/debounce v1.2.1 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
