@@ -22,7 +22,7 @@ func processArguments(args []string) {
 	} else {
 		handleFile(args[1])
 	}
-	// TODO make window flash/bring to front
+	bindings.BindingsInstance.App.Show()
 }
 
 func handleURI(uri string) error {

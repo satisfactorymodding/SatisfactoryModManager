@@ -124,3 +124,7 @@ func (a *App) ExternalInstallMod(modId, version string) {
 func (a *App) ExternalImportProfile(path string) {
 	wailsRuntime.EventsEmit(a.ctx, "externalImportProfile", path)
 }
+
+func (a *App) Show() {
+	wailsRuntime.Show(a.ctx)
+}
