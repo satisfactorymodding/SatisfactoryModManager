@@ -21,10 +21,10 @@
   })();
 </script>
 
-<div class="announcement-{importanceLower} announcement-bg p-1.5" class:announcement-new={isNew}>
-  <div class="flex items-center announcement-bg-text p-1">
-    <SvgIcon icon={icon} class="w-8 h-8 mr-3" />
-    <div class="grow truncate text-xl">
+<div class="announcement-{importanceLower} announcement-bg p-1.5 h-full" class:announcement-new={isNew}>
+  <div class="flex items-center announcement-bg-text p-1 h-full">
+    <SvgIcon icon={icon} class="w-8 h-8 mr-3 shrink-0" />
+    <div class="grow wrap text-lg">
       {announcement.message}
     </div>
   </div>
