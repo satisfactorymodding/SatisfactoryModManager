@@ -69,12 +69,12 @@ func main() {
 
 	err = settings.LoadSettings()
 	if err != nil {
-		panic(err)
+		log.Fatal().Err(err).Msg("Failed to load settings")
 	}
 
 	b, err := bindings.MakeBindings()
 	if err != nil {
-		panic(err)
+		log.Fatal().Err(err).Msg("Failed to create bindings")
 	}
 
 	// Create application with options
@@ -123,7 +123,7 @@ func init() {
 	case "linux":
 		baseLocalDir = path.Join(os.Getenv("HOME"), ".local", "share")
 	default:
-		panic("unsupported platform: " + runtime.GOOS)
+		log.Fatal().Str("os", runtime.GOOS).Msg("Unsupported OS")
 	}
 
 	viper.Set("base-local-dir", baseLocalDir)

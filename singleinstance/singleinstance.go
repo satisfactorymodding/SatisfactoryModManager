@@ -9,6 +9,7 @@ import (
 
 	"bitbucket.org/avd/go-ipc/mq"
 	"github.com/juju/fslock"
+	"github.com/rs/zerolog/log"
 )
 
 // Similar behaviour to electron's requestSingleInstanceLock.
@@ -20,7 +21,7 @@ func RequestSingleInstanceLock() bool {
 	if err != nil {
 		err = sendArgs()
 		if err != nil {
-			panic(err)
+			log.Fatal().Err(err).Msg("Failed to send arguments to first instance")
 		}
 		return false
 	}
@@ -36,7 +37,7 @@ func ListenForSecondInstance() {
 	mq.Destroy("SatisfactoryModManager")
 	messageQueue, err := mq.New("SatisfactoryModManager", os.O_CREATE|mq.O_NONBLOCK, 0666)
 	if err != nil {
-		panic(err)
+		log.Fatal().Err(err).Msg("Failed to create message queue")
 	}
 	data := make([]byte, 512)
 	listening = true
@@ -48,7 +49,7 @@ func ListenForSecondInstance() {
 				continue
 			}
 			if !mq.IsTemporary(err) && err.Error() != "MSGRCV: no message of desired type" {
-				panic(err)
+				log.Error().Err(err).Msg("Failed to receive message")
 			}
 		}
 		if l > 0 {
@@ -56,7 +57,7 @@ func ListenForSecondInstance() {
 			var args []string
 			err := json.Unmarshal(trimmedData, &args)
 			if err != nil {
-				panic(err)
+				log.Error().Err(err).Msg("Failed to unmarshal arguments")
 			}
 			OnSecondInstance(args)
 		}
