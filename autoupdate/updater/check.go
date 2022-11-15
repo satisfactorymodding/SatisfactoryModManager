@@ -25,19 +25,19 @@ func (u *Updater) CheckForUpdate() error {
 
 	latestSemver, err := semver.NewVersion(latestVersion)
 	if err != nil {
-		return errors.Wrap(err, "failed to parse latest version")
+		return errors.Wrapf(err, "failed to parse latest version %s", latestVersion)
 	}
 
 	var pendingSemver *semver.Version
 	if u.PendingUpdate != nil {
 		pendingSemver, err = semver.NewVersion(u.PendingUpdate.Version)
 		if err != nil {
-			return errors.Wrap(err, "failed to parse pending version")
+			return errors.Wrapf(err, "failed to parse pending version %s", u.PendingUpdate.Version)
 		}
 	}
 	currentSemver, err := semver.NewVersion(u.config.CurrentVersion)
 	if err != nil {
-		return errors.Wrap(err, "failed to parse current version")
+		return errors.Wrapf(err, "failed to parse current version %s", u.config.CurrentVersion)
 	}
 
 	if pendingSemver != nil {

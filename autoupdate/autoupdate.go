@@ -26,7 +26,13 @@ func Init(config AutoUpdateConfig) {
 	})
 }
 
+var checkStarted bool
+
 func CheckInterval(interval time.Duration) {
+	if checkStarted {
+		return
+	}
+	checkStarted = true
 	updateCheckTicker := time.NewTicker(interval)
 	go func() {
 		err := Updater.CheckForUpdate()
