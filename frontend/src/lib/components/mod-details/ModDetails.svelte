@@ -1,6 +1,6 @@
 <script lang="ts">
   import { getContextClient, queryStore } from '@urql/svelte';
-  import { CompatibilityState, GetModDetailsDocument, type Compatibility, type Version } from '$lib/generated';
+  import { CompatibilityState, GetModDetailsDocument, GetModReferenceDocument, type Compatibility, type Version } from '$lib/generated';
   import { markdown } from '$lib/utils/markdown';
   import Button, { Label } from '@smui/button';
   import Checkbox from '@smui/checkbox';
@@ -132,6 +132,21 @@
 
   function handleElementClick(element: HTMLElement) {
     if(element instanceof HTMLAnchorElement) {
+      const url = new URL(element.href);
+      if(url.hostname === 'ficsit.app' && url.pathname.startsWith('/mod/')) {
+        const modIdOrReference = url.pathname.split('/')[2];
+        if(modIdOrReference) {
+          client.query(GetModReferenceDocument, {
+            modIdOrReference,
+          }).toPromise()
+            .then((result) => {
+              if (result.data?.getModByIdOrReference?.mod_reference) {
+                $expandedMod = result.data.getModByIdOrReference.mod_reference;
+              }
+            });
+        }
+        return true;
+      }
       BrowserOpenURL(element.href);
       return true;
     }
