@@ -7598,10 +7598,10 @@ sass@^1.43.3:
     immutable "^4.0.0"
     source-map-js ">=0.6.2 <2.0.0"
 
-satisfactory-mod-manager-api@^4.0.1:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/satisfactory-mod-manager-api/-/satisfactory-mod-manager-api-4.0.1.tgz#e4ad961a7dc94d7d1273fc9367eebe55263c209c"
-  integrity sha512-AwfVY9rjI+qRpj86Y367vflWSsyQs6LHsLTN1+YsvUCoG2OHstBkVWp1dyyyYgC7Xp84SXs+yADmfDu/btTuGQ==
+satisfactory-mod-manager-api@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/satisfactory-mod-manager-api/-/satisfactory-mod-manager-api-4.0.2.tgz#120ffba9a8c2f12f16e3966477a726ead8610f8a"
+  integrity sha512-4OhKfuumVO3fQM0QaOUslehl/lZYoNocyq2QXQYfu9O6Wcv677bETdyglgVgjyoZvoAEhxUldYQ3FG9hG8PYTw==
   dependencies:
     "@apollo/client" "^3.4.16"
     apollo-link-scalars "^3.0.0"
