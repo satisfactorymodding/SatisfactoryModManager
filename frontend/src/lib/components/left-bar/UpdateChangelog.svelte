@@ -27,7 +27,7 @@
   open={!!update}
   surface$style="width: 500px; max-width: calc(100vw - 32px);"
   class="updates-dialog"
-  >
+>
   <Title>Changelog {update?.item} {update?.currentVersion} -> {update?.newVersion}</Title>
   <Content>
     {#each changelogs as changelog}

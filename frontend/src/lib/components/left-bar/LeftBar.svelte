@@ -108,7 +108,7 @@
             displayName: 'SMM Profile (*.smmprofile)',
             pattern: '*.smmprofile',
           }),
-        ]
+        ],
       }));
       importProfileMetadata = await ReadExportedProfileMetadata(importProfileFilepath);
     } catch (e) {

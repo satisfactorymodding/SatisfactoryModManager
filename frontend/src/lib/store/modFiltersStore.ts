@@ -39,7 +39,7 @@ export const filterOptions: Filter[] = [
         return versionCompatibility.state !== CompatibilityState.Broken;
       }
       return reportedCompatibility.state !== CompatibilityState.Broken;
-    } 
+    }, 
   },
   { name: 'Favorite', func: (mod: PartialMod) => get(favoriteMods).includes(mod.mod_reference) },
   { name: 'Queued', func: (mod: PartialMod) => get(queuedMods).some((q) => q.mod === mod.mod_reference) },

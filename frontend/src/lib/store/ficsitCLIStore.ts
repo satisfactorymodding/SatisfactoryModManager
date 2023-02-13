@@ -117,7 +117,7 @@ export interface Progress {
 
 export const progress = readableBinding<Progress | null>(null, { updateEvent: 'progress' });
 
-export const favoriteMods = readableBinding<string[]>([], { updateEvent: 'favoriteMods', initialGet: GetFavoriteMods});
+export const favoriteMods = readableBinding<string[]>([], { updateEvent: 'favoriteMods', initialGet: GetFavoriteMods });
 
 export const isGameRunning = readableBinding(false, { updateEvent: 'isGameRunning', allowNull: false });
 
@@ -195,7 +195,7 @@ export async function addQueuedModAction(mod: string, action: string, func: () =
   const queuedAction = { mod, action, func };
   queuedActionsInternal.set([
     ...get(queuedActionsInternal),
-    queuedAction
+    queuedAction,
   ]);
   if(get(queueAutoStart)) {
     startQueue();

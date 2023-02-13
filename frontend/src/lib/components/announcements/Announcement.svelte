@@ -10,13 +10,13 @@
   $: isNew = !$viewedAnnouncements.includes(announcement.id);
   $: icon = (() => {
     switch (announcement.importance) {
-    case AnnouncementImportance.Alert:
-    case AnnouncementImportance.Warning:
-      return mdiAlertOutline;
-    case AnnouncementImportance.Fix:
-    case AnnouncementImportance.Info:
-    default:
-      return mdiInformationOutline;
+      case AnnouncementImportance.Alert:
+      case AnnouncementImportance.Warning:
+        return mdiAlertOutline;
+      case AnnouncementImportance.Fix:
+      case AnnouncementImportance.Info:
+      default:
+        return mdiInformationOutline;
     }
   })();
 </script>

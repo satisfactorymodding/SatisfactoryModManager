@@ -116,7 +116,7 @@
             <SecondaryText>{ update.currentVersion } -> { update.newVersion }</SecondaryText>
           </Text>
           <div class="grow" />
-          <div on:click|stopPropagation={() => { /* empty */}}>
+          <div on:click|stopPropagation={() => {/* empty */}}>
             <Button on:click={() => changelogUpdate = update}>Changelog</Button>
           </div>
         </Item>

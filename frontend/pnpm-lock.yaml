@@ -118,7 +118,6 @@ specifiers:
   eslint: ^8.27.0
   eslint-config-prettier: ^8.3.0
   eslint-plugin-svelte: ^2.18.0
-  eslint-plugin-svelte3: ^4.0.0
   fuse.js: ^6.6.2
   graphql: ^16.2.0
   lodash: ^4.17.21
@@ -271,7 +270,6 @@ devDependencies:
   eslint: 8.34.0
   eslint-config-prettier: 8.6.0_eslint@8.34.0
   eslint-plugin-svelte: 2.18.0_dbthnr4b2bdkhyiebwn7su3hnq
-  eslint-plugin-svelte3: 4.0.0_dbthnr4b2bdkhyiebwn7su3hnq
   npm-run-all: 4.1.5
   postcss: 8.4.21
   postcss-import-url: 7.2.0_postcss@8.4.21
@@ -4440,16 +4438,6 @@ packages:
     transitivePeerDependencies:
       - supports-color
       - ts-node
-    dev: true
-
-  /eslint-plugin-svelte3/4.0.0_dbthnr4b2bdkhyiebwn7su3hnq:
-    resolution: {integrity: sha512-OIx9lgaNzD02+MDFNLw0GEUbuovNcglg+wnd/UY0fbZmlQSz7GlQiQ1f+yX0XvC07XPcDOnFcichqI3xCwp71g==}
-    peerDependencies:
-      eslint: '>=8.0.0'
-      svelte: ^3.2.0
-    dependencies:
-      eslint: 8.34.0
-      svelte: 3.55.1
     dev: true
 
   /eslint-scope/5.1.1:

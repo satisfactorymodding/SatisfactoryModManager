@@ -106,7 +106,7 @@
           state: reportedCompatibility.state,
           note: reportedCompatibility.note 
             ? `This mod has been reported as ${reportedCompatibility.state} on this game version.<br>${markdown(reportedCompatibility.note)}` 
-            : `This mod has been reported as ${reportedCompatibility.state} on this game version.`
+            : `This mod has been reported as ${reportedCompatibility.state} on this game version.`,
         };
       }
       if (mod.hidden && !isDependency) {
@@ -179,7 +179,7 @@
       <LinearProgress progress={$progress?.progress} class="mod-progress-bar h-full rounded-lg"/>
     </div>
   {/if}
-  <div class="flex relative h-full" readonly class:disabled={isInstalled && !isEnabled}>
+  <div class="flex relative h-full" class:disabled={isInstalled && !isEnabled}>
     <img src={renderedLogo} alt="{mod.name} Logo" class="logo h-full lg:w-24 md:w-[5.5rem] w-[4.25rem]" />
     <div class="ml-2 flex flex-col grow w-0">
       <Wrapper>
@@ -198,6 +198,7 @@
           </Tooltip>
         {:else if compatibility.state !== CompatibilityState.Works}
           <Tooltip surface$class="max-w-lg text-base">
+            <!-- eslint-disable-next-line svelte/no-at-html-tags -->
             { @html compatibility.note }
           </Tooltip>
         {/if}

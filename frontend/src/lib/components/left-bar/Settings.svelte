@@ -57,7 +57,7 @@
     {
       id: 'button',
       name: 'Launch Button',
-    }
+    },
   ];
   
   const urqlClient = getContextClient();
@@ -80,7 +80,7 @@
         version: $lockfileMods[modReference].version,
       };
     }));
-      // Sort by Friendly Name
+    // Sort by Friendly Name
     modList.sort((a, b) => {
       const x = a.friendlyName.toLowerCase();
       const y = b.friendlyName.toLowerCase();
@@ -207,46 +207,46 @@
         </Menu>
       </div>
       {#if $konami}
-      <Separator insetLeading insetTrailing insetPadding />
-      <Item nonInteractive>
-        <SvgIcon icon={mdiCog} class="h-5 w-5" />
-        <!-- <div class="w-7"/> -->
-        <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
-          <PrimaryText class="text-base">Secret settings</PrimaryText>
-        </Text>
-        <div class="grow" />
-      </Item>
-      <Separator insetLeading insetTrailing />
-      <div>
-        <Item on:click={() => launchButtonMenu.setOpen(true)}>
-          <div class="w-7"/>
+        <Separator insetLeading insetTrailing insetPadding />
+        <Item nonInteractive>
+          <SvgIcon icon={mdiCog} class="h-5 w-5" />
+          <!-- <div class="w-7"/> -->
           <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
-            <PrimaryText class="text-base">Launch button</PrimaryText>
+            <PrimaryText class="text-base">Secret settings</PrimaryText>
           </Text>
           <div class="grow" />
-          <Text class="pr-2 h-full flex flex-col content-center mb-1.5">
-            <PrimaryText class="text-base">{launchButtons.find((l) => l.id === $launchButton)?.name ?? ''}</PrimaryText>
-          </Text>
-          <SvgIcon icon={mdiChevronRight} class="h-5 w-5" />
         </Item>
-        <Menu bind:this={launchButtonMenu} class="w-full max-h-[32rem] overflow-visible" anchorCorner="TOP_RIGHT">
-          <List>
-            <SelectionGroup>
-              {#each launchButtons as launch}
-                <Item
-                  on:SMUI:action={() => ($launchButton = launch.id)}
-                  selected={$launchButton === launch.id}
-                >
-                  <SelectionGroupIcon>
-                    <SvgIcon icon={mdiCheck} class="h-5 w-5" />
-                  </SelectionGroupIcon>
-                  <Text>{launch.name}</Text>
-                </Item>
-              {/each}
-            </SelectionGroup>
-          </List>
-        </Menu>
-      </div>
+        <Separator insetLeading insetTrailing />
+        <div>
+          <Item on:click={() => launchButtonMenu.setOpen(true)}>
+            <div class="w-7"/>
+            <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
+              <PrimaryText class="text-base">Launch button</PrimaryText>
+            </Text>
+            <div class="grow" />
+            <Text class="pr-2 h-full flex flex-col content-center mb-1.5">
+              <PrimaryText class="text-base">{launchButtons.find((l) => l.id === $launchButton)?.name ?? ''}</PrimaryText>
+            </Text>
+            <SvgIcon icon={mdiChevronRight} class="h-5 w-5" />
+          </Item>
+          <Menu bind:this={launchButtonMenu} class="w-full max-h-[32rem] overflow-visible" anchorCorner="TOP_RIGHT">
+            <List>
+              <SelectionGroup>
+                {#each launchButtons as launch}
+                  <Item
+                    on:SMUI:action={() => ($launchButton = launch.id)}
+                    selected={$launchButton === launch.id}
+                  >
+                    <SelectionGroupIcon>
+                      <SvgIcon icon={mdiCheck} class="h-5 w-5" />
+                    </SelectionGroupIcon>
+                    <Text>{launch.name}</Text>
+                  </Item>
+                {/each}
+              </SelectionGroup>
+            </List>
+          </Menu>
+        </div>
       {/if}
     </List>
   </Menu>

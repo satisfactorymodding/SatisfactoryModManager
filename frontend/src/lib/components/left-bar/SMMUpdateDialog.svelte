@@ -5,7 +5,7 @@
   import { UpdateAndRestart } from '$wailsjs/go/bindings/Update';
   import Button from '@smui/button';
   import Dialog, { Actions, Content, Title } from '@smui/dialog';
-  import LinearProgress from '@smui/linear-progress/src/LinearProgress.svelte';
+  import LinearProgress from '@smui/linear-progress';
 
   let updateAvailableDialogOpen = false;
   let updateReadyDialogOpen = false;
@@ -51,6 +51,7 @@
     <div class="max-h-[500px] overflow-y-auto">
       {#each $smmUpdate?.changelogs ?? [] as changelog}
         <div class="text-xl font-semibold">{changelog.version}</div>
+        <!-- eslint-disable-next-line svelte/no-at-html-tags -->
         <div class="markdown-content">{@html markdown(filterChangelog(changelog.changelog))}</div>
       {/each}
     </div>

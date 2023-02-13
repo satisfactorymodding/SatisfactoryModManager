@@ -18,11 +18,11 @@ export function readableBinding<T>(defaultValue: T,
     updateEvent?: string,
     allowNull?: boolean,
     initialGet?: () => Promise<T>
-  }
+  },
 ) {
   const { updateEvent, allowNull, initialGet } = {
     allowNull: true,
-    ...options
+    ...options,
   };
   
   const initCallbacks: InitCallback[] = [];
@@ -59,7 +59,7 @@ export function readableBinding<T>(defaultValue: T,
       } else {
         initCallbacks.push(callback);
       }
-    }
+    },
   } as ReadableBinding<T>;
 
   return store;
@@ -68,10 +68,10 @@ export function readableBinding<T>(defaultValue: T,
 export function writableBinding<T>(defaultValue: T,
   options: {
     initialGet?: () => Promise<T>
-  }
+  },
 ) {
   const { initialGet } = {
-    ...options
+    ...options,
   };
   
   const initCallbacks: InitCallback[] = [];
@@ -94,7 +94,7 @@ export function writableBinding<T>(defaultValue: T,
       } else {
         initCallbacks.push(callback);
       }
-    }
+    },
   } as WritableBinding<T>;
 
   return store;
@@ -104,10 +104,10 @@ export function writableBindingSync<T>(defaultValue: T,
   options: {
     initialGet?: () => Promise<T>,
     updateFunction: (value: T) => Promise<void>
-  }
+  },
 ) {
   const { initialGet } = {
-    ...options
+    ...options,
   };
   
   const initCallbacks: InitCallback[] = [];
@@ -130,7 +130,7 @@ export function writableBindingSync<T>(defaultValue: T,
       } else {
         initCallbacks.push(callback);
       }
-    }
+    },
   } as WritableBinding<T>;
 
   store.subscribe((value) => {

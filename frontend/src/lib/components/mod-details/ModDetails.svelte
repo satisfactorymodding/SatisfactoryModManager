@@ -32,8 +32,8 @@
       pause: !$expandedMod,
       variables: {
         modReference: $expandedMod ?? '',
-      }
-    }
+      },
+    },
   );
 
   $: mod = $modQuery.fetching ? null : $modQuery.data?.mod;
@@ -64,7 +64,7 @@
           state: reportedCompatibility.state,
           note: reportedCompatibility.note 
             ? `This mod has been reported as ${reportedCompatibility.state} on this game version.<br>${markdown(reportedCompatibility.note)}` 
-            : `This mod has been reported as ${reportedCompatibility.state} on this game version.`
+            : `This mod has been reported as ${reportedCompatibility.state} on this game version.`,
         };
       }
       if (mod.hidden && !isDependency) {
@@ -80,12 +80,12 @@
 
   function colorForCompatibilityState(state?: CompatibilityState) {
     switch(state) {
-    case CompatibilityState.Broken:
-      return 'error';
-    case CompatibilityState.Damaged:
-      return 'warning';
-    case CompatibilityState.Works:
-      return 'success';
+      case CompatibilityState.Broken:
+        return 'error';
+      case CompatibilityState.Damaged:
+        return 'warning';
+      case CompatibilityState.Works:
+        return 'success';
     }
     return '';
   }
@@ -212,6 +212,7 @@
               <Tooltip surface$class="max-w-lg text-base">
                 This mod has been reported as {mod.compatibility.EA.state} on Early Access.
                 {#if mod.compatibility.EA.note}
+                  <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                   {@html markdown(mod.compatibility.EA.note)}
                 {/if}
               </Tooltip>
@@ -221,6 +222,7 @@
               <Tooltip surface$class="max-w-lg text-base">
                 This mod has been reported as {mod.compatibility.EXP.state} on Experimental.
                 {#if mod.compatibility.EXP.note}
+                  <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                   {@html markdown(mod.compatibility.EXP.note)}
                 {/if}
               </Tooltip>
@@ -327,6 +329,7 @@
   </div>
   <div class="markdown-content break-words overflow-wrap-anywhere flex-1 px-3 my-4 overflow-y-scroll overflow-x-hidden w-0">
     {#if descriptionRendered}
+      <!-- eslint-disable-next-line svelte/no-at-html-tags -->
       <p on:click={handleDescriptionClick}>{@html descriptionRendered}</p>
     {:else}
       <p>Loading...</p>

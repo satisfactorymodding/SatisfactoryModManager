@@ -4,7 +4,7 @@
   export let icon: string;
   let clazz = '';
 
-  export {clazz as class};
+  export { clazz as class };
 </script>
 
 <Icon component={Svg} viewBox="0 0 24 24" class="focus:outline-0 {clazz} w-full h-full">

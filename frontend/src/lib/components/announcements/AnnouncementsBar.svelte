@@ -46,26 +46,26 @@
 </script>
 
 {#if announcements.length > 0}
-<div class="w-full" on:mouseenter={() => hovered = true} on:mouseleave={() => hovered = false}>
-  <Carousel
-    autoplayDuration={hovered ? 1e100 : 5000}
-    duration={300}
-    autoplay={!hovered && announcements.length > 1}
-    dots={false}
-    arrows={false}
-    swiping={false}
-    on:pageChange={pageChange}
-  >
-    {#each announcements as announcement}
-      <div class="w-full shrink-0">
-        <Wrapper>
-          <Announcement {announcement} />
-          <Tooltip surface$class="max-w-xl text-base">
-            <span class="text-xl">{announcement.message}</span>
-          </Tooltip>
-        </Wrapper>
-      </div>
-    {/each}
-  </Carousel>
-</div>
+  <div class="w-full" on:mouseenter={() => hovered = true} on:mouseleave={() => hovered = false}>
+    <Carousel
+      autoplayDuration={hovered ? 1e100 : 5000}
+      duration={300}
+      autoplay={!hovered && announcements.length > 1}
+      dots={false}
+      arrows={false}
+      swiping={false}
+      on:pageChange={pageChange}
+    >
+      {#each announcements as announcement}
+        <div class="w-full shrink-0">
+          <Wrapper>
+            <Announcement {announcement} />
+            <Tooltip surface$class="max-w-xl text-base">
+              <span class="text-xl">{announcement.message}</span>
+            </Tooltip>
+          </Wrapper>
+        </div>
+      {/each}
+    </Carousel>
+  </div>
 {/if}

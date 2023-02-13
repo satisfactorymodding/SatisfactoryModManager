@@ -15,24 +15,24 @@ export default defineConfig({
           defaultHandler(warning);
         }
       },
-    })
+    }),
   ],
   optimizeDeps: {
     exclude: ['@urql/svelte'],
-    include: ['lodash.get', 'lodash.isequal', 'lodash.clonedeep']
+    include: ['lodash.get', 'lodash.isequal', 'lodash.clonedeep'],
   },
   publicDir: 'static',
   resolve: {
     alias: {
       $wailsjs: path.resolve('./wailsjs'),
       $lib: path.resolve('./src/lib'),
-    }
+    },
   },
   build: {
-    outDir: 'build'
+    outDir: 'build',
   },
   server: {
     port: 3000,
     strictPort: true,
-  }
+  },
 });

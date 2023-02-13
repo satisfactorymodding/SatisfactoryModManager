@@ -20,8 +20,8 @@
       pause: !modId,
       variables: {
         modReference: modId ?? '',
-      }
-    }
+      },
+    },
   );
 
   $: mod = $modQuery.fetching ? null : $modQuery.data?.mod;

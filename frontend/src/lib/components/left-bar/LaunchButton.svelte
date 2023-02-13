@@ -158,7 +158,7 @@
     {/if}
   </center>
   {#if versionIncompatible.length > 0 || versionPossiblyCompatible.length > 0 || reportedIncompatible.length > 0 || reportedPossiblyCompatible.length > 0}
-  <Tooltip surface$class="max-w-lg text-base">
+    <Tooltip surface$class="max-w-lg text-base">
       You have:
       <ul class="list-disc pl-5">
         {#if versionIncompatible.length > 0}
@@ -167,30 +167,30 @@
           </li>
         {/if}
         {#if reportedIncompatible.length > 0}
-        <li>
-          { reportedIncompatible.length } mod{ reportedIncompatible.length > 1 ? 's' : '' } that { reportedIncompatible.length > 1 ? 'are' : 'is' } reported as Broken on this game version.
-          Read the mod{ reportedIncompatible.length > 1 ? 's\'' : '\'s' } description or compatibility notes for more information.
-        </li>
+          <li>
+            { reportedIncompatible.length } mod{ reportedIncompatible.length > 1 ? 's' : '' } that { reportedIncompatible.length > 1 ? 'are' : 'is' } reported as Broken on this game version.
+            Read the mod{ reportedIncompatible.length > 1 ? 's\'' : '\'s' } description or compatibility notes for more information.
+          </li>
         {/if}
         {#if versionPossiblyCompatible.length > 0}
-        <li>
-          { versionPossiblyCompatible.length } mod{ versionPossiblyCompatible.length > 1 ? 's' : '' }
-          that { versionPossiblyCompatible.length > 1 ? 'are' : 'is' } likely incompatible with your game
-        </li>
+          <li>
+            { versionPossiblyCompatible.length } mod{ versionPossiblyCompatible.length > 1 ? 's' : '' }
+            that { versionPossiblyCompatible.length > 1 ? 'are' : 'is' } likely incompatible with your game
+          </li>
         {/if}
         {#if reportedPossiblyCompatible.length > 0}
-        <li>
-          { reportedPossiblyCompatible.length } mod{ reportedPossiblyCompatible.length > 1 ? 's' : '' }
-          that { reportedPossiblyCompatible.length > 1 ? 'are' : 'is' } reported as Damaged on this game version.
-          Read the mod{ reportedPossiblyCompatible.length > 1 ? 's\'' : '\'s' } description or compatibility notes for more information.
-        </li>
+          <li>
+            { reportedPossiblyCompatible.length } mod{ reportedPossiblyCompatible.length > 1 ? 's' : '' }
+            that { reportedPossiblyCompatible.length > 1 ? 'are' : 'is' } reported as Damaged on this game version.
+            Read the mod{ reportedPossiblyCompatible.length > 1 ? 's\'' : '\'s' } description or compatibility notes for more information.
+          </li>
         {/if}
       </ul>
       Are you sure you want to launch?
     </Tooltip>
-    {:else if !isInstallLaunchable}
+  {:else if !isInstallLaunchable}
     <Tooltip surface$class="max-w-lg text-base">
       You can still launch Satisfactory using your game launcher.
     </Tooltip>
-    {/if}
+  {/if}
 </Wrapper>

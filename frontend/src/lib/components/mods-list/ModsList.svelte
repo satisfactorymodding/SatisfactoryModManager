@@ -24,7 +24,7 @@
     if (count) {
       const pages = Math.ceil(count / MODS_PER_PAGE);
 
-      mods = (await Promise.all(Array.from({length: pages}).map(async (_, i) => {
+      mods = (await Promise.all(Array.from({ length: pages }).map(async (_, i) => {
         const offset = i * MODS_PER_PAGE;
         const modsPage = await urqlClient.query(GetModsDocument, { offset, limit: MODS_PER_PAGE }).toPromise();
         return modsPage.data?.getMods.mods ?? [];

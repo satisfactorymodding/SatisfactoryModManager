@@ -17,7 +17,7 @@
   let heightMap: number[] = [];
   
   $: {
-    heightMap = Array.from({length: items.length});
+    heightMap = Array.from({ length: items.length });
     if(viewport && container && items.length > 0) {
       tick().then(onScroll);
     }
