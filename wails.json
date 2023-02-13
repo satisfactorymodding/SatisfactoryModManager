@@ -1,9 +1,9 @@
 {
   "name": "Satisfactory Mod Manager",
   "outputfilename": "Satisfactory Mod Manager",
-  "frontend:install": "yarn install",
-  "frontend:build": "yarn build",
-  "frontend:dev:watcher": "yarn dev",
+  "frontend:install": "pnpm install",
+  "frontend:build": "pnpm build",
+  "frontend:dev:watcher": "pnpm dev",
   "frontend:dev:serverUrl": "http://localhost:3000",
   "author": {
     "name": "mircearoata",
