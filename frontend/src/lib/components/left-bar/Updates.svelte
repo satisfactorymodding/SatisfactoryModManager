@@ -67,7 +67,7 @@
   function showUpdateDialog() {
     if($smmUpdate) {
       smmUpdateDialog.show();
-    } else {
+    } else if ($updates.length > 0) {
       updatesDialog = true;
     }
   }
