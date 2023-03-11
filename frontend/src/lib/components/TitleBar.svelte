@@ -33,17 +33,13 @@
   </div>
 
   <div class="hover:bg-gray-500 p-1.5 w-11 cursor-default grid justify-center items-center h-full" on:click={minimize}>
-    <SvgIcon icon={mdiWindowMinimize}/>
+    <SvgIcon icon={mdiWindowMinimize} class="w-full h-full"/>
   </div>
   <div class="hover:bg-gray-500 p-1.5 w-11 cursor-default grid justify-center items-center h-full" on:click={toggleMaximize}>
-    {#if isMaximized}
-      <SvgIcon icon={mdiWindowRestore}/>
-    {:else}
-      <SvgIcon icon={mdiWindowMaximize}/>
-    {/if}
+    <SvgIcon icon={isMaximized ? mdiWindowRestore : mdiWindowMaximize} class="w-full h-full"/>
   </div>
   <div class="hover:bg-red-600 p-1.5 w-11 cursor-default grid justify-center items-center h-full" on:click={close}>
-    <SvgIcon icon={mdiWindowClose}/>
+    <SvgIcon icon={mdiWindowClose} class="w-full h-full"/>
   </div>
 </div>
 
