@@ -1,0 +1,9 @@
+query GetModNames($modReferences: [String!]!) {
+  getMods(filter: { references: $modReferences }) {
+    mods {
+      id
+      mod_reference
+      name
+    }
+  }
+}

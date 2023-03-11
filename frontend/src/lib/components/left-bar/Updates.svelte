@@ -13,6 +13,25 @@
   import SMMUpdateDialog from './SMMUpdateDialog.svelte';
   import { CheckForUpdates as CheckForSMMUpdates } from '$wailsjs/go/bindings/Update';
   import { smmUpdate, smmUpdateReady } from '$lib/store/smmUpdateStore';
+  import { getContextClient, queryStore } from '@urql/svelte';
+  import { GetModNamesDocument } from '$lib/generated';
+
+  const client = getContextClient();
+
+  $: modNamesQuery = queryStore({
+    query: GetModNamesDocument,
+    client,
+    variables: {
+      modReferences: $updates.map((u) => u.item).filter((u) => u !== 'SML') as string[],
+    },
+  });
+
+  $: modNames = $modNamesQuery.data?.getMods?.mods?.reduce((acc, mod) => {
+    if(mod) {
+      acc[mod.mod_reference] = mod.name;
+    }
+    return acc;
+  }, {} as Record<string, string>) ?? {};
 
   let updatesDialog = false;
 
@@ -112,7 +131,7 @@
             <div class="w-5"/>
           {/if}
           <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
-            <PrimaryText class="text-base">{ update.item }</PrimaryText>
+            <PrimaryText class="text-base">{ modNames[update.item] ?? update.item }</PrimaryText>
             <SecondaryText>{ update.currentVersion } -> { update.newVersion }</SecondaryText>
           </Text>
           <div class="grow" />
