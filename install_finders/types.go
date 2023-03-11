@@ -27,3 +27,27 @@ func (e InstallFindError) Error() string {
 func (e InstallFindError) Causes() error {
 	return e.Inner
 }
+
+type InstallFinderFunc func() ([]*Installation, []error)
+
+func FindAll(finders ...InstallFinderFunc) ([]*Installation, []error) {
+	var installs []*Installation
+	var errors []error
+	for _, finder := range finders {
+		foundInstalls, foundErrors := finder()
+		for _, install := range foundInstalls {
+			existing := false
+			for i := range installs {
+				if installs[i].Path == install.Path {
+					existing = true
+					break
+				}
+			}
+			if !existing {
+				installs = append(installs, install)
+			}
+		}
+		errors = append(errors, foundErrors...)
+	}
+	return installs, errors
+}
