@@ -9,6 +9,7 @@ import (
 
 	"bitbucket.org/avd/go-ipc/mq"
 	"github.com/juju/fslock"
+	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 )
 
@@ -71,16 +72,16 @@ func getLockFile() string {
 func sendArgs() error {
 	messageQueue, err := mq.Open("SatisfactoryModManager", mq.O_NONBLOCK)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Failed to open message queue")
 	}
 	defer messageQueue.Close()
 	argsBytes, err := json.Marshal(os.Args)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Failed to marshal arguments")
 	}
 	err = messageQueue.Send(argsBytes)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Failed to send arguments")
 	}
 	return nil
 }

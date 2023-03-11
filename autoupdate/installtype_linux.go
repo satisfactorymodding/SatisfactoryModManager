@@ -1,9 +1,6 @@
 package autoupdate
 
 import (
-	"path/filepath"
-	"runtime"
-
 	"github.com/satisfactorymodding/SatisfactoryModManager/autoupdate/updater/apply"
 )
 
