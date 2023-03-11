@@ -130,9 +130,7 @@ func findInstallationsSteam(steamPath string, launcher string, executable []stri
 			Launcher: launcher,
 			LaunchPath: append(
 				executable,
-				[]string{
-					`steam://rungameid/526870`,
-				}...,
+				`steam://rungameid/526870`,
 			),
 		})
 	}
