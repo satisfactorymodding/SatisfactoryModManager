@@ -91,9 +91,6 @@
 
   $: buttonDisabled = isDependency || (versionCompatibility.state === CompatibilityState.Broken && !isInstalled);
 
-  let isInstallButtonHovered = false;
-  let isEnableButtonHovered = false;
-
   $: isFavorite = $favoriteMods.includes(mod.mod_reference);
 
   let reportedCompatibility: Compatibility | undefined = { state: CompatibilityState.Works };
@@ -232,28 +229,26 @@
       {#if isInstalled && !isDependency}
         <Button
           on:click={ toggleModEnabled }
-          on:mouseover={() => isEnableButtonHovered = true}
-          on:mouseleave={() => isEnableButtonHovered = false}
           disabled={buttonDisabled || queuedInstall || inProgress}
           ripple={false}
           variant="text"
-          class="min-w-0 w-12 h-12 mod-enable-button {isEnabled || queued ? 'enabled' : ''} "
+          class="min-w-0 w-12 h-12 mod-enable-button {isEnabled || queued ? 'enabled' : ''} group"
         >
-          <SvgIcon icon={ isEnableButtonHovered ? enableButtonIconHover : enableButtonIcon } class="!p-1 !m-0 !w-full !h-full"/>
+          <SvgIcon icon={enableButtonIcon} class="!p-1 !m-0 !w-full !h-full group-hover:!hidden"/>
+          <SvgIcon icon={enableButtonIconHover} class="!p-1 !m-0 !w-full !h-full group-hover:!inline-block !hidden"/>
         </Button>
       {:else}
         <div class="min-w-0 w-12 h-12"/>
       {/if}
       <Button
         on:click={toggleModInstalled}
-        on:mouseover={() => isInstallButtonHovered = true}
-        on:mouseleave={() => isInstallButtonHovered = false}
         variant="text"
         disabled={buttonDisabled || queuedEnable || inProgress}
         ripple={false}
-        class="min-w-0 w-12 h-12 mod-install-button {isInstalled || queued ? 'installed' : ''}"
+        class="min-w-0 w-12 h-12 mod-install-button {isInstalled || queued ? 'installed' : ''} group"
       >
-        <SvgIcon icon={ isInstallButtonHovered ? installButtonIconHover : installButtonIcon } class="!p-1 !m-0 !w-full !h-full"/>
+        <SvgIcon icon={installButtonIcon} class="!p-1 !m-0 !w-full !h-full group-hover:!hidden"/>
+        <SvgIcon icon={installButtonIconHover} class="!p-1 !m-0 !w-full !h-full group-hover:!inline-block !hidden"/>
       </Button>
       <Button
         on:click={toggleModFavorite}
