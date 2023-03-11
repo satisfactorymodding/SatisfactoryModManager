@@ -3,6 +3,7 @@
   import Select, { Option } from '@smui/select';
   import Dialog, { Title, Content, Actions } from '@smui/dialog';
   import TextField from '@smui/textfield'; 
+  import Tooltip, { Wrapper } from '@smui/tooltip';
 
   import { mdiCheckCircle, mdiCloseCircle, mdiDownload, mdiHelpCircle, mdiPencil, mdiPlusCircle, mdiTrashCan, mdiUpload, mdiWeb } from '@mdi/js';
   import { siDiscord, siGithub } from 'simple-icons/icons';
@@ -164,9 +165,15 @@
       disabled={!$canModify}
     >
       {#each $installs as install}
-        <Option value={install}>
-          <Label>{install?.info?.branch} ({install?.info?.launcher})</Label>
-        </Option>
+        <Wrapper>
+          <Option value={install}>
+            <Label>{install?.info?.branch} ({install?.info?.launcher})</Label>
+          </Option>
+          
+          <Tooltip surface$class="max-w-lg text-base">
+            {install?.info?.path}
+          </Tooltip>
+        </Wrapper>
       {/each}
     </Select>
     <div class="flex w-full mt-2">
