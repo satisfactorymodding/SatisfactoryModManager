@@ -37,12 +37,14 @@ func (f *FicsitCLI) initInstallations() error {
 	})
 
 	for _, install := range f.installations {
-		savedSelectedProfile, ok := settings.Settings.SelectedProfile[install.Info.Path]
-		if ok {
+		if savedSelectedProfile, ok := settings.Settings.SelectedProfile[install.Info.Path]; ok {
 			err := install.Installation.SetProfile(f.ficsitCli, savedSelectedProfile)
 			if err != nil {
 				return errors.Wrap(err, "failed to set profile")
 			}
+		}
+		if modsEnabled, ok := settings.Settings.ModsEnabled[install.Info.Path]; ok {
+			install.Installation.Vanilla = !modsEnabled
 		}
 	}
 
@@ -122,6 +124,40 @@ func (f *FicsitCLI) SelectInstall(path string) error {
 
 func (f *FicsitCLI) GetSelectedInstall() *InstallationInfo {
 	return f.selectedInstallation
+}
+
+func (f *FicsitCLI) SetModsEnabled(enabled bool) error {
+	var message string
+	if enabled {
+		message = "Enabling mods"
+	} else {
+		message = "Disabling mods"
+	}
+	f.progress = &Progress{
+		Item:     "__toggle_mods__",
+		Message:  message,
+		Progress: -1,
+	}
+
+	f.setProgress(f.progress)
+
+	defer f.setProgress(nil)
+
+	f.selectedInstallation.Installation.Vanilla = !enabled
+	installErr := f.validateInstall(f.selectedInstallation, "__toggle_mods__")
+
+	if installErr != nil {
+		log.Error().Err(installErr).Str("install", f.selectedInstallation.Info.Path).Msg("Failed to validate install")
+		return errors.Wrap(installErr, "Failed to validate install")
+	}
+
+	settings.Settings.ModsEnabled[f.selectedInstallation.Info.Path] = enabled
+	settings.SaveSettings()
+	return nil
+}
+
+func (f *FicsitCLI) GetModsEnabled() bool {
+	return !f.selectedInstallation.Installation.Vanilla
 }
 
 func (f *FicsitCLI) GetLockFile(installation *InstallationInfo) (*cli.LockFile, error) {

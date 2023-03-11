@@ -17,10 +17,19 @@
   import Updates from './Updates.svelte';
   import { bindings, ficsitcli_bindings } from '$wailsjs/go/models';
   import HelperText from '@smui/textfield/helper-text';
-  import { ExportCurrentProfile, ReadExportedProfileMetadata } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
+  import { ExportCurrentProfile, ReadExportedProfileMetadata, SetModsEnabled } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
   import LaunchButton from './LaunchButton.svelte';
 
-  let modsEnabled = true;
+  $: modsEnabled = !$selectedInstall?.installation?.vanilla;
+
+  async function setModsEnabled(enabled: boolean) {
+    if ($selectedInstall) {
+      await SetModsEnabled(enabled);
+      if ($selectedInstall.installation) {
+        $selectedInstall.installation.vanilla = !enabled;
+      }
+    }
+  }
 
   let addProfileDialog = false;
   let newProfileName = '';
@@ -161,14 +170,14 @@
       {/each}
     </Select>
     <div class="flex w-full mt-2">
-      <Button variant="unelevated" class="w-1/2 rounded-tr-none rounded-br-none mods-toggle-button {modsEnabled ? '' : 'mods-off'}" on:click={() => modsEnabled = false} disabled={!$canModify}>
+      <Button variant="unelevated" class="w-1/2 rounded-tr-none rounded-br-none mods-toggle-button {modsEnabled ? '' : 'mods-off'}" on:click={() => setModsEnabled(false)} disabled={!$canModify}>
         <Label>
           Mods off
         </Label>
         <div class="grow"/>
         <SvgIcon icon={mdiCloseCircle} class="h-5 w-5" />
       </Button>
-      <Button variant="unelevated" class="w-1/2 rounded-tl-none rounded-bl-none mods-toggle-button {modsEnabled ? 'mods-on' : ''}" on:click={() => modsEnabled = true} disabled={!$canModify}>
+      <Button variant="unelevated" class="w-1/2 rounded-tl-none rounded-bl-none mods-toggle-button {modsEnabled ? 'mods-on' : ''}" on:click={() => setModsEnabled(true)} disabled={!$canModify}>
         <Label>
           Mods on
         </Label>

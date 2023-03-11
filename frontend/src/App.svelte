@@ -59,6 +59,7 @@
 
   $: installProgress = $progress?.item === '__select_install__';
   $: profileProgress = $progress?.item === '__select_profile__';
+  $: modsEnabledProgress = $progress?.item === '__toggle_mods__';
   
   const code = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
   const keyQueue: number[] = [];
@@ -114,6 +115,21 @@
   surface$style="width: 500px; max-width: calc(100vw - 32px);"
 >
   <Title>Selecting profile {$selectedProfile}</Title>
+  <Content>
+    {#if $progress}
+      <p>{$progress.message}</p>
+      <LinearProgress progress={$progress.progress} indeterminate={$progress.progress === -1} class="h-4 w-full rounded-lg"/>
+    {/if}
+  </Content>
+</Dialog>
+
+<Dialog
+  bind:open={modsEnabledProgress}
+  scrimClickAction=""
+  escapeKeyAction=""
+  surface$style="width: 500px; max-width: calc(100vw - 32px);"
+>
+  <Title>Togging mods</Title>
   <Content>
     {#if $progress}
       <p>{$progress.message}</p>

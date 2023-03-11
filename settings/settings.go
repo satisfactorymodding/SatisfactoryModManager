@@ -31,6 +31,7 @@ type SettingsData struct {
 	QueueAutoStart  bool              `json:"queueAutoStart"`
 	SelectedInstall string            `json:"selectedInstall"`
 	SelectedProfile map[string]string `json:"selectedProfile"`
+	ModsEnabled     map[string]bool   `json:"modsEnabled"`
 	Konami          bool              `json:"konami"`
 	LaunchButton    string            `json:"launchButton"`
 }
@@ -47,6 +48,7 @@ var Settings SettingsData = SettingsData{
 	QueueAutoStart:  true,
 	SelectedInstall: "",
 	SelectedProfile: map[string]string{},
+	ModsEnabled:     map[string]bool{},
 	Konami:          false,
 	LaunchButton:    "normal",
 }
