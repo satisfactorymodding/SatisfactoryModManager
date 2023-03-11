@@ -108,11 +108,7 @@ func (f *FicsitCLI) SelectInstall(path string) error {
 
 	defer f.setProgress(nil)
 
-	f.emitModsChange()
-
 	installErr := f.validateInstall(installation, "__select_install__")
-
-	f.emitModsChange()
 
 	if installErr != nil {
 		log.Error().Err(installErr).Str("install", installation.Info.Path).Msg("Failed to validate install")

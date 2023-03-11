@@ -8,7 +8,10 @@ import (
 )
 
 func (f *FicsitCLI) validateInstall(installation *InstallationInfo, progressItem string) error {
+	defer f.EmitModsChange()
+
 	installChannel := make(chan cli.InstallUpdate)
+	defer close(installChannel)
 
 	defer f.setProgress(f.progress)
 
@@ -30,14 +33,18 @@ func (f *FicsitCLI) validateInstall(installation *InstallationInfo, progressItem
 		}
 	}()
 
+	_, resolveErr := installation.Installation.ResolveProfile(f.ficsitCli)
+	if resolveErr != nil {
+		return errors.Wrap(resolveErr, "Failed to resolve profile")
+	}
 	installErr := installation.Installation.Install(f.ficsitCli, installChannel)
-
-	close(installChannel)
-
-	return installErr
+	if installErr != nil {
+		return errors.Wrap(installErr, "Failed to install")
+	}
+	return nil
 }
 
-func (f *FicsitCLI) emitModsChange() {
+func (f *FicsitCLI) EmitModsChange() {
 	installation := f.GetInstallation(f.selectedInstallation.Info.Path)
 	profileName := installation.Installation.Profile
 	profile := f.GetProfile(profileName)
@@ -83,8 +90,6 @@ func (f *FicsitCLI) InstallMod(mod string) error {
 
 	f.ficsitCli.Profiles.Save()
 
-	f.emitModsChange()
-
 	return nil
 }
 
@@ -120,8 +125,6 @@ func (f *FicsitCLI) InstallModVersion(mod string, version string) error {
 
 	f.ficsitCli.Profiles.Save()
 
-	f.emitModsChange()
-
 	return nil
 }
 
@@ -153,8 +156,6 @@ func (f *FicsitCLI) RemoveMod(mod string) error {
 	}
 
 	f.ficsitCli.Profiles.Save()
-
-	f.emitModsChange()
 
 	return nil
 }
@@ -188,8 +189,6 @@ func (f *FicsitCLI) EnableMod(mod string) error {
 
 	f.ficsitCli.Profiles.Save()
 
-	f.emitModsChange()
-
 	return nil
 }
 
@@ -221,8 +220,6 @@ func (f *FicsitCLI) DisableMod(mod string) error {
 	}
 
 	f.ficsitCli.Profiles.Save()
-
-	f.emitModsChange()
 
 	return nil
 }

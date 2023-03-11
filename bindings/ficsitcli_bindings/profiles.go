@@ -38,11 +38,7 @@ func (f *FicsitCLI) SetProfile(profile string) error {
 
 	defer f.setProgress(nil)
 
-	f.emitModsChange()
-
 	installErr := f.validateInstall(f.selectedInstallation, "__select_profile__")
-
-	f.emitModsChange()
 
 	if installErr != nil {
 		log.Error().Err(installErr).Str("profile", profile).Msg("Failed to validate install")

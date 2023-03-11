@@ -1,6 +1,6 @@
 import { get, readable, writable } from 'svelte/store';
 import { cli, ficsitcli_bindings } from '$wailsjs/go/models';
-import { AddProfile, CheckForUpdates, DeleteProfile, GetInstallationsInfo, GetInvalidInstalls, GetProfiles, ImportProfile, RenameProfile, SelectInstall, SetProfile } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
+import { AddProfile, CheckForUpdates, DeleteProfile, EmitModsChange, GetInstallationsInfo, GetInvalidInstalls, GetProfiles, ImportProfile, RenameProfile, SelectInstall, SetProfile } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
 import { GetFavoriteMods } from '$wailsjs/go/bindings/Settings';
 import { readableBinding, writableBinding } from './wailsStoreBindings';
 import { tick } from 'svelte';
@@ -20,28 +20,30 @@ Promise.all([installs.waitForInit, profiles.waitForInit]).then(() => {
   const i = get(installs);
   if(i.length > 0) {
     selectedInstall.set(get(installs)[0]);
-  }
-});
 
-selectedInstall.subscribe((i) => {
-  const path = i?.info?.path;
-  if(path) {
-    SelectInstall(path);
-    if(i.installation) {
-      selectedProfile.set(i.installation.profile);
-    }
-    checkForUpdates();
-  }
-});
+    selectedInstall.subscribe((i) => {
+      const path = i?.info?.path;
+      if(path) {
+        SelectInstall(path);
+        if(i.installation) {
+          selectedProfile.set(i.installation.profile);
+        }
+        checkForUpdates();
+      }
+    });
+    
+    selectedProfile.subscribe((p) => {
+      if(p) {
+        SetProfile(p);
+        const install = get(selectedInstall);
+        if(install && install.installation) {
+          install.installation.profile = p;
+        }
+        checkForUpdates();
+      }
+    });
 
-selectedProfile.subscribe((p) => {
-  if(p) {
-    SetProfile(p);
-    const install = get(selectedInstall);
-    if(install && install.installation) {
-      install.installation.profile = p;
-    }
-    checkForUpdates();
+    EmitModsChange();
   }
 });
 

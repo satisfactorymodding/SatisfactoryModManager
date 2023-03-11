@@ -109,7 +109,5 @@ func (f *FicsitCLI) UpdateAllMods() error {
 
 	f.ficsitCli.Profiles.Save()
 
-	f.emitModsChange()
-
 	return nil
 }
