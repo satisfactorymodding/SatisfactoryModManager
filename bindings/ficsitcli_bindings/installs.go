@@ -18,8 +18,17 @@ func (f *FicsitCLI) initInstallations() error {
 	f.installations = []*InstallationInfo{}
 	f.ficsitCli.Installations.Installations = []*cli.Installation{}
 
+	fallbackProfile := "Default"
+	if f.ficsitCli.Profiles.GetProfile(fallbackProfile) == nil {
+		// Pick first profile found
+		for name := range f.ficsitCli.Profiles.Profiles {
+			fallbackProfile = name
+			break
+		}
+	}
+
 	for _, install := range installs {
-		ficsitCliInstall, err := f.ficsitCli.Installations.AddInstallation(f.ficsitCli, install.Path, "Default")
+		ficsitCliInstall, err := f.ficsitCli.Installations.AddInstallation(f.ficsitCli, install.Path, fallbackProfile)
 		if err != nil {
 			return errors.Wrap(err, "failed to add installation")
 		}
@@ -38,6 +47,10 @@ func (f *FicsitCLI) initInstallations() error {
 
 	for _, install := range f.installations {
 		if savedSelectedProfile, ok := settings.Settings.SelectedProfile[install.Info.Path]; ok {
+			if f.ficsitCli.Profiles.GetProfile(savedSelectedProfile) == nil {
+				log.Warn().Str("profile", savedSelectedProfile).Str("install", install.Info.Path).Msg("Saved profile not found")
+				continue
+			}
 			err := install.Installation.SetProfile(f.ficsitCli, savedSelectedProfile)
 			if err != nil {
 				return errors.Wrap(err, "failed to set profile")

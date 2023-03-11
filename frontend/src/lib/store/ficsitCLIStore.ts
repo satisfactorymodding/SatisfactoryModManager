@@ -16,6 +16,15 @@ export const selectedInstall = writable(null as ficsitcli_bindings.InstallationI
 export const profiles = writableBinding<string[]>([], { initialGet: GetProfiles });
 export const selectedProfile = writable(null as string | null);
 
+function getFallbackProfile() {
+  const p = get(profiles);
+  if(p.includes('Default')) {
+    return 'Default';
+  } else {
+    return p[0];
+  }
+}
+
 Promise.all([installs.waitForInit, profiles.waitForInit]).then(() => {
   const i = get(installs);
   if(i.length > 0) {
@@ -26,7 +35,11 @@ Promise.all([installs.waitForInit, profiles.waitForInit]).then(() => {
       if(path) {
         SelectInstall(path);
         if(i.installation) {
-          selectedProfile.set(i.installation.profile);
+          if(get(profiles).includes(i.installation.profile)) {
+            selectedProfile.set(i.installation.profile);
+          } else {
+            selectedProfile.set(getFallbackProfile());
+          }
         }
         checkForUpdates();
       }
@@ -71,6 +84,9 @@ export async function renameProfile(oldName: string, newName: string) {
 }
 
 export async function deleteProfile(name: string) {
+  if(get(profiles).length === 1) {
+    return;
+  }
   await DeleteProfile(name);
   const newProfiles = get(profiles);
   if(newProfiles.includes(name)) {
@@ -78,9 +94,10 @@ export async function deleteProfile(name: string) {
     newProfiles.splice(idx, 1);
     profiles.set(newProfiles);
   }
-  get(installs).forEach((i) => { if(i.installation.profile === name) { i.installation.profile = 'Default'; } });
+  const fallbackProfile = getFallbackProfile();
+  get(installs).forEach((i) => { if(i.installation.profile === name) { i.installation.profile = fallbackProfile; } });
   if(get(selectedProfile) === name) {
-    selectedProfile.set('Default');
+    selectedProfile.set(fallbackProfile);
   }
 }
 

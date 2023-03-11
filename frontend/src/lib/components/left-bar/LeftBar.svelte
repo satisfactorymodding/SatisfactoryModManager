@@ -217,7 +217,7 @@
         <div class="grow"/>
         <SvgIcon icon={mdiPencil} />
       </Button>
-      <Button class="w-1/3 pr-2 pl-4 profile-delete" on:click={() => { deleteProfileName = $selectedProfile ?? ''; deleteProfileDialog = true; }} disabled={!$canModify}>
+      <Button class="w-1/3 pr-2 pl-4 profile-delete" on:click={() => { deleteProfileName = $selectedProfile ?? ''; deleteProfileDialog = true; }} disabled={!$canModify || $profiles.length === 1}>
         <Label>
           Delete
         </Label>
