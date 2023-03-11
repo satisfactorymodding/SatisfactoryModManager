@@ -22,7 +22,7 @@ VIAddVersionKey "FileVersion"     "${INFO_PRODUCTVERSION}"
 VIAddVersionKey "LegalCopyright"  "${INFO_COPYRIGHT}"
 VIAddVersionKey "ProductName"     "${INFO_PRODUCTNAME}"
 
-!include "MUI.nsh"
+!include "MUI2.nsh"
 
 !define MUI_ICON "..\icon.ico"
 !define MUI_UNICON "..\icon.ico"
@@ -32,6 +32,7 @@ VIAddVersionKey "ProductName"     "${INFO_PRODUCTNAME}"
 !include "smm2_uninstall.nsh"
 !include "uninstaller.nsh"
 !include "update_check.nsh"
+!include "utils.nsh"
 
 !define MUI_FINISHPAGE_SHOWREADME ""
 !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
@@ -92,6 +93,12 @@ Section
     !insertmacro wails.webview2runtime
 
     !insertmacro smm2Uninst
+    
+    Push $INSTDIR
+    Call isEmptyDir
+    Pop $0
+    StrCmp $0 0 0 +2
+    StrCpy $InstDir "$INSTDIR\${MULTIUSER_INSTALLMODE_INSTDIR}"
 
     SetOutPath $INSTDIR
     
@@ -123,4 +130,21 @@ FunctionEnd
 
 Function DirectoryPagePre
     !insertmacro abortIfUpdate
+FunctionEnd
+
+Function .onVerifyInstDir    
+    var /GLOBAL currentDir
+    StrCpy $currentDir $INSTDIR
+    
+    Check:
+    IfFileExists $currentDir\FactoryGame.exe GameExists
+    IfFileExists $currentDir\FactoryServer.exe GameExists
+    IfFileExists $currentDir\FactoryServer.sh GameExists
+    ${GetParent} $currentDir $currentDir
+    StrCmp $currentDir "" 0 Check
+    
+    Return
+    
+    GameExists:
+    Abort "SatisfactoryModManager should not be installed in the Satisfactory directory."
 FunctionEnd
