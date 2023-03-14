@@ -47,7 +47,18 @@ func findInstallationsSteam(steamPath string, launcher string, executable []stri
 		}
 
 		libraryFolderData := val.(map[string]interface{})
-		libraryFolders = append(libraryFolders, libraryFolderData["path"].(string))
+		libraryFolder := libraryFolderData["path"].(string)
+
+		found := false
+		for _, existingLibraryFolder := range libraryFolders {
+			if OsPathEqual(existingLibraryFolder, libraryFolder) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			libraryFolders = append(libraryFolders, libraryFolder)
+		}
 	}
 
 	var installs []*Installation

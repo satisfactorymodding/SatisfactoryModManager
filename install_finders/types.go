@@ -1,5 +1,11 @@
 package install_finders
 
+import (
+	"path/filepath"
+	"runtime"
+	"strings"
+)
+
 type GameBranch string
 
 var (
@@ -30,6 +36,15 @@ func (e InstallFindError) Causes() error {
 
 type InstallFinderFunc func() ([]*Installation, []error)
 
+func OsPathEqual(path1, path2 string) bool {
+	path1 = filepath.Clean(path1)
+	path2 = filepath.Clean(path2)
+	if runtime.GOOS == "windows" {
+		return strings.EqualFold(path1, path2)
+	}
+	return path1 == path2
+}
+
 func FindAll(finders ...InstallFinderFunc) ([]*Installation, []error) {
 	var installs []*Installation
 	var errors []error
@@ -38,7 +53,7 @@ func FindAll(finders ...InstallFinderFunc) ([]*Installation, []error) {
 		for _, install := range foundInstalls {
 			existing := false
 			for i := range installs {
-				if installs[i].Path == install.Path {
+				if OsPathEqual(installs[i].Path, install.Path) {
 					existing = true
 					break
 				}
