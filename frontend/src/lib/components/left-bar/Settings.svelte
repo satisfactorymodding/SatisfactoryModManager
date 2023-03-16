@@ -9,12 +9,13 @@
   
   import { GenerateDebugInfo } from '$wailsjs/go/bindings/DebugInfo';
   
-  import { startView, konami, launchButton, queueAutoStart } from '$lib/store/settingsStore';
+  import { startView, konami, launchButton, queueAutoStart, offline } from '$lib/store/settingsStore';
   import { manifestMods, lockfileMods } from '$lib/store/ficsitCLIStore';
   import { GetModNameDocument } from '$lib/generated';
   
   import { getContextClient } from '@urql/svelte';
   import type { LaunchButtonType, ViewType } from '$lib/wailsTypesExtensions';
+  import { OfflineGetMod } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
 
   let settingsMenu: Menu;
   let startViewMenu: Menu;
@@ -69,9 +70,13 @@
       if(modReference === 'SML') {
         modName = 'Satisfactory Mod Loader';
       } else {
-        const result = await urqlClient.query(GetModNameDocument, { modReference }).toPromise();
-        if(result?.data?.getModByReference?.name) {
-          modName = result.data.getModByReference.name;
+        if($offline) {
+          modName = (await OfflineGetMod(modReference)).name;
+        } else {
+          const result = await urqlClient.query(GetModNameDocument, { modReference }).toPromise();
+          if(result?.data?.getModByReference?.name) {
+            modName = result.data.getModByReference.name;
+          }
         }
       }
       return {
@@ -109,7 +114,7 @@
     <SvgIcon icon={mdiTune} class="h-5 w-5" />
   </Button>
   <Menu bind:this={settingsMenu} class="w-full max-h-[32rem] overflow-visible" anchorCorner="TOP_RIGHT">
-    <List>
+    <List on:SMUIList:action={(e) => { e.stopPropagation(); }}>
       <Item nonInteractive>
         <SvgIcon icon={mdiBug} class="h-5 w-5" />
         <!-- <div class="w-7"/> -->
@@ -119,7 +124,7 @@
         <div class="grow" />
       </Item>
       <Separator insetLeading insetTrailing />
-      <Item on:click={() => GenerateDebugInfo()}>
+      <Item on:SMUI:action={() => GenerateDebugInfo()}>
         <div class="w-7"/>
         <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
           <PrimaryText class="text-base">Generate debug info</PrimaryText>
@@ -128,7 +133,7 @@
         <SvgIcon icon={mdiDownload} class="h-5 w-5" />
       </Item>
       <Separator insetLeading insetTrailing insetPadding />
-      <Item on:click={() => copyModList()}>
+      <Item on:SMUI:action={() => copyModList()}>
         <div class="w-7"/>
         <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
           <PrimaryText class="text-base">Copy mods list</PrimaryText>
@@ -146,7 +151,7 @@
       </Item>
       <Separator insetLeading insetTrailing />
       <div>
-        <Item on:click={() => queueModeMenu.setOpen(true)}>
+        <Item on:SMUI:action={() => queueModeMenu.setOpen(true)}>
           <div class="w-7"/>
           <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
             <PrimaryText class="text-base">Queue</PrimaryText>
@@ -177,7 +182,7 @@
       </div>
       <Separator insetLeading insetTrailing />
       <div>
-        <Item on:click={() => startViewMenu.setOpen(true)}>
+        <Item on:SMUI:action={() => startViewMenu.setOpen(true)}>
           <div class="w-7"/>
           <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
             <PrimaryText class="text-base">Start view</PrimaryText>
@@ -206,6 +211,12 @@
           </List>
         </Menu>
       </div>
+      <Item on:SMUI:action={() => { $offline = !$offline; settingsMenu.setOpen(false); }}>
+        <div class="w-7"/>
+        <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
+          <PrimaryText class="text-base">Go { $offline ? 'Online' : 'Offline' }</PrimaryText>
+        </Text>
+      </Item>
       {#if $konami}
         <Separator insetLeading insetTrailing insetPadding />
         <Item nonInteractive>
@@ -218,7 +229,7 @@
         </Item>
         <Separator insetLeading insetTrailing />
         <div>
-          <Item on:click={() => launchButtonMenu.setOpen(true)}>
+          <Item on:SMUI:action={() => launchButtonMenu.setOpen(true)}>
             <div class="w-7"/>
             <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
               <PrimaryText class="text-base">Launch button</PrimaryText>

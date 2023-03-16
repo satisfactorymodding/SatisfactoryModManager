@@ -6,7 +6,7 @@
   import { checkForUpdates, canModify, progress, updates, updateCheckInProgress } from '$lib/store/ficsitCLIStore';
   import { error } from '$lib/store/generalStore';
   import Dialog, { Actions, Content, Title } from '@smui/dialog';
-  import { UpdateAllMods } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
+  import { OfflineGetModsByReferences, UpdateAllMods } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
   import List, { Item, PrimaryText, SecondaryText, Text } from '@smui/list';
   import type { ficsitcli_bindings } from '$wailsjs/go/models';
   import UpdateChangelog from './UpdateChangelog.svelte';
@@ -15,23 +15,35 @@
   import { smmUpdate, smmUpdateReady } from '$lib/store/smmUpdateStore';
   import { getContextClient, queryStore } from '@urql/svelte';
   import { GetModNamesDocument } from '$lib/generated';
+  import { offline } from '$lib/store/settingsStore';
 
   const client = getContextClient();
 
   $: modNamesQuery = queryStore({
     query: GetModNamesDocument,
     client,
+    pause: !!$offline,
     variables: {
       modReferences: $updates.map((u) => u.item).filter((u) => u !== 'SML') as string[],
     },
   });
 
-  $: modNames = $modNamesQuery.data?.getMods?.mods?.reduce((acc, mod) => {
+  let modNamesQueryResult: { mod_reference: string; name: string; }[] | undefined;
+  
+  $: modNames = modNamesQueryResult?.reduce((acc, mod) => {
     if(mod) {
       acc[mod.mod_reference] = mod.name;
     }
     return acc;
   }, {} as Record<string, string>) ?? {};
+
+  $: {
+    if($offline) {
+      OfflineGetModsByReferences($updates.map((u) => u.item).filter((u) => u !== 'SML') as string[]).then((mods) => { modNamesQueryResult = mods; });
+    } else {
+      modNamesQueryResult = $modNamesQuery.data?.getMods?.mods;
+    }
+  }
 
   let updatesDialog = false;
 

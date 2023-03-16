@@ -4,6 +4,7 @@ import { get, writable } from 'svelte/store';
 import { writableBindingSync } from './wailsStoreBindings';
 import { GetModFiltersOrder, GetModFiltersFilter, SetModFiltersOrder, SetModFiltersFilter } from '$wailsjs/go/bindings/Settings';
 import { getReportedCompatibility, getVersionCompatibility } from '$lib/utils/modCompatibility';
+import type { Client } from '@urql/svelte';
 
 export interface OrderBy {
   name: string;
@@ -12,7 +13,7 @@ export interface OrderBy {
 
 export interface Filter {
   name: string;
-  func: (mod: PartialMod) => Promise<boolean> | boolean,
+  func: (mod: PartialMod, urqlClient: Client) => Promise<boolean> | boolean,
 }
 
 export const orderByOptions: OrderBy[] = [
@@ -28,14 +29,14 @@ export const filterOptions: Filter[] = [
   { name: 'All mods', func: () => true },
   { 
     name: 'Compatible',
-    func: async (mod: PartialMod) => { 
+    func: async (mod: PartialMod, urqlClient: Client) => { 
       const installInfo = get(selectedInstall)?.info;
       if(!installInfo) {
         return false;
       }
       const reportedCompatibility = getReportedCompatibility(mod, installInfo.branch);
       if(!reportedCompatibility) {
-        const versionCompatibility = await getVersionCompatibility(mod.mod_reference, installInfo.version);
+        const versionCompatibility = await getVersionCompatibility(mod.mod_reference, installInfo.version, urqlClient);
         return versionCompatibility.state !== CompatibilityState.Broken;
       }
       return reportedCompatibility.state !== CompatibilityState.Broken;
@@ -50,7 +51,15 @@ export const filterOptions: Filter[] = [
   { name: 'Disabled', func: (mod: PartialMod) => mod.mod_reference in get(manifestMods) && !(mod.mod_reference in get(lockfileMods)) },
 ];
 
-export type PartialMod = GetModsQuery['getMods']['mods'][number];
+export type PartialSMRMod = GetModsQuery['getMods']['mods'][number];
+export interface OfflineMod {
+  offline: true;
+  mod_reference: string;
+  name: string;
+  logo?: string;
+  authors: string[];
+}
+export type PartialMod = PartialSMRMod | OfflineMod;
 
 export const search = writable('');
 export const order = writableBindingSync(orderByOptions[1], { 

@@ -23,3 +23,10 @@ config:
   scalars:
     ModID: string
     ModReference: string
+    VersionID: string
+    SMLVersionID: string
+    TagID: string
+    AnnouncementID: string
+    BootstrapVersionID: string
+    GuideID: string
+    UserID: string

@@ -10,6 +10,7 @@
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   
   import { addProfile, deleteProfile, importProfile, installs, profiles, canModify, renameProfile, selectedInstall, selectedProfile } from '$lib/store/ficsitCLIStore';
+  import { offline } from '$lib/store/settingsStore';
   import { error } from '$lib/store/generalStore';
   import { BrowserOpenURL, EventsOn } from '$wailsjs/runtime/runtime';
   import { OpenFileDialog } from '$wailsjs/go/bindings/App';

@@ -7,6 +7,7 @@ import (
 	"github.com/mitchellh/go-ps"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
+	"github.com/satisfactorymodding/SatisfactoryModManager/settings"
 	"github.com/satisfactorymodding/ficsit-cli/cli"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -43,6 +44,7 @@ func (f *FicsitCLI) Init() error {
 	if err != nil {
 		return errors.Wrap(err, "failed to initialize ficsit-cli")
 	}
+	f.ficsitCli.Provider.Offline = settings.Settings.Offline
 	err = f.initInstallations()
 	if err != nil {
 		return errors.Wrap(err, "failed to initialize installations")

@@ -1,7 +1,7 @@
 <script lang="ts">
   import Tooltip, { Wrapper } from '@smui/tooltip';
   import { selectedInstall, isGameRunning, lockfileMods, progress, queuedMods, startQueue } from '$lib/store/ficsitCLIStore';
-  import { launchButton, queueAutoStart } from '$lib/store/settingsStore';
+  import { launchButton, offline, queueAutoStart } from '$lib/store/settingsStore';
   import { isLaunchingGame } from '$lib/store/generalStore';
   import { LaunchGame } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
   import Button, { Label } from '@smui/button';
@@ -21,13 +21,15 @@
     const branch = $selectedInstall?.info?.branch as GameBranch;
     if(branch) {
       reportedCompatibilities = {};
-      Object.keys($lockfileMods).map(async (modReference) => {
-        const result = await client.query(ModReportedCompatibilityDocument, { modReference }).toPromise();
-        if(!result.data?.getModByReference) {
-          return;
-        }
-        reportedCompatibilities[modReference] = getReportedCompatibility(result.data.getModByReference, branch);
-      });
+      if($offline !== null && !$offline) {
+        Object.keys($lockfileMods).map(async (modReference) => {
+          const result = await client.query(ModReportedCompatibilityDocument, { modReference }).toPromise();
+          if(!result.data?.getModByReference) {
+            return;
+          }
+          reportedCompatibilities[modReference] = getReportedCompatibility(result.data.getModByReference, branch);
+        });
+      }
     }
   }
 
@@ -37,7 +39,9 @@
     if(gameVersion) {
       versionCompatibilities = {};
       Object.keys($lockfileMods).map(async (modReference) => {
-        versionCompatibilities[modReference] = await getVersionCompatibility(modReference, gameVersion);
+        if(modReference !== 'SML') {
+          versionCompatibilities[modReference] = await getVersionCompatibility(modReference, gameVersion, client);
+        }
       });
     }
   }

@@ -8,31 +8,47 @@
   import ModListFilters from './ModsListFilters.svelte';
   import { filter, order, search, type PartialMod } from '$lib/store/modFiltersStore';
   import { favoriteMods, lockfileMods, manifestMods, queuedMods } from '$lib/store/ficsitCLIStore';
-  import { startView } from '$lib/store/settingsStore';
+  import { offline, startView } from '$lib/store/settingsStore';
   import { expandedMod } from '$lib/store/generalStore';
   import AnnouncementsBar from '../announcements/AnnouncementsBar.svelte';
-
-  let mods: PartialMod[] = [];
+  import { OfflineGetMods } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
 
   const MODS_PER_PAGE = 50;
 
-  const urqlClient = getContextClient();
+  const client = getContextClient();
 
-  async function fetchAllMods() {
-    const result = await urqlClient.query(GetModCountDocument, {}).toPromise();
+  let onlineMods: PartialMod[] = [];
+  async function fetchAllModsOnline() {
+    const result = await client.query(GetModCountDocument, {}).toPromise();
     const count = result.data?.getMods.count;
     if (count) {
       const pages = Math.ceil(count / MODS_PER_PAGE);
 
-      mods = (await Promise.all(Array.from({ length: pages }).map(async (_, i) => {
+      onlineMods = (await Promise.all(Array.from({ length: pages }).map(async (_, i) => {
         const offset = i * MODS_PER_PAGE;
-        const modsPage = await urqlClient.query(GetModsDocument, { offset, limit: MODS_PER_PAGE }).toPromise();
+        const modsPage = await client.query(GetModsDocument, { offset, limit: MODS_PER_PAGE }).toPromise();
         return modsPage.data?.getMods.mods ?? [];
       }))).flat();
     }
   }
 
-  fetchAllMods();
+  let offlineMods: PartialMod[] = [];
+  async function fetchAllModsOffline() {
+    offlineMods = (await OfflineGetMods()).map((mod) => ({
+      ...mod,
+      offline: true,
+    }));
+  }
+  
+  $: if($offline !== null) {
+    if($offline) {
+      fetchAllModsOffline();
+    } else {
+      fetchAllModsOnline();
+    }
+  }
+
+  $: mods = $offline ? offlineMods : onlineMods;
 
   let filteredMods: PartialMod[] = [];
   $: {
@@ -42,7 +58,7 @@
     $favoriteMods;
     $queuedMods;
     
-    Promise.all(mods.map($filter.func)).then((results) => {
+    Promise.all(mods.map((mod) => $filter.func(mod, client))).then((results) => {
       filteredMods = mods.filter((_, i) => results[i]);
     });
   }
@@ -80,7 +96,7 @@
             weight: 0.75,
           },
           {
-            name: 'authors.user.username',
+            name: $offline ? 'authors' : 'authors.user.username',
             weight: 0.4,
           },
         ],

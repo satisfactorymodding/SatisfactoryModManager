@@ -1,7 +1,10 @@
 import { CompatibilityState, ModVersionsCompatibilityDocument, SmlVersionsCompatibilityDocument, type Compatibility, type Mod } from '$lib/generated';
+import { offline } from '$lib/store/settingsStore';
 import type { GameBranch } from '$lib/wailsTypesExtensions';
-import { getContextClient } from '@urql/svelte';
+import { OfflineGetMod, OfflineGetSMLVersions } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
+import { Client, getContextClient } from '@urql/svelte';
 import { coerce, compare, minVersion, satisfies } from 'semver';
+import { get } from 'svelte/store';
 
 function gameVersionToSemver(version: number): string | null {
   return coerce(version)?.format();
@@ -23,17 +26,50 @@ export function getReportedCompatibility(mod: Pick<Mod, 'compatibility'>, gameBr
   return undefined;
 }
 
-export async function getVersionCompatibility(modReference: string, gameVersion: number): Promise<Compatibility> {
-  const urqlclient = getContextClient();
+interface SMLVersion {
+  version: string;
+  satisfactory_version: number;
+}
 
-  const smlVersionsQuery = await urqlclient.query(SmlVersionsCompatibilityDocument).toPromise();
-  const versions = smlVersionsQuery.data?.getSMLVersions.sml_versions;
+async function getSMLVersions(urqlClient: Client): Promise<SMLVersion[] | undefined> {
+  if(get(offline)) {
+    return OfflineGetSMLVersions();
+  }
+  
+  const smlVersionsQuery = await urqlClient.query(SmlVersionsCompatibilityDocument).toPromise();
+
+  return smlVersionsQuery.data?.getSMLVersions.sml_versions;
+}
+
+interface ModVersion {
+  version: string;
+  dependencies: {
+    mod_id: string;
+    condition: string;
+  }[];
+}
+
+async function getModVersions(modReference: string, urqlClient: Client): Promise<ModVersion[] | undefined> {
+  if(get(offline)) {
+    try {
+      return (await OfflineGetMod(modReference)).versions;
+    } catch {
+      return undefined;
+    }
+  }
+  
+  const modQuery = await urqlClient.query(ModVersionsCompatibilityDocument, { modReference }).toPromise();
+  
+  return modQuery.data?.getModByReference?.versions;
+}
+
+export async function getVersionCompatibility(modReference: string, gameVersion: number, urqlClient: Client): Promise<Compatibility> {
+  const versions = await getSMLVersions(urqlClient);
   if(!versions) {
     return CompatibilityState.Broken;
   }
 
-  const modQuery = await urqlclient.query(ModVersionsCompatibilityDocument, { modReference }).toPromise();
-  const modVersions = modQuery.data?.getModByReference?.versions;
+  const modVersions = await getModVersions(modReference, urqlClient);
   if(!modVersions) {
     return CompatibilityState.Broken;
   }

@@ -16,6 +16,7 @@ require (
 	github.com/wailsapp/wails/v2 v2.4.0
 	github.com/zishang520/engine.io v1.3.1
 	github.com/zishang520/socket.io v1.0.20
+	golang.org/x/exp v0.0.0-20230307190834-24139beb5833
 	golang.org/x/sys v0.6.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )

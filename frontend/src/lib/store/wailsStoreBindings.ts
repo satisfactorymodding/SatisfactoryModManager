@@ -134,7 +134,9 @@ export function writableBindingSync<T>(defaultValue: T,
   } as WritableBinding<T>;
 
   store.subscribe((value) => {
-    options.updateFunction(value);
+    if(store.isInit) {
+      options.updateFunction(value);
+    }
   });
 
   return store;

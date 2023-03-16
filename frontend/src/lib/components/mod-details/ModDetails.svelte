@@ -12,7 +12,7 @@
   import { canModify, lockfileMods, manifestMods, progress } from '$lib/store/ficsitCLIStore';
   import { error } from '$lib/store/generalStore';
   import { search } from '$lib/store/modFiltersStore';
-  import { InstallModVersion } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
+  import { InstallModVersion, OfflineGetMod } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
   import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
   import Dialog, { Content, Title } from '@smui/dialog';
   import { getAuthor } from '$lib/utils/getModAuthor';
@@ -22,6 +22,8 @@
   import { expandedMod } from '$lib/store/generalStore';
   import { minVersion, valid, validRange, sort, coerce, SemVer } from 'semver';
   import Tooltip, { Wrapper } from '@smui/tooltip';
+  import { offline } from '$lib/store/settingsStore';
+  import type { ficsitcli_bindings } from '$wailsjs/go/models';
 
   const client = getContextClient();
 
@@ -29,17 +31,58 @@
     {
       query: GetModDetailsDocument,
       client,
-      pause: !$expandedMod,
+      pause: !$expandedMod || !!$offline,
       variables: {
         modReference: $expandedMod ?? '',
       },
     },
   );
 
-  $: mod = $modQuery.fetching ? null : $modQuery.data?.mod;
+  interface OfflineMod {
+    offline: true;
+    mod_reference: string;
+    name: string;
+    authors: {
+      role: 'creator';
+      user: {
+        username: string;
+      }
+    }[];
+    logo?: string;
+    versions: ficsitcli_bindings.ModVersion[];
+  }
+  
+  let offlineMod: OfflineMod = {
+    offline: true,
+    mod_reference: '',
+    name: '',
+    versions: [],
+    authors: [],
+    logo: undefined,
+  };
 
-  $: renderedLogo = mod?.logo || 'https://ficsit.app/images/no_image.webp';
-  $: descriptionRendered = mod?.full_description ? markdown(mod.full_description) : undefined;
+  $: {
+    if($offline && $expandedMod) {
+      OfflineGetMod($expandedMod).then((mod) => {
+        offlineMod = {
+          ...mod,
+          authors: mod.authors.map((author) => ({
+            role: 'creator',
+            user: {
+              username: author,
+            },
+          })),
+          offline: true,
+        };
+      });
+    }
+  }
+
+  $: mod = $offline ? offlineMod : ($modQuery.fetching ? null : $modQuery.data?.mod);
+
+  $: actualLogo = (mod && 'offline' in mod) ? (mod?.logo ? `data:image/png;base64, ${mod?.logo}` : undefined) : mod?.logo;
+  $: renderedLogo = actualLogo || 'https://ficsit.app/images/no_image.webp';
+  $: descriptionRendered = (mod && 'full_description' in mod && mod?.full_description) ? markdown(mod.full_description) : undefined;
   $: author = getAuthor(mod);
 
   $: isInstalled = mod && mod.mod_reference in $manifestMods;
@@ -58,20 +101,25 @@
   let versionCompatibility: Compatibility = { state: CompatibilityState.Works };
   $: {
     if(mod && $selectedInstall && $selectedInstall.info) {
-      reportedCompatibility = getReportedCompatibility(mod, $selectedInstall.info.branch as GameBranch);
-      if(reportedCompatibility) {
-        reportedCompatibility = {
-          state: reportedCompatibility.state,
-          note: reportedCompatibility.note 
-            ? `This mod has been reported as ${reportedCompatibility.state} on this game version.<br>${markdown(reportedCompatibility.note)}` 
-            : `This mod has been reported as ${reportedCompatibility.state} on this game version.`,
-        };
+      if(!('offline' in mod)) {
+        reportedCompatibility = getReportedCompatibility(mod, $selectedInstall.info.branch as GameBranch);
+        if(reportedCompatibility) {
+          reportedCompatibility = {
+            state: reportedCompatibility.state,
+            note: reportedCompatibility.note 
+              ? `This mod has been reported as ${reportedCompatibility.state} on this game version.<br>${markdown(reportedCompatibility.note)}` 
+              : `This mod has been reported as ${reportedCompatibility.state} on this game version.`,
+          };
+        }
+      } else {
+        reportedCompatibility = undefined;
       }
-      if (mod.hidden && !isDependency) {
+
+      if (!('offline' in mod) && mod.hidden && !isDependency) {
         versionCompatibility = { state: CompatibilityState.Broken, note: 'This mod was hidden by the author.' };
       }
       else {
-        getVersionCompatibility(mod.mod_reference, $selectedInstall.info.version).then((compatibility) => {
+        getVersionCompatibility(mod.mod_reference, $selectedInstall.info.version, client).then((compatibility) => {
           versionCompatibility = compatibility;
         });
       }
@@ -130,6 +178,7 @@
     imageViewSrc = null;
   }
 
+  // Does not need offline support, since descriptions are disabled in offline mode
   function handleElementClick(element: HTMLElement) {
     if(element instanceof HTMLAnchorElement) {
       const url = new URL(element.href);
@@ -185,7 +234,9 @@
         <List>
           {#each mod?.authors ?? [] as author}
             <Item style="height: 80px" on:SMUI:action={() => $search = `author:"${author.user.username}"`}>
-              <img src={author.user.avatar} alt="{author.user.username} Avatar" class="avatar" />
+              {#if 'avatar' in author.user}
+                <img src={author.user.avatar} alt="{author.user.username} Avatar" class="avatar" />
+              {/if}
               <Text class="pl-2 h-full flex flex-col content-center -mb-4">
                 <PrimaryText class="text-base">{author.user.username}</PrimaryText>
                 <SecondaryText class="text-base">{author.role}</SecondaryText>
@@ -199,39 +250,41 @@
     <div class="pt-4">
       <span>Mod info:</span><br>
       <span>Size: </span><span class="font-bold">{size ?? 'Loading...'}</span><br>
-      <span>Created: </span><span class="font-bold">{mod ? new Date(mod.created_at).toLocaleDateString() : 'Loading...'}</span><br>
-      <span>Updated: </span><span class="font-bold">{mod ? new Date(mod.last_version_date).toLocaleString() : 'Loading...'}</span><br>
-      <span>Total downloads: </span><span class="font-bold">{mod?.downloads.toLocaleString() ?? 'Loading...'}</span><br>
-      <span>Views: </span><span class="font-bold">{mod?.views.toLocaleString() ?? 'Loading...'}</span><br>
-      <div class="flex h-5">
-        <span>Compatibility: </span>
-        {#if mod?.compatibility}
-          <div class="flex pl-1">
-            <Wrapper>
-              <SvgIcon icon={mdiRocketLaunch} class="{colorForCompatibilityState(mod.compatibility.EA.state)} w-5" />
-              <Tooltip surface$class="max-w-lg text-base">
-                This mod has been reported as {mod.compatibility.EA.state} on Early Access.
-                {#if mod.compatibility.EA.note}
-                  <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-                  {@html markdown(mod.compatibility.EA.note)}
-                {/if}
-              </Tooltip>
-            </Wrapper>
-            <Wrapper>
-              <SvgIcon icon={mdiTestTube} class="{colorForCompatibilityState(mod.compatibility.EXP.state)} w-5" />
-              <Tooltip surface$class="max-w-lg text-base">
-                This mod has been reported as {mod.compatibility.EXP.state} on Experimental.
-                {#if mod.compatibility.EXP.note}
-                  <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-                  {@html markdown(mod.compatibility.EXP.note)}
-                {/if}
-              </Tooltip>
-            </Wrapper>
-          </div>
-        {:else}
-          <span class="font-bold">N/A</span>
-        {/if}
-      </div>
+      {#if (!mod || !('offline' in mod)) && !$offline}
+        <span>Created: </span><span class="font-bold">{mod ? new Date(mod.created_at).toLocaleDateString() : 'Loading...'}</span><br>
+        <span>Updated: </span><span class="font-bold">{mod ? new Date(mod.last_version_date).toLocaleString() : 'Loading...'}</span><br>
+        <span>Total downloads: </span><span class="font-bold">{mod?.downloads.toLocaleString() ?? 'Loading...'}</span><br>
+        <span>Views: </span><span class="font-bold">{mod?.views.toLocaleString() ?? 'Loading...'}</span><br>
+        <div class="flex h-5">
+          <span>Compatibility: </span>
+          {#if mod?.compatibility}
+            <div class="flex pl-1">
+              <Wrapper>
+                <SvgIcon icon={mdiRocketLaunch} class="{colorForCompatibilityState(mod.compatibility.EA.state)} w-5" />
+                <Tooltip surface$class="max-w-lg text-base">
+                  This mod has been reported as {mod.compatibility.EA.state} on Early Access.
+                  {#if mod.compatibility.EA.note}
+                    <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+                    {@html markdown(mod.compatibility.EA.note)}
+                  {/if}
+                </Tooltip>
+              </Wrapper>
+              <Wrapper>
+                <SvgIcon icon={mdiTestTube} class="{colorForCompatibilityState(mod.compatibility.EXP.state)} w-5" />
+                <Tooltip surface$class="max-w-lg text-base">
+                  This mod has been reported as {mod.compatibility.EXP.state} on Experimental.
+                  {#if mod.compatibility.EXP.note}
+                    <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+                    {@html markdown(mod.compatibility.EXP.note)}
+                  {/if}
+                </Tooltip>
+              </Wrapper>
+            </div>
+          {:else}
+            <span class="font-bold">N/A</span>
+          {/if}
+        </div>
+      {/if}
     </div>
 
     <div class="pt-4">
@@ -293,24 +346,26 @@
           </List>
         </Menu>
       </div>
-      <div class="pt-2">
-        <Button variant="unelevated" color="secondary" class="w-full" disabled={!$canModify} on:click={() => $canModify && changelogsMenu.setOpen(!changelogsMenu.isOpen())}>
-          <Label>Changelogs</Label>
-          <SvgIcon icon={mdiChevronDown}/>
-        </Button>
-        <Menu bind:this={changelogsMenu} class="min-w-[10rem] max-h-[32rem] overflow-x-visible" anchorCorner="TOP_LEFT">
-          <List>
-            {#each mod?.versions ?? [] as version}
-              <Item on:SMUI:action={() => { changelogVersion = version; changelogsMenu.setOpen(false); }}>
-                <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
-                  <PrimaryText class="text-base">{version.version}</PrimaryText>
-                </Text>
-              </Item>
-              <Separator insetLeading insetTrailing />
-            {/each}
-          </List>
-        </Menu>
-      </div>
+      {#if (!mod || !('offline' in mod)) && !$offline}
+        <div class="pt-2">
+          <Button variant="unelevated" color="secondary" class="w-full" disabled={!$canModify} on:click={() => $canModify && changelogsMenu.setOpen(!changelogsMenu.isOpen())}>
+            <Label>Changelogs</Label>
+            <SvgIcon icon={mdiChevronDown}/>
+          </Button>
+          <Menu bind:this={changelogsMenu} class="min-w-[10rem] max-h-[32rem] overflow-x-visible" anchorCorner="TOP_LEFT">
+            <List>
+              {#each mod?.versions ?? [] as version}
+                <Item on:SMUI:action={() => { changelogVersion = version; changelogsMenu.setOpen(false); }}>
+                  <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
+                    <PrimaryText class="text-base">{version.version}</PrimaryText>
+                  </Text>
+                </Item>
+                <Separator insetLeading insetTrailing />
+              {/each}
+            </List>
+          </Menu>
+        </div>
+      {/if}
     </div>
 
     <div class="pt-4">
@@ -328,7 +383,9 @@
     </Button>
   </div>
   <div class="markdown-content break-words overflow-wrap-anywhere flex-1 px-3 my-4 overflow-y-scroll overflow-x-hidden w-0">
-    {#if descriptionRendered}
+    {#if $offline}
+      <div class="flex items-center justify-center h-full text-center font-bold">Offline mode is enabled. Changelogs and descriptions are not available.</div>
+    {:else if descriptionRendered}
       <!-- eslint-disable-next-line svelte/no-at-html-tags -->
       <p on:click={handleDescriptionClick}>{@html descriptionRendered}</p>
     {:else}

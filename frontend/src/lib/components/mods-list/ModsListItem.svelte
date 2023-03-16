@@ -15,8 +15,11 @@
   import type { GameBranch } from '$lib/wailsTypesExtensions';
   import { CompatibilityState, type Compatibility } from '$lib/generated';
   import { markdown } from '$lib/utils/markdown';
+  import { getContextClient } from '@urql/svelte';
   
   export let mod: PartialMod;
+
+  const client = getContextClient();
 
   const dispatch = createEventDispatcher();
 
@@ -26,8 +29,9 @@
   
   export let selected: boolean;
 
-  $: renderedLogo = mod.logo || 'https://ficsit.app/images/no_image.webp';
-  $: author = getAuthor(mod);
+  $: actualLogo = 'offline' in mod ? (mod.logo ? `data:image/png;base64, ${mod.logo}` : undefined) : mod.logo;
+  $: renderedLogo = actualLogo || 'https://ficsit.app/images/no_image.webp';
+  $: author = 'offline' in mod ? mod.authors[0] : getAuthor(mod);
 
   $: isInstalled = mod.mod_reference in $manifestMods;
   $: isEnabled = mod.mod_reference in $lockfileMods;
@@ -97,20 +101,25 @@
   let versionCompatibility: Compatibility = { state: CompatibilityState.Works };
   $: {
     if($selectedInstall && $selectedInstall.info) {
-      reportedCompatibility = getReportedCompatibility(mod, $selectedInstall.info.branch as GameBranch);
-      if(reportedCompatibility) {
-        reportedCompatibility = {
-          state: reportedCompatibility.state,
-          note: reportedCompatibility.note 
-            ? `This mod has been reported as ${reportedCompatibility.state} on this game version.<br>${markdown(reportedCompatibility.note)}` 
-            : `This mod has been reported as ${reportedCompatibility.state} on this game version.`,
-        };
+      if(!('offline' in mod)) {
+        reportedCompatibility = getReportedCompatibility(mod, $selectedInstall.info.branch as GameBranch);
+        if(reportedCompatibility) {
+          reportedCompatibility = {
+            state: reportedCompatibility.state,
+            note: reportedCompatibility.note 
+              ? `This mod has been reported as ${reportedCompatibility.state} on this game version.<br>${markdown(reportedCompatibility.note)}` 
+              : `This mod has been reported as ${reportedCompatibility.state} on this game version.`,
+          };
+        }
+      } else {
+        reportedCompatibility = undefined;
       }
-      if (mod.hidden && !isDependency) {
+
+      if (!('offline' in mod) && mod.hidden && !isDependency) {
         versionCompatibility = { state: CompatibilityState.Broken, note: 'This mod was hidden by the author.' };
       }
       else {
-        getVersionCompatibility(mod.mod_reference, $selectedInstall.info.version).then((compatibility) => {
+        getVersionCompatibility(mod.mod_reference, $selectedInstall.info.version, client).then((compatibility) => {
           versionCompatibility = compatibility;
         });
       }
@@ -200,24 +209,28 @@
           </Tooltip>
         {/if}
       </Wrapper>
-      <div class="truncate md:text-base text-sm hidden md:block">{mod.short_description}</div>
+      <div class="truncate md:text-base text-sm hidden md:block">{'short_description' in mod ? mod.short_description : ''}</div>
       <div class="flex">
         {#if !inProgress}
           <div class="grow w-0 lg:text-base text-sm">
-            <div class="truncate text-base md:text-sm block md:hidden">{mod.short_description}</div>
+            <div class="truncate text-base md:text-sm block md:hidden">{'short_description' in mod ? mod.short_description : ''}</div>
             <div class="truncate hidden md:block">
-              {#each mod?.tags ?? [] as tag}
-                <span class="pr-1">#{tag.name}</span>
-              {/each}
+              {#if !('offline' in mod)}
+                {#each mod?.tags ?? [] as tag}
+                  <span class="pr-1">#{tag.name}</span>
+                {/each}
+              {/if}
               &nbsp; <!-- keep div height even when no tags are available -->
             </div>
             <div class="flex h-5 md:h-4.5">
-              <div class="w-24 flex items-center">
-                <div class="pr-1 inline-flex items-center justify-items-center lg:w-7 w-6"><SvgIcon icon={mdiEye} class=""/></div><span>{mod.views.toLocaleString()}</span>
-              </div>
-              <div class="w-24 flex items-center">
-                <div class="pr-1 inline-flex items-center justify-items-center lg:w-7 w-6"><SvgIcon icon={mdiDownload} class=""/></div><span>{mod.downloads.toLocaleString()}</span>
-              </div>
+              {#if !('offline' in mod)}
+                <div class="w-24 flex items-center">
+                  <div class="pr-1 inline-flex items-center justify-items-center lg:w-7 w-6"><SvgIcon icon={mdiEye} class=""/></div><span>{mod.views.toLocaleString()}</span>
+                </div>
+                <div class="w-24 flex items-center">
+                  <div class="pr-1 inline-flex items-center justify-items-center lg:w-7 w-6"><SvgIcon icon={mdiDownload} class=""/></div><span>{mod.downloads.toLocaleString()}</span>
+                </div>
+              {/if}
             </div>
           </div>
         {:else}

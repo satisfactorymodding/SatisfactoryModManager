@@ -32,6 +32,7 @@ type SettingsData struct {
 	SelectedInstall string            `json:"selectedInstall"`
 	SelectedProfile map[string]string `json:"selectedProfile"`
 	ModsEnabled     map[string]bool   `json:"modsEnabled"`
+	Offline         bool              `json:"offline"`
 	Konami          bool              `json:"konami"`
 	LaunchButton    string            `json:"launchButton"`
 }
@@ -49,6 +50,7 @@ var Settings SettingsData = SettingsData{
 	SelectedInstall: "",
 	SelectedProfile: map[string]string{},
 	ModsEnabled:     map[string]bool{},
+	Offline:         false,
 	Konami:          false,
 	LaunchButton:    "normal",
 }

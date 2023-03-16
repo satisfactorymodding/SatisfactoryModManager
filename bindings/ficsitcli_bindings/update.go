@@ -26,7 +26,7 @@ func (f *FicsitCLI) CheckForUpdates() ([]Update, error) {
 
 	profile := f.GetProfile(f.selectedInstallation.Installation.Profile)
 
-	resolver := cli.NewDependencyResolver(f.ficsitCli.APIClient)
+	resolver := cli.NewDependencyResolver(f.ficsitCli.Provider)
 
 	gameVersion, err := f.selectedInstallation.Installation.GetGameVersion(f.ficsitCli)
 	if err != nil {

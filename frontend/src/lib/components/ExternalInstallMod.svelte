@@ -1,6 +1,7 @@
 <script lang="ts">
   import { GetModSummaryDocument } from '$lib/generated';
   import { addQueuedModAction, manifestMods, queuedMods, removeQueuedModAction } from '$lib/store/ficsitCLIStore';
+  import { offline } from '$lib/store/settingsStore';
   import { InstallMod } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
   import { EventsOn } from '$wailsjs/runtime/runtime';
   import Button from '@smui/button';
@@ -17,7 +18,7 @@
     {
       query: GetModSummaryDocument,
       client,
-      pause: !modId,
+      pause: !modId || !!$offline,
       variables: {
         modReference: modId ?? '',
       },
