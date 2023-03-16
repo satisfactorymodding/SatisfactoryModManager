@@ -250,6 +250,24 @@ func (f *FicsitCLI) ImportProfile(name string, file string) error {
 		return errors.Wrap(err, "Failed to write profile")
 	}
 
+	f.progress = &Progress{
+		Item:     "__import_profile__",
+		Message:  "Validating install",
+		Progress: -1,
+	}
+
+	f.setProgress(f.progress)
+
+	defer f.setProgress(nil)
+
+	installErr := f.validateInstall(selectedInstall, "__import_profile__")
+
+	if installErr != nil {
+		f.ficsitCli.Profiles.DeleteProfile(name)
+		log.Error().Err(installErr).Str("profile", name).Msg("Failed to validate install")
+		return errors.Wrap(installErr, "Failed to validate install")
+	}
+
 	f.ficsitCli.Profiles.Save()
 
 	return nil

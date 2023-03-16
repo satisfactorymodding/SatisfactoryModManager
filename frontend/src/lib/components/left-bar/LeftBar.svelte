@@ -9,7 +9,7 @@
   import { siDiscord, siGithub } from 'simple-icons/icons';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   
-  import { addProfile, deleteProfile, importProfile, installs, profiles, canModify, renameProfile, selectedInstall, selectedProfile } from '$lib/store/ficsitCLIStore';
+  import { addProfile, deleteProfile, importProfile, installs, profiles, canModify, renameProfile, selectedInstall, selectedProfile, progress } from '$lib/store/ficsitCLIStore';
   import { offline } from '$lib/store/settingsStore';
   import { error } from '$lib/store/generalStore';
   import { BrowserOpenURL, EventsOn } from '$wailsjs/runtime/runtime';
@@ -21,6 +21,7 @@
   import HelperText from '@smui/textfield/helper-text';
   import { ExportCurrentProfile, ReadExportedProfileMetadata, SetModsEnabled } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
   import LaunchButton from './LaunchButton.svelte';
+  import LinearProgress from '@smui/linear-progress';
 
   $: modsEnabled = !$selectedInstall?.installation?.vanilla;
 
@@ -152,6 +153,8 @@
     importProfileMetadata = await ReadExportedProfileMetadata(importProfileFilepath);
     importProfileDialog = true;
   });
+
+  $: importProfileProgress = $progress?.item === '__import_profile__';
 </script>
 
 <div class="flex flex-col h-full p-4 left-bar w-[22rem] min-w-[22rem] ">
@@ -398,6 +401,21 @@
       <Label>Import</Label>
     </Button>
   </Actions>
+</Dialog>
+
+<Dialog
+  bind:open={importProfileProgress}
+  scrimClickAction=""
+  escapeKeyAction=""
+  surface$style="width: 500px; max-width: calc(100vw - 32px);"
+>
+  <Title>Importing profile {importProfileName}</Title>
+  <Content>
+    {#if $progress}
+      <p>{$progress.message}</p>
+      <LinearProgress progress={$progress.progress} indeterminate={$progress.progress === -1} class="h-4 w-full rounded-lg"/>
+    {/if}
+  </Content>
 </Dialog>
 
 <style>
