@@ -1,11 +1,12 @@
 <script lang="ts">
+  import Button from '@smui/button';
+  import Dialog, { Actions, Content, Title } from '@smui/dialog';
+  import LinearProgress from '@smui/linear-progress';
+
   import { smmUpdate, smmUpdateProgress, smmUpdateReady } from '$lib/store/smmUpdateStore';
   import { bytesToAppropriate, secondsToAppropriate } from '$lib/utils/dataFormats';
   import { markdown } from '$lib/utils/markdown';
   import { UpdateAndRestart } from '$wailsjs/go/bindings/Update';
-  import Button from '@smui/button';
-  import Dialog, { Actions, Content, Title } from '@smui/dialog';
-  import LinearProgress from '@smui/linear-progress';
 
   let updateAvailableDialogOpen = false;
   let updateReadyDialogOpen = false;

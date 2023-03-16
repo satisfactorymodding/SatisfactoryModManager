@@ -1,12 +1,14 @@
 import { get, readable, writable } from 'svelte/store';
+import { tick } from 'svelte';
+import { queue } from 'async';
+
+import { readableBinding, writableBinding } from './wailsStoreBindings';
+import { isLaunchingGame } from './generalStore';
+import { queueAutoStart } from './settingsStore';
+
 import { cli, ficsitcli_bindings } from '$wailsjs/go/models';
 import { AddProfile, CheckForUpdates, DeleteProfile, EmitModsChange, GetInstallationsInfo, GetInvalidInstalls, GetProfiles, ImportProfile, RenameProfile, SelectInstall, SetProfile } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
 import { GetFavoriteMods } from '$wailsjs/go/bindings/Settings';
-import { readableBinding, writableBinding } from './wailsStoreBindings';
-import { tick } from 'svelte';
-import { isLaunchingGame } from './generalStore';
-import { queue } from 'async';
-import { queueAutoStart } from './settingsStore';
 
 export const invalidInstalls = readableBinding<(Error & {path?: string})[]>([], { initialGet: GetInvalidInstalls });
 

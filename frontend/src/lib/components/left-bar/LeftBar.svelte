@@ -4,24 +4,22 @@
   import Dialog, { Title, Content, Actions } from '@smui/dialog';
   import TextField from '@smui/textfield'; 
   import Tooltip, { Wrapper } from '@smui/tooltip';
-
   import { mdiCheckCircle, mdiCloseCircle, mdiDownload, mdiHelpCircle, mdiPencil, mdiPlusCircle, mdiTrashCan, mdiUpload, mdiWeb } from '@mdi/js';
   import { siDiscord, siGithub } from 'simple-icons/icons';
-  import SvgIcon from '$lib/components/SVGIcon.svelte';
-  
-  import { addProfile, deleteProfile, importProfile, installs, profiles, canModify, renameProfile, selectedInstall, selectedProfile, progress } from '$lib/store/ficsitCLIStore';
-  import { offline } from '$lib/store/settingsStore';
-  import { error } from '$lib/store/generalStore';
-  import { BrowserOpenURL, EventsOn } from '$wailsjs/runtime/runtime';
-  import { OpenFileDialog } from '$wailsjs/go/bindings/App';
+  import HelperText from '@smui/textfield/helper-text';
+  import LinearProgress from '@smui/linear-progress';
 
   import Settings from './Settings.svelte';
   import Updates from './Updates.svelte';
-  import { bindings, ficsitcli_bindings } from '$wailsjs/go/models';
-  import HelperText from '@smui/textfield/helper-text';
-  import { ExportCurrentProfile, ReadExportedProfileMetadata, SetModsEnabled } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
   import LaunchButton from './LaunchButton.svelte';
-  import LinearProgress from '@smui/linear-progress';
+
+  import SvgIcon from '$lib/components/SVGIcon.svelte';
+  import { addProfile, deleteProfile, importProfile, installs, profiles, canModify, renameProfile, selectedInstall, selectedProfile, progress } from '$lib/store/ficsitCLIStore';
+  import { error } from '$lib/store/generalStore';
+  import { BrowserOpenURL, EventsOn } from '$wailsjs/runtime/runtime';
+  import { OpenFileDialog } from '$wailsjs/go/bindings/App';
+  import { bindings, ficsitcli_bindings } from '$wailsjs/go/models';
+  import { ExportCurrentProfile, ReadExportedProfileMetadata, SetModsEnabled } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
 
   $: modsEnabled = !$selectedInstall?.installation?.vanilla;
 

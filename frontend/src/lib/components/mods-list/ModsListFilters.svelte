@@ -1,10 +1,12 @@
 <script lang="ts">
-  import { filter, filterOptions, order, orderByOptions, search } from '$lib/store/modFiltersStore';
   import Textfield, { Input } from '@smui/textfield';
   import LineRipple from '@smui/line-ripple';
   import Select, { Option } from '@smui/select';
-  import SvgIcon from '../SVGIcon.svelte';
   import { mdiFilter, mdiSort } from '@mdi/js';
+
+  import SvgIcon from '../SVGIcon.svelte';
+
+  import { filter, filterOptions, order, orderByOptions, search } from '$lib/store/modFiltersStore';
   
   let inputA: Input;
   let lineRippleA: LineRipple;

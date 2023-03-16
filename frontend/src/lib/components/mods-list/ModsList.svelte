@@ -1,16 +1,19 @@
 <script lang="ts">
   import { getContextClient } from '@urql/svelte';
+  import _ from 'lodash';
+  import Fuse from 'fuse.js';
+
+  import AnnouncementsBar from '../announcements/AnnouncementsBar.svelte';
+
+  import ModListFilters from './ModsListFilters.svelte';
+
   import { GetModsDocument, GetModCountDocument } from '$lib/generated';
   import VirtualList from '$lib/components/mods-list/VirtualModList.svelte';
   import ModsListItem from '$lib/components/mods-list/ModsListItem.svelte';
-  import _ from 'lodash';
-  import Fuse from 'fuse.js';
-  import ModListFilters from './ModsListFilters.svelte';
   import { filter, order, search, type PartialMod } from '$lib/store/modFiltersStore';
   import { favoriteMods, lockfileMods, manifestMods, queuedMods } from '$lib/store/ficsitCLIStore';
   import { offline, startView } from '$lib/store/settingsStore';
   import { expandedMod } from '$lib/store/generalStore';
-  import AnnouncementsBar from '../announcements/AnnouncementsBar.svelte';
   import { OfflineGetMods } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
 
   const MODS_PER_PAGE = 50;

@@ -1,10 +1,11 @@
 <script lang="ts">
-  import { GetChangelogDocument } from '$lib/generated';
-  import { offline } from '$lib/store/settingsStore';
-  import type { ficsitcli_bindings } from '$wailsjs/go/models';
   import Dialog, { Content, Title } from '@smui/dialog';
   import { getContextClient, queryStore } from '@urql/svelte';
   import { gt, lte } from 'semver';
+
+  import { GetChangelogDocument } from '$lib/generated';
+  import { offline } from '$lib/store/settingsStore';
+  import type { ficsitcli_bindings } from '$wailsjs/go/models';
 
   export let update: ficsitcli_bindings.Update | null = null;
 

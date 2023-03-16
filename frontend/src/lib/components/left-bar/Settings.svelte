@@ -2,18 +2,14 @@
   import Button, { Label } from '@smui/button';
   import Menu, { SelectionGroup, SelectionGroupIcon } from '@smui/menu';
   import List, { Item, PrimaryText, Text, Separator } from '@smui/list';
-  
   import { mdiBug, mdiCheck, mdiChevronRight, mdiClipboard, mdiCog, mdiDownload, mdiTune } from '@mdi/js';
-  
+  import { getContextClient } from '@urql/svelte';
+
   import SvgIcon from '$lib/components/SVGIcon.svelte';
-  
   import { GenerateDebugInfo } from '$wailsjs/go/bindings/DebugInfo';
-  
   import { startView, konami, launchButton, queueAutoStart, offline } from '$lib/store/settingsStore';
   import { manifestMods, lockfileMods } from '$lib/store/ficsitCLIStore';
   import { GetModNameDocument } from '$lib/generated';
-  
-  import { getContextClient } from '@urql/svelte';
   import type { LaunchButtonType, ViewType } from '$lib/wailsTypesExtensions';
   import { OfflineGetMod } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
 

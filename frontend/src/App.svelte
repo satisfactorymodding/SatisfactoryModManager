@@ -1,9 +1,13 @@
 <script lang="ts">
   import './_global.postcss';
+  import { setContextClient } from '@urql/svelte';
+  import Dialog, { Actions, Content, Title } from '@smui/dialog';
+  import Button, { Label } from '@smui/button';
+  import LinearProgress from '@smui/linear-progress';
+
   import TitleBar from '$lib/components/TitleBar.svelte';
   import ModsList from '$lib/components/mods-list/ModsList.svelte';
   import { initializeGraphQLClient } from '$lib/core/graphql';
-  import { setContextClient } from '@urql/svelte';
   import { Environment } from '$wailsjs/runtime';
   import ModDetails from '$lib/components/mod-details/ModDetails.svelte';
   import { ExpandMod, UnexpandMod } from '$wailsjs/go/bindings/App';
@@ -11,11 +15,8 @@
   import { installs, invalidInstalls, progress, selectedInstall, selectedProfile } from '$lib/store/ficsitCLIStore';
   import { konami } from '$lib/store/settingsStore';
   import { expandedMod, error } from '$lib/store/generalStore';
-  import Dialog, { Actions, Content, Title } from '@smui/dialog';
-  import Button, { Label } from '@smui/button';
   import { GenerateDebugInfo } from '$wailsjs/go/bindings/DebugInfo';
   import ExternalInstallMod from '$lib/components/ExternalInstallMod.svelte';
-  import LinearProgress from '@smui/linear-progress';
 
   let frameless = false;
   Environment().then((env) => {

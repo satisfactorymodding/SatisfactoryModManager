@@ -1,27 +1,26 @@
 <script lang="ts">
   import { getContextClient, queryStore } from '@urql/svelte';
-  import { CompatibilityState, GetModDetailsDocument, GetModReferenceDocument, type Compatibility, type Version } from '$lib/generated';
-  import { markdown } from '$lib/utils/markdown';
   import Button, { Label } from '@smui/button';
   import Checkbox from '@smui/checkbox';
-  import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { mdiCheck, mdiChevronDown, mdiImport, mdiRocketLaunch, mdiTestTube } from '@mdi/js';
   import Menu from '@smui/menu';
   import List, { Item, PrimaryText, SecondaryText, Separator, Text } from '@smui/list';
+  import Dialog, { Content, Title } from '@smui/dialog';
+  import { minVersion, valid, validRange, sort, coerce, SemVer } from 'semver';
+  import Tooltip, { Wrapper } from '@smui/tooltip';
+
+  import { CompatibilityState, GetModDetailsDocument, GetModReferenceDocument, type Compatibility, type Version } from '$lib/generated';
+  import { markdown } from '$lib/utils/markdown';
+  import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { bytesToAppropriate } from '$lib/utils/dataFormats';
-  import { canModify, lockfileMods, manifestMods, progress } from '$lib/store/ficsitCLIStore';
-  import { error } from '$lib/store/generalStore';
+  import { canModify, lockfileMods, manifestMods, progress , selectedInstall } from '$lib/store/ficsitCLIStore';
+  import { error , expandedMod } from '$lib/store/generalStore';
   import { search } from '$lib/store/modFiltersStore';
   import { InstallModVersion, OfflineGetMod } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
   import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
-  import Dialog, { Content, Title } from '@smui/dialog';
   import { getAuthor } from '$lib/utils/getModAuthor';
-  import { selectedInstall } from '$lib/store/ficsitCLIStore';
   import { getReportedCompatibility, getVersionCompatibility } from '$lib/utils/modCompatibility';
   import type { GameBranch } from '$lib/wailsTypesExtensions';
-  import { expandedMod } from '$lib/store/generalStore';
-  import { minVersion, valid, validRange, sort, coerce, SemVer } from 'semver';
-  import Tooltip, { Wrapper } from '@smui/tooltip';
   import { offline } from '$lib/store/settingsStore';
   import type { ficsitcli_bindings } from '$wailsjs/go/models';
 

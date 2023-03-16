@@ -1,15 +1,16 @@
 <script lang="ts">
   import Tooltip, { Wrapper } from '@smui/tooltip';
+  import Button, { Label } from '@smui/button';
+  import { getContextClient } from '@urql/svelte';
+  import { mdiCheckCircleOutline, mdiOpenInNew } from '@mdi/js';
+
   import { selectedInstall, isGameRunning, lockfileMods, progress, queuedMods, startQueue } from '$lib/store/ficsitCLIStore';
   import { launchButton, offline, queueAutoStart } from '$lib/store/settingsStore';
   import { isLaunchingGame } from '$lib/store/generalStore';
   import { LaunchGame } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
-  import Button, { Label } from '@smui/button';
-  import { getContextClient } from '@urql/svelte';
   import { CompatibilityState, ModReportedCompatibilityDocument, type Compatibility } from '$lib/generated';
   import { getReportedCompatibility, getVersionCompatibility } from '$lib/utils/modCompatibility';
   import type { GameBranch } from '$lib/wailsTypesExtensions';
-  import { mdiCheckCircleOutline, mdiOpenInNew } from '@mdi/js';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
 
   $: isInstallLaunchable = !$selectedInstall?.info || !!$selectedInstall.info.launchPath;

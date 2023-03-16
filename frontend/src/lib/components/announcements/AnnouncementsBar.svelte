@@ -1,10 +1,12 @@
 <script lang="ts">
-  import { AnnouncementImportance, GetAnnouncementsDocument, SmrHealthcheckDocument, type Announcement as AnnouncementType } from '$lib/generated';
   import { getContextClient, queryStore } from '@urql/svelte';
-  import Announcement from './Announcement.svelte';
   import Carousel from 'svelte-carousel';
-  import { viewedAnnouncements } from '$lib/store/generalStore';
   import Tooltip, { Wrapper } from '@smui/tooltip';
+
+  import Announcement from './Announcement.svelte';
+
+  import { viewedAnnouncements } from '$lib/store/generalStore';
+  import { AnnouncementImportance, GetAnnouncementsDocument, SmrHealthcheckDocument, type Announcement as AnnouncementType } from '$lib/generated';
   import { offline } from '$lib/store/settingsStore';
 
   const client = getContextClient();

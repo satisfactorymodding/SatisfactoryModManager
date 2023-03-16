@@ -1,19 +1,20 @@
 <script lang="ts">
   import Button, { Label } from '@smui/button';
-  import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { mdiCheckCircle, mdiSync, mdiUpload } from '@mdi/js';
-
-  import { checkForUpdates, canModify, progress, updates, updateCheckInProgress } from '$lib/store/ficsitCLIStore';
-  import { error } from '$lib/store/generalStore';
   import Dialog, { Actions, Content, Title } from '@smui/dialog';
-  import { OfflineGetModsByReferences, UpdateAllMods } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
   import List, { Item, PrimaryText, SecondaryText, Text } from '@smui/list';
-  import type { ficsitcli_bindings } from '$wailsjs/go/models';
+  import { getContextClient, queryStore } from '@urql/svelte';
+
   import UpdateChangelog from './UpdateChangelog.svelte';
   import SMMUpdateDialog from './SMMUpdateDialog.svelte';
+
+  import SvgIcon from '$lib/components/SVGIcon.svelte';
+  import { checkForUpdates, canModify, progress, updates, updateCheckInProgress } from '$lib/store/ficsitCLIStore';
+  import { error } from '$lib/store/generalStore';
+  import { OfflineGetModsByReferences, UpdateAllMods } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
+  import type { ficsitcli_bindings } from '$wailsjs/go/models';
   import { CheckForUpdates as CheckForSMMUpdates } from '$wailsjs/go/bindings/Update';
   import { smmUpdate, smmUpdateReady } from '$lib/store/smmUpdateStore';
-  import { getContextClient, queryStore } from '@urql/svelte';
   import { GetModNamesDocument } from '$lib/generated';
   import { offline } from '$lib/store/settingsStore';
 

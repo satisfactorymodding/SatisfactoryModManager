@@ -1,11 +1,13 @@
 <script lang="ts">
   import { mdiDownload, mdiEye, mdiStar, mdiCheckCircle, mdiPlay, mdiPause, mdiTrashCan, mdiTrayFull, mdiTrayMinus, mdiSync } from '@mdi/js';
-  import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { createEventDispatcher } from 'svelte';
-  import { search, type PartialMod } from '$lib/store/modFiltersStore';
   import Button from '@smui/button';
   import LinearProgress from '@smui/linear-progress';
   import Tooltip, { Wrapper } from '@smui/tooltip';
+  import { getContextClient } from '@urql/svelte';
+
+  import SvgIcon from '$lib/components/SVGIcon.svelte';
+  import { search, type PartialMod } from '$lib/store/modFiltersStore';
   import { addQueuedModAction, queuedMods, favoriteMods, lockfileMods, manifestMods, progress, selectedInstall, removeQueuedModAction } from '$lib/store/ficsitCLIStore';
   import { error } from '$lib/store/generalStore';
   import { DisableMod, EnableMod, InstallMod, RemoveMod } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
@@ -15,7 +17,6 @@
   import type { GameBranch } from '$lib/wailsTypesExtensions';
   import { CompatibilityState, type Compatibility } from '$lib/generated';
   import { markdown } from '$lib/utils/markdown';
-  import { getContextClient } from '@urql/svelte';
   
   export let mod: PartialMod;
 

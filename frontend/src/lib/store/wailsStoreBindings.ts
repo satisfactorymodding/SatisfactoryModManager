@@ -1,4 +1,5 @@
 import { readable, writable, type Readable, type Writable } from 'svelte/store';
+
 import { EventsOff, EventsOn } from '$wailsjs/runtime/runtime';
 
 export type InitCallback = () => void;

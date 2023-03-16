@@ -5,6 +5,7 @@ module.exports = {
   ],
   plugins: [
     '@typescript-eslint',
+    'import',
   ],
   parserOptions: {
     sourceType: 'module',
@@ -58,5 +59,8 @@ module.exports = {
     semi: ['error', 'always'],
     'comma-dangle': ['error', 'always-multiline'],
     'object-curly-spacing': ['error', 'always'],
+    'import/order': ['error', { 'newlines-between': 'always' }],
+    'import/newline-after-import': ['error'],
+    'import/no-duplicates': ['error'],
   },
 };

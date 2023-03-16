@@ -2,6 +2,7 @@ import type { Client } from '@urql/svelte';
 import { createClient } from '@urql/svelte';
 import { cacheExchange } from '@urql/exchange-graphcache';
 import { persistedFetchExchange } from '@urql/exchange-persisted-fetch';
+
 import schema from '$lib/generated/graphql.schema.urql.json';
 
 export function initializeGraphQLClient(): Client {
