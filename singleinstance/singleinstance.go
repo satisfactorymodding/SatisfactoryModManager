@@ -35,8 +35,8 @@ func ListenForSecondInstance() {
 	if listening {
 		return
 	}
-	mq.Destroy("SatisfactoryModManager")
-	messageQueue, err := mq.New("SatisfactoryModManager", os.O_CREATE|mq.O_NONBLOCK, 0666)
+	_ = mq.Destroy("SatisfactoryModManager")
+	messageQueue, err := mq.New("SatisfactoryModManager", os.O_CREATE|mq.O_NONBLOCK, 0o666)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to create message queue")
 	}

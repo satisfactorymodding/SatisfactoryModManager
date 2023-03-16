@@ -1,6 +1,10 @@
 package updater
 
-import "io"
+import (
+	"io"
+
+	"github.com/pkg/errors"
+)
 
 type progressReader struct {
 	io.Reader
@@ -23,5 +27,5 @@ func (pr *progressReader) Read(p []byte) (int, error) {
 		pr.progressCallback(pr.downloaded, pr.downloaded)
 	}
 
-	return n, err
+	return n, errors.Wrap(err, "failed to read from reader")
 }

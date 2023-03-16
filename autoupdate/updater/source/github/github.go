@@ -8,19 +8,19 @@ import (
 	"github.com/pkg/errors"
 )
 
-type GithubProvider struct {
+type Provider struct {
 	repo            string
 	releaseFilename string
 }
 
-func MakeGithubProvider(repo string, releaseFilename string) *GithubProvider {
-	return &GithubProvider{
+func MakeGithubProvider(repo string, releaseFilename string) *Provider {
+	return &Provider{
 		repo:            repo,
 		releaseFilename: releaseFilename,
 	}
 }
 
-func (g *GithubProvider) GetLatestVersion() (string, error) {
+func (g *Provider) GetLatestVersion() (string, error) {
 	release, err := g.getLatestReleaseData()
 	if err != nil {
 		return "", errors.Wrap(err, "failed to get latest release")
@@ -28,7 +28,7 @@ func (g *GithubProvider) GetLatestVersion() (string, error) {
 	return release.TagName, nil
 }
 
-func (g *GithubProvider) GetFile() (io.ReadCloser, int64, error) {
+func (g *Provider) GetFile() (io.ReadCloser, int64, error) {
 	release, err := g.getLatestReleaseData()
 	if err != nil {
 		return nil, 0, errors.Wrap(err, "failed to get latest release")
@@ -50,7 +50,7 @@ func (g *GithubProvider) GetFile() (io.ReadCloser, int64, error) {
 	return response.Body, response.ContentLength, nil
 }
 
-func (g *GithubProvider) GetChangelogs() (map[string]string, error) {
+func (g *Provider) GetChangelogs() (map[string]string, error) {
 	releases, err := g.getReleasesData()
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get latest release")
@@ -62,13 +62,13 @@ func (g *GithubProvider) GetChangelogs() (map[string]string, error) {
 	return changelogs, nil
 }
 
-func (g *GithubProvider) getLatestReleaseData() (*GithubRelease, error) {
+func (g *Provider) getLatestReleaseData() (*Release, error) {
 	response, err := http.Get("https://api.github.com/repos/" + g.repo + "/releases/latest")
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get latest release")
 	}
 	defer response.Body.Close()
-	var release GithubRelease
+	var release Release
 	err = json.NewDecoder(response.Body).Decode(&release)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to decode latest release")
@@ -76,13 +76,13 @@ func (g *GithubProvider) getLatestReleaseData() (*GithubRelease, error) {
 	return &release, nil
 }
 
-func (g *GithubProvider) getReleasesData() ([]GithubRelease, error) {
+func (g *Provider) getReleasesData() ([]Release, error) {
 	response, err := http.Get("https://api.github.com/repos/" + g.repo + "/releases")
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get releases")
 	}
 	defer response.Body.Close()
-	var releases []GithubRelease
+	var releases []Release
 	err = json.NewDecoder(response.Body).Decode(&releases)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to decode releases")

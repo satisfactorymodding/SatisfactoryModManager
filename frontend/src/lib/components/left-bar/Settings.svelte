@@ -11,7 +11,7 @@
   import { manifestMods, lockfileMods } from '$lib/store/ficsitCLIStore';
   import { GetModNameDocument } from '$lib/generated';
   import type { LaunchButtonType, ViewType } from '$lib/wailsTypesExtensions';
-  import { OfflineGetMod } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
+  import { OfflineGetMod } from '$wailsjs/go/ficsitcli/FicsitCLI';
 
   let settingsMenu: Menu;
   let startViewMenu: Menu;

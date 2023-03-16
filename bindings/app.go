@@ -4,11 +4,13 @@ import (
 	"context"
 	"time"
 
+	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
-	"github.com/satisfactorymodding/SatisfactoryModManager/project_file"
+	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
+
+	"github.com/satisfactorymodding/SatisfactoryModManager/projectfile"
 	"github.com/satisfactorymodding/SatisfactoryModManager/settings"
 	"github.com/satisfactorymodding/SatisfactoryModManager/utils"
-	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 // App struct
@@ -77,7 +79,7 @@ func (a *App) UnexpandMod() bool {
 }
 
 func (a *App) GetVersion() string {
-	return project_file.Version()
+	return projectfile.Version()
 }
 
 type FileFilter struct {
@@ -114,11 +116,15 @@ func (a *App) OpenFileDialog(options OpenDialogOptions) (string, error) {
 		ResolvesAliases:            options.ResolvesAliases,
 		TreatPackagesAsDirectories: options.TreatPackagesAsDirectories,
 	}
-	return wailsRuntime.OpenFileDialog(a.ctx, wailsOptions)
+	file, err := wailsRuntime.OpenFileDialog(a.ctx, wailsOptions)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to open file dialog")
+	}
+	return file, nil
 }
 
-func (a *App) ExternalInstallMod(modId, version string) {
-	wailsRuntime.EventsEmit(a.ctx, "externalInstallMod", modId, version)
+func (a *App) ExternalInstallMod(modID, version string) {
+	wailsRuntime.EventsEmit(a.ctx, "externalInstallMod", modID, version)
 }
 
 func (a *App) ExternalImportProfile(path string) {

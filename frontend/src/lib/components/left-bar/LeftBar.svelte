@@ -18,8 +18,8 @@
   import { error } from '$lib/store/generalStore';
   import { BrowserOpenURL, EventsOn } from '$wailsjs/runtime/runtime';
   import { OpenFileDialog } from '$wailsjs/go/bindings/App';
-  import { bindings, ficsitcli_bindings } from '$wailsjs/go/models';
-  import { ExportCurrentProfile, ReadExportedProfileMetadata, SetModsEnabled } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
+  import { bindings, ficsitcli } from '$wailsjs/go/models';
+  import { ExportCurrentProfile, ReadExportedProfileMetadata, SetModsEnabled } from '$wailsjs/go/ficsitcli/FicsitCLI';
 
   $: modsEnabled = !$selectedInstall?.installation?.vanilla;
 
@@ -105,7 +105,7 @@
   let importProfileFilepath = '';
   let importProfileError = '';
   let fileDialogOpen = false;
-  let importProfileMetadata: ficsitcli_bindings.ExportedProfileMetadata | null = null;
+  let importProfileMetadata: ficsitcli.ExportedProfileMetadata | null = null;
   async function pickImportProfileFile() {
     if(fileDialogOpen) {
       return;

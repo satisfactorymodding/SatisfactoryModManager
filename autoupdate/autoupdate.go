@@ -4,17 +4,20 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
+	"github.com/spf13/viper"
+
 	"github.com/satisfactorymodding/SatisfactoryModManager/autoupdate/updater"
 	"github.com/satisfactorymodding/SatisfactoryModManager/autoupdate/updater/apply"
 	"github.com/satisfactorymodding/SatisfactoryModManager/autoupdate/updater/source/github"
-	"github.com/spf13/viper"
 )
 
-var Updater *updater.Updater
-var updateApply apply.Apply
-var releaseFile string
+var (
+	Updater     *updater.Updater
+	updateApply apply.Apply
+	releaseFile string
+)
 
-func Init(config AutoUpdateConfig) {
+func Init(config Config) {
 	releaseFile, updateApply = getInstallType()
 	Updater = updater.MakeUpdater(updater.Config{
 		Source:                   github.MakeGithubProvider(viper.GetString("github-release-repo"), releaseFile),
@@ -52,7 +55,7 @@ func OnExit(restart bool) error {
 	return updateApply.OnExit(restart)
 }
 
-type AutoUpdateConfig struct {
+type Config struct {
 	UpdateFoundCallback      func(latestVersion string, changelogs map[string]string)
 	DownloadProgressCallback func(bytesDownloaded, totalBytes int64)
 	UpdateReadyCallback      func()

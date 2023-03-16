@@ -2,7 +2,7 @@ package github
 
 import "time"
 
-type GithubRelease struct {
+type Release struct {
 	URL             string    `json:"url"`
 	AssetsURL       string    `json:"assets_url"`
 	UploadURL       string    `json:"upload_url"`

@@ -6,6 +6,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
+
 	"github.com/satisfactorymodding/SatisfactoryModManager/bindings"
 )
 
@@ -20,7 +21,10 @@ func processArguments(args []string) {
 			log.Error().Err(err).Str("uri", uri).Msg("Failed to handle smmanager:// URI")
 		}
 	} else {
-		handleFile(args[1])
+		err := handleFile(args[1])
+		if err != nil {
+			log.Error().Err(err).Str("path", args[1]).Msg("Failed to handle file")
+		}
 	}
 	bindings.BindingsInstance.App.Show()
 }
@@ -32,12 +36,13 @@ func handleURI(uri string) error {
 	}
 	switch u.Host {
 	case "install":
-		modId := u.Query().Get("modID")
+		modID := u.Query().Get("modID")
 		version := u.Query().Get("version")
-		bindings.BindingsInstance.App.ExternalInstallMod(modId, version)
+		bindings.BindingsInstance.App.ExternalInstallMod(modID, version)
 		return nil
+	default:
+		return errors.New("unknown URI action " + u.Host)
 	}
-	return errors.New("unknown URI action " + u.Host)
 }
 
 func handleFile(path string) error {

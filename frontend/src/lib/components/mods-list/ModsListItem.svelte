@@ -10,7 +10,7 @@
   import { search, type PartialMod } from '$lib/store/modFiltersStore';
   import { addQueuedModAction, queuedMods, favoriteMods, lockfileMods, manifestMods, progress, selectedInstall, removeQueuedModAction } from '$lib/store/ficsitCLIStore';
   import { error } from '$lib/store/generalStore';
-  import { DisableMod, EnableMod, InstallMod, RemoveMod } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
+  import { DisableMod, EnableMod, InstallMod, RemoveMod } from '$wailsjs/go/ficsitcli/FicsitCLI';
   import { FavoriteMod, UnFavoriteMod } from '$wailsjs/go/bindings/Settings';
   import { getAuthor } from '$lib/utils/getModAuthor';
   import { getReportedCompatibility, getVersionCompatibility } from '$lib/utils/modCompatibility';

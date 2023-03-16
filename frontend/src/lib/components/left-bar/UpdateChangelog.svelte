@@ -5,9 +5,9 @@
 
   import { GetChangelogDocument } from '$lib/generated';
   import { offline } from '$lib/store/settingsStore';
-  import type { ficsitcli_bindings } from '$wailsjs/go/models';
+  import type { ficsitcli } from '$wailsjs/go/models';
 
-  export let update: ficsitcli_bindings.Update | null = null;
+  export let update: ficsitcli.Update | null = null;
 
   const client = getContextClient();
 

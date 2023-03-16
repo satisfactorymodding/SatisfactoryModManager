@@ -28,7 +28,7 @@ func (a *NsisApply) Apply(file io.Reader) error {
 	if err != nil {
 		return errors.Wrap(err, "failed to read installer file")
 	}
-	err = os.WriteFile(a.config.InstallerDownloadPath, fileContent, 0755)
+	err = os.WriteFile(a.config.InstallerDownloadPath, fileContent, 0o755)
 	if err != nil {
 		return errors.Wrap(err, "failed to write installer file")
 	}

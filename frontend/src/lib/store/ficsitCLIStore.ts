@@ -6,14 +6,14 @@ import { readableBinding, writableBinding } from './wailsStoreBindings';
 import { isLaunchingGame } from './generalStore';
 import { queueAutoStart } from './settingsStore';
 
-import { cli, ficsitcli_bindings } from '$wailsjs/go/models';
-import { AddProfile, CheckForUpdates, DeleteProfile, EmitModsChange, GetInstallationsInfo, GetInvalidInstalls, GetProfiles, ImportProfile, RenameProfile, SelectInstall, SetProfile } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
+import { cli, ficsitcli } from '$wailsjs/go/models';
+import { AddProfile, CheckForUpdates, DeleteProfile, EmitModsChange, GetInstallationsInfo, GetInvalidInstalls, GetProfiles, ImportProfile, RenameProfile, SelectInstall, SetProfile } from '$wailsjs/go/ficsitcli/FicsitCLI';
 import { GetFavoriteMods } from '$wailsjs/go/bindings/Settings';
 
 export const invalidInstalls = readableBinding<(Error & {path?: string})[]>([], { initialGet: GetInvalidInstalls });
 
-export const installs = readableBinding<ficsitcli_bindings.InstallationInfo[]>([], { initialGet: GetInstallationsInfo });
-export const selectedInstall = writable(null as ficsitcli_bindings.InstallationInfo | null);
+export const installs = readableBinding<ficsitcli.InstallationInfo[]>([], { initialGet: GetInstallationsInfo });
+export const selectedInstall = writable(null as ficsitcli.InstallationInfo | null);
 
 export const profiles = writableBinding<string[]>([], { initialGet: GetProfiles });
 export const selectedProfile = writable(null as string | null);
@@ -157,7 +157,7 @@ export const canModify = readable(true, (set) => {
 
 });
 
-export const updates = writable<ficsitcli_bindings.Update[]>([]);
+export const updates = writable<ficsitcli.Update[]>([]);
 export const updateCheckInProgress = writable(false);
 
 export async function checkForUpdates() {

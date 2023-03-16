@@ -11,8 +11,8 @@
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { checkForUpdates, canModify, progress, updates, updateCheckInProgress } from '$lib/store/ficsitCLIStore';
   import { error } from '$lib/store/generalStore';
-  import { OfflineGetModsByReferences, UpdateAllMods } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
-  import type { ficsitcli_bindings } from '$wailsjs/go/models';
+  import { OfflineGetModsByReferences, UpdateAllMods } from '$wailsjs/go/ficsitcli/FicsitCLI';
+  import type { ficsitcli } from '$wailsjs/go/models';
   import { CheckForUpdates as CheckForSMMUpdates } from '$wailsjs/go/bindings/Update';
   import { smmUpdate, smmUpdateReady } from '$lib/store/smmUpdateStore';
   import { GetModNamesDocument } from '$lib/generated';
@@ -65,14 +65,14 @@
     }
   }
 
-  let selectedUpdates: ficsitcli_bindings.Update[] = [];
+  let selectedUpdates: ficsitcli.Update[] = [];
 
   async function updateSelected() {
     // TODO
     console.log(selectedUpdates);
   }
 
-  function toggleSelected(update: ficsitcli_bindings.Update) {
+  function toggleSelected(update: ficsitcli.Update) {
     if(selectedUpdates.includes(update)) {
       selectedUpdates = selectedUpdates.filter((u) => u !== update);
     } else {
@@ -85,7 +85,7 @@
     selectedUpdates = [];
   };
 
-  let changelogUpdate: ficsitcli_bindings.Update | null = null;
+  let changelogUpdate: ficsitcli.Update | null = null;
 
   function checkForAllUpdates() {
     checkForUpdates();

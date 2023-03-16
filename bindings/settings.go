@@ -3,8 +3,9 @@ package bindings
 import (
 	"context"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/settings"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
+
+	"github.com/satisfactorymodding/SatisfactoryModManager/settings"
 )
 
 type Settings struct {
@@ -52,7 +53,7 @@ func (s *Settings) UnFavoriteMod(modReference string) bool {
 		return false
 	}
 	settings.Settings.FavoriteMods = append(settings.Settings.FavoriteMods[:idx], settings.Settings.FavoriteMods[idx+1:]...)
-	settings.SaveSettings()
+	_ = settings.SaveSettings()
 	s.emitFavoriteMods()
 	return true
 }
@@ -71,12 +72,12 @@ func (s *Settings) GetModFiltersFilter() string {
 
 func (s *Settings) SetModFiltersOrder(order string) {
 	settings.Settings.ModFilters.Order = order
-	settings.SaveSettings()
+	_ = settings.SaveSettings()
 }
 
 func (s *Settings) SetModFiltersFilter(filter string) {
 	settings.Settings.ModFilters.Filter = filter
-	settings.SaveSettings()
+	_ = settings.SaveSettings()
 }
 
 func (s *Settings) emitFavoriteMods() {
@@ -89,7 +90,7 @@ func (s *Settings) GetStartView() settings.View {
 
 func (s *Settings) SetStartView(view settings.View) {
 	settings.Settings.StartView = view
-	settings.SaveSettings()
+	_ = settings.SaveSettings()
 }
 
 func (s *Settings) GetKonami() bool {
@@ -98,7 +99,7 @@ func (s *Settings) GetKonami() bool {
 
 func (s *Settings) SetKonami(value bool) {
 	settings.Settings.Konami = value
-	settings.SaveSettings()
+	_ = settings.SaveSettings()
 }
 
 func (s *Settings) GetLaunchButton() string {
@@ -107,7 +108,7 @@ func (s *Settings) GetLaunchButton() string {
 
 func (s *Settings) SetLaunchButton(value string) {
 	settings.Settings.LaunchButton = value
-	settings.SaveSettings()
+	_ = settings.SaveSettings()
 }
 
 func (s *Settings) GetQueueAutoStart() bool {
@@ -116,5 +117,5 @@ func (s *Settings) GetQueueAutoStart() bool {
 
 func (s *Settings) SetQueueAutoStart(value bool) {
 	settings.Settings.QueueAutoStart = value
-	settings.SaveSettings()
+	_ = settings.SaveSettings()
 }

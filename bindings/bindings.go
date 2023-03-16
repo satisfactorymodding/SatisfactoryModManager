@@ -3,13 +3,13 @@ package bindings
 import (
 	"context"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/bindings/ficsitcli_bindings"
+	"github.com/satisfactorymodding/SatisfactoryModManager/bindings/ficsitcli"
 )
 
 type Bindings struct {
 	App       *App
 	Update    *Update
-	FicsitCLI *ficsitcli_bindings.FicsitCLI
+	FicsitCLI *ficsitcli.FicsitCLI
 	settings  *Settings
 	debugInfo *DebugInfo
 }
@@ -21,7 +21,7 @@ func MakeBindings() (*Bindings, error) {
 		return BindingsInstance, nil
 	}
 
-	ficsitCLI, err := ficsitcli_bindings.MakeFicsitCLI()
+	ficsitCLI, err := ficsitcli.MakeFicsitCLI()
 	if err != nil {
 		return nil, err
 	}

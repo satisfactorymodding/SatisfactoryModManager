@@ -64,7 +64,6 @@ require (
 	github.com/wailsapp/mimetype v1.4.1 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	golang.org/x/crypto v0.7.0 // indirect
-	golang.org/x/exp v0.0.0-20230307190834-24139beb5833 // indirect
 	golang.org/x/net v0.8.0 // indirect
 	golang.org/x/text v0.8.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect

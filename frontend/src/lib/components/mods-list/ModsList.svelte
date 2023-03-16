@@ -14,7 +14,7 @@
   import { favoriteMods, lockfileMods, manifestMods, queuedMods } from '$lib/store/ficsitCLIStore';
   import { offline, startView } from '$lib/store/settingsStore';
   import { expandedMod } from '$lib/store/generalStore';
-  import { OfflineGetMods } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
+  import { OfflineGetMods } from '$wailsjs/go/ficsitcli/FicsitCLI';
 
   const MODS_PER_PAGE = 50;
 

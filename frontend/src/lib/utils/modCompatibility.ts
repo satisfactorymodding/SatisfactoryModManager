@@ -5,7 +5,7 @@ import { get } from 'svelte/store';
 import { CompatibilityState, ModVersionsCompatibilityDocument, SmlVersionsCompatibilityDocument, type Compatibility, type Mod } from '$lib/generated';
 import { offline } from '$lib/store/settingsStore';
 import type { GameBranch } from '$lib/wailsTypesExtensions';
-import { OfflineGetMod, OfflineGetSMLVersions } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
+import { OfflineGetMod, OfflineGetSMLVersions } from '$wailsjs/go/ficsitcli/FicsitCLI';
 
 function gameVersionToSemver(version: number): string | null {
   return coerce(version)?.format();

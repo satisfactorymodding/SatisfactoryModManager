@@ -7,7 +7,7 @@
   import { selectedInstall, isGameRunning, lockfileMods, progress, queuedMods, startQueue } from '$lib/store/ficsitCLIStore';
   import { launchButton, offline, queueAutoStart } from '$lib/store/settingsStore';
   import { isLaunchingGame } from '$lib/store/generalStore';
-  import { LaunchGame } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
+  import { LaunchGame } from '$wailsjs/go/ficsitcli/FicsitCLI';
   import { CompatibilityState, ModReportedCompatibilityDocument, type Compatibility } from '$lib/generated';
   import { getReportedCompatibility, getVersionCompatibility } from '$lib/utils/modCompatibility';
   import type { GameBranch } from '$lib/wailsTypesExtensions';

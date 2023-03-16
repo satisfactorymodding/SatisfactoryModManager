@@ -16,13 +16,13 @@
   import { canModify, lockfileMods, manifestMods, progress , selectedInstall } from '$lib/store/ficsitCLIStore';
   import { error , expandedMod } from '$lib/store/generalStore';
   import { search } from '$lib/store/modFiltersStore';
-  import { InstallModVersion, OfflineGetMod } from '$wailsjs/go/ficsitcli_bindings/FicsitCLI';
+  import { InstallModVersion, OfflineGetMod } from '$wailsjs/go/ficsitcli/FicsitCLI';
   import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
   import { getAuthor } from '$lib/utils/getModAuthor';
   import { getReportedCompatibility, getVersionCompatibility } from '$lib/utils/modCompatibility';
   import type { GameBranch } from '$lib/wailsTypesExtensions';
   import { offline } from '$lib/store/settingsStore';
-  import type { ficsitcli_bindings } from '$wailsjs/go/models';
+  import type { ficsitcli } from '$wailsjs/go/models';
 
   const client = getContextClient();
 
@@ -48,7 +48,7 @@
       }
     }[];
     logo?: string;
-    versions: ficsitcli_bindings.ModVersion[];
+    versions: ficsitcli.ModVersion[];
   }
   
   let offlineMod: OfflineMod = {

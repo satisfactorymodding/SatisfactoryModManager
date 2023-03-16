@@ -12,12 +12,13 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
-	"github.com/satisfactorymodding/SatisfactoryModManager/install_finders"
-	"github.com/satisfactorymodding/SatisfactoryModManager/project_file"
-	"github.com/satisfactorymodding/SatisfactoryModManager/utils"
 	ficsitCli "github.com/satisfactorymodding/ficsit-cli/cli"
 	"github.com/spf13/viper"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
+
+	"github.com/satisfactorymodding/SatisfactoryModManager/installfinders"
+	"github.com/satisfactorymodding/SatisfactoryModManager/projectfile"
+	"github.com/satisfactorymodding/SatisfactoryModManager/utils"
 )
 
 type DebugInfo struct {
@@ -33,7 +34,7 @@ func (d *DebugInfo) startup(ctx context.Context) {
 }
 
 type MetadataInstallation struct {
-	*install_finders.Installation
+	*installfinders.Installation
 	Name    string `json:"name"`
 	Profile string `json:"profile"`
 }
@@ -68,7 +69,7 @@ func addFactoryGameLog(writer *zip.Writer) error {
 func addMetadata(writer *zip.Writer) error {
 	ficsitCliInstalls := BindingsInstance.FicsitCLI.GetInstallationsInfo()
 	selectedFicsitCliInstall := BindingsInstance.FicsitCLI.GetSelectedInstall()
-	var metadataInstalls []*MetadataInstallation
+	metadataInstalls := make([]*MetadataInstallation, 0)
 	var selectedMetadataInstall *MetadataInstallation
 	for _, install := range ficsitCliInstalls {
 		i := &MetadataInstallation{
@@ -86,7 +87,7 @@ func addMetadata(writer *zip.Writer) error {
 
 	ficsitCliProfileNames := BindingsInstance.FicsitCLI.GetProfiles()
 	selectedMetadataProfileName := BindingsInstance.FicsitCLI.GetSelectedProfile()
-	var metadataProfiles []*ficsitCli.Profile
+	metadataProfiles := make([]*ficsitCli.Profile, 0)
 	for _, profileName := range ficsitCliProfileNames {
 		p := BindingsInstance.FicsitCLI.GetProfile(profileName)
 
@@ -109,7 +110,7 @@ func addMetadata(writer *zip.Writer) error {
 	}
 
 	metadata := Metadata{
-		SMMVersion:           project_file.Version(),
+		SMMVersion:           projectfile.Version(),
 		Installations:        metadataInstalls,
 		SelectedInstallation: selectedMetadataInstall,
 		Profiles:             metadataProfiles,

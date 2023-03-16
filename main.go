@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	_ "embed"
 	"encoding/json"
 	"io"
 	"os"
@@ -11,28 +10,36 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/satisfactorymodding/SatisfactoryModManager/autoupdate"
-	"github.com/satisfactorymodding/SatisfactoryModManager/bindings"
-	"github.com/satisfactorymodding/SatisfactoryModManager/file_scheme_association"
-	"github.com/satisfactorymodding/SatisfactoryModManager/project_file"
-	"github.com/satisfactorymodding/SatisfactoryModManager/settings"
-	"github.com/satisfactorymodding/SatisfactoryModManager/singleinstance"
-	"github.com/satisfactorymodding/SatisfactoryModManager/utils"
-	"github.com/satisfactorymodding/SatisfactoryModManager/wails_logging"
-	"github.com/satisfactorymodding/SatisfactoryModManager/websocket"
 	"github.com/spf13/viper"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"gopkg.in/natefinch/lumberjack.v2"
+
+	"github.com/satisfactorymodding/SatisfactoryModManager/association"
+	"github.com/satisfactorymodding/SatisfactoryModManager/autoupdate"
+	"github.com/satisfactorymodding/SatisfactoryModManager/bindings"
+	"github.com/satisfactorymodding/SatisfactoryModManager/projectfile"
+	"github.com/satisfactorymodding/SatisfactoryModManager/settings"
+	"github.com/satisfactorymodding/SatisfactoryModManager/singleinstance"
+	"github.com/satisfactorymodding/SatisfactoryModManager/utils"
+	"github.com/satisfactorymodding/SatisfactoryModManager/wailslogging"
+	"github.com/satisfactorymodding/SatisfactoryModManager/websocket"
+
+	_ "embed"
 )
 
 //go:embed wails.json
 var projectFile []byte
 
 func loadProjectFile() error {
-	return json.Unmarshal(projectFile, &project_file.ProjectFile)
+	err := json.Unmarshal(projectFile, &projectfile.ProjectFile)
+	if err != nil {
+		return errors.Wrap(err, "Failed to load project file")
+	}
+	return nil
 }
 
 func main() {
@@ -40,7 +47,7 @@ func main() {
 		return
 	}
 
-	autoupdate.Init(autoupdate.AutoUpdateConfig{
+	autoupdate.Init(autoupdate.Config{
 		UpdateFoundCallback: func(latestVersion string, changelogs map[string]string) {
 			bindings.BindingsInstance.Update.UpdateAvailable(latestVersion, changelogs)
 		},
@@ -55,12 +62,12 @@ func main() {
 	}
 	go singleinstance.ListenForSecondInstance()
 
-	err := file_scheme_association.SetAsDefaultSchemeHandler("smmanager")
+	err := association.SetAsDefaultSchemeHandler("smmanager")
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to set as default scheme handler")
 	}
 
-	err = file_scheme_association.SetAsDefaultFileHandler(".smmprofile")
+	err = association.SetAsDefaultFileHandler(".smmprofile")
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to set as default file extension handler")
 	}
@@ -94,7 +101,7 @@ func main() {
 			autoupdate.CheckInterval(5 * time.Minute)
 		},
 		Bind:   b.GetBindings(),
-		Logger: wails_logging.WailsZeroLogLogger{},
+		Logger: wailslogging.WailsZeroLogLogger{},
 	})
 
 	if err != nil {
@@ -134,16 +141,16 @@ func init() {
 	}
 
 	cacheDir := filepath.Clean(filepath.Join(baseCacheDir, "SatisfactoryModManagerNEW"))
-	utils.EnsureDirExists(cacheDir)
+	_ = utils.EnsureDirExists(cacheDir)
 	viper.Set("cache-dir", cacheDir)
 
 	localDir := filepath.Clean(filepath.Join(baseLocalDir, "SatisfactoryModManagerNEW"))
-	utils.EnsureDirExists(localDir)
+	_ = utils.EnsureDirExists(localDir)
 	viper.Set("local-dir", localDir)
 
 	viper.Set("websocket-port", 33642)
 
-	viper.Set("version", project_file.ProjectFile.Info.ProductVersion)
+	viper.Set("version", projectfile.ProjectFile.Info.ProductVersion)
 	viper.Set("github-release-repo", "satisfactorymodding/SatisfactoryModManager")
 
 	// ficsit-cli config
@@ -169,13 +176,11 @@ func init() {
 			MaxAge:     30, // days
 		}
 
-		if err == nil {
-			writers = append(writers, zerolog.ConsoleWriter{
-				Out:        logFile,
-				TimeFormat: time.RFC3339,
-				NoColor:    true,
-			})
-		}
+		writers = append(writers, zerolog.ConsoleWriter{
+			Out:        logFile,
+			TimeFormat: time.RFC3339,
+			NoColor:    true,
+		})
 	}
 
 	log.Logger = zerolog.New(io.MultiWriter(writers...)).With().Timestamp().Logger()

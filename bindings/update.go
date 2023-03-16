@@ -3,8 +3,9 @@ package bindings
 import (
 	"context"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/autoupdate"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
+
+	"github.com/satisfactorymodding/SatisfactoryModManager/autoupdate"
 )
 
 type Update struct {
@@ -21,7 +22,7 @@ func (u *Update) startup(ctx context.Context) {
 }
 
 func (u *Update) CheckForUpdates() {
-	autoupdate.Updater.CheckForUpdate()
+	_ = autoupdate.Updater.CheckForUpdate()
 }
 
 func (u *Update) UpdateAndRestart() {

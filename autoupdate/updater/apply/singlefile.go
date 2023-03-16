@@ -9,8 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-type SingleFileApply struct {
-}
+type SingleFileApply struct{}
 
 func MakeSingleFileApply() *SingleFileApply {
 	return &SingleFileApply{}
@@ -28,7 +27,7 @@ func (a *SingleFileApply) OnExit(restart bool) error {
 	if restart {
 		wd, err := os.Getwd()
 		if err != nil {
-			return err
+			return errors.Wrap(err, "failed to get working directory")
 		}
 
 		executable, err := os.Executable()

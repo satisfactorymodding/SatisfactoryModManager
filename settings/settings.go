@@ -6,8 +6,9 @@ import (
 	"path/filepath"
 
 	"github.com/pkg/errors"
-	"github.com/satisfactorymodding/SatisfactoryModManager/utils"
 	"github.com/spf13/viper"
+
+	"github.com/satisfactorymodding/SatisfactoryModManager/utils"
 )
 
 type SavedModFilters struct {
@@ -18,11 +19,11 @@ type SavedModFilters struct {
 type View string
 
 var (
-	VIEW_COMPACT  View = "compact"
-	VIEW_EXPANDED View = "expanded"
+	ViewCompact  View = "compact"
+	ViewExpanded View = "expanded"
 )
 
-type SettingsData struct {
+type settings struct {
 	FavoriteMods    []string          `json:"favoriteMods"`
 	ModFilters      SavedModFilters   `json:"modFilters"`
 	UnexpandedSize  utils.Size        `json:"unexpandedSize"`
@@ -37,7 +38,7 @@ type SettingsData struct {
 	LaunchButton    string            `json:"launchButton"`
 }
 
-var Settings SettingsData = SettingsData{
+var Settings = settings{
 	FavoriteMods: []string{},
 	ModFilters: SavedModFilters{
 		Order:  "Last updated",
@@ -45,7 +46,7 @@ var Settings SettingsData = SettingsData{
 	},
 	UnexpandedSize:  utils.UnexpandedDefault,
 	ExpandedSize:    utils.ExpandedDefault,
-	StartView:       VIEW_COMPACT,
+	StartView:       ViewCompact,
 	QueueAutoStart:  true,
 	SelectedInstall: "",
 	SelectedProfile: map[string]string{},
@@ -88,7 +89,7 @@ func SaveSettings() error {
 	if err != nil {
 		return errors.Wrap(err, "failed to marshal settings")
 	}
-	err = os.WriteFile(filepath.Join(viper.GetString("local-dir"), settingsFileName), settingsFile, 0755)
+	err = os.WriteFile(filepath.Join(viper.GetString("local-dir"), settingsFileName), settingsFile, 0o755)
 	if err != nil {
 		return errors.Wrap(err, "failed to write settings")
 	}

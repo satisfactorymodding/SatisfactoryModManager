@@ -13,7 +13,7 @@ func EnsureDirExists(path string) error {
 			return errors.Wrapf(err, "failed to stat path %s", path)
 		}
 
-		err = os.MkdirAll(path, 0755)
+		err = os.MkdirAll(path, 0o755)
 		if err != nil {
 			return errors.Wrapf(err, "failed to create directory %s", path)
 		}
