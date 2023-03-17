@@ -2,7 +2,7 @@ query GetMods($offset: Int!, $limit: Int!) {
   getMods(filter: { limit: $limit, offset: $offset }) {
     count
     mods {
-      id
+      ...ModKey
       mod_reference
       name
       logo

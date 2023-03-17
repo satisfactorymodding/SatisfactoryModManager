@@ -2,16 +2,34 @@ import { Client } from '@urql/svelte';
 import { coerce, compare, minVersion, satisfies } from 'semver';
 import { get } from 'svelte/store';
 
-import { CompatibilityState, ModVersionsCompatibilityDocument, SmlVersionsCompatibilityDocument, type Compatibility, type Mod } from '$lib/generated';
+import { CompatibilityState, ModReportedCompatibilityDocument, ModVersionsCompatibilityDocument, SmlVersionsCompatibilityDocument, type Compatibility } from '$lib/generated';
 import { offline } from '$lib/store/settingsStore';
 import type { GameBranch } from '$lib/wailsTypesExtensions';
 import { OfflineGetMod, OfflineGetSMLVersions } from '$wailsjs/go/ficsitcli/FicsitCLI';
+
+export interface CompatibilityWithSource extends Compatibility {
+  source: 'reported' | 'version';
+}
+
+export async function getCompatiblity(modReference: string, gameBranch: GameBranch, gameVersion: number, urqlClient: Client): Promise<CompatibilityWithSource> {
+  const reportedCompatibility = await getReportedCompatibility(modReference, gameBranch, urqlClient);
+  if(reportedCompatibility) {
+    return { ...reportedCompatibility, source: 'reported' };
+  }
+  const versionCompatibility = await getVersionCompatibility(modReference, gameVersion, urqlClient);
+  return { ...versionCompatibility, source: 'version' };
+}
 
 function gameVersionToSemver(version: number): string | null {
   return coerce(version)?.format();
 }
 
-export function getReportedCompatibility(mod: Pick<Mod, 'compatibility'>, gameBranch: GameBranch): Compatibility | undefined {
+export async function getReportedCompatibility(modReference: string, gameBranch: GameBranch, urqlClient: Client): Promise<Compatibility | undefined> {
+  const result = await urqlClient.query(ModReportedCompatibilityDocument, { modReference }).toPromise();
+  if(!result.data?.getModByReference) {
+    return undefined;
+  }
+  const mod = result.data.getModByReference;
   if(mod.compatibility) {
     switch(gameBranch) {
     case 'EA':
@@ -59,7 +77,7 @@ async function getModVersions(modReference: string, urqlClient: Client): Promise
     }
   }
   
-  const modQuery = await urqlClient.query(ModVersionsCompatibilityDocument, { modReference }).toPromise();
+  const modQuery = await urqlClient.query(ModVersionsCompatibilityDocument, { modReference }, { requestPolicy: 'cache-first' }).toPromise();
   
   return modQuery.data?.getModByReference?.versions;
 }
@@ -67,12 +85,12 @@ async function getModVersions(modReference: string, urqlClient: Client): Promise
 export async function getVersionCompatibility(modReference: string, gameVersion: number, urqlClient: Client): Promise<Compatibility> {
   const versions = await getSMLVersions(urqlClient);
   if(!versions) {
-    return CompatibilityState.Broken;
+    return { state: CompatibilityState.Broken };
   }
 
   const modVersions = await getModVersions(modReference, urqlClient);
   if(!modVersions) {
-    return CompatibilityState.Broken;
+    return { state: CompatibilityState.Broken };
   }
 
   versions.sort((a, b) => compare(a.version, b.version));

@@ -9,7 +9,7 @@
   import { minVersion, valid, validRange, sort, coerce, SemVer } from 'semver';
   import Tooltip, { Wrapper } from '@smui/tooltip';
 
-  import { CompatibilityState, GetModDetailsDocument, GetModReferenceDocument, type Compatibility, type Version } from '$lib/generated';
+  import { CompatibilityState, GetModDetailsDocument, GetModReferenceDocument, type Version } from '$lib/generated';
   import { markdown } from '$lib/utils/markdown';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { bytesToAppropriate } from '$lib/utils/dataFormats';
@@ -19,7 +19,7 @@
   import { InstallModVersion, OfflineGetMod } from '$wailsjs/go/ficsitcli/FicsitCLI';
   import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
   import { getAuthor } from '$lib/utils/getModAuthor';
-  import { getReportedCompatibility, getVersionCompatibility } from '$lib/utils/modCompatibility';
+  import { getCompatiblity, getVersionCompatibility, type CompatibilityWithSource } from '$lib/utils/modCompatibility';
   import type { GameBranch } from '$lib/wailsTypesExtensions';
   import { offline } from '$lib/store/settingsStore';
   import type { ficsitcli } from '$wailsjs/go/models';
@@ -96,31 +96,38 @@
 
   $: ficsitAppLink = `https://ficsit.app/mod/${$expandedMod}`;
 
-  let reportedCompatibility: Compatibility | undefined;
-  let versionCompatibility: Compatibility = { state: CompatibilityState.Works };
+  let compatibility: CompatibilityWithSource = { state: CompatibilityState.Works, source: 'reported' };
   $: {
-    if(mod && $selectedInstall && $selectedInstall.info) {
-      if(!('offline' in mod)) {
-        reportedCompatibility = getReportedCompatibility(mod, $selectedInstall.info.branch as GameBranch);
-        if(reportedCompatibility) {
-          reportedCompatibility = {
-            state: reportedCompatibility.state,
-            note: reportedCompatibility.note 
-              ? `This mod has been reported as ${reportedCompatibility.state} on this game version.<br>${markdown(reportedCompatibility.note)}` 
-              : `This mod has been reported as ${reportedCompatibility.state} on this game version.`,
-          };
+    if(mod) {
+      const gameVersion = $selectedInstall?.info?.version;
+      const branch = $selectedInstall?.info?.branch as GameBranch;
+      if(gameVersion && branch) {
+        if(!('offline' in mod)) {
+          if(mod.hidden && !isDependency) {
+            compatibility = { state: CompatibilityState.Broken, note: 'This mod was hidden by the author.', source: 'reported' };
+          } else {
+            getCompatiblity(mod.mod_reference, branch, gameVersion, client).then((result) => {
+              if (result.source === 'reported') {
+                compatibility = {
+                  state: result.state,
+                  note: result.note 
+                    ? `This mod has been reported as ${result.state} on this game version.<br>${markdown(result.note)}` 
+                    : `This mod has been reported as ${result.state} on this game version.`,
+                  source: 'reported',
+                };
+              } else {
+                compatibility = result;
+              }
+            });
+          }
+        } else {
+          getVersionCompatibility(mod.mod_reference, gameVersion, client).then((result) => {
+            compatibility = {
+              ...result,
+              source: 'version',
+            };
+          });
         }
-      } else {
-        reportedCompatibility = undefined;
-      }
-
-      if (!('offline' in mod) && mod.hidden && !isDependency) {
-        versionCompatibility = { state: CompatibilityState.Broken, note: 'This mod was hidden by the author.' };
-      }
-      else {
-        getVersionCompatibility(mod.mod_reference, $selectedInstall.info.version, client).then((compatibility) => {
-          versionCompatibility = compatibility;
-        });
       }
     }
   }
@@ -136,8 +143,6 @@
     }
     return '';
   }
-
-  $: compatibility = reportedCompatibility ?? versionCompatibility;
 
   let authorsMenu: Menu;
 

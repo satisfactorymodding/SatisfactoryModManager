@@ -5,11 +5,11 @@
   import { mdiCheckCircleOutline, mdiOpenInNew } from '@mdi/js';
 
   import { selectedInstall, isGameRunning, lockfileMods, progress, queuedMods, startQueue } from '$lib/store/ficsitCLIStore';
-  import { launchButton, offline, queueAutoStart } from '$lib/store/settingsStore';
+  import { launchButton, queueAutoStart } from '$lib/store/settingsStore';
   import { isLaunchingGame } from '$lib/store/generalStore';
   import { LaunchGame } from '$wailsjs/go/ficsitcli/FicsitCLI';
-  import { CompatibilityState, ModReportedCompatibilityDocument, type Compatibility } from '$lib/generated';
-  import { getReportedCompatibility, getVersionCompatibility } from '$lib/utils/modCompatibility';
+  import { CompatibilityState, type Compatibility } from '$lib/generated';
+  import { getCompatiblity, type CompatibilityWithSource } from '$lib/utils/modCompatibility';
   import type { GameBranch } from '$lib/wailsTypesExtensions';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
 
@@ -17,35 +17,33 @@
 
   const client = getContextClient();
 
-  let reportedCompatibilities: Record<string, Compatibility | undefined> = {};
-  $: {
-    const branch = $selectedInstall?.info?.branch as GameBranch;
-    if(branch) {
-      reportedCompatibilities = {};
-      if($offline !== null && !$offline) {
-        Object.keys($lockfileMods).map(async (modReference) => {
-          const result = await client.query(ModReportedCompatibilityDocument, { modReference }).toPromise();
-          if(!result.data?.getModByReference) {
-            return;
-          }
-          reportedCompatibilities[modReference] = getReportedCompatibility(result.data.getModByReference, branch);
-        });
-      }
-    }
-  }
-
-  let versionCompatibilities: Record<string, Compatibility> = {};
+  let compatibilities: Record<string, CompatibilityWithSource> = {};
   $: {
     const gameVersion = $selectedInstall?.info?.version;
-    if(gameVersion) {
-      versionCompatibilities = {};
+    const branch = $selectedInstall?.info?.branch as GameBranch;
+    if (gameVersion && branch) {
+      compatibilities = {};
       Object.keys($lockfileMods).map(async (modReference) => {
-        if(modReference !== 'SML') {
-          versionCompatibilities[modReference] = await getVersionCompatibility(modReference, gameVersion, client);
+        if (modReference !== 'SML') {
+          compatibilities[modReference] = await getCompatiblity(modReference, branch, gameVersion, client);
         }
       });
     }
   }
+
+  $: reportedCompatibilities = Object.entries(compatibilities).reduce((acc, [modReference, compatibility]) => {
+    if (compatibility?.source === 'reported') {
+      acc[modReference] = compatibility;
+    }
+    return acc;
+  }, {} as Record<string, Compatibility>);
+
+  $: versionCompatibilities = Object.entries(compatibilities).reduce((acc, [modReference, compatibility]) => {
+    if (compatibility?.source === 'version') {
+      acc[modReference] = compatibility;
+    }
+    return acc;
+  }, {} as Record<string, Compatibility>);
 
   $: versionIncompatible = Object.keys($lockfileMods).filter((modReference) => versionCompatibilities[modReference]?.state === CompatibilityState.Broken);
   $: versionPossiblyCompatible = Object.keys($lockfileMods).filter((modReference) => versionCompatibilities[modReference]?.state === CompatibilityState.Damaged);

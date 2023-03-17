@@ -1,6 +1,6 @@
 query GetModReference($modIdOrReference: String!) {
   getModByIdOrReference(modIdOrReference: $modIdOrReference) {
-    id
+    ...ModKey
     mod_reference
   }
 }

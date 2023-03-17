@@ -13,9 +13,9 @@
   import { DisableMod, EnableMod, InstallMod, RemoveMod } from '$wailsjs/go/ficsitcli/FicsitCLI';
   import { FavoriteMod, UnFavoriteMod } from '$wailsjs/go/bindings/Settings';
   import { getAuthor } from '$lib/utils/getModAuthor';
-  import { getReportedCompatibility, getVersionCompatibility } from '$lib/utils/modCompatibility';
+  import { getCompatiblity, getVersionCompatibility, type CompatibilityWithSource } from '$lib/utils/modCompatibility';
   import type { GameBranch } from '$lib/wailsTypesExtensions';
-  import { CompatibilityState, type Compatibility } from '$lib/generated';
+  import { CompatibilityState } from '$lib/generated';
   import { markdown } from '$lib/utils/markdown';
   
   export let mod: PartialMod;
@@ -94,40 +94,43 @@
     return mdiPlay;
   })();
 
-  $: buttonDisabled = isDependency || (versionCompatibility.state === CompatibilityState.Broken && !isInstalled);
+  $: buttonDisabled = isDependency || (compatibility.state === CompatibilityState.Broken && compatibility.source === 'version' && !isInstalled);
 
   $: isFavorite = $favoriteMods.includes(mod.mod_reference);
 
-  let reportedCompatibility: Compatibility | undefined = { state: CompatibilityState.Works };
-  let versionCompatibility: Compatibility = { state: CompatibilityState.Works };
+  let compatibility: CompatibilityWithSource = { state: CompatibilityState.Works, source: 'reported' };
   $: {
-    if($selectedInstall && $selectedInstall.info) {
+    const gameVersion = $selectedInstall?.info?.version;
+    const branch = $selectedInstall?.info?.branch as GameBranch;
+    if(gameVersion && branch) {
       if(!('offline' in mod)) {
-        reportedCompatibility = getReportedCompatibility(mod, $selectedInstall.info.branch as GameBranch);
-        if(reportedCompatibility) {
-          reportedCompatibility = {
-            state: reportedCompatibility.state,
-            note: reportedCompatibility.note 
-              ? `This mod has been reported as ${reportedCompatibility.state} on this game version.<br>${markdown(reportedCompatibility.note)}` 
-              : `This mod has been reported as ${reportedCompatibility.state} on this game version.`,
-          };
+        if(mod.hidden && !isDependency) {
+          compatibility = { state: CompatibilityState.Broken, note: 'This mod was hidden by the author.', source: 'reported' };
+        } else {
+          getCompatiblity(mod.mod_reference, branch, gameVersion, client).then((result) => {
+            if (result.source === 'reported') {
+              compatibility = {
+                state: result.state,
+                note: result.note 
+                  ? `This mod has been reported as ${result.state} on this game version.<br>${markdown(result.note)}` 
+                  : `This mod has been reported as ${result.state} on this game version.`,
+                source: 'reported',
+              };
+            } else {
+              compatibility = result;
+            }
+          });
         }
       } else {
-        reportedCompatibility = undefined;
-      }
-
-      if (!('offline' in mod) && mod.hidden && !isDependency) {
-        versionCompatibility = { state: CompatibilityState.Broken, note: 'This mod was hidden by the author.' };
-      }
-      else {
-        getVersionCompatibility(mod.mod_reference, $selectedInstall.info.version, client).then((compatibility) => {
-          versionCompatibility = compatibility;
+        getVersionCompatibility(mod.mod_reference, gameVersion, client).then((result) => {
+          compatibility = {
+            ...result,
+            source: 'version',
+          };
         });
       }
     }
   }
-
-  $: compatibility = reportedCompatibility ?? versionCompatibility;
 
   async function toggleModInstalled() {
     // Svelte does not recreate the component, but reuse it, so the associated mod reference might change

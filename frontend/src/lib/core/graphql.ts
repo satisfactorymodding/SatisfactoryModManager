@@ -22,6 +22,14 @@ export function initializeGraphQLClient(): Client {
           Compatibility: () => null,
           CompatibilityInfo: () => null,
           VersionDependency: () => null,
+          Mod: (data) => data.mod_reference,
+        },
+        resolvers: {
+          Query: {
+            getModByReference: (_parent, args) => {
+              return { __typename: 'Mod', mod_reference: args.modReference };
+            },
+          },
         },
       }),
       persistedFetchExchange({

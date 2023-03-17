@@ -1,6 +1,6 @@
 query GetModSummary($modReference: ModReference!) {
   mod: getModByReference(modReference: $modReference) {
-    id
+    ...ModKey
     name
     logo
     mod_reference

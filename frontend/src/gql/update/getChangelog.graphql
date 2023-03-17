@@ -1,6 +1,6 @@
 query GetChangelog($modReference: ModReference!) {
   getModByReference(modReference: $modReference) {
-    id
+    ...ModKey
     versions {
       id
       version

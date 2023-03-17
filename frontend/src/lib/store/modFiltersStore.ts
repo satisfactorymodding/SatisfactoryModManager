@@ -6,7 +6,7 @@ import { writableBindingSync } from './wailsStoreBindings';
 import { CompatibilityState, type GetModsQuery } from '$lib/generated';
 import { favoriteMods, lockfileMods, manifestMods, queuedMods, selectedInstall } from '$lib/store/ficsitCLIStore';
 import { GetModFiltersOrder, GetModFiltersFilter, SetModFiltersOrder, SetModFiltersFilter } from '$wailsjs/go/bindings/Settings';
-import { getReportedCompatibility, getVersionCompatibility } from '$lib/utils/modCompatibility';
+import { getCompatiblity } from '$lib/utils/modCompatibility';
 
 export interface OrderBy {
   name: string;
@@ -36,12 +36,10 @@ export const filterOptions: Filter[] = [
       if(!installInfo) {
         return false;
       }
-      const reportedCompatibility = getReportedCompatibility(mod, installInfo.branch);
-      if(!reportedCompatibility) {
-        const versionCompatibility = await getVersionCompatibility(mod.mod_reference, installInfo.version, urqlClient);
-        return versionCompatibility.state !== CompatibilityState.Broken;
-      }
-      return reportedCompatibility.state !== CompatibilityState.Broken;
+      const gameVersion = installInfo.version;
+      const branch = installInfo.branch as GameBranch;
+      const compatibility = await getCompatiblity(mod.mod_reference, branch, gameVersion, urqlClient);
+      return compatibility.state !== CompatibilityState.Broken;
     }, 
   },
   { name: 'Favorite', func: (mod: PartialMod) => get(favoriteMods).includes(mod.mod_reference) },

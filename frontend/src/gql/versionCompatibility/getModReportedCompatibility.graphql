@@ -1,6 +1,6 @@
 query ModReportedCompatibility($modReference: ModReference!) {
   getModByReference(modReference: $modReference) {
-    id
+    ...ModKey
     compatibility {
       EA {
         state

@@ -1,0 +1,4 @@
+fragment ModKey on Mod {
+  id
+  mod_reference
+}
