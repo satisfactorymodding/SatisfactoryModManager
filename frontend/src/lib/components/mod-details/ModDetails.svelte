@@ -79,7 +79,7 @@
 
   $: mod = $offline ? offlineMod : ($modQuery.fetching ? null : $modQuery.data?.mod);
 
-  $: actualLogo = (mod && 'offline' in mod) ? (mod?.logo ? `data:image/png;base64, ${mod?.logo}` : undefined) : mod?.logo;
+  $: actualLogo = (mod && 'offline' in mod) ? (mod?.logo ? `data:image/png;base64, ${mod?.logo}` : '/images/no_image.webp') : mod?.logo;
   $: renderedLogo = actualLogo || 'https://ficsit.app/images/no_image.webp';
   $: descriptionRendered = (mod && 'full_description' in mod && mod?.full_description) ? markdown(mod.full_description) : undefined;
   $: author = getAuthor(mod);

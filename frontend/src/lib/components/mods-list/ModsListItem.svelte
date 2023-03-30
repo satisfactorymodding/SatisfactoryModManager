@@ -30,7 +30,7 @@
   
   export let selected: boolean;
 
-  $: actualLogo = 'offline' in mod ? (mod.logo ? `data:image/png;base64, ${mod.logo}` : undefined) : mod.logo;
+  $: actualLogo = 'offline' in mod ? (mod.logo ? `data:image/png;base64, ${mod.logo}` : '/images/no_image.webp') : mod.logo;
   $: renderedLogo = actualLogo || 'https://ficsit.app/images/no_image.webp';
   $: author = 'offline' in mod ? mod.authors[0] : getAuthor(mod);
 
