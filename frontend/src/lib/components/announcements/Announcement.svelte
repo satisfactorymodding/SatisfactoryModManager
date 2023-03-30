@@ -26,7 +26,9 @@
   <div class="flex items-center announcement-bg-text p-1 h-full">
     <SvgIcon icon={icon} class="w-8 h-8 mr-3 shrink-0" />
     <div class="grow wrap text-lg">
-      {announcement.message}
+      <slot>
+        {announcement.message}
+      </slot>
     </div>
   </div>
 </div>
