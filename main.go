@@ -183,5 +183,11 @@ func init() {
 		})
 	}
 
+	level, err := zerolog.ParseLevel(viper.GetString("log"))
+	if err != nil {
+		panic(err)
+	}
+	zerolog.SetGlobalLevel(level)
+
 	log.Logger = zerolog.New(io.MultiWriter(writers...)).With().Timestamp().Logger()
 }
