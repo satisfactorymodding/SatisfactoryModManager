@@ -4,7 +4,6 @@
   import Dialog, { Actions, Content, Title } from '@smui/dialog';
   import List, { Item, PrimaryText, SecondaryText, Text } from '@smui/list';
   import { getContextClient, queryStore } from '@urql/svelte';
-  import Checkbox from '@smui/checkbox';
 
   import UpdateChangelog from './UpdateChangelog.svelte';
   import SMMUpdateDialog from './SMMUpdateDialog.svelte';
@@ -12,7 +11,7 @@
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { checkForUpdates, canModify, progress, updates, updateCheckInProgress } from '$lib/store/ficsitCLIStore';
   import { error } from '$lib/store/generalStore';
-  import { OfflineGetModsByReferences, UpdateAllMods } from '$wailsjs/go/ficsitcli/FicsitCLI';
+  import { OfflineGetModsByReferences, UpdateMods } from '$wailsjs/go/ficsitcli/FicsitCLI';
   import type { ficsitcli } from '$wailsjs/go/models';
   import { CheckForUpdates as CheckForSMMUpdates } from '$wailsjs/go/bindings/Update';
   import { smmUpdate, smmUpdateReady } from '$lib/store/smmUpdateStore';
@@ -51,10 +50,10 @@
   let updatesDialog = false;
 
   async function updateAll() {
-    if($updates.length > 0) {
+    if(updatesToDisplay.length > 0) {
       try {
-        await UpdateAllMods();
-        $updates = [];
+        await UpdateMods(updatesToDisplay.map((u) => u.item));
+        $updates = $updates.filter((u) => !updatesToDisplay.includes(u));
       } catch(e) {
         if (e instanceof Error) {
           $error = e.message;
@@ -70,8 +69,20 @@
   let selectedUpdates: ficsitcli.Update[] = [];
 
   async function updateSelected() {
-    // TODO
-    console.log(selectedUpdates);
+    if(selectedUpdates.length > 0) {
+      try {
+        await UpdateMods(selectedUpdates.map((u) => u.item));
+        $updates = $updates.filter((u) => !selectedUpdates.includes(u));
+      } catch(e) {
+        if (e instanceof Error) {
+          $error = e.message;
+        } else if (typeof e === 'string') {
+          $error = e;
+        } else {
+          $error = 'Unknown error';
+        }
+      }
+    }
   }
 
   function toggleSelected(update: ficsitcli.Update) {

@@ -54,7 +54,7 @@ func (f *FicsitCLI) CheckForUpdates() ([]Update, error) {
 	updates := []Update{}
 
 	for modReference, newLockedMod := range newLockfile {
-		if prevLockedMod, ok := (*currentLockfile)[modReference]; ok {
+		if prevLockedMod, ok := currentLockfile[modReference]; ok {
 			if newLockedMod.Version != prevLockedMod.Version {
 				updates = append(updates, Update{
 					Item:           modReference,
@@ -68,7 +68,7 @@ func (f *FicsitCLI) CheckForUpdates() ([]Update, error) {
 	return updates, nil
 }
 
-func (f *FicsitCLI) UpdateAllMods() error {
+func (f *FicsitCLI) UpdateMods(mods []string) error {
 	l := log.With().Str("task", "updateAllMods").Logger()
 
 	if f.progress != nil {
@@ -76,21 +76,23 @@ func (f *FicsitCLI) UpdateAllMods() error {
 		return errors.New("Another operation in progress")
 	}
 
-	previousLockfile, err := f.selectedInstallation.Installation.LockFile(f.ficsitCli)
-	if err != nil {
-		l.Error().Err(err).Msg("Failed to get current lockfile")
-		return errors.Wrap(err, "Failed to get current lockfile")
-	}
-
 	profile := f.GetProfile(f.selectedInstallation.Installation.Profile)
-	for modReference, modData := range profile.Mods {
+	for _, modReference := range mods {
+		if _, ok := profile.Mods[modReference]; !ok {
+			l.Warn().Str("mod", modReference).Msg("Mod not found in profile")
+			continue
+		}
 		profile.Mods[modReference] = cli.ProfileMod{
-			Enabled: modData.Enabled,
+			Enabled: profile.Mods[modReference].Enabled,
 			Version: ">=0.0.0",
 		}
 	}
 
-	_ = f.selectedInstallation.Installation.WriteLockFile(f.ficsitCli, cli.LockFile{})
+	err := f.selectedInstallation.Installation.UpdateMods(f.ficsitCli, mods)
+	if err != nil {
+		l.Error().Err(err).Msg("Failed to update mods")
+		return errors.Wrap(err, "Failed to update mods")
+	}
 
 	f.progress = &Progress{
 		Item:     "__update__",
@@ -105,9 +107,8 @@ func (f *FicsitCLI) UpdateAllMods() error {
 	err = f.validateInstall(f.selectedInstallation, "__update__")
 
 	if err != nil {
-		_ = f.selectedInstallation.Installation.WriteLockFile(f.ficsitCli, *previousLockfile)
 		l.Error().Err(err).Msg("Failed to validate installation")
-		return errors.Wrap(err, "Failed to update mods")
+		return errors.Wrap(err, "Failed to validate installation")
 	}
 
 	_ = f.ficsitCli.Profiles.Save()

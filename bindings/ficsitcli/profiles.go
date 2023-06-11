@@ -123,7 +123,7 @@ func (f *FicsitCLI) DeleteProfile(name string) error {
 
 type ExportedProfile struct {
 	Profile  *cli.Profile             `json:"profile"`
-	LockFile *cli.LockFile            `json:"lockfile"`
+	LockFile cli.LockFile             `json:"lockfile"`
 	Metadata *ExportedProfileMetadata `json:"metadata"`
 }
 
@@ -256,7 +256,7 @@ func (f *FicsitCLI) ImportProfile(name string, file string) error {
 
 	_ = selectedInstall.Installation.SetProfile(f.ficsitCli, name)
 
-	err = selectedInstall.Installation.WriteLockFile(f.ficsitCli, *exportedProfile.LockFile)
+	err = selectedInstall.Installation.WriteLockFile(f.ficsitCli, exportedProfile.LockFile)
 	if err != nil {
 		_ = f.ficsitCli.Profiles.DeleteProfile(name)
 		l.Error().Err(err).Str("name", name).Msg("Failed to write lockfile")
