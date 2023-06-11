@@ -13,7 +13,7 @@ require (
 	github.com/rs/zerolog v1.29.0
 	github.com/satisfactorymodding/ficsit-cli v0.1.3
 	github.com/spf13/viper v1.15.0
-	github.com/wailsapp/wails/v2 v2.4.1
+	github.com/wailsapp/wails/v2 v2.5.1
 	github.com/zishang520/engine.io v1.4.3
 	github.com/zishang520/socket.io v1.0.21
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29
