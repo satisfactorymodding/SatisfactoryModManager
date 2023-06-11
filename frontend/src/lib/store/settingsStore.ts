@@ -2,7 +2,7 @@ import { writableBindingSync } from './wailsStoreBindings';
 
 import type { LaunchButtonType, ViewType } from '$lib/wailsTypesExtensions';
 import { GetOffline, SetOffline } from '$wailsjs/go/ficsitcli/FicsitCLI';
-import { GetStartView, SetStartView, GetKonami, SetKonami, GetLaunchButton, SetLaunchButton, GetQueueAutoStart, SetQueueAutoStart } from '$wailsjs/go/bindings/Settings';
+import { GetStartView, SetStartView, GetKonami, SetKonami, GetLaunchButton, SetLaunchButton, GetQueueAutoStart, SetQueueAutoStart, GetUpdateCheckMode, SetUpdateCheckMode } from '$wailsjs/go/bindings/Settings';
 
 export const startView = writableBindingSync<ViewType | null>(null, { 
   initialGet: GetStartView,
@@ -16,3 +16,5 @@ export const launchButton = writableBindingSync<LaunchButtonType>('normal', { in
 export const queueAutoStart = writableBindingSync(true, { initialGet: GetQueueAutoStart, updateFunction: SetQueueAutoStart });
 
 export const offline = writableBindingSync<boolean|null>(null, { initialGet: GetOffline, updateFunction: SetOffline });
+
+export const updateCheckMode = writableBindingSync<'launch'|'exit'|'ask'>('launch', { initialGet: GetUpdateCheckMode, updateFunction: SetUpdateCheckMode });

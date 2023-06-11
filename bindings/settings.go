@@ -119,3 +119,13 @@ func (s *Settings) SetQueueAutoStart(value bool) {
 	settings.Settings.QueueAutoStart = value
 	_ = settings.SaveSettings()
 }
+
+
+func (s *Settings) GetUpdateCheckMode() settings.UpdateCheckMode {
+	return settings.Settings.UpdateCheckMode
+}
+
+func (s *Settings) SetUpdateCheckMode(value settings.UpdateCheckMode) {
+	settings.Settings.UpdateCheckMode = value
+	_ = settings.SaveSettings()
+}

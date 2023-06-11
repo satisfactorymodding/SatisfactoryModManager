@@ -7,7 +7,7 @@
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { GenerateDebugInfo } from '$wailsjs/go/bindings/DebugInfo';
-  import { startView, konami, launchButton, queueAutoStart, offline } from '$lib/store/settingsStore';
+  import { startView, konami, launchButton, queueAutoStart, offline, updateCheckMode } from '$lib/store/settingsStore';
   import { manifestMods, lockfileMods } from '$lib/store/ficsitCLIStore';
   import { GetModNameDocument } from '$lib/generated';
   import type { LaunchButtonType, ViewType } from '$lib/wailsTypesExtensions';
@@ -24,6 +24,23 @@
     {
       id: 'expanded',
       name: 'Expanded',
+    },
+  ];
+
+  let updateCheckModeMenu: Menu;
+
+  let updateCheckModes: {id: 'launch'|'exit'|'ask', name: string}[] = [
+    {
+      id: 'launch',
+      name: 'On start',
+    },
+    {
+      id: 'exit',
+      name: 'On exit',
+    },
+    {
+      id: 'ask',
+      name: 'Ask when found',
     },
   ];
 
@@ -147,6 +164,37 @@
       </Item>
       <Separator insetLeading insetTrailing />
       <div>
+        <Item on:SMUI:action={() => updateCheckModeMenu.setOpen(true)}>
+          <div class="w-7"/>
+          <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
+            <PrimaryText class="text-base">Update check</PrimaryText>
+          </Text>
+          <div class="grow" />
+          <Text class="pr-2 h-full flex flex-col content-center mb-1.5">
+            <PrimaryText class="text-base">{updateCheckModes.find((v) => v.id === $updateCheckMode)?.name ?? ''}</PrimaryText>
+          </Text>
+          <SvgIcon icon={mdiChevronRight} class="h-5 w-5" />
+        </Item>
+        <Menu bind:this={updateCheckModeMenu} class="w-full max-h-[32rem] overflow-visible" anchorCorner="TOP_RIGHT">
+          <List>
+            <SelectionGroup>
+              {#each updateCheckModes as mode}
+                <Item
+                  on:SMUI:action={() => ($updateCheckMode = mode.id)}
+                  selected={$updateCheckMode === mode.id}
+                >
+                  <SelectionGroupIcon>
+                    <SvgIcon icon={mdiCheck} class="h-5 w-5" />
+                  </SelectionGroupIcon>
+                  <Text>{mode.name}</Text>
+                </Item>
+              {/each}
+            </SelectionGroup>
+          </List>
+        </Menu>
+      </div>
+      <Separator insetLeading insetTrailing insetPadding />
+      <div>
         <Item on:SMUI:action={() => queueModeMenu.setOpen(true)}>
           <div class="w-7"/>
           <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
@@ -176,7 +224,7 @@
           </List>
         </Menu>
       </div>
-      <Separator insetLeading insetTrailing />
+      <Separator insetLeading insetTrailing insetPadding />
       <div>
         <Item on:SMUI:action={() => startViewMenu.setOpen(true)}>
           <div class="w-7"/>
@@ -207,6 +255,7 @@
           </List>
         </Menu>
       </div>
+      <Separator insetLeading insetTrailing insetPadding />
       <Item on:SMUI:action={() => { $offline = !$offline; settingsMenu.setOpen(false); }}>
         <div class="w-7"/>
         <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
