@@ -147,11 +147,11 @@ func init() {
 		panic(err)
 	}
 
-	cacheDir := filepath.Clean(filepath.Join(baseCacheDir, "SatisfactoryModManagerNEW"))
+	cacheDir := filepath.Clean(filepath.Join(baseCacheDir, "SatisfactoryModManager"))
 	_ = utils.EnsureDirExists(cacheDir)
 	viper.Set("cache-dir", cacheDir)
 
-	localDir := filepath.Clean(filepath.Join(baseLocalDir, "SatisfactoryModManagerNEW"))
+	localDir := filepath.Clean(filepath.Join(baseLocalDir, "SatisfactoryModManager"))
 	_ = utils.EnsureDirExists(localDir)
 	viper.Set("local-dir", localDir)
 
