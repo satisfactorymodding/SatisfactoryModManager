@@ -26,7 +26,6 @@ import (
 	"github.com/satisfactorymodding/SatisfactoryModManager/settings"
 	"github.com/satisfactorymodding/SatisfactoryModManager/singleinstance"
 	"github.com/satisfactorymodding/SatisfactoryModManager/utils"
-	"github.com/satisfactorymodding/SatisfactoryModManager/wailslogging"
 	"github.com/satisfactorymodding/SatisfactoryModManager/websocket"
 )
 
@@ -103,7 +102,7 @@ func main() {
 			autoupdate.CheckInterval(5 * time.Minute)
 		},
 		Bind:   b.GetBindings(),
-		Logger: wailslogging.WailsZeroLogLogger{},
+		Logger: wailsZeroLogLogger{},
 	})
 
 	if err != nil {
