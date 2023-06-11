@@ -3,7 +3,7 @@ import { tick } from 'svelte';
 import { queue } from 'async';
 
 import { readableBinding, writableBinding } from './wailsStoreBindings';
-import { isLaunchingGame } from './generalStore';
+import { error, isLaunchingGame } from './generalStore';
 import { queueAutoStart } from './settingsStore';
 
 import { cli, ficsitcli } from '$wailsjs/go/models';
@@ -35,7 +35,9 @@ Promise.all([installs.waitForInit, profiles.waitForInit]).then(() => {
     selectedInstall.subscribe((i) => {
       const path = i?.info?.path;
       if(path) {
-        SelectInstall(path);
+        SelectInstall(path).catch((e) => {
+          error.set(e instanceof Error ? e.message : e);
+        });
         if(i.installation) {
           if(get(profiles).includes(i.installation.profile)) {
             selectedProfile.set(i.installation.profile);
@@ -49,7 +51,9 @@ Promise.all([installs.waitForInit, profiles.waitForInit]).then(() => {
     
     selectedProfile.subscribe((p) => {
       if(p) {
-        SetProfile(p);
+        SetProfile(p).catch((e) => {
+          error.set(e instanceof Error ? e.message : e);
+        });
         const install = get(selectedInstall);
         if(install && install.installation) {
           install.installation.profile = p;

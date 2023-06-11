@@ -7,6 +7,7 @@
   import { GetModSummaryDocument } from '$lib/generated';
   import { addQueuedModAction, manifestMods, queuedMods, removeQueuedModAction } from '$lib/store/ficsitCLIStore';
   import { offline } from '$lib/store/settingsStore';
+  import { error } from '$lib/store/generalStore';
   import { InstallMod } from '$wailsjs/go/ficsitcli/FicsitCLI';
   import { EventsOn } from '$wailsjs/runtime/runtime';
 
@@ -46,7 +47,7 @@
       return;
     }
     const modReference = modId;
-    const action = async () => InstallMod(modReference);
+    const action = async () => InstallMod(modReference).catch((e) => $error = e);
     const actionName = 'install';
     if(queued) {
       removeQueuedModAction(modReference);

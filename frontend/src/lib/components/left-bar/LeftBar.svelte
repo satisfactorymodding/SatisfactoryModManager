@@ -25,9 +25,19 @@
 
   async function setModsEnabled(enabled: boolean) {
     if ($selectedInstall) {
-      await SetModsEnabled(enabled);
-      if ($selectedInstall.installation) {
-        $selectedInstall.installation.vanilla = !enabled;
+      try {
+        await SetModsEnabled(enabled);
+        if ($selectedInstall.installation) {
+          $selectedInstall.installation.vanilla = !enabled;
+        }
+      } catch(e) {
+        if (e instanceof Error) {
+          $error = e.message;
+        } else if (typeof e === 'string') {
+          $error = e;
+        } else {
+          $error = 'Unknown error';
+        }
       }
     }
   }

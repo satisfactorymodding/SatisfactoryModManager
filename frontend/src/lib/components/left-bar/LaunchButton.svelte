@@ -6,7 +6,7 @@
 
   import { selectedInstall, isGameRunning, lockfileMods, progress, queuedMods, startQueue } from '$lib/store/ficsitCLIStore';
   import { launchButton, queueAutoStart } from '$lib/store/settingsStore';
-  import { isLaunchingGame } from '$lib/store/generalStore';
+  import { error, isLaunchingGame } from '$lib/store/generalStore';
   import { LaunchGame } from '$wailsjs/go/ficsitcli/FicsitCLI';
   import { CompatibilityState, type Compatibility } from '$lib/generated';
   import { getCompatiblity, type CompatibilityWithSource } from '$lib/utils/modCompatibility';
@@ -54,7 +54,7 @@
 
   function launchGame() {
     $isLaunchingGame = true;
-    LaunchGame();
+    LaunchGame().catch((e) => $error = e);
     setTimeout(() => $isLaunchingGame = false, 10000);
   }
 
