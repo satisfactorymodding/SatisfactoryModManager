@@ -5,6 +5,11 @@ type Size struct {
 	Height int `json:"height"`
 }
 
+type Position struct {
+	X int `json:"x"`
+	Y int `json:"y"`
+}
+
 var (
 	UnexpandedMin     = Size{Width: 850, Height: 750}
 	UnexpandedMax     = Size{Width: 0, Height: 0}

@@ -26,10 +26,15 @@ func MakeApp() *App {
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 
-	sizeTicker := time.NewTicker(100 * time.Millisecond)
+	windowStateTicker := time.NewTicker(100 * time.Millisecond)
 	go func() {
-		for range sizeTicker.C {
+		for range windowStateTicker.C {
+			if wailsRuntime.WindowIsMinimised(a.ctx) {
+				// When the window is minimized, the window position values are garbage
+				continue
+			}
 			w, h := wailsRuntime.WindowGetSize(a.ctx)
+			x, y := wailsRuntime.WindowGetPosition(a.ctx)
 			changed := false
 			if BindingsInstance.App.isExpanded {
 				if w != settings.Settings.ExpandedSize.Width {
@@ -50,6 +55,22 @@ func (a *App) startup(ctx context.Context) {
 				settings.Settings.UnexpandedSize.Height = h
 				changed = true
 			}
+			if settings.Settings.WindowPosition == nil {
+				settings.Settings.WindowPosition = &utils.Position{
+					X: x,
+					Y: y,
+				}
+				changed = true
+			} else {
+				if x != settings.Settings.WindowPosition.X {
+					settings.Settings.WindowPosition.X = x
+					changed = true
+				}
+				if y != settings.Settings.WindowPosition.Y {
+					settings.Settings.WindowPosition.Y = y
+					changed = true
+				}
+			}
 			if changed {
 				err := settings.SaveSettings()
 				if err != nil {
@@ -58,6 +79,11 @@ func (a *App) startup(ctx context.Context) {
 			}
 		}
 	}()
+
+	// Wails doesn't support setting the window position on init, so we do it here
+	if settings.Settings.WindowPosition != nil {
+		wailsRuntime.WindowSetPosition(a.ctx, settings.Settings.WindowPosition.X, settings.Settings.WindowPosition.Y)
+	}
 }
 
 func (a *App) ExpandMod() bool {

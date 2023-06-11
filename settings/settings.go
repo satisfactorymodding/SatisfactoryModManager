@@ -24,37 +24,57 @@ var (
 )
 
 type settings struct {
-	FavoriteMods    []string          `json:"favoriteMods"`
-	ModFilters      SavedModFilters   `json:"modFilters"`
-	UnexpandedSize  utils.Size        `json:"unexpandedSize"`
-	ExpandedSize    utils.Size        `json:"expandedSize"`
-	StartView       View              `json:"startView"`
-	QueueAutoStart  bool              `json:"queueAutoStart"`
+	WindowPosition *utils.Position `json:"windowPosition"`
+	Maximized      bool            `json:"maximized"`
+
+	UnexpandedSize utils.Size `json:"unexpandedSize"`
+	ExpandedSize   utils.Size `json:"expandedSize"`
+
+	StartView View `json:"startView"`
+
+	FavoriteMods []string        `json:"favoriteMods"`
+	ModFilters   SavedModFilters `json:"modFilters"`
+
 	SelectedInstall string            `json:"selectedInstall"`
 	SelectedProfile map[string]string `json:"selectedProfile"`
 	ModsEnabled     map[string]bool   `json:"modsEnabled"`
-	Offline         bool              `json:"offline"`
-	Konami          bool              `json:"konami"`
-	LaunchButton    string            `json:"launchButton"`
+
+	QueueAutoStart      bool                `json:"queueAutoStart"`
+
+	Offline bool `json:"offline"`
+
+	Konami       bool   `json:"konami"`
+	LaunchButton string `json:"launchButton"`
 }
 
 var Settings = settings{
+	WindowPosition: nil,
+	Maximized:      false,
+
+	UnexpandedSize: utils.UnexpandedDefault,
+	ExpandedSize:   utils.ExpandedDefault,
+
+	StartView: ViewCompact,
+
 	FavoriteMods: []string{},
 	ModFilters: SavedModFilters{
 		Order:  "Last updated",
 		Filter: "Compatible",
 	},
-	UnexpandedSize:  utils.UnexpandedDefault,
-	ExpandedSize:    utils.ExpandedDefault,
-	StartView:       ViewCompact,
-	QueueAutoStart:  true,
+
 	SelectedInstall: "",
 	SelectedProfile: map[string]string{},
 	ModsEnabled:     map[string]bool{},
-	Offline:         false,
-	Konami:          false,
-	LaunchButton:    "normal",
+
+
+	QueueAutoStart:      true,
+
+	Offline: false,
+
+	Konami:       false,
+	LaunchButton: "normal",
 }
+
 var settingsFileName = "settings.json"
 
 func LoadSettings() error {

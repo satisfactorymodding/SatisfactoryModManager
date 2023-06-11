@@ -85,18 +85,24 @@ func main() {
 		log.Fatal().Err(err).Msg("Failed to create bindings")
 	}
 
+	windowStartState := options.Minimised
+	if settings.Settings.Maximized {
+		windowStartState = options.Maximised
+	}
+
 	// Create application with options
 	err = wails.Run(&options.App{
-		Title:     "SatisfactoryModManager",
-		Frameless: runtime.GOOS == "windows",
-		Width:     settings.Settings.UnexpandedSize.Width,
-		Height:    settings.Settings.UnexpandedSize.Height,
-		MinWidth:  utils.UnexpandedMin.Width,
-		MaxWidth:  utils.UnexpandedMax.Width,
-		MinHeight: utils.UnexpandedMin.Height,
-		MaxHeight: utils.UnexpandedMax.Height,
-		Assets:    assets,
-		OnStartup: b.Startup,
+		Title:            "SatisfactoryModManager",
+		Frameless:        runtime.GOOS == "windows",
+		Width:            settings.Settings.UnexpandedSize.Width,
+		Height:           settings.Settings.UnexpandedSize.Height,
+		MinWidth:         utils.UnexpandedMin.Width,
+		MaxWidth:         utils.UnexpandedMax.Width,
+		MinHeight:        utils.UnexpandedMin.Height,
+		MaxHeight:        utils.UnexpandedMax.Height,
+		WindowStartState: windowStartState,
+		Assets:           assets,
+		OnStartup:        b.Startup,
 		OnDomReady: func(ctx context.Context) {
 			processArguments(os.Args)
 			autoupdate.CheckInterval(5 * time.Minute)
