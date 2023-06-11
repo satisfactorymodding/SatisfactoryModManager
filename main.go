@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"embed"
 	"encoding/json"
 	"io"
 	"os"
@@ -27,9 +28,10 @@ import (
 	"github.com/satisfactorymodding/SatisfactoryModManager/utils"
 	"github.com/satisfactorymodding/SatisfactoryModManager/wailslogging"
 	"github.com/satisfactorymodding/SatisfactoryModManager/websocket"
-
-	_ "embed"
 )
+
+//go:embed all:frontend/build
+var assets embed.FS
 
 //go:embed wails.json
 var projectFile []byte
