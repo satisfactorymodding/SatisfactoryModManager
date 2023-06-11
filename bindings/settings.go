@@ -120,6 +120,30 @@ func (s *Settings) SetQueueAutoStart(value bool) {
 	_ = settings.SaveSettings()
 }
 
+func (s *Settings) GetIgnoredUpdates() map[string][]string {
+	return settings.Settings.IgnoredUpdates
+}
+
+func (s *Settings) SetUpdateIgnore(modReference string, version string) {
+	settings.Settings.IgnoredUpdates[modReference] = append(settings.Settings.IgnoredUpdates[modReference], version)
+	_ = settings.SaveSettings()
+}
+
+func (s *Settings) SetUpdateUnignore(modReference string, version string) {
+	versions := settings.Settings.IgnoredUpdates[modReference]
+	idx := -1
+	for i, v := range versions {
+		if v == version {
+			idx = i
+			break
+		}
+	}
+	if idx == -1 {
+		return
+	}
+	settings.Settings.IgnoredUpdates[modReference] = append(versions[:idx], versions[idx+1:]...)
+	_ = settings.SaveSettings()
+}
 
 func (s *Settings) GetUpdateCheckMode() settings.UpdateCheckMode {
 	return settings.Settings.UpdateCheckMode

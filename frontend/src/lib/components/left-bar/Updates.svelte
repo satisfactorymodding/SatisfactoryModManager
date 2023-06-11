@@ -4,6 +4,7 @@
   import Dialog, { Actions, Content, Title } from '@smui/dialog';
   import List, { Item, PrimaryText, SecondaryText, Text } from '@smui/list';
   import { getContextClient, queryStore } from '@urql/svelte';
+  import Checkbox from '@smui/checkbox';
 
   import UpdateChangelog from './UpdateChangelog.svelte';
   import SMMUpdateDialog from './SMMUpdateDialog.svelte';
@@ -16,7 +17,8 @@
   import { CheckForUpdates as CheckForSMMUpdates } from '$wailsjs/go/bindings/Update';
   import { smmUpdate, smmUpdateReady } from '$lib/store/smmUpdateStore';
   import { GetModNamesDocument } from '$lib/generated';
-  import { offline } from '$lib/store/settingsStore';
+  import { ignoredUpdates, offline } from '$lib/store/settingsStore';
+  import { SetUpdateIgnore, SetUpdateUnignore } from '$wailsjs/go/bindings/Settings';
 
   const client = getContextClient();
 
@@ -103,14 +105,34 @@
       updatesDialog = true;
     }
   }
+
+  function isUpdateIgnored(update: ficsitcli.Update) {
+    return $ignoredUpdates[update.item]?.includes(update.newVersion);
+  }
+
+  $: ignoredAvailableUpdates = $ignoredUpdates ? $updates.filter((u) => isUpdateIgnored(u)) : [];
+
+  let showIgnored = false;
+
+  $: updatesToDisplay = showIgnored ? $updates : $updates.filter((u) => !ignoredAvailableUpdates.includes(u));
+
+  function toggleIgnoreUpdate(update: ficsitcli.Update) {
+    if(!isUpdateIgnored(update)) {
+      SetUpdateIgnore(update.item, update.newVersion);
+      $ignoredUpdates[update.item] = [...($ignoredUpdates[update.item] ?? []), update.newVersion];
+    } else {
+      SetUpdateUnignore(update.item, update.newVersion);
+      $ignoredUpdates[update.item] = $ignoredUpdates[update.item].filter((v) => v !== update.newVersion);
+    }
+  }
 </script>
 
-<Button variant="unelevated" class="w-full mt-2 update-button {$smmUpdate || $updates.length > 0 ? 'has-update' : ''}" on:click={() => showUpdateDialog()}>
+<Button variant="unelevated" class="w-full mt-2 update-button {$smmUpdate || updatesToDisplay.length > 0 ? 'has-update' : ''}" on:click={() => showUpdateDialog()}>
   <Label>
     {#if $smmUpdate}
       SMM update available
-    {:else if $updates.length > 0}
-      {$updates.length} updates available
+    {:else if updatesToDisplay.length > 0}
+      {updatesToDisplay.length} updates available
     {:else}
       No updates right now
     {/if}
@@ -133,8 +155,9 @@
 >
   <Title>Updates</Title>
   <Content>
+    <Button on:click={() => showIgnored = !showIgnored}>{ showIgnored ? 'Hide ignored' : 'Show ignored' }</Button>
     <List>
-      {#each $updates as update}
+      {#each updatesToDisplay as update}
         <Item 
           on:SMUI:action={() => toggleSelected(update)}
         >
@@ -150,16 +173,17 @@
           <div class="grow" />
           <div on:click|stopPropagation={() => {/* empty */}}>
             <Button on:click={() => changelogUpdate = update}>Changelog</Button>
+            <Button on:click={() => toggleIgnoreUpdate(update)}>{ ignoredAvailableUpdates.includes(update) ? 'Unignore' : 'Ignore' }</Button>
           </div>
         </Item>
       {/each}
     </List>
   </Content>
   <Actions>
-    <Button on:click={() => updateAll()} disabled={!$canModify || $updateCheckInProgress}>
+    <Button on:click={() => updateAll()} disabled={!$canModify || $updateCheckInProgress || updatesToDisplay.length == 0}>
       <Label>Update All</Label>
     </Button>
-    <Button on:click={() => updateSelected()} disabled={!$canModify || $updateCheckInProgress}>
+    <Button on:click={() => updateSelected()} disabled={!$canModify || $updateCheckInProgress || updatesToDisplay.length == 0 || selectedUpdates.length == 0}>
       <Label>Update Selected</Label>
     </Button>
   </Actions>

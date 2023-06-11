@@ -423,7 +423,4 @@
     width: 50px;
     height: 50px;
   }
-  a:visited {
-    color: #249a20;
-  }
 </style>
