@@ -6,7 +6,7 @@
   import Menu from '@smui/menu';
   import List, { Item, PrimaryText, SecondaryText, Separator, Text } from '@smui/list';
   import Dialog, { Content, Title } from '@smui/dialog';
-  import { minVersion, valid, validRange, sort, coerce, SemVer } from 'semver';
+  import { minVersion, valid, validRange, sort, coerce, SemVer, parse } from 'semver';
   import Tooltip, { Wrapper } from '@smui/tooltip';
 
   import { CompatibilityState, GetModDetailsDocument, GetModReferenceDocument, type Version } from '$lib/generated';
@@ -91,7 +91,7 @@
 
   $: size = mod ? bytesToAppropriate(mod.versions[0]?.size ?? 0) : undefined;
 
-  $: latestVersion = mod?.versions?.length ? sort(mod.versions.map((v) => coerce(v.version)).filter((v) => !!v) as SemVer[]).reverse()[0] : 'N/A';
+  $: latestVersion = mod?.versions?.length ? sort(mod.versions.map((v) => parse(v.version) ?? coerce(v.version)).filter((v) => !!v) as SemVer[]).reverse()[0] : 'N/A';
   $: installedVersion = (mod && $lockfileMods[mod.mod_reference]?.version) ?? 'Not installed';
 
   $: ficsitAppLink = `https://ficsit.app/mod/${$expandedMod}`;
