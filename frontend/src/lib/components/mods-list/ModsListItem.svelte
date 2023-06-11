@@ -30,12 +30,12 @@
   
   export let selected: boolean;
 
-  $: actualLogo = 'offline' in mod ? (mod.logo ? `data:image/png;base64, ${mod.logo}` : '/images/no_image.webp') : mod.logo;
+  $: actualLogo = ('offline' in mod || 'missing' in mod) ? (mod.logo ? `data:image/png;base64, ${mod.logo}` : '/images/no_image.webp') : mod.logo;
   $: renderedLogo = actualLogo || 'https://ficsit.app/images/no_image.webp';
-  $: author = 'offline' in mod ? mod.authors[0] : getAuthor(mod);
+  $: author = ('offline' in mod || 'missing' in mod) ? mod.authors[0] : getAuthor(mod);
 
   $: isInstalled = mod.mod_reference in $manifestMods;
-  $: isEnabled = mod.mod_reference in $lockfileMods;
+  $: isEnabled = $manifestMods[mod.mod_reference]?.enabled ?? mod.mod_reference in $lockfileMods;
   $: isDependency = !isInstalled && isEnabled;
   $: inProgress = $progress?.item === mod.mod_reference;
   $: queued = $queuedMods.some((q) => q.mod === mod.mod_reference);
@@ -103,7 +103,7 @@
     const gameVersion = $selectedInstall?.info?.version;
     const branch = $selectedInstall?.info?.branch as GameBranch;
     if(gameVersion && branch) {
-      if(!('offline' in mod)) {
+      if(!('offline' in mod) && !('missing' in mod)) {
         if(mod.hidden && !isDependency) {
           compatibility = { state: CompatibilityState.Broken, note: 'This mod was hidden by the author.', source: 'reported' };
         } else {
@@ -121,6 +121,8 @@
             }
           });
         }
+      } else if('missing' in mod) {
+        compatibility = { state: CompatibilityState.Broken, note: 'This mod is no longer available on ficsit.app. You may want to remove it.', source: 'version' };
       } else {
         getVersionCompatibility(mod.mod_reference, gameVersion, client).then((result) => {
           compatibility = {
@@ -135,7 +137,7 @@
   async function toggleModInstalled() {
     // Svelte does not recreate the component, but reuse it, so the associated mod reference might change
     const modReference = mod.mod_reference;
-    const action = isInstalled ? async () => RemoveMod(modReference) : async () => InstallMod(modReference);
+    const action = isInstalled ? async () => RemoveMod(modReference).catch((e) => $error = e) : async () => InstallMod(modReference).catch((e) => $error = e);
     const actionName = isInstalled ? 'remove' : 'install';
     if(queued) {
       removeQueuedModAction(modReference);
@@ -151,7 +153,7 @@
   async function toggleModEnabled() {
     // Svelte does not recreate the component, but reuse it, so the associated mod reference might change
     const modReference = mod.mod_reference;
-    const action = isEnabled ? async () => DisableMod(modReference) : async () => EnableMod(modReference);
+    const action = isEnabled ? async () => DisableMod(modReference).catch((e) => $error = e) : async () => EnableMod(modReference).catch((e) => $error = e);
     const actionName = isEnabled ? 'disable' : 'enable';
     if(queued) {
       removeQueuedModAction(modReference);
@@ -219,7 +221,7 @@
           <div class="grow w-0 lg:text-base text-sm">
             <div class="truncate text-base md:text-sm block md:hidden">{'short_description' in mod ? mod.short_description : ''}</div>
             <div class="truncate hidden md:block">
-              {#if !('offline' in mod)}
+              {#if !('offline' in mod) && !('missing' in mod)}
                 {#each mod?.tags ?? [] as tag}
                   <span class="pr-1">#{tag.name}</span>
                 {/each}
@@ -227,7 +229,7 @@
               &nbsp; <!-- keep div height even when no tags are available -->
             </div>
             <div class="flex h-5 md:h-4.5">
-              {#if !('offline' in mod)}
+              {#if !('offline' in mod) && !('missing' in mod)}
                 <div class="w-24 flex items-center">
                   <div class="pr-1 inline-flex items-center justify-items-center lg:w-7 w-6"><SvgIcon icon={mdiEye} class=""/></div><span>{mod.views.toLocaleString()}</span>
                 </div>

@@ -44,14 +44,30 @@
   }
   
   $: if($offline !== null) {
-    if($offline) {
-      fetchAllModsOffline();
-    } else {
+    fetchAllModsOffline();
+    if(!$offline) {
       fetchAllModsOnline();
     }
   }
 
-  $: mods = $offline ? offlineMods : onlineMods;
+  $: knownMods = $offline ? offlineMods : onlineMods;
+
+  $: unknownModReferences = Object.keys($manifestMods)
+    .filter((modReference) => !knownMods.find((knownMod) => knownMod.mod_reference === modReference) && modReference !== 'SML');
+
+  $: unknownMods = unknownModReferences.map((modReference) => {
+    const offlineMod = offlineMods.find((mod) => mod.mod_reference === modReference);
+    const mod = {
+      mod_reference: modReference,
+      name: offlineMod ? offlineMod.name : modReference,
+      logo: offlineMod ? offlineMod.logo : undefined,
+      authors: offlineMod ? offlineMod.authors : ['N/A'],
+      missing: true,
+    } as PartialMod;
+    return mod;
+  });
+
+  $: mods = [...knownMods, ...unknownMods];
 
   let filteredMods: PartialMod[] = [];
   $: {

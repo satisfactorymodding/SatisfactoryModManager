@@ -47,7 +47,7 @@ export const filterOptions: Filter[] = [
   { name: 'Installed', func: (mod: PartialMod) => mod.mod_reference in get(manifestMods) },
   { name: 'Dependency', func: (mod: PartialMod) => !(mod.mod_reference in get(manifestMods)) && mod.mod_reference in get(lockfileMods) },
   { name: 'Not installed', func: (mod: PartialMod) => !(mod.mod_reference in get(manifestMods)) },
-  { name: 'Enabled', func: (mod: PartialMod) => mod.mod_reference in get(lockfileMods) },
+  { name: 'Enabled', func: (mod: PartialMod) => get(manifestMods)[mod.mod_reference]?.enabled ?? mod.mod_reference in get(lockfileMods) },
   { name: 'Disabled', func: (mod: PartialMod) => mod.mod_reference in get(manifestMods) && !(mod.mod_reference in get(lockfileMods)) },
 ];
 
@@ -59,7 +59,14 @@ export interface OfflineMod {
   logo?: string;
   authors: string[];
 }
-export type PartialMod = PartialSMRMod | OfflineMod;
+export interface MissingMod {
+  missing: true;
+  mod_reference: string;
+  name: string;
+  logo?: string;
+  authors: string[];
+}
+export type PartialMod = PartialSMRMod | OfflineMod | MissingMod;
 
 export const search = writable('');
 export const order = writableBindingSync(orderByOptions[1], { 
