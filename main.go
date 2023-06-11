@@ -169,6 +169,8 @@ func init() {
 	viper.Set("log", "debug")
 	viper.Set("log-file", filepath.Join(cacheDir, "logs", "SatisfactoryModManager.log"))
 
+	viper.Set("concurrent-downloads", 5)
+
 	writers := make([]io.Writer, 0)
 	writers = append(writers, zerolog.ConsoleWriter{
 		Out:        os.Stdout,

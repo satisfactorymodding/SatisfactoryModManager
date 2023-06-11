@@ -187,11 +187,11 @@
 
 <div class="my-1 px-0 lg:h-24 md:h-[5.5rem] h-[4.25rem]" class:rounded-lg={selected} class:selected on:click={click}>
   {#if inProgress}
-    <div class="relative h-0">
+    <div class="relative h-full">
       <LinearProgress progress={$progress?.progress} class="mod-progress-bar h-full rounded-lg"/>
     </div>
   {/if}
-  <div class="flex relative h-full" class:disabled={isInstalled && !isEnabled}>
+  <div class="flex relative h-full" class:-top-full={inProgress} class:disabled={isInstalled && !isEnabled}>
     <img src={renderedLogo} alt="{mod.name} Logo" class="logo h-full lg:w-24 md:w-[5.5rem] w-[4.25rem]" />
     <div class="ml-2 flex flex-col grow w-0">
       <Wrapper>

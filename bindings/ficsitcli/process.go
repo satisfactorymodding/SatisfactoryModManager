@@ -1,9 +1,14 @@
 package ficsitcli
 
 import (
+	"fmt"
+	"sync"
+	"time"
+
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 	"github.com/satisfactorymodding/ficsit-cli/cli"
+	"github.com/satisfactorymodding/ficsit-cli/utils"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
@@ -11,26 +16,101 @@ func (f *FicsitCLI) validateInstall(installation *InstallationInfo, progressItem
 	defer f.EmitModsChange()
 
 	installChannel := make(chan cli.InstallUpdate)
-	defer close(installChannel)
 
 	defer f.setProgress(f.progress)
 
+	type modProgress struct {
+		downloadProgress utils.GenericProgress
+		extractProgress  utils.GenericProgress
+		downloading      bool
+		complete         bool
+	}
+	modProgresses := map[string]modProgress{}
+	modProgressesMutex := &sync.Mutex{}
+
+	progressTicker := time.NewTicker(100 * time.Millisecond)
+	done := make(chan bool)
 	go func() {
-		for data := range installChannel {
-			if data.DownloadProgress < 1 {
-				f.setProgress(&Progress{
-					Item:     progressItem,
-					Message:  "Downloading " + data.ModName,
-					Progress: data.DownloadProgress,
-				})
-			} else {
-				f.setProgress(&Progress{
-					Item:     progressItem,
-					Message:  "Extracting " + data.ModName,
-					Progress: data.ExtractProgress,
-				})
+		for {
+			select {
+			case <-done:
+				return
+			case <-progressTicker.C:
+				modProgressesMutex.Lock()
+
+				totalDownload := int64(0)
+				completedDownload := int64(0)
+				totalExtracted := int64(0)
+				completedExtracted := int64(0)
+				downloadsInProgressCount := 0
+				extractionsInProgressCount := 0
+
+				for _, modProgress := range modProgresses {
+					if !modProgress.complete {
+						if modProgress.downloading {
+							downloadsInProgressCount++
+						} else {
+							extractionsInProgressCount++
+						}
+					}
+					completedDownload += modProgress.downloadProgress.Completed
+					totalDownload += modProgress.downloadProgress.Total
+					completedExtracted += modProgress.extractProgress.Completed
+					totalExtracted += modProgress.extractProgress.Total
+				}
+
+				if downloadsInProgressCount > 0 {
+					if totalDownload != 0 {
+						f.setProgress(&Progress{
+							Item:     progressItem,
+							Message:  fmt.Sprintf("Downloading %d mods", downloadsInProgressCount),
+							Progress: float64(completedDownload) / float64(totalDownload),
+						})
+					}
+				} else if extractionsInProgressCount > 0 {
+					if totalExtracted != 0 {
+						f.setProgress(&Progress{
+							Item:     progressItem,
+							Message:  fmt.Sprintf("Extracting %d mods", extractionsInProgressCount),
+							Progress: float64(completedExtracted) / float64(totalExtracted),
+						})
+					}
+				}
+				modProgressesMutex.Unlock()
 			}
 		}
+	}()
+
+	go func() {
+		for update := range installChannel {
+			modProgressesMutex.Lock()
+			switch update.Type {
+			case cli.InstallUpdateTypeModDownload:
+				modProgresses[update.Item.Mod] = modProgress{
+					downloadProgress: update.Progress,
+					extractProgress:  modProgresses[update.Item.Mod].extractProgress,
+					downloading:      true,
+					complete:         false,
+				}
+			case cli.InstallUpdateTypeModExtract:
+				modProgresses[update.Item.Mod] = modProgress{
+					downloadProgress: modProgresses[update.Item.Mod].downloadProgress,
+					extractProgress:  update.Progress,
+					downloading:      false,
+					complete:         false,
+				}
+			case cli.InstallUpdateTypeModComplete:
+				modProgresses[update.Item.Mod] = modProgress{
+					downloadProgress: modProgresses[update.Item.Mod].downloadProgress,
+					extractProgress:  modProgresses[update.Item.Mod].extractProgress,
+					downloading:      false,
+					complete:         true,
+				}
+			}
+			modProgressesMutex.Unlock()
+		}
+		progressTicker.Stop()
+		close(done)
 	}()
 
 	_, resolveErr := installation.Installation.ResolveProfile(f.ficsitCli)
