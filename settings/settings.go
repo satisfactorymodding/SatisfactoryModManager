@@ -23,6 +23,14 @@ var (
 	ViewExpanded View = "expanded"
 )
 
+type UpdateCheckMode string
+
+var (
+	UpdateOnLaunch UpdateCheckMode = "launch"
+	UpdateOnExit   UpdateCheckMode = "exit"
+	UpdateAsk      UpdateCheckMode = "ask"
+)
+
 type settings struct {
 	WindowPosition *utils.Position `json:"windowPosition"`
 	Maximized      bool            `json:"maximized"`
@@ -40,6 +48,9 @@ type settings struct {
 	ModsEnabled     map[string]bool   `json:"modsEnabled"`
 
 	QueueAutoStart      bool                `json:"queueAutoStart"`
+	IgnoredUpdates      map[string][]string `json:"ignoredUpdates"`
+	UpdateCheckMode     UpdateCheckMode     `json:"updateCheckMode"`
+	ViewedAnnouncements []string            `json:"viewedAnnouncements"`
 
 	Offline bool `json:"offline"`
 
@@ -66,8 +77,10 @@ var Settings = settings{
 	SelectedProfile: map[string]string{},
 	ModsEnabled:     map[string]bool{},
 
-
 	QueueAutoStart:      true,
+	IgnoredUpdates:      map[string][]string{},
+	UpdateCheckMode:     UpdateOnLaunch,
+	ViewedAnnouncements: []string{},
 
 	Offline: false,
 
@@ -98,7 +111,11 @@ func LoadSettings() error {
 	}
 
 	if err := json.Unmarshal(settingsFile, &Settings); err != nil {
-		return errors.Wrap(err, "failed to unmarshal settings")
+		// Settings file might be SMM2 settings, try to load those
+		err = readSMM2Settings(settingsFile)
+		if err != nil {
+			return errors.Wrap(err, "failed to unmarshal settings")
+		}
 	}
 
 	return nil
