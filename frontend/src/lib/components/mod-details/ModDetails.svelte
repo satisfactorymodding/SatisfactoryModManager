@@ -373,8 +373,7 @@
     </div>
 
     <div class="pt-4">
-      <!-- svelte-ignore a11y-missing-attribute -->
-      <a on:click={() => BrowserOpenURL(ficsitAppLink)} class="color-primary">View on ficsit.app</a>
+      <span on:click={() => BrowserOpenURL(ficsitAppLink)} class="color-primary">View on ficsit.app</span>
     </div>
 
     <div class="grow"></div>

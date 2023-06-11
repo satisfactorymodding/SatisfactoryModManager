@@ -129,3 +129,22 @@ func (s *Settings) SetUpdateCheckMode(value settings.UpdateCheckMode) {
 	settings.Settings.UpdateCheckMode = value
 	_ = settings.SaveSettings()
 }
+
+func (s *Settings) GetViewedAnnouncements() []string {
+	return settings.Settings.ViewedAnnouncements
+}
+
+func (s *Settings) SetAnnouncementViewed(announcement string) {
+	found := false
+	for _, viewed := range settings.Settings.ViewedAnnouncements {
+		if viewed == announcement {
+			found = true
+			break
+		}
+	}
+	if found {
+		return
+	}
+	settings.Settings.ViewedAnnouncements = append(settings.Settings.ViewedAnnouncements, announcement)
+	_ = settings.SaveSettings()
+}

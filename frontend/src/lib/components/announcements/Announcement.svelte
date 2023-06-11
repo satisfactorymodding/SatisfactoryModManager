@@ -3,7 +3,7 @@
 
   import { AnnouncementImportance, type Announcement } from '$lib/generated';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
-  import { viewedAnnouncements } from '$lib/store/generalStore';
+  import { viewedAnnouncements } from '$lib/store/settingsStore';
 
   export let announcement: Pick<Announcement, 'id' | 'importance' | 'message'>;
 

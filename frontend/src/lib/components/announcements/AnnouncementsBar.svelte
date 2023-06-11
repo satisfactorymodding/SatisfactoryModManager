@@ -5,10 +5,10 @@
 
   import Announcement from './Announcement.svelte';
 
-  import { viewedAnnouncements } from '$lib/store/generalStore';
+  import { viewedAnnouncements , offline } from '$lib/store/settingsStore';
   import { AnnouncementImportance, GetAnnouncementsDocument, SmrHealthcheckDocument, type Announcement as AnnouncementType } from '$lib/generated';
-  import { offline } from '$lib/store/settingsStore';
-
+  import { SetAnnouncementViewed } from '$wailsjs/go/bindings/Settings';
+  
   const client = getContextClient();
 
   $: healthcheckStore = queryStore({
@@ -92,6 +92,7 @@
   function setAnnouncementViewed(announcement?: Pick<ViewableAnnouncement, 'id' | 'viewable'>) {
     if(!announcement?.viewable) return;
     if(!$viewedAnnouncements.some((id) => announcement.id === id)) {
+      SetAnnouncementViewed(announcement.id);
       viewedAnnouncements.update((ids) => [...ids, announcement.id]);
     }
   }
@@ -102,7 +103,7 @@
     <Announcement announcement={offlineAnnouncement}>
       <div class="flex pr-2">
         <span>{offlineAnnouncement.message}</span>
-        <a on:click={() => $offline = false} class="text-yellow-400 font-bold underline cursor-pointer ml-auto">Go Online</a>
+        <span on:click={() => $offline = false} class="text-yellow-400 font-bold underline cursor-pointer ml-auto">Go Online</span>
       </div>
     </Announcement>
   </div>
@@ -124,7 +125,7 @@
               {#if announcement.id === '__healthcheck__'}
                 <div class="flex pr-2">
                   <span>{announcement.message}</span>
-                  <a on:click={() => $offline = true} class="text-yellow-400 font-bold underline cursor-pointer ml-auto">Go Offline</a>
+                  <span on:click={() => $offline = true} class="text-yellow-400 font-bold underline cursor-pointer ml-auto">Go Offline</span>
                 </div>
               {:else}
                 {announcement.message}
