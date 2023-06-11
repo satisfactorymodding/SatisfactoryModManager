@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/pkg/errors"
+
 	"github.com/satisfactorymodding/SatisfactoryModManager/utils"
 )
 
