@@ -13,9 +13,11 @@ type Update struct {
 }
 
 func (f *FicsitCLI) CheckForUpdates() ([]Update, error) {
+	l := log.With().Str("task", "checkForUpdates").Logger()
+
 	currentLockfile, err := f.selectedInstallation.Installation.LockFile(f.ficsitCli)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to get current lockfile")
+		l.Error().Err(err).Msg("Failed to get current lockfile")
 		return nil, errors.Wrap(err, "Failed to get current lockfile")
 	}
 
@@ -29,7 +31,7 @@ func (f *FicsitCLI) CheckForUpdates() ([]Update, error) {
 
 	gameVersion, err := f.selectedInstallation.Installation.GetGameVersion(f.ficsitCli)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to get game version")
+		l.Error().Err(err).Msg("Failed to get game version")
 		return nil, errors.Wrap(err, "Failed to get game version")
 	}
 
@@ -45,7 +47,7 @@ func (f *FicsitCLI) CheckForUpdates() ([]Update, error) {
 	}
 	newLockfile, err := updateProfile.Resolve(resolver, nil, gameVersion)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to resolve new lockfile")
+		l.Error().Err(err).Msg("Failed to resolve new lockfile")
 		return nil, errors.Wrap(err, "Error resolving dependencies")
 	}
 
@@ -67,14 +69,16 @@ func (f *FicsitCLI) CheckForUpdates() ([]Update, error) {
 }
 
 func (f *FicsitCLI) UpdateAllMods() error {
+	l := log.With().Str("task", "updateAllMods").Logger()
+
 	if f.progress != nil {
-		log.Error().Msg("Another operation in progress")
+		l.Error().Msg("Another operation in progress")
 		return errors.New("Another operation in progress")
 	}
 
 	previousLockfile, err := f.selectedInstallation.Installation.LockFile(f.ficsitCli)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to get current lockfile")
+		l.Error().Err(err).Msg("Failed to get current lockfile")
 		return errors.Wrap(err, "Failed to get current lockfile")
 	}
 
@@ -102,7 +106,7 @@ func (f *FicsitCLI) UpdateAllMods() error {
 
 	if err != nil {
 		_ = f.selectedInstallation.Installation.WriteLockFile(f.ficsitCli, *previousLockfile)
-		log.Error().Err(err).Msg("Failed to validate installation")
+		l.Error().Err(err).Msg("Failed to validate installation")
 		return errors.Wrap(err, "Failed to update mods")
 	}
 

@@ -105,12 +105,13 @@ func (f *FicsitCLI) GetInstallation(path string) *InstallationInfo {
 }
 
 func (f *FicsitCLI) SelectInstall(path string) error {
+	l := log.With().Str("task", "selectInstall").Str("path", path).Logger()
 	if f.selectedInstallation != nil && f.selectedInstallation.Info.Path == path {
 		return nil
 	}
 	installation := f.GetInstallation(path)
 	if installation == nil {
-		log.Error().Str("path", path).Msg("Failed to find installation")
+		l.Error().Str("path", path).Msg("Failed to find installation")
 		return errors.New("Installation \"" + path + "\" not found")
 	}
 	f.selectedInstallation = installation
@@ -128,7 +129,7 @@ func (f *FicsitCLI) SelectInstall(path string) error {
 	installErr := f.validateInstall(installation, "__select_install__")
 
 	if installErr != nil {
-		log.Error().Err(installErr).Str("install", installation.Info.Path).Msg("Failed to validate install")
+		l.Error().Err(installErr).Str("install", installation.Info.Path).Msg("Failed to validate install")
 		return errors.Wrap(installErr, "Failed to validate install")
 	}
 
@@ -142,6 +143,8 @@ func (f *FicsitCLI) GetSelectedInstall() *InstallationInfo {
 }
 
 func (f *FicsitCLI) SetModsEnabled(enabled bool) error {
+	l := log.With().Str("task", "setModsEnabled").Bool("enabled", enabled).Logger()
+
 	var message string
 	if enabled {
 		message = "Enabling mods"
@@ -162,7 +165,7 @@ func (f *FicsitCLI) SetModsEnabled(enabled bool) error {
 	installErr := f.validateInstall(f.selectedInstallation, "__toggle_mods__")
 
 	if installErr != nil {
-		log.Error().Err(installErr).Str("install", f.selectedInstallation.Info.Path).Msg("Failed to validate install")
+		l.Error().Err(installErr).Str("install", f.selectedInstallation.Info.Path).Msg("Failed to validate install")
 		return errors.Wrap(installErr, "Failed to validate install")
 	}
 
