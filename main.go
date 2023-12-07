@@ -17,6 +17,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
+	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 	"gopkg.in/natefinch/lumberjack.v2"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/association"
@@ -101,7 +102,7 @@ func main() {
 		MinHeight:        utils.UnexpandedMin.Height,
 		MaxHeight:        utils.UnexpandedMax.Height,
 		WindowStartState: windowStartState,
-		Assets:           assets,
+		AssetServer:      &assetserver.Options{Assets: assets},
 		OnStartup:        b.Startup,
 		OnDomReady: func(ctx context.Context) {
 			processArguments(os.Args)
