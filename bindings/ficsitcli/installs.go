@@ -178,7 +178,7 @@ func (f *FicsitCLI) GetModsEnabled() bool {
 	return !f.selectedInstallation.Installation.Vanilla
 }
 
-func (f *FicsitCLI) GetLockFile(installation *InstallationInfo) (cli.LockFile, error) {
+func (f *FicsitCLI) GetLockFile(installation *InstallationInfo) (*cli.LockFile, error) {
 	lockfile, err := installation.Installation.LockFile(f.ficsitCli)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get lockfile")

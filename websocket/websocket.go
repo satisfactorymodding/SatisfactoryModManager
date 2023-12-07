@@ -33,7 +33,7 @@ func ListenAndServeWebsocket() {
 				return
 			}
 			installedMods := make(map[string]string)
-			for modReference, info := range lockfile {
+			for modReference, info := range lockfile.Mods {
 				installedMods[modReference] = info.Version
 			}
 			_ = client.Emit("installedMods", installedMods)

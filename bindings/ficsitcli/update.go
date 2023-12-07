@@ -53,8 +53,8 @@ func (f *FicsitCLI) CheckForUpdates() ([]Update, error) {
 
 	updates := []Update{}
 
-	for modReference, newLockedMod := range newLockfile {
-		if prevLockedMod, ok := currentLockfile[modReference]; ok {
+	for modReference, newLockedMod := range newLockfile.Mods {
+		if prevLockedMod, ok := currentLockfile.Mods[modReference]; ok {
 			if newLockedMod.Version != prevLockedMod.Version {
 				updates = append(updates, Update{
 					Item:           modReference,

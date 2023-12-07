@@ -5,17 +5,18 @@ import (
 
 	"github.com/pkg/errors"
 	ficsitcache "github.com/satisfactorymodding/ficsit-cli/cli/cache"
+	"github.com/satisfactorymodding/ficsit-cli/cli/provider"
 	"golang.org/x/exp/slices"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/settings"
 )
 
 func (f *FicsitCLI) GetOffline() bool {
-	return f.ficsitCli.Provider.Offline
+	return f.ficsitCli.Provider.IsOffline()
 }
 
 func (f *FicsitCLI) SetOffline(offline bool) {
-	f.ficsitCli.Provider.Offline = offline
+	f.ficsitCli.Provider.(*provider.MixedProvider).Offline = offline
 	settings.Settings.Offline = offline
 	_ = settings.SaveSettings()
 }
@@ -47,12 +48,13 @@ func (f *FicsitCLI) OfflineGetMods() ([]Mod, error) {
 	}
 
 	mods := make([]Mod, 0)
-	for modReference, modFiles := range cache {
+	cache.Range(func(modReference string, modFiles []ficsitcache.File) bool {
 		if modReference == "SML" {
-			continue
+			return true
 		}
 		mods = append(mods, convertCacheFileToMod(modFiles))
-	}
+		return true
+	})
 	return mods, nil
 }
 
@@ -63,15 +65,16 @@ func (f *FicsitCLI) OfflineGetModsByReferences(modReferences []string) ([]Mod, e
 	}
 
 	mods := make([]Mod, 0)
-	for modReference, modFiles := range cache {
+	cache.Range(func(modReference string, modFiles []ficsitcache.File) bool {
 		if modReference == "SML" {
-			continue
+			return true
 		}
 		if !slices.Contains(modReferences, modReference) {
-			continue
+			return true
 		}
 		mods = append(mods, convertCacheFileToMod(modFiles))
-	}
+		return true
+	})
 	return mods, nil
 }
 
