@@ -1,24 +1,21 @@
-import { writableBinding, writableBindingSync } from './wailsStoreBindings';
+import { binding, bindingTwoWayNoExcept } from './wailsStoreBindings';
 
 import type { LaunchButtonType, ViewType } from '$lib/wailsTypesExtensions';
 import { GetOffline, SetOffline } from '$wailsjs/go/ficsitcli/FicsitCLI';
 import { GetStartView, SetStartView, GetKonami, SetKonami, GetLaunchButton, SetLaunchButton, GetQueueAutoStart, SetQueueAutoStart, GetUpdateCheckMode, SetUpdateCheckMode, GetViewedAnnouncements, GetIgnoredUpdates } from '$wailsjs/go/bindings/Settings';
 
-export const startView = writableBindingSync<ViewType | null>(null, { 
-  initialGet: GetStartView,
-  updateFunction: (value) => value ? SetStartView(value) : Promise.resolve(),
-});
+export const startView = bindingTwoWayNoExcept<ViewType | null>(null, { initialGet: GetStartView }, { updateFunction: SetStartView });
 
-export const konami = writableBindingSync(false, { initialGet: GetKonami, updateFunction: SetKonami });
+export const konami = bindingTwoWayNoExcept(false, { initialGet: GetKonami }, { updateFunction: SetKonami });
 
-export const launchButton = writableBindingSync<LaunchButtonType>('normal', { initialGet: GetLaunchButton, updateFunction: SetLaunchButton });
+export const launchButton = bindingTwoWayNoExcept<LaunchButtonType>('normal', { initialGet: () => GetLaunchButton().then((l) => l as LaunchButtonType) } , { updateFunction: SetLaunchButton });
 
-export const queueAutoStart = writableBindingSync(true, { initialGet: GetQueueAutoStart, updateFunction: SetQueueAutoStart });
+export const queueAutoStart = bindingTwoWayNoExcept(true, { initialGet: GetQueueAutoStart }, { updateFunction: SetQueueAutoStart });
 
-export const offline = writableBindingSync<boolean|null>(null, { initialGet: GetOffline, updateFunction: SetOffline });
+export const offline = bindingTwoWayNoExcept<boolean>(false, { initialGet: GetOffline }, { updateFunction: SetOffline });
 
-export const updateCheckMode = writableBindingSync<'launch'|'exit'|'ask'>('launch', { initialGet: GetUpdateCheckMode, updateFunction: SetUpdateCheckMode });
+export const updateCheckMode = bindingTwoWayNoExcept<'launch'|'exit'|'ask'>('launch', { initialGet: GetUpdateCheckMode }, { updateFunction: SetUpdateCheckMode });
 
-export const viewedAnnouncements = writableBinding<string[]>([], { initialGet: GetViewedAnnouncements });
+export const viewedAnnouncements = binding<string[]>([], { initialGet: GetViewedAnnouncements, updateEvent: 'viewedAnnouncements' });
 
-export const ignoredUpdates = writableBinding<Record<string, string[]>>({}, { initialGet: GetIgnoredUpdates });
+export const ignoredUpdates = binding<Record<string, string[]>>({}, { initialGet: GetIgnoredUpdates, updateEvent: 'ignoredUpdates' });

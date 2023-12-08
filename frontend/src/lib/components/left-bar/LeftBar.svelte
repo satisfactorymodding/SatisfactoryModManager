@@ -14,22 +14,61 @@
   import LaunchButton from './LaunchButton.svelte';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
-  import { addProfile, deleteProfile, importProfile, installs, profiles, canModify, renameProfile, selectedInstall, selectedProfile, progress } from '$lib/store/ficsitCLIStore';
+  import { installs, profiles, canModify, selectedInstall, selectedInstallPath, selectedProfile, modsEnabled, progress } from '$lib/store/ficsitCLIStore';
   import { error } from '$lib/store/generalStore';
   import { BrowserOpenURL, EventsOn } from '$wailsjs/runtime/runtime';
   import { OpenFileDialog } from '$wailsjs/go/bindings/App';
   import { bindings, ficsitcli } from '$wailsjs/go/models';
-  import { ExportCurrentProfile, ReadExportedProfileMetadata, SetModsEnabled } from '$wailsjs/go/ficsitcli/FicsitCLI';
+  import { AddProfile, DeleteProfile, RenameProfile, ImportProfile, ExportCurrentProfile, ReadExportedProfileMetadata } from '$wailsjs/go/ficsitcli/FicsitCLI';
+  
+  const selectedInstallPathInit = selectedInstallPath.isInit;
+  const selectedProfileInit = selectedProfile.isInit;
 
-  $: modsEnabled = !$selectedInstall?.installation?.vanilla;
+  async function installSelectChanged({ detail: { value } }: CustomEvent<{value?: string}>) {
+    if (!value) {
+      return;
+    }
+    if (!$selectedInstallPathInit) {
+      return;
+    }
+    try {
+      await selectedInstallPath.asyncSet(value);
+    } catch(e) {
+      if (e instanceof Error) {
+        $error = e.message;
+      } else if (typeof e === 'string') {
+        $error = e;
+      } else {
+        $error = 'Unknown error';
+      }
+    }
+  }
+
+  async function profileSelectChanged({ detail: { value } }: CustomEvent<{value?: string}>) {
+    console.log($selectedProfileInit, value);
+    if (!value) {
+      return;
+    }
+    if (!$selectedProfileInit) {
+      return;
+    }
+    try {
+      await selectedProfile.asyncSet(value);
+    } catch(e) {
+      if (e instanceof Error) {
+        $error = e.message;
+      } else if (typeof e === 'string') {
+        $error = e;
+      } else {
+        $error = 'Unknown error';
+      }
+    }
+  }
 
   async function setModsEnabled(enabled: boolean) {
     if ($selectedInstall) {
       try {
-        await SetModsEnabled(enabled);
-        if ($selectedInstall.installation) {
-          $selectedInstall.installation.vanilla = !enabled;
-        }
+        await modsEnabled.asyncSet(enabled);
       } catch(e) {
         if (e instanceof Error) {
           $error = e.message;
@@ -46,8 +85,8 @@
   let newProfileName = '';
   async function finishAddProfile() {
     try {
-      await addProfile(newProfileName);
-      selectedProfile.set(newProfileName);
+      await AddProfile(newProfileName);
+      await selectedProfile.asyncSet(newProfileName);
       newProfileName = '';
     } catch(e) {
       if (e instanceof Error) {
@@ -65,7 +104,7 @@
   let renameNewProfileName = '';
   async function finishRenameProfile() {
     try {
-      await renameProfile(renameOldProfileName, renameNewProfileName);
+      await RenameProfile(renameOldProfileName, renameNewProfileName);
       renameOldProfileName = '';
       renameNewProfileName = '';
     } catch(e) {
@@ -83,7 +122,7 @@
   let deleteProfileName = '';
   async function finishDeleteProfile() {
     try {
-      await deleteProfile(deleteProfileName);
+      await DeleteProfile(deleteProfileName);
       deleteProfileName = '';
     } catch(e) {
       if (e instanceof Error) {
@@ -145,7 +184,7 @@
   }
   async function finishImportProfile() {
     try {
-      await importProfile(importProfileName, importProfileFilepath);
+      await ImportProfile(importProfileName, importProfileFilepath);
     } catch(e) {
       if(e instanceof Error) {
         importProfileError = e.message;
@@ -172,31 +211,32 @@
       variant="filled"
       class="mt-2"
       menu$class="max-h-[32rem]"
-      bind:value={$selectedInstall}
+      value={$selectedInstallPath}
+      on:SMUISelect:change={installSelectChanged}
       ripple={false}
       disabled={!$canModify}
     >
       {#each $installs as install}
         <Wrapper>
-          <Option value={install}>
-            <Label>{install?.info?.branch} ({install?.info?.launcher})</Label>
+          <Option value={install.path}>
+            <Label>{install?.branch} ({install?.launcher})</Label>
           </Option>
           
           <Tooltip surface$class="max-w-lg text-base">
-            {install?.info?.path}
+            {install?.path}
           </Tooltip>
         </Wrapper>
       {/each}
     </Select>
     <div class="flex w-full mt-2">
-      <Button variant="unelevated" class="w-1/2 rounded-tr-none rounded-br-none mods-toggle-button {modsEnabled ? '' : 'mods-off'}" on:click={() => setModsEnabled(false)} disabled={!$canModify}>
+      <Button variant="unelevated" class="w-1/2 rounded-tr-none rounded-br-none mods-toggle-button {$modsEnabled ? '' : 'mods-off'}" on:click={() => setModsEnabled(false)} disabled={!$canModify}>
         <Label>
           Mods off
         </Label>
         <div class="grow"/>
         <SvgIcon icon={mdiCloseCircle} class="h-5 w-5" />
       </Button>
-      <Button variant="unelevated" class="w-1/2 rounded-tl-none rounded-bl-none mods-toggle-button {modsEnabled ? 'mods-on' : ''}" on:click={() => setModsEnabled(true)} disabled={!$canModify}>
+      <Button variant="unelevated" class="w-1/2 rounded-tl-none rounded-bl-none mods-toggle-button {$modsEnabled ? 'mods-on' : ''}" on:click={() => setModsEnabled(true)} disabled={!$canModify}>
         <Label>
           Mods on
         </Label>
@@ -211,7 +251,8 @@
       variant="filled"
       class="mt-2"
       menu$class="max-h-[32rem]"
-      bind:value={$selectedProfile}
+      value={$selectedProfile}
+      on:SMUISelect:change={profileSelectChanged}
       ripple={false}
       disabled={!$canModify}
     >

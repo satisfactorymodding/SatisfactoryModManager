@@ -127,6 +127,7 @@ func (s *Settings) GetIgnoredUpdates() map[string][]string {
 func (s *Settings) SetUpdateIgnore(modReference string, version string) {
 	settings.Settings.IgnoredUpdates[modReference] = append(settings.Settings.IgnoredUpdates[modReference], version)
 	_ = settings.SaveSettings()
+	wailsRuntime.EventsEmit(s.ctx, "ignoredUpdates", settings.Settings.IgnoredUpdates)
 }
 
 func (s *Settings) SetUpdateUnignore(modReference string, version string) {
@@ -143,6 +144,7 @@ func (s *Settings) SetUpdateUnignore(modReference string, version string) {
 	}
 	settings.Settings.IgnoredUpdates[modReference] = append(versions[:idx], versions[idx+1:]...)
 	_ = settings.SaveSettings()
+	wailsRuntime.EventsEmit(s.ctx, "ignoredUpdates", settings.Settings.IgnoredUpdates)
 }
 
 func (s *Settings) GetUpdateCheckMode() settings.UpdateCheckMode {
@@ -171,4 +173,5 @@ func (s *Settings) SetAnnouncementViewed(announcement string) {
 	}
 	settings.Settings.ViewedAnnouncements = append(settings.Settings.ViewedAnnouncements, announcement)
 	_ = settings.SaveSettings()
+	wailsRuntime.EventsEmit(s.ctx, "viewedAnnouncements", settings.Settings.ViewedAnnouncements)
 }

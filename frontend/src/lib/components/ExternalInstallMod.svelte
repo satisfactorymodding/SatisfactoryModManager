@@ -4,7 +4,8 @@
   import { getContextClient, queryStore } from '@urql/svelte';
 
   import { GetModSummaryDocument } from '$lib/generated';
-  import { addQueuedModAction, manifestMods, queuedMods, removeQueuedModAction } from '$lib/store/ficsitCLIStore';
+  import { manifestMods } from '$lib/store/ficsitCLIStore';
+  import { addQueuedModAction, queuedMods, removeQueuedModAction } from '$lib/store/actionQueue';
   import { offline } from '$lib/store/settingsStore';
   import { error } from '$lib/store/generalStore';
   import { InstallMod } from '$wailsjs/go/ficsitcli/FicsitCLI';

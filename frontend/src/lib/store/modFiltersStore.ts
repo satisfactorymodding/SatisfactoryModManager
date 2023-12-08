@@ -1,10 +1,11 @@
 import { get, writable } from 'svelte/store';
 import type { Client } from '@urql/svelte';
 
-import { writableBindingSync } from './wailsStoreBindings';
+import { bindingTwoWayNoExcept } from './wailsStoreBindings';
 
 import { CompatibilityState, type GetModsQuery } from '$lib/generated';
-import { favoriteMods, lockfileMods, manifestMods, queuedMods, selectedInstall } from '$lib/store/ficsitCLIStore';
+import { favoriteMods, lockfileMods, manifestMods, selectedInstall } from '$lib/store/ficsitCLIStore';
+import { queuedMods } from '$lib/store/actionQueue';
 import { GetModFiltersOrder, GetModFiltersFilter, SetModFiltersOrder, SetModFiltersFilter } from '$wailsjs/go/bindings/Settings';
 import { getCompatiblity } from '$lib/utils/modCompatibility';
 import type { GameBranch } from '$lib/wailsTypesExtensions';
@@ -33,7 +34,7 @@ export const filterOptions: Filter[] = [
   { 
     name: 'Compatible',
     func: async (mod: PartialMod, urqlClient: Client) => { 
-      const installInfo = get(selectedInstall)?.info;
+      const installInfo = get(selectedInstall);
       if(!installInfo) {
         return false;
       }
@@ -70,11 +71,13 @@ export interface MissingMod {
 export type PartialMod = PartialSMRMod | OfflineMod | MissingMod;
 
 export const search = writable('');
-export const order = writableBindingSync(orderByOptions[1], { 
+export const order = bindingTwoWayNoExcept(orderByOptions[1], { 
   initialGet: async () => GetModFiltersOrder().then((i) => orderByOptions.find((o) => o.name === i) || orderByOptions[1]),
+}, {
   updateFunction: async (o) => SetModFiltersOrder(o.name),
 });
-export const filter = writableBindingSync(filterOptions[0], {
+export const filter = bindingTwoWayNoExcept(filterOptions[0], {
   initialGet: async () => GetModFiltersFilter().then((i) => filterOptions.find((o) => o.name === i) || filterOptions[0]),
+}, {
   updateFunction: async (f) => SetModFiltersFilter(f.name),
 });

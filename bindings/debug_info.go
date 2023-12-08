@@ -67,7 +67,7 @@ func addFactoryGameLog(writer *zip.Writer) error {
 }
 
 func addMetadata(writer *zip.Writer) error {
-	ficsitCliInstalls := BindingsInstance.FicsitCLI.GetInstallationsInfo()
+	ficsitCliInstalls := BindingsInstance.FicsitCLI.GetInstallations()
 	selectedFicsitCliInstall := BindingsInstance.FicsitCLI.GetSelectedInstall()
 	metadataInstalls := make([]*MetadataInstallation, 0)
 	var selectedMetadataInstall *MetadataInstallation
@@ -80,7 +80,7 @@ func addMetadata(writer *zip.Writer) error {
 
 		metadataInstalls = append(metadataInstalls, i)
 
-		if selectedFicsitCliInstall != nil && selectedFicsitCliInstall.Installation == install.Installation {
+		if selectedFicsitCliInstall != nil && selectedFicsitCliInstall == install.Info {
 			selectedMetadataInstall = i
 		}
 	}
@@ -94,7 +94,7 @@ func addMetadata(writer *zip.Writer) error {
 		metadataProfiles = append(metadataProfiles, p)
 	}
 
-	lockfile, err := BindingsInstance.FicsitCLI.GetLockFile(selectedFicsitCliInstall)
+	lockfile, err := BindingsInstance.FicsitCLI.GetSelectedInstallLockfile()
 	if err != nil {
 		return errors.Wrap(err, "Failed to get lockfile")
 	}

@@ -99,8 +99,8 @@
   let compatibility: CompatibilityWithSource = { state: CompatibilityState.Works, source: 'reported' };
   $: {
     if(mod) {
-      const gameVersion = $selectedInstall?.info?.version;
-      const branch = $selectedInstall?.info?.branch as GameBranch;
+      const gameVersion = $selectedInstall?.version;
+      const branch = $selectedInstall?.branch as GameBranch;
       if(gameVersion && branch) {
         if(!('offline' in mod)) {
           if(mod.hidden && !isDependency) {

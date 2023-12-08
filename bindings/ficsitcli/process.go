@@ -10,9 +10,12 @@ import (
 	"github.com/satisfactorymodding/ficsit-cli/cli"
 	"github.com/satisfactorymodding/ficsit-cli/utils"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
+
+	"github.com/satisfactorymodding/SatisfactoryModManager/installfinders"
 )
 
 func (f *FicsitCLI) validateInstall(installation *InstallationInfo, progressItem string) error {
+	f.EmitModsChange()
 	defer f.EmitModsChange()
 
 	installChannel := make(chan cli.InstallUpdate)
@@ -135,7 +138,22 @@ func (f *FicsitCLI) EmitModsChange() {
 	}
 	wailsRuntime.EventsEmit(f.ctx, "lockfileMods", lockfile)
 	wailsRuntime.EventsEmit(f.ctx, "manifestMods", profile.Mods)
-	wailsRuntime.EventsEmit(f.ctx, "selectedProfile", profileName)
+}
+
+func (f *FicsitCLI) EmitGlobals() {
+	installInfos := make([]*installfinders.Installation, 0, len(f.installations))
+	for _, install := range f.installations {
+		installInfos = append(installInfos, install.Info)
+	}
+	wailsRuntime.EventsEmit(f.ctx, "installations", installInfos)
+	wailsRuntime.EventsEmit(f.ctx, "selectedInstallation", f.selectedInstallation.Installation.Path)
+	profileNames := make([]string, 0, len(f.ficsitCli.Profiles.Profiles))
+	for k := range f.ficsitCli.Profiles.Profiles {
+		profileNames = append(profileNames, k)
+	}
+	wailsRuntime.EventsEmit(f.ctx, "profiles", profileNames)
+	wailsRuntime.EventsEmit(f.ctx, "selectedProfile", f.selectedInstallation.Installation.Profile)
+	wailsRuntime.EventsEmit(f.ctx, "modsEnabled", !f.selectedInstallation.Installation.Vanilla)
 }
 
 func (f *FicsitCLI) InstallMod(mod string) error {

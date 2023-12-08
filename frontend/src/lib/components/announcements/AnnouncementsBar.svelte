@@ -93,7 +93,6 @@
     if(!announcement?.viewable) return;
     if(!$viewedAnnouncements.some((id) => announcement.id === id)) {
       SetAnnouncementViewed(announcement.id);
-      viewedAnnouncements.update((ids) => [...ids, announcement.id]);
     }
   }
 </script>

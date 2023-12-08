@@ -50,7 +50,10 @@
   let invalidInstallsDialog = false;
   let noInstallsDialog = false;
 
-  $: if(installs.isInit && $installs.length === 0) {
+  const installsInit = installs.isInit;
+  const invalidInstallsInit = invalidInstalls.isInit;
+
+  $: if($installsInit && $invalidInstallsInit && $installs.length === 0) {
     if($invalidInstalls.length > 0) {
       invalidInstallsDialog = true;
     } else {
@@ -100,7 +103,7 @@
   escapeKeyAction=""
   surface$style="width: 500px; max-width: calc(100vw - 32px);"
 >
-  <Title>Checking install {$selectedInstall?.info?.branch} ({$selectedInstall?.info?.launcher}) - CL{$selectedInstall?.info?.version}</Title>
+  <Title>Checking install {$selectedInstall?.branch} ({$selectedInstall?.launcher}) - CL{$selectedInstall?.version}</Title>
   <Content>
     {#if $progress}
       <p>{$progress.message}</p>

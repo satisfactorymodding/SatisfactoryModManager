@@ -31,6 +31,8 @@ func (f *FicsitCLI) SetProfile(profile string) error {
 		return errors.Wrap(err, "Failed to set profile")
 	}
 
+	f.EmitGlobals()
+
 	f.progress = &Progress{
 		Item:     "__select_profile__",
 		Message:  "Validating install",
@@ -84,6 +86,8 @@ func (f *FicsitCLI) AddProfile(name string) error {
 
 	_ = f.ficsitCli.Profiles.Save()
 
+	f.EmitGlobals()
+
 	return nil
 }
 
@@ -97,6 +101,8 @@ func (f *FicsitCLI) RenameProfile(oldName string, newName string) error {
 	}
 
 	_ = f.ficsitCli.Profiles.Save()
+
+	f.EmitGlobals()
 
 	return nil
 }
@@ -118,6 +124,8 @@ func (f *FicsitCLI) DeleteProfile(name string) error {
 		}
 	}
 
+	f.EmitGlobals()
+
 	return nil
 }
 
@@ -134,7 +142,7 @@ type ExportedProfileMetadata struct {
 func (f *FicsitCLI) MakeCurrentExportedProfile() (*ExportedProfile, error) {
 	l := log.With().Str("task", "makeCurrentExportedProfile").Logger()
 
-	selectedInstall := f.GetSelectedInstall()
+	selectedInstall := f.selectedInstallation
 	if selectedInstall == nil {
 		l.Error().Msg("No installation selected")
 		return nil, errors.New("No installation selected")
@@ -158,6 +166,10 @@ func (f *FicsitCLI) MakeCurrentExportedProfile() (*ExportedProfile, error) {
 	}
 	metadata := &ExportedProfileMetadata{
 		GameVersion: selectedInstall.Info.Version,
+	}
+
+	if lockfile == nil {
+		lockfile = cli.MakeLockfile()
 	}
 
 	return &ExportedProfile{
@@ -227,7 +239,7 @@ func (f *FicsitCLI) ReadExportedProfileMetadata(file string) (*ExportedProfileMe
 func (f *FicsitCLI) ImportProfile(name string, file string) error {
 	l := log.With().Str("task", "importProfile").Str("name", name).Str("file", file).Logger()
 
-	selectedInstall := f.GetSelectedInstall()
+	selectedInstall := f.selectedInstallation
 	if selectedInstall == nil {
 		l.Error().Msg("No installation selected")
 		return errors.New("No installation selected")
@@ -262,6 +274,8 @@ func (f *FicsitCLI) ImportProfile(name string, file string) error {
 		l.Error().Err(err).Str("name", name).Msg("Failed to write lockfile")
 		return errors.Wrap(err, "Failed to write profile")
 	}
+
+	f.EmitGlobals()
 
 	f.progress = &Progress{
 		Item:     "__import_profile__",

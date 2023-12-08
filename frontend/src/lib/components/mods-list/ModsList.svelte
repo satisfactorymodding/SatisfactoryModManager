@@ -11,7 +11,8 @@
   import VirtualList from '$lib/components/mods-list/VirtualModList.svelte';
   import ModsListItem from '$lib/components/mods-list/ModsListItem.svelte';
   import { filter, order, search, type PartialMod, type OfflineMod } from '$lib/store/modFiltersStore';
-  import { favoriteMods, lockfileMods, manifestMods, queuedMods } from '$lib/store/ficsitCLIStore';
+  import { favoriteMods, lockfileMods, manifestMods } from '$lib/store/ficsitCLIStore';
+  import { queuedMods } from '$lib/store/actionQueue';
   import { offline, startView } from '$lib/store/settingsStore';
   import { expandedMod } from '$lib/store/generalStore';
   import { OfflineGetMods } from '$wailsjs/go/ficsitcli/FicsitCLI';

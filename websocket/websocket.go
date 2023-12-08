@@ -23,7 +23,7 @@ func ListenAndServeWebsocket() {
 	_ = io.On("connection", func(data ...any) {
 		client := data[0].(*socket.Socket)
 		_ = client.On("installedMods", func(datas ...any) {
-			lockfile, err := bindings.BindingsInstance.FicsitCLI.GetLockFile(bindings.BindingsInstance.FicsitCLI.GetSelectedInstall())
+			lockfile, err := bindings.BindingsInstance.FicsitCLI.GetSelectedInstallLockfile()
 			if err != nil {
 				log.Error().Err(err).Msg("Failed to get lockfile")
 				return

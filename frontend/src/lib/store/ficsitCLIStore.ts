@@ -1,127 +1,28 @@
-import { derived, get, readable, writable } from 'svelte/store';
-import { tick } from 'svelte';
-import { queue } from 'async';
+import { writable, derived } from 'svelte/store';
 
-import { readableBinding, writableBinding } from './wailsStoreBindings';
-import { error, isLaunchingGame } from './generalStore';
-import { queueAutoStart } from './settingsStore';
+import { binding, bindingTwoWay } from './wailsStoreBindings';
+import { isLaunchingGame } from './generalStore';
 
 import { cli, ficsitcli } from '$wailsjs/go/models';
-import { AddProfile, CheckForUpdates, DeleteProfile, EmitModsChange, GetInstallationsInfo, GetInvalidInstalls, GetProfiles, ImportProfile, RenameProfile, SelectInstall, SetProfile } from '$wailsjs/go/ficsitcli/FicsitCLI';
+import { CheckForUpdates, GetInstallationsInfo, GetInvalidInstalls, GetProfiles, GetSelectedInstall, GetSelectedProfile, SelectInstall, SetProfile, GetModsEnabled, SetModsEnabled } from '$wailsjs/go/ficsitcli/FicsitCLI';
 import { GetFavoriteMods } from '$wailsjs/go/bindings/Settings';
 
-export const invalidInstalls = readableBinding<string[]>([], { initialGet: GetInvalidInstalls });
+export const invalidInstalls = binding([], { initialGet: GetInvalidInstalls });
 
-export const installs = readableBinding<ficsitcli.InstallationInfo[]>([], { initialGet: GetInstallationsInfo });
-export const selectedInstall = writable(null as ficsitcli.InstallationInfo | null);
-
-export const profiles = writableBinding<string[]>([], { initialGet: GetProfiles });
-export const selectedProfile = writable(null as string | null);
-
-function getFallbackProfile() {
-  const p = get(profiles);
-  if(p.includes('Default')) {
-    return 'Default';
-  } else {
-    return p[0];
-  }
-}
-
-Promise.all([installs.waitForInit, profiles.waitForInit]).then(() => {
-  const i = get(installs);
-  if(i.length > 0) {
-    selectedInstall.set(get(installs)[0]);
-
-    selectedInstall.subscribe((i) => {
-      const path = i?.info?.path;
-      if(path) {
-        SelectInstall(path).catch((e) => {
-          error.set(e instanceof Error ? e.message : e);
-        });
-        if(i.installation) {
-          if(get(profiles).includes(i.installation.profile)) {
-            selectedProfile.set(i.installation.profile);
-          } else {
-            selectedProfile.set(getFallbackProfile());
-          }
-        }
-        checkForUpdates();
-      }
-    });
-    
-    selectedProfile.subscribe((p) => {
-      if(p) {
-        SetProfile(p).catch((e) => {
-          error.set(e instanceof Error ? e.message : e);
-        });
-        const install = get(selectedInstall);
-        if(install && install.installation) {
-          install.installation.profile = p;
-        }
-        checkForUpdates();
-      }
-    });
-
-    EmitModsChange();
-  }
+export const installs = binding([], { initialGet: GetInstallationsInfo, updateEvent: 'installs' });
+export const selectedInstallPath = bindingTwoWay(null, { initialGet: () => GetSelectedInstall().then((i) => i?.path ?? null), updateEvent: 'selectedInstall' }, { updateFunction: SelectInstall });
+export const selectedInstall = derived([installs, selectedInstallPath], ([$installs, $selectedInstallPath]) => {
+  return $installs.find((i) => i.path === $selectedInstallPath) ?? null;
 });
 
-export async function addProfile(name: string) {
-  await AddProfile(name);
-  const newProfiles = get(profiles);
-  if(!newProfiles.includes(name)) {
-    newProfiles.push(name);
-    profiles.set(newProfiles);
-  }
-}
+export const profiles = binding([], { initialGet: GetProfiles, updateEvent: 'profiles' });
+export const selectedProfile = bindingTwoWay(null, { initialGet: GetSelectedProfile, updateEvent: 'selectedProfile', allowNull: false }, { updateFunction: SetProfile });
 
-export async function renameProfile(oldName: string, newName: string) {
-  await RenameProfile(oldName, newName);
-  const newProfiles = get(profiles);
-  if(newProfiles.includes(oldName)) {
-    const idx = newProfiles.indexOf(oldName);
-    newProfiles[idx] = newName;
-    profiles.set(newProfiles);
-  }
-  get(installs).forEach((i) => { if(i.installation?.profile === oldName) { i.installation.profile = newName; } });
-  if(get(selectedProfile) === oldName) {
-    selectedProfile.set(newName);
-  }
-}
-
-export async function deleteProfile(name: string) {
-  if(get(profiles).length === 1) {
-    return;
-  }
-  await DeleteProfile(name);
-  const newProfiles = get(profiles);
-  if(newProfiles.includes(name)) {
-    const idx = newProfiles.indexOf(name);
-    newProfiles.splice(idx, 1);
-    profiles.set(newProfiles);
-  }
-  const fallbackProfile = getFallbackProfile();
-  get(installs).forEach((i) => { if(i.installation?.profile === name) { i.installation.profile = fallbackProfile; } });
-  if(get(selectedProfile) === name) {
-    selectedProfile.set(fallbackProfile);
-  }
-}
-
-export async function importProfile(name: string, filepath: string) {
-  await ImportProfile(name, filepath);
-  const newProfiles = get(profiles);
-  if(!newProfiles.includes(name)) {
-    newProfiles.push(name);
-    profiles.set(newProfiles);
-    tick().then(() => {
-      selectedProfile.set(name);
-    });
-  }
-}
+export const modsEnabled = bindingTwoWay(true, { initialGet: GetModsEnabled, updateEvent: 'modsEnabled', allowNull: false }, { updateFunction: SetModsEnabled });
 
 export type ProfileMods = { [name: string]: cli.ProfileMod };
 
-export const manifestMods = readableBinding<ProfileMods>({}, { allowNull: false, updateEvent: 'manifestMods' });
+export const manifestMods = binding<ProfileMods>({}, { allowNull: false, updateEvent: 'manifestMods' });
 
 export interface LockedMod {
   version: string;
@@ -132,7 +33,7 @@ export interface LockedMod {
 
 export type LockFile = { [name: string]: LockedMod };
 
-export const lockfileMods = readableBinding<LockFile>({}, { allowNull: false, updateEvent: 'lockfileMods' });
+export const lockfileMods = binding<LockFile>({}, { allowNull: false, updateEvent: 'lockfileMods' });
 
 export interface Progress {
   item: string;
@@ -140,25 +41,14 @@ export interface Progress {
   message: string;
 }
 
-export const progress = readableBinding<Progress | null>(null, { updateEvent: 'progress' });
+export const progress = binding<Progress | null>(null, { updateEvent: 'progress' });
 
-export const favoriteMods = readableBinding<string[]>([], { updateEvent: 'favoriteMods', initialGet: GetFavoriteMods });
+export const favoriteMods = binding<string[]>([], { updateEvent: 'favoriteMods', initialGet: GetFavoriteMods });
 
-export const isGameRunning = readableBinding(false, { updateEvent: 'isGameRunning', allowNull: false });
+export const isGameRunning = binding(false, { updateEvent: 'isGameRunning', allowNull: false });
 
-export const canModify = readable(true, (set) => {
-  const update = () => {
-    set(!get(isGameRunning) && !get(progress) && !get(isLaunchingGame));
-  };
-  const unsubGameRunning = isGameRunning.subscribe(update);
-  const unsubProgress = progress.subscribe(update);
-  const unsubLaunchingGame = isLaunchingGame.subscribe(update);
-  return () => {
-    unsubGameRunning();
-    unsubProgress();
-    unsubLaunchingGame();
-  };
-
+export const canModify = derived([isGameRunning, progress, isLaunchingGame], ([$isGameRunning, $progress, $isLaunchingGame]) => {
+  return !$isGameRunning && !$progress && !$isLaunchingGame;
 });
 
 export const updates = writable<ficsitcli.Update[]>([]);
@@ -175,59 +65,3 @@ export async function checkForUpdates() {
 }
 
 setInterval(checkForUpdates, 1000 * 60 * 5); // Check for updates every 5 minutes
-
-interface QueuedAction<T> {
-  mod: string;
-  action: 'install' | 'remove' | 'enable' | 'disable';
-  func: () => Promise<T>;
-}
-
-const queuedActionsInternal = writable<QueuedAction<unknown>[]>([]);
-export const queuedMods = derived(queuedActionsInternal, (actions) => actions.map((a) => ({ ...a, func: undefined })));
-
-const modActionsQueue = queue((task: () => Promise<unknown>, cb) => {
-  const complete = (e?: Error) => {
-    queuedActionsInternal.set(get(queuedActionsInternal).filter((a) => a.func !== task));
-    cb(e);
-  };
-  task().then(() => complete()).catch(complete);
-});
-
-modActionsQueue.empty(() => {
-  if(!get(queueAutoStart)) {
-    modActionsQueue.pause();
-  }
-});
-
-queueAutoStart.subscribe((val) => {
-  if(val) {
-    modActionsQueue.resume();
-  } else {
-    modActionsQueue.pause();
-  }
-});
-
-export function startQueue() {
-  modActionsQueue.resume();
-}
-
-export async function addQueuedModAction<T>(mod: string, action: string, func: () => Promise<T>): Promise<T> {
-  const queuedAction = { mod, action, func } as QueuedAction<T>;
-  queuedActionsInternal.set([
-    ...get(queuedActionsInternal),
-    queuedAction,
-  ]);
-  if(get(queueAutoStart)) {
-    startQueue();
-  }
-  return modActionsQueue.pushAsync(func);
-}
-
-export function removeQueuedModAction(mod: string) {
-  const queuedAction = get(queuedActionsInternal).find((a) => a.mod === mod);
-  if(!queuedAction) {
-    return;
-  }
-  modActionsQueue.remove((a) => a.data === queuedAction.func);
-  queuedActionsInternal.set(get(queuedActionsInternal).filter((a) => a.mod !== mod));
-}

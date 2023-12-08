@@ -79,8 +79,16 @@ func (f *FicsitCLI) initInstallations() error {
 	return nil
 }
 
-func (f *FicsitCLI) GetInstallationsInfo() []*InstallationInfo {
+func (f *FicsitCLI) GetInstallations() []*InstallationInfo {
 	return f.installations
+}
+
+func (f *FicsitCLI) GetInstallationsInfo() []*installfinders.Installation {
+	result := []*installfinders.Installation{}
+	for _, install := range f.installations {
+		result = append(result, install.Info)
+	}
+	return result
 }
 
 func (f *FicsitCLI) GetInvalidInstalls() []string {
@@ -116,6 +124,11 @@ func (f *FicsitCLI) SelectInstall(path string) error {
 	}
 	f.selectedInstallation = installation
 
+	f.EmitGlobals()
+
+	settings.Settings.SelectedInstall = installation.Info.Path
+	_ = settings.SaveSettings()
+
 	f.progress = &Progress{
 		Item:     "__select_install__",
 		Message:  "Validating install",
@@ -132,14 +145,14 @@ func (f *FicsitCLI) SelectInstall(path string) error {
 		l.Error().Err(installErr).Str("install", installation.Info.Path).Msg("Failed to validate install")
 		return errors.Wrap(installErr, "Failed to validate install")
 	}
-
-	settings.Settings.SelectedInstall = installation.Info.Path
-	_ = settings.SaveSettings()
 	return nil
 }
 
-func (f *FicsitCLI) GetSelectedInstall() *InstallationInfo {
-	return f.selectedInstallation
+func (f *FicsitCLI) GetSelectedInstall() *installfinders.Installation {
+	if f.selectedInstallation == nil {
+		return nil
+	}
+	return f.selectedInstallation.Info
 }
 
 func (f *FicsitCLI) SetModsEnabled(enabled bool) error {
@@ -151,6 +164,11 @@ func (f *FicsitCLI) SetModsEnabled(enabled bool) error {
 	} else {
 		message = "Disabling mods"
 	}
+
+	f.selectedInstallation.Installation.Vanilla = !enabled
+
+	f.EmitGlobals()
+
 	f.progress = &Progress{
 		Item:     "__toggle_mods__",
 		Message:  message,
@@ -161,7 +179,6 @@ func (f *FicsitCLI) SetModsEnabled(enabled bool) error {
 
 	defer f.setProgress(nil)
 
-	f.selectedInstallation.Installation.Vanilla = !enabled
 	installErr := f.validateInstall(f.selectedInstallation, "__toggle_mods__")
 
 	if installErr != nil {
@@ -178,8 +195,8 @@ func (f *FicsitCLI) GetModsEnabled() bool {
 	return !f.selectedInstallation.Installation.Vanilla
 }
 
-func (f *FicsitCLI) GetLockFile(installation *InstallationInfo) (*cli.LockFile, error) {
-	lockfile, err := installation.Installation.LockFile(f.ficsitCli)
+func (f *FicsitCLI) GetSelectedInstallLockfile() (*cli.LockFile, error) {
+	lockfile, err := f.selectedInstallation.Installation.LockFile(f.ficsitCli)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get lockfile")
 	}
