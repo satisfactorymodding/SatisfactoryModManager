@@ -28,6 +28,7 @@ module.exports = {
       rules: {
         'svelte/indent': ['error', { indent: 2 }],
         'svelte/valid-compile': ['error', { ignoreWarnings: true }],
+        '@typescript-eslint/no-unused-vars': 'warn',
         indent: 'off',
       },
     },
@@ -37,6 +38,9 @@ module.exports = {
       extends: [
         'plugin:@typescript-eslint/recommended',
       ],
+      rules: {
+        '@typescript-eslint/no-unused-vars': 'warn',
+      },
     },
     {
       files: ['*.js', '*.cjs'],
