@@ -4,7 +4,7 @@ import { binding, bindingTwoWay } from './wailsStoreBindings';
 import { isLaunchingGame } from './generalStore';
 
 import { cli, ficsitcli } from '$wailsjs/go/models';
-import { CheckForUpdates, GetInstallationsInfo, GetInvalidInstalls, GetProfiles, GetSelectedInstall, GetSelectedProfile, SelectInstall, SetProfile, GetModsEnabled, SetModsEnabled } from '$wailsjs/go/ficsitcli/FicsitCLI';
+import { CheckForUpdates, GetInstallationsInfo, GetInvalidInstalls, GetProfiles, GetSelectedInstall, GetSelectedProfile, SelectInstall, SetProfile, GetModsEnabled, SetModsEnabled, GetSelectedInstallProfileMods, GetSelectedInstallLockfileMods } from '$wailsjs/go/ficsitcli/FicsitCLI';
 import { GetFavoriteMods } from '$wailsjs/go/bindings/Settings';
 
 export const invalidInstalls = binding([], { initialGet: GetInvalidInstalls });
@@ -22,7 +22,7 @@ export const modsEnabled = bindingTwoWay(true, { initialGet: GetModsEnabled, upd
 
 export type ProfileMods = { [name: string]: cli.ProfileMod };
 
-export const manifestMods = binding<ProfileMods>({}, { allowNull: false, updateEvent: 'manifestMods' });
+export const manifestMods = binding<ProfileMods>({}, { initialGet: GetSelectedInstallProfileMods, updateEvent: 'manifestMods', allowNull: false });
 
 export interface LockedMod {
   version: string;
@@ -31,9 +31,7 @@ export interface LockedMod {
   dependencies: { [id: string]: string };
 }
 
-export type LockFile = { [name: string]: LockedMod };
-
-export const lockfileMods = binding<LockFile>({}, { allowNull: false, updateEvent: 'lockfileMods' });
+export const lockfileMods = binding({}, { initialGet: GetSelectedInstallLockfileMods, updateEvent: 'lockfileMods', allowNull: false });
 
 export interface Progress {
   item: string;

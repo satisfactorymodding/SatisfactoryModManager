@@ -128,16 +128,13 @@ func (f *FicsitCLI) validateInstall(installation *InstallationInfo, progressItem
 }
 
 func (f *FicsitCLI) EmitModsChange() {
-	installation := f.GetInstallation(f.selectedInstallation.Info.Path)
-	profileName := installation.Installation.Profile
-	profile := f.GetProfile(profileName)
-	lockfile, err := installation.Installation.LockFile(f.ficsitCli)
+	lockfileMods, err := f.GetSelectedInstallLockfileMods()
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to load lockfile")
 		return
 	}
-	wailsRuntime.EventsEmit(f.ctx, "lockfileMods", lockfile)
-	wailsRuntime.EventsEmit(f.ctx, "manifestMods", profile.Mods)
+	wailsRuntime.EventsEmit(f.ctx, "lockfileMods", lockfileMods)
+	wailsRuntime.EventsEmit(f.ctx, "manifestMods", f.GetSelectedInstallProfileMods())
 }
 
 func (f *FicsitCLI) EmitGlobals() {

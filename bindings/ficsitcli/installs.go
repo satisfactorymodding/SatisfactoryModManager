@@ -195,6 +195,22 @@ func (f *FicsitCLI) GetModsEnabled() bool {
 	return !f.selectedInstallation.Installation.Vanilla
 }
 
+func (f *FicsitCLI) GetSelectedInstallProfileMods() map[string]cli.ProfileMod {
+	profile := f.GetProfile(f.selectedInstallation.Installation.Profile)
+	return profile.Mods
+}
+
+func (f *FicsitCLI) GetSelectedInstallLockfileMods() (map[string]cli.LockedMod, error) {
+	lockfile, err := f.selectedInstallation.Installation.LockFile(f.ficsitCli)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get lockfile")
+	}
+	if lockfile == nil {
+		return make(map[string]cli.LockedMod), nil
+	}
+	return lockfile.Mods, nil
+}
+
 func (f *FicsitCLI) GetSelectedInstallLockfile() (*cli.LockFile, error) {
 	lockfile, err := f.selectedInstallation.Installation.LockFile(f.ficsitCli)
 	if err != nil {

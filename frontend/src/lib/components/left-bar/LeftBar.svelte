@@ -45,7 +45,6 @@
   }
 
   async function profileSelectChanged({ detail: { value } }: CustomEvent<{value?: string}>) {
-    console.log($selectedProfileInit, value);
     if (!value) {
       return;
     }
