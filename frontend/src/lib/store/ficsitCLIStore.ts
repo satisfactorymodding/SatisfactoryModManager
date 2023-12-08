@@ -1,4 +1,4 @@
-import { get, readable, writable } from 'svelte/store';
+import { derived, get, readable, writable } from 'svelte/store';
 import { tick } from 'svelte';
 import { queue } from 'async';
 
@@ -10,7 +10,7 @@ import { cli, ficsitcli } from '$wailsjs/go/models';
 import { AddProfile, CheckForUpdates, DeleteProfile, EmitModsChange, GetInstallationsInfo, GetInvalidInstalls, GetProfiles, ImportProfile, RenameProfile, SelectInstall, SetProfile } from '$wailsjs/go/ficsitcli/FicsitCLI';
 import { GetFavoriteMods } from '$wailsjs/go/bindings/Settings';
 
-export const invalidInstalls = readableBinding<(Error & {path?: string})[]>([], { initialGet: GetInvalidInstalls });
+export const invalidInstalls = readableBinding<string[]>([], { initialGet: GetInvalidInstalls });
 
 export const installs = readableBinding<ficsitcli.InstallationInfo[]>([], { initialGet: GetInstallationsInfo });
 export const selectedInstall = writable(null as ficsitcli.InstallationInfo | null);
@@ -83,7 +83,7 @@ export async function renameProfile(oldName: string, newName: string) {
     newProfiles[idx] = newName;
     profiles.set(newProfiles);
   }
-  get(installs).forEach((i) => { if(i.installation.profile === oldName) { i.installation.profile = newName; } });
+  get(installs).forEach((i) => { if(i.installation?.profile === oldName) { i.installation.profile = newName; } });
   if(get(selectedProfile) === oldName) {
     selectedProfile.set(newName);
   }
@@ -101,7 +101,7 @@ export async function deleteProfile(name: string) {
     profiles.set(newProfiles);
   }
   const fallbackProfile = getFallbackProfile();
-  get(installs).forEach((i) => { if(i.installation.profile === name) { i.installation.profile = fallbackProfile; } });
+  get(installs).forEach((i) => { if(i.installation?.profile === name) { i.installation.profile = fallbackProfile; } });
   if(get(selectedProfile) === name) {
     selectedProfile.set(fallbackProfile);
   }
@@ -176,26 +176,21 @@ export async function checkForUpdates() {
 
 setInterval(checkForUpdates, 1000 * 60 * 5); // Check for updates every 5 minutes
 
-interface QueuedAction {
+interface QueuedAction<T> {
   mod: string;
   action: 'install' | 'remove' | 'enable' | 'disable';
   func: () => Promise<T>;
 }
 
-const queuedActionsInternal = writable<QueuedAction[]>([]);
-export const queuedMods = readable<Omit<QueuedAction, 'func'>[]>([], (set) => {
-  const unsub = queuedActionsInternal.subscribe((q) => {
-    set(q);
-  });
-  return unsub;
-});
+const queuedActionsInternal = writable<QueuedAction<unknown>[]>([]);
+export const queuedMods = derived(queuedActionsInternal, (actions) => actions.map((a) => ({ ...a, func: undefined })));
 
-const modActionsQueue = queue((task: () => Promise<T>, cb) => {
-  const complete = (e: Error | null) => {
+const modActionsQueue = queue((task: () => Promise<unknown>, cb) => {
+  const complete = (e?: Error) => {
     queuedActionsInternal.set(get(queuedActionsInternal).filter((a) => a.func !== task));
     cb(e);
   };
-  task().then(complete).catch(complete);
+  task().then(() => complete()).catch(complete);
 });
 
 modActionsQueue.empty(() => {
@@ -216,8 +211,8 @@ export function startQueue() {
   modActionsQueue.resume();
 }
 
-export async function addQueuedModAction(mod: string, action: string, func: () => Promise<T>): Promise<T> {
-  const queuedAction = { mod, action, func };
+export async function addQueuedModAction<T>(mod: string, action: string, func: () => Promise<T>): Promise<T> {
+  const queuedAction = { mod, action, func } as QueuedAction<T>;
   queuedActionsInternal.set([
     ...get(queuedActionsInternal),
     queuedAction,

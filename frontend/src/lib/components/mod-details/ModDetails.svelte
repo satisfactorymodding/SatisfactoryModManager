@@ -327,8 +327,8 @@
                   <PrimaryText class="text-base">or newer</PrimaryText>
                 </Text>
                 <div on:click|stopPropagation={() => installVersion(`>=${version.version}`)}>
-                  <Checkbox 
-                    input$onclick={() => false}
+                  <Checkbox
+                    input$readonly
                     checked={!!manifestVersion && !!validRange(manifestVersion) && !valid(manifestVersion) && minVersion(manifestVersion)?.format() === version.version}
                   />
                 </div>

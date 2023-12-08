@@ -137,6 +137,7 @@
     "@tsconfig/svelte": "^5.0.2",
     "@types/async": "^3.2.24",
     "@types/cookie": "^0.6.0",
+    "@types/dompurify": "^3.0.5",
     "@types/lodash": "^4.14.202",
     "@types/node": "^18.19.3",
     "@types/semver": "^7.5.6",

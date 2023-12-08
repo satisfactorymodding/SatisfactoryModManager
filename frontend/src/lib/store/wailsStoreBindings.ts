@@ -35,7 +35,7 @@ export function readableBinding<T>(defaultValue: T,
   const store = {
     isInit: false,
     ...readable(defaultValue, (set) => {
-      const setData = (data) => {
+      const setData = (data: T) => {
         if(data === null && !allowNull) {
           set(defaultValue);
         } else {
@@ -43,14 +43,18 @@ export function readableBinding<T>(defaultValue: T,
         }
       };
 
-      EventsOn(updateEvent, setData);
+      if (updateEvent) {
+        EventsOn(updateEvent, setData);
+      }
 
       if(initialGet) {
         initialGet().then(setData).then(() => store.isInit = true).then(() => initCallbacks.forEach((cb) => cb())).then(resolveInit);
       }
 
       return () => {
-        EventsOff(updateEvent);
+        if (updateEvent) {
+          EventsOff(updateEvent);
+        }
       };
     }),
     waitForInit: initPromise,

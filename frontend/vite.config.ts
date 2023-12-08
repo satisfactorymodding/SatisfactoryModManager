@@ -25,7 +25,7 @@ export default defineConfig({
   publicDir: 'static',
   resolve: {
     alias: {
-      $wailsjs: path.resolve('./wailsjs'),
+      $wailsjs: path.resolve('./src/lib/generated/wailsjs'),
       $lib: path.resolve('./src/lib'),
     },
   },

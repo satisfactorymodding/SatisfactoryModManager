@@ -1,7 +1,6 @@
 <script lang="ts">
   import Button from '@smui/button';
-  import { Actions, Content } from '@smui/dialog';
-  import Dialog from '@smui/dialog/src/Dialog.svelte';
+  import Dialog, { Actions, Content } from '@smui/dialog';
   import { getContextClient, queryStore } from '@urql/svelte';
 
   import { GetModSummaryDocument } from '$lib/generated';

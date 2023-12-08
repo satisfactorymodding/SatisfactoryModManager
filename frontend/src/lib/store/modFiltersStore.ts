@@ -7,6 +7,7 @@ import { CompatibilityState, type GetModsQuery } from '$lib/generated';
 import { favoriteMods, lockfileMods, manifestMods, queuedMods, selectedInstall } from '$lib/store/ficsitCLIStore';
 import { GetModFiltersOrder, GetModFiltersFilter, SetModFiltersOrder, SetModFiltersFilter } from '$wailsjs/go/bindings/Settings';
 import { getCompatiblity } from '$lib/utils/modCompatibility';
+import type { GameBranch } from '$lib/wailsTypesExtensions';
 
 export interface OrderBy {
   name: string;
@@ -20,11 +21,11 @@ export interface Filter {
 
 export const orderByOptions: OrderBy[] = [
   { name: 'Name', func: (mod: PartialMod) => mod.name.trim() },
-  { name: 'Last updated', func: (mod: PartialMod) => Date.now() - Date.parse(mod.last_version_date) },
-  { name: 'Popularity', func: (mod: PartialMod) => -mod.popularity },
-  { name: 'Hotness', func: (mod: PartialMod) => -mod.hotness },
-  { name: 'Views', func: (mod: PartialMod) => -mod.views },
-  { name: 'Downloads', func: (mod: PartialMod) => -mod.downloads },
+  { name: 'Last updated', func: (mod: PartialMod) => 'last_version_date' in mod ? Date.now() - Date.parse(mod.last_version_date) : 0 },
+  { name: 'Popularity', func: (mod: PartialMod) => 'popularity' in mod ? -mod.popularity : 0 },
+  { name: 'Hotness', func: (mod: PartialMod) => 'hotness' in mod ? -mod.hotness : 0 },
+  { name: 'Views', func: (mod: PartialMod) => 'views' in mod ? -mod.views : 0 },
+  { name: 'Downloads', func: (mod: PartialMod) => 'downloads' in mod ? -mod.downloads : 0 },
 ];
 
 export const filterOptions: Filter[] = [

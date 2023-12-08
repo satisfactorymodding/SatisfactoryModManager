@@ -20,7 +20,7 @@ const timeRanges = {
 };
 
 export function secondsToAppropriate(seconds: number): string {
-  const ranges = Object.keys(timeRanges);
+  const ranges = Object.keys(timeRanges) as (keyof (typeof timeRanges))[];
   let rangeNum = 0;
   while (rangeNum < ranges.length - 1 && seconds >= timeRanges[ranges[rangeNum + 1]]) {
     rangeNum += 1;

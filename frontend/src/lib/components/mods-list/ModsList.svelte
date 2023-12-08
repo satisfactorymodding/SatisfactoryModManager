@@ -10,7 +10,7 @@
   import { GetModsDocument, GetModCountDocument } from '$lib/generated';
   import VirtualList from '$lib/components/mods-list/VirtualModList.svelte';
   import ModsListItem from '$lib/components/mods-list/ModsListItem.svelte';
-  import { filter, order, search, type PartialMod } from '$lib/store/modFiltersStore';
+  import { filter, order, search, type PartialMod, type OfflineMod } from '$lib/store/modFiltersStore';
   import { favoriteMods, lockfileMods, manifestMods, queuedMods } from '$lib/store/ficsitCLIStore';
   import { offline, startView } from '$lib/store/settingsStore';
   import { expandedMod } from '$lib/store/generalStore';
@@ -40,7 +40,7 @@
     offlineMods = (await OfflineGetMods()).map((mod) => ({
       ...mod,
       offline: true,
-    }));
+    } as OfflineMod));
   }
   
   $: if($offline !== null) {

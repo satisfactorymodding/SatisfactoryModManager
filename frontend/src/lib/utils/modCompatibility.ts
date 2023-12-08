@@ -20,8 +20,8 @@ export async function getCompatiblity(modReference: string, gameBranch: GameBran
   return { ...versionCompatibility, source: 'version' };
 }
 
-function gameVersionToSemver(version: number): string | null {
-  return coerce(version)?.format();
+function gameVersionToSemver(version: number): string {
+  return coerce(version)!.format();
 }
 
 export async function getReportedCompatibility(modReference: string, gameBranch: GameBranch, urqlClient: Client): Promise<Compatibility | undefined> {
@@ -32,12 +32,10 @@ export async function getReportedCompatibility(modReference: string, gameBranch:
   const mod = result.data.getModByReference;
   if(mod.compatibility) {
     switch(gameBranch) {
-    case 'EA':
     case 'Early Access':
       return mod.compatibility.EA;
-    case 'EXP':
     case 'Experimental':
-      return mod.compatibility.EA;
+      return mod.compatibility.EXP;
     default:
       throw new Error('Invalid game branch');
     }
@@ -55,7 +53,7 @@ async function getSMLVersions(urqlClient: Client): Promise<SMLVersion[] | undefi
     return OfflineGetSMLVersions();
   }
   
-  const smlVersionsQuery = await urqlClient.query(SmlVersionsCompatibilityDocument).toPromise();
+  const smlVersionsQuery = await urqlClient.query(SmlVersionsCompatibilityDocument, {}).toPromise();
 
   return smlVersionsQuery.data?.getSMLVersions.sml_versions;
 }
@@ -107,7 +105,7 @@ export async function getVersionCompatibility(modReference: string, gameVersion:
   const compatible = modVersions.some((ver) => ver.dependencies
     .some((dep) => dep.mod_id === 'SML' && compatibleSMLVersions.some((smlVer) => satisfies(smlVer, dep.condition))));
   const possiblyCompatible = modVersions.some((ver) => ver.dependencies
-    .some((dep) => dep.mod_id === 'SML' && satisfies(minVersion(dep.condition)), '>=3.0.0'));
+    .some((dep) => dep.mod_id === 'SML' && satisfies(minVersion(dep.condition)!, '>=3.0.0')));
 
   if(compatible) {
     return { state: CompatibilityState.Works };

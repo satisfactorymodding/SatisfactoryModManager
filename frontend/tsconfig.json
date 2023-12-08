@@ -17,11 +17,13 @@
 				"./src/lib/*"
 			],
 			"$wailsjs": [
-				"./wailsjs"
+				"./src/lib/generated/wailsjs"
 			],
 			"$wailsjs/*": [
-				"./wailsjs/*"
+				"./src/lib/generated/wailsjs/*"
 			]
 		},
-  }
+  },
+	"include": ["src/**/*.ts", "src/**/*.js", "src/**/*.svelte"],
+	"exclude": ["src/lib/generated/wailsjs/**/*"]
 }

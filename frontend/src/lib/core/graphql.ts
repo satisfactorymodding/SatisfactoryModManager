@@ -22,7 +22,7 @@ export function initializeGraphQLClient(): Client {
           Compatibility: () => null,
           CompatibilityInfo: () => null,
           VersionDependency: () => null,
-          Mod: (data) => data.mod_reference,
+          Mod: (data) => data.mod_reference as string,
         },
         resolvers: {
           Query: {

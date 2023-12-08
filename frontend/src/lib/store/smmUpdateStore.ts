@@ -26,7 +26,7 @@ export const smmUpdate = readable<SMMUpdate | null>(null, (set) => {
 });
 
 export const smmUpdateProgress = readable<SMMUpdateProgress | null>(null, (set) => {
-  const pastDownloaded: { downloaded: number; time: number } = [];
+  const pastDownloaded: { downloaded: number; time: number }[] = [];
   const speedTimeframe = 1000 * 5;
   EventsOn('updateDownloadProgress', (downloaded: number, total: number) => {
     pastDownloaded.push({
