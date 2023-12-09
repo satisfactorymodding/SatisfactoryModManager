@@ -238,7 +238,7 @@
     <span class="pt-2 font-light">A mod by:</span>
     <span bind:this={focusOnEntry} class="font-medium color-primary cursor-pointer" role="button" tabindex="0" on:click={authorClick} on:keypress={authorClick} >{author ?? 'Loading...'}</span>
     
-    <div class="pt-2" on:mouseenter={() => authorsMenu.setOpen(true)} on:mouseleave={() => authorsMenu.setOpen(false)}>
+    <div class="pt-2" on:mouseenter={() => authorsMenu.setOpen(true)} on:mouseleave={() => authorsMenu.setOpen(false)} role="listbox" tabindex="0">
       <Button variant="unelevated" color="secondary" class="w-full">
         <Label>Contributors <span class="color-primary">({mod?.authors.length ?? 0})</span></Label>
         <SvgIcon icon={mdiChevronDown}/>
@@ -344,7 +344,7 @@
                 <Text class="pl-2 h-full flex flex-col content-center mb-1.5 shrink-0">
                   <PrimaryText class="text-base">or newer</PrimaryText>
                 </Text>
-                <div on:click|stopPropagation={() => installVersion(`>=${version.version}`)}>
+                <div on:click|stopPropagation={() => installVersion(`>=${version.version}`)} on:keypress|stopPropagation={() => installVersion(`>=${version.version}`)} role="button" tabindex="0">
                   <Checkbox
                     input$readonly
                     checked={!!manifestVersion && !!validRange(manifestVersion) && !valid(manifestVersion) && minVersion(manifestVersion)?.format() === version.version}
@@ -409,8 +409,12 @@
     {#if $offline}
       <div class="flex items-center justify-center h-full text-center font-bold">Offline mode is enabled. Changelogs and descriptions are not available.</div>
     {:else if descriptionRendered}
+      <!-- Intercepting mouse clicks for the link interrupter also seems to work for pressing Enter on the keyboard without a specific key handler added -->
+      <!-- svelte-ignore a11y-no-noninteractive-element-interactions a11y-click-events-have-key-events -->
       <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-      <p on:click={handleDescriptionClick}>{@html descriptionRendered}</p>
+      <p on:click={handleDescriptionClick} role="article">
+        {@html descriptionRendered}
+      </p>
     {:else}
       <p>Loading...</p>
     {/if}

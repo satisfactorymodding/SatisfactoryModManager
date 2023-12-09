@@ -12,6 +12,7 @@
         "golangci",
         "graphqlrc",
         "Konami",
+        "SMUI",
         "urql",
         "wailsjs"
     ],
