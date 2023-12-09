@@ -25,26 +25,12 @@
 
   const dispatch = createEventDispatcher();
 
-  function handleKeypress(event: KeyboardEvent, toRun: () => void) {
-    if (event.key === 'Enter' || event.key === ' ') {
-      toRun();
-    }
-  }
-
   function listingClick() {
     dispatch('click');
   }
 
-  function listingKeypress(event: KeyboardEvent) {
-    handleKeypress(event, listingClick);
-  }
-
   $: authorClick = () => {
     $search = `author:"${author}"`
-  }
-
-  function authorKeypress(event: KeyboardEvent) {
-    handleKeypress(event, authorClick);
   }
 
   export let selected: boolean;
@@ -204,7 +190,7 @@
   }
 </script>
 
-<div class="my-1 px-0 lg:h-24 md:h-[5.5rem] h-[4.25rem]" class:rounded-lg={selected} class:selected on:click={listingClick} on:keypress={listingKeypress} role="tab" tabindex="0">
+<div class="my-1 px-0 lg:h-24 md:h-[5.5rem] h-[4.25rem]" class:rounded-lg={selected} class:selected on:click={listingClick} on:keypress={listingClick} role="tab" tabindex="0">
   {#if inProgress}
     <div class="relative h-full">
       <LinearProgress progress={$progress?.progress} class="mod-progress-bar h-full rounded-lg"/>
@@ -221,7 +207,7 @@
           <div class="shrink-0">
             <span class="pl-1">by</span>
             <!-- We could offer keyboard navigation for clicking this, but it's a waste of the user's time while nagivating via keyboard. If they want to search by author, they could enter the mod description pane -->
-            <span class="color-primary whitespace-nowrap" on:click|stopPropagation={authorClick} on:keypress|stopPropagation={authorKeypress} role="button" tabindex="-1">{author}</span>
+            <span class="color-primary whitespace-nowrap" on:click|stopPropagation={authorClick} on:keypress|stopPropagation={authorClick} role="button" tabindex="-1">{author}</span>
           </div>
         </div>
         {#if isInstalled && !isEnabled}

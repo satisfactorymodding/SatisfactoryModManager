@@ -24,6 +24,8 @@
   import { offline } from '$lib/store/settingsStore';
   import type { ficsitcli } from '$wailsjs/go/models';
 
+  export let focusOnEntry: HTMLElement | undefined = undefined;
+
   const client = getContextClient();
 
   $: modQuery = queryStore(
@@ -182,6 +184,10 @@
     imageViewSrc = null;
   }
 
+  $: authorClick = () => {
+    $search = `author:"${author}"`
+  }
+
   // Does not need offline support, since descriptions are disabled in offline mode
   function handleElementClick(element: HTMLElement) {
     if(element instanceof HTMLAnchorElement) {
@@ -230,7 +236,7 @@
     <img src={renderedLogo} alt="{mod?.name} Logo" class="logo w-full" />
     <span class="pt-4 font-bold w-md:text-lg text-base">{mod?.name ?? 'Loading...'}</span>
     <span class="pt-2 font-light">A mod by:</span>
-    <span class="font-medium color-primary cursor-pointer" on:click={() => $search = `author:"${author}"`}>{author ?? 'Loading...'}</span>
+    <span bind:this={focusOnEntry} class="font-medium color-primary cursor-pointer" role="button" tabindex="0" on:click={authorClick} on:keypress={authorClick} >{author ?? 'Loading...'}</span>
     
     <div class="pt-2" on:mouseenter={() => authorsMenu.setOpen(true)} on:mouseleave={() => authorsMenu.setOpen(false)}>
       <Button variant="unelevated" color="secondary" class="w-full">

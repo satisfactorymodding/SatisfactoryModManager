@@ -16,6 +16,9 @@
   import { offline, startView } from '$lib/store/settingsStore';
   import { expandedMod } from '$lib/store/generalStore';
   import { OfflineGetMods } from '$wailsjs/go/ficsitcli/FicsitCLI';
+    import { createEventDispatcher } from 'svelte';
+
+  const dispatch = createEventDispatcher();
 
   const MODS_PER_PAGE = 50;
 
@@ -147,7 +150,14 @@
   <div class="py-4 grow h-0 mods-list" style="position: relative;">
     <div class="ml-5 mr-3 h-full">
       <VirtualList items={displayMods} let:item={mod}>
-        <ModsListItem {mod} on:click={() => $expandedMod = mod.mod_reference} selected={$expandedMod == mod.mod_reference}/>
+        <ModsListItem
+          {mod}
+          on:click={() => {
+            $expandedMod = mod.mod_reference;
+            dispatch('expandedMod', mod.mod_reference);
+          }}
+          selected={$expandedMod == mod.mod_reference}
+        />
       </VirtualList>
     </div>
   </div>

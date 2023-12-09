@@ -54,6 +54,7 @@
 
   let invalidInstallsDialog = false;
   let noInstallsDialog = false;
+  let focusOnEntry: HTMLSpanElement;
 
   const installsInit = installs.isInit;
   const invalidInstallsInit = invalidInstalls.isInit;
@@ -91,11 +92,13 @@
   <div class="flex grow h-0">
     <LeftBar />
     <div class="grow w-1/2 min-w-[400px] md:min-w-[420px] lg:min-w-[445px] {$expandedMod ? 'max-w-[600px]' : ''}">
-      <ModsList />
+      <ModsList on:expandedMod={() => {
+        focusOnEntry.focus();
+      }}/>
     </div>
     {#if $expandedMod}
       <div class:grow={!pendingExpand} class:w-0={pendingExpand}>
-        <ModDetails />
+        <ModDetails bind:focusOnEntry/>
       </div>
     {/if}
   </div>
