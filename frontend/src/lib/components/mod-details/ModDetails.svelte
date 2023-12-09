@@ -195,6 +195,9 @@
             .then((result) => {
               if (result.data?.getModByIdOrReference?.mod_reference) {
                 $expandedMod = result.data.getModByIdOrReference.mod_reference;
+              } else {
+                console.error(`Failed to GetModReferenceDocument for modIdOrReference '${modIdOrReference}', so opening the link '${element.href}' in the browser instead.`);
+                BrowserOpenURL(element.href);
               }
             });
         }
