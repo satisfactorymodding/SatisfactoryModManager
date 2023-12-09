@@ -14,7 +14,7 @@
   import LeftBar from '$lib/components/left-bar/LeftBar.svelte';
   import { installs, invalidInstalls, progress, selectedInstall, selectedProfile } from '$lib/store/ficsitCLIStore';
   import { konami } from '$lib/store/settingsStore';
-  import { expandedMod, error } from '$lib/store/generalStore';
+  import { expandedMod, error, siteURL } from '$lib/store/generalStore';
   import { GenerateDebugInfo } from '$wailsjs/go/bindings/DebugInfo';
   import ExternalInstallMod from '$lib/components/ExternalInstallMod.svelte';
 
@@ -29,6 +29,9 @@
   });
 
   export let apiEndpointURL!: string;
+  export let siteEndpointURL!: string;
+  
+  $: $siteURL = siteEndpointURL;
 
   setContextClient(initializeGraphQLClient(apiEndpointURL));
 

@@ -10,7 +10,7 @@
   import { search, type PartialMod } from '$lib/store/modFiltersStore';
   import { favoriteMods, lockfileMods, manifestMods, progress, selectedInstall } from '$lib/store/ficsitCLIStore';
   import { addQueuedModAction, queuedMods, removeQueuedModAction } from '$lib/store/actionQueue';
-  import { error } from '$lib/store/generalStore';
+  import { error, siteURL } from '$lib/store/generalStore';
   import { DisableMod, EnableMod, InstallMod, RemoveMod } from '$wailsjs/go/ficsitcli/FicsitCLI';
   import { FavoriteMod, UnFavoriteMod } from '$wailsjs/go/bindings/Settings';
   import { getAuthor } from '$lib/utils/getModAuthor';
@@ -32,7 +32,7 @@
   export let selected: boolean;
 
   $: actualLogo = ('offline' in mod || 'missing' in mod) ? (mod.logo ? `data:image/png;base64, ${mod.logo}` : '/images/no_image.webp') : mod.logo;
-  $: renderedLogo = actualLogo || 'https://ficsit.app/images/no_image.webp';
+  $: renderedLogo = actualLogo || `${$siteURL}/images/no_image.webp`;
   $: author = ('offline' in mod || 'missing' in mod) ? mod.authors[0] : getAuthor(mod);
 
   $: isInstalled = mod.mod_reference in $manifestMods;

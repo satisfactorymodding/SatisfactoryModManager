@@ -2,6 +2,7 @@ package bindings
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -164,4 +165,8 @@ func (a *App) Show() {
 
 func (a *App) GetAPIEndpoint() string {
 	return viper.GetString("api-base") + viper.GetString("graphql-api")
+}
+
+func (a *App) GetSiteEndpoint() string {
+	return strings.Replace(viper.GetString("api-base"), "api.", "", 1)
 }

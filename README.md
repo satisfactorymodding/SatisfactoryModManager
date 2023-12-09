@@ -57,6 +57,9 @@ The development server will hot reload whenever you make changes to the Go or Ty
 wails dev
 ```
 
+Upon successful launch of the development server, the application will open automatically.
+The command line output will also include a localhost URL you can visit in your browser if you wish to utilize browser developer tools for debugging.
+
 Make sure you don't already have a copy of the application running or the command will silently fail.
 
 ### Building

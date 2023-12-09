@@ -14,7 +14,7 @@
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { bytesToAppropriate } from '$lib/utils/dataFormats';
   import { canModify, lockfileMods, manifestMods, progress , selectedInstall } from '$lib/store/ficsitCLIStore';
-  import { error , expandedMod } from '$lib/store/generalStore';
+  import { error , expandedMod, siteURL } from '$lib/store/generalStore';
   import { search } from '$lib/store/modFiltersStore';
   import { InstallModVersion, OfflineGetMod } from '$wailsjs/go/ficsitcli/FicsitCLI';
   import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
@@ -80,7 +80,7 @@
   $: mod = $offline ? offlineMod : ($modQuery.fetching ? null : $modQuery.data?.mod);
 
   $: actualLogo = (mod && 'offline' in mod) ? (mod?.logo ? `data:image/png;base64, ${mod?.logo}` : '/images/no_image.webp') : mod?.logo;
-  $: renderedLogo = actualLogo || 'https://ficsit.app/images/no_image.webp';
+  $: renderedLogo = actualLogo || `${$siteURL}/images/no_image.webp`;
   $: descriptionRendered = (mod && 'full_description' in mod && mod?.full_description) ? markdown(mod.full_description) : undefined;
   $: author = getAuthor(mod);
 
@@ -94,7 +94,7 @@
   $: latestVersion = mod?.versions?.length ? sort(mod.versions.map((v) => parse(v.version) ?? coerce(v.version)).filter((v) => !!v) as SemVer[]).reverse()[0] : 'N/A';
   $: installedVersion = (mod && $lockfileMods[mod.mod_reference]?.version) ?? 'Not installed';
 
-  $: ficsitAppLink = `https://ficsit.app/mod/${$expandedMod}`;
+  $: ficsitAppLink = `${$siteURL}/mod/${$expandedMod}`;
 
   let compatibility: CompatibilityWithSource = { state: CompatibilityState.Works, source: 'reported' };
   $: {

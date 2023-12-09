@@ -7,7 +7,7 @@
   import { manifestMods } from '$lib/store/ficsitCLIStore';
   import { addQueuedModAction, queuedMods, removeQueuedModAction } from '$lib/store/actionQueue';
   import { offline } from '$lib/store/settingsStore';
-  import { error } from '$lib/store/generalStore';
+  import { error, siteURL } from '$lib/store/generalStore';
   import { InstallMod } from '$wailsjs/go/ficsitcli/FicsitCLI';
   import { EventsOn } from '$wailsjs/runtime/runtime';
 

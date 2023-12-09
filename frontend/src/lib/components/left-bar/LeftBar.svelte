@@ -15,7 +15,7 @@
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { installs, profiles, canModify, selectedInstall, selectedInstallPath, selectedProfile, modsEnabled, progress } from '$lib/store/ficsitCLIStore';
-  import { error } from '$lib/store/generalStore';
+  import { error, siteURL } from '$lib/store/generalStore';
   import { BrowserOpenURL, EventsOn } from '$wailsjs/runtime/runtime';
   import { OpenFileDialog } from '$wailsjs/go/bindings/App';
   import { bindings, ficsitcli } from '$wailsjs/go/models';
@@ -318,9 +318,9 @@
   </div>
   <div class="flex flex-col mt-8">
     <span class="pl-4">Links</span>
-    <Button variant="unelevated" class="w-full mt-2" on:click={() => BrowserOpenURL('https://ficsit.app')}>
+    <Button variant="unelevated" class="w-full mt-2" on:click={() => BrowserOpenURL($siteURL)}>
       <Label>
-        ficsit.app mod website
+        ficsit.app (Mod Repository)
       </Label>
       <div class="grow" />
       <SvgIcon icon={mdiWeb} class="h-5 w-5" />
