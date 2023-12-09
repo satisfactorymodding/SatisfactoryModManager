@@ -43,7 +43,21 @@ for common issues and their solutions.
 
 ### Configuration
 
-If you want to point to the SMR staging API instead of production, edit `main.go` to set `api-base` to the staging api (`https://api.ficsit.dev`)
+If you want to point to the SMR staging API instead of production, edit:
+
+* `main.go` to set `api-base` to the staging api (`https://api.ficsit.dev`)
+* `frontend\.graphqlrc` to set `schema` to the staging api (`https://api.ficsit.dev/v2/query`)
+* `frontend\codegen.yml` to set `schema` to the staging api (`https://api.ficsit.dev/v2/query`)
+
+### Development Server
+
+The development server will hot reload whenever you make changes to the Go or Typescript code.
+
+```bash
+wails dev
+```
+
+Make sure you don't already have a copy of the application running or the command will silently fail.
 
 ### Building
 
