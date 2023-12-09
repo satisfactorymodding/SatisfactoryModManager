@@ -5,9 +5,9 @@ import { persistedExchange } from '@urql/exchange-persisted';
 
 import schema from '$lib/generated/graphql.schema.urql.json';
 
-export function initializeGraphQLClient(): Client {
+export function initializeGraphQLClient(apiEndpointURL: string): Client {
   return createClient({
-    url: 'https://api.ficsit.app/v2/query',
+    url: apiEndpointURL,
     exchanges: [
       cacheExchange({
         schema,

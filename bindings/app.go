@@ -6,6 +6,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
+	"github.com/spf13/viper"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/projectfile"
@@ -159,4 +160,8 @@ func (a *App) ExternalImportProfile(path string) {
 
 func (a *App) Show() {
 	wailsRuntime.Show(a.ctx)
+}
+
+func (a *App) GetAPIEndpoint() string {
+	return viper.GetString("api-base") + viper.GetString("graphql-api")
 }

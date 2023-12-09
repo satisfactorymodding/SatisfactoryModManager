@@ -28,7 +28,9 @@
     }
   });
 
-  setContextClient(initializeGraphQLClient());
+  export let apiEndpointURL!: string;
+
+  setContextClient(initializeGraphQLClient(apiEndpointURL));
 
   let windowExpanded = false;
 
