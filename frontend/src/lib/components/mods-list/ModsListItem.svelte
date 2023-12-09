@@ -25,10 +25,28 @@
 
   const dispatch = createEventDispatcher();
 
-  function click() {
+  function handleKeypress(event: KeyboardEvent, toRun: () => void) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      toRun();
+    }
+  }
+
+  function listingClick() {
     dispatch('click');
   }
-  
+
+  function listingKeypress(event: KeyboardEvent) {
+    handleKeypress(event, listingClick);
+  }
+
+  $: authorClick = () => {
+    $search = `author:"${author}"`
+  }
+
+  function authorKeypress(event: KeyboardEvent) {
+    handleKeypress(event, authorClick);
+  }
+
   export let selected: boolean;
 
   $: actualLogo = ('offline' in mod || 'missing' in mod) ? (mod.logo ? `data:image/png;base64, ${mod.logo}` : '/images/no_image.webp') : mod.logo;
@@ -186,7 +204,7 @@
   }
 </script>
 
-<div class="my-1 px-0 lg:h-24 md:h-[5.5rem] h-[4.25rem]" class:rounded-lg={selected} class:selected on:click={click}>
+<div class="my-1 px-0 lg:h-24 md:h-[5.5rem] h-[4.25rem]" class:rounded-lg={selected} class:selected on:click={listingClick} on:keypress={listingKeypress} role="tab" tabindex="0">
   {#if inProgress}
     <div class="relative h-full">
       <LinearProgress progress={$progress?.progress} class="mod-progress-bar h-full rounded-lg"/>
@@ -202,7 +220,8 @@
           </div>
           <div class="shrink-0">
             <span class="pl-1">by</span>
-            <span class="color-primary whitespace-nowrap" on:click|stopPropagation={() => $search = `author:"${author}"`}>{author}</span>
+            <!-- We could offer keyboard navigation for clicking this, but it's a waste of the user's time while nagivating via keyboard. If they want to search by author, they could enter the mod description pane -->
+            <span class="color-primary whitespace-nowrap" on:click|stopPropagation={authorClick} on:keypress|stopPropagation={authorKeypress} role="button" tabindex="-1">{author}</span>
           </div>
         </div>
         {#if isInstalled && !isEnabled}
@@ -245,7 +264,9 @@
         {/if}
       </div>
     </div>
-    <div class="pr-2 flex h-full items-center" on:click|stopPropagation={() => { /* empty */ }}>
+    <!-- The purpose of the event handlers here are to prevent navigating to the mod's page when clicking on one of the sub-buttons of the div. Thus, it shouldn't be focusable despite having "interactions" -->
+    <!-- svelte-ignore a11y-no-noninteractive-element-interactions a11y-click-events-have-key-events -->
+    <div class="pr-2 flex h-full items-center" role="separator" tabindex="-1" on:click|stopPropagation={() => { /* empty */ }} on:keypress|stopPropagation={() => { /* empty */ }}>.
       {#if isInstalled && !isDependency}
         <Button
           on:click={ toggleModEnabled }
