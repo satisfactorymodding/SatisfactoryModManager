@@ -87,8 +87,8 @@ export async function getVersionCompatibility(modReference: string, gameVersion:
   }
 
   const modVersions = await getModVersions(modReference, urqlClient);
-  if(!modVersions) {
-    return { state: CompatibilityState.Broken };
+  if(!modVersions || modVersions.length === 0) {
+    return { state: CompatibilityState.Broken, note: 'This mod has a page on ficsit.app, but there are no versions of the mod available for download.' };
   }
 
   versions.sort((a, b) => compare(a.version, b.version));

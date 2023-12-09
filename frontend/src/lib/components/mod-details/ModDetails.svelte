@@ -112,7 +112,7 @@
                   state: result.state,
                   note: result.note 
                     ? `This mod has been reported as ${result.state} on this game version.<br>${markdown(result.note)}` 
-                    : `This mod has been reported as ${result.state} on this game version.`,
+                    : `This mod has been reported as ${result.state} on this game version. (No further notes provided)`,
                   source: 'reported',
                 };
               } else {
@@ -270,6 +270,8 @@
                   {#if mod.compatibility.EA.note}
                     <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                     {@html markdown(mod.compatibility.EA.note)}
+                  {:else}
+                    (No further notes provided)
                   {/if}
                 </Tooltip>
               </Wrapper>
@@ -280,12 +282,19 @@
                   {#if mod.compatibility.EXP.note}
                     <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                     {@html markdown(mod.compatibility.EXP.note)}
+                  {:else}
+                    (No further notes provided)
                   {/if}
                 </Tooltip>
               </Wrapper>
             </div>
           {:else}
-            <span class="font-bold">N/A</span>
+            <Wrapper>
+              <span class="font-bold">Unknown</span>
+              <Tooltip surface$class="max-w-lg text-base">
+                No compatibility information has been reported for this mod yet. Try it out and contact us on the Discord so it can be updated!
+              </Tooltip>
+            </Wrapper>
           {/if}
         </div>
       {/if}

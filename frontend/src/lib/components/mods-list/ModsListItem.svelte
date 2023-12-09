@@ -114,7 +114,7 @@
                 state: result.state,
                 note: result.note 
                   ? `This mod has been reported as ${result.state} on this game version.<br>${markdown(result.note)}` 
-                  : `This mod has been reported as ${result.state} on this game version.`,
+                  : `This mod has been reported as ${result.state} on this game version. (No further notes provided)`,
                 source: 'reported',
               };
             } else {

@@ -189,7 +189,7 @@
 >
   <Title>No Satisfactory installs found</Title>
   <Content>
-    Seems wrong? Click the button below and send the generated zip file on the modding discord in #help-using-mods.
+    Seems wrong? Click the button below and send the generated zip file on the <a href="https://discord.gg/xkVJ73E">modding discord</a> in #help-using-mods.
   </Content>
   <Actions>
     <Button action="" on:click={GenerateDebugInfo}>
@@ -207,7 +207,7 @@
   <Title>Error</Title>
   <Content>
     <p>{ $error }</p>
-    <p class="pt-4">Seems wrong? Click the button below and send the generated zip file on the modding discord in #help-using-mods.</p>
+    <p class="pt-4">Seems wrong? Click the button below and send the generated zip file on the <a href="https://discord.gg/xkVJ73E">modding discord</a> in #help-using-mods.</p>
   </Content>
   <Actions>
     <Button action="" on:click={() => $error = null}>
