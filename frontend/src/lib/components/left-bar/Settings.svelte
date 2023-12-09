@@ -121,7 +121,7 @@
 <div class="settings-menu">
   <Button variant="unelevated" class="w-full mt-2" on:click={() => settingsMenu.setOpen(true)}>
     <Label>
-      SMM settings
+      Mod Manager Settings
     </Label>
     <div class="grow" />
     <SvgIcon icon={mdiTune} class="h-5 w-5" />

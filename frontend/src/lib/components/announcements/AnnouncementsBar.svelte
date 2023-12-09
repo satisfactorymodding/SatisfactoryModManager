@@ -51,14 +51,14 @@
 
   const offlineAnnouncement: ViewableAnnouncement = {
     id: '__offline__',
-    message: 'You are currently offline. Some features may be unavailable.',
+    message: 'You are currently offline. Some features may be unavailable. (To reconnect, use Mod Manager Settings > Go Online)',
     importance: AnnouncementImportance.Info,
     viewable: false,
   };
 
   const healthcheckFailAnnouncement: ViewableAnnouncement = {
     id: '__healthcheck__',
-    message: 'Could not reach ficsit.app. Check your internet connection or consider using the offline mode.',
+    message: 'Could not reach ficsit.app. Check your internet connection or consider using the offline mode. (Mod Manager Settings > Go Offline)',
     importance: AnnouncementImportance.Warning,
     viewable: false,
   };
