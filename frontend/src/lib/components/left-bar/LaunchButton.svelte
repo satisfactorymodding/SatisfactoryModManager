@@ -52,6 +52,7 @@
   $: reportedPossiblyCompatible = Object.keys($lockfileMods).filter((modReference) => reportedCompatibilities[modReference]?.state === CompatibilityState.Damaged);
 
   $: launchButtonColor = (versionIncompatible.length > 0 || reportedIncompatible.length > 0) ? 'error' : ((versionPossiblyCompatible.length > 0 || reportedPossiblyCompatible.length > 0) ? 'warning' : '');
+  $: areOperationsQueued = !$queueAutoStart && $queuedMods.length > 0;
 
   function launchGame() {
     $isLaunchingGame = true;
@@ -101,7 +102,7 @@
 
 <Wrapper>
   <center>
-    {#if !$queueAutoStart && $queuedMods.length > 0}
+    {#if areOperationsQueued}
       <Button variant="unelevated" class="h-12 w-full launch-game error" on:click={() => startQueue()}>
         <Label>Apply {$queuedMods.length} changes</Label>
         <div class="grow" />
@@ -109,7 +110,7 @@
       </Button>
     {:else if !isInstallLaunchable}    
       <Button variant="unelevated" class="h-12 w-full launch-game bg-grey-500" disabled>
-        <Label>SMM cannot launch this install</Label>
+        <Label>SMM can't launch this install</Label>
         <div class="grow" />
       </Button>
     {:else if $launchButton === 'normal' || $isGameRunning || $isLaunchingGame }
@@ -212,9 +213,29 @@
       </ul>
       Are you sure you want to launch?
     </Tooltip>
+  {:else if areOperationsQueued}
+    <Tooltip surface$class="max-w-lg text-base">
+      Changes have not yet been made to your mod files. Click the button above to apply the changes you have queued.<br/><br/>(You're in Queue "Start manually" mode)
+    </Tooltip>
+  {:else if $isGameRunning}
+    <Tooltip surface$class="max-w-lg text-base">
+      Your game launcher is reporting that the game is already running (or still in the process of closing).
+    </Tooltip>
+  {:else if $isLaunchingGame}
+    <Tooltip surface$class="max-w-lg text-base">
+      Launch in progress...
+    </Tooltip>
+  {:else if !!$progress}
+    <Tooltip surface$class="max-w-lg text-base">
+      An operation is already in progress.
+    </Tooltip>
   {:else if !isInstallLaunchable}
     <Tooltip surface$class="max-w-lg text-base">
-      You can still launch Satisfactory using your game launcher.
+      The Mod Manager is not capable of launching this install type, but it will still manage the mod files for you. Launch Satisfactory using your usual game launcher.
+    </Tooltip>
+  {:else}
+    <Tooltip surface$class="max-w-lg text-base">
+      You're ready to rumble!<br/><br/>Note: The Mod Manager has already finished installing the mod files for you. You could launch the game using your usual game launcher and mods would still be loaded.
     </Tooltip>
   {/if}
 </Wrapper>
