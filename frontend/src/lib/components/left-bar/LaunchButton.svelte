@@ -119,6 +119,8 @@
         <SvgIcon icon={ mdiOpenInNew }/>
       </Button>
     {:else if $launchButton === 'cat' }
+      <!-- fixme SMMv3 seems to have broken this button -->
+      <!-- svelte-ignore a11y-no-static-element-interactions -->
       <div
         style="height: 32px"
         class="overflow-hidden"
@@ -130,34 +132,52 @@
           draggable="false"
           alt="Space background"
         >
-        <img
-          src="/images/launch/cat/cat_full.png"
-          style="position: relative; top: -57px; zoom: 0.55"
-          style:left={`calc(-480px + ${catPosition * 87}%)`}
-          draggable="false"
+        <div
           on:mousedown={catMouseDown}
-          alt="Cat"
+          role="button"
+          tabindex="0"
         >
+          <img
+            src="/images/launch/cat/cat_full.png"
+            style="position: relative; top: -57px; zoom: 0.55"
+            style:left={`calc(-480px + ${catPosition * 87}%)`}
+            draggable="false"
+            alt="Cat"
+          >
+        </div>
+        
       </div>
     {:else if $launchButton === 'button' }
-      <div style="height: 50px">
+      <!-- FIXME: keyboard navigation isn't allowing pressing this button with enter/space -->
+      <div
+        style="height: 50px"
+        role="button"
+        tabindex="0"
+        on:keydown={launchButtonPressed}
+      >
         <img
           src="/images/launch/fun/launch_fun.png"
           draggable="false"
           alt="Launch Button Background"
         >
-        <img
-          src={`/images/launch/fun/launch_fun_button_${launchButtonState}.png`}
-          style="position: relative; zoom: 0.56"
-          style:top={launchButtonState === 'press' ? '-97.5px' : '-98px'}
-          draggable="false"
-          on:click={() => launchButtonPressed()}
-          on:mousedown={() => launchButtonState = 'press'}
+        <!-- Keyboard interactions for the button are defined in the overall div -->
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <div
+          on:click={launchButtonPressed}
           on:mouseup={() => launchButtonState = 'over'}
+          on:mousedown={() => launchButtonState = 'press'}
           on:mouseenter={() => launchButtonState = 'over'}
           on:mouseleave={() => launchButtonState = 'normal'}
-          alt="Launch Button"
         >
+          <img
+            src={`/images/launch/fun/launch_fun_button_${launchButtonState}.png`}
+            style="position: relative; zoom: 0.56"
+            style:top={launchButtonState === 'press' ? '-97.5px' : '-98px'}
+            draggable="false"
+            alt="Launch Button"
+          >
+        </div>
       </div>
     {/if}
   </center>
