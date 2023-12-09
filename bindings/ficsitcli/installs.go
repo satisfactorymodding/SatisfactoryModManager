@@ -139,7 +139,7 @@ func (f *FicsitCLI) SelectInstall(path string) error {
 
 	defer f.setProgress(nil)
 
-	installErr := f.validateInstall(installation, "__select_install__")
+	installErr := f.validateInstall(f.selectedInstallation, "__select_install__")
 
 	if installErr != nil {
 		l.Error().Err(installErr).Str("install", installation.Info.Path).Msg("Failed to validate install")
@@ -156,6 +156,10 @@ func (f *FicsitCLI) GetSelectedInstall() *installfinders.Installation {
 }
 
 func (f *FicsitCLI) SetModsEnabled(enabled bool) error {
+	if f.selectedInstallation == nil {
+		log.Error().Msg("No installation selected")
+		return errors.New("No installation selected")
+	}
 	l := log.With().Str("task", "setModsEnabled").Bool("enabled", enabled).Logger()
 
 	var message string
@@ -192,15 +196,21 @@ func (f *FicsitCLI) SetModsEnabled(enabled bool) error {
 }
 
 func (f *FicsitCLI) GetModsEnabled() bool {
-	return !f.selectedInstallation.Installation.Vanilla
+	return f.selectedInstallation == nil || !f.selectedInstallation.Installation.Vanilla
 }
 
 func (f *FicsitCLI) GetSelectedInstallProfileMods() map[string]cli.ProfileMod {
+	if f.selectedInstallation == nil {
+		return make(map[string]cli.ProfileMod)
+	}
 	profile := f.GetProfile(f.selectedInstallation.Installation.Profile)
 	return profile.Mods
 }
 
 func (f *FicsitCLI) GetSelectedInstallLockfileMods() (map[string]cli.LockedMod, error) {
+	if f.selectedInstallation == nil {
+		return make(map[string]cli.LockedMod), nil
+	}
 	lockfile, err := f.selectedInstallation.Installation.LockFile(f.ficsitCli)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get lockfile")
@@ -212,6 +222,9 @@ func (f *FicsitCLI) GetSelectedInstallLockfileMods() (map[string]cli.LockedMod, 
 }
 
 func (f *FicsitCLI) GetSelectedInstallLockfile() (*cli.LockFile, error) {
+	if f.selectedInstallation == nil {
+		return nil, nil
+	}
 	lockfile, err := f.selectedInstallation.Installation.LockFile(f.ficsitCli)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get lockfile")

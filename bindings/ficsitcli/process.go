@@ -143,12 +143,17 @@ func (f *FicsitCLI) EmitGlobals() {
 		installInfos = append(installInfos, install.Info)
 	}
 	wailsRuntime.EventsEmit(f.ctx, "installations", installInfos)
-	wailsRuntime.EventsEmit(f.ctx, "selectedInstallation", f.selectedInstallation.Installation.Path)
 	profileNames := make([]string, 0, len(f.ficsitCli.Profiles.Profiles))
 	for k := range f.ficsitCli.Profiles.Profiles {
 		profileNames = append(profileNames, k)
 	}
 	wailsRuntime.EventsEmit(f.ctx, "profiles", profileNames)
+
+	if f.selectedInstallation == nil {
+		return
+	}
+
+	wailsRuntime.EventsEmit(f.ctx, "selectedInstallation", f.selectedInstallation.Installation.Path)
 	wailsRuntime.EventsEmit(f.ctx, "selectedProfile", f.selectedInstallation.Installation.Profile)
 	wailsRuntime.EventsEmit(f.ctx, "modsEnabled", !f.selectedInstallation.Installation.Vanilla)
 }
@@ -158,8 +163,11 @@ func (f *FicsitCLI) InstallMod(mod string) error {
 		return errors.New("Another operation in progress")
 	}
 
-	installation := f.GetInstallation(f.selectedInstallation.Info.Path)
-	profileName := installation.Installation.Profile
+	if f.selectedInstallation == nil {
+		return errors.New("No installation selected")
+	}
+
+	profileName := f.selectedInstallation.Installation.Profile
 	profile := f.GetProfile(profileName)
 
 	profileErr := profile.AddMod(mod, ">=0.0.0")
@@ -177,7 +185,7 @@ func (f *FicsitCLI) InstallMod(mod string) error {
 
 	defer f.setProgress(nil)
 
-	installErr := f.validateInstall(installation, mod)
+	installErr := f.validateInstall(f.selectedInstallation, mod)
 
 	if installErr != nil {
 		return errors.Wrapf(installErr, "Failed to install mod: %s@latest", mod)
@@ -193,8 +201,11 @@ func (f *FicsitCLI) InstallModVersion(mod string, version string) error {
 		return errors.New("Another operation in progress")
 	}
 
-	installation := f.GetInstallation(f.selectedInstallation.Info.Path)
-	profileName := installation.Installation.Profile
+	if f.selectedInstallation == nil {
+		return errors.New("No installation selected")
+	}
+
+	profileName := f.selectedInstallation.Installation.Profile
 	profile := f.GetProfile(profileName)
 
 	profileErr := profile.AddMod(mod, version)
@@ -212,7 +223,7 @@ func (f *FicsitCLI) InstallModVersion(mod string, version string) error {
 
 	defer f.setProgress(nil)
 
-	installErr := f.validateInstall(installation, mod)
+	installErr := f.validateInstall(f.selectedInstallation, mod)
 
 	if installErr != nil {
 		return errors.Wrapf(installErr, "Failed to install mod: %s@%s", mod, version)
@@ -228,8 +239,11 @@ func (f *FicsitCLI) RemoveMod(mod string) error {
 		return errors.New("Another operation in progress")
 	}
 
-	installation := f.GetInstallation(f.selectedInstallation.Info.Path)
-	profileName := installation.Installation.Profile
+	if f.selectedInstallation == nil {
+		return errors.New("No installation selected")
+	}
+
+	profileName := f.selectedInstallation.Installation.Profile
 	profile := f.GetProfile(profileName)
 
 	profile.RemoveMod(mod)
@@ -244,7 +258,7 @@ func (f *FicsitCLI) RemoveMod(mod string) error {
 
 	defer f.setProgress(nil)
 
-	installErr := f.validateInstall(installation, mod)
+	installErr := f.validateInstall(f.selectedInstallation, mod)
 
 	if installErr != nil {
 		return errors.Wrapf(installErr, "Failed to remove mod: %s", mod)
@@ -260,8 +274,11 @@ func (f *FicsitCLI) EnableMod(mod string) error {
 		return errors.New("Another operation in progress")
 	}
 
-	installation := f.GetInstallation(f.selectedInstallation.Info.Path)
-	profileName := installation.Installation.Profile
+	if f.selectedInstallation == nil {
+		return errors.New("No installation selected")
+	}
+
+	profileName := f.selectedInstallation.Installation.Profile
 	profile := f.GetProfile(profileName)
 
 	profile.SetModEnabled(mod, true)
@@ -276,7 +293,7 @@ func (f *FicsitCLI) EnableMod(mod string) error {
 
 	defer f.setProgress(nil)
 
-	installErr := f.validateInstall(installation, mod)
+	installErr := f.validateInstall(f.selectedInstallation, mod)
 
 	if installErr != nil {
 		return errors.Wrapf(installErr, "Failed to enable mod: %s", mod)
@@ -292,8 +309,11 @@ func (f *FicsitCLI) DisableMod(mod string) error {
 		return errors.New("Another operation in progress")
 	}
 
-	installation := f.GetInstallation(f.selectedInstallation.Info.Path)
-	profileName := installation.Installation.Profile
+	if f.selectedInstallation == nil {
+		return errors.New("No installation selected")
+	}
+
+	profileName := f.selectedInstallation.Installation.Profile
 	profile := f.GetProfile(profileName)
 
 	profile.SetModEnabled(mod, false)
@@ -308,7 +328,7 @@ func (f *FicsitCLI) DisableMod(mod string) error {
 
 	defer f.setProgress(nil)
 
-	installErr := f.validateInstall(installation, mod)
+	installErr := f.validateInstall(f.selectedInstallation, mod)
 
 	if installErr != nil {
 		return errors.Wrapf(installErr, "Failed to disable mod: %s", mod)

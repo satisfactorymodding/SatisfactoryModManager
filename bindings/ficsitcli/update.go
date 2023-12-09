@@ -13,6 +13,9 @@ type Update struct {
 }
 
 func (f *FicsitCLI) CheckForUpdates() ([]Update, error) {
+	if f.selectedInstallation == nil {
+		return []Update{}, nil
+	}
 	l := log.With().Str("task", "checkForUpdates").Logger()
 
 	currentLockfile, err := f.selectedInstallation.Installation.LockFile(f.ficsitCli)
@@ -74,6 +77,10 @@ func (f *FicsitCLI) UpdateMods(mods []string) error {
 	if f.progress != nil {
 		l.Error().Msg("Another operation in progress")
 		return errors.New("Another operation in progress")
+	}
+
+	if f.selectedInstallation == nil {
+		return errors.New("No installation selected")
 	}
 
 	profile := f.GetProfile(f.selectedInstallation.Installation.Profile)

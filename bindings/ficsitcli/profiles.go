@@ -142,8 +142,7 @@ type ExportedProfileMetadata struct {
 func (f *FicsitCLI) MakeCurrentExportedProfile() (*ExportedProfile, error) {
 	l := log.With().Str("task", "makeCurrentExportedProfile").Logger()
 
-	selectedInstall := f.selectedInstallation
-	if selectedInstall == nil {
+	if f.selectedInstallation == nil {
 		l.Error().Msg("No installation selected")
 		return nil, errors.New("No installation selected")
 	}
@@ -159,13 +158,13 @@ func (f *FicsitCLI) MakeCurrentExportedProfile() (*ExportedProfile, error) {
 		l.Error().Str("profile", *profileName).Msg("Profile not found")
 		return nil, errors.New("Profile not found")
 	}
-	lockfile, err := selectedInstall.Installation.LockFile(f.ficsitCli)
+	lockfile, err := f.selectedInstallation.Installation.LockFile(f.ficsitCli)
 	if err != nil {
 		l.Error().Err(err).Msg("Failed to get lockfile")
 		return nil, errors.Wrap(err, "Failed to get lockfile")
 	}
 	metadata := &ExportedProfileMetadata{
-		GameVersion: selectedInstall.Info.Version,
+		GameVersion: f.selectedInstallation.Info.Version,
 	}
 
 	if lockfile == nil {
@@ -239,8 +238,7 @@ func (f *FicsitCLI) ReadExportedProfileMetadata(file string) (*ExportedProfileMe
 func (f *FicsitCLI) ImportProfile(name string, file string) error {
 	l := log.With().Str("task", "importProfile").Str("name", name).Str("file", file).Logger()
 
-	selectedInstall := f.selectedInstallation
-	if selectedInstall == nil {
+	if f.selectedInstallation == nil {
 		l.Error().Msg("No installation selected")
 		return errors.New("No installation selected")
 	}
@@ -266,9 +264,9 @@ func (f *FicsitCLI) ImportProfile(name string, file string) error {
 
 	profile.Mods = exportedProfile.Profile.Mods
 
-	_ = selectedInstall.Installation.SetProfile(f.ficsitCli, name)
+	_ = f.selectedInstallation.Installation.SetProfile(f.ficsitCli, name)
 
-	err = selectedInstall.Installation.WriteLockFile(f.ficsitCli, &exportedProfile.LockFile)
+	err = f.selectedInstallation.Installation.WriteLockFile(f.ficsitCli, &exportedProfile.LockFile)
 	if err != nil {
 		_ = f.ficsitCli.Profiles.DeleteProfile(name)
 		l.Error().Err(err).Str("name", name).Msg("Failed to write lockfile")
@@ -287,7 +285,7 @@ func (f *FicsitCLI) ImportProfile(name string, file string) error {
 
 	defer f.setProgress(nil)
 
-	installErr := f.validateInstall(selectedInstall, "__import_profile__")
+	installErr := f.validateInstall(f.selectedInstallation, "__import_profile__")
 
 	if installErr != nil {
 		_ = f.ficsitCli.Profiles.DeleteProfile(name)
