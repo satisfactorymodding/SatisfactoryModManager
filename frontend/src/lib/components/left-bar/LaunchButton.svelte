@@ -10,7 +10,7 @@
   import { error, isLaunchingGame } from '$lib/store/generalStore';
   import { LaunchGame } from '$wailsjs/go/ficsitcli/FicsitCLI';
   import { CompatibilityState, type Compatibility } from '$lib/generated';
-  import { getCompatiblity, type CompatibilityWithSource } from '$lib/utils/modCompatibility';
+  import { getCompatibility, type CompatibilityWithSource } from '$lib/utils/modCompatibility';
   import type { GameBranch } from '$lib/wailsTypesExtensions';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
 
@@ -26,7 +26,7 @@
       compatibilities = {};
       Object.keys($lockfileMods).map(async (modReference) => {
         if (modReference !== 'SML') {
-          compatibilities[modReference] = await getCompatiblity(modReference, branch, gameVersion, client);
+          compatibilities[modReference] = await getCompatibility(modReference, branch, gameVersion, client);
         }
       });
     }

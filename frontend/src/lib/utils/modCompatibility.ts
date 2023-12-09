@@ -11,7 +11,7 @@ export interface CompatibilityWithSource extends Compatibility {
   source: 'reported' | 'version';
 }
 
-export async function getCompatiblity(modReference: string, gameBranch: GameBranch, gameVersion: number, urqlClient: Client): Promise<CompatibilityWithSource> {
+export async function getCompatibility(modReference: string, gameBranch: GameBranch, gameVersion: number, urqlClient: Client): Promise<CompatibilityWithSource> {
   const reportedCompatibility = await getReportedCompatibility(modReference, gameBranch, urqlClient);
   if(reportedCompatibility) {
     return { ...reportedCompatibility, source: 'reported' };

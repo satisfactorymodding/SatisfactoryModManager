@@ -7,7 +7,7 @@ import { CompatibilityState, type GetModsQuery } from '$lib/generated';
 import { favoriteMods, lockfileMods, manifestMods, selectedInstall } from '$lib/store/ficsitCLIStore';
 import { queuedMods } from '$lib/store/actionQueue';
 import { GetModFiltersOrder, GetModFiltersFilter, SetModFiltersOrder, SetModFiltersFilter } from '$wailsjs/go/bindings/Settings';
-import { getCompatiblity } from '$lib/utils/modCompatibility';
+import { getCompatibility } from '$lib/utils/modCompatibility';
 import type { GameBranch } from '$lib/wailsTypesExtensions';
 
 export interface OrderBy {
@@ -40,7 +40,7 @@ export const filterOptions: Filter[] = [
       }
       const gameVersion = installInfo.version;
       const branch = installInfo.branch as GameBranch;
-      const compatibility = await getCompatiblity(mod.mod_reference, branch, gameVersion, urqlClient);
+      const compatibility = await getCompatibility(mod.mod_reference, branch, gameVersion, urqlClient);
       return compatibility.state !== CompatibilityState.Broken;
     }, 
   },

@@ -19,7 +19,7 @@
   import { InstallModVersion, OfflineGetMod } from '$wailsjs/go/ficsitcli/FicsitCLI';
   import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
   import { getAuthor } from '$lib/utils/getModAuthor';
-  import { getCompatiblity, getVersionCompatibility, type CompatibilityWithSource } from '$lib/utils/modCompatibility';
+  import { getCompatibility, getVersionCompatibility, type CompatibilityWithSource } from '$lib/utils/modCompatibility';
   import type { GameBranch } from '$lib/wailsTypesExtensions';
   import { offline } from '$lib/store/settingsStore';
   import type { ficsitcli } from '$wailsjs/go/models';
@@ -106,7 +106,7 @@
           if(mod.hidden && !isDependency) {
             compatibility = { state: CompatibilityState.Broken, note: 'This mod was hidden by the author.', source: 'reported' };
           } else {
-            getCompatiblity(mod.mod_reference, branch, gameVersion, client).then((result) => {
+            getCompatibility(mod.mod_reference, branch, gameVersion, client).then((result) => {
               if (result.source === 'reported') {
                 compatibility = {
                   state: result.state,
