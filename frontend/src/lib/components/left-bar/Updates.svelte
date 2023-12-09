@@ -143,9 +143,9 @@
     {#if $smmUpdate}
       SMM update available
     {:else if updatesToDisplay.length > 0}
-      {updatesToDisplay.length} updates available
+      {updatesToDisplay.length} mod updates available
     {:else}
-      No updates right now
+      No mod/SMM updates right now
     {/if}
   </Label>
   <div class="grow" />
