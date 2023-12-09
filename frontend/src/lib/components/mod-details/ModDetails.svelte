@@ -2,7 +2,7 @@
   import { getContextClient, queryStore } from '@urql/svelte';
   import Button, { Label } from '@smui/button';
   import Checkbox from '@smui/checkbox';
-  import { mdiCheck, mdiChevronDown, mdiImport, mdiRocketLaunch, mdiTestTube } from '@mdi/js';
+  import { mdiCheck, mdiChevronDown, mdiImport, mdiRocketLaunch, mdiTestTube, mdiWeb } from '@mdi/js';
   import Menu from '@smui/menu';
   import List, { Item, PrimaryText, SecondaryText, Separator, Text } from '@smui/list';
   import Dialog, { Content, Title } from '@smui/dialog';
@@ -382,10 +382,12 @@
           </Menu>
         </div>
       {/if}
-    </div>
-
-    <div class="pt-4">
-      <span on:click={() => BrowserOpenURL(ficsitAppLink)} class="color-primary">View on ficsit.app</span>
+      <div class="pt-2">
+        <Button variant="unelevated" color="primary" class="w-full" on:click={() => BrowserOpenURL(ficsitAppLink)}>
+          <Label>View on ficsit.app</Label>
+          <SvgIcon icon={mdiWeb}/>
+        </Button>
+      </div>
     </div>
 
     <div class="grow"></div>
