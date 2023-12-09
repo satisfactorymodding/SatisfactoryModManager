@@ -153,7 +153,11 @@
 </Button>
 <Button variant="unelevated" class="w-full mt-2" on:click={checkForAllUpdates} disabled={!!$progress || $updateCheckInProgress}>
   <Label>
-    Check for updates
+    {#if $updateCheckInProgress}
+      Checking for updates...
+    {:else}
+      Check for updates
+    {/if}
   </Label>
   <div class="grow" />
   <SvgIcon icon={mdiSync} class="h-5 w-5 {$updateCheckInProgress ? 'update-check' : ''}" />
