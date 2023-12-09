@@ -95,6 +95,14 @@
       SetAnnouncementViewed(announcement.id);
     }
   }
+
+  function goOnline() {
+    $offline = false;
+  }
+
+  function goOffline() {
+    $offline = true;
+  }
 </script>
 
 {#if $offline}
@@ -102,12 +110,12 @@
     <Announcement announcement={offlineAnnouncement}>
       <div class="flex pr-2">
         <span>{offlineAnnouncement.message}</span>
-        <span on:click={() => $offline = false} class="text-yellow-400 font-bold underline cursor-pointer ml-auto">Go Online</span>
+        <span on:click={goOnline} on:keypress={goOnline} role="button" tabindex="0" class="text-yellow-400 font-bold underline cursor-pointer ml-auto">Go Online</span>
       </div>
     </Announcement>
   </div>
 {:else if announcements.length > 0}
-  <div class="w-full" on:mouseenter={() => hovered = true} on:mouseleave={() => hovered = false}>
+  <div class="w-full" on:mouseenter={() => hovered = true} on:mouseleave={() => hovered = false} role="alert">
     <Carousel
       autoplayDuration={hovered ? 1e100 : 5000}
       duration={300}
@@ -124,7 +132,7 @@
               {#if announcement.id === '__healthcheck__'}
                 <div class="flex pr-2">
                   <span>{announcement.message}</span>
-                  <span on:click={() => $offline = true} class="text-yellow-400 font-bold underline cursor-pointer ml-auto">Go Offline</span>
+                  <span on:click={goOffline} on:keypress={goOffline} role="button" tabindex="0" class="text-yellow-400 font-bold underline cursor-pointer ml-auto">Go Offline</span>
                 </div>
               {:else}
                 {announcement.message}

@@ -128,7 +128,7 @@
         <img
           src="/images/launch/cat/bg.png"
           draggable="false"
-          alt="Nyan background"
+          alt="Space background"
         >
         <img
           src="/images/launch/cat/cat_full.png"
@@ -136,7 +136,7 @@
           style:left={`calc(-480px + ${catPosition * 87}%)`}
           draggable="false"
           on:mousedown={catMouseDown}
-          alt="Nyan"
+          alt="Cat"
         >
       </div>
     {:else if $launchButton === 'button' }

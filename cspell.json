@@ -12,7 +12,13 @@
         "golangci",
         "graphqlrc",
         "Konami",
+        "Maximised",
+        "Minimised",
+        "Nyan",
+        "smmanager",
+        "smmprofile",
         "SMUI",
+        "Unexpand",
         "urql",
         "wailsjs"
     ],
