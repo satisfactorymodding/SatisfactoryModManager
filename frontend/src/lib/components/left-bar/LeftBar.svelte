@@ -308,7 +308,7 @@
   <div class="flex flex-col mt-8">
     <span class="pl-4">Other</span>
     <Settings />
-    <Button variant="unelevated" class="w-full mt-2">
+    <Button variant="unelevated" class="w-full mt-2" on:click={() => BrowserOpenURL('https://docs.ficsit.app/satisfactory-modding/latest/ForUsers/SatisfactoryModManager.html')}>
       <Label>
         Help
       </Label>
