@@ -280,7 +280,11 @@
           <div class="grow w-0 lg:text-base text-sm">
             <div class="truncate text-base md:text-sm block md:hidden">{'short_description' in mod ? mod.short_description : ''}</div>
             <div class="truncate hidden md:block">
-              {#if !('offline' in mod) && !('missing' in mod)}
+              {#if !('offline' in mod) && !('missing' in mod) && (mod?.tags?.length ?? -1 > 0 )}
+                <div class="flex inline-flex items-center justify-items-center lg:w-4 w-3">
+                  <!-- TODO this icon is not vertically centered -->
+                  <SvgIcon icon={mdiTagMultiple} class=""/>
+                </div>
                 {#each mod?.tags ?? [] as tag}
                   <span class="pr-1">#{tag.name}</span>
                 {/each}
