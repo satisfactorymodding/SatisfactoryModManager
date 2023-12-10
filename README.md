@@ -3,6 +3,8 @@
 Mod manager for [Satisfactory](https://www.satisfactorygame.com/).
 Handles all the steps of installing mods for you.
 
+Implemented in [Wails](https://wails.io/).
+
 ## Installation and Usage
 
 Check the [modding documentation](https://docs.ficsit.app/satisfactory-modding/latest/index.html#_for_users)
@@ -38,7 +40,7 @@ for common issues and their solutions.
 * [Go 1.21](https://go.dev/doc/install)
 * [pnpm](https://pnpm.io/installation)
 * [nodejs](https://nodejs.org/en/download/)
-* wails (`go install github.com/wailsapp/wails/v2/cmd/wails@latest`)
+* Wails (`go install github.com/wailsapp/wails/v2/cmd/wails@latest`)
 * IDE of Choice. Goland or VSCode suggested.
 
 ### Configuration
