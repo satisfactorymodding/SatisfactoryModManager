@@ -2,7 +2,7 @@
   import Tooltip, { Wrapper } from '@smui/tooltip';
   import Button, { Label } from '@smui/button';
   import { getContextClient } from '@urql/svelte';
-  import { mdiCheckCircleOutline, mdiOpenInNew } from '@mdi/js';
+  import { mdiOpenInNew, mdiTrayFull } from '@mdi/js';
 
   import { selectedInstall, isGameRunning, lockfileMods, progress } from '$lib/store/ficsitCLIStore';
   import { queuedMods, startQueue } from '$lib/store/actionQueue';
@@ -106,7 +106,7 @@
       <Button variant="unelevated" class="h-12 w-full launch-game error" on:click={() => startQueue()}>
         <Label>Apply {$queuedMods.length} changes</Label>
         <div class="grow" />
-        <SvgIcon icon={ mdiCheckCircleOutline }/>
+        <SvgIcon icon={ mdiTrayFull }/>
       </Button>
     {:else if !isInstallLaunchable}    
       <Button variant="unelevated" class="h-12 w-full launch-game bg-grey-500" disabled>

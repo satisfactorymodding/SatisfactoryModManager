@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { mdiDownload, mdiEye, mdiStar, mdiCheckCircle, mdiPlay, mdiPause, mdiTrashCan, mdiTrayFull, mdiTrayMinus, mdiSync } from '@mdi/js';
+  import { mdiDownload, mdiEye, mdiStar, mdiPlay, mdiPause, mdiTrashCan, mdiTrayFull, mdiTrayMinus, mdiSync, mdiLinkLock, mdiArchiveCheck, mdiPauseCircle, mdiPlayCircle, mdiStarMinus, mdiStarPlus, mdiStarOutline } from '@mdi/js';
   import { createEventDispatcher } from 'svelte';
   import Button from '@smui/button';
   import LinearProgress from '@smui/linear-progress';
@@ -20,6 +20,13 @@
   import { markdown } from '$lib/utils/markdown';
   
   export let mod: PartialMod;
+
+  interface ButtonDisplay {
+    icon: string;
+    iconHover: string;
+    tooltip: string;
+    tooltipHtml?: string;
+  }
 
   const client = getContextClient();
 
@@ -47,61 +54,112 @@
   $: queuedInstall = $queuedMods.some((q) => q.mod === mod.mod_reference && (q.action === 'install' || q.action === 'remove'));
   $: queuedEnable = $queuedMods.some((q) => q.mod === mod.mod_reference && (q.action === 'enable' || q.action === 'disable'));
   
-  $: installButtonIcon = (() => {
+  $: installButtonDisplay = ((): ButtonDisplay => {
     if (isDependency) {
-      return mdiCheckCircle;
+      return {
+        icon: mdiLinkLock,
+        iconHover: mdiLinkLock,
+        tooltip: 'This mod is installed a dependency of another mod. It cannot be installed or removed on its own.',
+      };
     }
     if (inProgress) {
-      return mdiSync;
+      return {
+        icon: mdiSync,
+        iconHover: mdiSync,
+        tooltip: 'Wait for the current operation to complete.',
+      };
     }
     if (queuedInstall) {
-      return mdiTrayFull;
+      return {
+        icon: mdiTrayFull,
+        iconHover: mdiTrayMinus,
+        tooltip: isInstalled ?
+          'This mod is queued to be uninstalled. Click to cancel the operation.' :
+          'This mod is queued to be installed. Click to cancel the operation.',
+      };
+    }
+
+    let display: ButtonDisplay = {
+      icon: mdiDownload,
+      iconHover: mdiDownload,
+      tooltip: 'Click to install this mod.',
     }
     if (isInstalled) {
-      return mdiCheckCircle;
+      display = {
+        icon: mdiArchiveCheck,
+        iconHover: mdiTrashCan,
+        tooltip: 'This mod is installed on this profile. Click to uninstall it.',
+      };
+    } else if (compatibility.state !== CompatibilityState.Works) {
+      if (installButtonDisabled) {
+        display.tooltip = `You can't install this mod. Reason:`;
+      } else {
+        display.tooltip = `There are problems reported with this mod, but you can try to install it anyways. Details:`;
+      }
+      if (compatibility.note) {
+        display.tooltipHtml = '<br/>' + compatibility.note;
+      } else {
+        // TODO compatibility.note should always be non-null here, what should our fallback text be if it's not?
+        display.tooltip += ' (None specified)';
+      }
     }
-    return mdiDownload;
-  })();
-  
-  $: installButtonIconHover = (() => {
-    if (isDependency) {
-      return mdiCheckCircle;
+    if (queued) {
+      display.tooltip = "This mod is already queued for another operation.";
+      delete display.tooltipHtml;
     }
-    if (inProgress) {
-      return mdiSync;
-    }
-    if (queuedInstall) {
-      return mdiTrayMinus;
-    }
-    if (isInstalled) {
-      return mdiTrashCan;
-    }
-    return mdiDownload;
-  })();
-  
-  $: enableButtonIcon = (() => {
-    if (queuedEnable) {
-      return mdiTrayFull;
-    }
-    if (isEnabled) {
-      return mdiPlay;
-    }
-    return mdiPause;
-  })();
-  
-  $: enableButtonIconHover = (() => {
-    if (queuedEnable) {
-      return mdiTrayMinus;
-    }
-    if (isEnabled) {
-      return mdiPause;
-    }
-    return mdiPlay;
+    return display;
   })();
 
-  $: buttonDisabled = isDependency || (compatibility.state === CompatibilityState.Broken && compatibility.source === 'version' && !isInstalled);
+  $: enableButtonDisplay = ((): ButtonDisplay => {
+    if (queuedEnable) {
+      return {
+        icon: mdiTrayFull,
+        iconHover: mdiTrayMinus,
+        tooltip: isEnabled ?
+          'This mod is queued to be Paused. Click to cancel the operation.' :
+          'This mod is queued to be Resumed. Click to cancel the operation.',
+      };
+    }
+
+    let display: ButtonDisplay = {
+      icon: mdiPause,
+      iconHover: mdiPlayCircle,
+      tooltip: 'This mod is Paused on this profile. Click to Resume it.',
+    };
+    if (isEnabled) {
+      display = {
+        icon: mdiPlay,
+        iconHover: mdiPauseCircle,
+        tooltip: 'This mod is Enabled on this profile. Click to Pause it, which prevents it from loading when you start the game, but still keeps it a part of this profile.',
+      };
+    }
+    if (queued) {
+      display.tooltip = "This mod is already queued for another operation.";
+    }
+    return display;
+  })();
+
+  $: controlButtonsDisabled = isDependency || (compatibility.state === CompatibilityState.Broken && compatibility.source === 'version' && !isInstalled);
+  $: installButtonDisabled = controlButtonsDisabled || queuedEnable || inProgress;
+  $: enableButtonDisabled = controlButtonsDisabled || queuedInstall || inProgress;
 
   $: isFavorite = $favoriteMods.includes(mod.mod_reference);
+
+  $: favoriteButtonDisplay = ((): ButtonDisplay => {
+    if (isFavorite) {
+      return {
+        icon: mdiStar,
+        iconHover: mdiStarMinus,
+        tooltip: 'This mod is Favorited. Click to remove it from your favorites.',
+      };
+    }
+    return {
+      icon: mdiStarOutline,
+      iconHover: mdiStarPlus,
+      tooltip: 'Click to add this mod to your Favorites.',
+      tooltipHtml: "Having a mod Favorited is unrelated to whether or not it's installed - it's a way to keep track of a mod for later regardless of what Profile you have selected."
+    };
+  })();
 
   let compatibility: CompatibilityWithSource = { state: CompatibilityState.Works, source: 'reported' };
   $: {
@@ -212,7 +270,7 @@
         </div>
         {#if isInstalled && !isEnabled}
           <Tooltip surface$class="max-w-lg text-base">
-            This mod is disabled. Press the pause icon to enable it. 
+            This mod is Paused. Press the pause icon to enable it. 
           </Tooltip>
         {:else if compatibility.state !== CompatibilityState.Works}
           <Tooltip surface$class="max-w-lg text-base">
@@ -252,39 +310,73 @@
     </div>
     <!-- The purpose of the event handlers here are to prevent navigating to the mod's page when clicking on one of the sub-buttons of the div. Thus, it shouldn't be focusable despite having "interactions" -->
     <!-- svelte-ignore a11y-no-noninteractive-element-interactions a11y-click-events-have-key-events -->
-    <div class="pr-2 flex h-full items-center" role="separator" tabindex="-1" on:click|stopPropagation={() => { /* empty */ }} on:keypress|stopPropagation={() => { /* empty */ }}>.
+    <div class="pr-2 flex h-full items-center" role="separator" tabindex="-1" on:click|stopPropagation={() => { /* empty */ }} on:keypress|stopPropagation={() => { /* empty */ }}>
       {#if isInstalled && !isDependency}
-        <Button
-          on:click={ toggleModEnabled }
-          disabled={buttonDisabled || queuedInstall || inProgress}
-          ripple={false}
-          variant="text"
-          class="min-w-0 w-12 h-12 mod-enable-button {isEnabled || queued ? 'enabled' : ''} group"
-        >
-          <SvgIcon icon={enableButtonIcon} class="!p-1 !m-0 !w-full !h-full group-hover:!hidden"/>
-          <SvgIcon icon={enableButtonIconHover} class="!p-1 !m-0 !w-full !h-full group-hover:!inline-block !hidden"/>
-        </Button>
+        <Wrapper>
+          <!-- Div required so a tooltip can still be displayed on a disabled button -->
+          <div>
+            <Button
+              on:click={toggleModEnabled}
+              disabled={enableButtonDisabled}
+              ripple={false}
+              variant="text"
+              class="min-w-0 w-12 h-12 mod-enable-button {isEnabled || queued ? 'enabled' : ''} group"
+            >
+              <SvgIcon icon={enableButtonDisplay.icon} class="!p-1 !m-0 !w-full !h-full group-hover:!hidden"/>
+              <SvgIcon icon={enableButtonDisplay.iconHover} class="!p-1 !m-0 !w-full !h-full group-hover:!inline-block !hidden"/>
+            </Button>
+          </div>
+          <Tooltip surface$class="max-w-lg text-base">
+            {enableButtonDisplay.tooltip}
+            {#if enableButtonDisplay.tooltipHtml}
+              <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+              { @html enableButtonDisplay.tooltipHtml }
+            {/if}
+          </Tooltip>
+        </Wrapper>
       {:else}
         <div class="min-w-0 w-12 h-12"/>
       {/if}
-      <Button
-        on:click={toggleModInstalled}
-        variant="text"
-        disabled={buttonDisabled || queuedEnable || inProgress}
-        ripple={false}
-        class="min-w-0 w-12 h-12 mod-install-button {isInstalled || queued ? 'installed' : ''} group"
-      >
-        <SvgIcon icon={installButtonIcon} class="!p-1 !m-0 !w-full !h-full group-hover:!hidden"/>
-        <SvgIcon icon={installButtonIconHover} class="!p-1 !m-0 !w-full !h-full group-hover:!inline-block !hidden"/>
-      </Button>
-      <Button
-        on:click={toggleModFavorite}
-        variant="text"
-        ripple={false}
-        class="min-w-0 w-12 h-12 mod-favorite-button {isFavorite ? 'favorite' : ''}"
-      >
-        <SvgIcon icon={ mdiStar } class="!p-1 !m-0 !w-full !h-full"/>
-      </Button>
+      <Wrapper>
+        <!-- Div required so a tooltip can still be displayed on a disabled button -->
+        <div>
+          <Button
+            on:click={toggleModInstalled}
+            disabled={installButtonDisabled}
+            ripple={false}
+            variant="text"
+            class="min-w-0 w-12 h-12 mod-install-button {isInstalled || queued ? 'installed' : ''} group"
+          >
+            <SvgIcon icon={installButtonDisplay.icon} class="!p-1 !m-0 !w-full !h-full group-hover:!hidden"/>
+            <SvgIcon icon={installButtonDisplay.iconHover} class="!p-1 !m-0 !w-full !h-full group-hover:!inline-block !hidden"/>
+          </Button>
+        </div>
+        <Tooltip surface$class="max-w-lg text-base">
+          {installButtonDisplay.tooltip}
+          {#if installButtonDisplay.tooltipHtml}
+            <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+            { @html installButtonDisplay.tooltipHtml }
+          {/if}
+        </Tooltip>
+      </Wrapper>
+      <Wrapper>
+        <Button
+          on:click={toggleModFavorite}
+          ripple={false}
+          variant="text"
+          class="min-w-0 w-12 h-12 mod-favorite-button {isFavorite ? 'favorite' : ''} group"
+        >
+        <SvgIcon icon={favoriteButtonDisplay.icon} class="!p-1 !m-0 !w-full !h-full group-hover:!hidden"/>
+        <SvgIcon icon={favoriteButtonDisplay.iconHover} class="!p-1 !m-0 !w-full !h-full group-hover:!inline-block !hidden"/>
+        </Button>
+        <Tooltip surface$class="max-w-lg text-base">
+          {favoriteButtonDisplay.tooltip}
+          {#if favoriteButtonDisplay.tooltipHtml}
+            <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+            { @html favoriteButtonDisplay.tooltipHtml }
+          {/if}
+        </Tooltip>
+      </Wrapper>
     </div>
   </div>
 </div>
