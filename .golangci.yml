@@ -33,6 +33,12 @@ linters-settings:
       - blank
       - dot
 
+issues:
+  exclude-rules:
+    - linters:
+        - typecheck
+      text: "no matching files found"
+
 run:
   skip-dirs:
     - frontend
