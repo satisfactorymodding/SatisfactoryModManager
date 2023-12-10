@@ -1,8 +1,10 @@
 <script lang="ts">
-  import Button from "@smui/button";
-  import Tooltip, { Wrapper } from "@smui/tooltip";
-  import SvgIcon from "./SVGIcon.svelte";
-  import type { ButtonDisplay } from "$lib/utils/responsiveButton";
+  import Button from '@smui/button';
+  import Tooltip, { Wrapper } from '@smui/tooltip';
+
+  import SvgIcon from './SVGIcon.svelte';
+
+  import type { ButtonDisplay } from '$lib/utils/responsiveButton';
 
   export let display: ButtonDisplay;
   export let onClickAction: () => void;

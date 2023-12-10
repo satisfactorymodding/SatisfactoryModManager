@@ -2,6 +2,7 @@
   import { getContextClient } from '@urql/svelte';
   import _ from 'lodash';
   import Fuse from 'fuse.js';
+  import { createEventDispatcher } from 'svelte';
 
   import AnnouncementsBar from '../announcements/AnnouncementsBar.svelte';
 
@@ -16,7 +17,6 @@
   import { offline, startView } from '$lib/store/settingsStore';
   import { expandedMod } from '$lib/store/generalStore';
   import { OfflineGetMods } from '$wailsjs/go/ficsitcli/FicsitCLI';
-    import { createEventDispatcher } from 'svelte';
 
   const dispatch = createEventDispatcher();
 

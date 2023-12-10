@@ -1,7 +1,6 @@
 <script lang="ts">
   import { mdiDownload, mdiEye, mdiStar, mdiPlay, mdiPause, mdiTrashCan, mdiTrayFull, mdiTrayMinus, mdiSync, mdiLinkLock, mdiArchiveCheck, mdiPauseCircle, mdiPlayCircle, mdiStarMinus, mdiStarPlus, mdiStarOutline, mdiTagMultiple } from '@mdi/js';
   import { createEventDispatcher } from 'svelte';
-  import Button from '@smui/button';
   import LinearProgress from '@smui/linear-progress';
   import Tooltip, { Wrapper } from '@smui/tooltip';
   import { getContextClient } from '@urql/svelte';
@@ -19,7 +18,7 @@
   import { CompatibilityState } from '$lib/generated';
   import { markdown } from '$lib/utils/markdown';
   import type { ButtonDisplay } from '$lib/utils/responsiveButton';
-  import ResponsiveButton from '../ResponsiveButton.svelte';
+  import ResponsiveButton from '$lib/components/ResponsiveButton.svelte';
 
   export let mod: PartialMod;
 
@@ -32,8 +31,8 @@
   }
 
   $: authorClick = () => {
-    $search = `author:"${author}"`
-  }
+    $search = `author:"${author}"`;
+  };
 
   export let selected: boolean;
 
@@ -70,7 +69,7 @@
         iconHover: mdiTrayMinus,
         tooltip: isInstalled ?
           'This mod is queued to be uninstalled. Click to cancel the operation.' :
-          'This mod is queued to be installed. Click to cancel the operation.',
+            'This mod is queued to be installed. Click to cancel the operation.',
       };
     }
 
@@ -78,7 +77,7 @@
       icon: mdiDownload,
       iconHover: mdiDownload,
       tooltip: 'Click to install this mod.',
-    }
+    };
     if (isInstalled) {
       display = {
         icon: mdiArchiveCheck,
@@ -87,9 +86,9 @@
       };
     } else if (compatibility.state !== CompatibilityState.Works) {
       if (installButtonDisabled) {
-        display.tooltip = `You can't install this mod. Reason:`;
+        display.tooltip = 'You can\'t install this mod. Reason:';
       } else {
-        display.tooltip = `There are problems reported with this mod, but you can try to install it anyways. Details:`;
+        display.tooltip = 'There are problems reported with this mod, but you can try to install it anyways. Details:';
       }
       if (compatibility.note) {
         display.tooltipHtml = '<br/>' + compatibility.note;
@@ -99,7 +98,7 @@
       }
     }
     if (queued) {
-      display.tooltip = "This mod is already queued for another operation.";
+      display.tooltip = 'This mod is already queued for another operation.';
       delete display.tooltipHtml;
     }
     return display;
@@ -112,7 +111,7 @@
         iconHover: mdiTrayMinus,
         tooltip: isEnabled ?
           'This mod is queued to be Paused. Click to cancel the operation.' :
-          'This mod is queued to be Resumed. Click to cancel the operation.',
+            'This mod is queued to be Resumed. Click to cancel the operation.',
       };
     }
 
@@ -129,7 +128,7 @@
       };
     }
     if (queued) {
-      display.tooltip = "This mod is already queued for another operation.";
+      display.tooltip = 'This mod is already queued for another operation.';
     }
     return display;
   })();
@@ -152,7 +151,7 @@
       icon: mdiStarOutline,
       iconHover: mdiStarPlus,
       tooltip: 'Click to add this mod to your Favorites.',
-      tooltipHtml: "Having a mod Favorited is unrelated to whether or not it's installed - it's a way to keep track of a mod for later regardless of what Profile you have selected."
+      tooltipHtml: 'Having a mod Favorited is unrelated to whether or not it\'s installed - it\'s a way to keep track of a mod for later regardless of what Profile you have selected.',
     };
   })();
 
@@ -314,7 +313,7 @@
       </div>
     </div>
     <!-- The purpose of the event handlers here are to prevent navigating to the mod's page when clicking on one of the sub-buttons of the div. Thus, it shouldn't be focusable despite having "interactions" -->
-    <!-- svelte-ignore a11y-no-noninteractive-element-interactions a11y-click-events-have-key-events -->
+    <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
     <div class="pr-2 flex h-full items-center" role="separator" tabindex="-1" on:click|stopPropagation={() => { /* empty */ }} on:keypress|stopPropagation={() => { /* empty */ }}>
       <ResponsiveButton
         display={enableButtonDisplay}

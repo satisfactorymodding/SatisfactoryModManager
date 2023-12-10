@@ -185,8 +185,8 @@
   }
 
   $: authorClick = () => {
-    $search = `author:"${author}"`
-  }
+    $search = `author:"${author}"`;
+  };
 
   // Does not need offline support, since descriptions are disabled in offline mode
   function handleElementClick(element: HTMLElement) {
@@ -411,8 +411,8 @@
     {:else if descriptionRendered}
       <!-- Intercepting mouse clicks for the link interrupter also seems to work for pressing Enter on the keyboard without a specific key handler added -->
       <!-- svelte-ignore a11y-no-noninteractive-element-interactions a11y-click-events-have-key-events -->
-      <!-- eslint-disable-next-line svelte/no-at-html-tags -->
       <p on:click={handleDescriptionClick} role="article">
+        <!-- eslint-disable-next-line svelte/no-at-html-tags -->
         {@html descriptionRendered}
       </p>
     {:else}
