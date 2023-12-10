@@ -34,12 +34,19 @@
     </div>
   </div>
 
+  <!-- System level keybinds can be used instead -->
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div class="hover:bg-gray-500 p-1.5 w-11 cursor-default grid justify-center items-center h-full" on:click={minimize}>
     <SvgIcon icon={mdiWindowMinimize} class="w-full h-full"/>
   </div>
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div class="hover:bg-gray-500 p-1.5 w-11 cursor-default grid justify-center items-center h-full" on:click={toggleMaximize}>
     <SvgIcon icon={isMaximized ? mdiWindowRestore : mdiWindowMaximize} class="w-full h-full"/>
   </div>
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div class="hover:bg-red-600 p-1.5 w-11 cursor-default grid justify-center items-center h-full" on:click={close}>
     <SvgIcon icon={mdiWindowClose} class="w-full h-full"/>
   </div>
