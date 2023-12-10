@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { mdiDownload, mdiEye, mdiStar, mdiPlay, mdiPause, mdiTrashCan, mdiTrayFull, mdiTrayMinus, mdiSync, mdiLinkLock, mdiArchiveCheck, mdiPauseCircle, mdiPlayCircle, mdiStarMinus, mdiStarPlus, mdiStarOutline } from '@mdi/js';
+  import { mdiDownload, mdiEye, mdiStar, mdiPlay, mdiPause, mdiTrashCan, mdiTrayFull, mdiTrayMinus, mdiSync, mdiLinkLock, mdiArchiveCheck, mdiPauseCircle, mdiPlayCircle, mdiStarMinus, mdiStarPlus, mdiStarOutline, mdiTagMultiple } from '@mdi/js';
   import { createEventDispatcher } from 'svelte';
   import Button from '@smui/button';
   import LinearProgress from '@smui/linear-progress';
@@ -18,15 +18,10 @@
   import type { GameBranch } from '$lib/wailsTypesExtensions';
   import { CompatibilityState } from '$lib/generated';
   import { markdown } from '$lib/utils/markdown';
-  
-  export let mod: PartialMod;
+  import type { ButtonDisplay } from '$lib/utils/responsiveButton';
+  import ResponsiveButton from '../ResponsiveButton.svelte';
 
-  interface ButtonDisplay {
-    icon: string;
-    iconHover: string;
-    tooltip: string;
-    tooltipHtml?: string;
-  }
+  export let mod: PartialMod;
 
   const client = getContextClient();
 
@@ -295,10 +290,16 @@
             <div class="flex h-5 md:h-4.5">
               {#if !('offline' in mod) && !('missing' in mod)}
                 <div class="w-24 flex items-center">
-                  <div class="pr-1 inline-flex items-center justify-items-center lg:w-7 w-6"><SvgIcon icon={mdiEye} class=""/></div><span>{mod.views.toLocaleString()}</span>
+                  <div class="pr-1 inline-flex items-center justify-items-center lg:w-7 w-6">
+                    <SvgIcon icon={mdiEye} class=""/>
+                  </div>
+                  <span>{mod.views.toLocaleString()}</span>
                 </div>
                 <div class="w-24 flex items-center">
-                  <div class="pr-1 inline-flex items-center justify-items-center lg:w-7 w-6"><SvgIcon icon={mdiDownload} class=""/></div><span>{mod.downloads.toLocaleString()}</span>
+                  <div class="pr-1 inline-flex items-center justify-items-center lg:w-7 w-6">
+                    <SvgIcon icon={mdiDownload} class=""/>
+                  </div>
+                  <span>{mod.downloads.toLocaleString()}</span>
                 </div>
               {/if}
             </div>
@@ -311,72 +312,24 @@
     <!-- The purpose of the event handlers here are to prevent navigating to the mod's page when clicking on one of the sub-buttons of the div. Thus, it shouldn't be focusable despite having "interactions" -->
     <!-- svelte-ignore a11y-no-noninteractive-element-interactions a11y-click-events-have-key-events -->
     <div class="pr-2 flex h-full items-center" role="separator" tabindex="-1" on:click|stopPropagation={() => { /* empty */ }} on:keypress|stopPropagation={() => { /* empty */ }}>
-      {#if isInstalled && !isDependency}
-        <Wrapper>
-          <!-- Div required so a tooltip can still be displayed on a disabled button -->
-          <div>
-            <Button
-              on:click={toggleModEnabled}
-              disabled={enableButtonDisabled}
-              ripple={false}
-              variant="text"
-              class="min-w-0 w-12 h-12 mod-enable-button {isEnabled || queued ? 'enabled' : ''} group"
-            >
-              <SvgIcon icon={enableButtonDisplay.icon} class="!p-1 !m-0 !w-full !h-full group-hover:!hidden"/>
-              <SvgIcon icon={enableButtonDisplay.iconHover} class="!p-1 !m-0 !w-full !h-full group-hover:!inline-block !hidden"/>
-            </Button>
-          </div>
-          <Tooltip surface$class="max-w-lg text-base">
-            {enableButtonDisplay.tooltip}
-            {#if enableButtonDisplay.tooltipHtml}
-              <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-              { @html enableButtonDisplay.tooltipHtml }
-            {/if}
-          </Tooltip>
-        </Wrapper>
-      {:else}
-        <div class="min-w-0 w-12 h-12"/>
-      {/if}
-      <Wrapper>
-        <!-- Div required so a tooltip can still be displayed on a disabled button -->
-        <div>
-          <Button
-            on:click={toggleModInstalled}
-            disabled={installButtonDisabled}
-            ripple={false}
-            variant="text"
-            class="min-w-0 w-12 h-12 mod-install-button {isInstalled || queued ? 'installed' : ''} group"
-          >
-            <SvgIcon icon={installButtonDisplay.icon} class="!p-1 !m-0 !w-full !h-full group-hover:!hidden"/>
-            <SvgIcon icon={installButtonDisplay.iconHover} class="!p-1 !m-0 !w-full !h-full group-hover:!inline-block !hidden"/>
-          </Button>
-        </div>
-        <Tooltip surface$class="max-w-lg text-base">
-          {installButtonDisplay.tooltip}
-          {#if installButtonDisplay.tooltipHtml}
-            <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-            { @html installButtonDisplay.tooltipHtml }
-          {/if}
-        </Tooltip>
-      </Wrapper>
-      <Wrapper>
-        <Button
-          on:click={toggleModFavorite}
-          ripple={false}
-          variant="text"
-          class="min-w-0 w-12 h-12 mod-favorite-button {isFavorite ? 'favorite' : ''} group"
-        >
-        <SvgIcon icon={favoriteButtonDisplay.icon} class="!p-1 !m-0 !w-full !h-full group-hover:!hidden"/>
-        <SvgIcon icon={favoriteButtonDisplay.iconHover} class="!p-1 !m-0 !w-full !h-full group-hover:!inline-block !hidden"/>
-        </Button>
-        <Tooltip surface$class="max-w-lg text-base">
-          {favoriteButtonDisplay.tooltip}
-          {#if favoriteButtonDisplay.tooltipHtml}
-            <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-            { @html favoriteButtonDisplay.tooltipHtml }
-          {/if}
-        </Tooltip>
-      </Wrapper>
+      <ResponsiveButton
+        display={enableButtonDisplay}
+        disabled={enableButtonDisabled}
+        onClickAction={toggleModEnabled}
+        class={'mod-enable-button ' + (isEnabled || queued ? 'enabled' : '')}
+        visible={isInstalled && !isDependency}
+      />
+      <ResponsiveButton
+        display={installButtonDisplay}
+        disabled={installButtonDisabled}
+        onClickAction={toggleModInstalled}
+        class={'mod-install-button ' + (isInstalled || queued ? 'installed' : '')}
+      />
+      <ResponsiveButton
+        display={favoriteButtonDisplay}
+        onClickAction={toggleModFavorite}
+        class={'mod-favorite-button ' + (isFavorite ? 'favorite' : '')}
+      />
     </div>
   </div>
 </div>
