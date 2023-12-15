@@ -54,7 +54,7 @@ $md: 825px;
 $lg: 900px;
 
 $left-bar-controls-background: $grey-darker;
-$left-bar-controls-height-sm: 27px;
+$left-bar-controls-height-sm: 30px;
 $left-bar-controls-height-md: 35px;
 $left-bar-controls-height-lg: 40px;
 
@@ -153,6 +153,15 @@ $left-bar-controls-height-lg: 40px;
     &.error {
       @include button.container-fill-color($red-normal);
     }
+  }
+}
+
+.mods-details {
+  .mdc-button {
+    @include button.height($left-bar-controls-height-md);
+    @media (min-height: $lg) {
+      @include button.height($left-bar-controls-height-lg);
+    };
   }
 }
 

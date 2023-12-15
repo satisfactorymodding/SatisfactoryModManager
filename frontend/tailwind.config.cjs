@@ -6,10 +6,12 @@ module.exports = {
   theme: {
     extend: {
       screens: {
-        md: { raw: '(min-height: 825px)' },
-        lg: { raw: '(min-height: 900px)' },
-        'w-md': { raw: '(min-width: 1500px)' },
+        'h-md': { raw: '(min-height: 825px)' },
+        'h-lg': { raw: '(min-height: 900px)' },
       },
     },
   },
+  plugins: [
+    require('@tailwindcss/container-queries'),
+  ],
 };

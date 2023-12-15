@@ -91,16 +91,18 @@
   {/if}
   <div class="flex grow h-0">
     <LeftBar />
-    <div class="grow w-1/2 min-w-[400px] md:min-w-[420px] lg:min-w-[445px] {$expandedMod ? 'max-w-[600px]' : ''}">
-      <ModsList on:expandedMod={() => {
-        focusOnEntry.focus();
-      }}/>
-    </div>
-    {#if $expandedMod}
-      <div class:grow={!pendingExpand} class:w-0={pendingExpand}>
-        <ModDetails bind:focusOnEntry/>
+    <div class="flex w-0 grow">
+      <div class="{$expandedMod ? 'max-w-[600px]' : ''} w-2/5 grow">
+        <ModsList on:expandedMod={() => {
+          focusOnEntry.focus();
+        }}/>
       </div>
-    {/if}
+      {#if $expandedMod}
+        <div class:grow={!pendingExpand} class="{pendingExpand ? 'w-0' : 'w-3/5'}">
+          <ModDetails bind:focusOnEntry/>
+        </div>
+      {/if}
+    </div>
   </div>
 </div>
 

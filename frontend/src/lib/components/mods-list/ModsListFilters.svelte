@@ -10,19 +10,9 @@
   
   let inputA: Input;
   let lineRippleA: LineRipple;
-
-  let container!: HTMLDivElement;
-
-  let compact = false;
-
-  $: if(container) {
-    new ResizeObserver(() => {
-      compact = container.clientWidth < 500;
-    }).observe(container);
-  }
 </script>
 
-<div class="px-5 py-2 flex" bind:this={container}>
+<div class="px-5 py-2 flex @container/mod-list-filters">
   <div class="grow mr-2">
     <Textfield
       bind:input={inputA}
@@ -40,15 +30,15 @@
       <LineRipple bind:this={lineRippleA} slot="ripple" />
     </Textfield>
   </div>
-  <div class="flex grow shrink-0" class:min-w-[140px]={compact} class:min-w-[24rem]={!compact} class:w-0={compact}>
+  <div class="flex grow shrink-0 min-w-[140px] w-0 @lg/mod-list-filters:min-w-[24rem]">
     <Select
-      class="control-area-input {compact ? 'w-20' : 'w-1/2'} pr-0.5"
+      class="control-area-input w-20 @lg/mod-list-filters:w-1/2 pr-0.5"
       variant="filled"
       bind:value={$filter}
       placeholder="Filter"
       ripple={false}
       selectedText$class="color-primary"
-      selectedTextContainer$class="{compact ? '!hidden' : ''}"
+      selectedTextContainer$class="!hidden @lg/mod-list-filters:!block"
       dropdownIcon$class="ml-0"
       anchor$class="!items-center w-0"
     >
@@ -62,13 +52,13 @@
       {/each}
     </Select>
     <Select
-      class="control-area-input {compact ? 'w-20' : 'w-1/2'} pl-0.5"
+      class="control-area-input w-20 @lg/mod-list-filters:w-1/2 pr-0.5"
       variant="filled"
       bind:value={$order}
       placeholder="Order by"
       ripple={false}
       selectedText$class="color-primary"
-      selectedTextContainer$class="{compact ? '!hidden' : ''}"
+      selectedTextContainer$class="!hidden @lg/mod-list-filters:!block"
       dropdownIcon$class="ml-0"
       anchor$class="!items-center w-0"
     >

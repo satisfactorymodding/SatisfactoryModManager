@@ -244,7 +244,7 @@
       </Button>
     </div>
   </div>
-  <div class="flex flex-col mt-8">
+  <div class="flex flex-col mt-4 h-md:mt-8">
     <span class="pl-4">Profile</span>
     <Select
       variant="filled"
@@ -301,11 +301,11 @@
       </Button>
     </div>
   </div>
-  <div class="flex flex-col mt-8">
+  <div class="flex flex-col mt-4 h-md:mt-8">
     <span class="pl-4">Updates</span>
     <Updates />
   </div>
-  <div class="flex flex-col mt-8">
+  <div class="flex flex-col mt-4 h-md:mt-8">
     <span class="pl-4">Other</span>
     <Settings />
     <Button variant="unelevated" class="w-full mt-2" on:click={() => BrowserOpenURL('https://docs.ficsit.app/satisfactory-modding/latest/ForUsers/SatisfactoryModManager.html')}>
@@ -316,7 +316,7 @@
       <SvgIcon icon={mdiHelpCircle} class="h-5 w-5" />
     </Button>
   </div>
-  <div class="flex flex-col mt-8">
+  <div class="flex flex-col mt-4 h-md:mt-8">
     <span class="pl-4">Links</span>
     <Button variant="unelevated" class="w-full mt-2" on:click={() => BrowserOpenURL($siteURL)}>
       <Label>

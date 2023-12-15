@@ -242,21 +242,21 @@
   }
 </script>
 
-<div class="my-1 px-0 lg:h-24 md:h-[5.5rem] h-[4.25rem]" class:rounded-lg={selected} class:selected on:click={listingClick} on:keypress={listingClick} role="tab" tabindex="0">
+<div class="my-1 px-0 @lg/mods-list:h-24 @md/mods-list:h-[5.5rem] h-[4.25rem]" class:rounded-lg={selected} class:selected on:click={listingClick} on:keypress={listingClick} role="tab" tabindex="0">
   {#if inProgress}
     <div class="relative h-full">
       <LinearProgress progress={$progress?.progress} class="mod-progress-bar h-full rounded-lg"/>
     </div>
   {/if}
   <div class="flex relative h-full" class:-top-full={inProgress} class:disabled={isInstalled && !isEnabled}>
-    <img src={renderedLogo} alt="{mod.name} Logo" class="logo h-full lg:w-24 md:w-[5.5rem] w-[4.25rem]" />
+    <img src={renderedLogo} alt="{mod.name} Logo" class="logo h-full @lg/mods-list:w-24 @md/mods-list:w-[5.5rem] w-[4.25rem]" />
     <div class="ml-2 flex flex-col grow w-0">
       <Wrapper>
         <div class="flex items-center">
-          <div class="shrink min-w-0 truncate">
-            <span class="lg:text-xl text-lg font-medium min-w-0 w-full" class:error={compatibility.state === CompatibilityState.Broken} class:warning={compatibility.state === CompatibilityState.Damaged}>{mod.name}</span>
+          <div class="shrink min-w-[100px] truncate">
+            <span class="@lg/mods-list:text-xl text-lg font-medium min-w-0 w-full" class:error={compatibility.state === CompatibilityState.Broken} class:warning={compatibility.state === CompatibilityState.Damaged}>{mod.name}</span>
           </div>
-          <div class="shrink-0">
+          <div class="shrink-0 hidden @lg/mods-list:block truncate w-[100px] grow">
             <span class="pl-1">by</span>
             <!-- We could offer keyboard navigation for clicking this, but it's a waste of the user's time while nagivating via keyboard. If they want to search by author, they could enter the mod description pane -->
             <span class="color-primary whitespace-nowrap" on:click|stopPropagation={authorClick} on:keypress|stopPropagation={authorClick} role="button" tabindex="-1">{author}</span>
@@ -273,14 +273,14 @@
           </Tooltip>
         {/if}
       </Wrapper>
-      <div class="truncate md:text-base text-sm hidden md:block">{'short_description' in mod ? mod.short_description : ''}</div>
+      <div class="truncate @md/mods-list:text-base text-sm hidden @md/mods-list:block">{'short_description' in mod ? mod.short_description : ''}</div>
       <div class="flex">
         {#if !inProgress}
-          <div class="grow w-0 lg:text-base text-sm">
-            <div class="truncate text-base md:text-sm block md:hidden">{'short_description' in mod ? mod.short_description : ''}</div>
-            <div class="truncate hidden md:block">
+          <div class="grow w-0 @lg/mods-list:text-base text-sm">
+            <div class="truncate text-base @md/mods-list:text-sm block @md/mods-list:hidden">{'short_description' in mod ? mod.short_description : ''}</div>
+            <div class="truncate hidden @md/mods-list:block">
               {#if !('offline' in mod) && !('missing' in mod) && (mod?.tags?.length ?? -1 > 0 )}
-                <div class="flex inline-flex items-center justify-items-center lg:w-4 w-3">
+                <div class="flex inline-flex items-center justify-items-center @lg/mods-list:w-4 w-3">
                   <!-- TODO this icon is not vertically centered -->
                   <SvgIcon icon={mdiTagMultiple} class=""/>
                 </div>
@@ -290,16 +290,16 @@
               {/if}
               &nbsp; <!-- keep div height even when no tags are available -->
             </div>
-            <div class="flex h-5 md:h-4.5">
+            <div class="flex h-5 @md/mods-list:h-4.5">
               {#if !('offline' in mod) && !('missing' in mod)}
                 <div class="w-24 flex items-center">
-                  <div class="pr-1 inline-flex items-center justify-items-center lg:w-7 w-6">
+                  <div class="pr-1 inline-flex items-center justify-items-center @lg/mods-list:w-7 w-6">
                     <SvgIcon icon={mdiEye} class=""/>
                   </div>
                   <span>{mod.views.toLocaleString()}</span>
                 </div>
                 <div class="w-24 flex items-center">
-                  <div class="pr-1 inline-flex items-center justify-items-center lg:w-7 w-6">
+                  <div class="pr-1 inline-flex items-center justify-items-center @lg/mods-list:w-7 w-6">
                     <SvgIcon icon={mdiDownload} class=""/>
                   </div>
                   <span>{mod.downloads.toLocaleString()}</span>

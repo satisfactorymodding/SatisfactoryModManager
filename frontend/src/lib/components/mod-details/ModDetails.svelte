@@ -231,10 +231,10 @@
   }
 </script>
 
-<div class="h-full flex mods-details min-w-[545px] w-md:text-base text-sm">
-  <div class="px-4 py-4 flex flex-col h-full w-md:w-64 w-52 mods-details" style="border-right-color: rgba(239, 239, 239, 0.12);">
+<div class="@container/mod-details h-full flex mods-details w-full  @3xl/mod-details:text-base text-sm">
+  <div class="px-4 py-4 flex flex-col h-full @3xl/mod-details:w-64 w-52 mods-details" style="border-right-color: rgba(239, 239, 239, 0.12);">
     <img src={renderedLogo} alt="{mod?.name} Logo" class="logo w-full" />
-    <span class="pt-4 font-bold w-md:text-lg text-base">{mod?.name ?? 'Loading...'}</span>
+    <span class="pt-4 font-bold @3xl/mod-details:text-lg text-base">{mod?.name ?? 'Loading...'}</span>
     <span class="pt-2 font-light">A mod by:</span>
     <span bind:this={focusOnEntry} class="font-medium color-primary cursor-pointer" role="button" tabindex="0" on:click={authorClick} on:keypress={authorClick} >{author ?? 'Loading...'}</span>
     
