@@ -64,7 +64,7 @@ func main() {
 		log.Fatal().Err(err).Msg("Failed to create bindings")
 	}
 
-	windowStartState := options.Minimised
+	windowStartState := options.Normal
 	if settings.Settings.Maximized {
 		windowStartState = options.Maximised
 	}
