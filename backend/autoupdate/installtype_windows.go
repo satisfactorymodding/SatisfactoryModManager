@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/viper"
 	"golang.org/x/sys/windows/registry"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/autoupdate/updater/apply"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate/updater/apply"
 )
 
 func getInstallType() (string, apply.Apply) {

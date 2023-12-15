@@ -11,7 +11,7 @@ import (
 	"github.com/satisfactorymodding/ficsit-cli/utils"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/installfinders"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders"
 )
 
 func (f *FicsitCLI) validateInstall(installation *InstallationInfo, progressItem string) error {

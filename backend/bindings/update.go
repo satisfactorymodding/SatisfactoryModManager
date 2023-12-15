@@ -5,7 +5,7 @@ import (
 
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/autoupdate"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate"
 )
 
 type Update struct {

@@ -6,9 +6,9 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/autoupdate/updater"
-	"github.com/satisfactorymodding/SatisfactoryModManager/autoupdate/updater/apply"
-	"github.com/satisfactorymodding/SatisfactoryModManager/autoupdate/updater/source/github"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate/updater"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate/updater/apply"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate/updater/source/github"
 )
 
 var (

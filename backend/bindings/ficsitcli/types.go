@@ -3,7 +3,7 @@ package ficsitcli
 import (
 	"github.com/satisfactorymodding/ficsit-cli/cli"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/installfinders"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders"
 )
 
 type InstallationInfo struct {

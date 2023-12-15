@@ -10,9 +10,9 @@ import (
 	"github.com/spf13/viper"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/projectfile"
-	"github.com/satisfactorymodding/SatisfactoryModManager/settings"
-	"github.com/satisfactorymodding/SatisfactoryModManager/utils"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/projectfile"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/settings"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 )
 
 // App struct

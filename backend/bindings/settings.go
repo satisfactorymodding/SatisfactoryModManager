@@ -5,7 +5,7 @@ import (
 
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/settings"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/settings"
 )
 
 type Settings struct {

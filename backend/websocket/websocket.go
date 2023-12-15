@@ -8,7 +8,7 @@ import (
 	engineio_types "github.com/zishang520/engine.io/types"
 	"github.com/zishang520/socket.io/socket"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/bindings"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/bindings"
 )
 
 func ListenAndServeWebsocket() {

@@ -8,8 +8,8 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/satisfactorymodding/ficsit-cli/cli"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/installfinders"
-	"github.com/satisfactorymodding/SatisfactoryModManager/settings"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/settings"
 )
 
 func (f *FicsitCLI) initInstallations() error {

@@ -1,4 +1,4 @@
-package main
+package backend
 
 import (
 	"net/url"
@@ -7,10 +7,10 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/bindings"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/bindings"
 )
 
-func processArguments(args []string) {
+func ProcessArguments(args []string) {
 	if len(args) < 2 {
 		return
 	}

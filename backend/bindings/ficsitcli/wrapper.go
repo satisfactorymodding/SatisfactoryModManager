@@ -11,7 +11,7 @@ import (
 	"github.com/satisfactorymodding/ficsit-cli/cli/provider"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/settings"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/settings"
 )
 
 type FicsitCLI struct {

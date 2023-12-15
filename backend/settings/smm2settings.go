@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"golang.org/x/exp/maps"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/utils"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 )
 
 type smm2Settings struct {

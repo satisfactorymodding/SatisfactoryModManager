@@ -8,7 +8,7 @@ import (
 	"github.com/satisfactorymodding/ficsit-cli/cli/provider"
 	"golang.org/x/exp/slices"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/settings"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/settings"
 )
 
 func (f *FicsitCLI) GetOffline() bool {

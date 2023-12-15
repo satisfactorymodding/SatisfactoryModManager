@@ -3,8 +3,8 @@ package updater
 import (
 	"sync"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/autoupdate/updater/apply"
-	"github.com/satisfactorymodding/SatisfactoryModManager/autoupdate/updater/source"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate/updater/apply"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate/updater/source"
 )
 
 type Updater struct {

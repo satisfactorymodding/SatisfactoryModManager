@@ -20,14 +20,15 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 	"gopkg.in/natefinch/lumberjack.v2"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/association"
-	"github.com/satisfactorymodding/SatisfactoryModManager/autoupdate"
-	"github.com/satisfactorymodding/SatisfactoryModManager/bindings"
-	"github.com/satisfactorymodding/SatisfactoryModManager/projectfile"
-	"github.com/satisfactorymodding/SatisfactoryModManager/settings"
-	"github.com/satisfactorymodding/SatisfactoryModManager/singleinstance"
-	"github.com/satisfactorymodding/SatisfactoryModManager/utils"
-	"github.com/satisfactorymodding/SatisfactoryModManager/websocket"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/association"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/bindings"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/projectfile"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/settings"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/singleinstance"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/websocket"
 )
 
 //go:embed all:frontend/build
@@ -60,7 +61,7 @@ func main() {
 	})
 
 	singleinstance.OnSecondInstance = func(args []string) {
-		processArguments(args)
+		backend.ProcessArguments(args)
 	}
 	go singleinstance.ListenForSecondInstance()
 
@@ -105,11 +106,11 @@ func main() {
 		AssetServer:      &assetserver.Options{Assets: assets},
 		OnStartup:        b.Startup,
 		OnDomReady: func(ctx context.Context) {
-			processArguments(os.Args)
+			backend.ProcessArguments(os.Args)
 			autoupdate.CheckInterval(5 * time.Minute)
 		},
 		Bind:   b.GetBindings(),
-		Logger: wailsZeroLogLogger{},
+		Logger: backend.WailsZeroLogLogger{},
 	})
 
 	if err != nil {

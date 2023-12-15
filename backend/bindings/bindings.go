@@ -3,7 +3,7 @@ package bindings
 import (
 	"context"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/bindings/ficsitcli"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/bindings/ficsitcli"
 )
 
 type Bindings struct {
