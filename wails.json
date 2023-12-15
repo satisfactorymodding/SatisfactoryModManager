@@ -13,5 +13,18 @@
   },
   "info": {
     "productVersion": "3.0.0",
+    "fileAssociations": [
+      {
+        "ext": "smmprofile",
+        "name": "Satisfactory Mod Manager Profile",
+        "iconName": "icons\\smmprofile"
+      }
+    ],
+    "protocols": [
+      {
+        "scheme": "smmanager",
+        "description": "Satisfactory Mod Manager"
+      }
+    ]
   }
 }

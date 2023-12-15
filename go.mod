@@ -5,10 +5,8 @@ go 1.21
 toolchain go1.21.5
 
 require (
-	bitbucket.org/avd/go-ipc v0.6.1
 	github.com/Masterminds/semver/v3 v3.2.1
 	github.com/andygrunwald/vdf v1.1.0
-	github.com/juju/fslock v0.0.0-20160525022230-4d5c94c67b4b
 	github.com/minio/selfupdate v0.6.0
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/pkg/errors v0.9.1

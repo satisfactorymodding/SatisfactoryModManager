@@ -160,6 +160,7 @@ func (a *App) ExternalImportProfile(path string) {
 }
 
 func (a *App) Show() {
+	wailsRuntime.WindowUnminimise(a.ctx)
 	wailsRuntime.Show(a.ctx)
 }
 

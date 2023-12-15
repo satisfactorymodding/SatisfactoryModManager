@@ -11,17 +11,17 @@ import (
 )
 
 func ProcessArguments(args []string) {
-	if len(args) < 2 {
+	if len(args) < 1 {
 		return
 	}
-	if strings.HasPrefix(args[1], "smmanager://") {
-		uri := args[1]
+	if strings.HasPrefix(args[0], "smmanager://") {
+		uri := args[0]
 		err := handleURI(uri)
 		if err != nil {
 			log.Error().Err(err).Str("uri", uri).Msg("Failed to handle smmanager:// URI")
 		}
 	} else {
-		err := handleFile(args[1])
+		err := handleFile(args[0])
 		if err != nil {
 			log.Error().Err(err).Str("path", args[1]).Msg("Failed to handle file")
 		}

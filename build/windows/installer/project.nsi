@@ -106,6 +106,9 @@ Section
 
     CreateShortcut "$SMPROGRAMS\${INFO_PRODUCTNAME}.lnk" "$INSTDIR\${PRODUCT_EXECUTABLE}"
 
+    !insertmacro wails.associateFiles
+    !insertmacro wails.associateCustomProtocols
+
     !insertmacro writeUninstaller
 SectionEnd
 
@@ -116,6 +119,9 @@ Section "uninstall"
 
     Delete "$SMPROGRAMS\${INFO_PRODUCTNAME}.lnk"
     Delete "$DESKTOP\${INFO_PRODUCTNAME}.lnk"
+
+    !insertmacro wails.unassociateFiles
+    !insertmacro wails.unassociateCustomProtocols
 
     !insertmacro deleteUninstaller
 SectionEnd

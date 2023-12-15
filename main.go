@@ -21,12 +21,10 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend"
-	"github.com/satisfactorymodding/SatisfactoryModManager/backend/association"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/bindings"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/projectfile"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/settings"
-	"github.com/satisfactorymodding/SatisfactoryModManager/backend/singleinstance"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/websocket"
 )
@@ -46,10 +44,6 @@ func loadProjectFile() error {
 }
 
 func main() {
-	if !singleinstance.RequestSingleInstanceLock() {
-		return
-	}
-
 	autoupdate.Init(autoupdate.Config{
 		UpdateFoundCallback: func(latestVersion string, changelogs map[string]string) {
 			bindings.BindingsInstance.Update.UpdateAvailable(latestVersion, changelogs)
@@ -60,24 +54,7 @@ func main() {
 		UpdateReadyCallback: func() { bindings.BindingsInstance.Update.UpdateReady() },
 	})
 
-	singleinstance.OnSecondInstance = func(args []string) {
-		backend.ProcessArguments(args)
-	}
-	go singleinstance.ListenForSecondInstance()
-
-	err := association.SetAsDefaultSchemeHandler("smmanager")
-	if err != nil {
-		log.Error().Err(err).Msg("Failed to set as default scheme handler")
-	}
-
-	err = association.SetAsDefaultFileHandler(".smmprofile")
-	if err != nil {
-		log.Error().Err(err).Msg("Failed to set as default file extension handler")
-	}
-
-	go websocket.ListenAndServeWebsocket()
-
-	err = settings.LoadSettings()
+	err := settings.LoadSettings()
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to load settings")
 	}
@@ -104,9 +81,19 @@ func main() {
 		MaxHeight:        utils.UnexpandedMax.Height,
 		WindowStartState: windowStartState,
 		AssetServer:      &assetserver.Options{Assets: assets},
-		OnStartup:        b.Startup,
+		SingleInstanceLock: &options.SingleInstanceLock{
+			UniqueId: "SatisfactoryModManager_b04ab4c3-450f-48f4-ab14-af6d7adc5416",
+			OnSecondInstanceLaunch: func(secondInstanceData options.SecondInstanceData) {
+				b.App.Show()
+				backend.ProcessArguments(secondInstanceData.Args)
+			},
+		},
+		OnStartup: func(ctx context.Context) {
+			go websocket.ListenAndServeWebsocket()
+			b.Startup(ctx)
+		},
 		OnDomReady: func(ctx context.Context) {
-			backend.ProcessArguments(os.Args)
+			backend.ProcessArguments(os.Args[1:])
 			autoupdate.CheckInterval(5 * time.Minute)
 		},
 		Bind:   b.GetBindings(),
