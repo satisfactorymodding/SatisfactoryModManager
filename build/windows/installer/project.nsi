@@ -93,12 +93,14 @@ Section
     !insertmacro wails.webview2runtime
 
     !insertmacro smm2Uninst
-    
-    Push $INSTDIR
-    Call isEmptyDir
-    Pop $0
-    StrCmp $0 0 0 +2
-    StrCpy $InstDir "$INSTDIR\${MULTIUSER_INSTALLMODE_INSTDIR}"
+
+    ${If} ${FileExists} "$InstDir\*"
+        Push $INSTDIR
+        Call isEmptyDir
+        Pop $0
+        StrCmp $0 0 0 +2
+        StrCpy $InstDir "$INSTDIR\${MULTIUSER_INSTALLMODE_INSTDIR}"
+    ${EndIf}
 
     SetOutPath $INSTDIR
     
