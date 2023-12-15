@@ -42,6 +42,7 @@ jobs:
       - name: Install additional dependencies
         if: matrix.os == 'ubuntu-latest'
         run: |
+          sudo apt update
           sudo apt -y install libgtk-3-dev libwebkit2gtk-4.0-dev
 
       - name: Install Wails
@@ -77,15 +78,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
           cache-dependency-path: frontend
-
-      - uses: pnpm/action-setup@v2
-        with:
-          version: ${{ env.PNPM_VERSION }}
       
       - name: Install dependencies
         working-directory: frontend
