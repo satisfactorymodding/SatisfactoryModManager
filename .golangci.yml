@@ -40,6 +40,7 @@ issues:
       text: "no matching files found"
 
 run:
+  timeout: 5m
   skip-dirs:
     - frontend
 
