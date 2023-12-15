@@ -1,4 +1,5 @@
 {
+  "$schema": "https://wails.io/schemas/config.v2.json",
   "name": "Satisfactory Mod Manager",
   "outputfilename": "Satisfactory Mod Manager",
   "frontend:install": "pnpm install",
@@ -10,7 +11,7 @@
     "name": "mircearoata",
     "email": "mircearoatapalade@gmail.com"
   },
-  "Info": {
-    "ProductVersion": "3.0.0"
+  "info": {
+    "productVersion": "3.0.0",
   }
 }

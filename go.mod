@@ -15,7 +15,7 @@ require (
 	github.com/rs/zerolog v1.31.0
 	github.com/satisfactorymodding/ficsit-cli v0.2.0
 	github.com/spf13/viper v1.18.0
-	github.com/wailsapp/wails/v2 v2.6.0
+	github.com/wailsapp/wails/v2 v2.7.1
 	github.com/zishang520/engine.io v1.5.12
 	github.com/zishang520/socket.io v1.3.2
 	golang.org/x/exp v0.0.0-20231206192017-f3f8817b8deb
@@ -32,6 +32,7 @@ require (
 	github.com/bep/debounce v1.2.1 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
+	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/google/uuid v1.4.0 // indirect
 	github.com/gookit/color v1.5.4 // indirect
 	github.com/gorilla/websocket v1.5.1 // indirect
@@ -45,6 +46,7 @@ require (
 	github.com/leaanthony/go-ansi-parser v1.6.1 // indirect
 	github.com/leaanthony/gosod v1.0.3 // indirect
 	github.com/leaanthony/slicer v1.6.0 // indirect
+	github.com/leaanthony/u v1.1.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
