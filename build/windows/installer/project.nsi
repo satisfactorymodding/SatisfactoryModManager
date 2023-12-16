@@ -5,10 +5,12 @@ Unicode true
 !include "wails_tools.nsh"
 
 !define MULTIUSER_EXECUTIONLEVEL Highest
-!define MULTIUSER_INSTALLMODE_FUNCTION onMultiUserModeChanged
+!define MULTIUSER_USE_PROGRAMFILES64 1
 !define MULTIUSER_INSTALLMODE_INSTDIR "${INFO_PRODUCTNAME}"
 !define MULTIUSER_INSTALLMODE_DEFAULT_REGISTRY_KEY "${UNINST_KEY}"
 !define MULTIUSER_INSTALLMODE_DEFAULT_REGISTRY_VALUENAME "UninstallString"
+!define MULTIUSER_INSTALLMODE_INSTDIR_REGISTRY_KEY "${UNINST_KEY}"
+!define MULTIUSER_INSTALLMODE_INSTDIR_REGISTRY_VALUENAME "InstallPath"
 !include MultiUser.nsh
 
 # The version information for this two must consist of 4 parts
@@ -31,7 +33,6 @@ VIAddVersionKey "ProductName"     "${INFO_PRODUCTNAME}"
 
 !include "smm2_uninstall.nsh"
 !include "uninstaller.nsh"
-!include "update_check.nsh"
 !include "utils.nsh"
 
 !define MUI_FINISHPAGE_SHOWREADME ""
@@ -63,30 +64,15 @@ OutFile "..\..\bin\Satisfactory-Mod-Manager-Setup.exe"
 ShowInstDetails show
 
 Function .onInit
+    SetRegView 64
     ; The original wails.checkArchitecture macro adds an unnecessary requirement on Windows 10
     ; !insertmacro wails.checkArchitecture
-    !insertmacro checkUpdate
     !insertmacro MULTIUSER_INIT
-    
-    ${If} $IS_UPDATE == 1
-        ${If} $EXISTING_INSTALL_MODE == "currentuser"
-            Call MultiUser.InstallMode.CurrentUser
-        ${ElseIf} $EXISTING_INSTALL_MODE == "allusers"
-            Call MultiUser.InstallMode.AllUsers
-        ${EndIf}
-    ${EndIf}
 FunctionEnd
 
 Function un.onInit
+  SetRegView 64
   !insertmacro MULTIUSER_UNINIT
-FunctionEnd
-
-Function onMultiUserModeChanged
-    ${If} $MultiUser.InstallMode == "CurrentUser"
-        StrCpy $InstDir "$LocalAppdata\Programs\${MULTIUSER_INSTALLMODE_INSTDIR}"
-    ${Else}
-        StrCpy $InstDir "$ProgramFiles64\${MULTIUSER_INSTALLMODE_INSTDIR}"
-    ${EndIf}
 FunctionEnd
 
 Section
@@ -94,12 +80,14 @@ Section
 
     !insertmacro smm2Uninst
 
-    ${If} ${FileExists} "$InstDir\*"
-        Push $INSTDIR
-        Call isEmptyDir
-        Pop $0
-        StrCmp $0 0 0 +2
-        StrCpy $InstDir "$INSTDIR\${MULTIUSER_INSTALLMODE_INSTDIR}"
+    ${If} $MultiUser.InstDir == ""
+        ${If} ${FileExists} "$InstDir\*"
+            Push $INSTDIR
+            Call isEmptyDir
+            Pop $0
+            StrCmp $0 0 0 +2
+            StrCpy $InstDir "$INSTDIR\${MULTIUSER_INSTALLMODE_INSTDIR}"
+        ${EndIf}
     ${EndIf}
 
     SetOutPath $INSTDIR
@@ -114,7 +102,7 @@ Section
     !insertmacro writeUninstaller
 SectionEnd
 
-Section "uninstall" 
+Section "uninstall"
     RMDir /r "$AppData\${PRODUCT_EXECUTABLE}" # Remove the WebView2 DataPath
 
     RMDir /r $INSTDIR
@@ -133,11 +121,15 @@ Function desktopShortcut
 FunctionEnd
 
 Function MultiUserPagePre
-    !insertmacro abortIfUpdate
+    ${If} $MultiUser.InstDir != ""
+        Abort
+    ${EndIf}
 FunctionEnd
 
 Function DirectoryPagePre
-    !insertmacro abortIfUpdate
+    ${If} $MultiUser.InstDir != ""
+        Abort
+    ${EndIf}
 FunctionEnd
 
 Function .onVerifyInstDir    
