@@ -110,21 +110,21 @@
         icon: mdiTrayFull,
         iconHover: mdiTrayMinus,
         tooltip: isEnabled ?
-          'This mod is queued to be Paused. Click to cancel the operation.' :
-            'This mod is queued to be Resumed. Click to cancel the operation.',
+          'This mod is queued to be Disabled. Click to cancel the operation.' :
+            'This mod is queued to be Enabled. Click to cancel the operation.',
       };
     }
 
     let display: ButtonDisplay = {
       icon: mdiPause,
       iconHover: mdiPlayCircle,
-      tooltip: 'This mod is Paused on this profile. Click to Resume it.',
+      tooltip: 'This mod is Disabled on this profile. Click to Enable it.',
     };
     if (isEnabled) {
       display = {
         icon: mdiPlay,
         iconHover: mdiPauseCircle,
-        tooltip: 'This mod is Enabled on this profile. Click to Pause it, which prevents it from loading when you start the game, but still keeps it a part of this profile.',
+        tooltip: 'This mod is Enabled on this profile. Click to Disable it, which prevents it from loading when you start the game, but still keeps it a part of this profile.',
       };
     }
     if (queued) {
@@ -264,7 +264,7 @@
         </div>
         {#if isInstalled && !isEnabled}
           <Tooltip surface$class="max-w-lg text-base">
-            This mod is Paused. Press the pause icon to enable it. 
+            This mod is Disabled. Click the pause icon to Enable it. 
           </Tooltip>
         {:else if compatibility.state !== CompatibilityState.Works}
           <Tooltip surface$class="max-w-lg text-base">
