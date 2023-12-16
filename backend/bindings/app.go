@@ -116,14 +116,14 @@ type FileFilter struct {
 }
 
 type OpenDialogOptions struct {
-	DefaultDirectory           string       `json:"defaultDirectory"`
-	DefaultFilename            string       `json:"defaultFilename"`
-	Title                      string       `json:"title"`
-	Filters                    []FileFilter `json:"filters"`
-	ShowHiddenFiles            bool         `json:"showHiddenFiles"`
-	CanCreateDirectories       bool         `json:"canCreateDirectories"`
-	ResolvesAliases            bool         `json:"resolvesAliases"`
-	TreatPackagesAsDirectories bool         `json:"treatPackagesAsDirectories"`
+	DefaultDirectory           string       `json:"defaultDirectory,omitempty"`
+	DefaultFilename            string       `json:"defaultFilename,omitempty"`
+	Title                      string       `json:"title,omitempty"`
+	Filters                    []FileFilter `json:"filters,omitempty"`
+	ShowHiddenFiles            bool         `json:"showHiddenFiles,omitempty"`
+	CanCreateDirectories       bool         `json:"canCreateDirectories,omitempty"`
+	ResolvesAliases            bool         `json:"resolvesAliases,omitempty"`
+	TreatPackagesAsDirectories bool         `json:"treatPackagesAsDirectories,omitempty"`
 }
 
 func (a *App) OpenFileDialog(options OpenDialogOptions) (string, error) {

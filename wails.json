@@ -26,5 +26,10 @@
         "description": "Satisfactory Mod Manager"
       }
     ]
+  },
+  "bindings": {
+    "ts_generation": {
+      "outputType": "interfaces"
+    }
   }
 }

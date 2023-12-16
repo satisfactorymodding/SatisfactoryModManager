@@ -18,7 +18,7 @@
   import { error, siteURL } from '$lib/store/generalStore';
   import { BrowserOpenURL, EventsOn } from '$wailsjs/runtime/runtime';
   import { OpenFileDialog } from '$wailsjs/go/bindings/App';
-  import { bindings, ficsitcli } from '$wailsjs/go/models';
+  import type { ficsitcli } from '$wailsjs/go/models';
   import { AddProfile, DeleteProfile, RenameProfile, ImportProfile, ExportCurrentProfile, ReadExportedProfileMetadata } from '$wailsjs/go/ficsitcli/FicsitCLI';
   
   const selectedInstallPathInit = selectedInstallPath.isInit;
@@ -160,14 +160,14 @@
     }
     fileDialogOpen = true;
     try {
-      importProfileFilepath = await OpenFileDialog(bindings.OpenDialogOptions.createFrom({
+      importProfileFilepath = await OpenFileDialog({
         filters: [
-          bindings.FileFilter.createFrom({
+          {
             displayName: 'SMM Profile (*.smmprofile)',
             pattern: '*.smmprofile',
-          }),
+          },
         ],
-      }));
+      });
       importProfileMetadata = await ReadExportedProfileMetadata(importProfileFilepath);
     } catch (e) {
       fileDialogOpen = false;
