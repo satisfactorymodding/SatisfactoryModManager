@@ -47,6 +47,9 @@ jobs:
 
       - name: Install Wails
         run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: Generate files
+        run: go generate -x -tags tools ./...
       
       - name: Build
         run: wails build ${{ matrix.buildArgs }}
