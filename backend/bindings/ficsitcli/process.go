@@ -116,10 +116,6 @@ func (f *FicsitCLI) validateInstall(installation *InstallationInfo, progressItem
 		close(done)
 	}()
 
-	_, resolveErr := installation.Installation.ResolveProfile(f.ficsitCli)
-	if resolveErr != nil {
-		return errors.Wrap(resolveErr, "Failed to resolve profile")
-	}
 	installErr := installation.Installation.Install(f.ficsitCli, installChannel)
 	if installErr != nil {
 		return errors.Wrap(installErr, "Failed to install")
