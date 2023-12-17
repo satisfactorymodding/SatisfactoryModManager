@@ -83,22 +83,14 @@ func readSMM2Settings(data []byte) error {
 		Settings.Maximized = *s.Maximized
 	}
 
-	if s.SelectedInstall != nil {
-		Settings.SelectedInstall = *s.SelectedInstall
-	}
+	// Ignore selected install, profile, and mods enabled
+	// They are stored in ficsit-cli, but that gets initialized later
+	// They are not critical anyway
 
 	// Ignore DebugMode, it's not used anymore
 
-	if s.SelectedProfile != nil {
-		Settings.SelectedProfile = *s.SelectedProfile
-	}
-
 	if s.UpdateCheckMode != nil {
 		Settings.UpdateCheckMode = *s.UpdateCheckMode
-	}
-
-	if s.ModsEnabled != nil {
-		Settings.ModsEnabled = *s.ModsEnabled
 	}
 
 	if s.Konami != nil {

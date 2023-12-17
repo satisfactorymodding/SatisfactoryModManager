@@ -11,8 +11,6 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/satisfactorymodding/ficsit-cli/cli"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
-
-	"github.com/satisfactorymodding/SatisfactoryModManager/backend/settings"
 )
 
 func (f *FicsitCLI) SetProfile(profile string) error {
@@ -30,6 +28,7 @@ func (f *FicsitCLI) SetProfile(profile string) error {
 		l.Error().Err(err).Str("profile", profile).Msg("Failed to set profile")
 		return errors.Wrap(err, "Failed to set profile")
 	}
+	_ = f.ficsitCli.Installations.Save()
 
 	f.EmitGlobals()
 
@@ -50,8 +49,6 @@ func (f *FicsitCLI) SetProfile(profile string) error {
 		return errors.Wrap(installErr, "Failed to validate install")
 	}
 
-	settings.Settings.SelectedProfile[f.selectedInstallation.Info.Path] = profile
-	_ = settings.SaveSettings()
 	return nil
 }
 

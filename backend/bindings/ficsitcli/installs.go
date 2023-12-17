@@ -9,15 +9,42 @@ import (
 	"github.com/satisfactorymodding/ficsit-cli/cli"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders"
-	"github.com/satisfactorymodding/SatisfactoryModManager/backend/settings"
 )
 
 func (f *FicsitCLI) initInstallations() error {
+	err := f.initLocalInstallations()
+	if err != nil {
+		return errors.Wrap(err, "failed to initialize found installations")
+	}
+
+	sort.Slice(f.installations, func(i, j int) bool {
+		if f.installations[i].Info.Launcher != f.installations[j].Info.Launcher {
+			return f.installations[i].Info.Launcher < f.installations[j].Info.Launcher
+		}
+		return f.installations[i].Info.Branch < f.installations[j].Info.Branch
+	})
+
+	if len(f.installations) > 0 {
+		f.selectedInstallation = f.installations[0]
+	}
+
+	if f.ficsitCli.Installations.SelectedInstallation != "" {
+		for _, install := range f.installations {
+			if install.Info.Path == f.ficsitCli.Installations.SelectedInstallation {
+				f.selectedInstallation = install
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+func (f *FicsitCLI) initLocalInstallations() error {
 	installs, findErrors := installfinders.FindInstallations()
 
 	f.installFindErrors = findErrors
 	f.installations = []*InstallationInfo{}
-	f.ficsitCli.Installations.Installations = []*cli.Installation{}
 
 	fallbackProfile := "Default"
 	if f.ficsitCli.Profiles.GetProfile(fallbackProfile) == nil {
@@ -28,10 +55,16 @@ func (f *FicsitCLI) initInstallations() error {
 		}
 	}
 
+	createdNewInstalls := false
 	for _, install := range installs {
-		ficsitCliInstall, err := f.ficsitCli.Installations.AddInstallation(f.ficsitCli, install.Path, fallbackProfile)
-		if err != nil {
-			return errors.Wrap(err, "failed to add installation")
+		ficsitCliInstall := f.ficsitCli.Installations.GetInstallation(install.Path)
+		if ficsitCliInstall == nil {
+			var err error
+			ficsitCliInstall, err = f.ficsitCli.Installations.AddInstallation(f.ficsitCli, install.Path, fallbackProfile)
+			if err != nil {
+				return errors.Wrap(err, "failed to add installation")
+			}
+			createdNewInstalls = true
 		}
 		f.installations = append(f.installations, &InstallationInfo{
 			Installation: ficsitCliInstall,
@@ -39,43 +72,12 @@ func (f *FicsitCLI) initInstallations() error {
 		})
 	}
 
-	sort.Slice(f.installations, func(i, j int) bool {
-		if f.installations[i].Info.Launcher != f.installations[j].Info.Launcher {
-			return f.installations[i].Info.Launcher < f.installations[j].Info.Launcher
-		}
-		return f.installations[i].Info.Branch < f.installations[j].Info.Branch
-	})
-
-	for _, install := range f.installations {
-		if savedSelectedProfile, ok := settings.Settings.SelectedProfile[install.Info.Path]; ok {
-			if f.ficsitCli.Profiles.GetProfile(savedSelectedProfile) == nil {
-				log.Warn().Str("profile", savedSelectedProfile).Str("install", install.Info.Path).Msg("Saved profile not found")
-				continue
-			}
-			err := install.Installation.SetProfile(f.ficsitCli, savedSelectedProfile)
-			if err != nil {
-				return errors.Wrap(err, "failed to set profile")
-			}
-		}
-		if modsEnabled, ok := settings.Settings.ModsEnabled[install.Info.Path]; ok {
-			install.Installation.Vanilla = !modsEnabled
+	if createdNewInstalls {
+		err := f.ficsitCli.Installations.Save()
+		if err != nil {
+			return errors.Wrap(err, "failed to save installations")
 		}
 	}
-
-	if len(f.installations) > 0 {
-		f.selectedInstallation = f.installations[0]
-	}
-
-	savedSelectedInstall := settings.Settings.SelectedInstall
-	if savedSelectedInstall != "" {
-		for _, install := range f.installations {
-			if install.Info.Path == savedSelectedInstall {
-				f.selectedInstallation = install
-				break
-			}
-		}
-	}
-
 	return nil
 }
 
@@ -124,10 +126,10 @@ func (f *FicsitCLI) SelectInstall(path string) error {
 	}
 	f.selectedInstallation = installation
 
-	f.EmitGlobals()
+	f.ficsitCli.Installations.SelectedInstallation = path
+	_ = f.ficsitCli.Installations.Save()
 
-	settings.Settings.SelectedInstall = installation.Info.Path
-	_ = settings.SaveSettings()
+	f.EmitGlobals()
 
 	f.progress = &Progress{
 		Item:     "__select_install__",
@@ -170,6 +172,7 @@ func (f *FicsitCLI) SetModsEnabled(enabled bool) error {
 	}
 
 	f.selectedInstallation.Installation.Vanilla = !enabled
+	_ = f.ficsitCli.Installations.Save()
 
 	f.EmitGlobals()
 
@@ -190,8 +193,6 @@ func (f *FicsitCLI) SetModsEnabled(enabled bool) error {
 		return errors.Wrap(installErr, "Failed to validate install")
 	}
 
-	settings.Settings.ModsEnabled[f.selectedInstallation.Info.Path] = enabled
-	_ = settings.SaveSettings()
 	return nil
 }
 

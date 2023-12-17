@@ -43,10 +43,6 @@ type settings struct {
 	FavoriteMods []string        `json:"favoriteMods"`
 	ModFilters   SavedModFilters `json:"modFilters"`
 
-	SelectedInstall string            `json:"selectedInstall"`
-	SelectedProfile map[string]string `json:"selectedProfile"`
-	ModsEnabled     map[string]bool   `json:"modsEnabled"`
-
 	QueueAutoStart      bool                `json:"queueAutoStart"`
 	IgnoredUpdates      map[string][]string `json:"ignoredUpdates"`
 	UpdateCheckMode     UpdateCheckMode     `json:"updateCheckMode"`
@@ -73,10 +69,6 @@ var Settings = settings{
 		Filter: "Compatible",
 	},
 
-	SelectedInstall: "",
-	SelectedProfile: map[string]string{},
-	ModsEnabled:     map[string]bool{},
-
 	QueueAutoStart:      true,
 	IgnoredUpdates:      map[string][]string{},
 	UpdateCheckMode:     UpdateOnLaunch,
@@ -91,7 +83,7 @@ var Settings = settings{
 var settingsFileName = "settings.json"
 
 func LoadSettings() error {
-	settingsFilePath := filepath.Join(viper.GetString("local-dir"), settingsFileName)
+	settingsFilePath := filepath.Join(viper.GetString("smm-local-dir"), settingsFileName)
 
 	_, err := os.Stat(settingsFilePath)
 	if err != nil {
@@ -105,7 +97,7 @@ func LoadSettings() error {
 		}
 	}
 
-	settingsFile, err := os.ReadFile(filepath.Join(viper.GetString("local-dir"), settingsFileName))
+	settingsFile, err := os.ReadFile(filepath.Join(viper.GetString("smm-local-dir"), settingsFileName))
 	if err != nil {
 		return errors.Wrap(err, "failed to read settings")
 	}
@@ -126,7 +118,7 @@ func SaveSettings() error {
 	if err != nil {
 		return errors.Wrap(err, "failed to marshal settings")
 	}
-	err = os.WriteFile(filepath.Join(viper.GetString("local-dir"), settingsFileName), settingsFile, 0o755)
+	err = os.WriteFile(filepath.Join(viper.GetString("smm-local-dir"), settingsFileName), settingsFile, 0o755)
 	if err != nil {
 		return errors.Wrap(err, "failed to write settings")
 	}

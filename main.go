@@ -136,13 +136,17 @@ func init() {
 		panic(err)
 	}
 
-	cacheDir := filepath.Clean(filepath.Join(baseCacheDir, "SatisfactoryModManager"))
+	cacheDir := filepath.Clean(filepath.Join(baseCacheDir, "ficsit"))
 	_ = utils.EnsureDirExists(cacheDir)
 	viper.Set("cache-dir", cacheDir)
 
-	localDir := filepath.Clean(filepath.Join(baseLocalDir, "SatisfactoryModManager"))
+	localDir := filepath.Clean(filepath.Join(baseLocalDir, "ficsit"))
 	_ = utils.EnsureDirExists(localDir)
 	viper.Set("local-dir", localDir)
+
+	smmLocalDir := filepath.Clean(filepath.Join(baseLocalDir, "SatisfactoryModManager"))
+	_ = utils.EnsureDirExists(smmLocalDir)
+	viper.Set("smm-local-dir", smmLocalDir)
 
 	viper.Set("websocket-port", 33642)
 
