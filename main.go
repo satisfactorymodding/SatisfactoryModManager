@@ -4,16 +4,16 @@ import (
 	"context"
 	"embed"
 	"encoding/json"
-	"io"
+	"log/slog"
 	"os"
 	"path"
 	"path/filepath"
 	"runtime"
 	"time"
 
+	"github.com/lmittmann/tint"
 	"github.com/pkg/errors"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
+	slogmulti "github.com/samber/slog-multi"
 	"github.com/spf13/viper"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -56,12 +56,14 @@ func main() {
 
 	err := settings.LoadSettings()
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to load settings")
+		slog.Error("failed to load settings", slog.Any("error", err))
+		os.Exit(1)
 	}
 
 	b, err := bindings.MakeBindings()
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to create bindings")
+		slog.Error("failed to create bindings", slog.Any("error", err))
+		os.Exit(1)
 	}
 
 	windowStartState := options.Normal
@@ -101,12 +103,12 @@ func main() {
 	})
 
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to start application")
+		slog.Error("failed to start application", slog.Any("error", err))
 	}
 
 	err = autoupdate.OnExit(bindings.BindingsInstance.Update.Restart)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to apply update on exit")
+		slog.Error("failed to apply update on exit", slog.Any("error", err))
 	}
 }
 
@@ -126,7 +128,8 @@ func init() {
 	case "linux":
 		baseLocalDir = path.Join(os.Getenv("HOME"), ".local", "share")
 	default:
-		log.Fatal().Str("os", runtime.GOOS).Msg("Unsupported OS")
+		slog.Error("unsupported OS", slog.String("os", runtime.GOOS))
+		os.Exit(1)
 	}
 
 	viper.Set("base-local-dir", baseLocalDir)
@@ -139,6 +142,10 @@ func init() {
 	cacheDir := filepath.Clean(filepath.Join(baseCacheDir, "ficsit"))
 	_ = utils.EnsureDirExists(cacheDir)
 	viper.Set("cache-dir", cacheDir)
+
+	smmCacheDir := filepath.Clean(filepath.Join(baseCacheDir, "SatisfactoryModManager"))
+	_ = utils.EnsureDirExists(smmCacheDir)
+	viper.Set("smm-cache-dir", smmCacheDir)
 
 	localDir := filepath.Clean(filepath.Join(baseLocalDir, "ficsit"))
 	_ = utils.EnsureDirExists(localDir)
@@ -160,15 +167,19 @@ func init() {
 	viper.Set("graphql-api", "/v2/query")
 
 	viper.Set("log", "debug")
-	viper.Set("log-file", filepath.Join(cacheDir, "logs", "SatisfactoryModManager.log"))
+	viper.Set("log-file", filepath.Join(smmCacheDir, "logs", "SatisfactoryModManager.log"))
 
 	viper.Set("concurrent-downloads", 5)
 
-	writers := make([]io.Writer, 0)
-	writers = append(writers, zerolog.ConsoleWriter{
-		Out:        os.Stdout,
+	level := slog.LevelInfo
+	_ = level.UnmarshalText([]byte(viper.GetString("log")))
+
+	handlers := make([]slog.Handler, 0)
+	handlers = append(handlers, tint.NewHandler(os.Stdout, &tint.Options{
+		Level:      level,
+		AddSource:  true,
 		TimeFormat: time.RFC3339,
-	})
+	}))
 
 	if viper.GetString("log-file") != "" {
 		logFile := &lumberjack.Logger{
@@ -178,18 +189,8 @@ func init() {
 			MaxAge:     30, // days
 		}
 
-		writers = append(writers, zerolog.ConsoleWriter{
-			Out:        logFile,
-			TimeFormat: time.RFC3339,
-			NoColor:    true,
-		})
+		handlers = append(handlers, slog.NewJSONHandler(logFile, nil))
 	}
 
-	level, err := zerolog.ParseLevel(viper.GetString("log"))
-	if err != nil {
-		panic(err)
-	}
-	zerolog.SetGlobalLevel(level)
-
-	log.Logger = zerolog.New(io.MultiWriter(writers...)).With().Timestamp().Logger()
+	slog.SetDefault(slog.New(slogmulti.Fanout(handlers...)))
 }

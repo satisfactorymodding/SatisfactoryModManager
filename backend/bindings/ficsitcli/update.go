@@ -1,9 +1,12 @@
 package ficsitcli
 
 import (
+	"log/slog"
+
 	"github.com/pkg/errors"
-	"github.com/rs/zerolog/log"
 	"github.com/satisfactorymodding/ficsit-cli/cli"
+	resolver "github.com/satisfactorymodding/ficsit-resolver"
+	"github.com/spf13/viper"
 )
 
 type Update struct {
@@ -16,11 +19,11 @@ func (f *FicsitCLI) CheckForUpdates() ([]Update, error) {
 	if f.selectedInstallation == nil {
 		return []Update{}, nil
 	}
-	l := log.With().Str("task", "checkForUpdates").Logger()
+	l := slog.With(slog.String("task", "checkForUpdates"))
 
 	currentLockfile, err := f.selectedInstallation.Installation.LockFile(f.ficsitCli)
 	if err != nil {
-		l.Error().Err(err).Msg("Failed to get current lockfile")
+		l.Error("failed to get current lockfile", slog.Any("error", err))
 		return nil, errors.Wrap(err, "Failed to get current lockfile")
 	}
 
@@ -30,11 +33,11 @@ func (f *FicsitCLI) CheckForUpdates() ([]Update, error) {
 
 	profile := f.GetProfile(f.selectedInstallation.Installation.Profile)
 
-	resolver := cli.NewDependencyResolver(f.ficsitCli.Provider)
+	resolver := resolver.NewDependencyResolver(f.ficsitCli.Provider, viper.GetString("api-base"))
 
 	gameVersion, err := f.selectedInstallation.Installation.GetGameVersion(f.ficsitCli)
 	if err != nil {
-		l.Error().Err(err).Msg("Failed to get game version")
+		l.Error("failed to get game version", slog.Any("error", err))
 		return nil, errors.Wrap(err, "Failed to get game version")
 	}
 
@@ -50,7 +53,7 @@ func (f *FicsitCLI) CheckForUpdates() ([]Update, error) {
 	}
 	newLockfile, err := updateProfile.Resolve(resolver, nil, gameVersion)
 	if err != nil {
-		l.Error().Err(err).Msg("Failed to resolve new lockfile")
+		l.Error("failed to resolve dependencies", slog.Any("error", err))
 		return nil, errors.Wrap(err, "Error resolving dependencies")
 	}
 
@@ -72,10 +75,10 @@ func (f *FicsitCLI) CheckForUpdates() ([]Update, error) {
 }
 
 func (f *FicsitCLI) UpdateMods(mods []string) error {
-	l := log.With().Str("task", "updateAllMods").Logger()
+	l := slog.With(slog.String("task", "updateMods"))
 
 	if f.progress != nil {
-		l.Error().Msg("Another operation in progress")
+		l.Error("another operation in progress")
 		return errors.New("Another operation in progress")
 	}
 
@@ -86,7 +89,7 @@ func (f *FicsitCLI) UpdateMods(mods []string) error {
 	profile := f.GetProfile(f.selectedInstallation.Installation.Profile)
 	for _, modReference := range mods {
 		if _, ok := profile.Mods[modReference]; !ok {
-			l.Warn().Str("mod", modReference).Msg("Mod not found in profile")
+			l.Warn("mod not found in profile", slog.String("mod", modReference))
 			continue
 		}
 		profile.Mods[modReference] = cli.ProfileMod{
@@ -97,7 +100,7 @@ func (f *FicsitCLI) UpdateMods(mods []string) error {
 
 	err := f.selectedInstallation.Installation.UpdateMods(f.ficsitCli, mods)
 	if err != nil {
-		l.Error().Err(err).Msg("Failed to update mods")
+		l.Error("failed to update mods", slog.Any("error", err))
 		return errors.Wrap(err, "Failed to update mods")
 	}
 
@@ -114,7 +117,7 @@ func (f *FicsitCLI) UpdateMods(mods []string) error {
 	err = f.validateInstall(f.selectedInstallation, "__update__")
 
 	if err != nil {
-		l.Error().Err(err).Msg("Failed to validate installation")
+		l.Error("failed to validate installation", slog.Any("error", err))
 		return errors.Wrap(err, "Failed to validate installation")
 	}
 

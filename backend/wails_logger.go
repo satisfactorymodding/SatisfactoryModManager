@@ -1,33 +1,37 @@
 package backend
 
-import "github.com/rs/zerolog/log"
+import (
+	"log/slog"
+	"os"
+)
 
 type WailsZeroLogLogger struct{}
 
 func (l WailsZeroLogLogger) Print(message string) {
-	log.Trace().Msg(message)
+	slog.Debug(message)
 }
 
 func (l WailsZeroLogLogger) Trace(message string) {
-	log.Trace().Msg(message)
+	slog.Debug(message)
 }
 
 func (l WailsZeroLogLogger) Debug(message string) {
-	log.Debug().Msg(message)
+	slog.Debug(message)
 }
 
 func (l WailsZeroLogLogger) Info(message string) {
-	log.Info().Msg(message)
+	slog.Info(message)
 }
 
 func (l WailsZeroLogLogger) Warning(message string) {
-	log.Warn().Msg(message)
+	slog.Warn(message)
 }
 
 func (l WailsZeroLogLogger) Error(message string) {
-	log.Error().Msg(message)
+	slog.Error(message)
 }
 
 func (l WailsZeroLogLogger) Fatal(message string) {
-	log.Fatal().Msg(message)
+	slog.Error(message)
+	os.Exit(1)
 }

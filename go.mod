@@ -7,21 +7,21 @@ toolchain go1.21.5
 require (
 	github.com/Masterminds/semver/v3 v3.2.1
 	github.com/andygrunwald/vdf v1.1.0
+	github.com/lmittmann/tint v1.0.3
 	github.com/minio/selfupdate v0.6.0
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/pkg/errors v0.9.1
-	github.com/rs/zerolog v1.31.0
-	github.com/satisfactorymodding/ficsit-cli v0.2.0
-	github.com/spf13/viper v1.18.0
+	github.com/samber/slog-multi v1.0.2
+	github.com/satisfactorymodding/ficsit-cli v0.3.0
+	github.com/satisfactorymodding/ficsit-resolver v0.0.2
+	github.com/spf13/viper v1.18.1
 	github.com/wailsapp/wails/v2 v2.7.1
 	github.com/zishang520/engine.io v1.5.12
 	github.com/zishang520/socket.io v1.3.2
-	golang.org/x/exp v0.0.0-20231206192017-f3f8817b8deb
+	golang.org/x/exp v0.0.0-20231214170342-aacd6d4b4611
 	golang.org/x/sys v0.15.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
-
-replace github.com/Masterminds/semver/v3 => github.com/Vilsol/semver/v3 v3.1.2-0.20220414201711-64ef71d40f9a
 
 require (
 	aead.dev/minisign v0.2.1 // indirect
@@ -50,8 +50,9 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mircearoata/pubgrub-go v0.3.3 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
-	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
+	github.com/pelletier/go-toml/v2 v2.1.1 // indirect
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8 // indirect
+	github.com/pterm/pterm v0.12.72 // indirect
 	github.com/puzpuzpuz/xsync/v3 v3.0.2 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect

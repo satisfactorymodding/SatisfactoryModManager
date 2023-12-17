@@ -1,13 +1,14 @@
 package ficsitcli
 
 import (
+	"log/slog"
 	"os"
 	"os/exec"
 	"sort"
 
 	"github.com/pkg/errors"
-	"github.com/rs/zerolog/log"
 	"github.com/satisfactorymodding/ficsit-cli/cli"
+	resolver "github.com/satisfactorymodding/ficsit-resolver"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders"
 )
@@ -133,13 +134,13 @@ func (f *FicsitCLI) GetInstallation(path string) *InstallationInfo {
 }
 
 func (f *FicsitCLI) SelectInstall(path string) error {
-	l := log.With().Str("task", "selectInstall").Str("path", path).Logger()
+	l := slog.With(slog.String("task", "selectInstall"), slog.String("path", path))
 	if f.selectedInstallation != nil && f.selectedInstallation.Info.Path == path {
 		return nil
 	}
 	installation := f.GetInstallation(path)
 	if installation == nil {
-		l.Error().Str("path", path).Msg("Failed to find installation")
+		l.Error("Failed to find installation")
 		return errors.New("Installation \"" + path + "\" not found")
 	}
 	f.selectedInstallation = installation
@@ -162,7 +163,7 @@ func (f *FicsitCLI) SelectInstall(path string) error {
 	installErr := f.validateInstall(f.selectedInstallation, "__select_install__")
 
 	if installErr != nil {
-		l.Error().Err(installErr).Str("install", installation.Info.Path).Msg("Failed to validate install")
+		l.Error("Failed to validate install", slog.Any("error", installErr), slog.String("install", installation.Info.Path))
 		return errors.Wrap(installErr, "Failed to validate install")
 	}
 	return nil
@@ -177,10 +178,10 @@ func (f *FicsitCLI) GetSelectedInstall() *installfinders.Installation {
 
 func (f *FicsitCLI) SetModsEnabled(enabled bool) error {
 	if f.selectedInstallation == nil {
-		log.Error().Msg("No installation selected")
+		slog.Error("no installation selected")
 		return errors.New("No installation selected")
 	}
-	l := log.With().Str("task", "setModsEnabled").Bool("enabled", enabled).Logger()
+	l := slog.With(slog.String("task", "setModsEnabled"), slog.Bool("enabled", enabled), slog.String("install", f.selectedInstallation.Info.Path))
 
 	var message string
 	if enabled {
@@ -207,7 +208,7 @@ func (f *FicsitCLI) SetModsEnabled(enabled bool) error {
 	installErr := f.validateInstall(f.selectedInstallation, "__toggle_mods__")
 
 	if installErr != nil {
-		l.Error().Err(installErr).Str("install", f.selectedInstallation.Info.Path).Msg("Failed to validate install")
+		l.Error("failed to validate install", slog.Any("error", installErr))
 		return errors.Wrap(installErr, "Failed to validate install")
 	}
 
@@ -226,21 +227,21 @@ func (f *FicsitCLI) GetSelectedInstallProfileMods() map[string]cli.ProfileMod {
 	return profile.Mods
 }
 
-func (f *FicsitCLI) GetSelectedInstallLockfileMods() (map[string]cli.LockedMod, error) {
+func (f *FicsitCLI) GetSelectedInstallLockfileMods() (map[string]resolver.LockedMod, error) {
 	if f.selectedInstallation == nil {
-		return make(map[string]cli.LockedMod), nil
+		return make(map[string]resolver.LockedMod), nil
 	}
 	lockfile, err := f.selectedInstallation.Installation.LockFile(f.ficsitCli)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get lockfile")
 	}
 	if lockfile == nil {
-		return make(map[string]cli.LockedMod), nil
+		return make(map[string]resolver.LockedMod), nil
 	}
 	return lockfile.Mods, nil
 }
 
-func (f *FicsitCLI) GetSelectedInstallLockfile() (*cli.LockFile, error) {
+func (f *FicsitCLI) GetSelectedInstallLockfile() (*resolver.LockFile, error) {
 	if f.selectedInstallation == nil {
 		return nil, nil
 	}
@@ -253,13 +254,13 @@ func (f *FicsitCLI) GetSelectedInstallLockfile() (*cli.LockFile, error) {
 
 func (f *FicsitCLI) LaunchGame() {
 	if f.selectedInstallation == nil {
-		log.Error().Msg("No installation selected")
+		slog.Error("no installation selected")
 		return
 	}
 	cmd := exec.Command(f.selectedInstallation.Info.LaunchPath[0], f.selectedInstallation.Info.LaunchPath[1:]...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Error().Err(err).Str("cmd", cmd.String()).Str("output", string(out)).Msg("Failed to launch game")
+		slog.Error("failed to launch game", slog.Any("error", err), slog.String("cmd", cmd.String()), slog.String("output", string(out)))
 		return
 	}
 }

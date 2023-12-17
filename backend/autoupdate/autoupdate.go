@@ -1,9 +1,9 @@
 package autoupdate
 
 import (
+	"log/slog"
 	"time"
 
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate/updater"
@@ -40,12 +40,12 @@ func CheckInterval(interval time.Duration) {
 	go func() {
 		err := Updater.CheckForUpdate()
 		if err != nil {
-			log.Error().Err(err).Msg("Failed to check for update")
+			slog.Error("failed to check for update", slog.Any("error", err))
 		}
 		for range updateCheckTicker.C {
 			err := Updater.CheckForUpdate()
 			if err != nil {
-				log.Error().Err(err).Msg("Failed to check for update")
+				slog.Error("failed to check for update", slog.Any("error", err))
 			}
 		}
 	}()

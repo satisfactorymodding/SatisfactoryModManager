@@ -2,11 +2,11 @@ package ficsitcli
 
 import (
 	"fmt"
+	"log/slog"
 	"sync"
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/rs/zerolog/log"
 	"github.com/satisfactorymodding/ficsit-cli/cli"
 	"github.com/satisfactorymodding/ficsit-cli/utils"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
@@ -124,7 +124,7 @@ func (f *FicsitCLI) validateInstall(installation *InstallationInfo, progressItem
 func (f *FicsitCLI) EmitModsChange() {
 	lockfileMods, err := f.GetSelectedInstallLockfileMods()
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to load lockfile")
+		slog.Error("failed to load lockfile", slog.Any("error", err))
 		return
 	}
 	wailsRuntime.EventsEmit(f.ctx, "lockfileMods", lockfileMods)

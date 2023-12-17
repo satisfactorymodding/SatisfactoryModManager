@@ -2,11 +2,11 @@ package ficsitcli
 
 import (
 	"context"
+	"log/slog"
 	"time"
 
 	"github.com/mitchellh/go-ps"
 	"github.com/pkg/errors"
-	"github.com/rs/zerolog/log"
 	"github.com/satisfactorymodding/ficsit-cli/cli"
 	"github.com/satisfactorymodding/ficsit-cli/cli/provider"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
@@ -56,7 +56,7 @@ func (f *FicsitCLI) Init() error {
 		for range gameRunningTicker.C {
 			processes, err := ps.Processes()
 			if err != nil {
-				log.Error().Err(err).Msg("failed to get processes")
+				slog.Error("failed to get processes", slog.Any("error", err))
 				continue
 			}
 			f.isGameRunning = false

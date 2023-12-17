@@ -2,11 +2,11 @@ package bindings
 
 import (
 	"context"
+	"log/slog"
 	"strings"
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
@@ -76,7 +76,7 @@ func (a *App) startup(ctx context.Context) {
 			if changed {
 				err := settings.SaveSettings()
 				if err != nil {
-					log.Error().Err(err).Msg("Failed to save settings")
+					slog.Error("failed to save settings", slog.Any("error", err))
 				}
 			}
 		}

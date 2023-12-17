@@ -1,11 +1,11 @@
 package backend
 
 import (
+	"log/slog"
 	"net/url"
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/rs/zerolog/log"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/bindings"
 )
@@ -18,12 +18,12 @@ func ProcessArguments(args []string) {
 		uri := args[0]
 		err := handleURI(uri)
 		if err != nil {
-			log.Error().Err(err).Str("uri", uri).Msg("Failed to handle smmanager:// URI")
+			slog.Error("failed to handle smmanager:// URI", slog.Any("error", err), slog.String("uri", uri))
 		}
 	} else {
 		err := handleFile(args[0])
 		if err != nil {
-			log.Error().Err(err).Str("path", args[1]).Msg("Failed to handle file")
+			slog.Error("failed to handle file", slog.Any("error", err), slog.String("path", args[0]))
 		}
 	}
 	bindings.BindingsInstance.App.Show()

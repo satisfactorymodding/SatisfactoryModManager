@@ -5,13 +5,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"os"
 	"path"
 	"runtime"
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/rs/zerolog/log"
 	ficsitCli "github.com/satisfactorymodding/ficsit-cli/cli"
 	"github.com/spf13/viper"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
@@ -175,7 +175,7 @@ func (d *DebugInfo) GenerateDebugInfo() bool {
 		},
 	})
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to open save dialog")
+		slog.Error("failed to open save dialog", slog.Any("error", err))
 		return false
 	}
 	if filename == "" {
@@ -184,7 +184,7 @@ func (d *DebugInfo) GenerateDebugInfo() bool {
 
 	err = d.generateAndSaveDebugInfo(filename)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to generate debuginfo")
+		slog.Error("failed to generate debug info", slog.Any("error", err))
 		return false
 	}
 

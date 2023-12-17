@@ -3,7 +3,8 @@
 package websocket
 
 import (
-	"github.com/rs/zerolog/log"
+	"log/slog"
+
 	"github.com/spf13/viper"
 	engineio_types "github.com/zishang520/engine.io/types"
 	"github.com/zishang520/socket.io/socket"
@@ -25,11 +26,11 @@ func ListenAndServeWebsocket() {
 		_ = client.On("installedMods", func(datas ...any) {
 			lockfile, err := bindings.BindingsInstance.FicsitCLI.GetSelectedInstallLockfile()
 			if err != nil {
-				log.Error().Err(err).Msg("Failed to get lockfile")
+				slog.Error("failed to get lockfile", slog.Any("error", err))
 				return
 			}
 			if lockfile == nil {
-				log.Error().Err(err).Msg("no lockfile found for websocket call")
+				slog.Error("no lockfile found for websocket call", slog.Any("error", err))
 				return
 			}
 			installedMods := make(map[string]string)
