@@ -1,6 +1,7 @@
 package ficsitcli
 
 import (
+	"os"
 	"os/exec"
 	"sort"
 
@@ -15,6 +16,11 @@ func (f *FicsitCLI) initInstallations() error {
 	err := f.initLocalInstallations()
 	if err != nil {
 		return errors.Wrap(err, "failed to initialize found installations")
+	}
+
+	err = f.initRemoteServerInstallations()
+	if err != nil {
+		return errors.Wrap(err, "failed to initialize remote server installations")
 	}
 
 	sort.Slice(f.installations, func(i, j int) bool {
@@ -76,6 +82,18 @@ func (f *FicsitCLI) initLocalInstallations() error {
 		err := f.ficsitCli.Installations.Save()
 		if err != nil {
 			return errors.Wrap(err, "failed to save installations")
+		}
+	}
+	return nil
+}
+
+func (f *FicsitCLI) initRemoteServerInstallations() error {
+	for _, installation := range f.ficsitCli.Installations.Installations {
+		if _, err := os.Stat(installation.Path); errors.Is(err, os.ErrNotExist) {
+			// It is not a local installation
+			if err := f.AddRemoteServer(installation.Path); err != nil {
+				return errors.Wrap(err, "failed to add remote server")
+			}
 		}
 	}
 	return nil

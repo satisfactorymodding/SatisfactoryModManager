@@ -10,8 +10,6 @@ import (
 	"github.com/satisfactorymodding/ficsit-cli/cli"
 	"github.com/satisfactorymodding/ficsit-cli/utils"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
-
-	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders"
 )
 
 func (f *FicsitCLI) validateInstall(installation *InstallationInfo, progressItem string) error {
@@ -134,11 +132,8 @@ func (f *FicsitCLI) EmitModsChange() {
 }
 
 func (f *FicsitCLI) EmitGlobals() {
-	installInfos := make([]*installfinders.Installation, 0, len(f.installations))
-	for _, install := range f.installations {
-		installInfos = append(installInfos, install.Info)
-	}
-	wailsRuntime.EventsEmit(f.ctx, "installations", installInfos)
+	wailsRuntime.EventsEmit(f.ctx, "installations", f.GetInstallationsInfo())
+	wailsRuntime.EventsEmit(f.ctx, "remoteServers", f.GetRemoteInstallations())
 	profileNames := make([]string, 0, len(f.ficsitCli.Profiles.Profiles))
 	for k := range f.ficsitCli.Profiles.Profiles {
 		profileNames = append(profileNames, k)

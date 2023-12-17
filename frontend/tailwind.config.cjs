@@ -6,8 +6,8 @@ module.exports = {
   theme: {
     extend: {
       screens: {
-        'h-md': { raw: '(min-height: 825px)' },
-        'h-lg': { raw: '(min-height: 900px)' },
+        'h-md': { raw: '(min-height: 875px)' },
+        'h-lg': { raw: '(min-height: 950px)' },
       },
     },
   },

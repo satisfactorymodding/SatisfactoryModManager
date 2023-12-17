@@ -121,6 +121,8 @@ func FindInstallationsWindowsEpic() ([]*Installation, []error) {
 		installs = append(installs, &Installation{
 			Path:     epicManifest.InstallLocation,
 			Version:  versionData.Changelist,
+			Type:     InstallTypeWindowsClient,
+			Location: LocationTypeLocal,
 			Branch:   branch,
 			Launcher: "Epic Games",
 			LaunchPath: []string{

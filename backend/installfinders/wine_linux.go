@@ -129,6 +129,8 @@ func findInstallationsWineEpic(winePrefix string, launcher string, launchPath []
 		installs = append(installs, &Installation{
 			Path:       wineInstallLocation,
 			Version:    versionData.Changelist,
+			Type:       InstallTypeWindowsClient,
+			Location:   LocationTypeLocal,
 			Branch:     branch,
 			Launcher:   launcher,
 			LaunchPath: launchPath,

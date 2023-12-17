@@ -12,6 +12,7 @@
   import Settings from './Settings.svelte';
   import Updates from './Updates.svelte';
   import LaunchButton from './LaunchButton.svelte';
+  import ServerManager from './ServerManager.svelte';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { installs, profiles, canModify, selectedInstall, selectedInstallPath, selectedProfile, modsEnabled, progress } from '$lib/store/ficsitCLIStore';
@@ -307,6 +308,7 @@
   </div>
   <div class="flex flex-col mt-4 h-md:mt-8">
     <span class="pl-4">Other</span>
+    <ServerManager />
     <Settings />
     <Button variant="unelevated" class="w-full mt-2" on:click={() => BrowserOpenURL('https://docs.ficsit.app/satisfactory-modding/latest/ForUsers/SatisfactoryModManager.html')}>
       <Label>

@@ -13,12 +13,29 @@ var (
 	BranchExperimental GameBranch = "Experimental"
 )
 
+type InstallType string
+
+var (
+	InstallTypeWindowsClient InstallType = "WindowsClient"
+	InstallTypeWindowsServer InstallType = "WindowsServer"
+	InstallTypeLinuxServer   InstallType = "LinuxServer"
+)
+
+type LocationType string
+
+var (
+	LocationTypeLocal  LocationType = "Local"
+	LocationTypeRemote LocationType = "Remote"
+)
+
 type Installation struct {
-	Path       string     `json:"path"`
-	Version    int        `json:"version"`
-	Branch     GameBranch `json:"branch"`
-	Launcher   string     `json:"launcher"`
-	LaunchPath []string   `json:"launchPath"`
+	Path       string       `json:"path"`
+	Version    int          `json:"version"`
+	Type       InstallType  `json:"type"`
+	Location   LocationType `json:"location"`
+	Branch     GameBranch   `json:"branch"`
+	Launcher   string       `json:"launcher"`
+	LaunchPath []string     `json:"launchPath"`
 }
 
 type InstallFindError struct {

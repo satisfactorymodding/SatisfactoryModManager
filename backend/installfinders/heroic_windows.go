@@ -65,6 +65,8 @@ func FindInstallationsWindowsHeroic() ([]*Installation, []error) {
 		installs = append(installs, &Installation{
 			Path:       legendaryGame.InstallPath,
 			Version:    version,
+			Type:       InstallTypeWindowsClient,
+			Location:   LocationTypeLocal,
 			Branch:     branch,
 			Launcher:   "Heroic",
 			LaunchPath: nil, // Heroic doesn't support launching from command line

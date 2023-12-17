@@ -4,16 +4,18 @@ import { binding, bindingTwoWay } from './wailsStoreBindings';
 import { isLaunchingGame } from './generalStore';
 
 import type { cli, ficsitcli } from '$wailsjs/go/models';
-import { CheckForUpdates, GetInstallationsInfo, GetInvalidInstalls, GetProfiles, GetSelectedInstall, GetSelectedProfile, SelectInstall, SetProfile, GetModsEnabled, SetModsEnabled, GetSelectedInstallProfileMods, GetSelectedInstallLockfileMods } from '$wailsjs/go/ficsitcli/FicsitCLI';
+import { CheckForUpdates, GetInstallationsInfo, GetInvalidInstalls, GetProfiles, GetSelectedInstall, GetSelectedProfile, SelectInstall, SetProfile, GetModsEnabled, SetModsEnabled, GetSelectedInstallProfileMods, GetSelectedInstallLockfileMods, GetRemoteInstallations } from '$wailsjs/go/ficsitcli/FicsitCLI';
 import { GetFavoriteMods } from '$wailsjs/go/bindings/Settings';
 
 export const invalidInstalls = binding([], { initialGet: GetInvalidInstalls });
 
-export const installs = binding([], { initialGet: GetInstallationsInfo, updateEvent: 'installs' });
+export const installs = binding([], { initialGet: GetInstallationsInfo, updateEvent: 'installs', allowNull: false });
 export const selectedInstallPath = bindingTwoWay(null, { initialGet: () => GetSelectedInstall().then((i) => i?.path ?? null), updateEvent: 'selectedInstall' }, { updateFunction: SelectInstall });
 export const selectedInstall = derived([installs, selectedInstallPath], ([$installs, $selectedInstallPath]) => {
   return $installs.find((i) => i.path === $selectedInstallPath) ?? null;
 });
+
+export const remoteServers = binding([], { initialGet: () => GetRemoteInstallations(), updateEvent: 'remoteServers', allowNull: false });
 
 export const profiles = binding([], { initialGet: GetProfiles, updateEvent: 'profiles' });
 export const selectedProfile = bindingTwoWay(null, { initialGet: GetSelectedProfile, updateEvent: 'selectedProfile', allowNull: false }, { updateFunction: SetProfile });
