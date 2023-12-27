@@ -134,7 +134,7 @@ func findInstallationsSteam(steamPath string, launcher string, executable []stri
 		}
 
 		installs = append(installs, &Installation{
-			Path:     fullInstallationPath,
+			Path:     filepath.Clean(fullInstallationPath),
 			Version:  versionData.Changelist,
 			Type:     InstallTypeWindowsClient,
 			Location: LocationTypeLocal,

@@ -57,7 +57,7 @@ func FindInstallationsLinuxHeroicFlatpak() ([]*Installation, []error) {
 			continue
 		}
 		installs = append(installs, &Installation{
-			Path:       legendaryGame.InstallPath,
+			Path:       filepath.Clean(legendaryGame.InstallPath),
 			Version:    version,
 			Type:       InstallTypeWindowsClient,
 			Location:   LocationTypeLocal,

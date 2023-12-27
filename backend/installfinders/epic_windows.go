@@ -119,7 +119,7 @@ func FindInstallationsWindowsEpic() ([]*Installation, []error) {
 		}
 
 		installs = append(installs, &Installation{
-			Path:     epicManifest.InstallLocation,
+			Path:     filepath.Clean(epicManifest.InstallLocation),
 			Version:  versionData.Changelist,
 			Type:     InstallTypeWindowsClient,
 			Location: LocationTypeLocal,

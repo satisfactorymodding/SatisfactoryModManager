@@ -56,7 +56,7 @@ func FindInstallationsLinuxLegendary() ([]*Installation, []error) {
 			launchPath = []string{"legendary", "launch", legendaryGame.AppName}
 		}
 		installs = append(installs, &Installation{
-			Path:       legendaryGame.InstallPath,
+			Path:       filepath.Clean(legendaryGame.InstallPath),
 			Version:    version,
 			Type:       InstallTypeWindowsClient,
 			Location:   LocationTypeLocal,
