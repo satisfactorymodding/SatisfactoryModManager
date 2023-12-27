@@ -33,11 +33,14 @@
   let newServerPath = '';
   let err = '';
 
+  let addInProgress = false;
+
   async function addNewRemoteServer() {
     if (!newServerPath) {
       return;
     }
     try {
+      addInProgress = true;
       await AddRemoteServer(newProtocol + newServerPath);
       newServerPath = '';
     } catch (e) {
@@ -48,6 +51,8 @@
       } else {
         err = 'Unknown error';
       }
+    } finally {
+      addInProgress = false;
     }
   }
 </script>
@@ -91,7 +96,13 @@
           {/each}
         </Select>
         <Textfield bind:value={newServerPath} class="!h-full grow mx-4"/>
-        <Button on:click={() => addNewRemoteServer()} class="!h-full">Add</Button>
+        <Button on:click={() => addNewRemoteServer()} disabled={addInProgress} class="!h-full">
+          {#if !addInProgress}
+            Add
+          {:else}
+            Validating...
+          {/if}
+        </Button>
       </div>
       <p>{err}</p>
     </div>
