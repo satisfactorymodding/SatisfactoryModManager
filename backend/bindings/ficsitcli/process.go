@@ -132,6 +132,12 @@ func (f *FicsitCLI) EmitModsChange() {
 }
 
 func (f *FicsitCLI) EmitGlobals() {
+	if f.ctx == nil {
+		// This function can be called from AddRemoteServer, which is used during initialization
+		// at which point the context is not set yet.
+		// We can safely ignore this call.
+		return
+	}
 	wailsRuntime.EventsEmit(f.ctx, "installations", f.GetInstallationsInfo())
 	wailsRuntime.EventsEmit(f.ctx, "remoteServers", f.GetRemoteInstallations())
 	profileNames := make([]string, 0, len(f.ficsitCli.Profiles.Profiles))

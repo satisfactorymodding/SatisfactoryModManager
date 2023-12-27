@@ -2,7 +2,7 @@ package ficsitcli
 
 import (
 	"log/slog"
-	"os"
+	"net/url"
 	"os/exec"
 	"sort"
 
@@ -90,11 +90,24 @@ func (f *FicsitCLI) initLocalInstallations() error {
 
 func (f *FicsitCLI) initRemoteServerInstallations() error {
 	for _, installation := range f.ficsitCli.Installations.Installations {
-		if _, err := os.Stat(installation.Path); errors.Is(err, os.ErrNotExist) {
-			// It is not a local installation
-			if err := f.AddRemoteServer(installation.Path); err != nil {
-				return errors.Wrap(err, "failed to add remote server")
-			}
+		err := f.checkAndAddExistingRemote(installation)
+		if err != nil {
+			slog.Warn("failed to check and add existing remote", slog.Any("error", err), slog.String("path", installation.Path))
+		}
+	}
+	return nil
+}
+
+func (f *FicsitCLI) checkAndAddExistingRemote(installation *cli.Installation) error {
+	slog.Debug("checking installation", slog.String("path", installation.Path))
+	parsed, err := url.Parse(installation.Path)
+	if err != nil {
+		return errors.Wrap(err, "failed to parse installation path")
+	}
+	if parsed.Scheme == "ftp" || parsed.Scheme == "sftp" {
+		// It is not a local installation
+		if err := f.AddRemoteServer(installation.Path); err != nil {
+			return errors.Wrap(err, "failed to add remote server")
 		}
 	}
 	return nil
