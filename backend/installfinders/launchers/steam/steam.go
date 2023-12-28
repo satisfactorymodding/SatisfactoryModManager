@@ -1,4 +1,4 @@
-package installfinders
+package steam
 
 import (
 	"encoding/json"
@@ -9,9 +9,12 @@ import (
 
 	"github.com/andygrunwald/vdf"
 	"github.com/pkg/errors"
+
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/launchers/epic"
 )
 
-func findInstallationsSteam(steamPath string, launcher string, executable []string) ([]*Installation, []error) {
+func findInstallationsSteam(steamPath string, launcher string, executable []string) ([]*common.Installation, []error) {
 	steamAppsPath := filepath.Join(steamPath, "steamapps")
 	libraryFoldersManifestPath := filepath.Join(steamAppsPath, "libraryfolders.vdf")
 
@@ -50,7 +53,7 @@ func findInstallationsSteam(steamPath string, launcher string, executable []stri
 
 		found := false
 		for _, existingLibraryFolder := range libraryFolders {
-			if OsPathEqual(existingLibraryFolder, libraryFolder) {
+			if common.OsPathEqual(existingLibraryFolder, libraryFolder) {
 				found = true
 				break
 			}
@@ -60,7 +63,7 @@ func findInstallationsSteam(steamPath string, launcher string, executable []stri
 		}
 	}
 
-	installs := make([]*Installation, 0)
+	installs := make([]*common.Installation, 0)
 	var findErrors []error
 
 	for _, libraryFolder := range libraryFolders {
@@ -92,7 +95,7 @@ func findInstallationsSteam(steamPath string, launcher string, executable []stri
 
 		gameExe := filepath.Join(fullInstallationPath, "FactoryGame.exe")
 		if _, err := os.Stat(gameExe); os.IsNotExist(err) {
-			findErrors = append(findErrors, InstallFindError{
+			findErrors = append(findErrors, common.InstallFindError{
 				Path:  fullInstallationPath,
 				Inner: errors.Wrap(err, "Missing game executable"),
 			})
@@ -101,7 +104,7 @@ func findInstallationsSteam(steamPath string, launcher string, executable []stri
 
 		versionFilePath := filepath.Join(fullInstallationPath, "Engine", "Binaries", "Win64", "FactoryGame-Win64-Shipping.version")
 		if _, err := os.Stat(versionFilePath); os.IsNotExist(err) {
-			findErrors = append(findErrors, InstallFindError{
+			findErrors = append(findErrors, common.InstallFindError{
 				Path:  fullInstallationPath,
 				Inner: errors.Wrap(err, "Missing game version file"),
 			})
@@ -114,30 +117,30 @@ func findInstallationsSteam(steamPath string, launcher string, executable []stri
 			continue
 		}
 
-		var versionData GameVersionFile
+		var versionData epic.GameVersionFile
 		if err := json.Unmarshal(versionFile, &versionData); err != nil {
 			findErrors = append(findErrors, errors.Wrapf(err, "Failed to parse version file %s", versionFilePath))
 			continue
 		}
 
-		var branch GameBranch
+		var branch common.GameBranch
 		userConfig := manifest["AppState"].(map[string]interface{})["UserConfig"].(map[string]interface{})
 		betakey, ok := userConfig["betakey"]
 		if !ok {
-			branch = BranchEarlyAccess
+			branch = common.BranchEarlyAccess
 		} else {
 			if betakey == "experimental" {
-				branch = BranchExperimental
+				branch = common.BranchExperimental
 			} else {
 				findErrors = append(findErrors, errors.Errorf("Unknown beta key %s", betakey))
 			}
 		}
 
-		installs = append(installs, &Installation{
+		installs = append(installs, &common.Installation{
 			Path:     filepath.Clean(fullInstallationPath),
 			Version:  versionData.Changelist,
-			Type:     InstallTypeWindowsClient,
-			Location: LocationTypeLocal,
+			Type:     common.InstallTypeWindowsClient,
+			Location: common.LocationTypeLocal,
 			Branch:   branch,
 			Launcher: launcher,
 			LaunchPath: append(

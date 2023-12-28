@@ -1,13 +1,15 @@
-package installfinders
+package steam
 
 import (
 	"path/filepath"
 
 	"github.com/pkg/errors"
 	"golang.org/x/sys/windows/registry"
+
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 )
 
-func FindInstallationsWindowsSteam() ([]*Installation, []error) {
+func FindInstallations() ([]*common.Installation, []error) {
 	key, err := registry.OpenKey(registry.CURRENT_USER, `Software\Valve\Steam`, registry.QUERY_VALUE)
 	if err != nil {
 		return nil, []error{errors.Wrap(err, "Failed to open Steam registry key")}

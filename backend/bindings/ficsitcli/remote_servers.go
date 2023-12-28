@@ -3,13 +3,13 @@ package ficsitcli
 import (
 	"github.com/pkg/errors"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 )
 
-func (f *FicsitCLI) GetRemoteInstallations() []*installfinders.Installation {
-	remoteInstallations := []*installfinders.Installation{}
+func (f *FicsitCLI) GetRemoteInstallations() []*common.Installation {
+	remoteInstallations := []*common.Installation{}
 	for _, install := range f.installations {
-		if install.Info.Location == installfinders.LocationTypeRemote {
+		if install.Info.Location == common.LocationTypeRemote {
 			remoteInstallations = append(remoteInstallations, install.Info)
 		}
 	}
@@ -43,24 +43,24 @@ func (f *FicsitCLI) AddRemoteServer(path string) error {
 	if err != nil {
 		return errors.Wrap(err, "failed to get platform")
 	}
-	var installType installfinders.InstallType
+	var installType common.InstallType
 	switch platform.TargetName {
 	case "Windows":
-		installType = installfinders.InstallTypeWindowsClient
+		installType = common.InstallTypeWindowsClient
 	case "WindowsServer":
-		installType = installfinders.InstallTypeWindowsServer
+		installType = common.InstallTypeWindowsServer
 	case "LinuxServer":
-		installType = installfinders.InstallTypeLinuxServer
+		installType = common.InstallTypeLinuxServer
 	}
 
-	branch := installfinders.BranchEarlyAccess // TODO: Do we have a way to detect this for remote installs?
+	branch := common.BranchEarlyAccess // TODO: Do we have a way to detect this for remote installs?
 
 	f.installations = append(f.installations, &InstallationInfo{
 		Installation: installation,
-		Info: &installfinders.Installation{
+		Info: &common.Installation{
 			Path:     installation.Path,
 			Type:     installType,
-			Location: installfinders.LocationTypeRemote,
+			Location: common.LocationTypeRemote,
 			Branch:   branch,
 			Version:  gameVersion,
 			Launcher: "Remote",
@@ -74,7 +74,7 @@ func (f *FicsitCLI) AddRemoteServer(path string) error {
 
 func (f *FicsitCLI) RemoveRemoteServer(path string) error {
 	for _, install := range f.installations {
-		if install.Info.Path == path && install.Info.Location != installfinders.LocationTypeRemote {
+		if install.Info.Path == path && install.Info.Location != common.LocationTypeRemote {
 			return errors.New("installation is not remote")
 		}
 	}

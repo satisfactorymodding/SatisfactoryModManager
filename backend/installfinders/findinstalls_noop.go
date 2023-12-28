@@ -2,6 +2,8 @@
 
 package installfinders
 
-func FindInstallations() ([]*Installation, []error) {
+import "github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
+
+func FindInstallations() ([]*common.Installation, []error) {
 	return nil, nil
 }

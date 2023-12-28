@@ -11,6 +11,7 @@ import (
 	resolver "github.com/satisfactorymodding/ficsit-resolver"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 )
 
 func (f *FicsitCLI) initInstallations() error {
@@ -117,8 +118,8 @@ func (f *FicsitCLI) GetInstallations() []*InstallationInfo {
 	return f.installations
 }
 
-func (f *FicsitCLI) GetInstallationsInfo() []*installfinders.Installation {
-	result := []*installfinders.Installation{}
+func (f *FicsitCLI) GetInstallationsInfo() []*common.Installation {
+	result := []*common.Installation{}
 	for _, install := range f.installations {
 		result = append(result, install.Info)
 	}
@@ -128,7 +129,7 @@ func (f *FicsitCLI) GetInstallationsInfo() []*installfinders.Installation {
 func (f *FicsitCLI) GetInvalidInstalls() []string {
 	result := []string{}
 	for _, err := range f.installFindErrors {
-		var installFindErr installfinders.InstallFindError
+		var installFindErr common.InstallFindError
 		if ok := errors.As(err, &installFindErr); ok {
 			result = append(result, installFindErr.Path)
 		}
@@ -182,7 +183,7 @@ func (f *FicsitCLI) SelectInstall(path string) error {
 	return nil
 }
 
-func (f *FicsitCLI) GetSelectedInstall() *installfinders.Installation {
+func (f *FicsitCLI) GetSelectedInstall() *common.Installation {
 	if f.selectedInstallation == nil {
 		return nil
 	}

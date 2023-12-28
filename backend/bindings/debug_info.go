@@ -16,7 +16,7 @@ import (
 	"github.com/spf13/viper"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/projectfile"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 )
@@ -34,7 +34,7 @@ func (d *DebugInfo) startup(ctx context.Context) {
 }
 
 type MetadataInstallation struct {
-	*installfinders.Installation
+	*common.Installation
 	Name    string `json:"name"`
 	Profile string `json:"profile"`
 }

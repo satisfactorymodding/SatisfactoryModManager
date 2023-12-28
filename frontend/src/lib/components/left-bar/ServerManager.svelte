@@ -9,13 +9,13 @@
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { remoteServers } from '$lib/store/ficsitCLIStore';
   import { AddRemoteServer, RemoveRemoteServer } from '$lib/generated/wailsjs/go/ficsitcli/FicsitCLI';
-  import type { installfinders } from '$lib/generated/wailsjs/go/models';
+  import type { common } from '$lib/generated/wailsjs/go/models';
 
   let dialogOpen = false;
 
   const allowedProtocols = ['ftp://'];
 
-  async function removeServer(server: installfinders.Installation) {
+  async function removeServer(server: common.Installation) {
     try {
       await RemoveRemoteServer(server.path);
     } catch (e) {
