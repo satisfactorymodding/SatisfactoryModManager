@@ -1,12 +1,12 @@
 package ficsitcli
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/pkg/errors"
 	ficsitcache "github.com/satisfactorymodding/ficsit-cli/cli/cache"
 	"github.com/satisfactorymodding/ficsit-cli/cli/provider"
-	"golang.org/x/exp/slices"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/settings"
 )

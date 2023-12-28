@@ -2,9 +2,9 @@ package settings
 
 import (
 	"encoding/json"
+	"maps"
 
 	"github.com/pkg/errors"
-	"golang.org/x/exp/maps"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 )
