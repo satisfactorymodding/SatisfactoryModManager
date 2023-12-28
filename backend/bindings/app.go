@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pkg/browser"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
@@ -162,6 +163,13 @@ func (a *App) ExternalImportProfile(path string) {
 func (a *App) Show() {
 	wailsRuntime.WindowUnminimise(a.ctx)
 	wailsRuntime.Show(a.ctx)
+}
+
+func (a *App) OpenExternal(input string) {
+	err := browser.OpenFile(input)
+	if err != nil {
+		slog.Error("failed to open external", slog.Any("error", err), slog.String("path", input))
+	}
 }
 
 func (a *App) GetAPIEndpoint() string {

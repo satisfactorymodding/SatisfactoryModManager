@@ -4,7 +4,7 @@
   import Dialog, { Title, Content, Actions } from '@smui/dialog';
   import TextField from '@smui/textfield'; 
   import Tooltip, { Wrapper } from '@smui/tooltip';
-  import { mdiCheckCircle, mdiCloseCircle, mdiDownload, mdiHelpCircle, mdiPencil, mdiPlusCircle, mdiTrashCan, mdiUpload, mdiWeb } from '@mdi/js';
+  import { mdiCheckCircle, mdiCloseCircle, mdiDownload, mdiFolderOpen, mdiHelpCircle, mdiPencil, mdiPlusCircle, mdiTrashCan, mdiUpload, mdiWeb } from '@mdi/js';
   import { siDiscord, siGithub } from 'simple-icons/icons';
   import HelperText from '@smui/textfield/helper-text';
   import LinearProgress from '@smui/linear-progress';
@@ -18,7 +18,7 @@
   import { installs, profiles, canModify, selectedInstall, selectedInstallPath, selectedProfile, modsEnabled, progress } from '$lib/store/ficsitCLIStore';
   import { error, siteURL } from '$lib/store/generalStore';
   import { BrowserOpenURL, EventsOn } from '$wailsjs/runtime/runtime';
-  import { OpenFileDialog } from '$wailsjs/go/bindings/App';
+  import { OpenExternal, OpenFileDialog } from '$wailsjs/go/bindings/App';
   import type { ficsitcli } from '$wailsjs/go/models';
   import { AddProfile, DeleteProfile, RenameProfile, ImportProfile, ExportCurrentProfile, ReadExportedProfileMetadata } from '$wailsjs/go/ficsitcli/FicsitCLI';
   
@@ -217,15 +217,20 @@
       disabled={!$canModify}
     >
       {#each $installs as install}
-        <Wrapper>
-          <Option value={install.path}>
-            <Label>{install?.branch} ({install?.launcher})</Label>
-          </Option>
-          
-          <Tooltip surface$class="max-w-lg text-base">
-            {install?.path}
-          </Tooltip>
-        </Wrapper>
+        <Option value={install.path}>
+          <Label class="mdc-deprecated-list-item__text">{install?.branch} ({install?.launcher})</Label>
+          <div class="!p-4 !m-0 !ml-auto !h-full" on:click={(e) => {
+            e.stopPropagation();
+            OpenExternal(install.path);
+          }}>
+            <Wrapper>
+              <SvgIcon icon={mdiFolderOpen} class="!w-full !h-full"/>          
+              <Tooltip surface$class="max-w-lg text-base">
+                {install?.path}
+              </Tooltip>
+            </Wrapper>
+          </div>
+        </Option>
       {/each}
     </Select>
     <div class="flex w-full mt-2">
