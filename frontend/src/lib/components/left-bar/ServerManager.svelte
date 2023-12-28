@@ -13,7 +13,7 @@
 
   let dialogOpen = false;
 
-  const allowedProtocols = ['ftp://'];
+  const allowedProtocols = ['ftp://', 'sftp://'];
 
   async function removeServer(server: common.Installation) {
     try {
