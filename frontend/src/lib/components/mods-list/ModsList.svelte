@@ -143,7 +143,7 @@
 </script>
 
 <div class="h-full flex flex-col">
-  <div class="flex-none z-10">
+  <div class="flex-none z-[1]">
     <ModListFilters />
   </div>
   <AnnouncementsBar />
