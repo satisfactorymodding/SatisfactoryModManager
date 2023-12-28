@@ -9,7 +9,7 @@ import { GetFavoriteMods } from '$wailsjs/go/bindings/Settings';
 
 export const invalidInstalls = binding([], { initialGet: GetInvalidInstalls });
 
-export const installs = binding([], { initialGet: GetInstallationsInfo, updateEvent: 'installs', allowNull: false });
+export const installs = binding([], { initialGet: GetInstallationsInfo, updateEvent: 'installations', allowNull: false });
 export const selectedInstallPath = bindingTwoWay(null, { initialGet: () => GetSelectedInstall().then((i) => i?.path ?? null), updateEvent: 'selectedInstall' }, { updateFunction: SelectInstall });
 export const selectedInstall = derived([installs, selectedInstallPath], ([$installs, $selectedInstallPath]) => {
   return $installs.find((i) => i.path === $selectedInstallPath) ?? null;
