@@ -30,6 +30,9 @@ func (f *FicsitCLI) validateInstall(installation *InstallationInfo, progressItem
 
 	progressTicker := time.NewTicker(100 * time.Millisecond)
 	done := make(chan bool)
+	defer progressTicker.Stop()
+	defer close(done)
+
 	go func() {
 		for {
 			select {
@@ -106,8 +109,6 @@ func (f *FicsitCLI) validateInstall(installation *InstallationInfo, progressItem
 				return oldValue, false
 			})
 		}
-		progressTicker.Stop()
-		close(done)
 	}()
 
 	installErr := installation.Installation.Install(f.ficsitCli, installChannel)
