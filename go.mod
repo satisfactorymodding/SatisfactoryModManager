@@ -7,6 +7,7 @@ toolchain go1.21.5
 require (
 	github.com/Masterminds/semver/v3 v3.2.1
 	github.com/andygrunwald/vdf v1.1.0
+	github.com/dustin/go-humanize v1.0.1
 	github.com/lmittmann/tint v1.0.3
 	github.com/minio/selfupdate v0.6.0
 	github.com/mitchellh/go-ps v1.0.0

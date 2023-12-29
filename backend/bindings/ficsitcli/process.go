@@ -5,11 +5,14 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/dustin/go-humanize"
 	"github.com/pkg/errors"
 	"github.com/puzpuzpuz/xsync/v3"
 	"github.com/satisfactorymodding/ficsit-cli/cli"
-	"github.com/satisfactorymodding/ficsit-cli/utils"
+	ficsitUtils "github.com/satisfactorymodding/ficsit-cli/utils"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
+
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 )
 
 func (f *FicsitCLI) validateInstall(installation *InstallationInfo, progressItem string) error {
@@ -21,8 +24,8 @@ func (f *FicsitCLI) validateInstall(installation *InstallationInfo, progressItem
 	defer f.setProgress(f.progress)
 
 	type modProgress struct {
-		downloadProgress utils.GenericProgress
-		extractProgress  utils.GenericProgress
+		downloadProgress ficsitUtils.GenericProgress
+		extractProgress  ficsitUtils.GenericProgress
 		downloading      bool
 		complete         bool
 	}
@@ -33,16 +36,19 @@ func (f *FicsitCLI) validateInstall(installation *InstallationInfo, progressItem
 	defer progressTicker.Stop()
 	defer close(done)
 
+	downloadProgressTracker := utils.NewProgressTracker(time.Second * 5)
+	extractProgressTracker := utils.NewProgressTracker(time.Second * 5)
+
 	go func() {
 		for {
 			select {
 			case <-done:
 				return
 			case <-progressTicker.C:
-				downloadBytesProgress := utils.GenericProgress{}
-				extractBytesProgress := utils.GenericProgress{}
-				downloadModsProgress := utils.GenericProgress{}
-				extractModsProgress := utils.GenericProgress{}
+				downloadBytesProgress := ficsitUtils.GenericProgress{}
+				extractBytesProgress := ficsitUtils.GenericProgress{}
+				downloadModsProgress := ficsitUtils.GenericProgress{}
+				extractModsProgress := ficsitUtils.GenericProgress{}
 
 				hasDownloading := false
 
@@ -73,19 +79,36 @@ func (f *FicsitCLI) validateInstall(installation *InstallationInfo, progressItem
 					return true
 				})
 
+				downloadProgressTracker.Add(downloadBytesProgress.Completed)
+				downloadProgressTracker.Total = downloadBytesProgress.Total
+				extractProgressTracker.Add(extractBytesProgress.Completed)
+				extractProgressTracker.Total = extractBytesProgress.Total
+
 				if hasDownloading {
 					if downloadBytesProgress.Total != 0 {
 						f.setProgress(&Progress{
-							Item:     progressItem,
-							Message:  fmt.Sprintf("Downloading %d/%d mods", downloadModsProgress.Completed, downloadModsProgress.Total),
+							Item: progressItem,
+							Message: fmt.Sprintf(
+								"Downloading %d/%d mods: %s/%s, %s/s, %s",
+								downloadModsProgress.Completed, downloadModsProgress.Total,
+								humanize.Bytes(uint64(downloadBytesProgress.Completed)), humanize.Bytes(uint64(downloadBytesProgress.Total)),
+								humanize.Bytes(uint64(downloadProgressTracker.Speed())),
+								downloadProgressTracker.ETA().Round(time.Second),
+							),
 							Progress: downloadBytesProgress.Percentage(),
 						})
 					}
 				} else {
 					if extractBytesProgress.Total != 0 {
 						f.setProgress(&Progress{
-							Item:     progressItem,
-							Message:  fmt.Sprintf("Extracting %d/%d mods", extractModsProgress.Completed, extractModsProgress.Total),
+							Item: progressItem,
+							Message: fmt.Sprintf(
+								"Extracting %d/%d mods: %s/%s, %s/s, %s",
+								extractModsProgress.Completed, extractModsProgress.Total,
+								humanize.Bytes(uint64(extractBytesProgress.Completed)), humanize.Bytes(uint64(extractBytesProgress.Total)),
+								humanize.Bytes(uint64(extractProgressTracker.Speed())),
+								extractProgressTracker.ETA().Round(time.Second),
+							),
 							Progress: extractBytesProgress.Percentage(),
 						})
 					}
