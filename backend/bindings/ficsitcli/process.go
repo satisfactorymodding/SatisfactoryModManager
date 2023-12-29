@@ -104,7 +104,7 @@ func (f *FicsitCLI) validateInstall(installation *InstallationInfo, progressItem
 				case cli.InstallUpdateTypeModDownload:
 					oldValue.downloadProgress = update.Progress
 				case cli.InstallUpdateTypeModExtract:
-					oldValue.downloadProgress = update.Progress
+					oldValue.extractProgress = update.Progress
 				}
 				return oldValue, false
 			})
