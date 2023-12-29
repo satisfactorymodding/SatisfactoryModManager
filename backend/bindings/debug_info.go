@@ -9,6 +9,7 @@ import (
 	"os"
 	"path"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -35,8 +36,9 @@ func (d *DebugInfo) startup(ctx context.Context) {
 
 type MetadataInstallation struct {
 	*common.Installation
-	Name    string `json:"name"`
-	Profile string `json:"profile"`
+	LaunchPath string `json:"launchPath"`
+	Name       string `json:"name"`
+	Profile    string `json:"profile"`
 }
 
 type Metadata struct {
@@ -78,6 +80,7 @@ func addMetadata(writer *zip.Writer) error {
 			Profile:      install.Installation.Profile,
 		}
 		i.Path = utils.RedactPath(i.Path)
+		i.LaunchPath = strings.Join(i.Installation.LaunchPath, " ")
 
 		metadataInstalls = append(metadataInstalls, i)
 
