@@ -1,1 +1,2 @@
-* text=auto
+# Linters require Unix-style line endings
+* text=auto eol=lf
