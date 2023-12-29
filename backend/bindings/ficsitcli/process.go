@@ -3,10 +3,10 @@ package ficsitcli
 import (
 	"fmt"
 	"log/slog"
-	"sync"
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/puzpuzpuz/xsync/v3"
 	"github.com/satisfactorymodding/ficsit-cli/cli"
 	"github.com/satisfactorymodding/ficsit-cli/utils"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
@@ -26,8 +26,7 @@ func (f *FicsitCLI) validateInstall(installation *InstallationInfo, progressItem
 		downloading      bool
 		complete         bool
 	}
-	modProgresses := map[string]modProgress{}
-	modProgressesMutex := &sync.Mutex{}
+	modProgresses := xsync.NewMapOf[string, modProgress]()
 
 	progressTicker := time.NewTicker(100 * time.Millisecond)
 	done := make(chan bool)
@@ -37,78 +36,75 @@ func (f *FicsitCLI) validateInstall(installation *InstallationInfo, progressItem
 			case <-done:
 				return
 			case <-progressTicker.C:
-				modProgressesMutex.Lock()
+				downloadBytesProgress := utils.GenericProgress{}
+				extractBytesProgress := utils.GenericProgress{}
+				downloadModsProgress := utils.GenericProgress{}
+				extractModsProgress := utils.GenericProgress{}
 
-				totalDownload := int64(0)
-				completedDownload := int64(0)
-				totalExtracted := int64(0)
-				completedExtracted := int64(0)
-				downloadsInProgressCount := 0
-				extractionsInProgressCount := 0
+				hasDownloading := false
 
-				for _, modProgress := range modProgresses {
-					if !modProgress.complete {
-						if modProgress.downloading {
-							downloadsInProgressCount++
-						} else {
-							extractionsInProgressCount++
+				modProgresses.Range(func(key string, value modProgress) bool {
+					if value.downloadProgress.Total != 0 {
+						downloadModsProgress.Total++
+						if value.complete || !value.downloading {
+							downloadModsProgress.Completed++
+						}
+						if !value.complete && value.downloading {
+							hasDownloading = true
 						}
 					}
-					completedDownload += modProgress.downloadProgress.Completed
-					totalDownload += modProgress.downloadProgress.Total
-					completedExtracted += modProgress.extractProgress.Completed
-					totalExtracted += modProgress.extractProgress.Total
-				}
+					// Extraction progress is not available while the mod is still being downloaded,
+					// but we should still count it as an extraction that has to execute.
+					if value.downloadProgress.Total != 0 || value.extractProgress.Total != 0 {
+						extractModsProgress.Total++
+						if value.complete {
+							extractModsProgress.Completed++
+						}
+					}
 
-				if downloadsInProgressCount > 0 {
-					if totalDownload != 0 {
+					downloadBytesProgress.Completed += value.downloadProgress.Completed
+					downloadBytesProgress.Total += value.downloadProgress.Total
+					extractBytesProgress.Completed += value.extractProgress.Completed
+					extractBytesProgress.Total += value.extractProgress.Total
+
+					return true
+				})
+
+				if hasDownloading {
+					if downloadBytesProgress.Total != 0 {
 						f.setProgress(&Progress{
 							Item:     progressItem,
-							Message:  fmt.Sprintf("Downloading %d mods", downloadsInProgressCount),
-							Progress: float64(completedDownload) / float64(totalDownload),
+							Message:  fmt.Sprintf("Downloading %d/%d mods", downloadModsProgress.Completed, downloadModsProgress.Total),
+							Progress: downloadBytesProgress.Percentage(),
 						})
 					}
-				} else if extractionsInProgressCount > 0 {
-					if totalExtracted != 0 {
+				} else {
+					if extractBytesProgress.Total != 0 {
 						f.setProgress(&Progress{
 							Item:     progressItem,
-							Message:  fmt.Sprintf("Extracting %d mods", extractionsInProgressCount),
-							Progress: float64(completedExtracted) / float64(totalExtracted),
+							Message:  fmt.Sprintf("Extracting %d/%d mods", extractModsProgress.Completed, extractModsProgress.Total),
+							Progress: extractBytesProgress.Percentage(),
 						})
 					}
 				}
-				modProgressesMutex.Unlock()
 			}
 		}
 	}()
 
 	go func() {
 		for update := range installChannel {
-			modProgressesMutex.Lock()
-			switch update.Type {
-			case cli.InstallUpdateTypeModDownload:
-				modProgresses[update.Item.Mod] = modProgress{
-					downloadProgress: update.Progress,
-					extractProgress:  modProgresses[update.Item.Mod].extractProgress,
-					downloading:      true,
-					complete:         false,
+			modProgresses.Compute(update.Item.Mod, func(oldValue modProgress, loaded bool) (modProgress, bool) {
+				oldValue.complete = update.Type == cli.InstallUpdateTypeModComplete
+				oldValue.downloading = update.Type == cli.InstallUpdateTypeModDownload
+
+				switch update.Type {
+				case cli.InstallUpdateTypeModDownload:
+					oldValue.downloadProgress = update.Progress
+				case cli.InstallUpdateTypeModExtract:
+					oldValue.downloadProgress = update.Progress
 				}
-			case cli.InstallUpdateTypeModExtract:
-				modProgresses[update.Item.Mod] = modProgress{
-					downloadProgress: modProgresses[update.Item.Mod].downloadProgress,
-					extractProgress:  update.Progress,
-					downloading:      false,
-					complete:         false,
-				}
-			case cli.InstallUpdateTypeModComplete:
-				modProgresses[update.Item.Mod] = modProgress{
-					downloadProgress: modProgresses[update.Item.Mod].downloadProgress,
-					extractProgress:  modProgresses[update.Item.Mod].extractProgress,
-					downloading:      false,
-					complete:         true,
-				}
-			}
-			modProgressesMutex.Unlock()
+				return oldValue, false
+			})
 		}
 		progressTicker.Stop()
 		close(done)
