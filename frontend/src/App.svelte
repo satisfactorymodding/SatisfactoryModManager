@@ -144,7 +144,7 @@
   escapeKeyAction=""
   surface$style="width: 500px; max-width: calc(100vw - 32px);"
 >
-  <Title>Togging mods</Title>
+  <Title>Toggling mods</Title>
   <Content>
     {#if $progress}
       <p>{$progress.message}</p>
