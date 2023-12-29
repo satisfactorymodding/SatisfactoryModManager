@@ -96,7 +96,15 @@ func (f *FicsitCLI) validateInstall(installation *InstallationInfo, progressItem
 
 	go func() {
 		for update := range installChannel {
+			if update.Type == cli.InstallUpdateTypeOverall {
+				// Although this wouldn't cause any issues in the progress generation above, we can ignore this update.
+				continue
+			}
 			modProgresses.Compute(update.Item.Mod, func(oldValue modProgress, loaded bool) (modProgress, bool) {
+				if oldValue.complete {
+					// Sometimes extract updates are received after the mod is marked as complete.
+					return oldValue, false
+				}
 				oldValue.complete = update.Type == cli.InstallUpdateTypeModComplete
 				oldValue.downloading = update.Type == cli.InstallUpdateTypeModDownload
 
