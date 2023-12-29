@@ -202,7 +202,7 @@ func (f *FicsitCLI) ExportCurrentProfile() error {
 		return errors.Wrapf(err, "Failed to export profile: %s", exportedProfile.Profile.Name)
 	}
 
-	exportedProfileJSON, err := utils.JsonMarshal(exportedProfile, 2)
+	exportedProfileJSON, err := utils.JSONMarshal(exportedProfile, 2)
 	if err != nil {
 		l.Error("failed to marshal exported profile", slog.Any("error", err))
 		return errors.Wrapf(err, "Failed to export profile: %s", exportedProfile.Profile.Name)

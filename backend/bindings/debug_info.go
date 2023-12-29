@@ -3,7 +3,6 @@ package bindings
 import (
 	"archive/zip"
 	"context"
-	"encoding/json"
 	"fmt"
 	"log/slog"
 	"os"
@@ -123,7 +122,7 @@ func addMetadata(writer *zip.Writer) error {
 		SMLVersion:           smlVersion,
 	}
 
-	metadataBytes, err := json.MarshalIndent(metadata, "", "    ")
+	metadataBytes, err := utils.JSONMarshal(metadata, 2)
 	if err != nil {
 		return errors.Wrap(err, "Failed to marshal metadata")
 	}

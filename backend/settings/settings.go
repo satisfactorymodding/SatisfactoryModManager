@@ -114,7 +114,7 @@ func LoadSettings() error {
 }
 
 func SaveSettings() error {
-	settingsFile, err := json.MarshalIndent(Settings, "", "  ")
+	settingsFile, err := utils.JSONMarshal(Settings, 2)
 	if err != nil {
 		return errors.Wrap(err, "failed to marshal settings")
 	}
