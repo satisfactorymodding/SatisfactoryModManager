@@ -77,6 +77,7 @@ func addMetadata(writer *zip.Writer) error {
 			Name:         fmt.Sprintf("Satisfactory %s (%s)", install.Info.Branch, install.Info.Launcher),
 			Profile:      install.Installation.Profile,
 		}
+		i.Path = utils.RedactPath(i.Path)
 
 		metadataInstalls = append(metadataInstalls, i)
 

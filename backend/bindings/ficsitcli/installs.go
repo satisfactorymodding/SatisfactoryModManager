@@ -12,6 +12,7 @@ import (
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 )
 
 func (f *FicsitCLI) initInstallations() error {
@@ -93,14 +94,14 @@ func (f *FicsitCLI) initRemoteServerInstallations() error {
 	for _, installation := range f.ficsitCli.Installations.Installations {
 		err := f.checkAndAddExistingRemote(installation)
 		if err != nil {
-			slog.Warn("failed to check and add existing remote", slog.Any("error", err), slog.String("path", installation.Path))
+			slog.Warn("failed to check and add existing remote", slog.Any("error", err), utils.SlogPath("path", installation.Path))
 		}
 	}
 	return nil
 }
 
 func (f *FicsitCLI) checkAndAddExistingRemote(installation *cli.Installation) error {
-	slog.Debug("checking installation", slog.String("path", installation.Path))
+	slog.Debug("checking whether installation is remote", utils.SlogPath("path", installation.Path))
 	parsed, err := url.Parse(installation.Path)
 	if err != nil {
 		return errors.Wrap(err, "failed to parse installation path")
@@ -148,7 +149,7 @@ func (f *FicsitCLI) GetInstallation(path string) *InstallationInfo {
 }
 
 func (f *FicsitCLI) SelectInstall(path string) error {
-	l := slog.With(slog.String("task", "selectInstall"), slog.String("path", path))
+	l := slog.With(slog.String("task", "selectInstall"), utils.SlogPath("path", path))
 	if f.selectedInstallation != nil && f.selectedInstallation.Info.Path == path {
 		return nil
 	}
@@ -177,7 +178,7 @@ func (f *FicsitCLI) SelectInstall(path string) error {
 	installErr := f.validateInstall(f.selectedInstallation, "__select_install__")
 
 	if installErr != nil {
-		l.Error("Failed to validate install", slog.Any("error", installErr), slog.String("install", installation.Info.Path))
+		l.Error("Failed to validate install", slog.Any("error", installErr))
 		return errors.Wrap(installErr, "Failed to validate install")
 	}
 	return nil
@@ -195,7 +196,7 @@ func (f *FicsitCLI) SetModsEnabled(enabled bool) error {
 		slog.Error("no installation selected")
 		return errors.New("No installation selected")
 	}
-	l := slog.With(slog.String("task", "setModsEnabled"), slog.Bool("enabled", enabled), slog.String("install", f.selectedInstallation.Info.Path))
+	l := slog.With(slog.String("task", "setModsEnabled"), slog.Bool("enabled", enabled), utils.SlogPath("install", f.selectedInstallation.Info.Path))
 
 	var message string
 	if enabled {

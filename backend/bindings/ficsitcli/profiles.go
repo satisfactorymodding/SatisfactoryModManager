@@ -12,6 +12,8 @@ import (
 	"github.com/satisfactorymodding/ficsit-cli/cli"
 	resolver "github.com/satisfactorymodding/ficsit-resolver"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
+
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 )
 
 func (f *FicsitCLI) SetProfile(profile string) error {
@@ -200,7 +202,7 @@ func (f *FicsitCLI) ExportCurrentProfile() error {
 		return errors.Wrapf(err, "Failed to export profile: %s", exportedProfile.Profile.Name)
 	}
 
-	exportedProfileJSON, err := json.MarshalIndent(exportedProfile, "", "  ")
+	exportedProfileJSON, err := utils.JsonMarshal(exportedProfile, 2)
 	if err != nil {
 		l.Error("failed to marshal exported profile", slog.Any("error", err))
 		return errors.Wrapf(err, "Failed to export profile: %s", exportedProfile.Profile.Name)
