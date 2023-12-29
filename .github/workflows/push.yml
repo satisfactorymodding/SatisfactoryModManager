@@ -61,7 +61,11 @@ jobs:
           path: build/bin/*
   
   lint-backend:
-    runs-on: windows-latest # TODO: golangci-lint only lints the files for the current OS, so we need to run it on both
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
 
