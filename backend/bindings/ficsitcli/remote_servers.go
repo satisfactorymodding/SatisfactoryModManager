@@ -1,6 +1,9 @@
 package ficsitcli
 
 import (
+	"strconv"
+	"strings"
+
 	"github.com/pkg/errors"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
@@ -63,13 +66,30 @@ func (f *FicsitCLI) AddRemoteServer(path string) error {
 			Location: common.LocationTypeRemote,
 			Branch:   branch,
 			Version:  gameVersion,
-			Launcher: "Remote",
+			Launcher: f.getNextRemoteLauncherName(),
 		},
 	})
 
 	f.EmitGlobals()
 
 	return nil
+}
+
+func (f *FicsitCLI) getNextRemoteLauncherName() string {
+	existingNumbers := make(map[int]bool)
+	for _, install := range f.GetRemoteInstallations() {
+		if strings.HasPrefix(install.Launcher, "Remote ") {
+			num, err := strconv.Atoi(strings.TrimPrefix(install.Launcher, "Remote "))
+			if err == nil {
+				existingNumbers[num] = true
+			}
+		}
+	}
+	for i := 1; ; i++ {
+		if !existingNumbers[i] {
+			return "Remote " + strconv.Itoa(i)
+		}
+	}
 }
 
 func (f *FicsitCLI) RemoveRemoteServer(path string) error {
