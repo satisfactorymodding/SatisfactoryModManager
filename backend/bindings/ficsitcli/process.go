@@ -86,6 +86,11 @@ func (f *FicsitCLI) validateInstall(installation *InstallationInfo, progressItem
 
 				if hasDownloading {
 					if downloadBytesProgress.Total != 0 {
+						eta := downloadProgressTracker.ETA().Round(time.Second)
+						etaText := eta.String()
+						if eta == 0 {
+							etaText = "soon™"
+						}
 						f.setProgress(&Progress{
 							Item: progressItem,
 							Message: fmt.Sprintf(
@@ -93,13 +98,18 @@ func (f *FicsitCLI) validateInstall(installation *InstallationInfo, progressItem
 								downloadModsProgress.Completed, downloadModsProgress.Total,
 								humanize.Bytes(uint64(downloadBytesProgress.Completed)), humanize.Bytes(uint64(downloadBytesProgress.Total)),
 								humanize.Bytes(uint64(downloadProgressTracker.Speed())),
-								downloadProgressTracker.ETA().Round(time.Second),
+								etaText,
 							),
 							Progress: downloadBytesProgress.Percentage(),
 						})
 					}
 				} else {
 					if extractBytesProgress.Total != 0 {
+						eta := extractProgressTracker.ETA().Round(time.Second)
+						etaText := eta.String()
+						if eta == 0 {
+							etaText = "soon™"
+						}
 						f.setProgress(&Progress{
 							Item: progressItem,
 							Message: fmt.Sprintf(
@@ -107,7 +117,7 @@ func (f *FicsitCLI) validateInstall(installation *InstallationInfo, progressItem
 								extractModsProgress.Completed, extractModsProgress.Total,
 								humanize.Bytes(uint64(extractBytesProgress.Completed)), humanize.Bytes(uint64(extractBytesProgress.Total)),
 								humanize.Bytes(uint64(extractProgressTracker.Speed())),
-								extractProgressTracker.ETA().Round(time.Second),
+								etaText,
 							),
 							Progress: extractBytesProgress.Percentage(),
 						})
