@@ -1,7 +1,6 @@
 package epic
 
 import (
-	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -11,7 +10,6 @@ import (
 var epicManifestsFolder = filepath.Join(os.Getenv("PROGRAMDATA"), "Epic", "EpicGamesLauncher", "Data", "Manifests")
 
 func FindInstallations() ([]*common.Installation, []error) {
-	slog.Warn("test")
 	return findInstallationsEpic(epicManifestsFolder, "Epic Games", func(appName string) []string {
 		return []string{
 			"cmd",
