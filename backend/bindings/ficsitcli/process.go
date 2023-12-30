@@ -10,6 +10,7 @@ import (
 	"github.com/puzpuzpuz/xsync/v3"
 	"github.com/satisfactorymodding/ficsit-cli/cli"
 	ficsitUtils "github.com/satisfactorymodding/ficsit-cli/utils"
+	resolver "github.com/satisfactorymodding/ficsit-resolver"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
@@ -154,7 +155,11 @@ func (f *FicsitCLI) validateInstall(installation *InstallationInfo, progressItem
 
 	installErr := installation.Installation.Install(f.ficsitCli, installChannel)
 	if installErr != nil {
-		return errors.Wrap(installErr, "failed to install")
+		var solvingError resolver.DependencyResolverError
+		if errors.As(installErr, &solvingError) {
+			return solvingError
+		}
+		return installErr //nolint:wrapcheck
 	}
 	return nil
 }
@@ -202,11 +207,14 @@ func (f *FicsitCLI) InstallMod(mod string) error {
 		return errors.New("no installation selected")
 	}
 
+	l := slog.With(slog.String("task", "installMod"), slog.String("mod", mod), utils.SlogPath("install", f.selectedInstallation.Info.Path))
+
 	profileName := f.selectedInstallation.Installation.Profile
 	profile := f.GetProfile(profileName)
 
 	profileErr := profile.AddMod(mod, ">=0.0.0")
 	if profileErr != nil {
+		l.Error("failed to add mod", slog.Any("error", profileErr))
 		return errors.Wrapf(profileErr, "failed to add mod: %s@latest", mod)
 	}
 
@@ -223,7 +231,8 @@ func (f *FicsitCLI) InstallMod(mod string) error {
 	installErr := f.validateInstall(f.selectedInstallation, mod)
 
 	if installErr != nil {
-		return errors.Wrapf(installErr, "failed to install mod: %s@latest", mod)
+		l.Error("failed to install", slog.Any("error", installErr))
+		return installErr
 	}
 
 	_ = f.ficsitCli.Profiles.Save()
@@ -240,12 +249,15 @@ func (f *FicsitCLI) InstallModVersion(mod string, version string) error {
 		return errors.New("no installation selected")
 	}
 
+	l := slog.With(slog.String("task", "installModVersion"), slog.String("mod", mod), slog.String("version", version), utils.SlogPath("install", f.selectedInstallation.Info.Path))
+
 	profileName := f.selectedInstallation.Installation.Profile
 	profile := f.GetProfile(profileName)
 
 	profileErr := profile.AddMod(mod, version)
 	if profileErr != nil {
-		return errors.Wrapf(profileErr, "Failed to add mod: %s@%s", mod, version)
+		l.Error("failed to add mod", slog.Any("error", profileErr))
+		return errors.Wrapf(profileErr, "failed to add mod: %s@%s", mod, version)
 	}
 
 	f.progress = &Progress{
@@ -261,7 +273,8 @@ func (f *FicsitCLI) InstallModVersion(mod string, version string) error {
 	installErr := f.validateInstall(f.selectedInstallation, mod)
 
 	if installErr != nil {
-		return errors.Wrapf(installErr, "failed to install mod: %s@%s", mod, version)
+		l.Error("failed to install", slog.Any("error", installErr))
+		return installErr
 	}
 
 	_ = f.ficsitCli.Profiles.Save()
@@ -277,6 +290,8 @@ func (f *FicsitCLI) RemoveMod(mod string) error {
 	if f.selectedInstallation == nil {
 		return errors.New("no installation selected")
 	}
+
+	l := slog.With(slog.String("task", "removeMod"), slog.String("mod", mod), utils.SlogPath("install", f.selectedInstallation.Info.Path))
 
 	profileName := f.selectedInstallation.Installation.Profile
 	profile := f.GetProfile(profileName)
@@ -296,7 +311,8 @@ func (f *FicsitCLI) RemoveMod(mod string) error {
 	installErr := f.validateInstall(f.selectedInstallation, mod)
 
 	if installErr != nil {
-		return errors.Wrapf(installErr, "failed to remove mod: %s", mod)
+		l.Error("failed to install", slog.Any("error", installErr))
+		return installErr
 	}
 
 	_ = f.ficsitCli.Profiles.Save()
@@ -312,6 +328,8 @@ func (f *FicsitCLI) EnableMod(mod string) error {
 	if f.selectedInstallation == nil {
 		return errors.New("no installation selected")
 	}
+
+	l := slog.With(slog.String("task", "enableMod"), slog.String("mod", mod), utils.SlogPath("install", f.selectedInstallation.Info.Path))
 
 	profileName := f.selectedInstallation.Installation.Profile
 	profile := f.GetProfile(profileName)
@@ -331,7 +349,8 @@ func (f *FicsitCLI) EnableMod(mod string) error {
 	installErr := f.validateInstall(f.selectedInstallation, mod)
 
 	if installErr != nil {
-		return errors.Wrapf(installErr, "failed to enable mod: %s", mod)
+		l.Error("failed to install", slog.Any("error", installErr))
+		return installErr
 	}
 
 	_ = f.ficsitCli.Profiles.Save()
@@ -347,6 +366,8 @@ func (f *FicsitCLI) DisableMod(mod string) error {
 	if f.selectedInstallation == nil {
 		return errors.New("no installation selected")
 	}
+
+	l := slog.With(slog.String("task", "disableMod"), slog.String("mod", mod), utils.SlogPath("install", f.selectedInstallation.Info.Path))
 
 	profileName := f.selectedInstallation.Installation.Profile
 	profile := f.GetProfile(profileName)
@@ -366,7 +387,8 @@ func (f *FicsitCLI) DisableMod(mod string) error {
 	installErr := f.validateInstall(f.selectedInstallation, mod)
 
 	if installErr != nil {
-		return errors.Wrapf(installErr, "failed to disable mod: %s", mod)
+		l.Error("failed to install", slog.Any("error", installErr))
+		return installErr
 	}
 
 	_ = f.ficsitCli.Profiles.Save()

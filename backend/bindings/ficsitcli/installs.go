@@ -131,7 +131,7 @@ func (f *FicsitCLI) GetInvalidInstalls() []string {
 	result := []string{}
 	for _, err := range f.installFindErrors {
 		var installFindErr common.InstallFindError
-		if ok := errors.As(err, &installFindErr); ok {
+		if errors.As(err, &installFindErr) {
 			result = append(result, installFindErr.Path)
 		}
 	}
@@ -179,7 +179,7 @@ func (f *FicsitCLI) SelectInstall(path string) error {
 
 	if installErr != nil {
 		l.Error("failed to validate install", slog.Any("error", installErr))
-		return errors.Wrap(installErr, "Failed to validate install")
+		return installErr
 	}
 	return nil
 }
@@ -224,7 +224,7 @@ func (f *FicsitCLI) SetModsEnabled(enabled bool) error {
 
 	if installErr != nil {
 		l.Error("failed to validate install", slog.Any("error", installErr))
-		return errors.Wrap(installErr, "failed to validate install")
+		return installErr
 	}
 
 	return nil
@@ -248,7 +248,7 @@ func (f *FicsitCLI) GetSelectedInstallLockfileMods() (map[string]resolver.Locked
 	}
 	lockfile, err := f.selectedInstallation.Installation.LockFile(f.ficsitCli)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to get lockfile")
+		return nil, err //nolint:wrapcheck
 	}
 	if lockfile == nil {
 		return make(map[string]resolver.LockedMod), nil
@@ -262,7 +262,7 @@ func (f *FicsitCLI) GetSelectedInstallLockfile() (*resolver.LockFile, error) {
 	}
 	lockfile, err := f.selectedInstallation.Installation.LockFile(f.ficsitCli)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to get lockfile")
+		return nil, err //nolint:wrapcheck
 	}
 	return lockfile, nil
 }

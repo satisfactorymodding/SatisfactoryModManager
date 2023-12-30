@@ -49,7 +49,7 @@ func (f *FicsitCLI) SetProfile(profile string) error {
 
 	if installErr != nil {
 		l.Error("failed to validate installation", slog.Any("error", installErr))
-		return errors.Wrap(installErr, "Failed to validate install")
+		return installErr
 	}
 
 	return nil
@@ -290,7 +290,7 @@ func (f *FicsitCLI) ImportProfile(name string, file string) error {
 	if installErr != nil {
 		_ = f.ficsitCli.Profiles.DeleteProfile(name)
 		l.Error("failed to validate installation", slog.Any("error", installErr))
-		return errors.Wrap(installErr, "Failed to validate install")
+		return installErr
 	}
 
 	_ = f.ficsitCli.Profiles.Save()

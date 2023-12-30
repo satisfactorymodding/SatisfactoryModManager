@@ -33,7 +33,7 @@ func (f *FicsitCLI) CheckForUpdates() ([]Update, error) {
 
 	profile := f.GetProfile(f.selectedInstallation.Installation.Profile)
 
-	resolver := resolver.NewDependencyResolver(f.ficsitCli.Provider, viper.GetString("api-base"))
+	res := resolver.NewDependencyResolver(f.ficsitCli.Provider, viper.GetString("api-base"))
 
 	gameVersion, err := f.selectedInstallation.Installation.GetGameVersion(f.ficsitCli)
 	if err != nil {
@@ -51,10 +51,14 @@ func (f *FicsitCLI) CheckForUpdates() ([]Update, error) {
 			Version: ">=0.0.0",
 		}
 	}
-	newLockfile, err := updateProfile.Resolve(resolver, nil, gameVersion)
+	newLockfile, err := updateProfile.Resolve(res, nil, gameVersion)
 	if err != nil {
 		l.Error("failed to resolve dependencies", slog.Any("error", err))
-		return nil, errors.Wrap(err, "Error resolving dependencies")
+		var solvingError resolver.DependencyResolverError
+		if errors.As(err, &solvingError) {
+			return nil, solvingError
+		}
+		return nil, err //nolint:wrapcheck
 	}
 
 	updates := []Update{}
@@ -101,7 +105,11 @@ func (f *FicsitCLI) UpdateMods(mods []string) error {
 	err := f.selectedInstallation.Installation.UpdateMods(f.ficsitCli, mods)
 	if err != nil {
 		l.Error("failed to update mods", slog.Any("error", err))
-		return errors.Wrap(err, "Failed to update mods")
+		var solvingError resolver.DependencyResolverError
+		if errors.As(err, &solvingError) {
+			return solvingError
+		}
+		return err //nolint:wrapcheck
 	}
 
 	f.progress = &Progress{
@@ -118,7 +126,11 @@ func (f *FicsitCLI) UpdateMods(mods []string) error {
 
 	if err != nil {
 		l.Error("failed to validate installation", slog.Any("error", err))
-		return errors.Wrap(err, "Failed to validate installation")
+		var solvingError resolver.DependencyResolverError
+		if errors.As(err, &solvingError) {
+			return solvingError
+		}
+		return err
 	}
 
 	_ = f.ficsitCli.Profiles.Save()
