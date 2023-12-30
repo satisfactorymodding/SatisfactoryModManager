@@ -1,8 +1,8 @@
-import { binding, bindingTwoWayNoExcept } from './wailsStoreBindings';
+import { binding, bindingTwoWay, bindingTwoWayNoExcept } from './wailsStoreBindings';
 
 import type { LaunchButtonType, ViewType } from '$lib/wailsTypesExtensions';
 import { GetOffline, SetOffline } from '$wailsjs/go/ficsitcli/FicsitCLI';
-import { GetStartView, SetStartView, GetKonami, SetKonami, GetLaunchButton, SetLaunchButton, GetQueueAutoStart, SetQueueAutoStart, GetUpdateCheckMode, SetUpdateCheckMode, GetViewedAnnouncements, GetIgnoredUpdates } from '$wailsjs/go/bindings/Settings';
+import { GetStartView, SetStartView, GetKonami, SetKonami, GetLaunchButton, SetLaunchButton, GetQueueAutoStart, SetQueueAutoStart, GetUpdateCheckMode, SetUpdateCheckMode, GetViewedAnnouncements, GetIgnoredUpdates, GetCacheDir, SetCacheDir } from '$wailsjs/go/bindings/Settings';
 
 export const startView = bindingTwoWayNoExcept<ViewType | null>(null, { initialGet: GetStartView }, { updateFunction: SetStartView });
 
@@ -19,3 +19,5 @@ export const updateCheckMode = bindingTwoWayNoExcept<'launch'|'exit'|'ask'>('lau
 export const viewedAnnouncements = binding<string[]>([], { initialGet: GetViewedAnnouncements, updateEvent: 'viewedAnnouncements' });
 
 export const ignoredUpdates = binding<Record<string, string[]>>({}, { initialGet: GetIgnoredUpdates, updateEvent: 'ignoredUpdates' });
+
+export const cacheDir = bindingTwoWay<string, null>(null, { initialGet: GetCacheDir, updateEvent: 'cacheDir' }, { updateFunction: SetCacheDir });

@@ -52,6 +52,8 @@ type settings struct {
 
 	Konami       bool   `json:"konami"`
 	LaunchButton string `json:"launchButton"`
+
+	CacheDir string `json:"cacheDir,omitempty"`
 }
 
 var Settings = settings{

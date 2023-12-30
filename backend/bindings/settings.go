@@ -2,9 +2,12 @@ package bindings
 
 import (
 	"context"
+	"log/slog"
 
+	"github.com/spf13/viper"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/bindings/ficsitcli"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/settings"
 )
 
@@ -174,4 +177,23 @@ func (s *Settings) SetAnnouncementViewed(announcement string) {
 	settings.Settings.ViewedAnnouncements = append(settings.Settings.ViewedAnnouncements, announcement)
 	_ = settings.SaveSettings()
 	wailsRuntime.EventsEmit(s.ctx, "viewedAnnouncements", settings.Settings.ViewedAnnouncements)
+}
+
+func (s *Settings) SetCacheDir(dir string) error {
+	if dir == "" {
+		dir = viper.GetString("default-cache-dir")
+	}
+	err := ficsitcli.MoveCacheDir(dir)
+	if err != nil {
+		slog.Error("failed to set cache dir", slog.Any("error", err))
+		return err
+	}
+	settings.Settings.CacheDir = dir
+	_ = settings.SaveSettings()
+	wailsRuntime.EventsEmit(s.ctx, "cacheDir", dir)
+	return nil
+}
+
+func (s *Settings) GetCacheDir() string {
+	return viper.GetString("cache-dir")
 }

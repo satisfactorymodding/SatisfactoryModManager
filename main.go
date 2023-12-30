@@ -23,6 +23,7 @@ import (
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/bindings"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/bindings/ficsitcli"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/projectfile"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/settings"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
@@ -58,6 +59,15 @@ func main() {
 	if err != nil {
 		slog.Error("failed to load settings", slog.Any("error", err))
 		os.Exit(1)
+	}
+
+	if settings.Settings.CacheDir != "" {
+		err = ficsitcli.ValidateCacheDir(settings.Settings.CacheDir)
+		if err != nil {
+			slog.Error("failed to set cache dir", slog.Any("error", err))
+		} else {
+			viper.Set("cache-dir", settings.Settings.CacheDir)
+		}
 	}
 
 	b, err := bindings.MakeBindings()
@@ -142,6 +152,7 @@ func init() {
 	cacheDir := filepath.Clean(filepath.Join(baseCacheDir, "ficsit"))
 	_ = utils.EnsureDirExists(cacheDir)
 	viper.Set("cache-dir", cacheDir)
+	viper.Set("default-cache-dir", cacheDir)
 
 	smmCacheDir := filepath.Clean(filepath.Join(baseCacheDir, "SatisfactoryModManager"))
 	_ = utils.EnsureDirExists(smmCacheDir)

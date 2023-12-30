@@ -152,6 +152,31 @@ func (a *App) OpenFileDialog(options OpenDialogOptions) (string, error) {
 	return file, nil
 }
 
+func (a *App) OpenDirectoryDialog(options OpenDialogOptions) (string, error) {
+	wailsFilters := make([]wailsRuntime.FileFilter, len(options.Filters))
+	for i, filter := range options.Filters {
+		wailsFilters[i] = wailsRuntime.FileFilter{
+			DisplayName: filter.DisplayName,
+			Pattern:     filter.Pattern,
+		}
+	}
+	wailsOptions := wailsRuntime.OpenDialogOptions{
+		DefaultDirectory:           options.DefaultDirectory,
+		DefaultFilename:            options.DefaultFilename,
+		Title:                      options.Title,
+		Filters:                    wailsFilters,
+		ShowHiddenFiles:            options.ShowHiddenFiles,
+		CanCreateDirectories:       options.CanCreateDirectories,
+		ResolvesAliases:            options.ResolvesAliases,
+		TreatPackagesAsDirectories: options.TreatPackagesAsDirectories,
+	}
+	file, err := wailsRuntime.OpenDirectoryDialog(a.ctx, wailsOptions)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to open directory dialog")
+	}
+	return file, nil
+}
+
 func (a *App) ExternalInstallMod(modID, version string) {
 	wailsRuntime.EventsEmit(a.ctx, "externalInstallMod", modID, version)
 }

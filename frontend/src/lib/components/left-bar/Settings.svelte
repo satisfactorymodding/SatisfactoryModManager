@@ -2,16 +2,20 @@
   import Button, { Label } from '@smui/button';
   import Menu, { SelectionGroup, SelectionGroupIcon } from '@smui/menu';
   import List, { Item, PrimaryText, Text, Separator } from '@smui/list';
-  import { mdiBug, mdiCheck, mdiChevronRight, mdiClipboard, mdiCog, mdiDownload, mdiTune } from '@mdi/js';
+  import { mdiBug, mdiCheck, mdiChevronRight, mdiClipboard, mdiCog, mdiDownload, mdiFolderEdit, mdiTune } from '@mdi/js';
   import { getContextClient } from '@urql/svelte';
+  import Dialog, { Actions, Content, Title } from '@smui/dialog';
+  import Textfield from '@smui/textfield';
+  import HelperText from '@smui/textfield/helper-text';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { GenerateDebugInfo } from '$wailsjs/go/bindings/DebugInfo';
-  import { startView, konami, launchButton, queueAutoStart, offline, updateCheckMode } from '$lib/store/settingsStore';
+  import { startView, konami, launchButton, queueAutoStart, offline, updateCheckMode, cacheDir } from '$lib/store/settingsStore';
   import { manifestMods, lockfileMods } from '$lib/store/ficsitCLIStore';
   import { GetModNameDocument } from '$lib/generated';
   import type { LaunchButtonType, ViewType } from '$lib/wailsTypesExtensions';
   import { OfflineGetMod } from '$wailsjs/go/ficsitcli/FicsitCLI';
+  import { OpenDirectoryDialog } from '$lib/generated/wailsjs/go/bindings/App';
 
   let settingsMenu: Menu;
   let startViewMenu: Menu;
@@ -115,6 +119,75 @@
       modListString += `${mod.friendlyName} ${mod.modReference} ${mod.version}\n`;
     });
     navigator.clipboard.writeText(modListString.trim());
+  }
+
+  let cacheDialog = false;
+  let cacheError: string | null = null;
+  let newCacheLocation = $cacheDir;
+  
+  let fileDialogOpen = false;
+  async function pickCacheLocation() {
+    if(fileDialogOpen) {
+      return;
+    }
+    fileDialogOpen = true;
+    try {
+      let result = await OpenDirectoryDialog({
+        defaultDirectory: newCacheLocation ?? undefined,
+      });
+      if (result) {
+        newCacheLocation = result;
+      }
+    } catch (e) {
+      if(e instanceof Error) {
+        cacheError = e.message;
+      } else if (typeof e === 'string') {
+        cacheError = e;
+      } else {
+        cacheError = 'Unknown error';
+      }
+    } finally {
+      fileDialogOpen = false;
+    }
+  }
+
+  let cacheMoveInProgress = false;
+
+  async function setCacheLocation() {
+    try {
+      cacheMoveInProgress = true;
+      await cacheDir.asyncSet(newCacheLocation ?? '');
+      cacheError = null;
+    } catch(e) {
+      if (e instanceof Error) {
+        cacheError = e.message;
+      } else if (typeof e === 'string') {
+        cacheError = e;
+      } else {
+        cacheError = 'Unknown error';
+      }
+    } finally {
+      cacheMoveInProgress = false;
+    }
+  }
+
+  async function resetCacheLocation() {
+    try {
+      cacheMoveInProgress = true;
+      await cacheDir.asyncSet('');
+      newCacheLocation = $cacheDir;
+      cacheError = null;
+    } catch(e) {
+      if (e instanceof Error) {
+        cacheError = e.message;
+      } else if (typeof e === 'string') {
+        cacheError = e;
+      } else {
+        cacheError = 'Unknown error';
+      }
+    } finally {
+      cacheMoveInProgress = false;
+    }
   }
 </script>
 
@@ -256,6 +329,15 @@
         </Menu>
       </div>
       <Separator insetLeading insetTrailing insetPadding />
+      <Item on:SMUI:action={() => { cacheDialog = true; settingsMenu.setOpen(false); } }>
+        <div class="w-7"/>
+        <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
+          <PrimaryText class="text-base">Change cache location</PrimaryText>
+        </Text>
+        <div class="grow" />
+        <SvgIcon icon={mdiFolderEdit} class="h-5 w-5" />
+      </Item>
+      <Separator insetLeading insetTrailing insetPadding />
       <Item on:SMUI:action={() => { $offline = !$offline; settingsMenu.setOpen(false); }}>
         <div class="w-7"/>
         <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
@@ -307,3 +389,44 @@
     </List>
   </Menu>
 </div>
+
+
+<Dialog
+  bind:open={cacheDialog}
+  scrimClickAction="" escapeKeyAction=""
+  surface$style="max-height: calc(100vh - 128px); max-width: calc(100vw - 128px);"
+  surface$class="!min-w-[800px] min-h-[400px]"
+>
+  <Title>Change download cache location</Title>
+  <Content>
+    <div class="flex items-baseline">
+      <div
+        class="grow"
+      >
+        <Textfield
+          bind:value={newCacheLocation}
+          invalid={!!cacheError}
+          label="Cache location"
+          class="w-full"
+          input$readonly
+          on:click={() => pickCacheLocation()}
+        >
+          <HelperText validationMsg slot="helper">
+            { cacheError }
+          </HelperText>
+        </Textfield>
+      </div>
+      <Button on:click={() => resetCacheLocation()} disabled={cacheMoveInProgress} class="mr-4 shrink-0">
+        <Label>Reset to default</Label>
+      </Button>
+      <Button on:click={() => setCacheLocation()} disabled={cacheMoveInProgress} class="shrink-0">
+        <Label>Save and move</Label>
+      </Button>
+    </div>
+  </Content>
+  <Actions>
+    <Button on:click={() => { cacheDialog = false; }} disabled={cacheMoveInProgress}>
+      <Label>Close</Label>
+    </Button>
+  </Actions>
+</Dialog>
