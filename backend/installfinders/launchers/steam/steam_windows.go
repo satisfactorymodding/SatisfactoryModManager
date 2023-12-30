@@ -12,7 +12,7 @@ import (
 func FindInstallations() ([]*common.Installation, []error) {
 	key, err := registry.OpenKey(registry.CURRENT_USER, `Software\Valve\Steam`, registry.QUERY_VALUE)
 	if err != nil {
-		return nil, []error{errors.Wrap(err, "Failed to open Steam registry key")}
+		return nil, []error{errors.Wrap(err, "failed to open Steam registry key")}
 	}
 	defer key.Close()
 

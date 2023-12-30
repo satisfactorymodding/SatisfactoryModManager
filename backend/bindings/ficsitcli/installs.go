@@ -155,8 +155,8 @@ func (f *FicsitCLI) SelectInstall(path string) error {
 	}
 	installation := f.GetInstallation(path)
 	if installation == nil {
-		l.Error("Failed to find installation")
-		return errors.New("Installation \"" + path + "\" not found")
+		l.Error("failed to find installation")
+		return errors.Errorf("installation %s not found", path)
 	}
 	f.selectedInstallation = installation
 
@@ -178,7 +178,7 @@ func (f *FicsitCLI) SelectInstall(path string) error {
 	installErr := f.validateInstall(f.selectedInstallation, "__select_install__")
 
 	if installErr != nil {
-		l.Error("Failed to validate install", slog.Any("error", installErr))
+		l.Error("failed to validate install", slog.Any("error", installErr))
 		return errors.Wrap(installErr, "Failed to validate install")
 	}
 	return nil
@@ -194,7 +194,7 @@ func (f *FicsitCLI) GetSelectedInstall() *common.Installation {
 func (f *FicsitCLI) SetModsEnabled(enabled bool) error {
 	if f.selectedInstallation == nil {
 		slog.Error("no installation selected")
-		return errors.New("No installation selected")
+		return errors.New("no installation selected")
 	}
 	l := slog.With(slog.String("task", "setModsEnabled"), slog.Bool("enabled", enabled), utils.SlogPath("install", f.selectedInstallation.Info.Path))
 
@@ -224,7 +224,7 @@ func (f *FicsitCLI) SetModsEnabled(enabled bool) error {
 
 	if installErr != nil {
 		l.Error("failed to validate install", slog.Any("error", installErr))
-		return errors.Wrap(installErr, "Failed to validate install")
+		return errors.Wrap(installErr, "failed to validate install")
 	}
 
 	return nil

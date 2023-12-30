@@ -24,7 +24,7 @@ func (f *FicsitCLI) CheckForUpdates() ([]Update, error) {
 	currentLockfile, err := f.selectedInstallation.Installation.LockFile(f.ficsitCli)
 	if err != nil {
 		l.Error("failed to get current lockfile", slog.Any("error", err))
-		return nil, errors.Wrap(err, "Failed to get current lockfile")
+		return nil, errors.Wrap(err, "failed to get current lockfile")
 	}
 
 	if currentLockfile == nil {
@@ -38,7 +38,7 @@ func (f *FicsitCLI) CheckForUpdates() ([]Update, error) {
 	gameVersion, err := f.selectedInstallation.Installation.GetGameVersion(f.ficsitCli)
 	if err != nil {
 		l.Error("failed to get game version", slog.Any("error", err))
-		return nil, errors.Wrap(err, "Failed to get game version")
+		return nil, errors.Wrap(err, "failed to get game version")
 	}
 
 	updateProfile := &cli.Profile{
@@ -79,11 +79,11 @@ func (f *FicsitCLI) UpdateMods(mods []string) error {
 
 	if f.progress != nil {
 		l.Error("another operation in progress")
-		return errors.New("Another operation in progress")
+		return errors.New("another operation in progress")
 	}
 
 	if f.selectedInstallation == nil {
-		return errors.New("No installation selected")
+		return errors.New("no installation selected")
 	}
 
 	profile := f.GetProfile(f.selectedInstallation.Installation.Profile)

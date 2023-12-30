@@ -20,13 +20,13 @@ func findInstallationsSteam(steamPath string, launcher string, executable []stri
 
 	libraryFoldersF, err := os.Open(libraryFoldersManifestPath)
 	if err != nil {
-		return nil, []error{errors.Wrap(err, "Failed to open library folders manifest")}
+		return nil, []error{errors.Wrap(err, "failed to open library folders manifest")}
 	}
 
 	parser := vdf.NewParser(libraryFoldersF)
 	libraryFoldersManifest, err := parser.Parse()
 	if err != nil {
-		return nil, []error{errors.Wrap(err, "Failed to parse library folders manifest")}
+		return nil, []error{errors.Wrap(err, "failed to parse library folders manifest")}
 	}
 
 	var libraryFoldersList map[string]interface{}
@@ -36,7 +36,7 @@ func findInstallationsSteam(steamPath string, launcher string, executable []stri
 	} else if _, ok := libraryFoldersManifest["libraryfolders"]; ok {
 		libraryFoldersList = libraryFoldersManifest["libraryfolders"].(map[string]interface{})
 	} else {
-		return nil, []error{errors.New("Failed to find library folders in manifest")}
+		return nil, []error{errors.New("failed to find library folders in manifest")}
 	}
 
 	libraryFolders := []string{
@@ -75,14 +75,14 @@ func findInstallationsSteam(steamPath string, launcher string, executable []stri
 
 		manifestF, err := os.Open(manifestPath)
 		if err != nil {
-			findErrors = append(findErrors, errors.Wrapf(err, "Failed to open manifest file %s", manifestPath))
+			findErrors = append(findErrors, errors.Wrapf(err, "failed to open manifest file %s", manifestPath))
 			continue
 		}
 
 		parser := vdf.NewParser(manifestF)
 		manifest, err := parser.Parse()
 		if err != nil {
-			findErrors = append(findErrors, errors.Wrapf(err, "Failed to parse manifest file %s", manifestPath))
+			findErrors = append(findErrors, errors.Wrapf(err, "failed to parse manifest file %s", manifestPath))
 			continue
 		}
 
@@ -97,7 +97,7 @@ func findInstallationsSteam(steamPath string, launcher string, executable []stri
 		if _, err := os.Stat(gameExe); os.IsNotExist(err) {
 			findErrors = append(findErrors, common.InstallFindError{
 				Path:  fullInstallationPath,
-				Inner: errors.Wrap(err, "Missing game executable"),
+				Inner: errors.Wrap(err, "missing game executable"),
 			})
 			continue
 		}
@@ -106,20 +106,20 @@ func findInstallationsSteam(steamPath string, launcher string, executable []stri
 		if _, err := os.Stat(versionFilePath); os.IsNotExist(err) {
 			findErrors = append(findErrors, common.InstallFindError{
 				Path:  fullInstallationPath,
-				Inner: errors.Wrap(err, "Missing game version file"),
+				Inner: errors.Wrap(err, "missing game version file"),
 			})
 			continue
 		}
 
 		versionFile, err := os.ReadFile(versionFilePath)
 		if err != nil {
-			findErrors = append(findErrors, errors.Wrapf(err, "Failed to read version file %s", versionFilePath))
+			findErrors = append(findErrors, errors.Wrapf(err, "failed to read version file %s", versionFilePath))
 			continue
 		}
 
 		var versionData epic.GameVersionFile
 		if err := json.Unmarshal(versionFile, &versionData); err != nil {
-			findErrors = append(findErrors, errors.Wrapf(err, "Failed to parse version file %s", versionFilePath))
+			findErrors = append(findErrors, errors.Wrapf(err, "failed to parse version file %s", versionFilePath))
 			continue
 		}
 

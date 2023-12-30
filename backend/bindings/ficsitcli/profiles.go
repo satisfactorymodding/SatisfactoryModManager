@@ -21,7 +21,7 @@ func (f *FicsitCLI) SetProfile(profile string) error {
 
 	if f.selectedInstallation == nil {
 		l.Error("no installation selected")
-		return errors.New("No installation selected")
+		return errors.New("no installation selected")
 	}
 	if f.selectedInstallation.Installation.Profile == profile {
 		return nil
@@ -29,7 +29,7 @@ func (f *FicsitCLI) SetProfile(profile string) error {
 	err := f.selectedInstallation.Installation.SetProfile(f.ficsitCli, profile)
 	if err != nil {
 		l.Error("failed to set profile", slog.Any("error", err))
-		return errors.Wrap(err, "Failed to set profile")
+		return errors.Wrap(err, "failed to set profile")
 	}
 	_ = f.ficsitCli.Installations.Save()
 
@@ -81,7 +81,7 @@ func (f *FicsitCLI) AddProfile(name string) error {
 	_, err := f.ficsitCli.Profiles.AddProfile(name)
 	if err != nil {
 		l.Error("failed to add profile", slog.Any("error", err))
-		return errors.Wrapf(err, "Failed to add profile: %s", name)
+		return errors.Wrapf(err, "failed to add profile: %s", name)
 	}
 
 	_ = f.ficsitCli.Profiles.Save()
@@ -97,7 +97,7 @@ func (f *FicsitCLI) RenameProfile(oldName string, newName string) error {
 	err := f.ficsitCli.Profiles.RenameProfile(f.ficsitCli, oldName, newName)
 	if err != nil {
 		l.Error("failed to rename profile", slog.Any("error", err))
-		return errors.Wrapf(err, "Failed to rename profile: %s -> %s", oldName, newName)
+		return errors.Wrapf(err, "failed to rename profile: %s -> %s", oldName, newName)
 	}
 
 	_ = f.ficsitCli.Profiles.Save()
@@ -113,7 +113,7 @@ func (f *FicsitCLI) DeleteProfile(name string) error {
 	err := f.ficsitCli.Profiles.DeleteProfile(name)
 	if err != nil {
 		l.Error("failed to delete profile", slog.Any("error", err))
-		return errors.Wrapf(err, "Failed to delete profile: %s", name)
+		return errors.Wrapf(err, "failed to delete profile: %s", name)
 	}
 
 	_ = f.ficsitCli.Profiles.Save()
@@ -144,24 +144,24 @@ func (f *FicsitCLI) MakeCurrentExportedProfile() (*ExportedProfile, error) {
 
 	if f.selectedInstallation == nil {
 		l.Error("no installation selected")
-		return nil, errors.New("No installation selected")
+		return nil, errors.New("no installation selected")
 	}
 
 	profileName := f.GetSelectedProfile()
 	if profileName == nil {
 		l.Error("no profile selected")
-		return nil, errors.New("No profile selected")
+		return nil, errors.New("no profile selected")
 	}
 
 	profile := f.GetProfile(*profileName)
 	if profile == nil {
 		l.Error("profile not found", slog.String("profile", *profileName))
-		return nil, errors.New("Profile not found")
+		return nil, errors.New("profile not found")
 	}
 	lockfile, err := f.selectedInstallation.Installation.LockFile(f.ficsitCli)
 	if err != nil {
 		l.Error("failed to get lockfile", slog.Any("error", err))
-		return nil, errors.Wrap(err, "Failed to get lockfile")
+		return nil, errors.Wrap(err, "failed to get lockfile")
 	}
 	metadata := &ExportedProfileMetadata{
 		GameVersion: f.selectedInstallation.Info.Version,
@@ -184,7 +184,7 @@ func (f *FicsitCLI) ExportCurrentProfile() error {
 	exportedProfile, err := f.MakeCurrentExportedProfile()
 	if err != nil {
 		l.Error("failed to make exported profile", slog.Any("error", err))
-		return errors.Wrapf(err, "Failed to export profile")
+		return errors.Wrapf(err, "failed to export profile")
 	}
 
 	defaultFileName := fmt.Sprintf("%s-%s.smmprofile", exportedProfile.Profile.Name, time.Now().UTC().Format("2006-01-02-15-04-05"))
@@ -199,18 +199,18 @@ func (f *FicsitCLI) ExportCurrentProfile() error {
 	})
 	if err != nil {
 		l.Error("failed to open save dialog", slog.Any("error", err))
-		return errors.Wrapf(err, "Failed to export profile: %s", exportedProfile.Profile.Name)
+		return errors.Wrapf(err, "failed to open save dialog")
 	}
 
 	exportedProfileJSON, err := utils.JSONMarshal(exportedProfile, 2)
 	if err != nil {
 		l.Error("failed to marshal exported profile", slog.Any("error", err))
-		return errors.Wrapf(err, "Failed to export profile: %s", exportedProfile.Profile.Name)
+		return errors.Wrapf(err, "failed to marshal exported profile")
 	}
 	err = os.WriteFile(filename, exportedProfileJSON, 0o755)
 	if err != nil {
 		l.Error("failed to write exported profile", slog.Any("error", err))
-		return errors.Wrapf(err, "Failed to export profile: %s", exportedProfile.Profile.Name)
+		return errors.Wrapf(err, "failed to write exported profile")
 	}
 
 	return nil
@@ -222,14 +222,14 @@ func (f *FicsitCLI) ReadExportedProfileMetadata(file string) (*ExportedProfileMe
 	fileBytes, err := os.ReadFile(file)
 	if err != nil {
 		l.Error("failed to read exported profile", slog.Any("error", err))
-		return nil, errors.Wrap(err, "Failed to read exported profile")
+		return nil, errors.Wrap(err, "failed to read exported profile")
 	}
 
 	var exportedProfile ExportedProfile
 	err = json.Unmarshal(fileBytes, &exportedProfile)
 	if err != nil {
 		l.Error("failed to unmarshal exported profile", slog.Any("error", err))
-		return nil, errors.Wrap(err, "Failed to read exported profile")
+		return nil, errors.Wrap(err, "failed to parse exported profile")
 	}
 
 	return exportedProfile.Metadata, nil
@@ -240,26 +240,26 @@ func (f *FicsitCLI) ImportProfile(name string, file string) error {
 
 	if f.selectedInstallation == nil {
 		l.Error("no installation selected")
-		return errors.New("No installation selected")
+		return errors.New("no installation selected")
 	}
 
 	profileData, err := os.ReadFile(file)
 	if err != nil {
 		l.Error("failed to read exported profile", slog.Any("error", err))
-		return errors.Wrap(err, "Failed to read profile file")
+		return errors.Wrap(err, "failed to read profile file")
 	}
 
 	var exportedProfile ExportedProfile
 	err = json.Unmarshal(profileData, &exportedProfile)
 	if err != nil {
 		l.Error("failed to unmarshal exported profile", slog.Any("error", err))
-		return errors.Wrap(err, "Failed to read profile file")
+		return errors.Wrap(err, "failed to read profile file")
 	}
 
 	profile, err := f.ficsitCli.Profiles.AddProfile(name)
 	if err != nil {
 		l.Error("failed to add profile", slog.Any("error", err))
-		return errors.Wrap(err, "Failed to add imported profile")
+		return errors.Wrap(err, "failed to add imported profile")
 	}
 
 	profile.Mods = exportedProfile.Profile.Mods
@@ -270,7 +270,7 @@ func (f *FicsitCLI) ImportProfile(name string, file string) error {
 	if err != nil {
 		_ = f.ficsitCli.Profiles.DeleteProfile(name)
 		l.Error("failed to write lockfile", slog.Any("error", err))
-		return errors.Wrap(err, "Failed to write profile")
+		return errors.Wrap(err, "failed to write profile")
 	}
 
 	f.EmitGlobals()

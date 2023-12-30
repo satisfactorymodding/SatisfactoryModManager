@@ -39,7 +39,7 @@ var projectFile []byte
 func loadProjectFile() error {
 	err := json.Unmarshal(projectFile, &projectfile.ProjectFile)
 	if err != nil {
-		return errors.Wrap(err, "Failed to load project file")
+		return errors.Wrap(err, "failed to load project file")
 	}
 	return nil
 }
