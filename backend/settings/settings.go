@@ -32,26 +32,26 @@ var (
 )
 
 type settings struct {
-	WindowPosition *utils.Position `json:"windowPosition"`
-	Maximized      bool            `json:"maximized"`
+	WindowPosition *utils.Position `json:"windowPosition,omitempty"`
+	Maximized      bool            `json:"maximized,omitempty"`
 
-	UnexpandedSize utils.Size `json:"unexpandedSize"`
-	ExpandedSize   utils.Size `json:"expandedSize"`
+	UnexpandedSize utils.Size `json:"unexpandedSize,omitempty"`
+	ExpandedSize   utils.Size `json:"expandedSize,omitempty"`
 
-	StartView View `json:"startView"`
+	StartView View `json:"startView,omitempty"`
 
-	FavoriteMods []string        `json:"favoriteMods"`
-	ModFilters   SavedModFilters `json:"modFilters"`
+	FavoriteMods []string        `json:"favoriteMods,omitempty"`
+	ModFilters   SavedModFilters `json:"modFilters,omitempty"`
 
-	QueueAutoStart      bool                `json:"queueAutoStart"`
-	IgnoredUpdates      map[string][]string `json:"ignoredUpdates"`
-	UpdateCheckMode     UpdateCheckMode     `json:"updateCheckMode"`
-	ViewedAnnouncements []string            `json:"viewedAnnouncements"`
+	QueueAutoStart      bool                `json:"queueAutoStart,omitempty"`
+	IgnoredUpdates      map[string][]string `json:"ignoredUpdates,omitempty"`
+	UpdateCheckMode     UpdateCheckMode     `json:"updateCheckMode,omitempty"`
+	ViewedAnnouncements []string            `json:"viewedAnnouncements,omitempty"`
 
-	Offline bool `json:"offline"`
+	Offline bool `json:"offline,omitempty"`
 
-	Konami       bool   `json:"konami"`
-	LaunchButton string `json:"launchButton"`
+	Konami       bool   `json:"konami,omitempty"`
+	LaunchButton string `json:"launchButton,omitempty"`
 
 	CacheDir string `json:"cacheDir,omitempty"`
 }
