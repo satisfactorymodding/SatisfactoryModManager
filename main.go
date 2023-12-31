@@ -177,7 +177,7 @@ func init() {
 	viper.Set("api-base", "https://api.ficsit.app")
 	viper.Set("graphql-api", "/v2/query")
 
-	viper.Set("log", "debug")
+	viper.Set("log", "info")
 	viper.Set("log-file", filepath.Join(smmCacheDir, "logs", "SatisfactoryModManager.log"))
 
 	viper.Set("concurrent-downloads", 5)
