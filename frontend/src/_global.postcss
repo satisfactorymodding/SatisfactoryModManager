@@ -1,0 +1,120 @@
+@import '/smui.css';
+
+@import 'https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible&family=Roboto&family=Roboto+Mono&family=Material+Icons&display=swap';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  font-family: 'Roboto', Helvetica Neue, sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+html.accessibility,
+body.accessibility {
+  font-family: 'Atkinson Hyperlegible', Helvetica Neue, sans-serif;
+}
+
+.markdown-content {
+  @apply text-base;
+
+  & img {
+    max-width: 100%;
+    display: inline;
+  }
+
+  & h1 {
+    @apply text-4xl my-4 font-bold;
+  }
+
+  & h2 {
+    @apply text-3xl my-4 font-bold;
+  }
+
+  & h3 {
+    @apply text-2xl my-4 font-bold;
+  }
+
+  & h4 {
+    @apply text-xl my-4 font-bold;
+  }
+
+  & h5 {
+    @apply text-lg my-4 font-bold;
+  }
+
+  & h6 {
+    @apply text-base my-4 font-bold;
+  }
+
+  & ul {
+    display: block;
+    list-style-type: disc;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    padding-inline-start: 40px;
+  }
+
+  & p {
+    @apply text-base my-5;
+  }
+
+  & a {
+    @apply text-yellow-500;
+    text-decoration: underline;
+  }
+
+  & pre {
+    font-family: Roboto Mono, monospace !important;
+    padding: 1em;
+    margin: 0.5em 0;
+    overflow: auto;
+    border-radius: 0.3em;
+    text-shadow: 0 1px rgba(0, 0, 0, 0.3);
+    font-size: 1em;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+    tab-size: 4;
+    hyphens: none;
+    background: #272822;
+  }
+
+  & ol {
+    display: block;
+    list-style-type: decimal;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    padding-inline-start: 40px;
+  }
+
+  & ol ul {
+    list-style-type: circle;
+  }
+
+  & blockquote {
+    display: block;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 40px;
+    margin-inline-end: 40px;
+  }
+
+  & dl {
+    display: block;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+  }
+
+  & dd {
+    display: block;
+    margin-inline-start: 40px;
+  }
+}

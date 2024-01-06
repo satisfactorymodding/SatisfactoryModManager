@@ -1,0 +1,12 @@
+query GetModSummary($modReference: ModReference!) {
+  mod: getModByReference(modReference: $modReference) {
+    ...ModKey
+    name
+    logo
+    mod_reference
+    created_at
+    downloads
+    views
+    short_description
+  }
+}

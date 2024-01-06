@@ -1,0 +1,291 @@
+@use 'sass:color';
+@use 'sass:math';
+
+$ficsit-orange: #e59445;
+$ficsit-blue: #5dafc5;
+$grey-light: #666666;
+$grey-dark: #575757;
+$grey-darker: #2b2b2b;
+$grey-darkest: #1d1d1d;
+$almost-black: #0d0d0d;
+$yellow: #ffcc00;
+$red-bright: #ff0000;
+$red-normal: #bb2828;
+$red-darker: #691a1a;
+$green-bright: #00ff00;
+$green-normal: #5bb71d;
+$green-darker: #354f24;
+$white-bright: #ffffff;
+$white-normal: #efefef;
+$white-darker: #d5d5d5;
+
+@use '@material/theme/index' as theme with (
+  $primary: $green-normal,
+  $secondary: $grey-light,
+  $surface: $grey-darkest,
+  $on-surface: $white-normal,
+  $background: $grey-darkest,
+  $error: $red-bright,
+);
+
+@use '@material/typography/index' as typography with (
+  $styles-button: (
+    text-transform: none,
+    font-weight: 400,
+  )
+);
+
+@use '@material/linear-progress/index' as linear-progress;
+
+@use '@material/select/index' as select;
+@use '@material/shape/mixins' as shape-mixins;
+
+@use '@material/button/index' as button;
+
+@use '@material/list/index' as list;
+@use '@material/tooltip/index' as tooltip;
+
+.mod-progress-bar {
+  @include linear-progress.bar-color($grey-darkest);
+  @include linear-progress.buffer-color($grey-darker);
+}
+
+$md: 875px;
+$lg: 950px;
+
+$left-bar-controls-background: $grey-darker;
+$left-bar-controls-height-sm: 30px;
+$left-bar-controls-height-md: 35px;
+$left-bar-controls-height-lg: 40px;
+
+.left-bar {
+  .settings-menu {
+    .mdc-deprecated-list {
+      @include list.deprecated-single-line-density(-2);
+    }
+  }
+  .updates-dialog {
+    .mdc-deprecated-list-item__primary-text {
+      @include typography.text-baseline(
+        $top: 22px,
+        $bottom: 22px,
+        $display: block
+      );
+    }
+  }
+
+  .mdc-menu {
+    .mdc-deprecated-list-divider {
+      margin-top: 0px;
+      margin-bottom: 0px;
+    }
+    @include list.deprecated-divider-insets(47.5px, 16px);
+  }
+
+  .mdc-button {
+    @include button.height($left-bar-controls-height-sm);
+    @media (min-height: $md) {
+      @include button.height($left-bar-controls-height-md);
+    }
+    @media (min-height: $lg) {
+      @include button.height($left-bar-controls-height-lg);
+    }
+    @include button.container-fill-color($left-bar-controls-background);
+    @include button.ink-color(theme.$on-surface);
+  }
+  .mdc-select {
+    @include select.container-fill-color($left-bar-controls-background);
+    @include select.filled-height($left-bar-controls-height-sm);
+    @include select.filled-shape-radius(math.div($left-bar-controls-height-sm, 5), 0);
+    .mdc-select__anchor {
+      @include shape-mixins.radius(math.div($left-bar-controls-height-sm, 10));
+    }
+    @media (min-height: $md) {
+      @include select.filled-height($left-bar-controls-height-md);
+      @include select.filled-shape-radius(math.div($left-bar-controls-height-md, 5), 0);
+      .mdc-select__anchor {
+        @include shape-mixins.radius(math.div($left-bar-controls-height-md, 10));
+      }
+    }
+    @media (min-height: $lg) {
+      @include select.filled-height($left-bar-controls-height-lg);
+      @include select.filled-shape-radius(math.div($left-bar-controls-height-lg, 5), 0);
+      .mdc-select__anchor {
+        @include shape-mixins.radius(math.div($left-bar-controls-height-lg, 10));
+      }
+    }
+  }
+
+  .mods-toggle-button {
+    @include button.container-fill-color($left-bar-controls-background);
+    &.mods-on {
+      @include button.container-fill-color($green-darker);
+    }
+    &.mods-off {
+      @include button.container-fill-color($red-darker);
+    }
+  }
+
+  .profile-add {
+    @include button.icon-color($green-normal);
+  }
+  
+  .profile-edit {
+    @include button.icon-color($yellow);
+  }
+  
+  .profile-delete {
+    @include button.icon-color($red-normal);
+  }
+
+  .update-button {
+    @include button.container-fill-color($left-bar-controls-background);
+    &.has-update {
+      @include button.container-fill-color(theme.$primary);
+    }
+  }
+
+  .launch-game {
+    @include button.container-fill-color($green-darker);
+    &.warning {
+      @include button.container-fill-color($yellow);
+    }
+    &.error {
+      @include button.container-fill-color($red-normal);
+    }
+  }
+}
+
+.mods-details {
+  .mdc-button {
+    @include button.height($left-bar-controls-height-md);
+    @media (min-height: $lg) {
+      @include button.height($left-bar-controls-height-lg);
+    };
+  }
+}
+
+.mods-list {
+  background-color: $grey-darker;
+}
+
+div.mdc-tooltip {
+  @include tooltip.fill-color($almost-black);
+}
+
+.mod-install-button.mdc-button {
+  @include button.ink-color(theme.$on-surface);
+  &:not(.installed) {
+    @include button.ink-color($white-darker);
+    &:hover {
+      @include button.ink-color($green-normal);
+    }
+  }
+  &.installed {
+    @include button.ink-color($green-normal);
+    &:hover {
+      @include button.ink-color($red-normal);
+    }
+  }
+}
+
+.mod-enable-button.mdc-button {
+  @include button.ink-color($white-darker);
+  &:not(.enabled) {
+    @include button.ink-color($white-darker);
+    &:hover {
+      @include button.ink-color($green-normal);
+    }
+  }
+  &.enabled {
+    @include button.ink-color($white-darker);
+    &:hover {
+      @include button.ink-color($white-darker);
+    }
+  }
+}
+
+.mod-favorite-button.mdc-button {
+  &:not(.favorite) {
+    @include button.ink-color($white-darker);
+    &:hover {
+      @include button.ink-color($yellow);
+    }
+  }
+  &.favorite {
+    @include button.ink-color($yellow);
+    &:hover {
+      @include button.ink-color($white-darker);
+    }
+  }
+}
+
+.mods-details {
+  .mdc-deprecated-list {
+    @include list.deprecated-single-line-density(-2);
+  }
+
+  .mdc-menu {
+    .mdc-deprecated-list-divider {
+      margin-top: 0px;
+      margin-bottom: 0px;
+    }
+    @include list.deprecated-divider-insets(47.5px, 16px);
+  }
+}
+
+.color-primary {
+  color: theme.$primary !important;
+}
+
+.error {
+  color: $red-normal;
+}
+
+.warning {
+  color: $yellow;
+}
+
+.success {
+  color: $green-normal;
+}
+
+html,
+body {
+  background-color: theme.$surface;
+  color: theme.$on-surface;
+  font-size: 14px;
+}
+
+a {
+  color: #40b3ff;
+}
+a:visited {
+  color: color.scale(#40b3ff, $lightness: -35%);
+}
+
+::-webkit-scrollbar {
+  width: 25px;
+}
+::-webkit-scrollbar-track {
+  background: black;
+  border: solid 10px transparent;
+  border-top-width: 5px;
+  border-bottom-width: 5px;
+  background-clip: content-box;
+  border-radius: 0;
+}
+::-webkit-scrollbar-thumb {
+  background: #fff;
+  border: solid 10px transparent;
+  border-top-width: 5px;
+  border-bottom-width: 5px;
+  background-clip: content-box;
+  border-radius: 0;
+}
+::-webkit-scrollbar-thumb:hover {
+  border: solid 10px transparent;
+  border-top-width: 5px;
+  border-bottom-width: 5px;
+  background-clip: content-box;
+}

@@ -1,0 +1,9 @@
+query SMLVersionsCompatibility {
+  getSMLVersions(filter: { limit: 100, order_by: created_at, order: desc }) {
+    sml_versions {
+      id
+      version
+      satisfactory_version
+    }
+  }
+}

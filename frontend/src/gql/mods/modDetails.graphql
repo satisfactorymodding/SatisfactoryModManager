@@ -1,0 +1,39 @@
+query GetModDetails($modReference: ModReference!) {
+  mod: getModByReference(modReference: $modReference) {
+    ...ModKey
+    name
+    logo
+    mod_reference
+    full_description
+    created_at
+    last_version_date
+    downloads
+    views
+    hidden
+    compatibility {
+      EA {
+        state
+        note
+      }
+      EXP {
+        state
+        note
+      }
+    }
+    authors {
+      user {
+        id
+        username
+        avatar
+      }
+      role
+    }
+    versions(filter: {limit: 100}) {
+      id
+      version
+      sml_version
+      size
+      changelog
+    }
+  }
+}

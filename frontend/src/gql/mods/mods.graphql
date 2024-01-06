@@ -1,0 +1,39 @@
+query GetMods($offset: Int!, $limit: Int!) {
+  getMods(filter: { limit: $limit, offset: $offset }) {
+    count
+    mods {
+      ...ModKey
+      mod_reference
+      name
+      logo
+      short_description
+      hidden
+      popularity
+      hotness
+      views
+      downloads
+      last_version_date
+      tags {
+        id
+        name
+      }
+      authors {
+        user {
+          id
+          username
+        }
+        role
+      }
+      compatibility {
+        EA {
+          state
+          note
+        }
+        EXP {
+          state
+          note
+        }
+      }
+    }
+  }
+}

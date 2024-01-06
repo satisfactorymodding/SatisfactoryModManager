@@ -1,0 +1,71 @@
+linters-settings:
+  wrapcheck:
+    ignoreSigs:
+      - .Errorf(
+      - errors.New(
+      - errors.Unwrap(
+      - .Wrap(
+      - .Wrapf(
+      - .WithMessage(
+      - .WithMessagef(
+      - .WithStack(
+
+    ignorePackageGlobs:
+      - github.com/satisfactorymodding/SatisfactoryModManager/*
+
+  govet:
+    check-shadowing: true
+    enable-all: true
+    disable:
+      - shadow
+      - fieldalignment
+
+  gocritic:
+    disabled-checks:
+      - ifElseChain
+
+  gci:
+    custom-order: true
+    sections:
+      - standard
+      - default
+      - prefix(github.com/satisfactorymodding/SatisfactoryModManager)
+      - blank
+      - dot
+
+issues:
+  exclude-rules:
+    - linters:
+        - typecheck
+      text: "no matching files found"
+
+run:
+  timeout: 5m
+  skip-dirs:
+    - frontend
+
+linters:
+  disable-all: true
+  enable:
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - typecheck
+    - unused
+    - bidichk
+    - contextcheck
+    - durationcheck
+    - errorlint
+    - goconst
+    - goimports
+    - revive
+    - misspell
+    - prealloc
+    - whitespace
+    - wrapcheck
+    - gci
+    - gocritic
+    - gofumpt
+    - nonamedreturns
