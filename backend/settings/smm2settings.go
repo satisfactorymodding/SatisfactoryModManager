@@ -2,7 +2,6 @@ package settings
 
 import (
 	"encoding/json"
-	"maps"
 
 	"github.com/pkg/errors"
 
@@ -27,19 +26,22 @@ type smm2Settings struct {
 		ModFilters string `json:"modFilters"`
 		SortBy     string `json:"sortBy"`
 	} `json:"filters"`
-	IgnoredUpdates         *map[string][]string `json:"ignoredUpdates"`
-	Maximized              *bool                `json:"maximized"`
-	SelectedInstall        *string              `json:"selectedInstall"`
-	DebugMode              *bool                `json:"debugMode"`
-	SelectedProfile        *map[string]string   `json:"selectedProfile"`
-	UpdateCheckMode        *UpdateCheckMode     `json:"updateCheckMode"`
-	ModsEnabled            *map[string]bool     `json:"modsEnabled"`
-	Konami                 *bool                `json:"konami"`
-	LaunchButton           *bool                `json:"launchButton"`
-	ExpandModInfoOnStart   *bool                `json:"expandModInfoOnStart"`
-	LaunchCat              *bool                `json:"launchCat"`
-	ViewedAnnouncements    *[]string            `json:"viewedAnnouncements"`
-	DisableDownloadTimeout *bool                `json:"disableDownloadTimeout"`
+	IgnoredUpdates *[]struct {
+		Item    string `json:"item"`
+		Version string `json:"version"`
+	} `json:"ignoredUpdates"`
+	Maximized              *bool              `json:"maximized"`
+	SelectedInstall        *string            `json:"selectedInstall"`
+	DebugMode              *bool              `json:"debugMode"`
+	SelectedProfile        *map[string]string `json:"selectedProfile"`
+	UpdateCheckMode        *UpdateCheckMode   `json:"updateCheckMode"`
+	ModsEnabled            *map[string]bool   `json:"modsEnabled"`
+	Konami                 *bool              `json:"konami"`
+	LaunchButton           *bool              `json:"launchButton"`
+	ExpandModInfoOnStart   *bool              `json:"expandModInfoOnStart"`
+	LaunchCat              *bool              `json:"launchCat"`
+	ViewedAnnouncements    *[]string          `json:"viewedAnnouncements"`
+	DisableDownloadTimeout *bool              `json:"disableDownloadTimeout"`
 }
 
 func readSMM2Settings(data []byte) error {
@@ -76,7 +78,9 @@ func readSMM2Settings(data []byte) error {
 	}
 
 	if s.IgnoredUpdates != nil {
-		Settings.IgnoredUpdates = maps.Clone(*s.IgnoredUpdates)
+		for _, ignoredUpdate := range *s.IgnoredUpdates {
+			Settings.IgnoredUpdates[ignoredUpdate.Item] = append(Settings.IgnoredUpdates[ignoredUpdate.Item], ignoredUpdate.Version)
+		}
 	}
 
 	if s.Maximized != nil {
