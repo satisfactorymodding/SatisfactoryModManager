@@ -218,8 +218,8 @@
     >
       {#each $installs as install}
         <Option value={install.path}>
-          <Label class="mdc-deprecated-list-item__text">{install?.branch} ({install?.launcher})</Label>
-          <div class="!p-4 !m-0 !ml-auto !h-full" on:click={(e) => {
+          <Label class="mdc-deprecated-list-item__text">{install.branch}{install.type !== 'WindowsClient' ? ' - DS' : ''} ({install?.launcher})</Label>
+          <div class="py-4 !m-0 !ml-auto !h-full" on:click={(e) => {
             e.stopPropagation();
             OpenExternal(install.path);
           }}>

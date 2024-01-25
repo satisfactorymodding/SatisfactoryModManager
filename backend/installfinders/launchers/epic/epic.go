@@ -11,18 +11,6 @@ import (
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 )
 
-type GameVersionFile struct {
-	MajorVersion         int    `json:"MajorVersion"`
-	MinorVersion         int    `json:"MinorVersion"`
-	PatchVersion         int    `json:"PatchVersion"`
-	Changelist           int    `json:"Changelist"`
-	CompatibleChangelist int    `json:"CompatibleChangelist"`
-	IsLicenseeVersion    int    `json:"IsLicenseeVersion"`
-	IsPromotedBuild      int    `json:"IsPromotedBuild"`
-	BranchName           string `json:"BranchName"`
-	BuildID              string `json:"BuildId"`
-}
-
 type Manifest struct {
 	CatalogNamespace string `json:"CatalogNamespace"`
 	CatalogItemID    string `json:"CatalogItemID"`
@@ -40,8 +28,10 @@ type GameManifest struct {
 }
 
 var (
-	EarlyAccessAppName  = "CrabEA"
-	ExperimentalAppName = "CrabTest"
+	EarlyAccessAppName                 = "CrabEA"
+	ExperimentalAppName                = "CrabTest"
+	EarlyAccessDedicatedServerAppName  = "CrabDedicatedServer"
+	ExperimentalDedicatedServerAppName = "c509233193024c5f8124467d3aa36199"
 )
 
 func GetEpicBranch(appName string) (common.GameBranch, error) {
@@ -49,6 +39,10 @@ func GetEpicBranch(appName string) (common.GameBranch, error) {
 	case EarlyAccessAppName:
 		return common.BranchEarlyAccess, nil
 	case ExperimentalAppName:
+		return common.BranchExperimental, nil
+	case EarlyAccessDedicatedServerAppName:
+		return common.BranchEarlyAccess, nil
+	case ExperimentalDedicatedServerAppName:
 		return common.BranchExperimental, nil
 	default:
 		return "", errors.New("unknown branch for " + appName)
@@ -138,24 +132,12 @@ func findInstallationsEpic(epicManifestsPath string, launcher string, launchPath
 			continue
 		}
 
-		versionFilePath := filepath.Join(installLocation, "Engine", "Binaries", "Win64", "FactoryGame-Win64-Shipping.version")
-		if _, err := os.Stat(versionFilePath); os.IsNotExist(err) {
+		installType, version, err := common.GetGameInfo(installLocation)
+		if err != nil {
 			findErrors = append(findErrors, common.InstallFindError{
 				Path:  installLocation,
-				Inner: errors.Wrap(err, "failed to read game version"),
+				Inner: err,
 			})
-			continue
-		}
-
-		versionFile, err := os.ReadFile(versionFilePath)
-		if err != nil {
-			findErrors = append(findErrors, errors.Wrapf(err, "failed to read version file %s", versionFilePath))
-			continue
-		}
-
-		var versionData GameVersionFile
-		if err := json.Unmarshal(versionFile, &versionData); err != nil {
-			findErrors = append(findErrors, errors.Wrapf(err, "failed to parse version file %s", versionFilePath))
 			continue
 		}
 
@@ -170,8 +152,8 @@ func findInstallationsEpic(epicManifestsPath string, launcher string, launchPath
 
 		installs = append(installs, &common.Installation{
 			Path:       filepath.Clean(installLocation),
-			Version:    versionData.Changelist,
-			Type:       common.InstallTypeWindowsClient,
+			Version:    version,
+			Type:       installType,
 			Location:   common.LocationTypeLocal,
 			Branch:     branch,
 			Launcher:   launcher,

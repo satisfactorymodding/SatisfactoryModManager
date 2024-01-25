@@ -1,7 +1,6 @@
 package steam
 
 import (
-	"encoding/json"
 	"os"
 	"path"
 	"path/filepath"
@@ -11,8 +10,9 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
-	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/launchers/epic"
 )
+
+var manifests = []string{"appmanifest_526870.acf", "appmanifest_1690800.acf"}
 
 func findInstallationsSteam(steamPath string, launcher string, executable []string) ([]*common.Installation, []error) {
 	steamAppsPath := filepath.Join(steamPath, "steamapps")
@@ -67,87 +67,68 @@ func findInstallationsSteam(steamPath string, launcher string, executable []stri
 	var findErrors []error
 
 	for _, libraryFolder := range libraryFolders {
-		manifestPath := filepath.Join(libraryFolder, "steamapps", "appmanifest_526870.acf")
+		for _, manifest := range manifests {
+			manifestPath := filepath.Join(libraryFolder, "steamapps", manifest)
 
-		if _, err := os.Stat(manifestPath); os.IsNotExist(err) {
-			continue
-		}
-
-		manifestF, err := os.Open(manifestPath)
-		if err != nil {
-			findErrors = append(findErrors, errors.Wrapf(err, "failed to open manifest file %s", manifestPath))
-			continue
-		}
-
-		parser := vdf.NewParser(manifestF)
-		manifest, err := parser.Parse()
-		if err != nil {
-			findErrors = append(findErrors, errors.Wrapf(err, "failed to parse manifest file %s", manifestPath))
-			continue
-		}
-
-		if _, ok := manifest["AppState"]; !ok {
-			findErrors = append(findErrors, errors.Errorf("Failed to find AppState in manifest %s", manifestPath))
-			continue
-		}
-
-		fullInstallationPath := filepath.Join(libraryFolder, "steamapps", "common", manifest["AppState"].(map[string]interface{})["installdir"].(string))
-
-		gameExe := filepath.Join(fullInstallationPath, "FactoryGame.exe")
-		if _, err := os.Stat(gameExe); os.IsNotExist(err) {
-			findErrors = append(findErrors, common.InstallFindError{
-				Path:  fullInstallationPath,
-				Inner: errors.Wrap(err, "missing game executable"),
-			})
-			continue
-		}
-
-		versionFilePath := filepath.Join(fullInstallationPath, "Engine", "Binaries", "Win64", "FactoryGame-Win64-Shipping.version")
-		if _, err := os.Stat(versionFilePath); os.IsNotExist(err) {
-			findErrors = append(findErrors, common.InstallFindError{
-				Path:  fullInstallationPath,
-				Inner: errors.Wrap(err, "missing game version file"),
-			})
-			continue
-		}
-
-		versionFile, err := os.ReadFile(versionFilePath)
-		if err != nil {
-			findErrors = append(findErrors, errors.Wrapf(err, "failed to read version file %s", versionFilePath))
-			continue
-		}
-
-		var versionData epic.GameVersionFile
-		if err := json.Unmarshal(versionFile, &versionData); err != nil {
-			findErrors = append(findErrors, errors.Wrapf(err, "failed to parse version file %s", versionFilePath))
-			continue
-		}
-
-		var branch common.GameBranch
-		userConfig := manifest["AppState"].(map[string]interface{})["UserConfig"].(map[string]interface{})
-		betakey, ok := userConfig["betakey"]
-		if !ok {
-			branch = common.BranchEarlyAccess
-		} else {
-			if betakey == "experimental" {
-				branch = common.BranchExperimental
-			} else {
-				findErrors = append(findErrors, errors.Errorf("Unknown beta key %s", betakey))
+			if _, err := os.Stat(manifestPath); os.IsNotExist(err) {
+				continue
 			}
-		}
 
-		installs = append(installs, &common.Installation{
-			Path:     filepath.Clean(fullInstallationPath),
-			Version:  versionData.Changelist,
-			Type:     common.InstallTypeWindowsClient,
-			Location: common.LocationTypeLocal,
-			Branch:   branch,
-			Launcher: launcher,
-			LaunchPath: append(
-				executable,
-				`steam://rungameid/526870`,
-			),
-		})
+			manifestF, err := os.Open(manifestPath)
+			if err != nil {
+				findErrors = append(findErrors, errors.Wrapf(err, "failed to open manifest file %s", manifestPath))
+				continue
+			}
+
+			parser := vdf.NewParser(manifestF)
+			manifest, err := parser.Parse()
+			if err != nil {
+				findErrors = append(findErrors, errors.Wrapf(err, "failed to parse manifest file %s", manifestPath))
+				continue
+			}
+
+			if _, ok := manifest["AppState"]; !ok {
+				findErrors = append(findErrors, errors.Errorf("Failed to find AppState in manifest %s", manifestPath))
+				continue
+			}
+
+			fullInstallationPath := filepath.Join(libraryFolder, "steamapps", "common", manifest["AppState"].(map[string]interface{})["installdir"].(string))
+
+			installType, version, err := common.GetGameInfo(fullInstallationPath)
+			if err != nil {
+				findErrors = append(findErrors, common.InstallFindError{
+					Path:  fullInstallationPath,
+					Inner: err,
+				})
+				continue
+			}
+
+			var branch common.GameBranch
+			userConfig := manifest["AppState"].(map[string]interface{})["UserConfig"].(map[string]interface{})
+			betakey, ok := userConfig["betakey"]
+			if !ok {
+				branch = common.BranchEarlyAccess
+			} else {
+				if betakey == "experimental" {
+					branch = common.BranchExperimental
+				} else {
+					findErrors = append(findErrors, errors.Errorf("Unknown beta key %s", betakey))
+				}
+			}
+
+			installs = append(installs, &common.Installation{
+				Path:     filepath.Clean(fullInstallationPath),
+				Version:  version,
+				Type:     installType,
+				Location: common.LocationTypeLocal,
+				Branch:   branch,
+				Launcher: launcher,
+				LaunchPath: append(
+					executable,
+					`steam://rungameid/526870`,
+				),
+			})
+		}
 	}
 
 	return installs, findErrors

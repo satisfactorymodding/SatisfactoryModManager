@@ -5,7 +5,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strconv"
 
 	"github.com/pkg/errors"
 
@@ -55,6 +54,15 @@ func FindInstallationsIn(legendaryDataPath string, launcher string) ([]*common.I
 	var findErrors []error
 
 	for _, legendaryGame := range legendaryData {
+		installType, version, err := common.GetGameInfo(legendaryGame.InstallPath)
+		if err != nil {
+			findErrors = append(findErrors, common.InstallFindError{
+				Path:  legendaryGame.InstallPath,
+				Inner: err,
+			})
+			continue
+		}
+
 		branch, err := epic.GetEpicBranch(legendaryGame.AppName)
 		if err != nil {
 			findErrors = append(findErrors, common.InstallFindError{
@@ -64,14 +72,6 @@ func FindInstallationsIn(legendaryDataPath string, launcher string) ([]*common.I
 			continue
 		}
 
-		version, err := strconv.Atoi(legendaryGame.Version)
-		if err != nil {
-			findErrors = append(findErrors, common.InstallFindError{
-				Path:  legendaryGame.InstallPath,
-				Inner: errors.Wrap(err, "failed to parse version for "+legendaryGame.AppName),
-			})
-			continue
-		}
 		var launchPath []string
 		if canLaunchLegendary {
 			launchPath = []string{"legendary", "launch", legendaryGame.AppName}
@@ -79,7 +79,7 @@ func FindInstallationsIn(legendaryDataPath string, launcher string) ([]*common.I
 		installs = append(installs, &common.Installation{
 			Path:       filepath.Clean(legendaryGame.InstallPath),
 			Version:    version,
-			Type:       common.InstallTypeWindowsClient,
+			Type:       installType,
 			Location:   common.LocationTypeLocal,
 			Branch:     branch,
 			Launcher:   launcher,
