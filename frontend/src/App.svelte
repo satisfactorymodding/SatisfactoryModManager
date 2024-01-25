@@ -3,6 +3,7 @@
   import { setContextClient } from '@urql/svelte';
   import Dialog, { Actions, Content, Title } from '@smui/dialog';
   import Button, { Label } from '@smui/button';
+  import Card, { Content as CardContent, PrimaryAction } from '@smui/card';
   import LinearProgress from '@smui/linear-progress';
 
   import TitleBar from '$lib/components/TitleBar.svelte';
@@ -52,8 +53,8 @@
 
   $: pendingExpand = $expandedMod && !windowExpanded;
 
-  let invalidInstallsDialog = false;
-  let noInstallsDialog = false;
+  let invalidInstallsError = false;
+  let noInstallsError = false;
   let focusOnEntry: HTMLSpanElement;
 
   const installsInit = installs.isInit;
@@ -61,9 +62,9 @@
 
   $: if($installsInit && $invalidInstallsInit && $installs.length === 0) {
     if($invalidInstalls.length > 0) {
-      invalidInstallsDialog = true;
+      invalidInstallsError = true;
     } else {
-      noInstallsDialog = true;
+      noInstallsError = true;
     }
   }
 
@@ -95,7 +96,38 @@
       <div class="{$expandedMod ? 'max-w-[600px]' : ''} w-2/5 grow">
         <ModsList on:expandedMod={() => {
           focusOnEntry.focus();
-        }}/>
+        }} hideMods={noInstallsError || invalidInstallsError}>
+          {#if noInstallsError}
+            <Card variant="outlined" class="my-auto mr-2">
+              <CardContent>
+                <p class="font-bold text-2xl text-center">No Satisfactory installs found</p>
+                <p class="text-lg text-center">
+                  Seems wrong? Click the button below and send the generated zip file on the <a class="color-primary underline" href="https://discord.gg/xkVJ73E">modding discord</a> in #help-using-mods.
+                </p>
+              </CardContent>
+              <PrimaryAction>
+                <Button on:click={GenerateDebugInfo}>
+                  <Label>Generate debug info</Label>
+                </Button>
+              </PrimaryAction>
+            </Card>
+          {/if}
+          {#if invalidInstallsError}
+            <Card variant="outlined" class="my-auto mr-2">
+              <CardContent>
+                <p class="font-bold text-2xl text-center">{ $invalidInstalls.length } invalid Satisfactory installs found</p>
+                <p class="text-lg text-center">
+                  Seems wrong? Click the button below and send the generated zip file on the <a class="color-primary underline" href="https://discord.gg/xkVJ73E">modding discord</a> in #help-using-mods.
+                </p>
+              </CardContent>
+              <PrimaryAction>
+                <Button on:click={GenerateDebugInfo}>
+                  <Label>Generate debug info</Label>
+                </Button>
+              </PrimaryAction>
+            </Card>
+          {/if}
+        </ModsList>
       </div>
       {#if $expandedMod}
         <div class:grow={!pendingExpand} class="{pendingExpand ? 'w-0' : 'w-3/5'}">
@@ -166,44 +198,6 @@
       <LinearProgress progress={$progress.progress} indeterminate={$progress.progress === -1} class="h-4 w-full rounded-lg"/>
     {/if}
   </Content>
-</Dialog>
-
-<Dialog
-  bind:open={invalidInstallsDialog}
-  scrimClickAction=""
-  escapeKeyAction=""
-  surface$style="width: 500px; max-width: calc(100vw - 32px);"
->
-  <Title>{ $invalidInstalls.length } invalid Satisfactory installs found</Title>
-  <Content>
-    {#each $invalidInstalls as invalidInstall}
-      <span>"{ invalidInstall }"</span><br>
-    {/each}
-    <br>
-    Seems wrong? Click the button below and send the generated zip file on the <a class="color-primary underline" href="https://discord.gg/xkVJ73E">modding discord</a> in #help-using-mods.
-  </Content>
-  <Actions>
-    <Button action="" on:click={GenerateDebugInfo}>
-      <Label>Generate debug info</Label>
-    </Button>
-  </Actions>
-</Dialog>
-
-<Dialog
-  bind:open={noInstallsDialog}
-  scrimClickAction=""
-  escapeKeyAction=""
-  surface$style="width: 500px; max-width: calc(100vw - 32px);"
->
-  <Title>No Satisfactory installs found</Title>
-  <Content>
-    Seems wrong? Click the button below and send the generated zip file on the <a class="color-primary underline" href="https://discord.gg/xkVJ73E">modding discord</a> in #help-using-mods.
-  </Content>
-  <Actions>
-    <Button action="" on:click={GenerateDebugInfo}>
-      <Label>Generate debug info</Label>
-    </Button>
-  </Actions>
 </Dialog>
 
 <Dialog

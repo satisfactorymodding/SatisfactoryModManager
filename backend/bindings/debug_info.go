@@ -104,11 +104,14 @@ func addMetadata(writer *zip.Writer) error {
 
 	metadataInstalledMods := make(map[string]string)
 	var smlVersion *string
-	for name, data := range lockfile.Mods {
-		if name == "SML" {
-			smlVersion = &data.Version
-		} else {
-			metadataInstalledMods[name] = data.Version
+
+	if lockfile != nil {
+		for name, data := range lockfile.Mods {
+			if name == "SML" {
+				smlVersion = &data.Version
+			} else {
+				metadataInstalledMods[name] = data.Version
+			}
 		}
 	}
 

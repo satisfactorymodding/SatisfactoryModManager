@@ -47,8 +47,8 @@ export const favoriteMods = binding<string[]>([], { updateEvent: 'favoriteMods',
 
 export const isGameRunning = binding(false, { updateEvent: 'isGameRunning', allowNull: false });
 
-export const canModify = derived([isGameRunning, progress, isLaunchingGame], ([$isGameRunning, $progress, $isLaunchingGame]) => {
-  return !$isGameRunning && !$progress && !$isLaunchingGame;
+export const canModify = derived([isGameRunning, progress, isLaunchingGame, installs], ([$isGameRunning, $progress, $isLaunchingGame, $installs]) => {
+  return !$isGameRunning && !$progress && !$isLaunchingGame && $installs.length > 0;
 });
 
 export const updates = writable<ficsitcli.Update[]>([]);

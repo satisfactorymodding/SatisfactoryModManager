@@ -140,6 +140,8 @@
       }
     }
   }
+
+  export let hideMods: boolean = false;
 </script>
 
 <div class="h-full flex flex-col">
@@ -147,18 +149,22 @@
     <ModListFilters />
   </div>
   <AnnouncementsBar />
-  <div class="py-4 grow h-0 mods-list @container/mods-list" style="position: relative;">
-    <div class="ml-5 mr-3 h-full">
-      <VirtualList items={displayMods} let:item={mod}>
-        <ModsListItem
-          {mod}
-          on:click={() => {
-            $expandedMod = mod.mod_reference;
-            dispatch('expandedMod', mod.mod_reference);
-          }}
-          selected={$expandedMod == mod.mod_reference}
-        />
-      </VirtualList>
+  {#if hideMods}
+    <slot />
+  {:else}
+    <div class="py-4 grow h-0 mods-list @container/mods-list" style="position: relative;">
+      <div class="ml-5 mr-3 h-full">
+        <VirtualList items={displayMods} let:item={mod}>
+          <ModsListItem
+            {mod}
+            on:click={() => {
+              $expandedMod = mod.mod_reference;
+              dispatch('expandedMod', mod.mod_reference);
+            }}
+            selected={$expandedMod == mod.mod_reference}
+          />
+        </VirtualList>
+      </div>
     </div>
-  </div>
+  {/if}
 </div>
