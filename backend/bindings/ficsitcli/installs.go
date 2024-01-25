@@ -108,7 +108,13 @@ func (f *FicsitCLI) checkAndAddExistingRemote(path string) error {
 		return nil
 	}
 	if err := f.AddRemoteServer(path); err != nil {
-		return errors.Wrap(err, "failed to add remote server")
+		slog.Warn("could not connect to remote server, adding placeholder metadata", slog.Any("error", err), utils.SlogPath("path", installation.Path))
+
+		f.installationMetadata[path] = &common.Installation{
+			Path:     installation.Path,
+			Location: common.LocationTypeRemote,
+			Launcher: f.getNextRemoteLauncherName(),
+		}
 	}
 	return nil
 }

@@ -1,9 +1,10 @@
 <script lang="ts">
   import Button, { Label } from '@smui/button';
-  import { mdiServerNetwork, mdiTrashCan } from '@mdi/js';
+  import { mdiAlert, mdiServerNetwork, mdiTrashCan } from '@mdi/js';
   import Dialog, { Actions, Content, Title } from '@smui/dialog';
   import DataTable, { Body, Cell, Row } from '@smui/data-table';
   import Select, { Option } from '@smui/select';
+  import Tooltip, { Wrapper } from '@smui/tooltip';
   import Textfield from '@smui/textfield';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
@@ -54,6 +55,20 @@
       addInProgress = false;
     }
   }
+
+  async function retryConnect(server: string) {
+    try {
+      await AddRemoteServer(server);
+    } catch (e) {
+      if(e instanceof Error) {
+        err = e.message;
+      } else if (typeof e === 'string') {
+        err = e;
+      } else {
+        err = 'Unknown error';
+      }
+    }
+  }
 </script>
 
 <Button variant="unelevated" class="w-full mt-2" on:click={() => dialogOpen = true}>
@@ -76,8 +91,25 @@
         {#each $remoteServers as remoteServer}
           <Row>
             <Cell>{$installsMetadata[remoteServer].path}</Cell>
-            <Cell>{$installsMetadata[remoteServer].type}</Cell>
-            <Cell>{$installsMetadata[remoteServer].version}</Cell>
+            <Cell>
+              {#if $installsMetadata[remoteServer].type}
+                {$installsMetadata[remoteServer].type}
+              {:else}
+                <Wrapper>
+                  <Button on:click={() => retryConnect(remoteServer)}>
+                    <SvgIcon icon={mdiAlert} class="!p-1 !m-0 !w-full !h-full text-red-500" />
+                  </Button>
+                  <Tooltip surface$class="max-w-lg text-base">
+                    Failed to connect to server, click to retry
+                  </Tooltip>
+                </Wrapper>
+              {/if}
+            </Cell>
+            <Cell>
+              {#if $installsMetadata[remoteServer].version}
+                {$installsMetadata[remoteServer].version}
+              {/if}
+            </Cell>
             <Cell>
               <Button on:click={() => removeServer(remoteServer)}>
                 <SvgIcon icon={mdiTrashCan} class="!p-1 !m-0 !w-full !h-full group-hover:!hidden"/>
