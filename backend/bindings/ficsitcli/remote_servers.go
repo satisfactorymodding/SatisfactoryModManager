@@ -9,14 +9,19 @@ import (
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 )
 
-func (f *FicsitCLI) GetRemoteInstallations() []*common.Installation {
-	remoteInstallations := []*common.Installation{}
-	for _, install := range f.installations {
-		if install.Info.Location == common.LocationTypeRemote {
-			remoteInstallations = append(remoteInstallations, install.Info)
+func (f *FicsitCLI) GetRemoteInstallations() []string {
+	paths := make([]string, 0, len(f.installationMetadata))
+	for _, install := range f.GetInstallations() {
+		meta, ok := f.installationMetadata[install]
+		if ok {
+			if meta.Location != common.LocationTypeRemote {
+				continue
+			}
 		}
+		// Missing metadata means an unavailable remote installation
+		paths = append(paths, install)
 	}
-	return remoteInstallations
+	return paths
 }
 
 func (f *FicsitCLI) AddRemoteServer(path string) error {
@@ -58,17 +63,14 @@ func (f *FicsitCLI) AddRemoteServer(path string) error {
 
 	branch := common.BranchEarlyAccess // TODO: Do we have a way to detect this for remote installs?
 
-	f.installations = append(f.installations, &InstallationInfo{
-		Installation: installation,
-		Info: &common.Installation{
-			Path:     installation.Path,
-			Type:     installType,
-			Location: common.LocationTypeRemote,
-			Branch:   branch,
-			Version:  gameVersion,
-			Launcher: f.getNextRemoteLauncherName(),
-		},
-	})
+	f.installationMetadata[path] = &common.Installation{
+		Path:     installation.Path,
+		Type:     installType,
+		Location: common.LocationTypeRemote,
+		Branch:   branch,
+		Version:  gameVersion,
+		Launcher: f.getNextRemoteLauncherName(),
+	}
 
 	f.EmitGlobals()
 
@@ -78,10 +80,13 @@ func (f *FicsitCLI) AddRemoteServer(path string) error {
 func (f *FicsitCLI) getNextRemoteLauncherName() string {
 	existingNumbers := make(map[int]bool)
 	for _, install := range f.GetRemoteInstallations() {
-		if strings.HasPrefix(install.Launcher, "Remote ") {
-			num, err := strconv.Atoi(strings.TrimPrefix(install.Launcher, "Remote "))
-			if err == nil {
-				existingNumbers[num] = true
+		metadata := f.installationMetadata[install]
+		if metadata != nil {
+			if strings.HasPrefix(metadata.Launcher, "Remote ") {
+				num, err := strconv.Atoi(strings.TrimPrefix(metadata.Launcher, "Remote "))
+				if err == nil {
+					existingNumbers[num] = true
+				}
 			}
 		}
 	}
@@ -93,21 +98,18 @@ func (f *FicsitCLI) getNextRemoteLauncherName() string {
 }
 
 func (f *FicsitCLI) RemoveRemoteServer(path string) error {
-	for _, install := range f.installations {
-		if install.Info.Path == path && install.Info.Location != common.LocationTypeRemote {
-			return errors.New("installation is not remote")
-		}
+	metadata := f.installationMetadata[path]
+	if metadata == nil {
+		return errors.New("installation not found")
+	}
+	if metadata.Location != common.LocationTypeRemote {
+		return errors.New("installation is not remote")
 	}
 	err := f.ficsitCli.Installations.DeleteInstallation(path)
 	if err != nil {
 		return errors.Wrap(err, "failed to delete installation")
 	}
-	for i, install := range f.installations {
-		if install.Info.Path == path {
-			f.installations = append(f.installations[:i], f.installations[i+1:]...)
-			break
-		}
-	}
+	delete(f.installationMetadata, path)
 	f.EmitGlobals()
 	return nil
 }

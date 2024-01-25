@@ -7,17 +7,16 @@
   import Textfield from '@smui/textfield';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
-  import { remoteServers } from '$lib/store/ficsitCLIStore';
+  import { installsMetadata, remoteServers } from '$lib/store/ficsitCLIStore';
   import { AddRemoteServer, RemoveRemoteServer } from '$lib/generated/wailsjs/go/ficsitcli/FicsitCLI';
-  import type { common } from '$lib/generated/wailsjs/go/models';
 
   let dialogOpen = false;
 
   const allowedProtocols = ['ftp://', 'sftp://'];
 
-  async function removeServer(server: common.Installation) {
+  async function removeServer(server: string) {
     try {
-      await RemoveRemoteServer(server.path);
+      await RemoveRemoteServer(server);
     } catch (e) {
       if(e instanceof Error) {
         err = e.message;
@@ -76,9 +75,9 @@
       <Body>
         {#each $remoteServers as remoteServer}
           <Row>
-            <Cell>{remoteServer.path}</Cell>
-            <Cell>{remoteServer.type}</Cell>
-            <Cell>{remoteServer.version}</Cell>
+            <Cell>{$installsMetadata[remoteServer].path}</Cell>
+            <Cell>{$installsMetadata[remoteServer].type}</Cell>
+            <Cell>{$installsMetadata[remoteServer].version}</Cell>
             <Cell>
               <Button on:click={() => removeServer(remoteServer)}>
                 <SvgIcon icon={mdiTrashCan} class="!p-1 !m-0 !w-full !h-full group-hover:!hidden"/>

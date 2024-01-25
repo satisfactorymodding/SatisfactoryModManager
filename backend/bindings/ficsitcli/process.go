@@ -16,7 +16,11 @@ import (
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 )
 
-func (f *FicsitCLI) validateInstall(installation *InstallationInfo, progressItem string) error {
+func (f *FicsitCLI) validateInstall(installation *cli.Installation, progressItem string) error {
+	if !f.isValidInstall(installation.Path) {
+		return fmt.Errorf("invalid installation: %s", installation.Path)
+	}
+
 	f.EmitModsChange()
 	defer f.EmitModsChange()
 
@@ -153,7 +157,7 @@ func (f *FicsitCLI) validateInstall(installation *InstallationInfo, progressItem
 		}
 	}()
 
-	installErr := installation.Installation.Install(f.ficsitCli, installChannel)
+	installErr := installation.Install(f.ficsitCli, installChannel)
 	if installErr != nil {
 		var solvingError resolver.DependencyResolverError
 		if errors.As(installErr, &solvingError) {
@@ -181,7 +185,8 @@ func (f *FicsitCLI) EmitGlobals() {
 		// We can safely ignore this call.
 		return
 	}
-	wailsRuntime.EventsEmit(f.ctx, "installations", f.GetInstallationsInfo())
+	wailsRuntime.EventsEmit(f.ctx, "installations", f.GetInstallations())
+	wailsRuntime.EventsEmit(f.ctx, "installationsMetadata", f.GetInstallationsMetadata())
 	wailsRuntime.EventsEmit(f.ctx, "remoteServers", f.GetRemoteInstallations())
 	profileNames := make([]string, 0, len(f.ficsitCli.Profiles.Profiles))
 	for k := range f.ficsitCli.Profiles.Profiles {
@@ -189,13 +194,15 @@ func (f *FicsitCLI) EmitGlobals() {
 	}
 	wailsRuntime.EventsEmit(f.ctx, "profiles", profileNames)
 
-	if f.selectedInstallation == nil {
+	selectedInstallation := f.GetSelectedInstall()
+
+	if selectedInstallation == nil {
 		return
 	}
 
-	wailsRuntime.EventsEmit(f.ctx, "selectedInstallation", f.selectedInstallation.Installation.Path)
-	wailsRuntime.EventsEmit(f.ctx, "selectedProfile", f.selectedInstallation.Installation.Profile)
-	wailsRuntime.EventsEmit(f.ctx, "modsEnabled", !f.selectedInstallation.Installation.Vanilla)
+	wailsRuntime.EventsEmit(f.ctx, "selectedInstallation", selectedInstallation.Path)
+	wailsRuntime.EventsEmit(f.ctx, "selectedProfile", selectedInstallation.Profile)
+	wailsRuntime.EventsEmit(f.ctx, "modsEnabled", !selectedInstallation.Vanilla)
 }
 
 func (f *FicsitCLI) InstallMod(mod string) error {
@@ -203,13 +210,15 @@ func (f *FicsitCLI) InstallMod(mod string) error {
 		return errors.New("another operation in progress")
 	}
 
-	if f.selectedInstallation == nil {
+	selectedInstallation := f.GetSelectedInstall()
+
+	if selectedInstallation == nil {
 		return errors.New("no installation selected")
 	}
 
-	l := slog.With(slog.String("task", "installMod"), slog.String("mod", mod), utils.SlogPath("install", f.selectedInstallation.Info.Path))
+	l := slog.With(slog.String("task", "installMod"), slog.String("mod", mod), utils.SlogPath("install", selectedInstallation.Path))
 
-	profileName := f.selectedInstallation.Installation.Profile
+	profileName := selectedInstallation.Profile
 	profile := f.GetProfile(profileName)
 
 	profileErr := profile.AddMod(mod, ">=0.0.0")
@@ -228,7 +237,7 @@ func (f *FicsitCLI) InstallMod(mod string) error {
 
 	defer f.setProgress(nil)
 
-	installErr := f.validateInstall(f.selectedInstallation, mod)
+	installErr := f.validateInstall(selectedInstallation, mod)
 
 	if installErr != nil {
 		l.Error("failed to install", slog.Any("error", installErr))
@@ -245,13 +254,15 @@ func (f *FicsitCLI) InstallModVersion(mod string, version string) error {
 		return errors.New("another operation in progress")
 	}
 
-	if f.selectedInstallation == nil {
+	selectedInstallation := f.GetSelectedInstall()
+
+	if selectedInstallation == nil {
 		return errors.New("no installation selected")
 	}
 
-	l := slog.With(slog.String("task", "installModVersion"), slog.String("mod", mod), slog.String("version", version), utils.SlogPath("install", f.selectedInstallation.Info.Path))
+	l := slog.With(slog.String("task", "installModVersion"), slog.String("mod", mod), slog.String("version", version), utils.SlogPath("install", selectedInstallation.Path))
 
-	profileName := f.selectedInstallation.Installation.Profile
+	profileName := selectedInstallation.Profile
 	profile := f.GetProfile(profileName)
 
 	profileErr := profile.AddMod(mod, version)
@@ -270,7 +281,7 @@ func (f *FicsitCLI) InstallModVersion(mod string, version string) error {
 
 	defer f.setProgress(nil)
 
-	installErr := f.validateInstall(f.selectedInstallation, mod)
+	installErr := f.validateInstall(selectedInstallation, mod)
 
 	if installErr != nil {
 		l.Error("failed to install", slog.Any("error", installErr))
@@ -287,13 +298,15 @@ func (f *FicsitCLI) RemoveMod(mod string) error {
 		return errors.New("another operation in progress")
 	}
 
-	if f.selectedInstallation == nil {
+	selectedInstallation := f.GetSelectedInstall()
+
+	if selectedInstallation == nil {
 		return errors.New("no installation selected")
 	}
 
-	l := slog.With(slog.String("task", "removeMod"), slog.String("mod", mod), utils.SlogPath("install", f.selectedInstallation.Info.Path))
+	l := slog.With(slog.String("task", "removeMod"), slog.String("mod", mod), utils.SlogPath("install", selectedInstallation.Path))
 
-	profileName := f.selectedInstallation.Installation.Profile
+	profileName := selectedInstallation.Profile
 	profile := f.GetProfile(profileName)
 
 	profile.RemoveMod(mod)
@@ -308,7 +321,7 @@ func (f *FicsitCLI) RemoveMod(mod string) error {
 
 	defer f.setProgress(nil)
 
-	installErr := f.validateInstall(f.selectedInstallation, mod)
+	installErr := f.validateInstall(selectedInstallation, mod)
 
 	if installErr != nil {
 		l.Error("failed to install", slog.Any("error", installErr))
@@ -325,13 +338,15 @@ func (f *FicsitCLI) EnableMod(mod string) error {
 		return errors.New("another operation in progress")
 	}
 
-	if f.selectedInstallation == nil {
+	selectedInstallation := f.GetSelectedInstall()
+
+	if selectedInstallation == nil {
 		return errors.New("no installation selected")
 	}
 
-	l := slog.With(slog.String("task", "enableMod"), slog.String("mod", mod), utils.SlogPath("install", f.selectedInstallation.Info.Path))
+	l := slog.With(slog.String("task", "enableMod"), slog.String("mod", mod), utils.SlogPath("install", selectedInstallation.Path))
 
-	profileName := f.selectedInstallation.Installation.Profile
+	profileName := selectedInstallation.Profile
 	profile := f.GetProfile(profileName)
 
 	profile.SetModEnabled(mod, true)
@@ -346,7 +361,7 @@ func (f *FicsitCLI) EnableMod(mod string) error {
 
 	defer f.setProgress(nil)
 
-	installErr := f.validateInstall(f.selectedInstallation, mod)
+	installErr := f.validateInstall(selectedInstallation, mod)
 
 	if installErr != nil {
 		l.Error("failed to install", slog.Any("error", installErr))
@@ -363,13 +378,15 @@ func (f *FicsitCLI) DisableMod(mod string) error {
 		return errors.New("another operation in progress")
 	}
 
-	if f.selectedInstallation == nil {
+	selectedInstallation := f.GetSelectedInstall()
+
+	if selectedInstallation == nil {
 		return errors.New("no installation selected")
 	}
 
-	l := slog.With(slog.String("task", "disableMod"), slog.String("mod", mod), utils.SlogPath("install", f.selectedInstallation.Info.Path))
+	l := slog.With(slog.String("task", "disableMod"), slog.String("mod", mod), utils.SlogPath("install", selectedInstallation.Path))
 
-	profileName := f.selectedInstallation.Installation.Profile
+	profileName := selectedInstallation.Profile
 	profile := f.GetProfile(profileName)
 
 	profile.SetModEnabled(mod, false)
@@ -384,7 +401,7 @@ func (f *FicsitCLI) DisableMod(mod string) error {
 
 	defer f.setProgress(nil)
 
-	installErr := f.validateInstall(f.selectedInstallation, mod)
+	installErr := f.validateInstall(selectedInstallation, mod)
 
 	if installErr != nil {
 		l.Error("failed to install", slog.Any("error", installErr))

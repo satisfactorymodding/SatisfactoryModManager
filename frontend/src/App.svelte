@@ -13,7 +13,7 @@
   import ModDetails from '$lib/components/mod-details/ModDetails.svelte';
   import { ExpandMod, UnexpandMod } from '$wailsjs/go/bindings/App';
   import LeftBar from '$lib/components/left-bar/LeftBar.svelte';
-  import { installs, invalidInstalls, progress, selectedInstall, selectedProfile } from '$lib/store/ficsitCLIStore';
+  import { installs, invalidInstalls, progress, selectedInstallMetadata, selectedProfile } from '$lib/store/ficsitCLIStore';
   import { konami } from '$lib/store/settingsStore';
   import { expandedMod, error, siteURL } from '$lib/store/generalStore';
   import { GenerateDebugInfo } from '$wailsjs/go/bindings/DebugInfo';
@@ -146,7 +146,7 @@
   escapeKeyAction=""
   surface$style="width: 500px; max-width: calc(100vw - 32px);"
 >
-  <Title>Checking install {$selectedInstall?.branch} ({$selectedInstall?.launcher}) - CL{$selectedInstall?.version}</Title>
+  <Title>Checking install {$selectedInstallMetadata?.branch} ({$selectedInstallMetadata?.launcher}) - CL{$selectedInstallMetadata?.version}</Title>
   <Content>
     {#if $progress}
       <p>{$progress.message}</p>

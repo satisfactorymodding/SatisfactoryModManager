@@ -1,10 +1,10 @@
 package ficsitcli
 
 import (
+	"fmt"
 	"log/slog"
-	"net/url"
 	"os/exec"
-	"sort"
+	"slices"
 
 	"github.com/pkg/errors"
 	"github.com/satisfactorymodding/ficsit-cli/cli"
@@ -16,44 +16,32 @@ import (
 )
 
 func (f *FicsitCLI) initInstallations() error {
-	err := f.initLocalInstallations()
+	err := f.initLocalInstallationsMetadata()
 	if err != nil {
 		return errors.Wrap(err, "failed to initialize found installations")
 	}
 
-	err = f.initRemoteServerInstallations()
+	err = f.initRemoteServerInstallationsMetadata()
 	if err != nil {
 		return errors.Wrap(err, "failed to initialize remote server installations")
 	}
 
-	sort.Slice(f.installations, func(i, j int) bool {
-		if f.installations[i].Info.Launcher != f.installations[j].Info.Launcher {
-			return f.installations[i].Info.Launcher < f.installations[j].Info.Launcher
-		}
-		return f.installations[i].Info.Branch < f.installations[j].Info.Branch
-	})
-
-	if len(f.installations) > 0 {
-		f.selectedInstallation = f.installations[0]
-	}
-
-	if f.ficsitCli.Installations.SelectedInstallation != "" {
-		for _, install := range f.installations {
-			if install.Info.Path == f.ficsitCli.Installations.SelectedInstallation {
-				f.selectedInstallation = install
-				break
-			}
+	filteredInstalls := f.GetInstallations()
+	if len(filteredInstalls) > 0 {
+		if !slices.Contains(filteredInstalls, f.ficsitCli.Installations.SelectedInstallation) {
+			f.ficsitCli.Installations.SelectedInstallation = filteredInstalls[0]
+			_ = f.ficsitCli.Installations.Save()
 		}
 	}
 
 	return nil
 }
 
-func (f *FicsitCLI) initLocalInstallations() error {
+func (f *FicsitCLI) initLocalInstallationsMetadata() error {
 	installs, findErrors := installfinders.FindInstallations()
 
 	f.installFindErrors = findErrors
-	f.installations = []*InstallationInfo{}
+	f.installationMetadata = make(map[string]*common.Installation)
 
 	fallbackProfile := "Default"
 	if f.ficsitCli.Profiles.GetProfile(fallbackProfile) == nil {
@@ -68,17 +56,13 @@ func (f *FicsitCLI) initLocalInstallations() error {
 	for _, install := range installs {
 		ficsitCliInstall := f.ficsitCli.Installations.GetInstallation(install.Path)
 		if ficsitCliInstall == nil {
-			var err error
-			ficsitCliInstall, err = f.ficsitCli.Installations.AddInstallation(f.ficsitCli, install.Path, fallbackProfile)
+			_, err := f.ficsitCli.Installations.AddInstallation(f.ficsitCli, install.Path, fallbackProfile)
 			if err != nil {
 				return errors.Wrap(err, "failed to add installation")
 			}
 			createdNewInstalls = true
 		}
-		f.installations = append(f.installations, &InstallationInfo{
-			Installation: ficsitCliInstall,
-			Info:         install,
-		})
+		f.installationMetadata[install.Path] = install
 	}
 
 	if createdNewInstalls {
@@ -90,41 +74,74 @@ func (f *FicsitCLI) initLocalInstallations() error {
 	return nil
 }
 
-func (f *FicsitCLI) initRemoteServerInstallations() error {
-	for _, installation := range f.ficsitCli.Installations.Installations {
+func (f *FicsitCLI) initRemoteServerInstallationsMetadata() error {
+	for _, installation := range f.GetInstallations() {
 		err := f.checkAndAddExistingRemote(installation)
 		if err != nil {
-			slog.Warn("failed to check and add existing remote", slog.Any("error", err), utils.SlogPath("path", installation.Path))
+			slog.Warn("failed to check and add existing remote", slog.Any("error", err), utils.SlogPath("path", installation))
 		}
 	}
 	return nil
 }
 
-func (f *FicsitCLI) checkAndAddExistingRemote(installation *cli.Installation) error {
-	slog.Debug("checking whether installation is remote", utils.SlogPath("path", installation.Path))
-	parsed, err := url.Parse(installation.Path)
+func isServerTarget(targetName string) bool {
+	return targetName == "WindowsServer" || targetName == "LinuxServer"
+}
+
+func (f *FicsitCLI) checkAndAddExistingRemote(path string) error {
+	slog.Debug("checking whether installation is remote", utils.SlogPath("path", path))
+	installation := f.ficsitCli.Installations.GetInstallation(path)
+	if installation == nil {
+		return nil
+	}
+	if _, ok := f.installationMetadata[installation.Path]; ok {
+		// Already have metadata for this install
+		return nil
+	}
+	platform, err := installation.GetPlatform(f.ficsitCli)
 	if err != nil {
-		return errors.Wrap(err, "failed to parse installation path")
+		// Maybe the server is unreachable at the moment
+		// We will keep this install for now
+		slog.Info("failed to get platform", slog.Any("error", err), utils.SlogPath("path", installation.Path))
+	} else if !isServerTarget(platform.TargetName) {
+		// Not a server, but a local install, should already have metadata
+		return nil
 	}
-	if parsed.Scheme == "ftp" || parsed.Scheme == "sftp" {
-		// It is not a local installation
-		if err := f.AddRemoteServer(installation.Path); err != nil {
-			return errors.Wrap(err, "failed to add remote server")
-		}
+	if err := f.AddRemoteServer(path); err != nil {
+		return errors.Wrap(err, "failed to add remote server")
 	}
 	return nil
 }
 
-func (f *FicsitCLI) GetInstallations() []*InstallationInfo {
-	return f.installations
+func (f *FicsitCLI) GetInstallations() []string {
+	installations := make([]string, 0, len(f.ficsitCli.Installations.Installations))
+	for _, installation := range f.ficsitCli.Installations.Installations {
+		// Keep installations that we have metadata for
+		if _, ok := f.installationMetadata[installation.Path]; !ok {
+			// Keep installations that are remote servers
+			// Even if we don't have metadata for them
+			platform, err := installation.GetPlatform(f.ficsitCli)
+			if err != nil {
+				// Maybe the server is unreachable at the moment
+				// We will keep this install for now
+				slog.Info("failed to get platform", slog.Any("error", err), utils.SlogPath("path", installation.Path))
+			} else if !isServerTarget(platform.TargetName) {
+				// Not a server, but a local install, should already have metadata
+				continue
+			}
+		}
+		installations = append(installations, installation.Path)
+	}
+	return installations
 }
 
-func (f *FicsitCLI) GetInstallationsInfo() []*common.Installation {
-	result := []*common.Installation{}
-	for _, install := range f.installations {
-		result = append(result, install.Info)
-	}
-	return result
+func (f *FicsitCLI) GetInstallationsMetadata() map[string]*common.Installation {
+	return f.installationMetadata
+}
+
+func (f *FicsitCLI) GetCurrentInstallationMetadata() *common.Installation {
+	// This function only exists so common.Installation is generated to typescript
+	return f.installationMetadata[f.ficsitCli.Installations.SelectedInstallation]
 }
 
 func (f *FicsitCLI) GetInvalidInstalls() []string {
@@ -138,30 +155,29 @@ func (f *FicsitCLI) GetInvalidInstalls() []string {
 	return result
 }
 
-func (f *FicsitCLI) GetInstallation(path string) *InstallationInfo {
-	for _, install := range f.installations {
-		if install.Info.Path == path {
-			return install
-		}
-	}
-
-	return nil
+func (f *FicsitCLI) GetInstallation(path string) *cli.Installation {
+	return f.ficsitCli.Installations.GetInstallation(path)
 }
 
 func (f *FicsitCLI) SelectInstall(path string) error {
 	l := slog.With(slog.String("task", "selectInstall"), utils.SlogPath("path", path))
-	if f.selectedInstallation != nil && f.selectedInstallation.Info.Path == path {
+
+	if !f.isValidInstall(path) {
+		return fmt.Errorf("invalid installation: %s", path)
+	}
+	if f.ficsitCli.Installations.SelectedInstallation == path {
 		return nil
 	}
-	installation := f.GetInstallation(path)
+	installation := f.ficsitCli.Installations.GetInstallation(path)
 	if installation == nil {
 		l.Error("failed to find installation")
 		return errors.Errorf("installation %s not found", path)
 	}
-	f.selectedInstallation = installation
 
 	f.ficsitCli.Installations.SelectedInstallation = path
 	_ = f.ficsitCli.Installations.Save()
+
+	selectedInstallation := f.GetSelectedInstall()
 
 	f.EmitGlobals()
 
@@ -175,7 +191,7 @@ func (f *FicsitCLI) SelectInstall(path string) error {
 
 	defer f.setProgress(nil)
 
-	installErr := f.validateInstall(f.selectedInstallation, "__select_install__")
+	installErr := f.validateInstall(selectedInstallation, "__select_install__")
 
 	if installErr != nil {
 		l.Error("failed to validate install", slog.Any("error", installErr))
@@ -184,19 +200,18 @@ func (f *FicsitCLI) SelectInstall(path string) error {
 	return nil
 }
 
-func (f *FicsitCLI) GetSelectedInstall() *common.Installation {
-	if f.selectedInstallation == nil {
-		return nil
-	}
-	return f.selectedInstallation.Info
+func (f *FicsitCLI) GetSelectedInstall() *cli.Installation {
+	return f.ficsitCli.Installations.GetInstallation(f.ficsitCli.Installations.SelectedInstallation)
 }
 
 func (f *FicsitCLI) SetModsEnabled(enabled bool) error {
-	if f.selectedInstallation == nil {
+	selectedInstallation := f.GetSelectedInstall()
+
+	if selectedInstallation == nil {
 		slog.Error("no installation selected")
 		return errors.New("no installation selected")
 	}
-	l := slog.With(slog.String("task", "setModsEnabled"), slog.Bool("enabled", enabled), utils.SlogPath("install", f.selectedInstallation.Info.Path))
+	l := slog.With(slog.String("task", "setModsEnabled"), slog.Bool("enabled", enabled), utils.SlogPath("install", selectedInstallation.Path))
 
 	var message string
 	if enabled {
@@ -205,7 +220,7 @@ func (f *FicsitCLI) SetModsEnabled(enabled bool) error {
 		message = "Disabling mods"
 	}
 
-	f.selectedInstallation.Installation.Vanilla = !enabled
+	selectedInstallation.Vanilla = !enabled
 	_ = f.ficsitCli.Installations.Save()
 
 	f.EmitGlobals()
@@ -220,7 +235,7 @@ func (f *FicsitCLI) SetModsEnabled(enabled bool) error {
 
 	defer f.setProgress(nil)
 
-	installErr := f.validateInstall(f.selectedInstallation, "__toggle_mods__")
+	installErr := f.validateInstall(selectedInstallation, "__toggle_mods__")
 
 	if installErr != nil {
 		l.Error("failed to validate install", slog.Any("error", installErr))
@@ -231,22 +246,25 @@ func (f *FicsitCLI) SetModsEnabled(enabled bool) error {
 }
 
 func (f *FicsitCLI) GetModsEnabled() bool {
-	return f.selectedInstallation == nil || !f.selectedInstallation.Installation.Vanilla
+	selectedInstallation := f.GetSelectedInstall()
+	return selectedInstallation == nil || !selectedInstallation.Vanilla
 }
 
 func (f *FicsitCLI) GetSelectedInstallProfileMods() map[string]cli.ProfileMod {
-	if f.selectedInstallation == nil {
+	selectedInstallation := f.GetSelectedInstall()
+	if selectedInstallation == nil {
 		return make(map[string]cli.ProfileMod)
 	}
-	profile := f.GetProfile(f.selectedInstallation.Installation.Profile)
+	profile := f.GetProfile(selectedInstallation.Profile)
 	return profile.Mods
 }
 
 func (f *FicsitCLI) GetSelectedInstallLockfileMods() (map[string]resolver.LockedMod, error) {
-	if f.selectedInstallation == nil {
+	selectedInstallation := f.GetSelectedInstall()
+	if selectedInstallation == nil {
 		return make(map[string]resolver.LockedMod), nil
 	}
-	lockfile, err := f.selectedInstallation.Installation.LockFile(f.ficsitCli)
+	lockfile, err := selectedInstallation.LockFile(f.ficsitCli)
 	if err != nil {
 		return nil, err //nolint:wrapcheck
 	}
@@ -257,10 +275,11 @@ func (f *FicsitCLI) GetSelectedInstallLockfileMods() (map[string]resolver.Locked
 }
 
 func (f *FicsitCLI) GetSelectedInstallLockfile() (*resolver.LockFile, error) {
-	if f.selectedInstallation == nil {
+	selectedInstallation := f.GetSelectedInstall()
+	if selectedInstallation == nil {
 		return nil, nil
 	}
-	lockfile, err := f.selectedInstallation.Installation.LockFile(f.ficsitCli)
+	lockfile, err := selectedInstallation.LockFile(f.ficsitCli)
 	if err != nil {
 		return nil, err //nolint:wrapcheck
 	}
@@ -268,11 +287,17 @@ func (f *FicsitCLI) GetSelectedInstallLockfile() (*resolver.LockFile, error) {
 }
 
 func (f *FicsitCLI) LaunchGame() {
-	if f.selectedInstallation == nil {
+	selectedInstallation := f.GetSelectedInstall()
+	if selectedInstallation == nil {
 		slog.Error("no installation selected")
 		return
 	}
-	cmd := exec.Command(f.selectedInstallation.Info.LaunchPath[0], f.selectedInstallation.Info.LaunchPath[1:]...)
+	metadata := f.installationMetadata[selectedInstallation.Path]
+	if metadata == nil {
+		slog.Error("no metadata for installation")
+		return
+	}
+	cmd := exec.Command(metadata.LaunchPath[0], metadata.LaunchPath[1:]...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		slog.Error("failed to launch game", slog.Any("error", err), slog.String("cmd", cmd.String()), slog.String("output", string(out)))

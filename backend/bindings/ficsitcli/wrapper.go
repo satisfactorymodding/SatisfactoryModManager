@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/viper"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/settings"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 )
@@ -20,9 +21,8 @@ import (
 type FicsitCLI struct {
 	ctx                  context.Context
 	ficsitCli            *cli.GlobalContext
-	installations        []*InstallationInfo
+	installationMetadata map[string]*common.Installation
 	installFindErrors    []error
-	selectedInstallation *InstallationInfo
 	progress             *Progress
 	isGameRunning        bool
 }
@@ -78,6 +78,11 @@ func (f *FicsitCLI) Init() error {
 func (f *FicsitCLI) setProgress(p *Progress) {
 	f.progress = p
 	wailsRuntime.EventsEmit(f.ctx, "progress", p)
+}
+
+func (f *FicsitCLI) isValidInstall(path string) bool {
+	_, ok := f.installationMetadata[path]
+	return ok
 }
 
 func ValidateCacheDir(dir string) error {

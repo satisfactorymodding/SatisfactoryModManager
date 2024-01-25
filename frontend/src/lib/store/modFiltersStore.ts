@@ -4,7 +4,7 @@ import type { Client } from '@urql/svelte';
 import { bindingTwoWayNoExcept } from './wailsStoreBindings';
 
 import { CompatibilityState, type GetModsQuery } from '$lib/generated';
-import { favoriteMods, lockfileMods, manifestMods, selectedInstall } from '$lib/store/ficsitCLIStore';
+import { favoriteMods, lockfileMods, manifestMods, selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
 import { queuedMods } from '$lib/store/actionQueue';
 import { GetModFiltersOrder, GetModFiltersFilter, SetModFiltersOrder, SetModFiltersFilter } from '$wailsjs/go/bindings/Settings';
 import { getCompatibility } from '$lib/utils/modCompatibility';
@@ -34,7 +34,7 @@ export const filterOptions: Filter[] = [
   { 
     name: 'Compatible',
     func: async (mod: PartialMod, urqlClient: Client) => { 
-      const installInfo = get(selectedInstall);
+      const installInfo = get(selectedInstallMetadata);
       if(!installInfo) {
         return false;
       }

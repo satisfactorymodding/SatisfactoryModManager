@@ -68,22 +68,27 @@ func addFactoryGameLog(writer *zip.Writer) error {
 }
 
 func addMetadata(writer *zip.Writer) error {
-	ficsitCliInstalls := BindingsInstance.FicsitCLI.GetInstallations()
-	selectedFicsitCliInstall := BindingsInstance.FicsitCLI.GetSelectedInstall()
+	installs := BindingsInstance.FicsitCLI.GetInstallations()
+	selectedInstallInstance := BindingsInstance.FicsitCLI.GetSelectedInstall()
 	metadataInstalls := make([]*MetadataInstallation, 0)
 	var selectedMetadataInstall *MetadataInstallation
-	for _, install := range ficsitCliInstalls {
+	for _, install := range installs {
+		metadata := BindingsInstance.FicsitCLI.GetInstallationsMetadata()[install]
+		if metadata == nil {
+			slog.Warn("failed to get metadata for installation", slog.String("path", install))
+			continue
+		}
 		i := &MetadataInstallation{
-			Installation: install.Info,
-			Name:         fmt.Sprintf("Satisfactory %s (%s)", install.Info.Branch, install.Info.Launcher),
-			Profile:      install.Installation.Profile,
+			Installation: metadata,
+			Name:         fmt.Sprintf("Satisfactory %s (%s)", metadata.Branch, metadata.Launcher),
+			Profile:      BindingsInstance.FicsitCLI.GetInstallation(install).Profile,
 		}
 		i.Path = utils.RedactPath(i.Path)
 		i.LaunchPath = strings.Join(i.Installation.LaunchPath, " ")
 
 		metadataInstalls = append(metadataInstalls, i)
 
-		if selectedFicsitCliInstall != nil && selectedFicsitCliInstall == install.Info {
+		if selectedInstallInstance != nil && selectedInstallInstance.Path == install {
 			selectedMetadataInstall = i
 		}
 	}

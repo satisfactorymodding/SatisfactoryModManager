@@ -7,7 +7,7 @@
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { search, type PartialMod } from '$lib/store/modFiltersStore';
-  import { favoriteMods, lockfileMods, manifestMods, progress, selectedInstall } from '$lib/store/ficsitCLIStore';
+  import { favoriteMods, lockfileMods, manifestMods, progress, selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
   import { addQueuedModAction, queuedMods, removeQueuedModAction } from '$lib/store/actionQueue';
   import { error, siteURL } from '$lib/store/generalStore';
   import { DisableMod, EnableMod, InstallMod, RemoveMod } from '$wailsjs/go/ficsitcli/FicsitCLI';
@@ -157,8 +157,8 @@
 
   let compatibility: CompatibilityWithSource = { state: CompatibilityState.Works, source: 'reported' };
   $: {
-    const gameVersion = $selectedInstall?.version;
-    const branch = $selectedInstall?.branch as GameBranch;
+    const gameVersion = $selectedInstallMetadata?.version;
+    const branch = $selectedInstallMetadata?.branch as GameBranch;
     if(gameVersion && branch) {
       if(!('offline' in mod) && !('missing' in mod)) {
         if(mod.hidden && !isDependency) {

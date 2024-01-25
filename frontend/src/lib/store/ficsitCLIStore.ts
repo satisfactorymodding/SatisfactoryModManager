@@ -4,15 +4,16 @@ import { binding, bindingTwoWay } from './wailsStoreBindings';
 import { isLaunchingGame } from './generalStore';
 
 import type { cli, ficsitcli } from '$wailsjs/go/models';
-import { CheckForUpdates, GetInstallationsInfo, GetInvalidInstalls, GetProfiles, GetSelectedInstall, GetSelectedProfile, SelectInstall, SetProfile, GetModsEnabled, SetModsEnabled, GetSelectedInstallProfileMods, GetSelectedInstallLockfileMods, GetRemoteInstallations } from '$wailsjs/go/ficsitcli/FicsitCLI';
+import { CheckForUpdates, GetInstallationsMetadata, GetInvalidInstalls, GetProfiles, GetSelectedInstall, GetSelectedProfile, SelectInstall, SetProfile, GetModsEnabled, SetModsEnabled, GetSelectedInstallProfileMods, GetSelectedInstallLockfileMods, GetRemoteInstallations, GetInstallations } from '$wailsjs/go/ficsitcli/FicsitCLI';
 import { GetFavoriteMods } from '$wailsjs/go/bindings/Settings';
 
 export const invalidInstalls = binding([], { initialGet: GetInvalidInstalls });
 
-export const installs = binding([], { initialGet: GetInstallationsInfo, updateEvent: 'installations', allowNull: false });
-export const selectedInstallPath = bindingTwoWay(null, { initialGet: () => GetSelectedInstall().then((i) => i?.path ?? null), updateEvent: 'selectedInstall' }, { updateFunction: SelectInstall });
-export const selectedInstall = derived([installs, selectedInstallPath], ([$installs, $selectedInstallPath]) => {
-  return $installs.find((i) => i.path === $selectedInstallPath) ?? null;
+export const installs = binding([], { initialGet: GetInstallations, updateEvent: 'installations', allowNull: false });
+export const installsMetadata = binding({}, { initialGet: GetInstallationsMetadata, updateEvent: 'installationsMetadata', allowNull: false });
+export const selectedInstall = bindingTwoWay(null, { initialGet: () => GetSelectedInstall().then((i) => i?.path ?? null), updateEvent: 'selectedInstall' }, { updateFunction: SelectInstall });
+export const selectedInstallMetadata = derived([installsMetadata, selectedInstall], ([$installsMetadata, $selectedInstallPath]) => {
+  return $installsMetadata[$selectedInstallPath ?? '__invalid__install__'] ?? null;
 });
 
 export const remoteServers = binding([], { initialGet: () => GetRemoteInstallations(), updateEvent: 'remoteServers', allowNull: false });

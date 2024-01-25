@@ -4,7 +4,7 @@
   import { getContextClient } from '@urql/svelte';
   import { mdiOpenInNew, mdiTrayFull } from '@mdi/js';
 
-  import { selectedInstall, isGameRunning, lockfileMods, progress } from '$lib/store/ficsitCLIStore';
+  import { selectedInstallMetadata, isGameRunning, lockfileMods, progress } from '$lib/store/ficsitCLIStore';
   import { queuedMods, startQueue } from '$lib/store/actionQueue';
   import { launchButton, queueAutoStart } from '$lib/store/settingsStore';
   import { error, isLaunchingGame } from '$lib/store/generalStore';
@@ -14,14 +14,14 @@
   import type { GameBranch } from '$lib/wailsTypesExtensions';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
 
-  $: isInstallLaunchable = !!$selectedInstall?.launchPath;
+  $: isInstallLaunchable = !!$selectedInstallMetadata?.launchPath;
 
   const client = getContextClient();
 
   let compatibilities: Record<string, CompatibilityWithSource> = {};
   $: {
-    const gameVersion = $selectedInstall?.version;
-    const branch = $selectedInstall?.branch as GameBranch;
+    const gameVersion = $selectedInstallMetadata?.version;
+    const branch = $selectedInstallMetadata?.branch as GameBranch;
     if (gameVersion && branch) {
       compatibilities = {};
       Object.keys($lockfileMods).map(async (modReference) => {
