@@ -235,6 +235,12 @@ devDependencies:
   '@mdi/js':
     specifier: ^7.3.67
     version: 7.3.67
+  '@skeletonlabs/skeleton':
+    specifier: ^2.7.1
+    version: 2.7.1(svelte@4.2.8)
+  '@skeletonlabs/tw-plugin':
+    specifier: ^0.3.1
+    version: 0.3.1(tailwindcss@3.3.6)
   '@smui/banner':
     specifier: 7.0.0-beta.15
     version: 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
@@ -3177,6 +3183,23 @@ packages:
     dev: true
     optional: true
 
+  /@skeletonlabs/skeleton@2.7.1(svelte@4.2.8):
+    resolution: {integrity: sha512-zlHehSp8jXePmldLiNthYtFEomcitfcAIuLyvN1/lbHgsx5notUUO50CG0AEUF1BKcrl97watLv4jDmv1ShHJQ==}
+    peerDependencies:
+      svelte: ^3.56.0 || ^4.0.0
+    dependencies:
+      esm-env: 1.0.0
+      svelte: 4.2.8
+    dev: true
+
+  /@skeletonlabs/tw-plugin@0.3.1(tailwindcss@3.3.6):
+    resolution: {integrity: sha512-DjjeOHN3HhFQf6gYPT2MUZMkIdw1jeB9mbuKC8etQxUlOR4XitfC7hssRWFJ8RJsvrrN0myCBbdWkVG1JVA96g==}
+    peerDependencies:
+      tailwindcss: '>=3.0.0'
+    dependencies:
+      tailwindcss: 3.3.6
+    dev: true
+
   /@smui/banner@7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3):
     resolution: {integrity: sha512-OksNwc5xMP1ZksFo9rs9HZS61+A53N6sHB/XcSX5fuVIygBBgar+/HczDpJTwEXKcBuJUu4tKkTa3A/BEqnGeA==}
     dependencies:
@@ -5120,6 +5143,10 @@ packages:
       text-table: 0.2.0
     transitivePeerDependencies:
       - supports-color
+    dev: true
+
+  /esm-env@1.0.0:
+    resolution: {integrity: sha512-Cf6VksWPsTuW01vU9Mk/3vRue91Zevka5SjyNf3nEpokFRuqt/KjUQoGAwq9qMmhpLTHmXzSIrFRw8zxWzmFBA==}
     dev: true
 
   /espree@9.6.1:
