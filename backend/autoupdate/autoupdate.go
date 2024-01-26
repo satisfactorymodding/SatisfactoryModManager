@@ -52,6 +52,12 @@ func CheckInterval(interval time.Duration) {
 }
 
 func OnExit(restart bool) error {
+	if Updater.PendingUpdate == nil {
+		if restart {
+			slog.Warn("restart requested but no update is present. exiting anyway")
+		}
+		return nil
+	}
 	return updateApply.OnExit(restart)
 }
 
