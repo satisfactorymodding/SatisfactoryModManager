@@ -1,5 +1,4 @@
 <script lang="ts">
-  import Button, { Label } from '@smui/button';
   import { mdiAlert, mdiServerNetwork, mdiTrashCan } from '@mdi/js';
   import Dialog, { Actions, Content, Title } from '@smui/dialog';
   import DataTable, { Body, Cell, Row } from '@smui/data-table';
@@ -71,13 +70,15 @@
   }
 </script>
 
-<Button variant="unelevated" class="w-full mt-2" on:click={() => dialogOpen = true}>
-  <Label>
-    Manage Servers
-  </Label>
+<button
+  class="btn px-4 h-8 w-full text-sm bg-surface-200-700-token"
+  on:click={() => dialogOpen = true}>
+  <span>Manage Servers</span>
   <div class="grow" />
-  <SvgIcon icon={mdiServerNetwork} class="h-5 w-5" />
-</Button>
+  <SvgIcon
+    class="h-5 w-5"
+    icon={mdiServerNetwork} />
+</button>
 
 <Dialog
   bind:open={dialogOpen} scrimClickAction="" escapeKeyAction=""
@@ -96,9 +97,13 @@
                 {$installsMetadata[remoteServer].type}
               {:else}
                 <Wrapper>
-                  <Button on:click={() => retryConnect(remoteServer)}>
-                    <SvgIcon icon={mdiAlert} class="!p-1 !m-0 !w-full !h-full text-red-500" />
-                  </Button>
+                  <button
+                    class="btn-icon h-6 w-full text-sm"
+                    on:click={() => retryConnect(remoteServer)}>
+                    <SvgIcon
+                      class="!p-0 !m-0 !w-full !h-full text-red-500"
+                      icon={mdiAlert} />
+                  </button>
                   <Tooltip surface$class="max-w-lg text-base">
                     Failed to connect to server, click to retry
                   </Tooltip>
@@ -111,9 +116,13 @@
               {/if}
             </Cell>
             <Cell>
-              <Button on:click={() => removeServer(remoteServer)}>
-                <SvgIcon icon={mdiTrashCan} class="!p-1 !m-0 !w-full !h-full group-hover:!hidden"/>
-              </Button>
+              <button
+                class="btn-icon h-6 w-full text-sm"
+                on:click={() => removeServer(remoteServer)}>
+                <SvgIcon
+                  class="!p-0 !m-0 !w-full !h-full hover:text-red-500"
+                  icon={mdiTrashCan}/>
+              </button>
             </Cell>
           </Row>
         {/each}
@@ -127,18 +136,31 @@
           {/each}
         </Select>
         <Textfield bind:value={newServerPath} class="!h-full grow mx-4"/>
-        <Button on:click={() => addNewRemoteServer()} disabled={addInProgress} class="!h-full">
-          {#if !addInProgress}
-            Add
-          {:else}
-            Validating...
-          {/if}
-        </Button>
+        <button
+          class="btn h-full w-full text-sm bg-surface-500-400-token"
+          disabled={addInProgress}
+          on:click={() => addNewRemoteServer()}>
+          <span>
+            {#if !addInProgress}
+              Add
+            {:else}
+              Validating...
+            {/if}
+          </span>
+          <div class="grow" />
+          <SvgIcon
+            class="h-5 w-5"
+            icon={mdiServerNetwork} />
+        </button>
       </div>
       <p>{err}</p>
     </div>
   </Content>
   <Actions>
-    <Button on:click={() => dialogOpen = false}>Close</Button>
+    <button
+      class="btn h-8 w-full text-sm bg-surface-200-700-token"
+      on:click={() => dialogOpen = false}>
+      Close
+    </button>
   </Actions>
 </Dialog>

@@ -40,8 +40,6 @@ $white-darker: #d5d5d5;
 @use '@material/select/index' as select;
 @use '@material/shape/mixins' as shape-mixins;
 
-@use '@material/button/index' as button;
-
 @use '@material/list/index' as list;
 @use '@material/tooltip/index' as tooltip;
 
@@ -82,17 +80,6 @@ $left-bar-controls-height-lg: 40px;
     @include list.deprecated-divider-insets(47.5px, 16px);
   }
 
-  .mdc-button {
-    @include button.height($left-bar-controls-height-sm);
-    @media (min-height: $md) {
-      @include button.height($left-bar-controls-height-md);
-    }
-    @media (min-height: $lg) {
-      @include button.height($left-bar-controls-height-lg);
-    }
-    @include button.container-fill-color($left-bar-controls-background);
-    @include button.ink-color(theme.$on-surface);
-  }
   .mdc-select {
     @include select.container-fill-color($left-bar-controls-background);
     @include select.filled-height($left-bar-controls-height-sm);
@@ -115,54 +102,6 @@ $left-bar-controls-height-lg: 40px;
       }
     }
   }
-
-  .mods-toggle-button {
-    @include button.container-fill-color($left-bar-controls-background);
-    &.mods-on {
-      @include button.container-fill-color($green-darker);
-    }
-    &.mods-off {
-      @include button.container-fill-color($red-darker);
-    }
-  }
-
-  .profile-add {
-    @include button.icon-color($green-normal);
-  }
-  
-  .profile-edit {
-    @include button.icon-color($yellow);
-  }
-  
-  .profile-delete {
-    @include button.icon-color($red-normal);
-  }
-
-  .update-button {
-    @include button.container-fill-color($left-bar-controls-background);
-    &.has-update {
-      @include button.container-fill-color(theme.$primary);
-    }
-  }
-
-  .launch-game {
-    @include button.container-fill-color($green-darker);
-    &.warning {
-      @include button.container-fill-color($yellow);
-    }
-    &.error {
-      @include button.container-fill-color($red-normal);
-    }
-  }
-}
-
-.mods-details {
-  .mdc-button {
-    @include button.height($left-bar-controls-height-md);
-    @media (min-height: $lg) {
-      @include button.height($left-bar-controls-height-lg);
-    };
-  }
 }
 
 .mods-list {
@@ -171,53 +110,6 @@ $left-bar-controls-height-lg: 40px;
 
 div.mdc-tooltip {
   @include tooltip.fill-color($almost-black);
-}
-
-.mod-install-button.mdc-button {
-  @include button.ink-color(theme.$on-surface);
-  &:not(.installed) {
-    @include button.ink-color($white-darker);
-    &:hover {
-      @include button.ink-color($green-normal);
-    }
-  }
-  &.installed {
-    @include button.ink-color($green-normal);
-    &:hover {
-      @include button.ink-color($red-normal);
-    }
-  }
-}
-
-.mod-enable-button.mdc-button {
-  @include button.ink-color($white-darker);
-  &:not(.enabled) {
-    @include button.ink-color($white-darker);
-    &:hover {
-      @include button.ink-color($green-normal);
-    }
-  }
-  &.enabled {
-    @include button.ink-color($white-darker);
-    &:hover {
-      @include button.ink-color($white-darker);
-    }
-  }
-}
-
-.mod-favorite-button.mdc-button {
-  &:not(.favorite) {
-    @include button.ink-color($white-darker);
-    &:hover {
-      @include button.ink-color($yellow);
-    }
-  }
-  &.favorite {
-    @include button.ink-color($yellow);
-    &:hover {
-      @include button.ink-color($white-darker);
-    }
-  }
 }
 
 .mods-details {

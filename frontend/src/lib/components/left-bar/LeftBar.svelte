@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Button, { Label } from '@smui/button';
+  import { Label } from '@smui/common';
   import Select, { Option } from '@smui/select';
   import Dialog, { Title, Content, Actions } from '@smui/dialog';
   import TextField from '@smui/textfield'; 
@@ -205,11 +205,10 @@
 </script>
 
 <div class="flex flex-col h-full p-4 left-bar w-[22rem] min-w-[22rem] ">
-  <div class="flex flex-col">
+  <div class="flex flex-col gap-2">
     <span class="pl-4">Game version</span>
     <Select
       variant="filled"
-      class="mt-2"
       menu$class="max-h-[32rem]"
       value={$selectedInstall}
       on:SMUISelect:change={installSelectChanged}
@@ -249,28 +248,42 @@
         </Option>
       {/each}
     </Select>
-    <div class="flex w-full mt-2">
-      <Button variant="unelevated" class="w-1/2 rounded-tr-none rounded-br-none mods-toggle-button {$modsEnabled ? '' : 'mods-off'}" on:click={() => setModsEnabled(false)} disabled={!$canModify}>
-        <Label>
-          Mods off
-        </Label>
-        <div class="grow"/>
-        <SvgIcon icon={mdiCloseCircle} class="h-5 w-5" />
-      </Button>
-      <Button variant="unelevated" class="w-1/2 rounded-tl-none rounded-bl-none mods-toggle-button {$modsEnabled ? 'mods-on' : ''}" on:click={() => setModsEnabled(true)} disabled={!$canModify}>
-        <Label>
-          Mods on
-        </Label>
-        <div class="grow"/>
-        <SvgIcon icon={mdiCheckCircle} class="h-5 w-5" />
-      </Button>
+    <div class="flex w-full">
+      <div class="btn-group bg-surface-200-700-token w-full text-xl">
+        <button
+          class="w-1/2 !btn-sm !px-4"
+          class:!bg-error-900={!$modsEnabled}
+          disabled={!$canModify}
+          on:click={() => setModsEnabled(false)}
+        >
+          <span>
+            Mods off
+          </span>
+          <div class="grow"/>
+          <SvgIcon
+            class="h-5 w-5"
+            icon={mdiCloseCircle} />
+        </button>
+        <button
+          class="w-1/2 !btn-sm !px-4"
+          class:!bg-primary-900={$modsEnabled}
+          disabled={!$canModify}
+          on:click={() => setModsEnabled(true)}>
+          <span>
+            Mods on
+          </span>
+          <div class="grow"/>
+          <SvgIcon
+            class="h-5 w-5"
+            icon={mdiCheckCircle} />
+        </button>
+      </div>
     </div>
   </div>
-  <div class="flex flex-col mt-4 h-md:mt-8">
+  <div class="flex flex-col gap-2 mt-4 h-md:mt-8">
     <span class="pl-4">Profile</span>
     <Select
       variant="filled"
-      class="mt-2"
       menu$class="max-h-[32rem]"
       value={$selectedProfile}
       on:SMUISelect:change={profileSelectChanged}
@@ -283,85 +296,130 @@
         </Option>
       {/each}
     </Select>
-    <div class="flex w-full mt-2">
-      <Button class="w-1/3 pr-2 pl-5 profile-add" on:click={() => addProfileDialog = true} disabled={!$canModify}>
-        <Label>
+    <div class="flex w-full gap-1">
+      <button
+        class="btn w-1/3 bg-surface-200-700-token px-4 h-8 text-sm"
+        disabled={!$canModify}
+        on:click={() => addProfileDialog = true}>
+        <span>
           Add
-        </Label>
+        </span>
         <div class="grow"/>
-        <SvgIcon icon={mdiPlusCircle} />
-      </Button>
-      <Button class="w-1/3 mx-2 pr-0 profile-edit" on:click={() => { renameOldProfileName = $selectedProfile ?? ''; renameProfileDialog = true; }} disabled={!$canModify}>
-        <Label>
+        <SvgIcon
+          class="h-5 w-5 text-primary-600"
+          icon={mdiPlusCircle} />
+      </button>
+      <button
+        class="btn w-1/3 bg-surface-200-700-token px-2 h-8 text-sm"
+        disabled={!$canModify}
+        on:click={() => { renameOldProfileName = $selectedProfile ?? ''; renameProfileDialog = true; }}>
+        <span>
           Rename
-        </Label>
+        </span>
         <div class="grow"/>
-        <SvgIcon icon={mdiPencil} />
-      </Button>
-      <Button class="w-1/3 pr-2 pl-4 profile-delete" on:click={() => { deleteProfileName = $selectedProfile ?? ''; deleteProfileDialog = true; }} disabled={!$canModify || $profiles.length === 1}>
-        <Label>
+        <SvgIcon
+          class="h-5 w-5 text-warning-500"
+          icon={mdiPencil} />
+      </button>
+      <button
+        class="btn w-1/3 bg-surface-200-700-token px-3 h-8 text-sm"
+        disabled={!$canModify || $profiles.length === 1}
+        on:click={() => { deleteProfileName = $selectedProfile ?? ''; deleteProfileDialog = true; }}>
+        <span>
           Delete
-        </Label>
+        </span>
         <div class="grow"/>
-        <SvgIcon icon={mdiTrashCan} />
-      </Button>
+        <SvgIcon
+          class="h-5 w-5 text-error-700"
+          icon={mdiTrashCan} />
+      </button>
     </div>
-    <div class="flex w-full mt-2">
-      <Button class="w-1/2 pr-2 pl-5 mr-1 profile-import" on:click={() => importProfileDialog = true} disabled={!$canModify}>
-        <Label>
+    <div class="flex w-full gap-1">
+      <button
+        class="btn w-1/2 bg-surface-200-700-token px-4 h-8 text-sm"
+        disabled={!$canModify}
+        on:click={() => importProfileDialog = true}
+      >
+        <span>
           Import
-        </Label>
+        </span>
         <div class="grow"/>
-        <SvgIcon icon={mdiDownload} />
-      </Button>
-      <Button class="w-1/2 pr-2 pl-4 ml-1 profile-export" on:click={() => { exportCurrentProfile(); }} disabled={!$canModify}>
-        <Label>
+        <SvgIcon
+          class="h-5 w-5"
+          icon={mdiDownload} />
+      </button>
+      <button
+        class="btn w-1/2 bg-surface-200-700-token px-4 h-8 text-sm"
+        disabled={!$canModify}
+        on:click={() => { exportCurrentProfile(); }}
+      >
+        <span>
           Export
-        </Label>
+        </span>
         <div class="grow"/>
-        <SvgIcon icon={mdiUpload} />
-      </Button>
+        <SvgIcon
+          class="h-5 w-5"
+          icon={mdiUpload} />
+      </button>
     </div>
   </div>
-  <div class="flex flex-col mt-4 h-md:mt-8">
+  <div class="flex flex-col gap-2 mt-4 h-md:mt-8">
     <span class="pl-4">Updates</span>
     <Updates />
   </div>
-  <div class="flex flex-col mt-4 h-md:mt-8">
+  <div class="flex flex-col gap-2 mt-4 h-md:mt-8">
     <span class="pl-4">Other</span>
     <ServerManager />
     <Settings />
-    <Button variant="unelevated" class="w-full mt-2" on:click={() => BrowserOpenURL('https://docs.ficsit.app/satisfactory-modding/latest/ForUsers/SatisfactoryModManager.html')}>
-      <Label>
+    <button
+      class="btn w-full bg-surface-200-700-token px-4 h-8 text-sm"
+      disabled={!$canModify}
+      on:click={() => BrowserOpenURL('https://docs.ficsit.app/satisfactory-modding/latest/ForUsers/SatisfactoryModManager.html')}
+    >
+      <span>
         Help
-      </Label>
-      <div class="grow" />
-      <SvgIcon icon={mdiHelpCircle} class="h-5 w-5" />
-    </Button>
+      </span>
+      <div class="grow"/>
+      <SvgIcon
+        class="h-5 w-5"
+        icon={mdiHelpCircle} />
+    </button>
   </div>
-  <div class="flex flex-col mt-4 h-md:mt-8">
+  <div class="flex flex-col gap-2 mt-4 h-md:mt-8">
     <span class="pl-4">Links</span>
-    <Button variant="unelevated" class="w-full mt-2" on:click={() => BrowserOpenURL($siteURL)}>
-      <Label>
+    <button
+      class="btn w-full bg-surface-200-700-token px-4 h-8 text-sm"
+      on:click={() => BrowserOpenURL($siteURL)}>
+      <span>
         ficsit.app (Mod Repository)
-      </Label>
+      </span>
       <div class="grow" />
-      <SvgIcon icon={mdiWeb} class="h-5 w-5" />
-    </Button>
-    <Button variant="unelevated" class="w-full mt-2" on:click={() => BrowserOpenURL('https://discord.gg/xkVJ73E')}>
-      <Label>
+      <SvgIcon
+        class="h-5 w-5"
+        icon={mdiWeb} />
+    </button>
+    <button
+      class="btn w-full bg-surface-200-700-token px-4 h-8 text-sm"
+      on:click={() => BrowserOpenURL('https://discord.gg/xkVJ73E')}>
+      <span>
         Satisfactory Modding Discord
-      </Label>
+      </span>
       <div class="grow" />
-      <SvgIcon icon={siDiscord.path} class="h-5 w-5" />
-    </Button>
-    <Button variant="unelevated" class="w-full mt-2" on:click={() => BrowserOpenURL('https://github.com/satisfactorymodding/SatisfactoryModManager')} >
-      <Label>
+      <SvgIcon
+        class="h-5 w-5"
+        icon={siDiscord.path} />
+    </button>
+    <button
+      class="btn w-full bg-surface-200-700-token px-4 h-8 text-sm"
+      on:click={() => BrowserOpenURL('https://github.com/satisfactorymodding/SatisfactoryModManager')} >
+      <span>
         SMM GitHub
-      </Label>
+      </span>
       <div class="grow" />
-      <SvgIcon icon={siGithub.path} class="h-5 w-5" />
-    </Button>
+      <SvgIcon
+        class="h-5 w-5"
+        icon={siGithub.path} />
+    </button>
   </div>
   <div class="grow"/>
   <LaunchButton />
@@ -380,12 +438,17 @@
     />
   </Content>
   <Actions>
-    <Button on:click={() => addProfileDialog = false}>
-      <Label>Cancel</Label>
-    </Button>
-    <Button on:click={finishAddProfile} disabled={!newProfileName}>
-      <Label>Add</Label>
-    </Button>
+    <button
+      class="btn"
+      on:click={() => addProfileDialog = false}>
+      Cancel
+    </button>
+    <button
+      class="btn text-primary-600"
+      disabled={!newProfileName}
+      on:click={finishAddProfile}>
+      Add
+    </button>
   </Actions>
 </Dialog>
 
@@ -408,12 +471,17 @@
     />
   </Content>
   <Actions>
-    <Button on:click={() => renameProfileDialog = false}>
-      <Label>Cancel</Label>
-    </Button>
-    <Button on:click={finishRenameProfile} disabled={!renameNewProfileName}>
-      <Label>Rename</Label>
-    </Button>
+    <button
+      class="btn"
+      on:click={() => renameProfileDialog = false}>
+      Cancel
+    </button>
+    <button
+      class="btn text-primary-600"
+      disabled={!renameNewProfileName}
+      on:click={finishRenameProfile}>
+      Rename
+    </button>
   </Actions>
 </Dialog>
 
@@ -431,12 +499,16 @@
     />
   </Content>
   <Actions>
-    <Button on:click={() => deleteProfileDialog = false}>
-      <Label>Cancel</Label>
-    </Button>
-    <Button on:click={finishDeleteProfile}>
-      <Label>Delete</Label>
-    </Button>
+    <button
+      class="btn"
+      on:click={() => deleteProfileDialog = false}>
+      Cancel
+    </button>
+    <button
+      class="btn text-error-500"
+      on:click={finishDeleteProfile}>
+      Delete
+    </button>
   </Actions>
 </Dialog>
 
@@ -465,12 +537,17 @@
     </TextField>
   </Content>
   <Actions>
-    <Button on:click={() => importProfileDialog = false}>
-      <Label>Cancel</Label>
-    </Button>
-    <Button on:click={finishImportProfile} disabled={!importProfileName || !importProfileFilepath || !!importProfileError}>
-      <Label>Import</Label>
-    </Button>
+    <button
+      class="btn"
+      on:click={() => importProfileDialog = false}>
+      Cancel
+    </button>
+    <button
+      class="btn text-primary-600"
+      disabled={!importProfileName || !importProfileFilepath || !!importProfileError}
+      on:click={finishImportProfile}>
+      Import
+    </button>
   </Actions>
 </Dialog>
 

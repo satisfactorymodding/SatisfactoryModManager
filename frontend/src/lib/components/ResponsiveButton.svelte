@@ -1,5 +1,4 @@
 <script lang="ts">
-  import Button from '@smui/button';
   import Tooltip, { Wrapper } from '@smui/tooltip';
 
   import SvgIcon from './SVGIcon.svelte';
@@ -19,16 +18,17 @@
   <Wrapper>
     <!-- Div required so a tooltip can still be displayed on a disabled button -->
     <div>
-      <Button
-        on:click={onClickAction}
-        disabled={disabled}
-        ripple={false}
-        variant="text"
-        class="min-w-0 w-12 h-12 group {clazz}"
-      >
-        <SvgIcon icon={display.icon} class="!p-1 !m-0 !w-full !h-full group-hover:!hidden"/>
-        <SvgIcon icon={display.iconHover} class="!p-1 !m-0 !w-full !h-full group-hover:!inline-block !hidden"/>
-      </Button>
+      <button
+        class="btn-icon min-w-0 w-12 h-12 p-2 group {clazz}"
+        {disabled}
+        on:click={onClickAction}>
+        <SvgIcon
+          class="!p-1 !m-0 !w-full !h-full group-hover:!hidden {display.iconClass}"
+          icon={display.icon}/>
+        <SvgIcon
+          class="!p-1 !m-0 !w-full !h-full group-hover:!inline-block !hidden {display.iconHoverClass}"
+          icon={display.iconHover}/>
+      </button>
     </div>
     <Tooltip surface$class="max-w-lg text-base">
       {display.tooltip}

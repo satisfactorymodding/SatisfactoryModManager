@@ -1,5 +1,4 @@
 <script lang="ts">
-  import Button, { Label } from '@smui/button';
   import { mdiCheckCircle, mdiSync, mdiUpload } from '@mdi/js';
   import Dialog, { Actions, Content, Title } from '@smui/dialog';
   import List, { Item, PrimaryText, SecondaryText, Text } from '@smui/list';
@@ -138,8 +137,11 @@
   }
 </script>
 
-<Button variant="unelevated" class="w-full mt-2 update-button {$smmUpdate || updatesToDisplay.length > 0 ? 'has-update' : ''}" on:click={() => showUpdateDialog()}>
-  <Label>
+<button
+  class="btn w-full bg-surface-200-700-token px-4 h-8 text-sm"
+  class:!bg-primary-600={$smmUpdate || updatesToDisplay.length > 0}
+  on:click={() => showUpdateDialog()}>
+  <span>
     {#if $smmUpdate}
       SMM update available
     {:else if updatesToDisplay.length > 0}
@@ -147,30 +149,42 @@
     {:else}
       No mod/SMM updates right now
     {/if}
-  </Label>
+  </span>
   <div class="grow" />
-  <SvgIcon icon={mdiCheckCircle} class="h-5 w-5" />
-</Button>
-<Button variant="unelevated" class="w-full mt-2" on:click={checkForAllUpdates} disabled={!!$progress || $updateCheckInProgress}>
-  <Label>
+  <SvgIcon
+    class="h-5 w-5"
+    icon={mdiCheckCircle} />
+</button>
+
+<button
+  class="btn w-full bg-surface-200-700-token px-4 h-8 text-sm"
+  disabled={!!$progress || $updateCheckInProgress}
+  on:click={checkForAllUpdates}>
+  <span>
     {#if $updateCheckInProgress}
       Checking for updates...
     {:else}
       Check for updates
     {/if}
-  </Label>
+  </span>
   <div class="grow" />
-  <SvgIcon icon={mdiSync} class="h-5 w-5 {$updateCheckInProgress ? 'update-check' : ''}" />
-</Button>
+  <SvgIcon
+    class="h-5 w-5 {$updateCheckInProgress ? 'update-check' : ''}"
+    icon={mdiSync} />
+</button>
 
 <Dialog
-  bind:open={updatesDialog}
-  surface$style="width: 500px; max-width: calc(100vw - 32px);"
   class="updates-dialog"
+  surface$style="width: 500px; max-width: calc(100vw - 32px);"
+  bind:open={updatesDialog}
 >
   <Title>Updates</Title>
   <Content>
-    <Button on:click={() => showIgnored = !showIgnored}>{ showIgnored ? 'Hide ignored' : 'Show ignored' }</Button>
+    <button
+      class="btn"
+      on:click={() => showIgnored = !showIgnored}>
+      {showIgnored ? 'Hide ignored' : 'Show ignored'}
+    </button>
     <List>
       {#each updatesToDisplay as update}
         <Item 
@@ -187,20 +201,34 @@
           </Text>
           <div class="grow" />
           <div on:click|stopPropagation={() => {/* empty */}}>
-            <Button on:click={() => changelogUpdate = update}>Changelog</Button>
-            <Button on:click={() => toggleIgnoreUpdate(update)}>{ ignoredAvailableUpdates.includes(update) ? 'Unignore' : 'Ignore' }</Button>
+            <button
+              class="btn"
+              on:click={() => changelogUpdate = update}>
+              Changelog
+            </button>
+            <button
+              class="btn"
+              on:click={() => toggleIgnoreUpdate(update)}>
+              {ignoredAvailableUpdates.includes(update) ? 'Unignore' : 'Ignore'}
+            </button>
           </div>
         </Item>
       {/each}
     </List>
   </Content>
   <Actions>
-    <Button on:click={() => updateAll()} disabled={!$canModify || $updateCheckInProgress || updatesToDisplay.length == 0}>
-      <Label>Update All</Label>
-    </Button>
-    <Button on:click={() => updateSelected()} disabled={!$canModify || $updateCheckInProgress || updatesToDisplay.length == 0 || selectedUpdates.length == 0}>
-      <Label>Update Selected</Label>
-    </Button>
+    <button
+      class="btn"
+      disabled={!$canModify || $updateCheckInProgress || updatesToDisplay.length == 0}
+      on:click={() => updateAll()}>
+      Update All
+    </button>
+    <button
+      class="btn"
+      disabled={!$canModify || $updateCheckInProgress || updatesToDisplay.length == 0 || selectedUpdates.length == 0}
+      on:click={() => updateSelected()}>
+      Update Selected
+    </button>
   </Actions>
 </Dialog>
 

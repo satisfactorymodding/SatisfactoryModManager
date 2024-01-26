@@ -1,5 +1,4 @@
 <script lang="ts">
-  import Button, { Label } from '@smui/button';
   import Menu, { SelectionGroup, SelectionGroupIcon } from '@smui/menu';
   import List, { Item, PrimaryText, Text, Separator } from '@smui/list';
   import { mdiBug, mdiCheck, mdiChevronRight, mdiClipboard, mdiCog, mdiDownload, mdiFolderEdit, mdiTune } from '@mdi/js';
@@ -192,13 +191,15 @@
 </script>
 
 <div class="settings-menu">
-  <Button variant="unelevated" class="w-full mt-2" on:click={() => settingsMenu.setOpen(true)}>
-    <Label>
-      Mod Manager Settings
-    </Label>
+  <button
+    class="btn px-4 h-8 w-full text-sm bg-surface-200-700-token"
+    on:click={() => settingsMenu.setOpen(true)}>
+    <span>Mod Manager Settings</span>
     <div class="grow" />
-    <SvgIcon icon={mdiTune} class="h-5 w-5" />
-  </Button>
+    <SvgIcon
+      class="h-5 w-5"
+      icon={mdiTune} />
+  </button>
   <Menu bind:this={settingsMenu} class="w-full max-h-[32rem] overflow-visible" anchorCorner="TOP_RIGHT">
     <List on:SMUIList:action={(e) => { e.stopPropagation(); }}>
       <Item nonInteractive>
@@ -416,17 +417,29 @@
           </HelperText>
         </Textfield>
       </div>
-      <Button on:click={() => resetCacheLocation()} disabled={cacheMoveInProgress} class="mr-4 shrink-0">
-        <Label>Reset to default</Label>
-      </Button>
-      <Button on:click={() => setCacheLocation()} disabled={cacheMoveInProgress} class="shrink-0">
-        <Label>Save and move</Label>
-      </Button>
+      <button
+        class="btn mr-4 shrink-0 text-primary-600"
+        disabled={cacheMoveInProgress}
+        on:click={() => resetCacheLocation()}>
+        <span>Reset to default</span>
+        <div class="grow" />
+      </button>
+      <button
+        class="btn shrink-0 text-primary-600"
+        disabled={cacheMoveInProgress}
+        on:click={() => setCacheLocation()}>
+        <span>Save and move</span>
+        <div class="grow" />
+      </button>
     </div>
   </Content>
   <Actions>
-    <Button on:click={() => { cacheDialog = false; }} disabled={cacheMoveInProgress}>
-      <Label>Close</Label>
-    </Button>
+    <button
+      class="btn text-primary-600"
+      disabled={cacheMoveInProgress}
+      on:click={() => { cacheDialog = false; }}>
+      <span>Close</span>
+      <div class="grow" />
+    </button>
   </Actions>
 </Dialog>

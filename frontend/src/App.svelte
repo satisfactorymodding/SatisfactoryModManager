@@ -2,7 +2,6 @@
   import './_global.postcss';
   import { setContextClient } from '@urql/svelte';
   import Dialog, { Actions, Content, Title } from '@smui/dialog';
-  import Button, { Label } from '@smui/button';
   import Card, { Content as CardContent, PrimaryAction } from '@smui/card';
   import LinearProgress from '@smui/linear-progress';
 
@@ -106,9 +105,11 @@
                 </p>
               </CardContent>
               <PrimaryAction>
-                <Button on:click={GenerateDebugInfo}>
-                  <Label>Generate debug info</Label>
-                </Button>
+                <button
+                  class="btn text-primary-600"
+                  on:click={GenerateDebugInfo}>
+                  Generate debug info
+                </button>
               </PrimaryAction>
             </Card>
           {/if}
@@ -121,9 +122,11 @@
                 </p>
               </CardContent>
               <PrimaryAction>
-                <Button on:click={GenerateDebugInfo}>
-                  <Label>Generate debug info</Label>
-                </Button>
+                <button
+                  class="btn text-primary-600"
+                  on:click={GenerateDebugInfo}>
+                  Generate debug info
+                </button>
               </PrimaryAction>
             </Card>
           {/if}
@@ -211,12 +214,16 @@
     <p>{ $error }</p>
     <p class="pt-4">Seems wrong? Click the button below and send the generated zip file on the <a class="color-primary underline" href="https://discord.gg/xkVJ73E">modding discord</a> in #help-using-mods.</p>
   </Content>
-  <Actions>
-    <Button action="" on:click={() => $error = null}>
-      <Label>Close</Label>
-    </Button>
-    <Button action="" on:click={GenerateDebugInfo}>
-      <Label>Generate debug info</Label>
-    </Button>
+  <Actions>    
+    <button
+      class="btn"
+      on:click={() => $error = null}>
+      Close
+    </button>
+    <button
+      class="btn text-primary-600"
+      on:click={GenerateDebugInfo}>
+      Generate debug info
+    </button>
   </Actions>
 </Dialog>

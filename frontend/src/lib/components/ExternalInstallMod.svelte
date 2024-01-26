@@ -1,5 +1,4 @@
 <script lang="ts">
-  import Button from '@smui/button';
   import Dialog, { Actions, Content } from '@smui/dialog';
   import { getContextClient, queryStore } from '@urql/svelte';
 
@@ -87,7 +86,16 @@
     {/if}
   </Content>
   <Actions>
-    <Button on:click={cancel}>Cancel</Button>
-    <Button on:click={install} disabled={isInstalled}>{ isInstalled ? 'Already installed' : 'Install' }</Button>
+    <button
+      class="btn"
+      on:click={cancel}>
+      Cancel
+    </button>
+    <button
+      class="btn text-primary-600"
+      disabled={isInstalled}
+      on:click={install}>
+      {isInstalled ? 'Already installed' : 'Install'}
+    </button>
   </Actions>
 </Dialog>

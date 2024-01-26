@@ -1,6 +1,5 @@
 <script lang="ts">
   import Tooltip, { Wrapper } from '@smui/tooltip';
-  import Button, { Label } from '@smui/button';
   import { getContextClient } from '@urql/svelte';
   import { mdiOpenInNew, mdiTrayFull } from '@mdi/js';
 
@@ -102,22 +101,36 @@
 <Wrapper>
   <center>
     {#if areOperationsQueued}
-      <Button variant="unelevated" class="h-12 w-full launch-game error" on:click={() => startQueue()}>
-        <Label>Apply {$queuedMods.length} changes</Label>
+      <button
+        class="btn h-8 w-full text-sm bg-error-500"
+        on:click={() => startQueue()}
+      >
+        <span>Apply {$queuedMods.length} change{$queuedMods.length !== 1 ? 's' : ''}</span>
         <div class="grow" />
-        <SvgIcon icon={ mdiTrayFull }/>
-      </Button>
-    {:else if !isInstallLaunchable}    
-      <Button variant="unelevated" class="h-12 w-full launch-game bg-grey-500" disabled>
-        <Label>SMM can't launch this install</Label>
+        <SvgIcon
+          class="h-5 w-5"
+          icon={mdiTrayFull}/>
+      </button>
+    {:else if !isInstallLaunchable}
+      <button
+        class="btn h-8 w-full text-sm bg-surface-200-700-token"
+        disabled
+      >
+        <span>SMM can't launch this install</span>
         <div class="grow" />
-      </Button>
+      </button>
     {:else if $launchButton === 'normal' || $isGameRunning || $isLaunchingGame }
-      <Button variant="unelevated" class="h-12 w-full launch-game {launchButtonColor}" disabled={!!$progress || $isGameRunning || $isLaunchingGame} on:click={() => launchGame()}>
-        <Label>Play Satisfactory</Label>
+      <button
+        class="btn h-8 w-full text-sm bg-primary-900"
+        disabled={!!$progress || $isGameRunning || $isLaunchingGame}
+        on:click={() => launchGame()}
+      >
+        <span>Play Satisfactory</span>
         <div class="grow" />
-        <SvgIcon icon={ mdiOpenInNew }/>
-      </Button>
+        <SvgIcon
+          class="h-5 w-5"
+          icon={mdiOpenInNew}/>
+      </button>
     {:else if $launchButton === 'cat' }
       <!-- fixme SMMv3 seems to have broken this button -->
       <!-- svelte-ignore a11y-no-static-element-interactions -->

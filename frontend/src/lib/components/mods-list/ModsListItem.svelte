@@ -66,6 +66,7 @@
       return {
         icon: mdiTrayFull,
         iconHover: mdiTrayMinus,
+        iconHoverClass: 'text-red-500',
         tooltip: isInstalled ?
           'This mod is queued to be uninstalled. Click to cancel the operation.' :
             'This mod is queued to be installed. Click to cancel the operation.',
@@ -75,12 +76,14 @@
     let display: ButtonDisplay = {
       icon: mdiDownload,
       iconHover: mdiDownload,
+      iconHoverClass: 'text-primary-600',
       tooltip: 'Click to install this mod.',
     };
     if (isInstalled) {
       display = {
         icon: mdiArchiveCheck,
         iconHover: mdiTrashCan,
+        iconHoverClass: 'text-red-500',
         tooltip: 'This mod is installed on this profile. Click to uninstall it.',
       };
     } else if (compatibility.state !== CompatibilityState.Works) {
@@ -108,6 +111,7 @@
       return {
         icon: mdiTrayFull,
         iconHover: mdiTrayMinus,
+        iconHoverClass: 'text-red-500',
         tooltip: isEnabled ?
           'This mod is queued to be Disabled. Click to cancel the operation.' :
             'This mod is queued to be Enabled. Click to cancel the operation.',
@@ -117,6 +121,7 @@
     let display: ButtonDisplay = {
       icon: mdiPause,
       iconHover: mdiPlayCircle,
+      iconHoverClass: 'text-primary-600',
       tooltip: 'This mod is Disabled on this profile. Click to Enable it.',
     };
     if (isEnabled) {
@@ -143,12 +148,14 @@
       return {
         icon: mdiStar,
         iconHover: mdiStarMinus,
+        iconClass: 'text-warning-500',
         tooltip: 'This mod is Favorited. Click to remove it from your favorites.',
       };
     }
     return {
       icon: mdiStarOutline,
       iconHover: mdiStarPlus,
+      iconHoverClass: 'text-warning-500',
       tooltip: 'Click to add this mod to your Favorites.',
       tooltipHtml: 'Having a mod Favorited is unrelated to whether or not it\'s installed - it\'s a way to keep track of a mod for later regardless of what Profile you have selected.',
     };
@@ -318,19 +325,16 @@
         display={enableButtonDisplay}
         disabled={enableButtonDisabled}
         onClickAction={toggleModEnabled}
-        class={'mod-enable-button ' + (isEnabled || queued ? 'enabled' : '')}
         visible={isInstalled && !isDependency}
       />
       <ResponsiveButton
         display={installButtonDisplay}
         disabled={installButtonDisabled}
         onClickAction={toggleModInstalled}
-        class={'mod-install-button ' + (isInstalled || queued ? 'installed' : '')}
       />
       <ResponsiveButton
         display={favoriteButtonDisplay}
         onClickAction={toggleModFavorite}
-        class={'mod-favorite-button ' + (isFavorite ? 'favorite' : '')}
       />
     </div>
   </div>

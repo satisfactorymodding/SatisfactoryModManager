@@ -1,5 +1,4 @@
 <script lang="ts">
-  import Button from '@smui/button';
   import Dialog, { Actions, Content, Title } from '@smui/dialog';
   import LinearProgress from '@smui/linear-progress';
 
@@ -58,7 +57,12 @@
     </div>
   </Content>
   <Actions>
-    <Button on:click={() => updateAvailableDialogOpen = false}>Close</Button>
+    <button
+      class="btn"
+      on:click={() => updateAvailableDialogOpen = false}>
+      <span>Close</span>
+      <div class="grow" />
+    </button>
   </Actions>
 </Dialog>
 
@@ -68,8 +72,18 @@
     <div class="text-base">Update ready to install</div>
   </Content>
   <Actions>
-    <Button on:click={() => updateReadyDialogOpen = false}>Update on Exit</Button>
-    <Button on:click={() => UpdateAndRestart()}>Update and Restart</Button>
+    <button
+      class="btn"
+      on:click={() => updateReadyDialogOpen = false}>
+      <span>Update on Exit</span>
+      <div class="grow" />
+    </button>
+    <button
+      class="btn text-primary-600"
+      on:click={() => UpdateAndRestart()}>
+      <span>Update and Restart</span>
+      <div class="grow" />
+    </button>
   </Actions>
 </Dialog>
 

@@ -1,6 +1,5 @@
 <script lang="ts">
   import { getContextClient, queryStore } from '@urql/svelte';
-  import Button, { Label } from '@smui/button';
   import Checkbox from '@smui/checkbox';
   import { mdiCheck, mdiChevronDown, mdiImport, mdiRocketLaunch, mdiTestTube, mdiWeb } from '@mdi/js';
   import Menu from '@smui/menu';
@@ -238,10 +237,12 @@
     <span bind:this={focusOnEntry} class="font-medium color-primary cursor-pointer" role="button" tabindex="0" on:click={authorClick} on:keypress={authorClick} >{author ?? 'Loading...'}</span>
     
     <div class="pt-2" on:mouseenter={() => authorsMenu.setOpen(true)} on:mouseleave={() => authorsMenu.setOpen(false)} role="listbox" tabindex="0">
-      <Button variant="unelevated" color="secondary" class="w-full">
-        <Label>Contributors <span class="color-primary">({mod?.authors.length ?? 0})</span></Label>
-        <SvgIcon icon={mdiChevronDown}/>
-      </Button>
+      <button class="btn px-4 h-10 text-sm w-full bg-secondary-600">
+        <span class="whitespace-break-spaces">Contributors <span class="color-primary">({mod?.authors.length ?? 0})</span></span>
+        <SvgIcon
+          class="h-5 w-5"
+          icon={mdiChevronDown}/>
+      </button>
       <Menu bind:this={authorsMenu} class="w-full max-h-[32rem]" anchorCorner="BOTTOM_LEFT">
         <List>
           {#each mod?.authors ?? [] as author}
@@ -312,10 +313,15 @@
       <span>Latest version: </span><span class="font-bold">{ latestVersion ?? 'Loading...' }</span><br>
       <span>Installed version: </span><span class="font-bold">{ installedVersion ?? 'Loading...' }</span><br>
       <div class="pt-2">
-        <Button variant="unelevated" color="secondary" class="w-full" disabled={!$canModify} on:click={() => $canModify && versionsMenu.setOpen(!versionsMenu.isOpen())}>
-          <Label>Change version</Label>
-          <SvgIcon icon={mdiChevronDown}/>
-        </Button>
+        <button
+          class="btn px-4 h-10 text-sm w-full bg-secondary-600"
+          disabled={!$canModify}
+          on:click={() => $canModify && versionsMenu.setOpen(!versionsMenu.isOpen())}>
+          <span>Change version</span>
+          <SvgIcon
+            class="h-5 w-5"
+            icon={mdiChevronDown}/>
+        </button>
         <Menu bind:this={versionsMenu} class="min-w-[20rem] max-h-[32rem] overflow-x-visible" anchorCorner="TOP_LEFT">
           <List>
             <Item on:SMUI:action={() => installVersion(null)} disabled={!$canModify}>
@@ -369,10 +375,14 @@
       </div>
       {#if (!mod || !('offline' in mod)) && !$offline}
         <div class="pt-2">
-          <Button variant="unelevated" color="secondary" class="w-full" disabled={!$canModify} on:click={() => $canModify && changelogsMenu.setOpen(!changelogsMenu.isOpen())}>
-            <Label>Changelogs</Label>
-            <SvgIcon icon={mdiChevronDown}/>
-          </Button>
+          <button
+            class="btn px-4 h-10 text-sm w-full bg-secondary-600"
+            on:click={() => $canModify && changelogsMenu.setOpen(!changelogsMenu.isOpen())}>
+            <span>Changelogs</span>
+            <SvgIcon
+              class="h-5 w-5"
+              icon={mdiChevronDown}/>
+          </button>
           <Menu bind:this={changelogsMenu} class="min-w-[10rem] max-h-[32rem] overflow-x-visible" anchorCorner="TOP_LEFT">
             <List>
               {#each mod?.versions ?? [] as version}
@@ -388,21 +398,27 @@
         </div>
       {/if}
       <div class="pt-2">
-        <Button variant="unelevated" color="primary" class="w-full" on:click={() => BrowserOpenURL(ficsitAppLink)}>
-          <Label>View on ficsit.app</Label>
-          <SvgIcon icon={mdiWeb}/>
-        </Button>
+        <button
+          class="btn px-4 h-10 text-sm w-full bg-primary-900"
+          on:click={() => BrowserOpenURL(ficsitAppLink)}>
+          <span class="whitespace-break-spaces">View on ficsit.app</span>
+          <SvgIcon
+            class="h-5 w-5"
+            icon={mdiWeb}/>
+        </button>
       </div>
     </div>
 
-    <div class="grow"></div>
+    <div class="grow"/>
 
-    <Button variant="unelevated" color="secondary" on:click={close}>
-      <div class="-scale-x-100">
-        <SvgIcon icon={mdiImport}/>
-      </div>
-      <Label class="pl-4">Close</Label>
-    </Button>
+    <button
+      class="btn px-4 h-8 w-full bg-secondary-600 text-sm"
+      on:click={close}>
+      <SvgIcon
+        class="h-5 w-5 -scale-x-100"
+        icon={mdiImport}/>
+      <span>Close</span>
+    </button>
   </div>
   <div class="markdown-content break-words overflow-wrap-anywhere flex-1 px-3 my-4 overflow-y-scroll overflow-x-hidden w-0">
     {#if $offline}
