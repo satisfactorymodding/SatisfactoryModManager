@@ -105,6 +105,7 @@ func (f *FicsitCLI) RenameProfile(oldName string, newName string) error {
 	}
 
 	_ = f.ficsitCli.Profiles.Save()
+	_ = f.ficsitCli.Installations.Save() // Installs using the old name will be updated
 
 	f.EmitGlobals()
 
@@ -127,6 +128,8 @@ func (f *FicsitCLI) DeleteProfile(name string) error {
 			install.Profile = cli.DefaultProfileName
 		}
 	}
+
+	_ = f.ficsitCli.Installations.Save()
 
 	f.EmitGlobals()
 
