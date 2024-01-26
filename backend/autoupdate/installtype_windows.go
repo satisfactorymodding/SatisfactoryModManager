@@ -13,7 +13,7 @@ func getInstallType() (string, apply.Apply) {
 	nsis, elevation := isNsis()
 	if nsis {
 		return "Satisfactory-Mod-Manager-Setup.exe", apply.MakeNsisApply(apply.NsisApplyConfig{
-			InstallerDownloadPath: filepath.Join(viper.GetString("cache-dir"), "Satisfactory-Mod-Manager-Setup.exe"),
+			InstallerDownloadPath: filepath.Join(viper.GetString("smm-cache-dir"), "Satisfactory-Mod-Manager-Setup.exe"),
 			Elevation:             elevation,
 		})
 	}
