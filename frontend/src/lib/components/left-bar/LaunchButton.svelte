@@ -11,7 +11,6 @@
   import { LaunchGame } from '$wailsjs/go/ficsitcli/FicsitCLI';
   import { CompatibilityState, type Compatibility } from '$lib/generated';
   import { getCompatibility, type CompatibilityWithSource } from '$lib/utils/modCompatibility';
-  import type { GameBranch } from '$lib/wailsTypesExtensions';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
 
   $: isInstallLaunchable = !!$selectedInstallMetadata?.launchPath;
@@ -21,7 +20,7 @@
   let compatibilities: Record<string, CompatibilityWithSource> = {};
   $: {
     const gameVersion = $selectedInstallMetadata?.version;
-    const branch = $selectedInstallMetadata?.branch as GameBranch;
+    const branch = $selectedInstallMetadata?.branch;
     if (gameVersion && branch) {
       compatibilities = {};
       Object.keys($lockfileMods).map(async (modReference) => {

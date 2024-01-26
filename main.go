@@ -108,7 +108,11 @@ func main() {
 			backend.ProcessArguments(os.Args[1:])
 			autoupdate.CheckInterval(5 * time.Minute)
 		},
-		Bind:   b.GetBindings(),
+		Bind: b.GetBindings(),
+		EnumBind: []interface{}{
+			bindings.AllInstallTypes,
+			bindings.AllBranches,
+		},
 		Logger: backend.WailsZeroLogLogger{},
 	})
 

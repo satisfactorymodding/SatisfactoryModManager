@@ -14,7 +14,6 @@
   import { FavoriteMod, UnFavoriteMod } from '$wailsjs/go/bindings/Settings';
   import { getAuthor } from '$lib/utils/getModAuthor';
   import { getCompatibility, getVersionCompatibility, type CompatibilityWithSource } from '$lib/utils/modCompatibility';
-  import type { GameBranch } from '$lib/wailsTypesExtensions';
   import { CompatibilityState } from '$lib/generated';
   import { markdown } from '$lib/utils/markdown';
   import type { ButtonDisplay } from '$lib/utils/responsiveButton';
@@ -158,7 +157,7 @@
   let compatibility: CompatibilityWithSource = { state: CompatibilityState.Works, source: 'reported' };
   $: {
     const gameVersion = $selectedInstallMetadata?.version;
-    const branch = $selectedInstallMetadata?.branch as GameBranch;
+    const branch = $selectedInstallMetadata?.branch;
     if(gameVersion && branch) {
       if(!('offline' in mod) && !('missing' in mod)) {
         if(mod.hidden && !isDependency) {

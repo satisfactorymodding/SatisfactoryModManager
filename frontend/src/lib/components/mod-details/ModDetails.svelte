@@ -20,7 +20,6 @@
   import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
   import { getAuthor } from '$lib/utils/getModAuthor';
   import { getCompatibility, getVersionCompatibility, type CompatibilityWithSource } from '$lib/utils/modCompatibility';
-  import type { GameBranch } from '$lib/wailsTypesExtensions';
   import { offline } from '$lib/store/settingsStore';
   import type { ficsitcli } from '$wailsjs/go/models';
 
@@ -102,7 +101,7 @@
   $: {
     if(mod) {
       const gameVersion = $selectedInstallMetadata?.version;
-      const branch = $selectedInstallMetadata?.branch as GameBranch;
+      const branch = $selectedInstallMetadata?.branch;
       if(gameVersion && branch) {
         if(!('offline' in mod)) {
           if(mod.hidden && !isDependency) {

@@ -19,7 +19,7 @@
   import { error, siteURL } from '$lib/store/generalStore';
   import { BrowserOpenURL, EventsOn } from '$wailsjs/runtime/runtime';
   import { OpenExternal, OpenFileDialog } from '$wailsjs/go/bindings/App';
-  import type { ficsitcli } from '$wailsjs/go/models';
+  import { common, type ficsitcli } from '$wailsjs/go/models';
   import { AddProfile, DeleteProfile, RenameProfile, ImportProfile, ExportCurrentProfile, ReadExportedProfileMetadata } from '$wailsjs/go/ficsitcli/FicsitCLI';
   
   const selectedInstallPathInit = selectedInstall.isInit;
@@ -220,7 +220,7 @@
         <Option value={install}>
           <Label class="mdc-deprecated-list-item__text">
             {#if $installsMetadata[install]?.branch && $installsMetadata[install]?.type}
-              {$installsMetadata[install]?.branch}{$installsMetadata[install]?.type !== 'WindowsClient' ? ' - DS' : ''}
+              {$installsMetadata[install]?.branch}{$installsMetadata[install]?.type !== common.InstallType.WINDOWS ? ' - DS' : ''}
             {:else}
               Unknown
             {/if}

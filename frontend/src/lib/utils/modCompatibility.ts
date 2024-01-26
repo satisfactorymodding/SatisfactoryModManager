@@ -4,14 +4,14 @@ import { get } from 'svelte/store';
 
 import { CompatibilityState, ModReportedCompatibilityDocument, ModVersionsCompatibilityDocument, SmlVersionsCompatibilityDocument, type Compatibility } from '$lib/generated';
 import { offline } from '$lib/store/settingsStore';
-import type { GameBranch } from '$lib/wailsTypesExtensions';
+import { common } from '$lib/generated/wailsjs/go/models';
 import { OfflineGetMod, OfflineGetSMLVersions } from '$wailsjs/go/ficsitcli/FicsitCLI';
 
 export interface CompatibilityWithSource extends Compatibility {
   source: 'reported' | 'version';
 }
 
-export async function getCompatibility(modReference: string, gameBranch: GameBranch, gameVersion: number, urqlClient: Client): Promise<CompatibilityWithSource> {
+export async function getCompatibility(modReference: string, gameBranch: common.GameBranch, gameVersion: number, urqlClient: Client): Promise<CompatibilityWithSource> {
   const reportedCompatibility = await getReportedCompatibility(modReference, gameBranch, urqlClient);
   if(reportedCompatibility) {
     return { ...reportedCompatibility, source: 'reported' };
@@ -24,7 +24,7 @@ function gameVersionToSemver(version: number): string {
   return coerce(version)!.format();
 }
 
-export async function getReportedCompatibility(modReference: string, gameBranch: GameBranch, urqlClient: Client): Promise<Compatibility | undefined> {
+export async function getReportedCompatibility(modReference: string, gameBranch: common.GameBranch, urqlClient: Client): Promise<Compatibility | undefined> {
   const result = await urqlClient.query(ModReportedCompatibilityDocument, { modReference }).toPromise();
   if(!result.data?.getModByReference) {
     return undefined;
@@ -32,9 +32,9 @@ export async function getReportedCompatibility(modReference: string, gameBranch:
   const mod = result.data.getModByReference;
   if(mod.compatibility) {
     switch(gameBranch) {
-    case 'Early Access':
+    case common.GameBranch.EARLY_ACCESS:
       return mod.compatibility.EA;
-    case 'Experimental':
+    case common.GameBranch.EXPERIMENTAL:
       return mod.compatibility.EXP;
     default:
       throw new Error('Invalid game branch');
