@@ -15,6 +15,7 @@ import (
 	"github.com/pkg/errors"
 	slogmulti "github.com/samber/slog-multi"
 	"github.com/spf13/viper"
+	"github.com/tawesoft/golib/v2/dialog"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
@@ -58,6 +59,8 @@ func main() {
 	err := settings.LoadSettings()
 	if err != nil {
 		slog.Error("failed to load settings", slog.Any("error", err))
+		// Cannot use wails message dialogs here yet, because they expect a frontend to exist
+		_ = dialog.Error("Failed to load settings: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -73,6 +76,7 @@ func main() {
 	b, err := bindings.MakeBindings()
 	if err != nil {
 		slog.Error("failed to create bindings", slog.Any("error", err))
+		_ = dialog.Error("Failed to create bindings: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -118,17 +122,20 @@ func main() {
 
 	if err != nil {
 		slog.Error("failed to start application", slog.Any("error", err))
+		_ = dialog.Error("Failed to start application: %s", err.Error())
 	}
 
 	err = autoupdate.OnExit(bindings.BindingsInstance.Update.Restart)
 	if err != nil {
 		slog.Error("failed to apply update on exit", slog.Any("error", err))
+		_ = dialog.Error("Failed to apply update on exit: %s", err.Error())
 	}
 }
 
 func init() {
 	err := loadProjectFile()
 	if err != nil {
+		_ = dialog.Error("Failed to load project file: %s", err.Error())
 		panic(err)
 	}
 
@@ -143,6 +150,7 @@ func init() {
 		baseLocalDir = path.Join(os.Getenv("HOME"), ".local", "share")
 	default:
 		slog.Error("unsupported OS", slog.String("os", runtime.GOOS))
+		_ = dialog.Error("Unsupported OS: %s", runtime.GOOS)
 		os.Exit(1)
 	}
 

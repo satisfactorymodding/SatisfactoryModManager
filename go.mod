@@ -18,6 +18,7 @@ require (
 	github.com/satisfactorymodding/ficsit-cli v0.5.1
 	github.com/satisfactorymodding/ficsit-resolver v0.0.2
 	github.com/spf13/viper v1.18.1
+	github.com/tawesoft/golib/v2 v2.10.0
 	github.com/wailsapp/wails/v2 v2.7.1
 	github.com/zishang520/engine.io v1.5.12
 	github.com/zishang520/socket.io v1.3.2
@@ -28,6 +29,7 @@ require (
 require (
 	aead.dev/minisign v0.2.1 // indirect
 	github.com/Khan/genqlient v0.6.0 // indirect
+	github.com/alessio/shellescape v1.4.1 // indirect
 	github.com/andybalholm/brotli v1.0.6 // indirect
 	github.com/avast/retry-go v3.0.0+incompatible // indirect
 	github.com/bep/debounce v1.2.1 // indirect
