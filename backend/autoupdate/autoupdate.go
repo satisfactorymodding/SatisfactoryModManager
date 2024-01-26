@@ -58,6 +58,17 @@ func OnExit(restart bool) error {
 		}
 		return nil
 	}
+
+	// We do have an update, but it might not be ready yet
+	if !Updater.PendingUpdate.Ready {
+		// TODO: I'd like to use an event here, but the autoupdater currently only takes a callback in the config
+		recheckTicker := time.NewTicker(1 * time.Second)
+		for range recheckTicker.C {
+			if Updater.PendingUpdate.Ready {
+				break
+			}
+		}
+	}
 	return updateApply.OnExit(restart)
 }
 
