@@ -7,7 +7,7 @@
   import { mdiAlert, mdiCheckCircle, mdiCloseCircle, mdiDownload, mdiFolderOpen, mdiHelpCircle, mdiPencil, mdiPlusCircle, mdiTrashCan, mdiUpload, mdiWeb } from '@mdi/js';
   import { siDiscord, siGithub } from 'simple-icons/icons';
   import HelperText from '@smui/textfield/helper-text';
-  import LinearProgress from '@smui/linear-progress';
+  import { ProgressBar } from '@skeletonlabs/skeleton';
 
   import Settings from './Settings.svelte';
   import Updates from './Updates.svelte';
@@ -561,7 +561,7 @@
   <Content>
     {#if $progress}
       <p>{$progress.message}</p>
-      <LinearProgress progress={$progress.progress} indeterminate={$progress.progress === -1} class="h-4 w-full rounded-lg"/>
+      <ProgressBar value={$progress.progress === -1 ? undefined : $progress.progress} max={1} class="h-4 w-full" meter="bg-primary-600"/>
     {/if}
   </Content>
 </Dialog>

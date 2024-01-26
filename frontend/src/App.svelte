@@ -3,7 +3,7 @@
   import { setContextClient } from '@urql/svelte';
   import Dialog, { Actions, Content, Title } from '@smui/dialog';
   import Card, { Content as CardContent, PrimaryAction } from '@smui/card';
-  import LinearProgress from '@smui/linear-progress';
+  import { ProgressBar } from '@skeletonlabs/skeleton';
 
   import TitleBar from '$lib/components/TitleBar.svelte';
   import ModsList from '$lib/components/mods-list/ModsList.svelte';
@@ -153,7 +153,7 @@
   <Content>
     {#if $progress}
       <p>{$progress.message}</p>
-      <LinearProgress progress={$progress.progress} indeterminate={$progress.progress === -1} class="h-4 w-full rounded-lg"/>
+      <ProgressBar value={$progress.progress === -1 ? undefined : $progress.progress} max={1} class="h-4 w-full" meter="bg-primary-600"/>
     {/if}
   </Content>
 </Dialog>
@@ -168,7 +168,7 @@
   <Content>
     {#if $progress}
       <p>{$progress.message}</p>
-      <LinearProgress progress={$progress.progress} indeterminate={$progress.progress === -1} class="h-4 w-full rounded-lg"/>
+      <ProgressBar value={$progress.progress === -1 ? undefined : $progress.progress} max={1} class="h-4 w-full" meter="bg-primary-600"/>
     {/if}
   </Content>
 </Dialog>
@@ -183,7 +183,7 @@
   <Content>
     {#if $progress}
       <p>{$progress.message}</p>
-      <LinearProgress progress={$progress.progress} indeterminate={$progress.progress === -1} class="h-4 w-full rounded-lg"/>
+      <ProgressBar value={$progress.progress === -1 ? undefined : $progress.progress} max={1} class="h-4 w-full" meter="bg-primary-600"/>
     {/if}
   </Content>
 </Dialog>
@@ -198,7 +198,7 @@
   <Content>
     {#if $progress}
       <p>{$progress.message}</p>
-      <LinearProgress progress={$progress.progress} indeterminate={$progress.progress === -1} class="h-4 w-full rounded-lg"/>
+      <ProgressBar value={$progress.progress === -1 ? undefined : $progress.progress} max={1} class="h-4 w-full" meter="bg-primary-600"/>
     {/if}
   </Content>
 </Dialog>

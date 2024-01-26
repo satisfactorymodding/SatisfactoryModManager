@@ -1,6 +1,6 @@
 <script lang="ts">
   import Dialog, { Actions, Content, Title } from '@smui/dialog';
-  import LinearProgress from '@smui/linear-progress';
+  import { ProgressBar } from '@skeletonlabs/skeleton';
 
   import { smmUpdate, smmUpdateProgress, smmUpdateReady } from '$lib/store/smmUpdateStore';
   import { bytesToAppropriate, secondsToAppropriate } from '$lib/utils/dataFormats';
@@ -44,7 +44,7 @@
     {#if !$smmUpdateReady}
       {#if $smmUpdateProgress}
         <div>Downloading in background</div>
-        <LinearProgress progress={($smmUpdateProgress.downloaded) / ($smmUpdateProgress.total)} indeterminate={!$smmUpdateProgress.total} class="transition-none" />
+        <ProgressBar value={$smmUpdateProgress.total ? $smmUpdateProgress.downloaded : undefined} max={$smmUpdateProgress.total} class="h-4 w-full" meter="bg-primary-600"/>
         <div class="text-base">Downloading update: {bytesToAppropriate($smmUpdateProgress.downloaded)} / {bytesToAppropriate($smmUpdateProgress.total)}, {bytesToAppropriate($smmUpdateProgress.speed)}/s, ETA {eta >= 0 ? secondsToAppropriate(eta) : 'N/A'}</div>
       {/if}
     {/if}

@@ -1,9 +1,9 @@
 <script lang="ts">
   import { mdiDownload, mdiEye, mdiStar, mdiPlay, mdiPause, mdiTrashCan, mdiTrayFull, mdiTrayMinus, mdiSync, mdiLinkLock, mdiArchiveCheck, mdiPauseCircle, mdiPlayCircle, mdiStarMinus, mdiStarPlus, mdiStarOutline, mdiTagMultiple } from '@mdi/js';
   import { createEventDispatcher } from 'svelte';
-  import LinearProgress from '@smui/linear-progress';
   import Tooltip, { Wrapper } from '@smui/tooltip';
   import { getContextClient } from '@urql/svelte';
+  import { ProgressBar } from '@skeletonlabs/skeleton';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { search, type PartialMod } from '$lib/store/modFiltersStore';
@@ -251,7 +251,7 @@
 <div class="my-1 px-0 @lg/mods-list:h-24 @md/mods-list:h-[5.5rem] h-[4.25rem]" class:rounded-lg={selected} class:selected on:click={listingClick} on:keypress={listingClick} role="tab" tabindex="0">
   {#if inProgress}
     <div class="relative h-full">
-      <LinearProgress progress={$progress?.progress} class="mod-progress-bar h-full rounded-lg"/>
+      <ProgressBar value={$progress?.progress === -1 ? undefined : $progress?.progress} max={1} class="h-full w-full" track="bg-surface-200-700-token" meter="bg-surface-50-900-token"/>
     </div>
   {/if}
   <div class="flex relative h-full" class:-top-full={inProgress} class:disabled={isInstalled && !isEnabled}>

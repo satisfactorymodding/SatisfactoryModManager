@@ -35,18 +35,11 @@ $white-darker: #d5d5d5;
   )
 );
 
-@use '@material/linear-progress/index' as linear-progress;
-
 @use '@material/select/index' as select;
 @use '@material/shape/mixins' as shape-mixins;
 
 @use '@material/list/index' as list;
 @use '@material/tooltip/index' as tooltip;
-
-.mod-progress-bar {
-  @include linear-progress.bar-color($grey-darkest);
-  @include linear-progress.buffer-color($grey-darker);
-}
 
 $md: 875px;
 $lg: 950px;
