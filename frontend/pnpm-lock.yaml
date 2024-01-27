@@ -247,9 +247,6 @@ devDependencies:
   '@smui/banner':
     specifier: 7.0.0-beta.15
     version: 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
-  '@smui/card':
-    specifier: 7.0.0-beta.15
-    version: 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
   '@smui/checkbox':
     specifier: 7.0.0-beta.15
     version: 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
@@ -2519,6 +2516,7 @@ packages:
       '@material/shape': 14.0.0
       '@material/theme': 14.0.0
       tslib: 2.6.2
+    dev: false
 
   /@material/checkbox@14.0.0:
     resolution: {integrity: sha512-OoqwysCqvj1d0cRmEwVWPvg5OqYAiCFpE6Wng6me/Cahfe4xgRxSPa37WWqsClw20W7PG/5RrYRCBtc6bUUUZA==}
@@ -3230,20 +3228,6 @@ packages:
       '@material/shape': 14.0.0
       '@material/theme': 14.0.0
       '@smui/common': 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
-      '@smui/ripple': 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
-      svelte2tsx: 0.6.27(svelte@4.2.8)(typescript@5.3.3)
-    transitivePeerDependencies:
-      - svelte
-      - typescript
-    dev: true
-
-  /@smui/card@7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3):
-    resolution: {integrity: sha512-fGBpgmO3N5kDz5oTFxqIF++ks8/h9I1ef0yD2OgyTYQ5vzYb+N/5NRmjV9g8QitPV2BRYeRLkrOYfn3nnjOCBg==}
-    dependencies:
-      '@material/card': 14.0.0
-      '@smui/button': 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
-      '@smui/common': 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
-      '@smui/icon-button': 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
       '@smui/ripple': 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
       svelte2tsx: 0.6.27(svelte@4.2.8)(typescript@5.3.3)
     transitivePeerDependencies:

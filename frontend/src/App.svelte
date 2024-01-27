@@ -2,7 +2,6 @@
   import './_global.postcss';
   import { setContextClient } from '@urql/svelte';
   import Dialog, { Actions, Content, Title } from '@smui/dialog';
-  import Card, { Content as CardContent, PrimaryAction } from '@smui/card';
   import { ProgressBar, storePopup } from '@skeletonlabs/skeleton';
   import { computePosition, autoUpdate, offset, shift, flip, arrow, size } from '@floating-ui/dom';
 
@@ -99,40 +98,27 @@
         <ModsList on:expandedMod={() => {
           focusOnEntry.focus();
         }} hideMods={noInstallsError || invalidInstallsError}>
-          {#if noInstallsError}
-            <Card variant="outlined" class="my-auto mr-2">
-              <CardContent>
-                <p class="font-bold text-2xl text-center">No Satisfactory installs found</p>
-                <p class="text-lg text-center">
-                  Seems wrong? Click the button below and send the generated zip file on the <a class="color-primary underline" href="https://discord.gg/xkVJ73E">modding discord</a> in #help-using-mods.
-                </p>
-              </CardContent>
-              <PrimaryAction>
-                <button
-                  class="btn text-primary-600"
-                  on:click={GenerateDebugInfo}>
-                  Generate debug info
-                </button>
-              </PrimaryAction>
-            </Card>
-          {/if}
-          {#if invalidInstallsError}
-            <Card variant="outlined" class="my-auto mr-2">
-              <CardContent>
-                <p class="font-bold text-2xl text-center">{ $invalidInstalls.length } invalid Satisfactory installs found</p>
-                <p class="text-lg text-center">
-                  Seems wrong? Click the button below and send the generated zip file on the <a class="color-primary underline" href="https://discord.gg/xkVJ73E">modding discord</a> in #help-using-mods.
-                </p>
-              </CardContent>
-              <PrimaryAction>
-                <button
-                  class="btn text-primary-600"
-                  on:click={GenerateDebugInfo}>
-                  Generate debug info
-                </button>
-              </PrimaryAction>
-            </Card>
-          {/if}
+          <div class="card my-auto mr-4">
+            <header class="card-header font-bold text-2xl text-center">
+              {#if noInstallsError}
+                No Satisfactory installs found
+              {:else}
+                { $invalidInstalls.length } invalid Satisfactory install{$invalidInstalls.length !== 1 ? 's' : ''} found
+              {/if}
+            </header>
+            <section class="p-4">
+              <p class="text-lg text-center">
+                Seems wrong? Click the button below and send the generated zip file on the <a class="color-primary underline" href="https://discord.gg/xkVJ73E">modding discord</a> in #help-using-mods.
+              </p>
+            </section>
+            <footer class="card-footer">
+              <button
+                class="btn text-primary-600 w-full"
+                on:click={GenerateDebugInfo}>
+                Generate debug info
+              </button>
+            </footer>
+          </div>
         </ModsList>
       </div>
       {#if $expandedMod}
