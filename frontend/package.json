@@ -18,6 +18,7 @@
     "generate:watch": "run-p smui-theme:watch graphql-codegen:watch"
   },
   "dependencies": {
+    "@floating-ui/dom": "^1.6.0",
     "@fontsource/fira-mono": "^5.0.8",
     "@graphql-typed-document-node/core": "^3.2.0",
     "@lukeed/uuid": "^2.0.1",
@@ -122,7 +123,6 @@
     "@smui/radio": "7.0.0-beta.15",
     "@smui/ripple": "7.0.0-beta.15",
     "@smui/segmented-button": "7.0.0-beta.15",
-    "@smui/select": "7.0.0-beta.15",
     "@smui/slider": "7.0.0-beta.15",
     "@smui/snackbar": "7.0.0-beta.15",
     "@smui/switch": "7.0.0-beta.15",

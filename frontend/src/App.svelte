@@ -3,7 +3,8 @@
   import { setContextClient } from '@urql/svelte';
   import Dialog, { Actions, Content, Title } from '@smui/dialog';
   import Card, { Content as CardContent, PrimaryAction } from '@smui/card';
-  import { ProgressBar } from '@skeletonlabs/skeleton';
+  import { ProgressBar, storePopup } from '@skeletonlabs/skeleton';
+  import { computePosition, autoUpdate, offset, shift, flip, arrow, size } from '@floating-ui/dom';
 
   import TitleBar from '$lib/components/TitleBar.svelte';
   import ModsList from '$lib/components/mods-list/ModsList.svelte';
@@ -17,6 +18,8 @@
   import { expandedMod, error, siteURL } from '$lib/store/generalStore';
   import { GenerateDebugInfo } from '$wailsjs/go/bindings/DebugInfo';
   import ExternalInstallMod from '$lib/components/ExternalInstallMod.svelte';
+
+  storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow, size });
 
   let frameless = false;
   Environment().then((env) => {

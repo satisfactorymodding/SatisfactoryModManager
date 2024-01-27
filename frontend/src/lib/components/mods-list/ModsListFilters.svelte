@@ -1,13 +1,12 @@
 <script lang="ts">
   import Textfield, { Input } from '@smui/textfield';
   import LineRipple from '@smui/line-ripple';
-  import Select, { Option } from '@smui/select';
   import { mdiFilter, mdiSort } from '@mdi/js';
 
-  import SvgIcon from '../SVGIcon.svelte';
-
   import { filter, filterOptions, order, orderByOptions, search } from '$lib/store/modFiltersStore';
-  
+  import SvgIcon from '$lib/components/SVGIcon.svelte';
+  import Select from '$lib/components/Select.svelte';
+
   let inputA: Input;
   let lineRippleA: LineRipple;
 </script>
@@ -30,46 +29,46 @@
       <LineRipple bind:this={lineRippleA} slot="ripple" />
     </Textfield>
   </div>
-  <div class="flex grow shrink-0 min-w-[140px] w-0 @lg/mod-list-filters:min-w-[24rem]">
+  <div class="flex grow shrink-0 min-w-[140px] w-0 @lg/mod-list-filters:min-w-[21rem]">
     <Select
-      class="control-area-input w-20 @lg/mod-list-filters:w-1/2 pr-0.5"
-      variant="filled"
       bind:value={$filter}
-      placeholder="Filter"
-      ripple={false}
-      selectedText$class="color-primary"
-      selectedTextContainer$class="!hidden @lg/mod-list-filters:!block"
-      dropdownIcon$class="ml-0"
-      anchor$class="!items-center w-0"
+      items={filterOptions}
+      itemKey="name"
+      name="modsFilter"
+      class="!h-full w-1/2 shrink-0"
+      buttonClass="px-4 text-sm space-x-0.5"
+      itemClass="bg-surface-50-900-token"
+      itemActiveClass="!bg-surface-300/20"
     >
-      <div slot="leadingIcon" class="pl-3 pr-1">
+      <svelte:fragment slot="selected" let:item>
         <div class="h-5 w-5">
           <SvgIcon icon={mdiFilter} />
         </div>
-      </div>
-      {#each filterOptions as option}
-        <Option value={option}>{option.name}</Option>
-      {/each}
+        <span class="text-primary-600 hidden @lg/mod-list-filters:!block">{item.name}</span>
+      </svelte:fragment>
+      <svelte:fragment slot="item" let:item>
+        <span>{item.name}</span>
+      </svelte:fragment>
     </Select>
     <Select
-      class="control-area-input w-20 @lg/mod-list-filters:w-1/2 pr-0.5"
-      variant="filled"
       bind:value={$order}
-      placeholder="Order by"
-      ripple={false}
-      selectedText$class="color-primary"
-      selectedTextContainer$class="!hidden @lg/mod-list-filters:!block"
-      dropdownIcon$class="ml-0"
-      anchor$class="!items-center w-0"
+      items={orderByOptions}
+      itemKey="name"
+      name="modsOrderBy"
+      class="!h-full w-1/2 shrink-0"
+      buttonClass="px-4 text-sm space-x-0.5"
+      itemClass="bg-surface-50-900-token"
+      itemActiveClass="!bg-surface-300/20"
     >
-      <div slot="leadingIcon" class="pl-3 pr-1">
+      <svelte:fragment slot="selected" let:item>
         <div class="h-5 w-5">
           <SvgIcon icon={mdiSort} />
         </div>
-      </div>
-      {#each orderByOptions as option}
-        <Option value={option}>{option.name}</Option>
-      {/each}
+        <span class="text-primary-600 hidden @lg/mod-list-filters:!block">{item.name}</span>
+      </svelte:fragment>
+      <svelte:fragment slot="item" let:item>
+        <span>{item.name}</span>
+      </svelte:fragment>
     </Select>
   </div>
 </div>

@@ -2,10 +2,10 @@
   import { mdiAlert, mdiServerNetwork, mdiTrashCan } from '@mdi/js';
   import Dialog, { Actions, Content, Title } from '@smui/dialog';
   import DataTable, { Body, Cell, Row } from '@smui/data-table';
-  import Select, { Option } from '@smui/select';
   import Tooltip, { Wrapper } from '@smui/tooltip';
   import Textfield from '@smui/textfield';
 
+  import Select from '$lib/components/Select.svelte';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { installsMetadata, remoteServers } from '$lib/store/ficsitCLIStore';
   import { AddRemoteServer, RemoveRemoteServer } from '$lib/generated/wailsjs/go/ficsitcli/FicsitCLI';
@@ -130,14 +130,14 @@
     </DataTable>
     <div class="mt-4">
       <div class="flex h-10">
-        <Select bind:value={newProtocol} class="!h-full w-32">
-          {#each allowedProtocols as protocol}
-            <Option value={protocol}>{protocol}</Option>
-          {/each}
+        <Select bind:value={newProtocol} items={allowedProtocols} name="newServerProtocol" class="!h-full w-28 shrink-0">
+          <svelte:fragment slot="item" let:item>
+            {item}
+          </svelte:fragment>
         </Select>
         <Textfield bind:value={newServerPath} class="!h-full grow mx-4"/>
         <button
-          class="btn h-full w-full text-sm bg-surface-500-400-token"
+          class="btn h-full text-sm bg-surface-500-400-token"
           disabled={addInProgress}
           on:click={() => addNewRemoteServer()}>
           <span>

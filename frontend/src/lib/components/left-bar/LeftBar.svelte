@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { Label } from '@smui/common';
-  import Select, { Option } from '@smui/select';
   import Dialog, { Title, Content, Actions } from '@smui/dialog';
   import TextField from '@smui/textfield'; 
   import Tooltip, { Wrapper } from '@smui/tooltip';
@@ -14,6 +12,7 @@
   import LaunchButton from './LaunchButton.svelte';
   import ServerManager from './ServerManager.svelte';
 
+  import Select from '$lib/components/Select.svelte';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { installs, profiles, canModify, selectedInstallMetadata, selectedInstall, selectedProfile, modsEnabled, progress, installsMetadata } from '$lib/store/ficsitCLIStore';
   import { error, siteURL } from '$lib/store/generalStore';
@@ -25,7 +24,7 @@
   const selectedInstallPathInit = selectedInstall.isInit;
   const selectedProfileInit = selectedProfile.isInit;
 
-  async function installSelectChanged({ detail: { value } }: CustomEvent<{value?: string}>) {
+  async function installSelectChanged({ detail: value }: CustomEvent<string>) {
     if (!value) {
       return;
     }
@@ -45,7 +44,7 @@
     }
   }
 
-  async function profileSelectChanged({ detail: { value } }: CustomEvent<{value?: string}>) {
+  async function profileSelectChanged({ detail: value }: CustomEvent<string>) {
     if (!value) {
       return;
     }
@@ -208,46 +207,56 @@
   <div class="flex flex-col gap-2">
     <span class="pl-4">Game version</span>
     <Select
-      variant="filled"
-      menu$class="max-h-[32rem]"
-      value={$selectedInstall}
-      on:SMUISelect:change={installSelectChanged}
-      ripple={false}
+      name="installsCombobox"
+      class="w-full h-8"
+      buttonClass="bg-surface-200-700-token px-4 text-sm"
+      itemClass="bg-surface-50-900-token"
+      itemActiveClass="!bg-surface-300/20"
       disabled={!$canModify}
+      items={$installs}
+      value={$selectedInstall ?? ''}
+      on:change={installSelectChanged}
     >
-      {#each $installs as install}
-        <Option value={install}>
-          <Label class="mdc-deprecated-list-item__text">
-            {#if $installsMetadata[install]?.branch && $installsMetadata[install]?.type}
-              {$installsMetadata[install]?.branch}{$installsMetadata[install]?.type !== common.InstallType.WINDOWS ? ' - DS' : ''}
-            {:else}
-              Unknown
-            {/if}
-            ({$installsMetadata[install]?.launcher})
-          </Label>
-          <div class="py-4 !m-0 !ml-auto !h-full" on:click={(e) => {
-            e.stopPropagation();
-            OpenExternal(install);
-          }}>
-            {#if $installsMetadata[install]?.branch && $installsMetadata[install]?.type}
-              <Wrapper>
-                <SvgIcon icon={mdiFolderOpen} class="!w-full !h-full"/>
-                <Tooltip surface$class="max-w-lg text-base">
-                  {install}
-                </Tooltip>
-              </Wrapper>
-            {:else}
-              <Wrapper>
-                <SvgIcon icon={mdiAlert} class="!w-full !h-full text-red-500" />
-                <Tooltip surface$class="max-w-lg text-base">
-                  Failed to connect to server, retry connection in the server manager
-                </Tooltip>
-              </Wrapper>
-            {/if}
-          </div>
-        </Option>
-      {/each}
+      <svelte:fragment slot="item" let:item>
+        <span>
+          {#if $installsMetadata[item]?.branch && $installsMetadata[item]?.type}
+            {$installsMetadata[item]?.branch}{$installsMetadata[item]?.type !== common.InstallType.WINDOWS ? ' - DS' : ''}
+          {:else}
+            Unknown
+          {/if}
+          ({$installsMetadata[item]?.launcher})
+        </span>
+      </svelte:fragment>
+      <div on:click={(e) => {
+        e.stopPropagation();
+        OpenExternal(item);
+      }} slot="itemTrail" let:item>
+        {#if $installsMetadata[item]?.branch && $installsMetadata[item]?.type}
+          <Wrapper>
+            <SvgIcon icon={mdiFolderOpen} class="!w-5 !h-5"/>
+            <Tooltip surface$class="max-w-lg text-base">
+              {item}
+            </Tooltip>
+          </Wrapper>
+        {:else}
+          <Wrapper>
+            <SvgIcon icon={mdiAlert} class="!w-5 !h-5 text-red-500" />
+            <Tooltip surface$class="max-w-lg text-base">
+              Failed to connect to server, retry connection in the server manager
+            </Tooltip>
+          </Wrapper>
+        {/if}
+      </div>
+      <svelte:fragment slot="selected" let:item>
+        {#if $installsMetadata[item]?.branch && $installsMetadata[item]?.type}
+          {$installsMetadata[item]?.branch}{$installsMetadata[item]?.type !== common.InstallType.WINDOWS ? ' - DS' : ''}
+        {:else}
+          Unknown
+        {/if}
+        ({$installsMetadata[item]?.launcher})
+      </svelte:fragment>
     </Select>
+    
     <div class="flex w-full">
       <div class="btn-group bg-surface-200-700-token w-full text-xl">
         <button
@@ -282,20 +291,19 @@
   </div>
   <div class="flex flex-col gap-2 mt-4 h-md:mt-8">
     <span class="pl-4">Profile</span>
+    
     <Select
-      variant="filled"
-      menu$class="max-h-[32rem]"
-      value={$selectedProfile}
-      on:SMUISelect:change={profileSelectChanged}
-      ripple={false}
+      name="profileCombobox"
+      class="w-full h-8"
+      buttonClass="bg-surface-200-700-token px-4 text-sm"
+      itemClass="bg-surface-50-900-token"
+      itemActiveClass="!bg-surface-300/20"
       disabled={!$canModify}
-    >
-      {#each $profiles as profile}
-        <Option value={profile}>
-          <Label>{profile}</Label>
-        </Option>
-      {/each}
-    </Select>
+      items={$profiles}
+      value={$selectedProfile ?? ''}
+      on:change={profileSelectChanged}
+    />
+
     <div class="flex w-full gap-1">
       <button
         class="btn w-1/3 bg-surface-200-700-token px-4 h-8 text-sm"
