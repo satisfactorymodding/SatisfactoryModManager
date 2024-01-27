@@ -1,7 +1,6 @@
 <script lang="ts">
   import { mdiCheckCircle, mdiSync, mdiUpload } from '@mdi/js';
   import Dialog, { Actions, Content, Title } from '@smui/dialog';
-  import List, { Item, PrimaryText, SecondaryText, Text } from '@smui/list';
   import { getContextClient, queryStore } from '@urql/svelte';
 
   import UpdateChangelog from './UpdateChangelog.svelte';
@@ -185,36 +184,29 @@
       on:click={() => showIgnored = !showIgnored}>
       {showIgnored ? 'Hide ignored' : 'Show ignored'}
     </button>
-    <List>
+    <div class="grid grid-cols-12">
       {#each updatesToDisplay as update}
-        <Item 
-          on:SMUI:action={() => toggleSelected(update)}
-        >
+        <div class="inline-flex items-center p-1.5">
           {#if selectedUpdates.includes(update)}
-            <SvgIcon icon={mdiUpload} class="h-5 w-5" />
-          {:else}
-            <div class="w-5"/>
+            <SvgIcon icon={mdiUpload} class="h-full w-full" />
           {/if}
-          <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
-            <PrimaryText class="text-base">{ modNames[update.item] ?? update.item }</PrimaryText>
-            <SecondaryText>{ update.currentVersion } -> { update.newVersion }</SecondaryText>
-          </Text>
-          <div class="grow" />
-          <div on:click|stopPropagation={() => {/* empty */}}>
-            <button
-              class="btn"
-              on:click={() => changelogUpdate = update}>
-              Changelog
-            </button>
-            <button
-              class="btn"
-              on:click={() => toggleIgnoreUpdate(update)}>
-              {ignoredAvailableUpdates.includes(update) ? 'Unignore' : 'Ignore'}
-            </button>
-          </div>
-        </Item>
+        </div>
+        <div on:click={() => toggleSelected(update)} class="pl-2 h-full flex flex-col content-center mb-1.5 col-span-7">
+          <span>{ modNames[update.item] ?? update.item }</span>
+          <span>{ update.currentVersion } -> { update.newVersion }</span>
+        </div>
+        <button
+          class="btn col-span-2"
+          on:click={() => changelogUpdate = update}>
+          Changelog
+        </button>
+        <button
+          class="btn col-span-2"
+          on:click={() => toggleIgnoreUpdate(update)}>
+          {ignoredAvailableUpdates.includes(update) ? 'Unignore' : 'Ignore'}
+        </button>
       {/each}
-    </List>
+    </div>
   </Content>
   <Actions>
     <button
