@@ -4,13 +4,14 @@
   import { mdiCheck, mdiChevronDown, mdiImport, mdiRocketLaunch, mdiTestTube, mdiWeb } from '@mdi/js';
   import Menu from '@smui/menu';
   import List, { Item, PrimaryText, SecondaryText, Separator, Text } from '@smui/list';
-  import Dialog, { Content, Title } from '@smui/dialog';
   import { minVersion, valid, validRange, sort, coerce, SemVer, parse } from 'semver';
-  import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
+  import { popup, type PopupSettings, getModalStore } from '@skeletonlabs/skeleton';
 
-  import Tooltip from '../Tooltip.svelte';
+  import ModChangelog from '../modals/ModChangelog.svelte';
 
-  import { CompatibilityState, GetModDetailsDocument, GetModReferenceDocument, type Version } from '$lib/generated';
+  import Tooltip from '$lib/components/Tooltip.svelte';
+  import ModImage from '$lib/components/modals/ModImage.svelte';
+  import { CompatibilityState, GetModDetailsDocument, GetModReferenceDocument } from '$lib/generated';
   import { markdown } from '$lib/utils/markdown';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { bytesToAppropriate } from '$lib/utils/dataFormats';
@@ -25,6 +26,8 @@
   import type { ficsitcli } from '$wailsjs/go/models';
 
   export let focusOnEntry: HTMLElement | undefined = undefined;
+
+  const modalStore = getModalStore();
 
   const client = getContextClient();
 
@@ -152,8 +155,6 @@
   
   let changelogsMenu: Menu;
 
-  let changelogVersion: Pick<Version, 'version' | 'changelog'>;
-
   $: manifestVersion = mod && $manifestMods[mod.mod_reference]?.version;
   async function installVersion(version: string | null) {
     if(!mod) {
@@ -174,14 +175,6 @@
 
   function close() {
     $expandedMod = null;
-  }
-
-  let imageViewSrc: string | null = null;
-
-  let imageViewDialog = false;
-
-  $: if(!imageViewDialog) {
-    imageViewSrc = null;
   }
 
   $: authorClick = () => {
@@ -213,8 +206,15 @@
       return true;
     }
     if(element instanceof HTMLImageElement) {
-      imageViewSrc = element.src;
-      imageViewDialog = true;
+      modalStore.trigger({
+        type: 'component',
+        component: {
+          ref: ModImage,
+          props: {
+            imageSrc: element.src,
+          },
+        },
+      });
       return true;
     }
     return false;
@@ -283,7 +283,7 @@
           {#each mod?.authors ?? [] as author}
             <Item style="height: 80px" on:SMUI:action={() => $search = `author:"${author.user.username}"`}>
               {#if 'avatar' in author.user}
-                <img src={author.user.avatar} alt="{author.user.username} Avatar" class="avatar" />
+                <img src={author.user.avatar} alt="{author.user.username} Avatar" class="rounded-full w-12 h-12" />
               {/if}
               <Text class="pl-2 h-full flex flex-col content-center -mb-4">
                 <PrimaryText class="text-base">{author.user.username}</PrimaryText>
@@ -424,7 +424,7 @@
           <Menu bind:this={changelogsMenu} class="min-w-[10rem] max-h-[32rem] overflow-x-visible" anchorCorner="TOP_LEFT">
             <List>
               {#each mod?.versions ?? [] as version}
-                <Item on:SMUI:action={() => { changelogVersion = version; changelogsMenu.setOpen(false); }}>
+                <Item on:SMUI:action={() => { modalStore.trigger({ type:'component', component: { ref: ModChangelog, props:{ mod: mod?.mod_reference, versionRange: version.version } } }); changelogsMenu.setOpen(false); }}>
                   <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
                     <PrimaryText class="text-base">{version.version}</PrimaryText>
                   </Text>
@@ -474,30 +474,8 @@
   </div>
 </div>
 
-<Dialog
-  bind:open={imageViewDialog}
-  surface$style="max-height: calc(100vh - 128px); max-width: calc(100vw - 128px);"
->
-  <img src={imageViewSrc} alt="Dialog" style="max-height: calc(100vh - 128px); max-width: calc(100vw - 128px);"/>
-</Dialog>
-
-<Dialog open={!!changelogVersion}>
-  <Title>{mod?.name} v{changelogVersion?.version}</Title>
-  <Content>
-    {changelogVersion?.changelog}
-  </Content>
-</Dialog>
-
 <style>
   .overflow-wrap-anywhere {
     overflow-wrap: anywhere;
-  }
-  .mods-details {
-    background-color: #2B2B2B;
-  }
-  .avatar {
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
   }
 </style>

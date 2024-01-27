@@ -2,6 +2,7 @@ import { writable, derived } from 'svelte/store';
 
 import { binding, bindingTwoWay } from './wailsStoreBindings';
 import { isLaunchingGame } from './generalStore';
+import { ignoredUpdates } from './settingsStore';
 
 import type { cli, ficsitcli } from '$wailsjs/go/models';
 import { CheckForUpdates, GetInstallationsMetadata, GetInvalidInstalls, GetProfiles, GetSelectedInstall, GetSelectedProfile, SelectInstall, SetProfile, GetModsEnabled, SetModsEnabled, GetSelectedInstallProfileMods, GetSelectedInstallLockfileMods, GetRemoteInstallations, GetInstallations } from '$wailsjs/go/ficsitcli/FicsitCLI';
@@ -53,6 +54,7 @@ export const canModify = derived([isGameRunning, progress, isLaunchingGame, inst
 });
 
 export const updates = writable<ficsitcli.Update[]>([]);
+export const unignoredUpdates = derived([updates, ignoredUpdates], ([$updates, $ignoredUpdates]) => $updates.filter((u) => !$ignoredUpdates[u.item]?.includes(u.newVersion)));
 export const updateCheckInProgress = writable(false);
 
 export async function checkForUpdates() {

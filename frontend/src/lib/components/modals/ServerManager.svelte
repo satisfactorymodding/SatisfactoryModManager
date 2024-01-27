@@ -1,6 +1,5 @@
 <script lang="ts">
   import { mdiAlert, mdiServerNetwork, mdiTrashCan } from '@mdi/js';
-  import Dialog, { Actions, Content, Title } from '@smui/dialog';
   import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
 
   import Tooltip from '$lib/components/Tooltip.svelte';
@@ -9,8 +8,8 @@
   import { installsMetadata, remoteServers } from '$lib/store/ficsitCLIStore';
   import { AddRemoteServer, RemoveRemoteServer } from '$lib/generated/wailsjs/go/ficsitcli/FicsitCLI';
 
-  let dialogOpen = false;
-
+  export let parent: { onClose: () => void };
+  
   const allowedProtocols = ['ftp://', 'sftp://'];
 
   async function removeServer(server: string) {
@@ -82,23 +81,12 @@
   } as PopupSettings]).reduce((acc, [k, v]) => ({ ...acc, [k as string]: v as PopupSettings }), {} as Record<string, PopupSettings>);
 </script>
 
-<button
-  class="btn px-4 h-8 w-full text-sm bg-surface-200-700-token"
-  on:click={() => dialogOpen = true}>
-  <span>Manage Servers</span>
-  <div class="grow" />
-  <SvgIcon
-    class="h-5 w-5"
-    icon={mdiServerNetwork} />
-</button>
 
-<Dialog
-  bind:open={dialogOpen} scrimClickAction="" escapeKeyAction=""
-  surface$style="max-height: calc(100vh - 128px); max-width: calc(100vw - 128px);"
-  surface$class="!min-w-[800px] min-h-[400px]"
->
-  <Title>Dedicated Servers</Title>
-  <Content>
+<div class="card flex flex-col gap-2 !min-w-[800px] min-h-[400px]" style="max-height: calc(100vh - 128px); max-width: calc(100vw - 128px);">
+  <header class="card-header font-bold text-2xl text-center">
+    Dedicated Servers
+  </header>
+  <section class="p-4 grow">
     <table class="table w-full">
       <tbody>
         {#each $remoteServers as remoteServer}
@@ -171,12 +159,12 @@
       </div>
       <p>{err}</p>
     </div>
-  </Content>
-  <Actions>
+  </section>
+  <footer class="card-footer">
     <button
       class="btn h-8 w-full text-sm bg-surface-200-700-token"
-      on:click={() => dialogOpen = false}>
+      on:click={parent.onClose}>
       Close
     </button>
-  </Actions>
-</Dialog>
+  </footer>
+</div>

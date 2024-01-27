@@ -1,22 +1,26 @@
 <script lang="ts">
   import './_global.postcss';
   import { setContextClient } from '@urql/svelte';
-  import Dialog, { Actions, Content, Title } from '@smui/dialog';
-  import { ProgressBar, storePopup } from '@skeletonlabs/skeleton';
+  import { storePopup , initializeStores, Modal, getModalStore } from '@skeletonlabs/skeleton';
   import { computePosition, autoUpdate, offset, shift, flip, arrow, size } from '@floating-ui/dom';
 
   import TitleBar from '$lib/components/TitleBar.svelte';
   import ModsList from '$lib/components/mods-list/ModsList.svelte';
   import { initializeGraphQLClient } from '$lib/core/graphql';
-  import { Environment } from '$wailsjs/runtime';
+  import { Environment, EventsOn } from '$wailsjs/runtime';
   import ModDetails from '$lib/components/mod-details/ModDetails.svelte';
   import { ExpandMod, UnexpandMod } from '$wailsjs/go/bindings/App';
   import LeftBar from '$lib/components/left-bar/LeftBar.svelte';
-  import { installs, invalidInstalls, progress, selectedInstallMetadata, selectedProfile } from '$lib/store/ficsitCLIStore';
+  import { installs, invalidInstalls, progress } from '$lib/store/ficsitCLIStore';
   import { konami } from '$lib/store/settingsStore';
   import { expandedMod, error, siteURL } from '$lib/store/generalStore';
   import { GenerateDebugInfo } from '$wailsjs/go/bindings/DebugInfo';
-  import ExternalInstallMod from '$lib/components/ExternalInstallMod.svelte';
+  import ExternalInstallMod from '$lib/components/modals/ExternalInstallMod.svelte';
+  import { modalRegistry } from '$lib/components/modals/modalsRegistry';
+  import ErrorModal from '$lib/components/modals/ErrorModal.svelte';
+  import ImportProfile from '$lib/components/modals/profiles/ImportProfile.svelte';
+
+  initializeStores();
 
   storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow, size });
 
@@ -69,10 +73,79 @@
     }
   }
 
-  $: installProgress = $progress?.item === '__select_install__';
-  $: profileProgress = $progress?.item === '__select_profile__';
-  $: modsEnabledProgress = $progress?.item === '__toggle_mods__';
-  $: updateProgress = $progress?.item === '__update__';
+  const modalStore = getModalStore();
+
+  $: (() => {
+    const currentProgressModalIndex = $modalStore.findIndex((m) => m.component && m.component === 'progress');
+    if ($progress && currentProgressModalIndex === -1){
+      // Add it at the beginning instead of the end so it's on top
+      $modalStore = [{
+        type: 'component',
+        component: 'progress',
+        meta: {
+          persistent: true,
+        },
+      }, ...$modalStore];
+    }
+  })();
+
+  $: if($error) {
+    $modalStore = [{
+      type: 'component',
+      component: {
+        ref: ErrorModal,
+        props: {
+          error: $error,
+        },
+      },
+    }, ...$modalStore];
+    $error = null;
+  }
+
+  EventsOn('externalInstallMod', (modReference: string, version: string) => {
+    if (!modReference) return;
+    modalStore.trigger({
+      type: 'component',
+      component: {
+        ref: ExternalInstallMod,
+        props: {
+          modReference,
+          version,
+        },
+      },
+    });
+  });
+
+  EventsOn('externalImportProfile', async (path: string) => {
+    if (!path) return;
+    modalStore.trigger({
+      type: 'component',
+      component: {
+        ref: ImportProfile,
+        props: {
+          filepath: path,
+        },
+      },
+    });
+  });
+
+  $: isPersistentModal = $modalStore.length > 0 && $modalStore[0].meta?.persistent;
+
+  function modalMouseDown(event: MouseEvent) {
+    if (!isPersistentModal) return;
+    if (!(event.target instanceof Element)) return;
+    const classList = event.target.classList;
+    if (classList.contains('modal-backdrop') || classList.contains('modal-transition')) {
+      event.stopImmediatePropagation();
+    }
+  }
+
+  function modalKeyDown(event: KeyboardEvent) {
+    if (!isPersistentModal) return;
+    if (event.key === 'Escape') {
+      event.stopImmediatePropagation();
+    }
+  }
   
   const code = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
   const keyQueue: number[] = [];
@@ -130,89 +203,11 @@
   </div>
 </div>
 
-<ExternalInstallMod />
-
-<Dialog
-  bind:open={installProgress}
-  scrimClickAction=""
-  escapeKeyAction=""
-  surface$style="width: 500px; max-width: calc(100vw - 32px);"
->
-  <Title>Checking install {$selectedInstallMetadata?.branch} ({$selectedInstallMetadata?.launcher}) - CL{$selectedInstallMetadata?.version}</Title>
-  <Content>
-    {#if $progress}
-      <p>{$progress.message}</p>
-      <ProgressBar value={$progress.progress === -1 ? undefined : $progress.progress} max={1} class="h-4 w-full" meter="bg-primary-600"/>
-    {/if}
-  </Content>
-</Dialog>
-
-<Dialog
-  bind:open={profileProgress}
-  scrimClickAction=""
-  escapeKeyAction=""
-  surface$style="width: 500px; max-width: calc(100vw - 32px);"
->
-  <Title>Selecting profile {$selectedProfile}</Title>
-  <Content>
-    {#if $progress}
-      <p>{$progress.message}</p>
-      <ProgressBar value={$progress.progress === -1 ? undefined : $progress.progress} max={1} class="h-4 w-full" meter="bg-primary-600"/>
-    {/if}
-  </Content>
-</Dialog>
-
-<Dialog
-  bind:open={modsEnabledProgress}
-  scrimClickAction=""
-  escapeKeyAction=""
-  surface$style="width: 500px; max-width: calc(100vw - 32px);"
->
-  <Title>Toggling mods</Title>
-  <Content>
-    {#if $progress}
-      <p>{$progress.message}</p>
-      <ProgressBar value={$progress.progress === -1 ? undefined : $progress.progress} max={1} class="h-4 w-full" meter="bg-primary-600"/>
-    {/if}
-  </Content>
-</Dialog>
-
-<Dialog
-  bind:open={updateProgress}
-  scrimClickAction=""
-  escapeKeyAction=""
-  surface$style="width: 500px; max-width: calc(100vw - 32px);"
->
-  <Title>Updating mods</Title>
-  <Content>
-    {#if $progress}
-      <p>{$progress.message}</p>
-      <ProgressBar value={$progress.progress === -1 ? undefined : $progress.progress} max={1} class="h-4 w-full" meter="bg-primary-600"/>
-    {/if}
-  </Content>
-</Dialog>
-
-<Dialog
-  open={!!$error}
-  scrimClickAction=""
-  escapeKeyAction=""
-  surface$style="width: 500px; max-width: calc(100vw - 32px);"
->
-  <Title>Error</Title>
-  <Content>
-    <p>{ $error }</p>
-    <p class="pt-4">Seems wrong? Click the button below and send the generated zip file on the <a class="color-primary underline" href="https://discord.gg/xkVJ73E">modding discord</a> in #help-using-mods.</p>
-  </Content>
-  <Actions>    
-    <button
-      class="btn"
-      on:click={() => $error = null}>
-      Close
-    </button>
-    <button
-      class="btn text-primary-600"
-      on:click={GenerateDebugInfo}>
-      Generate debug info
-    </button>
-  </Actions>
-</Dialog>
+<!--
+  skeleton modals don't provide a way to make them persistent (i.e. ignore mouse clicks outside and escape key)
+  but we can capture the events and stop them if the modal has the persistent meta flag set, and the event would have closed the modal
+-->
+<svelte:window on:keydown|capture|nonpassive={modalKeyDown} />
+<div on:mousedown|capture|nonpassive={modalMouseDown}>
+  <Modal components={modalRegistry} />
+</div>

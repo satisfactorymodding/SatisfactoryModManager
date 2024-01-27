@@ -1,25 +1,28 @@
 <script lang="ts">
-  import Dialog, { Title, Content, Actions } from '@smui/dialog';
-  import { mdiAlert, mdiCheckCircle, mdiCloseCircle, mdiDownload, mdiFolderOpen, mdiHelpCircle, mdiPencil, mdiPlusCircle, mdiTrashCan, mdiUpload, mdiWeb } from '@mdi/js';
+  import { mdiAlert, mdiCheckCircle, mdiCloseCircle, mdiDownload, mdiFolderOpen, mdiHelpCircle, mdiPencil, mdiPlusCircle, mdiServerNetwork, mdiTrashCan, mdiUpload, mdiWeb } from '@mdi/js';
   import { siDiscord, siGithub } from 'simple-icons/icons';
-  import { popup, type PopupSettings, ProgressBar } from '@skeletonlabs/skeleton';
+  import { getModalStore, popup, type PopupSettings } from '@skeletonlabs/skeleton';
+  import _ from 'lodash';
 
   import Tooltip from '../Tooltip.svelte';
+  import RenameProfile from '../modals/profiles/RenameProfile.svelte';
+  import DeleteProfile from '../modals/profiles/DeleteProfile.svelte';
 
   import Settings from './Settings.svelte';
   import Updates from './Updates.svelte';
   import LaunchButton from './LaunchButton.svelte';
-  import ServerManager from './ServerManager.svelte';
 
   import Select from '$lib/components/Select.svelte';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
-  import { installs, profiles, canModify, selectedInstallMetadata, selectedInstall, selectedProfile, modsEnabled, progress, installsMetadata } from '$lib/store/ficsitCLIStore';
+  import { installs, profiles, canModify, selectedInstallMetadata, selectedInstall, selectedProfile, modsEnabled, installsMetadata } from '$lib/store/ficsitCLIStore';
   import { error, siteURL } from '$lib/store/generalStore';
-  import { BrowserOpenURL, EventsOn } from '$wailsjs/runtime/runtime';
-  import { OpenExternal, OpenFileDialog } from '$wailsjs/go/bindings/App';
-  import { common, type ficsitcli } from '$wailsjs/go/models';
-  import { AddProfile, DeleteProfile, RenameProfile, ImportProfile, ExportCurrentProfile, ReadExportedProfileMetadata } from '$wailsjs/go/ficsitcli/FicsitCLI';
+  import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
+  import { OpenExternal } from '$wailsjs/go/bindings/App';
+  import { common } from '$wailsjs/go/models';
+  import { ExportCurrentProfile } from '$wailsjs/go/ficsitcli/FicsitCLI';
   
+  const modalStore = getModalStore();
+
   const selectedInstallPathInit = selectedInstall.isInit;
   const selectedProfileInit = selectedProfile.isInit;
 
@@ -79,60 +82,6 @@
     }
   }
 
-  let addProfileDialog = false;
-  let newProfileName = '';
-  async function finishAddProfile() {
-    try {
-      await AddProfile(newProfileName);
-      await selectedProfile.asyncSet(newProfileName);
-      newProfileName = '';
-    } catch(e) {
-      if (e instanceof Error) {
-        $error = e.message;
-      } else if (typeof e === 'string') {
-        $error = e;
-      } else {
-        $error = 'Unknown error';
-      }
-    }
-  }
-
-  let renameProfileDialog = false;
-  let renameOldProfileName = '';
-  let renameNewProfileName = '';
-  async function finishRenameProfile() {
-    try {
-      await RenameProfile(renameOldProfileName, renameNewProfileName);
-      renameOldProfileName = '';
-      renameNewProfileName = '';
-    } catch(e) {
-      if (e instanceof Error) {
-        $error = e.message;
-      } else if (typeof e === 'string') {
-        $error = e;
-      } else {
-        $error = 'Unknown error';
-      }
-    }
-  }
-
-  let deleteProfileDialog = false;
-  let deleteProfileName = '';
-  async function finishDeleteProfile() {
-    try {
-      await DeleteProfile(deleteProfileName);
-      deleteProfileName = '';
-    } catch(e) {
-      if (e instanceof Error) {
-        $error = e.message;
-      } else if (typeof e === 'string') {
-        $error = e;
-      } else {
-        $error = 'Unknown error';
-      }
-    }
-  }
-
   async function exportCurrentProfile() {
     try {
       await ExportCurrentProfile();
@@ -146,64 +95,6 @@
       }
     }
   }
-
-  let importProfileDialog = false;
-  let importProfileName = '';
-  let importProfileFilepath = '';
-  let importProfileError = '';
-  let fileDialogOpen = false;
-  let importProfileMetadata: ficsitcli.ExportedProfileMetadata | null = null;
-  async function pickImportProfileFile() {
-    if(fileDialogOpen) {
-      return;
-    }
-    fileDialogOpen = true;
-    try {
-      importProfileFilepath = await OpenFileDialog({
-        filters: [
-          {
-            displayName: 'SMM Profile (*.smmprofile)',
-            pattern: '*.smmprofile',
-          },
-        ],
-      });
-      if (!importProfileFilepath) {
-        fileDialogOpen = false;
-        return;
-      }
-      importProfileMetadata = await ReadExportedProfileMetadata(importProfileFilepath);
-    } catch (e) {
-      fileDialogOpen = false;
-      if(e instanceof Error) {
-        importProfileError = e.message;
-      } else if (typeof e === 'string') {
-        importProfileError = e;
-      } else {
-        importProfileError = 'Unknown error';
-      }
-    }
-    fileDialogOpen = false;
-  }
-  async function finishImportProfile() {
-    try {
-      await ImportProfile(importProfileName, importProfileFilepath);
-    } catch(e) {
-      if(e instanceof Error) {
-        importProfileError = e.message;
-      } else if (typeof e === 'string') {
-        importProfileError = e;
-      } else {
-        importProfileError = 'Unknown error';
-      }
-    }
-  }
-  EventsOn('externalImportProfile', async (path: string) => {
-    importProfileFilepath = path;
-    importProfileMetadata = await ReadExportedProfileMetadata(importProfileFilepath);
-    importProfileDialog = true;
-  });
-
-  $: importProfileProgress = $progress?.item === '__import_profile__';
 
   function installPathPopupId(install: string) {
     return `install-path-${install.replace(/[^a-zA-Z0-9]/g, '-')}`;
@@ -242,7 +133,7 @@
       itemClass="bg-surface-50-900-token"
       itemActiveClass="!bg-surface-300/20"
       disabled={!$canModify}
-      items={$installs}
+      items={_.orderBy($installs)}
       value={$selectedInstall ?? ''}
       on:change={installSelectChanged}
     >
@@ -328,7 +219,7 @@
       itemClass="bg-surface-50-900-token"
       itemActiveClass="!bg-surface-300/20"
       disabled={!$canModify}
-      items={$profiles}
+      items={_.orderBy($profiles)}
       value={$selectedProfile ?? ''}
       on:change={profileSelectChanged}
     />
@@ -337,7 +228,7 @@
       <button
         class="btn w-1/3 bg-surface-200-700-token px-4 h-8 text-sm"
         disabled={!$canModify}
-        on:click={() => addProfileDialog = true}>
+        on:click={() => modalStore.trigger({ type:'component', component: 'addProfile' })}>
         <span>
           Add
         </span>
@@ -349,7 +240,7 @@
       <button
         class="btn w-1/3 bg-surface-200-700-token px-2 h-8 text-sm"
         disabled={!$canModify}
-        on:click={() => { renameOldProfileName = $selectedProfile ?? ''; renameProfileDialog = true; }}>
+        on:click={() => modalStore.trigger({ type:'component', component: { ref: RenameProfile, props: { profile: $selectedProfile } } })}>
         <span>
           Rename
         </span>
@@ -361,7 +252,7 @@
       <button
         class="btn w-1/3 bg-surface-200-700-token px-3 h-8 text-sm"
         disabled={!$canModify || $profiles.length === 1}
-        on:click={() => { deleteProfileName = $selectedProfile ?? ''; deleteProfileDialog = true; }}>
+        on:click={() => modalStore.trigger({ type:'component', component: { ref: DeleteProfile, props: { profile: $selectedProfile } } })}>
         <span>
           Delete
         </span>
@@ -375,7 +266,7 @@
       <button
         class="btn w-1/2 bg-surface-200-700-token px-4 h-8 text-sm"
         disabled={!$canModify}
-        on:click={() => importProfileDialog = true}
+        on:click={() => {modalStore.trigger({ type: 'component', component: 'importProfile' });}}
       >
         <span>
           Import
@@ -406,7 +297,15 @@
   </div>
   <div class="flex flex-col gap-2 mt-4 h-md:mt-8">
     <span class="pl-4">Other</span>
-    <ServerManager />
+    <button
+      class="btn px-4 h-8 w-full text-sm bg-surface-200-700-token"
+      on:click={() => modalStore.trigger({ type: 'component', component: 'serverManager' })}>
+      <span>Manage Servers</span>
+      <div class="grow" />
+      <SvgIcon
+        class="h-5 w-5"
+        icon={mdiServerNetwork} />
+    </button>
     <Settings />
     <button
       class="btn w-full bg-surface-200-700-token px-4 h-8 text-sm"
@@ -461,141 +360,6 @@
   <div class="grow"/>
   <LaunchButton />
 </div>
-
-<Dialog
-  bind:open={addProfileDialog}
-  surface$style="width: 500px; max-width: calc(100vw - 32px);"
->
-  <Title>Add profile</Title>
-  <Content class="space-y-2">
-    <label class="label w-full">
-      <span>Profile name</span>
-      <input class="input px-4 py-2" type="text" placeholder="My New Profile" bind:value={newProfileName}/>
-    </label>
-  </Content>
-  <Actions>
-    <button
-      class="btn"
-      on:click={() => addProfileDialog = false}>
-      Cancel
-    </button>
-    <button
-      class="btn text-primary-600"
-      disabled={!newProfileName}
-      on:click={finishAddProfile}>
-      Add
-    </button>
-  </Actions>
-</Dialog>
-
-<Dialog
-  bind:open={renameProfileDialog}
-  surface$style="width: 500px; max-width: calc(100vw - 32px);"
->
-  <Title>Rename profile</Title>
-  <Content class="space-y-2">
-    <label class="label w-full">
-      <span>Old profile name</span>
-      <input class="input px-4 py-2" type="text" placeholder="Old Profile" value={renameOldProfileName} readonly/>
-    </label>
-    <label class="label w-full">
-      <span>New profile name</span>
-      <input class="input px-4 py-2" type="text" placeholder="My New Profile" bind:value={renameNewProfileName}/>
-    </label>
-  </Content>
-  <Actions>
-    <button
-      class="btn"
-      on:click={() => renameProfileDialog = false}>
-      Cancel
-    </button>
-    <button
-      class="btn text-primary-600"
-      disabled={!renameNewProfileName}
-      on:click={finishRenameProfile}>
-      Rename
-    </button>
-  </Actions>
-</Dialog>
-
-<Dialog
-  bind:open={deleteProfileDialog}
-  surface$style="width: 500px; max-width: calc(100vw - 32px);"
->
-  <Title>Delete profile</Title>
-  <Content class="space-y-2">
-    <label class="label w-full">
-      <span>Profile name</span>
-      <input class="input px-4 py-2" type="text" readonly value={deleteProfileName}/>
-    </label>
-  </Content>
-  <Actions>
-    <button
-      class="btn"
-      on:click={() => deleteProfileDialog = false}>
-      Cancel
-    </button>
-    <button
-      class="btn text-error-500"
-      on:click={finishDeleteProfile}>
-      Delete
-    </button>
-  </Actions>
-</Dialog>
-
-<Dialog
-  bind:open={importProfileDialog}
-  surface$style="width: 500px; max-width: calc(100vw - 32px);"
->
-  <Title>Import profile</Title>
-  <Content class="space-y-2">
-    <label class="label w-full">
-      <span>Profile name</span>
-      <input class="input px-4 py-2" type="text" placeholder="My New Profile" bind:value={importProfileName}/>
-    </label>
-    <label class="label w-full">
-      <span>Profile file</span>
-      <input class="input px-4 py-2 hover:!cursor-pointer"
-        class:input-error={importProfileError}
-        type="text"
-        value={importProfileFilepath} 
-        on:click={() => pickImportProfileFile()}
-        readonly
-      />
-      <p>
-        {importProfileError}
-      </p>
-    </label>
-  </Content>
-  <Actions>
-    <button
-      class="btn"
-      on:click={() => importProfileDialog = false}>
-      Cancel
-    </button>
-    <button
-      class="btn text-primary-600"
-      disabled={!importProfileName || !importProfileFilepath || !!importProfileError}
-      on:click={finishImportProfile}>
-      Import
-    </button>
-  </Actions>
-</Dialog>
-
-<Dialog
-  bind:open={importProfileProgress}
-  scrimClickAction=""
-  escapeKeyAction=""
-  surface$style="width: 500px; max-width: calc(100vw - 32px);"
->
-  <Title>Importing profile {importProfileName}</Title>
-  <Content>
-    {#if $progress}
-      <p>{$progress.message}</p>
-      <ProgressBar value={$progress.progress === -1 ? undefined : $progress.progress} max={1} class="h-4 w-full" meter="bg-primary-600"/>
-    {/if}
-  </Content>
-</Dialog>
 
 <style>
   :global(.update-check) {

@@ -3,16 +3,17 @@
   import List, { Item, PrimaryText, Text, Separator } from '@smui/list';
   import { mdiBug, mdiCheck, mdiChevronRight, mdiClipboard, mdiCog, mdiDownload, mdiFolderEdit, mdiTune } from '@mdi/js';
   import { getContextClient } from '@urql/svelte';
-  import Dialog, { Actions, Content, Title } from '@smui/dialog';
+  import { getModalStore } from '@skeletonlabs/skeleton';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { GenerateDebugInfo } from '$wailsjs/go/bindings/DebugInfo';
-  import { startView, konami, launchButton, queueAutoStart, offline, updateCheckMode, cacheDir } from '$lib/store/settingsStore';
+  import { startView, konami, launchButton, queueAutoStart, offline, updateCheckMode } from '$lib/store/settingsStore';
   import { manifestMods, lockfileMods } from '$lib/store/ficsitCLIStore';
   import { GetModNameDocument } from '$lib/generated';
   import type { LaunchButtonType, ViewType } from '$lib/wailsTypesExtensions';
   import { OfflineGetMod } from '$wailsjs/go/ficsitcli/FicsitCLI';
-  import { OpenDirectoryDialog } from '$lib/generated/wailsjs/go/bindings/App';
+
+  const modalStore = getModalStore();
 
   let settingsMenu: Menu;
   let startViewMenu: Menu;
@@ -116,75 +117,6 @@
       modListString += `${mod.friendlyName} ${mod.modReference} ${mod.version}\n`;
     });
     navigator.clipboard.writeText(modListString.trim());
-  }
-
-  let cacheDialog = false;
-  let cacheError: string | null = null;
-  let newCacheLocation = $cacheDir;
-  
-  let fileDialogOpen = false;
-  async function pickCacheLocation() {
-    if(fileDialogOpen) {
-      return;
-    }
-    fileDialogOpen = true;
-    try {
-      let result = await OpenDirectoryDialog({
-        defaultDirectory: newCacheLocation ?? undefined,
-      });
-      if (result) {
-        newCacheLocation = result;
-      }
-    } catch (e) {
-      if(e instanceof Error) {
-        cacheError = e.message;
-      } else if (typeof e === 'string') {
-        cacheError = e;
-      } else {
-        cacheError = 'Unknown error';
-      }
-    } finally {
-      fileDialogOpen = false;
-    }
-  }
-
-  let cacheMoveInProgress = false;
-
-  async function setCacheLocation() {
-    try {
-      cacheMoveInProgress = true;
-      await cacheDir.asyncSet(newCacheLocation ?? '');
-      cacheError = null;
-    } catch(e) {
-      if (e instanceof Error) {
-        cacheError = e.message;
-      } else if (typeof e === 'string') {
-        cacheError = e;
-      } else {
-        cacheError = 'Unknown error';
-      }
-    } finally {
-      cacheMoveInProgress = false;
-    }
-  }
-
-  async function resetCacheLocation() {
-    try {
-      cacheMoveInProgress = true;
-      await cacheDir.asyncSet('');
-      newCacheLocation = $cacheDir;
-      cacheError = null;
-    } catch(e) {
-      if (e instanceof Error) {
-        cacheError = e.message;
-      } else if (typeof e === 'string') {
-        cacheError = e;
-      } else {
-        cacheError = 'Unknown error';
-      }
-    } finally {
-      cacheMoveInProgress = false;
-    }
   }
 </script>
 
@@ -328,7 +260,7 @@
         </Menu>
       </div>
       <Separator insetLeading insetTrailing insetPadding />
-      <Item on:SMUI:action={() => { cacheDialog = true; settingsMenu.setOpen(false); } }>
+      <Item on:SMUI:action={() => { modalStore.trigger({ type: 'component', component: 'cacheLocationPicker' }); settingsMenu.setOpen(false); } }>
         <div class="w-7"/>
         <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
           <PrimaryText class="text-base">Change cache location</PrimaryText>
@@ -388,57 +320,3 @@
     </List>
   </Menu>
 </div>
-
-
-<Dialog
-  bind:open={cacheDialog}
-  scrimClickAction="" escapeKeyAction=""
-  surface$style="max-height: calc(100vh - 128px); max-width: calc(100vw - 128px);"
-  surface$class="!min-w-[800px] min-h-[400px]"
->
-  <Title>Change download cache location</Title>
-  <Content>
-    <label class="label">
-      <span>Cache location</span>
-      <div class="flex items-baseline">
-        <div class="grow">
-          <input type="text"
-            class="input px-4 py-2 hover:!cursor-pointer"
-            class:input-error={cacheError}
-            value={newCacheLocation}
-            readonly
-            on:click={() => pickCacheLocation()}
-          />
-          <p>
-            {#if cacheError }
-              { cacheError }
-            {/if}
-          </p>
-        </div>
-        <button
-          class="btn mr-4 shrink-0 text-primary-600"
-          disabled={cacheMoveInProgress}
-          on:click={() => resetCacheLocation()}>
-          <span>Reset to default</span>
-          <div class="grow" />
-        </button>
-        <button
-          class="btn shrink-0 text-primary-600"
-          disabled={cacheMoveInProgress}
-          on:click={() => setCacheLocation()}>
-          <span>Save and move</span>
-          <div class="grow" />
-        </button>
-      </div>
-    </label>
-  </Content>
-  <Actions>
-    <button
-      class="btn text-primary-600"
-      disabled={cacheMoveInProgress}
-      on:click={() => { cacheDialog = false; }}>
-      <span>Close</span>
-      <div class="grow" />
-    </button>
-  </Actions>
-</Dialog>

@@ -259,9 +259,6 @@ devDependencies:
   '@smui/common':
     specifier: 7.0.0-beta.15
     version: 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
-  '@smui/dialog':
-    specifier: 7.0.0-beta.15
-    version: 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
   '@smui/drawer':
     specifier: 7.0.0-beta.15
     version: 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
@@ -2600,6 +2597,7 @@ packages:
       '@material/touch-target': 14.0.0
       '@material/typography': 14.0.0
       tslib: 2.6.2
+    dev: false
 
   /@material/dom@14.0.0:
     resolution: {integrity: sha512-8t88XyacclTj8qsIw9q0vEj4PI2KVncLoIsIMzwuMx49P2FZg6TsLjor262MI3Qs00UWAifuLMrhnOnfyrbe7Q==}
@@ -3272,19 +3270,6 @@ packages:
     resolution: {integrity: sha512-mrK7B75L9so6EtzRolkAZkatC1sKHAP+gvIjU+JSfmSJnaRuglTS5ZTcosEmP759GA7E4scAQtOY1Qw7BgVO/g==}
     dependencies:
       '@material/dom': 14.0.0
-      svelte2tsx: 0.6.27(svelte@4.2.8)(typescript@5.3.3)
-    transitivePeerDependencies:
-      - svelte
-      - typescript
-    dev: true
-
-  /@smui/dialog@7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3):
-    resolution: {integrity: sha512-5N2/cf+2ObVYXb9rzLJQ2juykNgB/T0je4f12zWQt/PYc8ZhLcZ4+eCz7pUSj02dDXo5pRmBXAkPeYmy26iPXQ==}
-    dependencies:
-      '@material/button': 14.0.0
-      '@material/dialog': 14.0.0
-      '@material/dom': 14.0.0
-      '@smui/common': 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
       svelte2tsx: 0.6.27(svelte@4.2.8)(typescript@5.3.3)
     transitivePeerDependencies:
       - svelte
