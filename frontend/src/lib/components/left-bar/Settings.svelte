@@ -4,8 +4,6 @@
   import { mdiBug, mdiCheck, mdiChevronRight, mdiClipboard, mdiCog, mdiDownload, mdiFolderEdit, mdiTune } from '@mdi/js';
   import { getContextClient } from '@urql/svelte';
   import Dialog, { Actions, Content, Title } from '@smui/dialog';
-  import Textfield from '@smui/textfield';
-  import HelperText from '@smui/textfield/helper-text';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { GenerateDebugInfo } from '$wailsjs/go/bindings/DebugInfo';
@@ -400,38 +398,39 @@
 >
   <Title>Change download cache location</Title>
   <Content>
-    <div class="flex items-baseline">
-      <div
-        class="grow"
-      >
-        <Textfield
-          bind:value={newCacheLocation}
-          invalid={!!cacheError}
-          label="Cache location"
-          class="w-full"
-          input$readonly
-          on:click={() => pickCacheLocation()}
-        >
-          <HelperText validationMsg slot="helper">
-            { cacheError }
-          </HelperText>
-        </Textfield>
+    <label class="label">
+      <span>Cache location</span>
+      <div class="flex items-baseline">
+        <div class="grow">
+          <input type="text"
+            class="input px-4 py-2 hover:!cursor-pointer"
+            class:input-error={cacheError}
+            value={newCacheLocation}
+            readonly
+            on:click={() => pickCacheLocation()}
+          />
+          <p>
+            {#if cacheError }
+              { cacheError }
+            {/if}
+          </p>
+        </div>
+        <button
+          class="btn mr-4 shrink-0 text-primary-600"
+          disabled={cacheMoveInProgress}
+          on:click={() => resetCacheLocation()}>
+          <span>Reset to default</span>
+          <div class="grow" />
+        </button>
+        <button
+          class="btn shrink-0 text-primary-600"
+          disabled={cacheMoveInProgress}
+          on:click={() => setCacheLocation()}>
+          <span>Save and move</span>
+          <div class="grow" />
+        </button>
       </div>
-      <button
-        class="btn mr-4 shrink-0 text-primary-600"
-        disabled={cacheMoveInProgress}
-        on:click={() => resetCacheLocation()}>
-        <span>Reset to default</span>
-        <div class="grow" />
-      </button>
-      <button
-        class="btn shrink-0 text-primary-600"
-        disabled={cacheMoveInProgress}
-        on:click={() => setCacheLocation()}>
-        <span>Save and move</span>
-        <div class="grow" />
-      </button>
-    </div>
+    </label>
   </Content>
   <Actions>
     <button

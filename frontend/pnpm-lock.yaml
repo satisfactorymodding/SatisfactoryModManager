@@ -286,9 +286,6 @@ devDependencies:
   '@smui/layout-grid':
     specifier: 7.0.0-beta.15
     version: 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
-  '@smui/line-ripple':
-    specifier: 7.0.0-beta.15
-    version: 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
   '@smui/list':
     specifier: 7.0.0-beta.15
     version: 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
@@ -332,9 +329,6 @@ devDependencies:
     specifier: 7.0.0-beta.15
     version: 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
   '@smui/tab-scroller':
-    specifier: 7.0.0-beta.15
-    version: 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
-  '@smui/textfield':
     specifier: 7.0.0-beta.15
     version: 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
   '@smui/top-app-bar':
@@ -2987,6 +2981,7 @@ packages:
       '@material/tokens': 14.0.0
       '@material/typography': 14.0.0
       tslib: 2.6.2
+    dev: false
 
   /@material/theme@14.0.0:
     resolution: {integrity: sha512-6/SENWNIFuXzeHMPHrYwbsXKgkvCtWuzzQ3cUu4UEt3KcQ5YpViazIM6h8ByYKZP8A9d8QpkJ0WGX5btGDcVoA==}
@@ -3619,25 +3614,6 @@ packages:
       '@smui/common': 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
       '@smui/ripple': 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
       '@smui/tab-indicator': 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
-      svelte2tsx: 0.6.27(svelte@4.2.8)(typescript@5.3.3)
-    transitivePeerDependencies:
-      - svelte
-      - typescript
-    dev: true
-
-  /@smui/textfield@7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3):
-    resolution: {integrity: sha512-98lGaVJRH3K5aXVUAa8o/8rHRQ/Vwu9q6phupSrPW4BEmEEEezb/fzKExTOgm0c241dy4nDRLkdH9IdtObTA8w==}
-    dependencies:
-      '@material/dom': 14.0.0
-      '@material/feature-targeting': 14.0.0
-      '@material/ripple': 14.0.0
-      '@material/rtl': 14.0.0
-      '@material/textfield': 14.0.0
-      '@smui/common': 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
-      '@smui/floating-label': 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
-      '@smui/line-ripple': 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
-      '@smui/notched-outline': 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
-      '@smui/ripple': 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
       svelte2tsx: 0.6.27(svelte@4.2.8)(typescript@5.3.3)
     transitivePeerDependencies:
       - svelte

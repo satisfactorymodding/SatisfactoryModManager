@@ -1,33 +1,14 @@
 <script lang="ts">
-  import Textfield, { Input } from '@smui/textfield';
-  import LineRipple from '@smui/line-ripple';
   import { mdiFilter, mdiSort } from '@mdi/js';
 
   import { filter, filterOptions, order, orderByOptions, search } from '$lib/store/modFiltersStore';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import Select from '$lib/components/Select.svelte';
-
-  let inputA: Input;
-  let lineRippleA: LineRipple;
 </script>
 
 <div class="px-5 py-2 flex @container/mod-list-filters">
   <div class="grow mr-2">
-    <Textfield
-      bind:input={inputA}
-      bind:lineRipple={lineRippleA}
-      class="w-full h-[30px]"
-    >
-      <Input
-        bind:this={inputA}
-        bind:value={$search}
-        id="input-manual-a"
-        aria-controls="helper-text-manual-a"
-        aria-describedby="helper-text-manual-a"
-        placeholder="Search mods"
-      />
-      <LineRipple bind:this={lineRippleA} slot="ripple" />
-    </Textfield>
+    <input bind:value={$search} class="w-full bg-transparent border-b-[1px] border-secondary-500 hover:border-secondary-50 focus:border-primary-600 duration-500 placeholder-secondary-400 placeholder:font-medium outline-none !ring-0 h-[30px] transition-colors" placeholder="Search mods"/>
   </div>
   <div class="flex grow shrink-0 min-w-[140px] w-0 @lg/mod-list-filters:min-w-[21rem]">
     <Select

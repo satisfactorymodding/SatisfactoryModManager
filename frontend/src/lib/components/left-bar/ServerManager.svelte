@@ -2,7 +2,6 @@
   import { mdiAlert, mdiServerNetwork, mdiTrashCan } from '@mdi/js';
   import Dialog, { Actions, Content, Title } from '@smui/dialog';
   import DataTable, { Body, Cell, Row } from '@smui/data-table';
-  import Textfield from '@smui/textfield';
   import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
 
   import Tooltip from '$lib/components/Tooltip.svelte';
@@ -145,14 +144,17 @@
     </DataTable>
     <div class="mt-4">
       <div class="flex h-10">
-        <Select bind:value={newProtocol} items={allowedProtocols} name="newServerProtocol" class="!h-full w-28 shrink-0">
+        <Select bind:value={newProtocol} items={allowedProtocols} name="newServerProtocol" class="!h-full w-28 shrink-0"
+          buttonClass="bg-surface-200-700-token px-4 text-sm"
+          itemClass="bg-surface-50-900-token"
+          itemActiveClass="!bg-surface-300/20">
           <svelte:fragment slot="item" let:item>
             {item}
           </svelte:fragment>
         </Select>
-        <Textfield bind:value={newServerPath} class="!h-full grow mx-4"/>
+        <input type="text" bind:value={newServerPath} class="input !h-full grow mx-4 px-4" placeholder="user:pass@host:port/path"/>
         <button
-          class="btn h-full text-sm bg-surface-500-400-token"
+          class="btn h-full text-sm bg-primary-600 text-secondary-900"
           disabled={addInProgress}
           on:click={() => addNewRemoteServer()}>
           <span>

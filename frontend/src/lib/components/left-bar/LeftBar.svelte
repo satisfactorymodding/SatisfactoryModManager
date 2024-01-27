@@ -1,9 +1,7 @@
 <script lang="ts">
   import Dialog, { Title, Content, Actions } from '@smui/dialog';
-  import TextField from '@smui/textfield'; 
   import { mdiAlert, mdiCheckCircle, mdiCloseCircle, mdiDownload, mdiFolderOpen, mdiHelpCircle, mdiPencil, mdiPlusCircle, mdiTrashCan, mdiUpload, mdiWeb } from '@mdi/js';
   import { siDiscord, siGithub } from 'simple-icons/icons';
-  import HelperText from '@smui/textfield/helper-text';
   import { popup, type PopupSettings, ProgressBar } from '@skeletonlabs/skeleton';
 
   import Tooltip from '../Tooltip.svelte';
@@ -169,6 +167,10 @@
           },
         ],
       });
+      if (!importProfileFilepath) {
+        fileDialogOpen = false;
+        return;
+      }
       importProfileMetadata = await ReadExportedProfileMetadata(importProfileFilepath);
     } catch (e) {
       fileDialogOpen = false;
@@ -465,12 +467,11 @@
   surface$style="width: 500px; max-width: calc(100vw - 32px);"
 >
   <Title>Add profile</Title>
-  <Content>
-    <TextField
-      bind:value={newProfileName}
-      label="Profile name"
-      class="w-full"
-    />
+  <Content class="space-y-2">
+    <label class="label w-full">
+      <span>Profile name</span>
+      <input class="input px-4 py-2" type="text" placeholder="My New Profile" bind:value={newProfileName}/>
+    </label>
   </Content>
   <Actions>
     <button
@@ -492,18 +493,15 @@
   surface$style="width: 500px; max-width: calc(100vw - 32px);"
 >
   <Title>Rename profile</Title>
-  <Content>
-    <TextField
-      bind:value={renameOldProfileName}
-      label="Old profile name"
-      class="w-full"
-      disabled
-    />
-    <TextField
-      bind:value={renameNewProfileName}
-      label="New profile name"
-      class="w-full"
-    />
+  <Content class="space-y-2">
+    <label class="label w-full">
+      <span>Old profile name</span>
+      <input class="input px-4 py-2" type="text" placeholder="Old Profile" value={renameOldProfileName} readonly/>
+    </label>
+    <label class="label w-full">
+      <span>New profile name</span>
+      <input class="input px-4 py-2" type="text" placeholder="My New Profile" bind:value={renameNewProfileName}/>
+    </label>
   </Content>
   <Actions>
     <button
@@ -525,13 +523,11 @@
   surface$style="width: 500px; max-width: calc(100vw - 32px);"
 >
   <Title>Delete profile</Title>
-  <Content>
-    <TextField
-      bind:value={deleteProfileName}
-      label="Profile name"
-      class="w-full"
-      disabled
-    />
+  <Content class="space-y-2">
+    <label class="label w-full">
+      <span>Profile name</span>
+      <input class="input px-4 py-2" type="text" readonly value={deleteProfileName}/>
+    </label>
   </Content>
   <Actions>
     <button
@@ -552,24 +548,24 @@
   surface$style="width: 500px; max-width: calc(100vw - 32px);"
 >
   <Title>Import profile</Title>
-  <Content>
-    <TextField
-      bind:value={importProfileName}
-      label="Profile name"
-      class="w-full"
-    />
-    <TextField
-      bind:value={importProfileFilepath}
-      invalid={!!importProfileError}
-      label="Profile file"
-      class="w-full"
-      input$readonly
-      on:click={() => pickImportProfileFile()}
-    >
-      <HelperText validationMsg slot="helper">
-        { importProfileError }
-      </HelperText>
-    </TextField>
+  <Content class="space-y-2">
+    <label class="label w-full">
+      <span>Profile name</span>
+      <input class="input px-4 py-2" type="text" placeholder="My New Profile" bind:value={importProfileName}/>
+    </label>
+    <label class="label w-full">
+      <span>Profile file</span>
+      <input class="input px-4 py-2 hover:!cursor-pointer"
+        class:input-error={importProfileError}
+        type="text"
+        value={importProfileFilepath} 
+        on:click={() => pickImportProfileFile()}
+        readonly
+      />
+      <p>
+        {importProfileError}
+      </p>
+    </label>
   </Content>
   <Actions>
     <button
