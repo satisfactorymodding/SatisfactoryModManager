@@ -1,7 +1,6 @@
 <script lang="ts">
   import { mdiAlert, mdiServerNetwork, mdiTrashCan } from '@mdi/js';
   import Dialog, { Actions, Content, Title } from '@smui/dialog';
-  import DataTable, { Body, Cell, Row } from '@smui/data-table';
   import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
 
   import Tooltip from '$lib/components/Tooltip.svelte';
@@ -100,12 +99,12 @@
 >
   <Title>Dedicated Servers</Title>
   <Content>
-    <DataTable table$aria-label="Todo list" style="width: 100%;">
-      <Body>
+    <table class="table w-full">
+      <tbody>
         {#each $remoteServers as remoteServer}
-          <Row>
-            <Cell>{$installsMetadata[remoteServer].path}</Cell>
-            <Cell>
+          <tr>
+            <td class="break-all">{$installsMetadata[remoteServer].path}</td>
+            <td>
               {#if $installsMetadata[remoteServer].type}
                 {$installsMetadata[remoteServer].type}
               {:else}
@@ -123,25 +122,25 @@
                   </span>
                 </Tooltip>
               {/if}
-            </Cell>
-            <Cell>
+            </td>
+            <td>
               {#if $installsMetadata[remoteServer].version}
-                {$installsMetadata[remoteServer].version}
+                CL{$installsMetadata[remoteServer].version}
               {/if}
-            </Cell>
-            <Cell>
+            </td>
+            <td>
               <button
-                class="btn-icon h-6 w-full text-sm"
+                class="btn-icon h-5 w-full"
                 on:click={() => removeServer(remoteServer)}>
                 <SvgIcon
                   class="!p-0 !m-0 !w-full !h-full hover:text-red-500"
                   icon={mdiTrashCan}/>
               </button>
-            </Cell>
-          </Row>
+            </td>
+          </tr>
         {/each}
-      </Body>
-    </DataTable>
+      </tbody>
+    </table>
     <div class="mt-4">
       <div class="flex h-10">
         <Select bind:value={newProtocol} items={allowedProtocols} name="newServerProtocol" class="!h-full w-28 shrink-0"
