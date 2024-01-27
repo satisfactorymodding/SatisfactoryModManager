@@ -6,7 +6,9 @@
   import List, { Item, PrimaryText, SecondaryText, Separator, Text } from '@smui/list';
   import Dialog, { Content, Title } from '@smui/dialog';
   import { minVersion, valid, validRange, sort, coerce, SemVer, parse } from 'semver';
-  import Tooltip, { Wrapper } from '@smui/tooltip';
+  import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
+
+  import Tooltip from '../Tooltip.svelte';
 
   import { CompatibilityState, GetModDetailsDocument, GetModReferenceDocument, type Version } from '$lib/generated';
   import { markdown } from '$lib/utils/markdown';
@@ -227,6 +229,39 @@
       element = element.parentElement;
     }
   }
+
+  const compatEAPopupId = 'mod-details-compat-ea';
+
+  const compatEAPopup = {
+    event: 'hover',
+    target: compatEAPopupId,
+    middleware: {
+      offset: 4,
+    },
+    placement: 'bottom-end',
+  } satisfies PopupSettings;
+
+  const compatEXPPopupId = 'mod-details-compat-exp';
+
+  const compatEXPPopup = {
+    event: 'hover',
+    target: compatEXPPopupId,
+    middleware: {
+      offset: 4,
+    },
+    placement: 'bottom-start',
+  } satisfies PopupSettings;
+
+  const compatUnknownPopupId = 'mod-details-compat-unknown';
+
+  const compatUnknownPopup = {
+    event: 'hover',
+    target: compatUnknownPopupId,
+    middleware: {
+      offset: 4,
+    },
+    placement: 'bottom',
+  } satisfies PopupSettings;
 </script>
 
 <div class="@container/mod-details h-full flex mods-details w-full  @3xl/mod-details:text-base text-sm">
@@ -272,38 +307,41 @@
           <span>Compatibility: </span>
           {#if mod?.compatibility}
             <div class="flex pl-1">
-              <Wrapper>
+              <div use:popup={compatEAPopup}>
                 <SvgIcon icon={mdiRocketLaunch} class="{colorForCompatibilityState(mod.compatibility.EA.state)} w-5" />
-                <Tooltip surface$class="max-w-lg text-base">
+              </div>
+              
+              <Tooltip popupId={compatEAPopupId}>
+                <span class="text-lg">
                   This mod has been reported as {mod.compatibility.EA.state} on Early Access.
-                  {#if mod.compatibility.EA.note}
-                    <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-                    {@html markdown(mod.compatibility.EA.note)}
-                  {:else}
-                    (No further notes provided)
-                  {/if}
-                </Tooltip>
-              </Wrapper>
-              <Wrapper>
+                </span>
+                {#if mod.compatibility.EA.note}
+                  <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+                  {@html markdown(mod.compatibility.EA.note)}
+                {:else}
+                  (No further notes provided)
+                {/if}
+              </Tooltip>
+              <div use:popup={compatEXPPopup}>
                 <SvgIcon icon={mdiTestTube} class="{colorForCompatibilityState(mod.compatibility.EXP.state)} w-5" />
-                <Tooltip surface$class="max-w-lg text-base">
+              </div>
+              <Tooltip popupId={compatEXPPopupId}>
+                <span class="text-lg">
                   This mod has been reported as {mod.compatibility.EXP.state} on Experimental.
-                  {#if mod.compatibility.EXP.note}
-                    <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-                    {@html markdown(mod.compatibility.EXP.note)}
-                  {:else}
-                    (No further notes provided)
-                  {/if}
-                </Tooltip>
-              </Wrapper>
+                </span>
+                {#if mod.compatibility.EXP.note}
+                  <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+                  {@html markdown(mod.compatibility.EXP.note)}
+                {:else}
+                  (No further notes provided)
+                {/if}
+              </Tooltip>
             </div>
           {:else}
-            <Wrapper>
-              <span class="font-bold">Unknown</span>
-              <Tooltip surface$class="max-w-lg text-base">
-                No compatibility information has been reported for this mod yet. Try it out and contact us on the Discord so it can be updated!
-              </Tooltip>
-            </Wrapper>
+            <span use:popup={compatUnknownPopup} class="font-bold">&nbsp;Unknown</span>
+            <Tooltip popupId={compatUnknownPopupId}>
+              <span class="text-lg">No compatibility information has been reported for this mod yet. Try it out and contact us on the Discord so it can be updated!</span>
+            </Tooltip>
           {/if}
         </div>
       {/if}

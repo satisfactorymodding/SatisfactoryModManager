@@ -1,11 +1,12 @@
 <script lang="ts">
   import Dialog, { Title, Content, Actions } from '@smui/dialog';
   import TextField from '@smui/textfield'; 
-  import Tooltip, { Wrapper } from '@smui/tooltip';
   import { mdiAlert, mdiCheckCircle, mdiCloseCircle, mdiDownload, mdiFolderOpen, mdiHelpCircle, mdiPencil, mdiPlusCircle, mdiTrashCan, mdiUpload, mdiWeb } from '@mdi/js';
   import { siDiscord, siGithub } from 'simple-icons/icons';
   import HelperText from '@smui/textfield/helper-text';
-  import { ProgressBar } from '@skeletonlabs/skeleton';
+  import { popup, type PopupSettings, ProgressBar } from '@skeletonlabs/skeleton';
+
+  import Tooltip from '../Tooltip.svelte';
 
   import Settings from './Settings.svelte';
   import Updates from './Updates.svelte';
@@ -201,6 +202,32 @@
   });
 
   $: importProfileProgress = $progress?.item === '__import_profile__';
+
+  function installPathPopupId(install: string) {
+    return `install-path-${install.replace(/[^a-zA-Z0-9]/g, '-')}`;
+  }
+
+  $: installPathPopups = $installs.map((i) => [i, {
+    event: 'hover',
+    target: installPathPopupId(i),
+    middleware: {
+      offset: 4,
+    },
+    placement: 'right',
+  } as PopupSettings]).reduce((acc, [k, v]) => ({ ...acc, [k as string]: v as PopupSettings }), {} as Record<string, PopupSettings>);
+
+  function installWarningPopupId(install: string) {
+    return `install-warning-${install}`;
+  }
+
+  $: installWarningPopups = $installs.map((i) => [i, {
+    event: 'hover',
+    target: installWarningPopupId(i),
+    middleware: {
+      offset: 4,
+    },
+    placement: 'right',
+  } as PopupSettings]).reduce((acc, [k, v]) => ({ ...acc, [k as string]: v as PopupSettings }), {} as Record<string, PopupSettings>);
 </script>
 
 <div class="flex flex-col h-full p-4 left-bar w-[22rem] min-w-[22rem] ">
@@ -227,26 +254,26 @@
           ({$installsMetadata[item]?.launcher})
         </span>
       </svelte:fragment>
-      <div on:click={(e) => {
-        e.stopPropagation();
-        OpenExternal(item);
-      }} slot="itemTrail" let:item>
+      <svelte:fragment slot="itemTrail" let:item>
         {#if $installsMetadata[item]?.branch && $installsMetadata[item]?.type}
-          <Wrapper>
-            <SvgIcon icon={mdiFolderOpen} class="!w-5 !h-5"/>
-            <Tooltip surface$class="max-w-lg text-base">
-              {item}
-            </Tooltip>
-          </Wrapper>
+          <Tooltip popupId={installPathPopupId(item)}>
+            {item}
+          </Tooltip>
+          <div use:popup={installPathPopups[item]} class="!w-5 !h-5" on:click={(e) => {
+            e.stopPropagation();
+            OpenExternal(item);
+          }} >
+            <SvgIcon icon={mdiFolderOpen} class="!w-full !h-full"/>
+          </div>
         {:else}
-          <Wrapper>
-            <SvgIcon icon={mdiAlert} class="!w-5 !h-5 text-red-500" />
-            <Tooltip surface$class="max-w-lg text-base">
-              Failed to connect to server, retry connection in the server manager
-            </Tooltip>
-          </Wrapper>
+          <div use:popup={installWarningPopups[item]} class="!w-5 !h-5">
+            <SvgIcon icon={mdiAlert} class="!w-full !h-full"/>
+          </div>
+          <Tooltip popupId={installWarningPopupId(item)}>
+            {item}
+          </Tooltip>
         {/if}
-      </div>
+      </svelte:fragment>
       <svelte:fragment slot="selected" let:item>
         {#if $installsMetadata[item]?.branch && $installsMetadata[item]?.type}
           {$installsMetadata[item]?.branch}{$installsMetadata[item]?.type !== common.InstallType.WINDOWS ? ' - DS' : ''}

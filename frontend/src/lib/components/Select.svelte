@@ -13,6 +13,7 @@
   let clazz = '';
   export { clazz as class };
   export let buttonClass = '';
+  export let menuClass = '';
   export let itemClass = '';
   export let itemActiveClass = '';
   
@@ -73,7 +74,7 @@
     </button>
   </div>
 
-  <div class="card w-full shadow-xl z-10 duration-0 overflow-y-auto" data-popup={name}>
+  <div class="card w-full shadow-xl z-10 duration-0 overflow-y-auto {menuClass}" data-popup={name}>
     <!-- 
     Skeleton's popup close function waits for the tranistion duration...
     before actually triggering the transition...

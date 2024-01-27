@@ -1,10 +1,10 @@
 <script lang="ts">
   import { getContextClient, queryStore } from '@urql/svelte';
   import Carousel from 'svelte-carousel';
-  import Tooltip, { Wrapper } from '@smui/tooltip';
+  import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
 
-  import Announcement from './Announcement.svelte';
-
+  import Tooltip from '$lib/components/Tooltip.svelte';
+  import Announcement from '$lib/components/announcements/Announcement.svelte';
   import { viewedAnnouncements , offline } from '$lib/store/settingsStore';
   import { AnnouncementImportance, GetAnnouncementsDocument, SmrHealthcheckDocument, type Announcement as AnnouncementType } from '$lib/generated';
   import { SetAnnouncementViewed } from '$wailsjs/go/bindings/Settings';
@@ -103,10 +103,37 @@
   function goOffline() {
     $offline = true;
   }
+
+  $: popupId = 'announcement';
+
+  $: popupHover = {
+    event: 'hover',
+    target: popupId,
+    middleware: {
+      offset: 4,
+    },
+    placement: 'bottom',
+  } satisfies PopupSettings;
 </script>
 
+<!-- the if gets executed before this is added to the DOM for some reason if this is below the ifs, so the use:popup would not find the element -->
+<Tooltip {popupId} disabled={!$offline && !announcements[currentIndex]}>
+  <!--
+    fixed allows the popup to be displayed outside the bounds of the parent
+    block opacity-0 ensure that the popup gets a width on first render, otherwise it will be 0px wide and floating-ui will "animate" widening it
+    inert is required when popup is invisible to ignore mouse inputs
+  -->
+  <span>
+    {#if $offline}
+      {offlineAnnouncement.message}
+    {:else}
+      {announcements[currentIndex]?.message}
+    {/if}
+  </span>
+</Tooltip>
+
 {#if $offline}
-  <div class="w-full">
+  <div class="w-full" use:popup={popupHover}>
     <Announcement announcement={offlineAnnouncement}>
       <div class="flex pr-2">
         <span>{offlineAnnouncement.message}</span>
@@ -115,7 +142,7 @@
     </Announcement>
   </div>
 {:else if announcements.length > 0}
-  <div class="w-full" on:mouseenter={() => hovered = true} on:mouseleave={() => hovered = false} role="alert">
+  <div class="w-full" role="alert" use:popup={popupHover}>
     <Carousel
       autoplayDuration={hovered ? 1e100 : 5000}
       duration={300}
@@ -139,12 +166,7 @@
               {/if}
             </Announcement>
           {:else}
-            <Wrapper>
-              <Announcement {announcement} />
-              <Tooltip surface$class="max-w-xl text-base">
-                <span class="text-xl">{announcement.message}</span>
-              </Tooltip>
-            </Wrapper>
+            <Announcement {announcement} />
           {/if}
         </div>
       {/each}

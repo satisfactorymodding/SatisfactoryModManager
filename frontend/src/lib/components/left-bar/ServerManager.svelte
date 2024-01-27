@@ -2,9 +2,10 @@
   import { mdiAlert, mdiServerNetwork, mdiTrashCan } from '@mdi/js';
   import Dialog, { Actions, Content, Title } from '@smui/dialog';
   import DataTable, { Body, Cell, Row } from '@smui/data-table';
-  import Tooltip, { Wrapper } from '@smui/tooltip';
   import Textfield from '@smui/textfield';
+  import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
 
+  import Tooltip from '$lib/components/Tooltip.svelte';
   import Select from '$lib/components/Select.svelte';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { installsMetadata, remoteServers } from '$lib/store/ficsitCLIStore';
@@ -68,6 +69,19 @@
       }
     }
   }
+
+  function installWarningPopupId(install: string) {
+    return `remote-server-warning-${install}`;
+  }
+
+  $: installWarningPopups = $remoteServers.map((i) => [i, {
+    event: 'hover',
+    target: installWarningPopupId(i),
+    middleware: {
+      offset: 4,
+    },
+    placement: 'bottom',
+  } as PopupSettings]).reduce((acc, [k, v]) => ({ ...acc, [k as string]: v as PopupSettings }), {} as Record<string, PopupSettings>);
 </script>
 
 <button
@@ -96,18 +110,19 @@
               {#if $installsMetadata[remoteServer].type}
                 {$installsMetadata[remoteServer].type}
               {:else}
-                <Wrapper>
-                  <button
-                    class="btn-icon h-6 w-full text-sm"
-                    on:click={() => retryConnect(remoteServer)}>
-                    <SvgIcon
-                      class="!p-0 !m-0 !w-full !h-full text-red-500"
-                      icon={mdiAlert} />
-                  </button>
-                  <Tooltip surface$class="max-w-lg text-base">
+                <button
+                  use:popup={installWarningPopups[remoteServer]}
+                  class="btn-icon h-6 w-full text-sm"
+                  on:click={() => retryConnect(remoteServer)}>
+                  <SvgIcon
+                    class="!p-0 !m-0 !w-full !h-full text-red-500"
+                    icon={mdiAlert} />
+                </button>
+                <Tooltip popupId={installWarningPopupId(remoteServer)}>
+                  <span class="text-base">
                     Failed to connect to server, click to retry
-                  </Tooltip>
-                </Wrapper>
+                  </span>
+                </Tooltip>
               {/if}
             </Cell>
             <Cell>

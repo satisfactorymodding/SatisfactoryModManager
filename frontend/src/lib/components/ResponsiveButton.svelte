@@ -1,10 +1,11 @@
 <script lang="ts">
-  import Tooltip, { Wrapper } from '@smui/tooltip';
+  import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
 
-  import SvgIcon from './SVGIcon.svelte';
-
+  import Tooltip from '$lib/components/Tooltip.svelte';
+  import SvgIcon from '$lib/components/SVGIcon.svelte';
   import type { ButtonDisplay } from '$lib/utils/responsiveButton';
 
+  export let id: string;
   export let display: ButtonDisplay;
   export let onClickAction: () => void;
   export let disabled = false;
@@ -12,32 +13,41 @@
   let clazz = '';
   export { clazz as class };
 
+  $: popupId = `responsiveButtonHover-${id}`;
+
+  $: popupHover = {
+    event: 'hover',
+    target: popupId,
+    middleware: {
+      offset: 4,
+    },
+    placement: 'bottom-end',
+  } satisfies PopupSettings;
 </script>
 
 {#if visible}
-  <Wrapper>
-    <!-- Div required so a tooltip can still be displayed on a disabled button -->
-    <div>
-      <button
-        class="btn-icon min-w-0 w-12 h-12 p-2 group {clazz}"
-        {disabled}
-        on:click={onClickAction}>
-        <SvgIcon
-          class="!p-1 !m-0 !w-full !h-full group-hover:!hidden {display.iconClass}"
-          icon={display.icon}/>
-        <SvgIcon
-          class="!p-1 !m-0 !w-full !h-full group-hover:!inline-block !hidden {display.iconHoverClass}"
-          icon={display.iconHover}/>
-      </button>
-    </div>
-    <Tooltip surface$class="max-w-lg text-base">
+  <div use:popup={popupHover}>
+    <button
+      class="btn-icon min-w-0 w-11 h-11 p-2 group {clazz}"
+      {disabled}
+      on:click={onClickAction}>
+      <SvgIcon
+        class="!p-1 !m-0 !w-full !h-full group-hover:!hidden {display.iconClass}"
+        icon={display.icon}/>
+      <SvgIcon
+        class="!p-1 !m-0 !w-full !h-full group-hover:!inline-block !hidden {display.iconHoverClass}"
+        icon={display.iconHover}/>
+    </button>
+  </div>
+  <Tooltip {popupId}>
+    <span>
       {display.tooltip}
       {#if display.tooltipHtml}
         <!-- eslint-disable-next-line svelte/no-at-html-tags -->
         { @html display.tooltipHtml }
       {/if}
-    </Tooltip>
-  </Wrapper>
+    </span>
+  </Tooltip>
 {:else}
   <div class="min-w-0 w-12 h-12"/>
 {/if}

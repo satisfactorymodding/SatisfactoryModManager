@@ -1,11 +1,11 @@
 <script lang="ts">
   import { mdiDownload, mdiEye, mdiStar, mdiPlay, mdiPause, mdiTrashCan, mdiTrayFull, mdiTrayMinus, mdiSync, mdiLinkLock, mdiArchiveCheck, mdiPauseCircle, mdiPlayCircle, mdiStarMinus, mdiStarPlus, mdiStarOutline, mdiTagMultiple } from '@mdi/js';
   import { createEventDispatcher } from 'svelte';
-  import Tooltip, { Wrapper } from '@smui/tooltip';
   import { getContextClient } from '@urql/svelte';
-  import { ProgressBar } from '@skeletonlabs/skeleton';
+  import { popup, type PopupSettings , ProgressBar } from '@skeletonlabs/skeleton';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
+  import Tooltip from '$lib/components/Tooltip.svelte';
   import { search, type PartialMod } from '$lib/store/modFiltersStore';
   import { favoriteMods, lockfileMods, manifestMods, progress, selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
   import { addQueuedModAction, queuedMods, removeQueuedModAction } from '$lib/store/actionQueue';
@@ -82,6 +82,7 @@
     if (isInstalled) {
       display = {
         icon: mdiArchiveCheck,
+        iconClass: 'text-primary-600',
         iconHover: mdiTrashCan,
         iconHoverClass: 'text-red-500',
         tooltip: 'This mod is installed on this profile. Click to uninstall it.',
@@ -246,39 +247,38 @@
       }
     }
   }
+
+  $: popupId = `mods-list-item-popup-${mod.mod_reference}`;
+
+  $: popupHover = {
+    event: 'hover',
+    target: popupId,
+    middleware: {
+      offset: 4,
+    },
+    placement: 'bottom-end',
+  } satisfies PopupSettings;
 </script>
 
-<div class="my-1 px-0 @lg/mods-list:h-24 @md/mods-list:h-[5.5rem] h-[4.25rem]" class:rounded-lg={selected} class:selected on:click={listingClick} on:keypress={listingClick} role="tab" tabindex="0">
+<div class="my-1 px-0 @lg/mods-list:h-24 @md/mods-list:h-[5.5rem] h-[4.25rem]" class:rounded-lg={selected} class:bg-surface-50-900-token={selected} on:click={listingClick} on:keypress={listingClick} role="tab" tabindex="0">
   {#if inProgress}
     <div class="relative h-full">
       <ProgressBar value={$progress?.progress === -1 ? undefined : $progress?.progress} max={1} class="h-full w-full" track="bg-surface-200-700-token" meter="bg-surface-50-900-token"/>
     </div>
   {/if}
-  <div class="flex relative h-full" class:-top-full={inProgress} class:disabled={isInstalled && !isEnabled}>
-    <img src={renderedLogo} alt="{mod.name} Logo" class="logo h-full @lg/mods-list:w-24 @md/mods-list:w-[5.5rem] w-[4.25rem]" />
-    <div class="ml-2 flex flex-col grow w-0">
-      <Wrapper>
-        <div class="flex items-center">
-          <div class="shrink min-w-[100px] truncate">
-            <span class="@lg/mods-list:text-xl text-lg font-medium min-w-0 w-full" class:error={compatibility.state === CompatibilityState.Broken} class:warning={compatibility.state === CompatibilityState.Damaged}>{mod.name}</span>
-          </div>
-          <div class="shrink-0 hidden @lg/mods-list:block truncate w-[100px] grow">
-            <span class="pl-1">by</span>
-            <!-- We could offer keyboard navigation for clicking this, but it's a waste of the user's time while nagivating via keyboard. If they want to search by author, they could enter the mod description pane -->
-            <span class="color-primary whitespace-nowrap" on:click|stopPropagation={authorClick} on:keypress|stopPropagation={authorClick} role="button" tabindex="-1">{author}</span>
-          </div>
+  <div class="flex relative h-full" class:-top-full={inProgress}>
+    <img src={renderedLogo} alt="{mod.name} Logo" class="logo h-full @lg/mods-list:w-24 @md/mods-list:w-[5.5rem] w-[4.25rem]" class:grayscale={isInstalled && !isEnabled} />
+    <div class="ml-2 flex flex-col grow w-0 opacity" class:opacity-30={isInstalled && !isEnabled}>
+      <div class="flex items-center" use:popup={popupHover}>
+        <div class="shrink min-w-[100px] truncate">
+          <span class="@lg/mods-list:text-xl text-lg font-medium min-w-0 w-full" class:error={compatibility.state === CompatibilityState.Broken} class:warning={compatibility.state === CompatibilityState.Damaged}>{mod.name}</span>
         </div>
-        {#if isInstalled && !isEnabled}
-          <Tooltip surface$class="max-w-lg text-base">
-            This mod is Disabled. Click the pause icon to Enable it. 
-          </Tooltip>
-        {:else if compatibility.state !== CompatibilityState.Works}
-          <Tooltip surface$class="max-w-lg text-base">
-            <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-            { @html compatibility.note }
-          </Tooltip>
-        {/if}
-      </Wrapper>
+        <div class="shrink-0 hidden @lg/mods-list:block truncate w-[100px] grow">
+          <span class="pl-1">by</span>
+          <!-- We could offer keyboard navigation for clicking this, but it's a waste of the user's time while nagivating via keyboard. If they want to search by author, they could enter the mod description pane -->
+          <span class="color-primary whitespace-nowrap" on:click|stopPropagation={authorClick} on:keypress|stopPropagation={authorClick} role="button" tabindex="-1">{author}</span>
+        </div>
+      </div>
       <div class="truncate @md/mods-list:text-base text-sm hidden @md/mods-list:block">{'short_description' in mod ? mod.short_description : ''}</div>
       <div class="flex">
         {#if !inProgress}
@@ -322,17 +322,20 @@
     <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
     <div class="pr-2 flex h-full items-center" role="separator" tabindex="-1" on:click|stopPropagation={() => { /* empty */ }} on:keypress|stopPropagation={() => { /* empty */ }}>
       <ResponsiveButton
+        id="enable-{mod.mod_reference}"
         display={enableButtonDisplay}
         disabled={enableButtonDisabled}
         onClickAction={toggleModEnabled}
         visible={isInstalled && !isDependency}
       />
       <ResponsiveButton
+        id="install-{mod.mod_reference}"
         display={installButtonDisplay}
         disabled={installButtonDisabled}
         onClickAction={toggleModInstalled}
       />
       <ResponsiveButton
+        id="favorite-{mod.mod_reference}"
         display={favoriteButtonDisplay}
         onClickAction={toggleModFavorite}
       />
@@ -340,18 +343,12 @@
   </div>
 </div>
 
-<style>
-  :global(.mdc-linear-progress__bar-inner) {
-    border-top-width: 100px;
-  }
-  .selected {
-    background-color: #1c1c1c;
-  }
-  .disabled {
-    opacity: 0.3;
-  }
-  .disabled img {
-    filter: grayscale(1);
-    animation-play-state: paused !important;
-  }
-</style>
+<Tooltip {popupId} disabled={!(isInstalled && !isEnabled) && compatibility.state === CompatibilityState.Works}>
+  {#if isInstalled && !isEnabled}
+    This mod is Disabled. Click the pause icon to Enable it. 
+  {:else if compatibility.state !== CompatibilityState.Works}
+    <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+    { @html compatibility.note }
+  {/if}
+</Tooltip>
+

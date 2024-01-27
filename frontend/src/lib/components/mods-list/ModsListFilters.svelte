@@ -37,6 +37,7 @@
       name="modsFilter"
       class="!h-full w-1/2 shrink-0"
       buttonClass="px-4 text-sm space-x-0.5"
+      menuClass="min-w-[10rem]"
       itemClass="bg-surface-50-900-token"
       itemActiveClass="!bg-surface-300/20"
     >
@@ -56,6 +57,7 @@
       itemKey="name"
       name="modsOrderBy"
       class="!h-full w-1/2 shrink-0"
+      menuClass="min-w-[10rem]"
       buttonClass="px-4 text-sm space-x-0.5"
       itemClass="bg-surface-50-900-token"
       itemActiveClass="!bg-surface-300/20"

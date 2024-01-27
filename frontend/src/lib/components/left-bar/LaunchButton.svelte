@@ -1,7 +1,9 @@
 <script lang="ts">
-  import Tooltip, { Wrapper } from '@smui/tooltip';
   import { getContextClient } from '@urql/svelte';
   import { mdiOpenInNew, mdiTrayFull } from '@mdi/js';
+  import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
+
+  import Tooltip from '../Tooltip.svelte';
 
   import { selectedInstallMetadata, isGameRunning, lockfileMods, progress } from '$lib/store/ficsitCLIStore';
   import { queuedMods, startQueue } from '$lib/store/actionQueue';
@@ -96,158 +98,159 @@
       }
     }
   }
+
+  const popupId = 'launch-button';
+
+  const popupHover = {
+    event: 'hover',
+    target: popupId,
+    middleware: {
+      offset: 4,
+    },
+    placement: 'top',
+  } satisfies PopupSettings;
 </script>
 
-<Wrapper>
-  <center>
-    {#if areOperationsQueued}
-      <button
-        class="btn h-8 w-full text-sm bg-error-500"
-        on:click={() => startQueue()}
+<center use:popup={popupHover}>
+  {#if areOperationsQueued}
+    <button
+      class="btn h-8 w-full text-sm bg-error-500"
+      on:click={() => startQueue()}
+    >
+      <span>Apply {$queuedMods.length} change{$queuedMods.length !== 1 ? 's' : ''}</span>
+      <div class="grow" />
+      <SvgIcon
+        class="h-5 w-5"
+        icon={mdiTrayFull}/>
+    </button>
+  {:else if !isInstallLaunchable}
+    <button
+      class="btn h-8 w-full text-sm bg-surface-200-700-token"
+      disabled
+    >
+      <span>SMM can't launch this install</span>
+      <div class="grow" />
+    </button>
+  {:else if $launchButton === 'normal' || $isGameRunning || $isLaunchingGame }
+    <button
+      class="btn h-8 w-full text-sm bg-primary-900"
+      disabled={!!$progress || $isGameRunning || $isLaunchingGame}
+      on:click={() => launchGame()}
+    >
+      <span>Play Satisfactory</span>
+      <div class="grow" />
+      <SvgIcon
+        class="h-5 w-5"
+        icon={mdiOpenInNew}/>
+    </button>
+  {:else if $launchButton === 'cat' }
+    <!-- fixme SMMv3 seems to have broken this button -->
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <div
+      style="height: 32px"
+      class="overflow-hidden"
+      on:mouseup={() => catPressed = false}
+      on:mousemove={catMouseMove}
+    >
+      <img
+        src="/images/launch/cat/bg.png"
+        draggable="false"
+        alt="Space background"
       >
-        <span>Apply {$queuedMods.length} change{$queuedMods.length !== 1 ? 's' : ''}</span>
-        <div class="grow" />
-        <SvgIcon
-          class="h-5 w-5"
-          icon={mdiTrayFull}/>
-      </button>
-    {:else if !isInstallLaunchable}
-      <button
-        class="btn h-8 w-full text-sm bg-surface-200-700-token"
-        disabled
-      >
-        <span>SMM can't launch this install</span>
-        <div class="grow" />
-      </button>
-    {:else if $launchButton === 'normal' || $isGameRunning || $isLaunchingGame }
-      <button
-        class="btn h-8 w-full text-sm bg-primary-900"
-        disabled={!!$progress || $isGameRunning || $isLaunchingGame}
-        on:click={() => launchGame()}
-      >
-        <span>Play Satisfactory</span>
-        <div class="grow" />
-        <SvgIcon
-          class="h-5 w-5"
-          icon={mdiOpenInNew}/>
-      </button>
-    {:else if $launchButton === 'cat' }
-      <!-- fixme SMMv3 seems to have broken this button -->
-      <!-- svelte-ignore a11y-no-static-element-interactions -->
       <div
-        style="height: 32px"
-        class="overflow-hidden"
-        on:mouseup={() => catPressed = false}
-        on:mousemove={catMouseMove}
-      >
-        <img
-          src="/images/launch/cat/bg.png"
-          draggable="false"
-          alt="Space background"
-        >
-        <div
-          on:mousedown={catMouseDown}
-          role="button"
-          tabindex="0"
-        >
-          <img
-            src="/images/launch/cat/cat_full.png"
-            style="position: relative; top: -57px; zoom: 0.55"
-            style:left={`calc(-480px + ${catPosition * 87}%)`}
-            draggable="false"
-            alt="Cat"
-          >
-        </div>
-        
-      </div>
-    {:else if $launchButton === 'button' }
-      <!-- FIXME: keyboard navigation isn't allowing pressing this button with enter/space -->
-      <div
-        style="height: 50px"
+        on:mousedown={catMouseDown}
         role="button"
         tabindex="0"
-        on:keydown={launchButtonPressed}
       >
         <img
-          src="/images/launch/fun/launch_fun.png"
+          src="/images/launch/cat/cat_full.png"
+          style="position: relative; top: -57px; zoom: 0.55"
+          style:left={`calc(-480px + ${catPosition * 87}%)`}
           draggable="false"
-          alt="Launch Button Background"
+          alt="Cat"
         >
-        <!-- Keyboard interactions for the button are defined in the overall div -->
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <div
-          on:click={launchButtonPressed}
-          on:mouseup={() => launchButtonState = 'over'}
-          on:mousedown={() => launchButtonState = 'press'}
-          on:mouseenter={() => launchButtonState = 'over'}
-          on:mouseleave={() => launchButtonState = 'normal'}
-        >
-          <img
-            src={`/images/launch/fun/launch_fun_button_${launchButtonState}.png`}
-            style="position: relative; zoom: 0.56"
-            style:top={launchButtonState === 'press' ? '-97.5px' : '-98px'}
-            draggable="false"
-            alt="Launch Button"
-          >
-        </div>
       </div>
-    {/if}
-  </center>
-  {#if versionIncompatible.length > 0 || versionPossiblyCompatible.length > 0 || reportedIncompatible.length > 0 || reportedPossiblyCompatible.length > 0}
-    <Tooltip surface$class="max-w-lg text-base">
-      You have:
-      <ul class="list-disc pl-5">
-        {#if versionIncompatible.length > 0}
-          <li>
-            { versionIncompatible.length } incompatible mod{ versionIncompatible.length > 1 ? 's' : '' } which will either not load or crash your game
-          </li>
-        {/if}
-        {#if reportedIncompatible.length > 0}
-          <li>
-            { reportedIncompatible.length } mod{ reportedIncompatible.length > 1 ? 's' : '' } that { reportedIncompatible.length > 1 ? 'are' : 'is' } reported as Broken on this game version.
-            Read the mod{ reportedIncompatible.length > 1 ? 's\'' : '\'s' } description or compatibility notes for more information.
-          </li>
-        {/if}
-        {#if versionPossiblyCompatible.length > 0}
-          <li>
-            { versionPossiblyCompatible.length } mod{ versionPossiblyCompatible.length > 1 ? 's' : '' }
-            that { versionPossiblyCompatible.length > 1 ? 'are' : 'is' } likely incompatible with your game
-          </li>
-        {/if}
-        {#if reportedPossiblyCompatible.length > 0}
-          <li>
-            { reportedPossiblyCompatible.length } mod{ reportedPossiblyCompatible.length > 1 ? 's' : '' }
-            that { reportedPossiblyCompatible.length > 1 ? 'are' : 'is' } reported as Damaged on this game version.
-            Read the mod{ reportedPossiblyCompatible.length > 1 ? 's\'' : '\'s' } description or compatibility notes for more information.
-          </li>
-        {/if}
-      </ul>
-      Are you sure you want to launch?
-    </Tooltip>
-  {:else if areOperationsQueued}
-    <Tooltip surface$class="max-w-lg text-base">
-      Changes have not yet been made to your mod files. Click the button above to apply the changes you have queued.<br/><br/>(You're in Queue "Start manually" mode)
-    </Tooltip>
-  {:else if $isGameRunning}
-    <Tooltip surface$class="max-w-lg text-base">
-      Your game launcher is reporting that the game is already running (or still in the process of closing).
-    </Tooltip>
-  {:else if $isLaunchingGame}
-    <Tooltip surface$class="max-w-lg text-base">
-      Launch in progress...
-    </Tooltip>
-  {:else if !!$progress}
-    <Tooltip surface$class="max-w-lg text-base">
-      An operation is already in progress.
-    </Tooltip>
-  {:else if !isInstallLaunchable}
-    <Tooltip surface$class="max-w-lg text-base">
-      The Mod Manager is not capable of launching this install type, but it will still manage the mod files for you. Launch Satisfactory using your usual game launcher.
-    </Tooltip>
-  {:else}
-    <Tooltip surface$class="max-w-lg text-base">
-      You're ready to rumble!<br/><br/>Note: The Mod Manager has already finished installing the mod files for you. You could launch the game using your usual game launcher and mods would still be loaded.
-    </Tooltip>
+        
+    </div>
+  {:else if $launchButton === 'button' }
+    <!-- FIXME: keyboard navigation isn't allowing pressing this button with enter/space -->
+    <div
+      style="height: 50px"
+      role="button"
+      tabindex="0"
+      on:keydown={launchButtonPressed}
+    >
+      <img
+        src="/images/launch/fun/launch_fun.png"
+        draggable="false"
+        alt="Launch Button Background"
+      >
+      <!-- Keyboard interactions for the button are defined in the overall div -->
+      <!-- svelte-ignore a11y-no-static-element-interactions -->
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <div
+        on:click={launchButtonPressed}
+        on:mouseup={() => launchButtonState = 'over'}
+        on:mousedown={() => launchButtonState = 'press'}
+        on:mouseenter={() => launchButtonState = 'over'}
+        on:mouseleave={() => launchButtonState = 'normal'}
+      >
+        <img
+          src={`/images/launch/fun/launch_fun_button_${launchButtonState}.png`}
+          style="position: relative; zoom: 0.56"
+          style:top={launchButtonState === 'press' ? '-97.5px' : '-98px'}
+          draggable="false"
+          alt="Launch Button"
+        >
+      </div>
+    </div>
   {/if}
-</Wrapper>
+</center>
+<Tooltip {popupId}>
+  {#if versionIncompatible.length > 0 || versionPossiblyCompatible.length > 0 || reportedIncompatible.length > 0 || reportedPossiblyCompatible.length > 0}
+    <span>You have:</span>
+    <ul class="list-disc pl-5">
+      {#if versionIncompatible.length > 0}
+        <li>
+          <span>
+            { versionIncompatible.length } incompatible mod{ versionIncompatible.length > 1 ? 's' : '' } which will either not load or crash your game
+          </span>
+        </li>
+      {/if}
+      {#if reportedIncompatible.length > 0}
+        <li>
+          <span>
+            { reportedIncompatible.length } mod{ reportedIncompatible.length > 1 ? 's' : '' } that { reportedIncompatible.length > 1 ? 'are' : 'is' } reported as Broken on this game version. Read the mod{ reportedIncompatible.length > 1 ? 's\'' : '\'s' } description or compatibility notes for more information.
+          </span>
+        </li>
+      {/if}
+      {#if versionPossiblyCompatible.length > 0}
+        <li>
+          <span>
+            { versionPossiblyCompatible.length } mod{ versionPossiblyCompatible.length > 1 ? 's' : '' } that { versionPossiblyCompatible.length > 1 ? 'are' : 'is' } likely incompatible with your game
+          </span>
+        </li>
+      {/if}
+      {#if reportedPossiblyCompatible.length > 0}
+        <li>
+          <span>
+            { reportedPossiblyCompatible.length } mod{ reportedPossiblyCompatible.length > 1 ? 's' : '' } that { reportedPossiblyCompatible.length > 1 ? 'are' : 'is' } reported as Damaged on this game version. Read the mod{ reportedPossiblyCompatible.length > 1 ? 's\'' : '\'s' } description or compatibility notes for more information.
+          </span>
+        </li>
+      {/if}
+    </ul>
+    <span>Are you sure you want to launch?</span>
+  {:else if areOperationsQueued}
+    <span>Changes have not yet been made to your mod files. Click the button above to apply the changes you have queued.<br/><br/>(You're in Queue "Start manually" mode)</span>
+  {:else if $isGameRunning}
+    <span>Your game launcher is reporting that the game is already running (or still in the process of closing).</span>
+  {:else if $isLaunchingGame}
+    <span>Launch in progress...</span>
+  {:else if !!$progress}
+    <span>An operation is already in progress.</span>
+  {:else if !isInstallLaunchable}
+    <span>The Mod Manager is not capable of launching this install type, but it will still manage the mod files for you. Launch Satisfactory using your usual game launcher.</span>
+  {:else}
+    <span>You're ready to rumble!<br/><br/>Note: The Mod Manager has already finished installing the mod files for you. You could launch the game using your usual game launcher and mods would still be loaded.</span>
+  {/if}
+</Tooltip>
