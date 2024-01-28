@@ -43,18 +43,20 @@
   }
 
   function onScroll() {
+    const { scrollTop } = viewport;
+
     updateHeightMap();
 
     
     let height = 0;
     let newStart = 0;
-    while(newStart < items.length && height + heightMap[newStart] < viewport.scrollTop) {
+    while(newStart < items.length && height + heightMap[newStart] < scrollTop) {
       height += heightMap[newStart];
       newStart++;
     }
 
     let newEnd = newStart;
-    while(newEnd < items.length && height < viewport.scrollTop + viewport.clientHeight) {
+    while(newEnd < items.length && height < scrollTop + viewport.clientHeight) {
       height += heightMap[newStart];
       newEnd++;
     }
@@ -62,9 +64,19 @@
     newStart = Math.max(newStart - bench, 0);
     newEnd = Math.min(newEnd + bench, items.length);
 
+    const old_start = start;
+
     start = newStart;
     end = newEnd;
-  }
+    
+    // prevent jumping if we scrolled up
+    // this became an issue when using using skeleton popups as tooltips,
+    // specifically when calling window.getComputedStyle(tooltipElement).<anyPropertyHere>
+    // I have no idea why that causes this issue
+    if (start < old_start) {
+      await tick();
+      viewport.scrollTo({ top: scrollTop, behavior: 'instant' });
+    }
 </script>
 
 <div
