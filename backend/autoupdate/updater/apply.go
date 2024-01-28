@@ -1,4 +1,4 @@
-package apply
+package updater
 
 import "io"
 

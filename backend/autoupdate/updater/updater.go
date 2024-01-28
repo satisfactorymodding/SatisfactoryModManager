@@ -2,9 +2,6 @@ package updater
 
 import (
 	"sync"
-
-	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate/updater/apply"
-	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate/updater/source"
 )
 
 type Updater struct {
@@ -20,8 +17,8 @@ type PendingUpdate struct {
 }
 
 type Config struct {
-	Source                   source.Source
-	Apply                    apply.Apply
+	Source                   Source
+	Apply                    Apply
 	CurrentVersion           string
 	UpdateFoundCallback      func(latestVersion string, changelogs map[string]string)
 	DownloadProgressCallback func(bytesDownloaded, totalBytes int64)
@@ -32,4 +29,8 @@ func MakeUpdater(config Config) *Updater {
 	return &Updater{
 		config: config,
 	}
+}
+
+func (u *Updater) OnExit(restart bool) error {
+	return u.config.Apply.OnExit(restart)
 }

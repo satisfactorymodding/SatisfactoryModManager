@@ -6,30 +6,29 @@ import (
 
 	"github.com/spf13/viper"
 
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate/source/github"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate/updater"
-	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate/updater/apply"
-	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate/updater/source/github"
 )
 
-var (
-	Updater     *updater.Updater
-	updateApply apply.Apply
-	releaseFile string
-)
+var Updater *updater.Updater
+
+var checkStarted bool
 
 func Init(config Config) {
-	releaseFile, updateApply = getInstallType()
+	updateType := getUpdateType()
+	if updateType == nil {
+		// No updater for this build type
+		return
+	}
 	Updater = updater.MakeUpdater(updater.Config{
-		Source:                   github.MakeGithubProvider(viper.GetString("github-release-repo"), releaseFile),
-		Apply:                    updateApply,
+		Source:                   github.MakeGithubProvider(viper.GetString("github-release-repo"), updateType.ArtifactName),
+		Apply:                    updateType.Apply,
 		CurrentVersion:           viper.GetString("version"),
 		UpdateFoundCallback:      config.UpdateFoundCallback,
 		DownloadProgressCallback: config.DownloadProgressCallback,
 		UpdateReadyCallback:      config.UpdateReadyCallback,
 	})
 }
-
-var checkStarted bool
 
 func CheckInterval(interval time.Duration) {
 	if checkStarted {
@@ -52,6 +51,10 @@ func CheckInterval(interval time.Duration) {
 }
 
 func OnExit(restart bool) error {
+	if Updater == nil {
+		// No updater for this build type
+		return nil
+	}
 	if Updater.PendingUpdate == nil {
 		if restart {
 			slog.Warn("restart requested but no update is present. exiting anyway")
@@ -69,7 +72,7 @@ func OnExit(restart bool) error {
 			}
 		}
 	}
-	return updateApply.OnExit(restart)
+	return Updater.OnExit(restart)
 }
 
 type Config struct {
