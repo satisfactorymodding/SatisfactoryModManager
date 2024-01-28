@@ -2,7 +2,7 @@ query GetChangelog($modReference: ModReference!) {
   getModByReference(modReference: $modReference) {
     ...ModKey
     name
-    versions {
+    versions(filter: { limit: 100 }) {
       id
       version
       changelog
