@@ -281,10 +281,13 @@ func (f *FicsitCLI) ImportProfile(name string, file string) error {
 
 	profile.Mods = exportedProfile.Profile.Mods
 
+	currentProfile := selectedInstallation.Profile
+
 	_ = selectedInstallation.SetProfile(f.ficsitCli, name)
 
 	err = selectedInstallation.WriteLockFile(f.ficsitCli, &exportedProfile.LockFile)
 	if err != nil {
+		_ = selectedInstallation.SetProfile(f.ficsitCli, currentProfile)
 		_ = f.ficsitCli.Profiles.DeleteProfile(name)
 		l.Error("failed to write lockfile", slog.Any("error", err))
 		return errors.Wrap(err, "failed to write profile")
