@@ -2,7 +2,7 @@
   import { mdiMenuDown } from '@mdi/js';
   import { popup, type PopupSettings, ListBox, ListBoxItem } from '@skeletonlabs/skeleton';
   import type { SizeOptions } from '@floating-ui/dom';
-  import { createEventDispatcher, type EventDispatcher } from 'svelte';
+  import { createEventDispatcher } from 'svelte';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
 
