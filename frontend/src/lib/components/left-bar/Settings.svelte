@@ -1,10 +1,8 @@
 <script lang="ts">
-  import Menu, { SelectionGroup, SelectionGroupIcon } from '@smui/menu';
-  import List, { Item, PrimaryText, Text, Separator } from '@smui/list';
   import { mdiBug, mdiCheck, mdiChevronRight, mdiClipboard, mdiCog, mdiDownload, mdiFolderEdit, mdiTune } from '@mdi/js';
   import { getContextClient } from '@urql/svelte';
-  import { getModalStore } from '@skeletonlabs/skeleton';
-
+  import { getModalStore, popup, type PopupSettings , ListBox, ListBoxItem } from '@skeletonlabs/skeleton';
+  
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { GenerateDebugInfo } from '$wailsjs/go/bindings/DebugInfo';
   import { startView, konami, launchButton, queueAutoStart, offline, updateCheckMode } from '$lib/store/settingsStore';
@@ -15,8 +13,25 @@
 
   const modalStore = getModalStore();
 
-  let settingsMenu: Menu;
-  let startViewMenu: Menu;
+  const settingsMenu = {
+    event: 'click',
+    target: 'settings-menu',
+    middleware: {
+      offset: 4,
+    },
+    placement: 'right-start',
+    closeQuery: '[data-popup="settings-menu"] li:not([data-noclose]):not(.section-header)',
+  } satisfies PopupSettings;
+
+  const startViewMenu = {
+    event: 'click',
+    target: 'start-view-menu',
+    middleware: {
+      offset: 4,
+    },
+    placement: 'right-start',
+    closeQuery: '[data-popup="start-view-menu"] .listbox-item',
+  } satisfies PopupSettings;
 
   let views: {id: ViewType, name: string}[] = [
     {
@@ -29,7 +44,15 @@
     },
   ];
 
-  let updateCheckModeMenu: Menu;
+  const updateCheckModeMenu = {
+    event: 'click',
+    target: 'update-check-mode-menu',
+    middleware: {
+      offset: 4,
+    },
+    placement: 'right-start',
+    closeQuery: '[data-popup="update-check-mode-menu"] .listbox-item',
+  } satisfies PopupSettings;
 
   let updateCheckModes: {id: 'launch'|'exit'|'ask', name: string}[] = [
     {
@@ -46,7 +69,15 @@
     },
   ];
 
-  let queueModeMenu: Menu;
+  const queueModeMenu = {
+    event: 'click',
+    target: 'queue-mode-menu',
+    middleware: {
+      offset: 4,
+    },
+    placement: 'right-start',
+    closeQuery: '[data-popup="queue-mode-menu"] .listbox-item',
+  } satisfies PopupSettings;
 
   let queueModes: {id: boolean, name: string}[] = [
     {
@@ -59,7 +90,15 @@
     },
   ];
 
-  let launchButtonMenu: Menu;
+  const launchButtonMenu = {
+    event: 'click',
+    target: 'launch-button-menu',
+    middleware: {
+      offset: 4,
+    },
+    placement: 'right-start',
+    closeQuery: '[data-popup="launch-button-menu"] .listbox-item',
+  } satisfies PopupSettings;
 
   let launchButtons: {id: LaunchButtonType, name: string}[] = [
     {
@@ -121,202 +160,230 @@
 </script>
 
 <div class="settings-menu">
-  <button
-    class="btn px-4 h-8 w-full text-sm bg-surface-200-700-token"
-    on:click={() => settingsMenu.setOpen(true)}>
-    <span>Mod Manager Settings</span>
-    <div class="grow" />
-    <SvgIcon
-      class="h-5 w-5"
-      icon={mdiTune} />
-  </button>
-  <Menu bind:this={settingsMenu} class="w-full max-h-[32rem] overflow-visible" anchorCorner="TOP_RIGHT">
-    <List on:SMUIList:action={(e) => { e.stopPropagation(); }}>
-      <Item nonInteractive>
-        <SvgIcon icon={mdiBug} class="h-5 w-5" />
-        <!-- <div class="w-7"/> -->
-        <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
-          <PrimaryText class="text-base">Debug</PrimaryText>
-        </Text>
-        <div class="grow" />
-      </Item>
-      <Separator insetLeading insetTrailing />
-      <Item on:SMUI:action={() => GenerateDebugInfo()}>
-        <div class="w-7"/>
-        <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
-          <PrimaryText class="text-base">Generate debug info</PrimaryText>
-        </Text>
-        <div class="grow" />
-        <SvgIcon icon={mdiDownload} class="h-5 w-5" />
-      </Item>
-      <Separator insetLeading insetTrailing insetPadding />
-      <Item on:SMUI:action={() => copyModList()}>
-        <div class="w-7"/>
-        <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
-          <PrimaryText class="text-base">Copy mods list</PrimaryText>
-        </Text>
-        <div class="grow" />
-        <SvgIcon icon={mdiClipboard} class="h-5 w-5" />
-      </Item>
-      <Separator insetLeading insetTrailing insetPadding />
-      <Item nonInteractive>
-        <SvgIcon icon={mdiCog} class="h-5 w-5" />
-        <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
-          <PrimaryText class="text-base">Settings</PrimaryText>
-        </Text>
-        <div class="grow" />
-      </Item>
-      <Separator insetLeading insetTrailing />
-      <div>
-        <Item on:SMUI:action={() => updateCheckModeMenu.setOpen(true)}>
-          <div class="w-7"/>
-          <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
-            <PrimaryText class="text-base">Update check</PrimaryText>
-          </Text>
-          <div class="grow" />
-          <Text class="pr-2 h-full flex flex-col content-center mb-1.5">
-            <PrimaryText class="text-base">{updateCheckModes.find((v) => v.id === $updateCheckMode)?.name ?? ''}</PrimaryText>
-          </Text>
-          <SvgIcon icon={mdiChevronRight} class="h-5 w-5" />
-        </Item>
-        <Menu bind:this={updateCheckModeMenu} class="w-full max-h-[32rem] overflow-visible" anchorCorner="TOP_RIGHT">
-          <List>
-            <SelectionGroup>
-              {#each updateCheckModes as mode}
-                <Item
-                  on:SMUI:action={() => ($updateCheckMode = mode.id)}
-                  selected={$updateCheckMode === mode.id}
-                >
-                  <SelectionGroupIcon>
-                    <SvgIcon icon={mdiCheck} class="h-5 w-5" />
-                  </SelectionGroupIcon>
-                  <Text>{mode.name}</Text>
-                </Item>
-              {/each}
-            </SelectionGroup>
-          </List>
-        </Menu>
-      </div>
-      <Separator insetLeading insetTrailing insetPadding />
-      <div>
-        <Item on:SMUI:action={() => queueModeMenu.setOpen(true)}>
-          <div class="w-7"/>
-          <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
-            <PrimaryText class="text-base">Queue</PrimaryText>
-          </Text>
-          <div class="grow" />
-          <Text class="pr-2 h-full flex flex-col content-center mb-1.5">
-            <PrimaryText class="text-base">{queueModes.find((v) => v.id === $queueAutoStart)?.name ?? ''}</PrimaryText>
-          </Text>
-          <SvgIcon icon={mdiChevronRight} class="h-5 w-5" />
-        </Item>
-        <Menu bind:this={queueModeMenu} class="w-full max-h-[32rem] overflow-visible" anchorCorner="TOP_RIGHT">
-          <List>
-            <SelectionGroup>
-              {#each queueModes as queueMode}
-                <Item
-                  on:SMUI:action={() => ($queueAutoStart = queueMode.id)}
-                  selected={$queueAutoStart === queueMode.id}
-                >
-                  <SelectionGroupIcon>
-                    <SvgIcon icon={mdiCheck} class="h-5 w-5" />
-                  </SelectionGroupIcon>
-                  <Text>{queueMode.name}</Text>
-                </Item>
-              {/each}
-            </SelectionGroup>
-          </List>
-        </Menu>
-      </div>
-      <Separator insetLeading insetTrailing insetPadding />
-      <div>
-        <Item on:SMUI:action={() => startViewMenu.setOpen(true)}>
-          <div class="w-7"/>
-          <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
-            <PrimaryText class="text-base">Start view</PrimaryText>
-          </Text>
-          <div class="grow" />
-          <Text class="pr-2 h-full flex flex-col content-center mb-1.5">
-            <PrimaryText class="text-base">{views.find((v) => v.id === $startView)?.name ?? ''}</PrimaryText>
-          </Text>
-          <SvgIcon icon={mdiChevronRight} class="h-5 w-5" />
-        </Item>
-        <Menu bind:this={startViewMenu} class="w-full max-h-[32rem] overflow-visible" anchorCorner="TOP_RIGHT">
-          <List>
-            <SelectionGroup>
-              {#each views as view}
-                <Item
-                  on:SMUI:action={() => ($startView = view.id)}
-                  selected={$startView === view.id}
-                >
-                  <SelectionGroupIcon>
-                    <SvgIcon icon={mdiCheck} class="h-5 w-5" />
-                  </SelectionGroupIcon>
-                  <Text>{view.name}</Text>
-                </Item>
-              {/each}
-            </SelectionGroup>
-          </List>
-        </Menu>
-      </div>
-      <Separator insetLeading insetTrailing insetPadding />
-      <Item on:SMUI:action={() => { modalStore.trigger({ type: 'component', component: 'cacheLocationPicker' }); settingsMenu.setOpen(false); } }>
-        <div class="w-7"/>
-        <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
-          <PrimaryText class="text-base">Change cache location</PrimaryText>
-        </Text>
-        <div class="grow" />
-        <SvgIcon icon={mdiFolderEdit} class="h-5 w-5" />
-      </Item>
-      <Separator insetLeading insetTrailing insetPadding />
-      <Item on:SMUI:action={() => { $offline = !$offline; settingsMenu.setOpen(false); }}>
-        <div class="w-7"/>
-        <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
-          <PrimaryText class="text-base">Go { $offline ? 'Online' : 'Offline' }</PrimaryText>
-        </Text>
-      </Item>
+  <div use:popup={settingsMenu} class="w-full h-8">
+    <button
+      class="btn px-4 h-full w-full text-sm bg-surface-200-700-token"
+    >
+      <span>Mod Manager Settings</span>
+      <div class="grow" />
+      <SvgIcon
+        class="h-5 w-5"
+        icon={mdiTune} />
+    </button>
+  </div>
+  <!-- #if gets executed before lower elements are added to the dom, so we have the submenus before to ensure they exist when use:popup is called-->
+  <div class="card shadow-xl w-48 z-10 duration-0 overflow-y-auto" data-popup="update-check-mode-menu">
+    <!-- 
+    Skeleton's popup close function waits for the tranistion duration...
+    before actually triggering the transition...
+    So we'll just not have a transition...
+    -->
+    <ul class="menu">
+      <ListBox class="w-full" rounded="rounded-none" spacing="space-y-0">
+        {#each updateCheckModes as item}
+          <ListBoxItem bind:group={$updateCheckMode} name="update-check-mode" value={item.id} class="bg-surface-50-900-token" active="">
+            {item.name}
+            <span class="h-5 w-5 block" slot="trail">
+              {#if $updateCheckMode === item.id}
+                <SvgIcon icon={mdiCheck} class="h-full w-full"/>
+              {/if}
+            </span>
+          </ListBoxItem>
+        {/each}
+      </ListBox>
+    </ul>
+  </div>
+  <div class="card shadow-xl w-56 z-10 duration-0 overflow-y-auto" data-popup="queue-mode-menu">
+    <!-- 
+    Skeleton's popup close function waits for the tranistion duration...
+    before actually triggering the transition...
+    So we'll just not have a transition...
+    -->
+    <ul class="menu">
+      <ListBox class="w-full" rounded="rounded-none" spacing="space-y-0">
+        {#each queueModes as item}
+          <ListBoxItem bind:group={$queueAutoStart} name="update-check-mode" value={item.id} class="bg-surface-50-900-token" active="">
+            {item.name}
+            <span class="h-5 w-5 block" slot="trail">
+              {#if $queueAutoStart === item.id}
+                <SvgIcon icon={mdiCheck} class="h-full w-full"/>
+              {/if}
+            </span>
+          </ListBoxItem>
+        {/each}
+      </ListBox>
+    </ul>
+  </div>
+  <div class="card shadow-xl w-48 z-10 duration-0 overflow-y-auto" data-popup="start-view-menu">
+    <!-- 
+    Skeleton's popup close function waits for the tranistion duration...
+    before actually triggering the transition...
+    So we'll just not have a transition...
+    -->
+    <ul class="menu">
+      <ListBox class="w-full" rounded="rounded-none" spacing="space-y-0">
+        {#each views as item}
+          <ListBoxItem bind:group={$startView} name="update-check-mode" value={item.id} class="bg-surface-50-900-token" active="">
+            {item.name}
+            <span class="h-5 w-5 block" slot="trail">
+              {#if $startView === item.id}
+                <SvgIcon icon={mdiCheck} class="h-full w-full"/>
+              {/if}
+            </span>
+          </ListBoxItem>
+        {/each}
+      </ListBox>
+    </ul>
+  </div>
+  <div class="card shadow-xl w-48 z-10 duration-0 overflow-y-auto" data-popup="launch-button-menu">
+    <!-- 
+    Skeleton's popup close function waits for the tranistion duration...
+    before actually triggering the transition...
+    So we'll just not have a transition...
+    -->
+    <ul class="menu">
+      <ListBox class="w-full" rounded="rounded-none" spacing="space-y-0">
+        {#each launchButtons as item}
+          <ListBoxItem bind:group={$launchButton} name="update-check-mode" value={item.id} class="bg-surface-50-900-token" active="">
+            {item.name}
+            <span class="h-5 w-5 block" slot="trail">
+              {#if $launchButton === item.id}
+                <SvgIcon icon={mdiCheck} class="h-full w-full"/>
+              {/if}
+            </span>
+          </ListBoxItem>
+        {/each}
+      </ListBox>
+    </ul>
+  </div>
+
+  <!-- main settings menu starts here -->
+  <div class="card shadow-xl z-10 duration-0 overflow-y-auto py-2" data-popup="settings-menu">
+    <!-- 
+    Skeleton's popup close function waits for the tranistion duration...
+    before actually triggering the transition...
+    So we'll just not have a transition...
+    -->
+    <ul class="menu">
+      <li class="section-header">
+        <span class="h-5 w-5"><SvgIcon icon={mdiBug} class="h-full w-full"/></span>
+        <span class="flex-auto">Debug</span>
+      </li>
+      <hr class="divider" />
+      <li>
+        <button on:click={() => GenerateDebugInfo()}>
+          <span class="h-5 w-5"></span>
+          <span class="flex-auto">Generate debug info</span>
+          <span class="h-5 w-5"><SvgIcon icon={mdiDownload} class="h-full w-full"/></span>
+        </button>
+      </li>
+      <hr class="divider" />
+      <li>
+        <button on:click={() => copyModList()}>
+          <span class="h-5 w-5"></span>
+          <span class="flex-auto">Copy mod list</span>
+          <span class="h-5 w-5"><SvgIcon icon={mdiClipboard} class="h-full w-full"/></span>
+        </button>
+      </li>
+      <hr class="divider" />
+      <li class="section-header">
+        <span class="h-5 w-5"><SvgIcon icon={mdiCog} class="h-full w-full"/></span>
+        <span class="flex-auto">Settings</span>
+      </li>
+      <hr class="divider" />
+      <li use:popup={updateCheckModeMenu} data-noclose>
+        <button>
+          <span class="h-5 w-5"></span>
+          <span class="flex-auto">Update check</span>
+          <span>{updateCheckModes.find((m) => m.id === $updateCheckMode)?.name}</span>
+          <span class="h-5 w-5">
+            <SvgIcon icon={mdiChevronRight} class="h-full w-full"/>
+          </span>
+        </button>
+      </li>
+      <hr class="divider" />
+      <li use:popup={queueModeMenu} data-noclose>
+        <button>
+          <span class="h-5 w-5"></span>
+          <span class="flex-auto">Queue</span>
+          <span>{queueModes.find((m) => m.id === $queueAutoStart)?.name}</span>
+          <span class="h-5 w-5">
+            <SvgIcon icon={mdiChevronRight} class="h-full w-full"/>
+          </span>
+        </button>
+      </li>
+      <hr class="divider" />
+      <li use:popup={startViewMenu} data-noclose>
+        <button>
+          <span class="h-5 w-5"></span>
+          <span class="flex-auto">Start view</span>
+          <span>{views.find((m) => m.id === $startView)?.name}</span>
+          <span class="h-5 w-5">
+            <SvgIcon icon={mdiChevronRight} class="h-full w-full"/>
+          </span>
+        </button>
+      </li>
+      <hr class="divider" />
+      <li>
+        <button on:click={() => modalStore.trigger({ type: 'component', component: 'cacheLocationPicker' })}>
+          <span class="h-5 w-5"></span>
+          <span class="flex-auto">Change cache location</span>
+          <span class="h-5 w-5"><SvgIcon icon={mdiFolderEdit} class="h-full w-full"/></span>
+        </button>
+      </li>
+      <hr class="divider" />
+      <li>
+        <button on:click={() => { $offline = !$offline; }}>
+          <span class="h-5 w-5"></span>
+          <span class="flex-auto">Go {$offline ? 'online' : 'offline'}</span>
+          <span class="h-5 w-5"></span>
+        </button>
+      </li>
       {#if $konami}
-        <Separator insetLeading insetTrailing insetPadding />
-        <Item nonInteractive>
-          <SvgIcon icon={mdiCog} class="h-5 w-5" />
-          <!-- <div class="w-7"/> -->
-          <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
-            <PrimaryText class="text-base">Secret settings</PrimaryText>
-          </Text>
-          <div class="grow" />
-        </Item>
-        <Separator insetLeading insetTrailing />
-        <div>
-          <Item on:SMUI:action={() => launchButtonMenu.setOpen(true)}>
-            <div class="w-7"/>
-            <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
-              <PrimaryText class="text-base">Launch button</PrimaryText>
-            </Text>
-            <div class="grow" />
-            <Text class="pr-2 h-full flex flex-col content-center mb-1.5">
-              <PrimaryText class="text-base">{launchButtons.find((l) => l.id === $launchButton)?.name ?? ''}</PrimaryText>
-            </Text>
-            <SvgIcon icon={mdiChevronRight} class="h-5 w-5" />
-          </Item>
-          <Menu bind:this={launchButtonMenu} class="w-full max-h-[32rem] overflow-visible" anchorCorner="TOP_RIGHT">
-            <List>
-              <SelectionGroup>
-                {#each launchButtons as launch}
-                  <Item
-                    on:SMUI:action={() => ($launchButton = launch.id)}
-                    selected={$launchButton === launch.id}
-                  >
-                    <SelectionGroupIcon>
-                      <SvgIcon icon={mdiCheck} class="h-5 w-5" />
-                    </SelectionGroupIcon>
-                    <Text>{launch.name}</Text>
-                  </Item>
-                {/each}
-              </SelectionGroup>
-            </List>
-          </Menu>
-        </div>
+        <hr class="divider" />
+        <li class="section-header">
+          <span class="h-5 w-5"><SvgIcon icon={mdiCog} class="h-full w-full"/></span>
+          <span class="flex-auto">Secret settings</span>
+        </li>
+        <hr class="divider" />
+        <li use:popup={launchButtonMenu} data-noclose>
+          <button>
+            <span class="h-5 w-5"></span>
+            <span class="flex-auto">Launch button</span>
+            <span>{launchButtons.find((l) => l.id === $launchButton)?.name ?? ''}</span>
+            <span class="h-5 w-5">
+              <SvgIcon icon={mdiChevronRight} class="h-full w-full"/>
+            </span>
+          </button>
+        </li>
       {/if}
-    </List>
-  </Menu>
+    </ul>
+  </div>
 </div>
+
+<style lang="postcss">
+  .menu {
+    @apply list;
+    > li {
+      @apply h-10
+    }
+    > hr.divider {
+      @apply border-surface-50 border-opacity-20 mr-4;
+    }
+    > .section-header {
+      @apply pl-4;
+      + hr.divider {
+        @apply ml-4;
+      }
+    }
+    > :not(.section-header) + hr.divider {
+      @apply ml-[3.25rem];
+    }
+    > :not(.section-header) > button {
+      @apply btn px-4 w-full space-x-4 text-left;
+      &:active {
+        @apply bg-surface-400;
+      }
+    }
+  }
+</style>

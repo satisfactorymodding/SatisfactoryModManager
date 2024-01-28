@@ -1,11 +1,9 @@
 <script lang="ts">
   import { getContextClient, queryStore } from '@urql/svelte';
-  import Checkbox from '@smui/checkbox';
   import { mdiCheck, mdiChevronDown, mdiImport, mdiRocketLaunch, mdiTestTube, mdiWeb } from '@mdi/js';
-  import Menu from '@smui/menu';
-  import List, { Item, PrimaryText, SecondaryText, Separator, Text } from '@smui/list';
-  import { minVersion, valid, validRange, sort, coerce, SemVer, parse } from 'semver';
+  import { minVersion, validRange, sort, coerce, SemVer, parse } from 'semver';
   import { popup, type PopupSettings, getModalStore } from '@skeletonlabs/skeleton';
+  import type { SizeOptions } from '@floating-ui/dom';
 
   import ModChangelog from '../modals/ModChangelog.svelte';
 
@@ -149,12 +147,6 @@
     return '';
   }
 
-  let authorsMenu: Menu;
-
-  let versionsMenu: Menu;
-  
-  let changelogsMenu: Menu;
-
   $: manifestVersion = mod && $manifestMods[mod.mod_reference]?.version;
   async function installVersion(version: string | null) {
     if(!mod) {
@@ -262,6 +254,60 @@
     },
     placement: 'bottom',
   } satisfies PopupSettings;
+
+  const authorsMenuPopupId = 'mod-details-authors-menu';
+
+  const authorsMenu = {
+    event: 'click',
+    target: authorsMenuPopupId,
+    middleware: {
+      offset: 4,
+      size: {
+        apply({ availableHeight, elements }) {
+          Object.assign(elements.floating.style, {
+            maxHeight: `${availableHeight * 0.8}px`,
+          });
+        },
+      } as SizeOptions,
+    },
+    placement: 'bottom',
+  } satisfies PopupSettings;
+
+  const changeVersionMenuPopupId = 'mod-details-change-version-menu';
+
+  const changeVersionMenu = {
+    event: 'click',
+    target: changeVersionMenuPopupId,
+    middleware: {
+      offset: 4,
+      size: {
+        apply({ availableHeight, elements }) {
+          Object.assign(elements.floating.style, {
+            maxHeight: `${availableHeight * 0.8}px`,
+          });
+        },
+      } as SizeOptions,
+    },
+    placement: 'bottom',
+  } satisfies PopupSettings;
+
+  const changelogMenuPopupId = 'mod-details-changelog-menu';
+
+  const changelogMenu = {
+    event: 'click',
+    target: changelogMenuPopupId,
+    middleware: {
+      offset: 4,
+      size: {
+        apply({ availableHeight, elements }) {
+          Object.assign(elements.floating.style, {
+            maxHeight: `${availableHeight * 0.8}px`,
+          });
+        },
+      } as SizeOptions,
+    },
+    placement: 'bottom',
+  } satisfies PopupSettings;
 </script>
 
 <div class="@container/mod-details h-full flex mods-details w-full  @3xl/mod-details:text-base text-sm">
@@ -271,28 +317,38 @@
     <span class="pt-2 font-light">A mod by:</span>
     <span bind:this={focusOnEntry} class="font-medium color-primary cursor-pointer" role="button" tabindex="0" on:click={authorClick} on:keypress={authorClick} >{author ?? 'Loading...'}</span>
     
-    <div class="pt-2" on:mouseenter={() => authorsMenu.setOpen(true)} on:mouseleave={() => authorsMenu.setOpen(false)} role="listbox" tabindex="0">
+    <div class="pt-2" use:popup={authorsMenu}>
       <button class="btn px-4 h-10 text-sm w-full bg-secondary-600">
         <span class="whitespace-break-spaces">Contributors <span class="color-primary">({mod?.authors.length ?? 0})</span></span>
         <SvgIcon
           class="h-5 w-5"
           icon={mdiChevronDown}/>
       </button>
-      <Menu bind:this={authorsMenu} class="w-full max-h-[32rem]" anchorCorner="BOTTOM_LEFT">
-        <List>
-          {#each mod?.authors ?? [] as author}
-            <Item style="height: 80px" on:SMUI:action={() => $search = `author:"${author.user.username}"`}>
-              {#if 'avatar' in author.user}
-                <img src={author.user.avatar} alt="{author.user.username} Avatar" class="rounded-full w-12 h-12" />
-              {/if}
-              <Text class="pl-2 h-full flex flex-col content-center -mb-4">
-                <PrimaryText class="text-base">{author.user.username}</PrimaryText>
-                <SecondaryText class="text-base">{author.role}</SecondaryText>
-              </Text>
-            </Item>
-          {/each}
-        </List>
-      </Menu>
+    </div>
+    <div class="card shadow-xl min-w-[11rem] z-10 duration-0 overflow-y-auto" data-popup={authorsMenuPopupId}>
+      <!-- 
+      Skeleton's popup close function waits for the tranistion duration...
+      before actually triggering the transition...
+      So we'll just not have a transition...
+      -->
+      
+      <ul>
+        {#each mod?.authors ?? [] as author}
+          <li>
+            <button class="btn w-full h-full space-x-4" on:click={() => $search = `author:"${author.user.username}"`}>
+              <div class="h-12 w-12">
+                {#if 'avatar' in author.user}
+                  <img src={author.user.avatar} alt="{author.user.username} Avatar" class="rounded-full w-ful h-full" />
+                {/if}
+              </div>
+              <div class="flex-auto flex flex-col text-left">
+                <span>{author.user.username}</span>
+                <span>{author.role}</span>
+              </div>
+            </button>
+          </li>
+        {/each}
+      </ul>
     </div>
 
     <div class="pt-4">
@@ -350,89 +406,85 @@
     <div class="pt-4">
       <span>Latest version: </span><span class="font-bold">{ latestVersion ?? 'Loading...' }</span><br>
       <span>Installed version: </span><span class="font-bold">{ installedVersion ?? 'Loading...' }</span><br>
-      <div class="pt-2">
+      <div class="pt-2" use:popup={changeVersionMenu}>
         <button
           class="btn px-4 h-10 text-sm w-full bg-secondary-600"
           disabled={!$canModify}
-          on:click={() => $canModify && versionsMenu.setOpen(!versionsMenu.isOpen())}>
+        >
           <span>Change version</span>
           <SvgIcon
             class="h-5 w-5"
             icon={mdiChevronDown}/>
         </button>
-        <Menu bind:this={versionsMenu} class="min-w-[20rem] max-h-[32rem] overflow-x-visible" anchorCorner="TOP_LEFT">
-          <List>
-            <Item on:SMUI:action={() => installVersion(null)} disabled={!$canModify}>
-              {#if manifestVersion === '>=0.0.0'}
-                <SvgIcon icon={mdiCheck} class="h-5 w-5" />
-              {:else}
-                <div class="w-7"/>
-              {/if}
-              <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
-                <PrimaryText class="text-base">Any</PrimaryText>
-              </Text>
-            </Item>
-            {#each mod?.versions ?? [] as version}
-              <Separator insetLeading insetTrailing />
-              <Item on:SMUI:action={() => installVersion(version.version)} disabled={!$canModify}>
-                {#if manifestVersion && validRange(manifestVersion) && minVersion(manifestVersion)?.format() === version.version }
-                  <SvgIcon icon={mdiCheck} class="h-5 w-5" />
-                {:else}
-                  <div class="w-7"/>
+      </div>
+      <div class="card shadow-xl min-w-[11rem] z-10 duration-0 overflow-y-auto" data-popup={changeVersionMenuPopupId}>
+        <!-- 
+        Skeleton's popup close function waits for the tranistion duration...
+        before actually triggering the transition...
+        So we'll just not have a transition...
+        -->
+        
+        <ul>
+          <li>
+            <button class="btn w-full h-full text-left" on:click={() => installVersion(null)}>
+              <div class="w-7 h-7 p-1">
+                {#if manifestVersion === '>=0.0.0'}
+                  <SvgIcon icon={mdiCheck} class="h-full w-full" />
                 {/if}
-                <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
-                  <PrimaryText class="text-base">{version.version}</PrimaryText>
-                </Text>
-                <div class="grow"/>
-                <Text class="pl-2 h-full flex flex-col content-center mb-1.5 shrink-0">
-                  <PrimaryText class="text-base">or newer</PrimaryText>
-                </Text>
-                <div on:click|stopPropagation={() => installVersion(`>=${version.version}`)} on:keypress|stopPropagation={() => installVersion(`>=${version.version}`)} role="button" tabindex="0">
-                  <Checkbox
-                    input$readonly
-                    checked={!!manifestVersion && !!validRange(manifestVersion) && !valid(manifestVersion) && minVersion(manifestVersion)?.format() === version.version}
-                  />
-                </div>
-              </Item>
-              <!-- {#if validRange(manifestVersion) && minVersion(manifestVersion)?.format() === version.version}
-                <Separator insetLeading insetTrailing insetPadding />
-                <Item on:SMUI:action={() => installVersion(`>=${version.version}`)} disabled={!$canModify}>
-                  {#if validRange(manifestVersion) && !valid(manifestVersion) && minVersion(manifestVersion)?.format() === version.version}
-                    <SvgIcon icon={mdiCheck} class="h-5" />
-                  {:else}
-                    <div class="w-7"/>
+              </div>
+              <span class="flex-auto">Any</span>
+            </button>
+          </li>
+          {#each mod?.versions ?? [] as version}
+            <li class="flex">
+              <button class="btn w-full h-full text-left" on:click={() => installVersion(version.version)}>
+                <div class="w-7 h-7 p-1">
+                  {#if manifestVersion === version.version}
+                    <SvgIcon icon={mdiCheck} class="h-full w-full" />
                   {/if}
-                  <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
-                    <PrimaryText class="text-base">{version.version} or newer</PrimaryText>
-                  </Text>
-                </Item>
-              {/if} -->
-            {/each}
-          </List>
-        </Menu>
+                </div>
+                <span class="flex-auto">{version.version}</span>
+              </button>
+              <button class="btn w-full h-full text-left" on:click={() => installVersion(`>=${version.version}`)}>
+                <span class="flex-auto">or newer</span>
+                <div class="w-7 h-7 p-1">
+                  {#if manifestVersion && manifestVersion !== version.version && validRange(manifestVersion) && minVersion(manifestVersion)?.format() === version.version}
+                    <SvgIcon icon={mdiCheck} class="h-full w-full" />
+                  {/if}
+                </div>
+              </button>
+            </li>
+          {/each}
+        </ul>
       </div>
       {#if (!mod || !('offline' in mod)) && !$offline}
-        <div class="pt-2">
+        <div class="pt-2" use:popup={changelogMenu}>
           <button
             class="btn px-4 h-10 text-sm w-full bg-secondary-600"
-            on:click={() => $canModify && changelogsMenu.setOpen(!changelogsMenu.isOpen())}>
+            disabled={!$canModify}
+          >
             <span>Changelogs</span>
             <SvgIcon
               class="h-5 w-5"
               icon={mdiChevronDown}/>
           </button>
-          <Menu bind:this={changelogsMenu} class="min-w-[10rem] max-h-[32rem] overflow-x-visible" anchorCorner="TOP_LEFT">
-            <List>
-              {#each mod?.versions ?? [] as version}
-                <Item on:SMUI:action={() => { modalStore.trigger({ type:'component', component: { ref: ModChangelog, props:{ mod: mod?.mod_reference, versionRange: version.version } } }); changelogsMenu.setOpen(false); }}>
-                  <Text class="pl-2 h-full flex flex-col content-center mb-1.5">
-                    <PrimaryText class="text-base">{version.version}</PrimaryText>
-                  </Text>
-                </Item>
-                <Separator insetLeading insetTrailing />
-              {/each}
-            </List>
-          </Menu>
+        </div>
+        <div class="card shadow-xl min-w-[11rem] z-10 duration-0 overflow-y-auto" data-popup={changelogMenuPopupId}>
+          <!-- 
+          Skeleton's popup close function waits for the tranistion duration...
+          before actually triggering the transition...
+          So we'll just not have a transition...
+          -->
+          
+          <ul>
+            {#each mod?.versions ?? [] as version}
+              <li>
+                <button class="btn w-full h-full" on:click={() => modalStore.trigger({ type:'component', component: { ref: ModChangelog, props:{ mod: mod?.mod_reference, versionRange: version.version } } })}>
+                  <span>{version.version}</span>
+                </button>
+              </li>
+            {/each}
+          </ul>
         </div>
       {/if}
       <div class="pt-2">

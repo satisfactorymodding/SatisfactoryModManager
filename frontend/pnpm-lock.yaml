@@ -283,9 +283,6 @@ devDependencies:
   '@smui/list':
     specifier: 7.0.0-beta.15
     version: 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
-  '@smui/menu':
-    specifier: 7.0.0-beta.15
-    version: 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
   '@smui/menu-surface':
     specifier: 7.0.0-beta.15
     version: 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
@@ -2774,6 +2771,7 @@ packages:
       '@material/rtl': 14.0.0
       '@material/theme': 14.0.0
       tslib: 2.6.2
+    dev: false
 
   /@material/notched-outline@14.0.0:
     resolution: {integrity: sha512-6S58DlWmhCDr4RQF2RuwqANxlmLdHtWy2mF4JQLD9WOiCg4qY9eCQnMXu3Tbhr7f/nOZ0vzc7AtA3vfJoZmCSw==}
@@ -3380,20 +3378,6 @@ packages:
       '@material/animation': 14.0.0
       '@material/menu-surface': 14.0.0
       '@smui/common': 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
-      svelte2tsx: 0.6.27(svelte@4.2.8)(typescript@5.3.3)
-    transitivePeerDependencies:
-      - svelte
-      - typescript
-    dev: true
-
-  /@smui/menu@7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3):
-    resolution: {integrity: sha512-hvw8iRuWvo1Lc1O6MaAtO99vIUQMlheK5vvG046WZlzwuiZMulBvtipc74nhM69BdrTTDAob69xsZXHih3LHVw==}
-    dependencies:
-      '@material/dom': 14.0.0
-      '@material/menu': 14.0.0
-      '@smui/common': 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
-      '@smui/list': 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
-      '@smui/menu-surface': 7.0.0-beta.15(svelte@4.2.8)(typescript@5.3.3)
       svelte2tsx: 0.6.27(svelte@4.2.8)(typescript@5.3.3)
     transitivePeerDependencies:
       - svelte
