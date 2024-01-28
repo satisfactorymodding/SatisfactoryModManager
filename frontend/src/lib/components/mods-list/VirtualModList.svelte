@@ -69,13 +69,13 @@
 
 <div
   bind:this={viewport}
-  on:scroll={onScroll}
   class="relative overflow-y-scroll h-full {clazz}"
+  on:scroll={onScroll}
 >
   <div
     bind:this={container}
-    class={containerClass}
     style="padding-top: {top}px; padding-bottom: {bottom}px;"
+    class={containerClass}
   >
     {#each visibleItems as item (item.index)}
       <div class="overflow-hidden">

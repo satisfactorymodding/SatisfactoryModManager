@@ -117,7 +117,7 @@
 </script>
 
 <!-- the if gets executed before this is added to the DOM for some reason if this is below the ifs, so the use:popup would not find the element -->
-<Tooltip {popupId} disabled={!$offline && !announcements[currentIndex]}>
+<Tooltip disabled={!$offline && !announcements[currentIndex]} {popupId}>
   <!--
     fixed allows the popup to be displayed outside the bounds of the parent
     block opacity-0 ensure that the popup gets a width on first render, otherwise it will be 0px wide and floating-ui will "animate" widening it
@@ -137,18 +137,23 @@
     <Announcement announcement={offlineAnnouncement}>
       <div class="flex pr-2">
         <span>{offlineAnnouncement.message}</span>
-        <span on:click={goOnline} on:keypress={goOnline} role="button" tabindex="0" class="text-yellow-400 font-bold underline cursor-pointer ml-auto">Go Online</span>
+        <span
+          class="text-yellow-400 font-bold underline cursor-pointer ml-auto"
+          role="button"
+          tabindex="0"
+          on:click={goOnline}
+          on:keypress={goOnline}>Go Online</span>
       </div>
     </Announcement>
   </div>
 {:else if announcements.length > 0}
   <div class="w-full" role="alert" use:popup={popupHover}>
     <Carousel
-      autoplayDuration={hovered ? 1e100 : 5000}
-      duration={300}
-      autoplay={!hovered && announcements.length > 1}
-      dots={false}
       arrows={false}
+      autoplay={!hovered && announcements.length > 1}
+      autoplayDuration={hovered ? 1e100 : 5000}
+      dots={false}
+      duration={300}
       swiping={false}
       on:pageChange={pageChange}
     >
@@ -159,7 +164,12 @@
               {#if announcement.id === '__healthcheck__'}
                 <div class="flex pr-2">
                   <span>{announcement.message}</span>
-                  <span on:click={goOffline} on:keypress={goOffline} role="button" tabindex="0" class="text-yellow-400 font-bold underline cursor-pointer ml-auto">Go Offline</span>
+                  <span
+                    class="text-yellow-400 font-bold underline cursor-pointer ml-auto"
+                    role="button"
+                    tabindex="0"
+                    on:click={goOffline}
+                    on:keypress={goOffline}>Go Offline</span>
                 </div>
               {:else}
                 {announcement.message}

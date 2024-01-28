@@ -29,7 +29,7 @@
   }
 </script>
 
-<div class="card flex flex-col gap-2" style="width: 500px; max-width: calc(100vw - 32px);">
+<div style="width: 500px; max-width: calc(100vw - 32px);" class="card flex flex-col gap-2">
   <header class="card-header font-bold text-2xl text-center">
     SMM Update Available - {$smmUpdate?.newVersion}
   </header>
@@ -37,7 +37,11 @@
     {#if !$smmUpdateReady}
       {#if $smmUpdateProgress}
         <div>Downloading in background</div>
-        <ProgressBar value={$smmUpdateProgress.total ? $smmUpdateProgress.downloaded : undefined} max={$smmUpdateProgress.total} class="h-4 w-full" meter="bg-primary-600"/>
+        <ProgressBar
+          class="h-4 w-full"
+          max={$smmUpdateProgress.total}
+          meter="bg-primary-600"
+          value={$smmUpdateProgress.total ? $smmUpdateProgress.downloaded : undefined}/>
         <div class="text-base">Downloading update: {bytesToAppropriate($smmUpdateProgress.downloaded)} / {bytesToAppropriate($smmUpdateProgress.total)}, {bytesToAppropriate($smmUpdateProgress.speed)}/s, ETA {eta >= 0 ? secondsToAppropriate(eta) : 'N/A'}</div>
       {/if}
     {/if}

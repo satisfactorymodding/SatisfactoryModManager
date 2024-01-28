@@ -131,7 +131,7 @@
       <span>SMM can't launch this install</span>
       <div class="grow" />
     </button>
-  {:else if $launchButton === 'normal' || $isGameRunning || $isLaunchingGame }
+  {:else if $launchButton === 'normal' || $isGameRunning || $isLaunchingGame}
     <button
       class="btn h-8 w-full text-sm bg-primary-900"
       disabled={!!$progress || $isGameRunning || $isLaunchingGame}
@@ -143,7 +143,7 @@
         class="h-5 w-5"
         icon={mdiOpenInNew}/>
     </button>
-  {:else if $launchButton === 'cat' }
+  {:else if $launchButton === 'cat'}
     <!-- fixme SMMv3 seems to have broken this button -->
     <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div
@@ -153,26 +153,26 @@
       on:mousemove={catMouseMove}
     >
       <img
-        src="/images/launch/cat/bg.png"
-        draggable="false"
         alt="Space background"
-      >
+        draggable="false"
+        src="/images/launch/cat/bg.png"
+      />
       <div
-        on:mousedown={catMouseDown}
         role="button"
         tabindex="0"
+        on:mousedown={catMouseDown}
       >
         <img
-          src="/images/launch/cat/cat_full.png"
           style="position: relative; top: -57px; zoom: 0.55"
           style:left={`calc(-480px + ${catPosition * 87}%)`}
-          draggable="false"
           alt="Cat"
-        >
+          draggable="false"
+          src="/images/launch/cat/cat_full.png"
+        />
       </div>
         
     </div>
-  {:else if $launchButton === 'button' }
+  {:else if $launchButton === 'button'}
     <!-- FIXME: keyboard navigation isn't allowing pressing this button with enter/space -->
     <div
       style="height: 50px"
@@ -181,10 +181,10 @@
       on:keydown={launchButtonPressed}
     >
       <img
-        src="/images/launch/fun/launch_fun.png"
-        draggable="false"
         alt="Launch Button Background"
-      >
+        draggable="false"
+        src="/images/launch/fun/launch_fun.png"
+      />
       <!-- Keyboard interactions for the button are defined in the overall div -->
       <!-- svelte-ignore a11y-no-static-element-interactions -->
       <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -196,12 +196,12 @@
         on:mouseleave={() => launchButtonState = 'normal'}
       >
         <img
-          src={`/images/launch/fun/launch_fun_button_${launchButtonState}.png`}
           style="position: relative; zoom: 0.56"
           style:top={launchButtonState === 'press' ? '-97.5px' : '-98px'}
-          draggable="false"
           alt="Launch Button"
-        >
+          draggable="false"
+          src={`/images/launch/fun/launch_fun_button_${launchButtonState}.png`}
+        />
       </div>
     </div>
   {/if}
@@ -213,28 +213,28 @@
       {#if versionIncompatible.length > 0}
         <li>
           <span>
-            { versionIncompatible.length } incompatible mod{ versionIncompatible.length > 1 ? 's' : '' } which will either not load or crash your game
+            {versionIncompatible.length} incompatible mod{versionIncompatible.length > 1 ? 's' : ''} which will either not load or crash your game
           </span>
         </li>
       {/if}
       {#if reportedIncompatible.length > 0}
         <li>
           <span>
-            { reportedIncompatible.length } mod{ reportedIncompatible.length > 1 ? 's' : '' } that { reportedIncompatible.length > 1 ? 'are' : 'is' } reported as Broken on this game version. Read the mod{ reportedIncompatible.length > 1 ? 's\'' : '\'s' } description or compatibility notes for more information.
+            {reportedIncompatible.length} mod{reportedIncompatible.length > 1 ? 's' : ''} that {reportedIncompatible.length > 1 ? 'are' : 'is'} reported as Broken on this game version. Read the mod{reportedIncompatible.length > 1 ? 's\'' : '\'s'} description or compatibility notes for more information.
           </span>
         </li>
       {/if}
       {#if versionPossiblyCompatible.length > 0}
         <li>
           <span>
-            { versionPossiblyCompatible.length } mod{ versionPossiblyCompatible.length > 1 ? 's' : '' } that { versionPossiblyCompatible.length > 1 ? 'are' : 'is' } likely incompatible with your game
+            {versionPossiblyCompatible.length} mod{versionPossiblyCompatible.length > 1 ? 's' : ''} that {versionPossiblyCompatible.length > 1 ? 'are' : 'is'} likely incompatible with your game
           </span>
         </li>
       {/if}
       {#if reportedPossiblyCompatible.length > 0}
         <li>
           <span>
-            { reportedPossiblyCompatible.length } mod{ reportedPossiblyCompatible.length > 1 ? 's' : '' } that { reportedPossiblyCompatible.length > 1 ? 'are' : 'is' } reported as Damaged on this game version. Read the mod{ reportedPossiblyCompatible.length > 1 ? 's\'' : '\'s' } description or compatibility notes for more information.
+            {reportedPossiblyCompatible.length} mod{reportedPossiblyCompatible.length > 1 ? 's' : ''} that {reportedPossiblyCompatible.length > 1 ? 'are' : 'is'} reported as Damaged on this game version. Read the mod{reportedPossiblyCompatible.length > 1 ? 's\'' : '\'s'} description or compatibility notes for more information.
           </span>
         </li>
       {/if}

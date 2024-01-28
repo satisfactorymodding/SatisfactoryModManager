@@ -5,7 +5,7 @@
   export let parent: {onClose: () => void};
 </script>
 
-<div class="card flex flex-col gap-2" style="width: 500px; max-width: calc(100vw - 32px);">
+<div style="width: 500px; max-width: calc(100vw - 32px);" class="card flex flex-col gap-2">
   <header class="card-header font-bold text-2xl text-center">
     SMM Update Ready - {$smmUpdate?.newVersion}
   </header>

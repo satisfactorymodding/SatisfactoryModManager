@@ -168,15 +168,17 @@
     <LeftBar />
     <div class="flex w-0 grow">
       <div class="{$expandedMod ? 'max-w-[600px]' : ''} w-2/5 grow">
-        <ModsList on:expandedMod={() => {
-          focusOnEntry.focus();
-        }} hideMods={noInstallsError || invalidInstallsError}>
+        <ModsList
+          hideMods={noInstallsError || invalidInstallsError}
+          on:expandedMod={() => {
+            focusOnEntry.focus();
+          }}>
           <div class="card my-auto mr-4">
             <header class="card-header font-bold text-2xl text-center">
               {#if noInstallsError}
                 No Satisfactory installs found
               {:else}
-                { $invalidInstalls.length } invalid Satisfactory install{$invalidInstalls.length !== 1 ? 's' : ''} found
+                {$invalidInstalls.length} invalid Satisfactory install{$invalidInstalls.length !== 1 ? 's' : ''} found
               {/if}
             </header>
             <section class="p-4">
@@ -195,7 +197,7 @@
         </ModsList>
       </div>
       {#if $expandedMod}
-        <div class:grow={!pendingExpand} class="{pendingExpand ? 'w-0' : 'w-3/5'}">
+        <div class="{pendingExpand ? 'w-0' : 'w-3/5'}" class:grow={!pendingExpand}>
           <ModDetails bind:focusOnEntry/>
         </div>
       {/if}
@@ -207,7 +209,7 @@
   skeleton modals don't provide a way to make them persistent (i.e. ignore mouse clicks outside and escape key)
   but we can capture the events and stop them if the modal has the persistent meta flag set, and the event would have closed the modal
 -->
-<svelte:window on:keydown|capture|nonpassive={modalKeyDown} />
-<div on:mousedown|capture|nonpassive={modalMouseDown}>
-  <Modal components={modalRegistry} />
-</div>
+<svelte:window
+  on:keydown|capture|nonpassive={modalKeyDown}
+  on:mousedown|capture|nonpassive={modalMouseDown} />
+<Modal components={modalRegistry} />

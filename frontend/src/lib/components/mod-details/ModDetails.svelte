@@ -63,21 +63,19 @@
     logo: undefined,
   };
 
-  $: {
-    if($offline && $expandedMod) {
-      OfflineGetMod($expandedMod).then((mod) => {
-        offlineMod = {
-          ...mod,
-          authors: mod.authors.map((author) => ({
-            role: 'creator',
-            user: {
-              username: author,
-            },
-          })),
-          offline: true,
-        };
-      });
-    }
+  $: if($offline && $expandedMod) {
+    OfflineGetMod($expandedMod).then((mod) => {
+      offlineMod = {
+        ...mod,
+        authors: mod.authors.map((author) => ({
+          role: 'creator',
+          user: {
+            username: author,
+          },
+        })),
+        offline: true,
+      };
+    });
   }
 
   $: mod = $offline ? offlineMod : ($modQuery.fetching ? null : $modQuery.data?.mod);
@@ -100,37 +98,35 @@
   $: ficsitAppLink = `${$siteURL}/mod/${$expandedMod}`;
 
   let compatibility: CompatibilityWithSource = { state: CompatibilityState.Works, source: 'reported' };
-  $: {
-    if(mod) {
-      const gameVersion = $selectedInstallMetadata?.version;
-      const branch = $selectedInstallMetadata?.branch;
-      if(gameVersion && branch) {
-        if(!('offline' in mod)) {
-          if(mod.hidden && !isDependency) {
-            compatibility = { state: CompatibilityState.Broken, note: 'This mod was hidden by the author.', source: 'reported' };
-          } else {
-            getCompatibility(mod.mod_reference, branch, gameVersion, client).then((result) => {
-              if (result.source === 'reported') {
-                compatibility = {
-                  state: result.state,
-                  note: result.note 
-                    ? `This mod has been reported as ${result.state} on this game version.<br>${markdown(result.note)}` 
-                    : `This mod has been reported as ${result.state} on this game version. (No further notes provided)`,
-                  source: 'reported',
-                };
-              } else {
-                compatibility = result;
-              }
-            });
-          }
+  $: if(mod) {
+    const gameVersion = $selectedInstallMetadata?.version;
+    const branch = $selectedInstallMetadata?.branch;
+    if(gameVersion && branch) {
+      if(!('offline' in mod)) {
+        if(mod.hidden && !isDependency) {
+          compatibility = { state: CompatibilityState.Broken, note: 'This mod was hidden by the author.', source: 'reported' };
         } else {
-          getVersionCompatibility(mod.mod_reference, gameVersion, client).then((result) => {
-            compatibility = {
-              ...result,
-              source: 'version',
-            };
+          getCompatibility(mod.mod_reference, branch, gameVersion, client).then((result) => {
+            if (result.source === 'reported') {
+              compatibility = {
+                state: result.state,
+                note: result.note 
+                  ? `This mod has been reported as ${result.state} on this game version.<br>${markdown(result.note)}` 
+                  : `This mod has been reported as ${result.state} on this game version. (No further notes provided)`,
+                source: 'reported',
+              };
+            } else {
+              compatibility = result;
+            }
           });
         }
+      } else {
+        getVersionCompatibility(mod.mod_reference, gameVersion, client).then((result) => {
+          compatibility = {
+            ...result,
+            source: 'version',
+          };
+        });
       }
     }
   }
@@ -311,11 +307,17 @@
 </script>
 
 <div class="@container/mod-details h-full flex mods-details w-full bg-surface-200-700-token @3xl/mod-details:text-base text-sm">
-  <div class="px-4 py-4 flex flex-col h-full @3xl/mod-details:w-64 w-52 mods-details" style="border-right-color: rgba(239, 239, 239, 0.12);">
-    <img src={renderedLogo} alt="{mod?.name} Logo" class="logo w-full" />
+  <div style="border-right-color: rgba(239, 239, 239, 0.12);" class="px-4 py-4 flex flex-col h-full @3xl/mod-details:w-64 w-52 mods-details">
+    <img class="logo w-full" alt="{mod?.name} Logo" src={renderedLogo} />
     <span class="pt-4 font-bold @3xl/mod-details:text-lg text-base">{mod?.name ?? 'Loading...'}</span>
     <span class="pt-2 font-light">A mod by:</span>
-    <span bind:this={focusOnEntry} class="font-medium text-primary-600 cursor-pointer" role="button" tabindex="0" on:click={authorClick} on:keypress={authorClick} >{author ?? 'Loading...'}</span>
+    <span
+      bind:this={focusOnEntry}
+      class="font-medium text-primary-600 cursor-pointer"
+      role="button"
+      tabindex="0"
+      on:click={authorClick}
+      on:keypress={authorClick} >{author ?? 'Loading...'}</span>
     
     <div class="pt-2" use:popup={authorsMenu}>
       <button class="btn px-4 h-10 text-sm w-full bg-secondary-600">
@@ -338,7 +340,7 @@
             <button class="btn w-full h-full space-x-4" on:click={() => $search = `author:"${author.user.username}"`}>
               <div class="h-12 w-12">
                 {#if 'avatar' in author.user}
-                  <img src={author.user.avatar} alt="{author.user.username} Avatar" class="rounded-full w-ful h-full" />
+                  <img class="rounded-full w-ful h-full" alt="{author.user.username} Avatar" src={author.user.avatar} />
                 {/if}
               </div>
               <div class="flex-auto flex flex-col text-left">
@@ -352,19 +354,19 @@
     </div>
 
     <div class="pt-4">
-      <span>Mod info:</span><br>
-      <span>Size: </span><span class="font-bold">{size ?? 'Loading...'}</span><br>
+      <span>Mod info:</span><br/>
+      <span>Size: </span><span class="font-bold">{size ?? 'Loading...'}</span><br/>
       {#if (!mod || !('offline' in mod)) && !$offline}
-        <span>Created: </span><span class="font-bold">{mod ? new Date(mod.created_at).toLocaleDateString() : 'Loading...'}</span><br>
-        <span>Updated: </span><span class="font-bold">{mod ? new Date(mod.last_version_date).toLocaleString() : 'Loading...'}</span><br>
-        <span>Total downloads: </span><span class="font-bold">{mod?.downloads.toLocaleString() ?? 'Loading...'}</span><br>
-        <span>Views: </span><span class="font-bold">{mod?.views.toLocaleString() ?? 'Loading...'}</span><br>
+        <span>Created: </span><span class="font-bold">{mod ? new Date(mod.created_at).toLocaleDateString() : 'Loading...'}</span><br/>
+        <span>Updated: </span><span class="font-bold">{mod ? new Date(mod.last_version_date).toLocaleString() : 'Loading...'}</span><br/>
+        <span>Total downloads: </span><span class="font-bold">{mod?.downloads.toLocaleString() ?? 'Loading...'}</span><br/>
+        <span>Views: </span><span class="font-bold">{mod?.views.toLocaleString() ?? 'Loading...'}</span><br/>
         <div class="flex h-5">
           <span>Compatibility: </span>
           {#if mod?.compatibility}
             <div class="flex pl-1">
               <div use:popup={compatEAPopup}>
-                <SvgIcon icon={mdiRocketLaunch} class="{colorForCompatibilityState(mod.compatibility.EA.state)} w-5" />
+                <SvgIcon class="{colorForCompatibilityState(mod.compatibility.EA.state)} w-5" icon={mdiRocketLaunch} />
               </div>
               
               <Tooltip popupId={compatEAPopupId}>
@@ -379,7 +381,7 @@
                 {/if}
               </Tooltip>
               <div use:popup={compatEXPPopup}>
-                <SvgIcon icon={mdiTestTube} class="{colorForCompatibilityState(mod.compatibility.EXP.state)} w-5" />
+                <SvgIcon class="{colorForCompatibilityState(mod.compatibility.EXP.state)} w-5" icon={mdiTestTube} />
               </div>
               <Tooltip popupId={compatEXPPopupId}>
                 <span class="text-base">
@@ -394,7 +396,7 @@
               </Tooltip>
             </div>
           {:else}
-            <span use:popup={compatUnknownPopup} class="font-bold">&nbsp;Unknown</span>
+            <span class="font-bold" use:popup={compatUnknownPopup}>&nbsp;Unknown</span>
             <Tooltip popupId={compatUnknownPopupId}>
               <span class="text-base">No compatibility information has been reported for this mod yet. Try it out and contact us on the Discord so it can be updated!</span>
             </Tooltip>
@@ -404,8 +406,8 @@
     </div>
 
     <div class="pt-4">
-      <span>Latest version: </span><span class="font-bold">{ latestVersion ?? 'Loading...' }</span><br>
-      <span>Installed version: </span><span class="font-bold">{ installedVersion ?? 'Loading...' }</span><br>
+      <span>Latest version: </span><span class="font-bold">{latestVersion ?? 'Loading...'}</span><br/>
+      <span>Installed version: </span><span class="font-bold">{installedVersion ?? 'Loading...'}</span><br/>
       <div class="pt-2" use:popup={changeVersionMenu}>
         <button
           class="btn px-4 h-10 text-sm w-full bg-secondary-600"
@@ -429,7 +431,7 @@
             <button class="btn w-full h-full text-left" on:click={() => installVersion(null)}>
               <div class="w-7 h-7 p-1">
                 {#if manifestVersion === '>=0.0.0'}
-                  <SvgIcon icon={mdiCheck} class="h-full w-full" />
+                  <SvgIcon class="h-full w-full" icon={mdiCheck} />
                 {/if}
               </div>
               <span class="flex-auto">Any</span>
@@ -440,7 +442,7 @@
               <button class="btn w-full h-full text-left" on:click={() => installVersion(version.version)}>
                 <div class="w-7 h-7 p-1">
                   {#if manifestVersion === version.version}
-                    <SvgIcon icon={mdiCheck} class="h-full w-full" />
+                    <SvgIcon class="h-full w-full" icon={mdiCheck} />
                   {/if}
                 </div>
                 <span class="flex-auto">{version.version}</span>
@@ -449,7 +451,7 @@
                 <span class="flex-auto">or newer</span>
                 <div class="w-7 h-7 p-1">
                   {#if manifestVersion && manifestVersion !== version.version && validRange(manifestVersion) && minVersion(manifestVersion)?.format() === version.version}
-                    <SvgIcon icon={mdiCheck} class="h-full w-full" />
+                    <SvgIcon class="h-full w-full" icon={mdiCheck} />
                   {/if}
                 </div>
               </button>
@@ -516,7 +518,7 @@
     {:else if descriptionRendered}
       <!-- Intercepting mouse clicks for the link interrupter also seems to work for pressing Enter on the keyboard without a specific key handler added -->
       <!-- svelte-ignore a11y-no-noninteractive-element-interactions a11y-click-events-have-key-events -->
-      <p on:click={handleDescriptionClick} role="article">
+      <p role="article" on:click={handleDescriptionClick}>
         <!-- eslint-disable-next-line svelte/no-at-html-tags -->
         {@html descriptionRendered}
       </p>

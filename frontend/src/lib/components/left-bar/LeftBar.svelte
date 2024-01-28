@@ -130,9 +130,9 @@
       name="installsCombobox"
       class="w-full h-8"
       buttonClass="bg-surface-200-700-token px-4 text-sm"
-      itemClass="bg-surface-50-900-token"
-      itemActiveClass="!bg-surface-300/20"
       disabled={!$canModify}
+      itemActiveClass="!bg-surface-300/20"
+      itemClass="bg-surface-50-900-token"
       items={_.orderBy($installs)}
       value={$selectedInstall ?? ''}
       on:change={installSelectChanged}
@@ -152,15 +152,15 @@
           <Tooltip popupId={installPathPopupId(item)}>
             {item}
           </Tooltip>
-          <div use:popup={installPathPopups[item]} class="!w-5 !h-5" on:click={(e) => {
-            e.stopPropagation();
-            OpenExternal(item);
-          }} >
-            <SvgIcon icon={mdiFolderOpen} class="!w-full !h-full"/>
-          </div>
+          <button
+            class="!w-5 !h-5"
+            on:click|stopPropagation={() => OpenExternal(item)}
+            use:popup={installPathPopups[item]} >
+            <SvgIcon class="!w-full !h-full" icon={mdiFolderOpen}/>
+          </button>
         {:else}
-          <div use:popup={installWarningPopups[item]} class="!w-5 !h-5">
-            <SvgIcon icon={mdiAlert} class="!w-full !h-full"/>
+          <div class="!w-5 !h-5" use:popup={installWarningPopups[item]}>
+            <SvgIcon class="!w-full !h-full" icon={mdiAlert}/>
           </div>
           <Tooltip popupId={installWarningPopupId(item)}>
             {item}
@@ -216,9 +216,9 @@
       name="profileCombobox"
       class="w-full h-8"
       buttonClass="bg-surface-200-700-token px-4 text-sm"
-      itemClass="bg-surface-50-900-token"
-      itemActiveClass="!bg-surface-300/20"
       disabled={!$canModify}
+      itemActiveClass="!bg-surface-300/20"
+      itemClass="bg-surface-50-900-token"
       items={_.orderBy($profiles)}
       value={$selectedProfile ?? ''}
       on:change={profileSelectChanged}

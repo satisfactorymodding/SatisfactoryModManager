@@ -22,14 +22,18 @@
   }
 </script>
 
-<div class="card flex flex-col gap-2" style="width: 500px; max-width: calc(100vw - 32px);">
+<div style="width: 500px; max-width: calc(100vw - 32px);" class="card flex flex-col gap-2">
   <header class="card-header font-bold text-2xl text-center">
     Delete profile
   </header>
   <section class="p-4 grow space-y-2">
     <label class="label w-full">
       <span>Profile name</span>
-      <input class="input px-4 py-2" type="text" readonly value={profile}/>
+      <input
+        class="input px-4 py-2"
+        readonly
+        type="text"
+        value={profile}/>
     </label>
   </section>
   <footer class="card-footer">

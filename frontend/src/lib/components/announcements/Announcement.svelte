@@ -24,7 +24,7 @@
 
 <div class="announcement-{importanceLower} announcement-bg p-1.5 h-full" class:announcement-new={isNew}>
   <div class="flex items-center announcement-bg-text p-1 h-full">
-    <SvgIcon icon={icon} class="w-8 h-8 mr-3 shrink-0" />
+    <SvgIcon class="w-8 h-8 mr-3 shrink-0" icon={icon} />
     <div class="grow wrap text-lg">
       <slot>
         {announcement.message}

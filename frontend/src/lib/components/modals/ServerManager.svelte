@@ -82,7 +82,7 @@
 </script>
 
 
-<div class="card flex flex-col gap-2 !min-w-[800px] min-h-[400px]" style="max-height: calc(100vh - 128px); max-width: calc(100vw - 128px);">
+<div style="max-height: calc(100vh - 128px); max-width: calc(100vw - 128px);" class="card flex flex-col gap-2 !min-w-[800px] min-h-[400px]">
   <header class="card-header font-bold text-2xl text-center">
     Dedicated Servers
   </header>
@@ -97,9 +97,9 @@
                 {$installsMetadata[remoteServer].type}
               {:else}
                 <button
-                  use:popup={installWarningPopups[remoteServer]}
                   class="btn-icon h-6 w-full text-sm"
-                  on:click={() => retryConnect(remoteServer)}>
+                  on:click={() => retryConnect(remoteServer)}
+                  use:popup={installWarningPopups[remoteServer]}>
                   <SvgIcon
                     class="!p-0 !m-0 !w-full !h-full text-red-500"
                     icon={mdiAlert} />
@@ -131,15 +131,23 @@
     </table>
     <div class="mt-4">
       <div class="flex h-10">
-        <Select bind:value={newProtocol} items={allowedProtocols} name="newServerProtocol" class="!h-full w-28 shrink-0"
+        <Select
+          name="newServerProtocol"
+          class="!h-full w-28 shrink-0"
           buttonClass="bg-surface-200-700-token px-4 text-sm"
+          itemActiveClass="!bg-surface-300/20"
           itemClass="bg-surface-50-900-token"
-          itemActiveClass="!bg-surface-300/20">
+          items={allowedProtocols}
+          bind:value={newProtocol}>
           <svelte:fragment slot="item" let:item>
             {item}
           </svelte:fragment>
         </Select>
-        <input type="text" bind:value={newServerPath} class="input !h-full grow mx-4 px-4" placeholder="user:pass@host:port/path"/>
+        <input
+          class="input !h-full grow mx-4 px-4"
+          placeholder="user:pass@host:port/path"
+          type="text"
+          bind:value={newServerPath}/>
         <button
           class="btn h-full text-sm bg-primary-600 text-secondary-900"
           disabled={addInProgress}

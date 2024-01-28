@@ -28,6 +28,13 @@ module.exports = {
       rules: {
         'svelte/indent': ['error', { indent: 2 }],
         'svelte/valid-compile': ['error', { ignoreWarnings: true }],
+        'svelte/first-attribute-linebreak': 'warn',
+        'svelte/max-attributes-per-line': ['warn', { singleline: 3 }],
+        'svelte/mustache-spacing': 'warn',
+        'svelte/no-extra-reactive-curlies': 'warn',
+        'svelte/no-spaces-around-equal-signs-in-attribute': 'error',
+        'svelte/sort-attributes': 'warn',
+        'svelte/html-self-closing': 'error',
         '@typescript-eslint/no-unused-vars': 'warn',
         indent: 'off',
       },

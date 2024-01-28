@@ -160,9 +160,8 @@
 </script>
 
 <div class="settings-menu">
-  <div use:popup={settingsMenu} class="w-full h-8">
-    <button
-      class="btn px-4 h-full w-full text-sm bg-surface-200-700-token"
+  <div class="w-full h-8" use:popup={settingsMenu}>
+    <button class="btn px-4 h-full w-full text-sm bg-surface-200-700-token"
     >
       <span>Mod Manager Settings</span>
       <div class="grow" />
@@ -181,11 +180,16 @@
     <ul class="menu">
       <ListBox class="w-full" rounded="rounded-none" spacing="space-y-0">
         {#each updateCheckModes as item}
-          <ListBoxItem bind:group={$updateCheckMode} name="update-check-mode" value={item.id} class="bg-surface-50-900-token" active="">
+          <ListBoxItem
+            name="update-check-mode"
+            class="bg-surface-50-900-token"
+            active=""
+            value={item.id}
+            bind:group={$updateCheckMode}>
             {item.name}
-            <span class="h-5 w-5 block" slot="trail">
+            <span slot="trail" class="h-5 w-5 block">
               {#if $updateCheckMode === item.id}
-                <SvgIcon icon={mdiCheck} class="h-full w-full"/>
+                <SvgIcon class="h-full w-full" icon={mdiCheck}/>
               {/if}
             </span>
           </ListBoxItem>
@@ -202,11 +206,16 @@
     <ul class="menu">
       <ListBox class="w-full" rounded="rounded-none" spacing="space-y-0">
         {#each queueModes as item}
-          <ListBoxItem bind:group={$queueAutoStart} name="update-check-mode" value={item.id} class="bg-surface-50-900-token" active="">
+          <ListBoxItem
+            name="update-check-mode"
+            class="bg-surface-50-900-token"
+            active=""
+            value={item.id}
+            bind:group={$queueAutoStart}>
             {item.name}
-            <span class="h-5 w-5 block" slot="trail">
+            <span slot="trail" class="h-5 w-5 block">
               {#if $queueAutoStart === item.id}
-                <SvgIcon icon={mdiCheck} class="h-full w-full"/>
+                <SvgIcon class="h-full w-full" icon={mdiCheck}/>
               {/if}
             </span>
           </ListBoxItem>
@@ -223,11 +232,16 @@
     <ul class="menu">
       <ListBox class="w-full" rounded="rounded-none" spacing="space-y-0">
         {#each views as item}
-          <ListBoxItem bind:group={$startView} name="update-check-mode" value={item.id} class="bg-surface-50-900-token" active="">
+          <ListBoxItem
+            name="update-check-mode"
+            class="bg-surface-50-900-token"
+            active=""
+            value={item.id}
+            bind:group={$startView}>
             {item.name}
-            <span class="h-5 w-5 block" slot="trail">
+            <span slot="trail" class="h-5 w-5 block">
               {#if $startView === item.id}
-                <SvgIcon icon={mdiCheck} class="h-full w-full"/>
+                <SvgIcon class="h-full w-full" icon={mdiCheck}/>
               {/if}
             </span>
           </ListBoxItem>
@@ -244,11 +258,16 @@
     <ul class="menu">
       <ListBox class="w-full" rounded="rounded-none" spacing="space-y-0">
         {#each launchButtons as item}
-          <ListBoxItem bind:group={$launchButton} name="update-check-mode" value={item.id} class="bg-surface-50-900-token" active="">
+          <ListBoxItem
+            name="update-check-mode"
+            class="bg-surface-50-900-token"
+            active=""
+            value={item.id}
+            bind:group={$launchButton}>
             {item.name}
-            <span class="h-5 w-5 block" slot="trail">
+            <span slot="trail" class="h-5 w-5 block">
               {#if $launchButton === item.id}
-                <SvgIcon icon={mdiCheck} class="h-full w-full"/>
+                <SvgIcon class="h-full w-full" icon={mdiCheck}/>
               {/if}
             </span>
           </ListBoxItem>
@@ -266,93 +285,93 @@
     -->
     <ul class="menu">
       <li class="section-header">
-        <span class="h-5 w-5"><SvgIcon icon={mdiBug} class="h-full w-full"/></span>
+        <span class="h-5 w-5"><SvgIcon class="h-full w-full" icon={mdiBug}/></span>
         <span class="flex-auto">Debug</span>
       </li>
       <hr class="divider" />
       <li>
         <button on:click={() => GenerateDebugInfo()}>
-          <span class="h-5 w-5"></span>
+          <span class="h-5 w-5"/>
           <span class="flex-auto">Generate debug info</span>
-          <span class="h-5 w-5"><SvgIcon icon={mdiDownload} class="h-full w-full"/></span>
+          <span class="h-5 w-5"><SvgIcon class="h-full w-full" icon={mdiDownload}/></span>
         </button>
       </li>
       <hr class="divider" />
       <li>
         <button on:click={() => copyModList()}>
-          <span class="h-5 w-5"></span>
+          <span class="h-5 w-5"/>
           <span class="flex-auto">Copy mod list</span>
-          <span class="h-5 w-5"><SvgIcon icon={mdiClipboard} class="h-full w-full"/></span>
+          <span class="h-5 w-5"><SvgIcon class="h-full w-full" icon={mdiClipboard}/></span>
         </button>
       </li>
       <hr class="divider" />
       <li class="section-header">
-        <span class="h-5 w-5"><SvgIcon icon={mdiCog} class="h-full w-full"/></span>
+        <span class="h-5 w-5"><SvgIcon class="h-full w-full" icon={mdiCog}/></span>
         <span class="flex-auto">Settings</span>
       </li>
       <hr class="divider" />
-      <li use:popup={updateCheckModeMenu} data-noclose>
+      <li data-noclose use:popup={updateCheckModeMenu}>
         <button>
-          <span class="h-5 w-5"></span>
+          <span class="h-5 w-5"/>
           <span class="flex-auto">Update check</span>
           <span>{updateCheckModes.find((m) => m.id === $updateCheckMode)?.name}</span>
           <span class="h-5 w-5">
-            <SvgIcon icon={mdiChevronRight} class="h-full w-full"/>
+            <SvgIcon class="h-full w-full" icon={mdiChevronRight}/>
           </span>
         </button>
       </li>
       <hr class="divider" />
-      <li use:popup={queueModeMenu} data-noclose>
+      <li data-noclose use:popup={queueModeMenu}>
         <button>
-          <span class="h-5 w-5"></span>
+          <span class="h-5 w-5"/>
           <span class="flex-auto">Queue</span>
           <span>{queueModes.find((m) => m.id === $queueAutoStart)?.name}</span>
           <span class="h-5 w-5">
-            <SvgIcon icon={mdiChevronRight} class="h-full w-full"/>
+            <SvgIcon class="h-full w-full" icon={mdiChevronRight}/>
           </span>
         </button>
       </li>
       <hr class="divider" />
-      <li use:popup={startViewMenu} data-noclose>
+      <li data-noclose use:popup={startViewMenu}>
         <button>
-          <span class="h-5 w-5"></span>
+          <span class="h-5 w-5"/>
           <span class="flex-auto">Start view</span>
           <span>{views.find((m) => m.id === $startView)?.name}</span>
           <span class="h-5 w-5">
-            <SvgIcon icon={mdiChevronRight} class="h-full w-full"/>
+            <SvgIcon class="h-full w-full" icon={mdiChevronRight}/>
           </span>
         </button>
       </li>
       <hr class="divider" />
       <li>
         <button on:click={() => modalStore.trigger({ type: 'component', component: 'cacheLocationPicker' })}>
-          <span class="h-5 w-5"></span>
+          <span class="h-5 w-5"/>
           <span class="flex-auto">Change cache location</span>
-          <span class="h-5 w-5"><SvgIcon icon={mdiFolderEdit} class="h-full w-full"/></span>
+          <span class="h-5 w-5"><SvgIcon class="h-full w-full" icon={mdiFolderEdit}/></span>
         </button>
       </li>
       <hr class="divider" />
       <li>
         <button on:click={() => { $offline = !$offline; }}>
-          <span class="h-5 w-5"></span>
+          <span class="h-5 w-5"/>
           <span class="flex-auto">Go {$offline ? 'online' : 'offline'}</span>
-          <span class="h-5 w-5"></span>
+          <span class="h-5 w-5"/>
         </button>
       </li>
       {#if $konami}
         <hr class="divider" />
         <li class="section-header">
-          <span class="h-5 w-5"><SvgIcon icon={mdiCog} class="h-full w-full"/></span>
+          <span class="h-5 w-5"><SvgIcon class="h-full w-full" icon={mdiCog}/></span>
           <span class="flex-auto">Secret settings</span>
         </li>
         <hr class="divider" />
-        <li use:popup={launchButtonMenu} data-noclose>
+        <li data-noclose use:popup={launchButtonMenu}>
           <button>
-            <span class="h-5 w-5"></span>
+            <span class="h-5 w-5"/>
             <span class="flex-auto">Launch button</span>
             <span>{launchButtons.find((l) => l.id === $launchButton)?.name ?? ''}</span>
             <span class="h-5 w-5">
-              <SvgIcon icon={mdiChevronRight} class="h-full w-full"/>
+              <SvgIcon class="h-full w-full" icon={mdiChevronRight}/>
             </span>
           </button>
         </li>

@@ -73,7 +73,7 @@
   }
 </script>
 
-<div class="card flex flex-col gap-2 !min-w-[800px] min-h-[200px]" style="max-height: calc(100vh - 128px); max-width: calc(100vw - 128px);">
+<div style="max-height: calc(100vh - 128px); max-width: calc(100vw - 128px);" class="card flex flex-col gap-2 !min-w-[800px] min-h-[200px]">
   <header class="card-header font-bold text-2xl text-center">
     Change download cache location
   </header>
@@ -82,16 +82,17 @@
       <span>Cache location</span>
       <div class="flex items-baseline">
         <div class="grow">
-          <input type="text"
+          <input
             class="input px-4 py-2 hover:!cursor-pointer"
             class:input-error={cacheError}
-            value={$newCacheLocation}
             readonly
+            type="text"
+            value={$newCacheLocation}
             on:click={() => pickCacheLocation()}
           />
           <p>
-            {#if cacheError }
-              { cacheError }
+            {#if cacheError}
+              {cacheError}
             {/if}
           </p>
         </div>

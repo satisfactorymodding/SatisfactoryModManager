@@ -28,7 +28,7 @@
 
 <div class="flex items-center h-9">
   <div class="dragregion grow flex items-center">
-    <img src="/images/smm_icon_small.png" class="h-7 pl-4 pr-2" alt="SMM Icon" />
+    <img class="h-7 pl-4 pr-2" alt="SMM Icon" src="/images/smm_icon_small.png" />
     <div>
       <span class="app-title pt-3">Satisfactory Mod Manager v{version}</span>
     </div>
@@ -38,17 +38,17 @@
   <!-- svelte-ignore a11y-click-events-have-key-events -->
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div class="hover:bg-gray-500 p-1.5 w-11 cursor-default grid justify-center items-center h-full" on:click={minimize}>
-    <SvgIcon icon={mdiWindowMinimize} class="w-full h-full"/>
+    <SvgIcon class="w-full h-full" icon={mdiWindowMinimize}/>
   </div>
   <!-- svelte-ignore a11y-click-events-have-key-events -->
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div class="hover:bg-gray-500 p-1.5 w-11 cursor-default grid justify-center items-center h-full" on:click={toggleMaximize}>
-    <SvgIcon icon={isMaximized ? mdiWindowRestore : mdiWindowMaximize} class="w-full h-full"/>
+    <SvgIcon class="w-full h-full" icon={isMaximized ? mdiWindowRestore : mdiWindowMaximize}/>
   </div>
   <!-- svelte-ignore a11y-click-events-have-key-events -->
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div class="hover:bg-red-600 p-1.5 w-11 cursor-default grid justify-center items-center h-full" on:click={close}>
-    <SvgIcon icon={mdiWindowClose} class="w-full h-full"/>
+    <SvgIcon class="w-full h-full" icon={mdiWindowClose}/>
   </div>
 </div>
 

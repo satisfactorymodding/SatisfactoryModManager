@@ -45,7 +45,7 @@
   $: renderedLogo = mod?.logo || 'https://ficsit.app/images/no_image.webp';
 </script>
 
-<div class="card flex flex-col gap-2" style="width: 500px; max-width: calc(100vw - 32px);">
+<div style="width: 500px; max-width: calc(100vw - 32px);" class="card flex flex-col gap-2">
   <header class="card-header font-bold text-2xl text-center">
     Install mod
   </header>
@@ -61,7 +61,7 @@
           {/if}
           <p>{mod.short_description}</p>
         </div>
-        <img src={renderedLogo} alt="{mod.name} Logo" class="logo h-24 w-24 mx-2" />
+        <img class="logo h-24 w-24 mx-2" alt="{mod.name} Logo" src={renderedLogo} />
       </div>
     {:else if $modQuery.fetching}
       <p>Loading...</p>

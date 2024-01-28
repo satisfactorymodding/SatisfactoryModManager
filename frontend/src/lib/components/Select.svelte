@@ -1,4 +1,4 @@
-<script lang="ts" generics="T">
+<script generics="T" lang="ts">
   import { mdiMenuDown } from '@mdi/js';
   import { popup, type PopupSettings, ListBox, ListBoxItem } from '@skeletonlabs/skeleton';
   import type { SizeOptions } from '@floating-ui/dom';
@@ -7,7 +7,9 @@
   import SvgIcon from '$lib/components/SVGIcon.svelte';
 
   export let name: string;
+  // eslint-disable-next-line no-undef
   export let items: T[];
+  // eslint-disable-next-line no-undef
   export let value: T;
   export let disabled = false;
   let clazz = '';
@@ -17,8 +19,10 @@
   export let itemClass = '';
   export let itemActiveClass = '';
   
+  // eslint-disable-next-line no-undef
   export let itemKey: ((item: T) => string) | keyof T = (item) => typeof item === 'string' ? item : JSON.stringify(item);
 
+  // eslint-disable-next-line no-undef
   function getKey(item: T) {
     return typeof itemKey === 'function' ? itemKey(item) : item[itemKey];
   }
@@ -42,7 +46,8 @@
     closeQuery: `.${name}-listbox-item`,
   } as PopupSettings;
 
-  const dispatch: EventDispatcher<{change: T}> = createEventDispatcher();
+  // eslint-disable-next-line no-undef
+  const dispatch = createEventDispatcher<{change: T}>();
 
   function onChange({ target }: Event) {
     const newValue = (target as HTMLButtonElement).value;
@@ -82,11 +87,17 @@
     -->
     <ListBox class="w-full" rounded="rounded-none" spacing="space-y-0">
       {#each items as item}
-        <ListBoxItem group={getKey(value)} on:change={onChange} {name} value={getKey(item)} class="{name}-listbox-item {itemClass}" active="{itemActiveClass}">
+        <ListBoxItem
+          {name}
+          class="{name}-listbox-item {itemClass}"
+          active="{itemActiveClass}"
+          group={getKey(value)}
+          value={getKey(item)}
+          on:change={onChange}>
           <slot name="item" {item}>
             {item}
           </slot>
-          <slot slot="trail" name="itemTrail" {item} />
+          <slot name="itemTrail" slot="trail" {item} />
         </ListBoxItem>
       {/each}
     </ListBox>

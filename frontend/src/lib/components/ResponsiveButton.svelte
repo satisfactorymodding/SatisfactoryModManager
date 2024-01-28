@@ -44,7 +44,7 @@
       {display.tooltip}
       {#if display.tooltipHtml}
         <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-        { @html display.tooltipHtml }
+        {@html display.tooltipHtml}
       {/if}
     </span>
   </Tooltip>

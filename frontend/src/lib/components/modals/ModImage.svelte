@@ -1,10 +1,13 @@
 <script lang="ts">
-  // eslint-ignore-next-line unused-export-let
+  // Skeleton passes the parent prop to the modal component, and we would get a warning if the prop is not present here
   export let parent: {onClose: () => void};
+
+  // Just so that it's not unused
+  $: parent;
 
   export let imageSrc: string;
 </script>
 
-<div class="card flex flex-col gap-2" style="max-height: calc(100vh - 128px); max-width: calc(100vw - 128px);">
-  <img src={imageSrc} alt="Mod" style="max-height: calc(100vh - 128px); max-width: calc(100vw - 128px);"/>
+<div style="max-height: calc(100vh - 128px); max-width: calc(100vw - 128px);" class="card flex flex-col gap-2">
+  <img style="max-height: calc(100vh - 128px); max-width: calc(100vw - 128px);" alt="Mod" src={imageSrc}/>
 </div>

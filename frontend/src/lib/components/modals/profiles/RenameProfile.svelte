@@ -28,18 +28,28 @@
   }
 </script>
 
-<div class="card flex flex-col gap-2" style="width: 500px; max-width: calc(100vw - 32px);">
+<div style="width: 500px; max-width: calc(100vw - 32px);" class="card flex flex-col gap-2">
   <header class="card-header font-bold text-2xl text-center">
     Rename profile
   </header>
   <section class="p-4 grow space-y-2">
     <label class="label w-full">
       <span>Old profile name</span>
-      <input class="input px-4 py-2" type="text" placeholder="Old Profile" value={profile} readonly/>
+      <input
+        class="input px-4 py-2"
+        placeholder="Old Profile"
+        readonly
+        type="text"
+        value={profile}/>
     </label>
     <label class="label w-full">
       <span>New profile name</span>
-      <input class="input px-4 py-2" class:input-error={newProfileNameExists} type="text" placeholder="My New Profile" bind:value={$newProfileName}/>
+      <input
+        class="input px-4 py-2"
+        class:input-error={newProfileNameExists}
+        placeholder="My New Profile"
+        type="text"
+        bind:value={$newProfileName}/>
     </label>
   </section>
   <footer class="card-footer">

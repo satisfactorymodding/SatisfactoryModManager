@@ -260,14 +260,30 @@
   } satisfies PopupSettings;
 </script>
 
-<div class="my-1 px-0 @lg/mods-list:h-24 @md/mods-list:h-[5.5rem] h-[4.25rem]" class:rounded-lg={selected} class:bg-surface-50-900-token={selected} on:click={listingClick} on:keypress={listingClick} role="tab" tabindex="0">
+<div
+  class="my-1 px-0 @lg/mods-list:h-24 @md/mods-list:h-[5.5rem] h-[4.25rem]"
+  class:bg-surface-50-900-token={selected}
+  class:rounded-lg={selected}
+  role="tab"
+  tabindex="0"
+  on:click={listingClick}
+  on:keypress={listingClick}>
   {#if inProgress}
     <div class="relative h-full">
-      <ProgressBar value={$progress?.progress === -1 ? undefined : $progress?.progress} max={1} class="h-full w-full" track="bg-surface-200-700-token" meter="bg-surface-50-900-token"/>
+      <ProgressBar
+        class="h-full w-full"
+        max={1}
+        meter="bg-surface-50-900-token"
+        track="bg-surface-200-700-token"
+        value={$progress?.progress === -1 ? undefined : $progress?.progress}/>
     </div>
   {/if}
   <div class="flex relative h-full" class:-top-full={inProgress}>
-    <img src={renderedLogo} alt="{mod.name} Logo" class="logo h-full @lg/mods-list:w-24 @md/mods-list:w-[5.5rem] w-[4.25rem]" class:grayscale={isInstalled && !isEnabled} />
+    <img
+      class="logo h-full @lg/mods-list:w-24 @md/mods-list:w-[5.5rem] w-[4.25rem]"
+      class:grayscale={isInstalled && !isEnabled}
+      alt="{mod.name} Logo"
+      src={renderedLogo} />
     <div class="ml-2 flex flex-col grow w-0 opacity" class:opacity-30={isInstalled && !isEnabled}>
       <div class="flex items-center" use:popup={popupHover}>
         <div class="shrink min-w-[100px] truncate">
@@ -276,7 +292,12 @@
         <div class="shrink-0 hidden @lg/mods-list:block truncate w-[100px] grow">
           <span class="pl-1">by</span>
           <!-- We could offer keyboard navigation for clicking this, but it's a waste of the user's time while nagivating via keyboard. If they want to search by author, they could enter the mod description pane -->
-          <span class="text-primary-600 whitespace-nowrap" on:click|stopPropagation={authorClick} on:keypress|stopPropagation={authorClick} role="button" tabindex="-1">{author}</span>
+          <span
+            class="text-primary-600 whitespace-nowrap"
+            role="button"
+            tabindex="-1"
+            on:click|stopPropagation={authorClick}
+            on:keypress|stopPropagation={authorClick}>{author}</span>
         </div>
       </div>
       <div class="truncate @md/mods-list:text-base text-sm hidden @md/mods-list:block">{'short_description' in mod ? mod.short_description : ''}</div>
@@ -288,7 +309,7 @@
               {#if !('offline' in mod) && !('missing' in mod) && (mod?.tags?.length ?? -1 > 0 )}
                 <div class="flex inline-flex items-center justify-items-center @lg/mods-list:w-4 w-3">
                   <!-- TODO this icon is not vertically centered -->
-                  <SvgIcon icon={mdiTagMultiple} class=""/>
+                  <SvgIcon class="" icon={mdiTagMultiple}/>
                 </div>
                 {#each mod?.tags ?? [] as tag}
                   <span class="pr-1">#{tag.name}</span>
@@ -300,13 +321,13 @@
               {#if !('offline' in mod) && !('missing' in mod)}
                 <div class="w-24 flex items-center">
                   <div class="pr-1 inline-flex items-center justify-items-center @lg/mods-list:w-7 w-6">
-                    <SvgIcon icon={mdiEye} class=""/>
+                    <SvgIcon class="" icon={mdiEye}/>
                   </div>
                   <span>{mod.views.toLocaleString()}</span>
                 </div>
                 <div class="w-24 flex items-center">
                   <div class="pr-1 inline-flex items-center justify-items-center @lg/mods-list:w-7 w-6">
-                    <SvgIcon icon={mdiDownload} class=""/>
+                    <SvgIcon class="" icon={mdiDownload}/>
                   </div>
                   <span>{mod.downloads.toLocaleString()}</span>
                 </div>
@@ -314,24 +335,29 @@
             </div>
           </div>
         {:else}
-          <span>{ $progress?.message }</span>
+          <span>{$progress?.message}</span>
         {/if}
       </div>
     </div>
     <!-- The purpose of the event handlers here are to prevent navigating to the mod's page when clicking on one of the sub-buttons of the div. Thus, it shouldn't be focusable despite having "interactions" -->
     <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-    <div class="pr-2 flex h-full items-center" role="separator" tabindex="-1" on:click|stopPropagation={() => { /* empty */ }} on:keypress|stopPropagation={() => { /* empty */ }}>
+    <div
+      class="pr-2 flex h-full items-center"
+      role="separator"
+      tabindex="-1"
+      on:click|stopPropagation={() => { /* empty */ }}
+      on:keypress|stopPropagation={() => { /* empty */ }}>
       <ResponsiveButton
         id="enable-{mod.mod_reference}"
-        display={enableButtonDisplay}
         disabled={enableButtonDisabled}
+        display={enableButtonDisplay}
         onClickAction={toggleModEnabled}
         visible={isInstalled && !isDependency}
       />
       <ResponsiveButton
         id="install-{mod.mod_reference}"
-        display={installButtonDisplay}
         disabled={installButtonDisabled}
+        display={installButtonDisplay}
         onClickAction={toggleModInstalled}
       />
       <ResponsiveButton
@@ -343,12 +369,12 @@
   </div>
 </div>
 
-<Tooltip {popupId} disabled={!(isInstalled && !isEnabled) && compatibility.state === CompatibilityState.Works}>
+<Tooltip disabled={!(isInstalled && !isEnabled) && compatibility.state === CompatibilityState.Works} {popupId}>
   {#if isInstalled && !isEnabled}
     This mod is Disabled. Click the pause icon to Enable it. 
   {:else if compatibility.state !== CompatibilityState.Works}
     <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-    { @html compatibility.note }
+    {@html compatibility.note}
   {/if}
 </Tooltip>
 

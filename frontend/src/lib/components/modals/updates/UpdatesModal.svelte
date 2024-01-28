@@ -40,13 +40,12 @@
     return acc;
   }, {} as Record<string, string>) ?? {};
 
-  $: {
-    if($offline) {
-      OfflineGetModsByReferences($updates.map((u) => u.item).filter((u) => u !== 'SML') as string[]).then((mods) => { modNamesQueryResult = mods; });
-    } else {
-      modNamesQueryResult = $modNamesQuery.data?.getMods?.mods;
-    }
+  $: if($offline) {
+    OfflineGetModsByReferences($updates.map((u) => u.item).filter((u) => u !== 'SML') as string[]).then((mods) => { modNamesQueryResult = mods; });
+  } else {
+    modNamesQueryResult = $modNamesQuery.data?.getMods?.mods;
   }
+
 
   $: updatesToDisplay = $showIgnored ? $updates : $unignoredUpdates;
 
@@ -108,7 +107,7 @@
   }
 </script>
 
-<div class="card flex flex-col gap-2" style="width: 500px; max-width: calc(100vw - 32px);">
+<div style="width: 500px; max-width: calc(100vw - 32px);" class="card flex flex-col gap-2">
   <header class="card-header font-bold text-2xl text-center">
     Updates
   </header>
@@ -120,15 +119,17 @@
     </button>
     <div class="grid grid-cols-12">
       {#each updatesToDisplay as update}
-        <div class="inline-flex items-center p-1.5">
-          {#if $selectedUpdates.includes(update)}
-            <SvgIcon icon={mdiUpload} class="h-full w-full" />
-          {/if}
-        </div>
-        <div on:click={() => toggleSelected(update)} class="pl-2 h-full flex flex-col content-center mb-1.5 col-span-7">
-          <span>{ modNames[update.item] ?? update.item }</span>
-          <span>{ update.currentVersion } -> { update.newVersion }</span>
-        </div>
+        <button class="btn p-2 col-span-8 text-left space-x-2" on:click={() => toggleSelected(update)}>
+          <div class="h-full w-6">
+            {#if $selectedUpdates.includes(update)}
+              <SvgIcon class="h-full w-full" icon={mdiUpload} />
+            {/if}
+          </div>
+          <div class="h-full flex-auto flex flex-col content-center">
+            <span>{modNames[update.item] ?? update.item}</span>
+            <span>{update.currentVersion} -> {update.newVersion}</span>
+          </div>
+        </button>
         <button
           class="btn col-span-2"
           on:click={() => $modalStore = [{ type:'component', component:{ ref: ModChangelog, props:{ mod:update.item, versionRange:{ from:update.currentVersion, to:update.newVersion } } } }, ...$modalStore]}>

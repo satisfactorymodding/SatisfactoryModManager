@@ -5,6 +5,6 @@
   export { clazz as class };
 </script>
 
-<svg viewBox="0 0 24 24" class="{clazz}">
-  <path fill="currentColor" d={icon} />
+<svg class="{clazz}" viewBox="0 0 24 24">
+  <path d={icon} fill="currentColor" />
 </svg>
