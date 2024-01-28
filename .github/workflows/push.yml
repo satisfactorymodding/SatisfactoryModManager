@@ -103,5 +103,4 @@ jobs:
         working-directory: frontend
         run: |
           pnpm lint
-          # disable check for now, as SMUI causes an error
-          # pnpm check
+          pnpm check
