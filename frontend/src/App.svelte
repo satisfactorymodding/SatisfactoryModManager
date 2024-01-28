@@ -167,7 +167,7 @@
   <div class="flex grow h-0">
     <LeftBar />
     <div class="flex w-0 grow">
-      <div class="{$expandedMod ? 'max-w-[600px]' : ''} w-2/5 grow">
+      <div class="{$expandedMod ? 'max-w-[42.5rem]' : ''} w-2/5 grow">
         <ModsList
           hideMods={noInstallsError || invalidInstallsError}
           on:expandedMod={() => {

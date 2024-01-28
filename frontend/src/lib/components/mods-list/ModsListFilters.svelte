@@ -8,9 +8,9 @@
 
 <div class="px-5 py-2 flex @container/mod-list-filters">
   <div class="grow mr-2">
-    <input class="w-full bg-transparent border-b-[1px] border-secondary-500 hover:border-secondary-50 focus:border-primary-600 duration-500 placeholder-secondary-400 placeholder:font-medium outline-none !ring-0 h-[30px] transition-colors" placeholder="Search mods" bind:value={$search}/>
+    <input class="w-full bg-transparent border-b-[1px] border-secondary-500 hover:border-secondary-50 focus:border-primary-600 duration-500 placeholder-secondary-400 placeholder:font-medium outline-none !ring-0 h-8 transition-colors" placeholder="Search mods" bind:value={$search}/>
   </div>
-  <div class="flex grow shrink-0 min-w-[140px] w-0 @lg/mod-list-filters:min-w-[21rem]">
+  <div class="flex grow shrink-0 min-w-[10rem] w-0 @lg/mod-list-filters:min-w-[21rem]">
     <Select
       name="modsFilter"
       class="!h-full w-1/2 shrink-0"
@@ -56,22 +56,3 @@
   </div>
 </div>
 
-<style>
-  * :global(.control-area-input),
-  * :global(.control-area-input .mdc-select__anchor) {
-    height: 28px;
-  }
-  * :global(.control-area-input .mdc-notched-outline),
-  * :global(.control-area-input .mdc-select__anchor)  {
-    background-color: #1c1c1c;
-  }
-  * :global(.control-area-input),
-  * :global(.control-area-input .mdc-select__anchor) {
-    border-radius: 4px;
-  }
-  * :global(
-      .control-area-input.mdc-text-field--with-leading-icon:not(.mdc-text-field--label-floating)
-      .mdc-floating-label) {
-    left: 16px;
-  }
-</style>

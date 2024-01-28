@@ -30,7 +30,7 @@
   <div class="dragregion grow flex items-center">
     <img class="h-7 pl-4 pr-2" alt="SMM Icon" src="/images/smm_icon_small.png" />
     <div>
-      <span class="app-title pt-3">Satisfactory Mod Manager v{version}</span>
+      <span class="app-title pt-3 text-base">Satisfactory Mod Manager v{version}</span>
     </div>
   </div>
 

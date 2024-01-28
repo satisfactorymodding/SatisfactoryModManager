@@ -286,10 +286,10 @@
       src={renderedLogo} />
     <div class="ml-2 flex flex-col grow w-0 opacity" class:opacity-30={isInstalled && !isEnabled}>
       <div class="flex items-center" use:popup={popupHover}>
-        <div class="shrink min-w-[100px] truncate">
+        <div class="shrink min-w-[7rem] truncate">
           <span class="@lg/mods-list:text-xl text-lg font-medium min-w-0 w-full" class:text-error-600={compatibility.state === CompatibilityState.Broken} class:text-warning-500={compatibility.state === CompatibilityState.Damaged}>{mod.name}</span>
         </div>
-        <div class="shrink-0 hidden @lg/mods-list:block truncate w-[100px] grow">
+        <div class="shrink-0 hidden @lg/mods-list:block truncate w-[7rem] grow">
           <span class="pl-1">by</span>
           <!-- We could offer keyboard navigation for clicking this, but it's a waste of the user's time while nagivating via keyboard. If they want to search by author, they could enter the mod description pane -->
           <span
