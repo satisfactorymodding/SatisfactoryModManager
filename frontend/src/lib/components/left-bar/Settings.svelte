@@ -371,7 +371,7 @@
       @apply border-surface-50 border-opacity-20 mr-4;
     }
     > .section-header {
-      @apply pl-4;
+      @apply pl-4 tracking-wider;
       + hr.divider {
         @apply ml-4;
       }

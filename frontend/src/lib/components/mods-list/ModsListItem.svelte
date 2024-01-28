@@ -271,12 +271,12 @@
     <div class="ml-2 flex flex-col grow w-0 opacity" class:opacity-30={isInstalled && !isEnabled}>
       <div class="flex items-center" use:popup={popupHover}>
         <div class="shrink min-w-[100px] truncate">
-          <span class="@lg/mods-list:text-xl text-lg font-medium min-w-0 w-full" class:error={compatibility.state === CompatibilityState.Broken} class:warning={compatibility.state === CompatibilityState.Damaged}>{mod.name}</span>
+          <span class="@lg/mods-list:text-xl text-lg font-medium min-w-0 w-full" class:text-error-600={compatibility.state === CompatibilityState.Broken} class:text-warning-500={compatibility.state === CompatibilityState.Damaged}>{mod.name}</span>
         </div>
         <div class="shrink-0 hidden @lg/mods-list:block truncate w-[100px] grow">
           <span class="pl-1">by</span>
           <!-- We could offer keyboard navigation for clicking this, but it's a waste of the user's time while nagivating via keyboard. If they want to search by author, they could enter the mod description pane -->
-          <span class="color-primary whitespace-nowrap" on:click|stopPropagation={authorClick} on:keypress|stopPropagation={authorClick} role="button" tabindex="-1">{author}</span>
+          <span class="text-primary-600 whitespace-nowrap" on:click|stopPropagation={authorClick} on:keypress|stopPropagation={authorClick} role="button" tabindex="-1">{author}</span>
         </div>
       </div>
       <div class="truncate @md/mods-list:text-base text-sm hidden @md/mods-list:block">{'short_description' in mod ? mod.short_description : ''}</div>

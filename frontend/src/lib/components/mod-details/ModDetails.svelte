@@ -138,11 +138,11 @@
   function colorForCompatibilityState(state?: CompatibilityState) {
     switch(state) {
       case CompatibilityState.Broken:
-        return 'error';
+        return 'text-error-500';
       case CompatibilityState.Damaged:
-        return 'warning';
+        return 'text-warning-500';
       case CompatibilityState.Works:
-        return 'success';
+        return 'text-primary-700';
     }
     return '';
   }
@@ -310,16 +310,16 @@
   } satisfies PopupSettings;
 </script>
 
-<div class="@container/mod-details h-full flex mods-details w-full  @3xl/mod-details:text-base text-sm">
+<div class="@container/mod-details h-full flex mods-details w-full bg-surface-200-700-token @3xl/mod-details:text-base text-sm">
   <div class="px-4 py-4 flex flex-col h-full @3xl/mod-details:w-64 w-52 mods-details" style="border-right-color: rgba(239, 239, 239, 0.12);">
     <img src={renderedLogo} alt="{mod?.name} Logo" class="logo w-full" />
     <span class="pt-4 font-bold @3xl/mod-details:text-lg text-base">{mod?.name ?? 'Loading...'}</span>
     <span class="pt-2 font-light">A mod by:</span>
-    <span bind:this={focusOnEntry} class="font-medium color-primary cursor-pointer" role="button" tabindex="0" on:click={authorClick} on:keypress={authorClick} >{author ?? 'Loading...'}</span>
+    <span bind:this={focusOnEntry} class="font-medium text-primary-600 cursor-pointer" role="button" tabindex="0" on:click={authorClick} on:keypress={authorClick} >{author ?? 'Loading...'}</span>
     
     <div class="pt-2" use:popup={authorsMenu}>
       <button class="btn px-4 h-10 text-sm w-full bg-secondary-600">
-        <span class="whitespace-break-spaces">Contributors <span class="color-primary">({mod?.authors.length ?? 0})</span></span>
+        <span class="whitespace-break-spaces">Contributors <span class="text-primary-600">({mod?.authors.length ?? 0})</span></span>
         <SvgIcon
           class="h-5 w-5"
           icon={mdiChevronDown}/>
@@ -368,7 +368,7 @@
               </div>
               
               <Tooltip popupId={compatEAPopupId}>
-                <span class="text-lg">
+                <span class="text-base">
                   This mod has been reported as {mod.compatibility.EA.state} on Early Access.
                 </span>
                 {#if mod.compatibility.EA.note}
@@ -382,7 +382,7 @@
                 <SvgIcon icon={mdiTestTube} class="{colorForCompatibilityState(mod.compatibility.EXP.state)} w-5" />
               </div>
               <Tooltip popupId={compatEXPPopupId}>
-                <span class="text-lg">
+                <span class="text-base">
                   This mod has been reported as {mod.compatibility.EXP.state} on Experimental.
                 </span>
                 {#if mod.compatibility.EXP.note}
@@ -396,7 +396,7 @@
           {:else}
             <span use:popup={compatUnknownPopup} class="font-bold">&nbsp;Unknown</span>
             <Tooltip popupId={compatUnknownPopupId}>
-              <span class="text-lg">No compatibility information has been reported for this mod yet. Try it out and contact us on the Discord so it can be updated!</span>
+              <span class="text-base">No compatibility information has been reported for this mod yet. Try it out and contact us on the Discord so it can be updated!</span>
             </Tooltip>
           {/if}
         </div>
@@ -510,7 +510,7 @@
       <span>Close</span>
     </button>
   </div>
-  <div class="markdown-content break-words overflow-wrap-anywhere flex-1 px-3 my-4 overflow-y-scroll overflow-x-hidden w-0">
+  <div class="markdown-content break-words overflow-wrap-anywhere flex-1 px-3 mr-3 my-4 overflow-y-scroll overflow-x-hidden w-0">
     {#if $offline}
       <div class="flex items-center justify-center h-full text-center font-bold">Offline mode is enabled. Changelogs and descriptions are not available.</div>
     {:else if descriptionRendered}

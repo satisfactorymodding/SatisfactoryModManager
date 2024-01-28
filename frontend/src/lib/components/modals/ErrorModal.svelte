@@ -12,7 +12,7 @@
   </header>
   <section class="p-4">
     <p>{error}</p>
-    <p class="pt-4">Seems wrong? Click the button below and send the generated zip file on the <a class="color-primary underline" href="https://discord.gg/xkVJ73E">modding discord</a> in #help-using-mods.</p>
+    <p class="pt-4">Seems wrong? Click the button below and send the generated zip file on the <a class="text-primary-600 underline" href="https://discord.gg/xkVJ73E">modding discord</a> in #help-using-mods.</p>
   </section>
   <footer class="card-footer">
     <button

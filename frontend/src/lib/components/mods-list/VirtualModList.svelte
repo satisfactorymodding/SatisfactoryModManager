@@ -8,6 +8,7 @@
   export let bench = 10;
   let clazz = '';
   export { clazz as class };
+  export let containerClass = '';
 
   let start = 0;
   let end = 10;
@@ -73,6 +74,7 @@
 >
   <div
     bind:this={container}
+    class={containerClass}
     style="padding-top: {top}px; padding-bottom: {bottom}px;"
   >
     {#each visibleItems as item (item.index)}

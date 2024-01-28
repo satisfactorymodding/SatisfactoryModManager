@@ -10,6 +10,8 @@ body {
   margin: 0;
   padding: 0;
   overflow: hidden;
+  @apply text-white;
+  @apply text-sm;
 }
 
 html.accessibility,
@@ -19,6 +21,17 @@ body.accessibility {
 
 button {
   @apply tracking-wider;
+}
+
+::-webkit-scrollbar-track {
+  @apply rounded-token;
+}
+::-webkit-scrollbar-thumb {
+	@apply bg-surface-500-400-token;
+  
+  &:hover {
+    @apply bg-surface-600-300-token;
+  }
 }
 
 .markdown-content {
