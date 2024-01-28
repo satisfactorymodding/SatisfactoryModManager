@@ -4,12 +4,11 @@
   import Fuse from 'fuse.js';
   import { createEventDispatcher } from 'svelte';
 
-  import AnnouncementsBar from '../announcements/AnnouncementsBar.svelte';
-
   import ModListFilters from './ModsListFilters.svelte';
 
+  import AnnouncementsBar from '$lib/components/announcements/AnnouncementsBar.svelte';
   import { GetModsDocument, GetModCountDocument } from '$lib/generated';
-  import VirtualList from '$lib/components/mods-list/VirtualModList.svelte';
+  import VirtualList from '$lib/components/VirtualList.svelte';
   import ModsListItem from '$lib/components/mods-list/ModsListItem.svelte';
   import { filter, order, search, type PartialMod, type OfflineMod } from '$lib/store/modFiltersStore';
   import { favoriteMods, lockfileMods, manifestMods } from '$lib/store/ficsitCLIStore';

@@ -1,9 +1,8 @@
-<script lang="ts">
+<script generics="T" lang="ts">
   import { tick } from 'svelte';
 
-  import type { PartialMod } from '$lib/store/modFiltersStore';
-
-  export let items: PartialMod[];
+  // eslint-disable-next-line no-undef
+  export let items: T[];
   export let itemHeight: number | undefined = undefined;
   export let bench = 10;
   let clazz = '';
