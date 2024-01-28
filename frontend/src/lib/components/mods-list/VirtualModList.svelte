@@ -20,33 +20,35 @@
   $: {
     heightMap = Array.from({ length: items.length });
     if(viewport && container && items.length > 0) {
-      tick().then(onScroll);
+      tick().then(updateVisible);
     }
   }
 
-  $: top = heightMap.slice(0, start).reduce((acc, curr) => acc + curr, 0);
-  $: bottom = heightMap.slice(end).reduce((acc, curr) => acc + curr, 0);
-  $: visibleItems = items.map((data, index) => ({ index, data })).slice(start, end);
 
   function updateHeightMap() {
-    const itemElements = Array.from(container?.children ?? []);
-    itemElements.forEach((elem, idx) => {
+    const virtualRows = Array.from(container?.children ?? []);
+    virtualRows.forEach((elem, idx) => {
       heightMap[start + idx] = elem.clientHeight;
     });
     
     const setHeights = heightMap.filter((x) => !!x);
     const averageHeight = setHeights.reduce((acc, curr) => acc + curr, 0) / setHeights.length;
     
-    for(let i = 0; i < heightMap.length; i++) {
-      heightMap[i] = itemHeight ?? (heightMap[i] ?? averageHeight);
-    }
+    heightMap = heightMap.map((x) => x ?? (itemHeight ?? averageHeight));
   }
 
-  function onScroll() {
+  let viewportHeight: number;
+
+  $: if(viewport) {
+    // Add or remove elements when the viewport height changes
+    viewportHeight;
+    updateVisible();
+  }
+
+  async function updateVisible() {
     const { scrollTop } = viewport;
 
     updateHeightMap();
-
     
     let height = 0;
     let newStart = 0;
@@ -77,12 +79,18 @@
       await tick();
       viewport.scrollTo({ top: scrollTop, behavior: 'instant' });
     }
+  }
+
+  $: top = heightMap.slice(0, start).reduce((acc, curr) => acc + curr, 0);
+  $: bottom = heightMap.slice(end).reduce((acc, curr) => acc + curr, 0);
+  $: visibleItems = items.map((data, index) => ({ index, data })).slice(start, end);
 </script>
 
 <div
   bind:this={viewport}
   class="relative overflow-y-scroll h-full {clazz}"
-  on:scroll={onScroll}
+  bind:offsetHeight={viewportHeight}
+  on:scroll={updateVisible}
 >
   <div
     bind:this={container}
