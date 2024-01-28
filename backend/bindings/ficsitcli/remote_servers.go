@@ -41,6 +41,7 @@ func (f *FicsitCLI) AddRemoteServer(path string) error {
 		if err != nil {
 			return errors.Wrap(err, "failed to add installation")
 		}
+		_ = f.ficsitCli.Installations.Save()
 	}
 	gameVersion, err := installation.GetGameVersion(f.ficsitCli)
 	if err != nil {
@@ -59,6 +60,10 @@ func (f *FicsitCLI) AddRemoteServer(path string) error {
 		installType = common.InstallTypeWindowsServer
 	case "LinuxServer":
 		installType = common.InstallTypeLinuxServer
+	}
+
+	if installType == common.InstallTypeWindowsClient {
+		return errors.New("remote server is not a server installation")
 	}
 
 	branch := common.BranchEarlyAccess // TODO: Do we have a way to detect this for remote installs?
