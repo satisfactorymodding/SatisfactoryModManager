@@ -1,0 +1,95 @@
+project_name: SatisfactoryModManager
+
+before:
+  hooks:
+    - go generate -x -tags tools ./...
+    - go mod tidy
+
+### Build
+
+builds:
+  - id: standalone
+
+    goos:
+      - linux
+    goarch:
+      - amd64
+
+    # Wails v2 apps cannot be built using regular go build, and must use wails build
+    # However, wails takes only the filename as the -o argument, so we use a wrapper that handles that
+    gobinary: "./.github/wailsWrapper.sh"
+    ldflags:
+      # The default args
+      - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
+      # Auto-update mode
+      - -X main.updateMode=standalone
+  
+  - id: package-manager
+
+    goos:
+      - linux
+    goarch:
+      - amd64
+
+    # Wails v2 apps cannot be built using regular go build, and must use wails build
+    # However, wails takes only the filename as the -o argument, so we use a wrapper that handles that
+    gobinary: "./.github/wailsWrapper.sh"
+    ldflags:
+      # The default args
+      - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
+      # Auto-update mode
+      - -X main.updateMode=package-manager
+
+  - id: nsis
+
+    binary: Satisfactory-Mod-Manager-Setup
+
+    goos:
+      - windows
+    goarch:
+      - amd64
+
+    # Wails v2 apps cannot be built using regular go build, and must use wails build
+    # However, wails takes only the filename as the -o argument, so we use a wrapper that handles that
+    gobinary: "./.github/wailsWrapper.sh"
+    ldflags:
+      # The default args
+      - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
+      # Auto-update mode
+      - -X autoupdate.updateMode=nsis
+
+    flags:
+      - nsis
+
+### Package
+
+archives:
+  - id: windows-nsis
+    builds:
+      - nsis
+    format: binary
+    name_template: Satisfactory-Mod-Manager-Setup # Use existing naming format for now for auto-update support
+
+  - id: standalone
+    builds:
+      - standalone
+    format: binary
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}"
+
+checksum:
+  name_template: 'checksums.txt'
+
+### Release
+
+release:  
+  draft: true
+  name_template: "{{.ProjectName}} v{{.Version}}"
+  
+  # Include all artifacts: windows-nsis, standalone
+
+  header: |
+    ## Installation
+    Download and run `Satisfactory-Mod-Manager-Setup.exe` (Windows) or `SatisfactoryModManager_linux_win64` (Linux)
+    If you already have Satisfactory Mod Manager installed, you don't need to download it again, it will auto-update.
+    
+    ## Changelog
