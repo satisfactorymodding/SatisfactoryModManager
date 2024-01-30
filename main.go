@@ -21,6 +21,7 @@ import (
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate/updater"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/bindings"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/bindings/ficsitcli"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/settings"
@@ -40,14 +41,18 @@ var (
 )
 
 func main() {
-	autoupdate.Init(autoupdate.Config{
-		UpdateFoundCallback: func(latestVersion string, changelogs map[string]string) {
-			bindings.BindingsInstance.Update.UpdateAvailable(latestVersion, changelogs)
-		},
-		DownloadProgressCallback: func(bytesDownloaded, totalBytes int64) {
-			bindings.BindingsInstance.Update.UpdateDownloadProgress(bytesDownloaded, totalBytes)
-		},
-		UpdateReadyCallback: func() { bindings.BindingsInstance.Update.UpdateReady() },
+	autoupdate.Init()
+
+	autoupdate.Updater.UpdateFound.On(func(pendingUpdate updater.PendingUpdate) {
+		bindings.BindingsInstance.Update.UpdateAvailable(pendingUpdate.Version, pendingUpdate.Changelogs)
+	})
+
+	autoupdate.Updater.DownloadProgress.On(func(progress updater.UpdateDownloadProgress) {
+		bindings.BindingsInstance.Update.UpdateDownloadProgress(progress.BytesDownloaded, progress.BytesTotal)
+	})
+
+	autoupdate.Updater.UpdateReady.On(func(_ interface{}) {
+		bindings.BindingsInstance.Update.UpdateReady()
 	})
 
 	err := settings.LoadSettings()

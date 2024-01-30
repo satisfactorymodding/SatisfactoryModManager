@@ -11,9 +11,9 @@ import (
 
 func (u *Updater) CheckForUpdate() error {
 	if u.PendingUpdate != nil {
-		u.config.UpdateFoundCallback(u.PendingUpdate.Version, u.PendingUpdate.Changelogs)
+		u.UpdateFound.Dispatch(*u.PendingUpdate)
 		if u.PendingUpdate.Ready {
-			u.config.UpdateReadyCallback()
+			u.UpdateReady.Dispatch(nil)
 		}
 	}
 
@@ -73,7 +73,7 @@ func (u *Updater) CheckForUpdate() error {
 		Changelogs: newChangelogs,
 		Ready:      false,
 	}
-	u.config.UpdateFoundCallback(latestVersion, newChangelogs)
+	u.UpdateFound.Dispatch(*u.PendingUpdate)
 
 	if u.config.File == "" || u.config.Apply == nil {
 		slog.Debug("no update file or apply method specified, not downloading update")
@@ -85,13 +85,20 @@ func (u *Updater) CheckForUpdate() error {
 		return errors.Wrap(err, "failed to get file")
 	}
 	defer file.Close()
-	p := &progressReader{Reader: file, progressCallback: u.config.DownloadProgressCallback, contentLength: length}
+
+	progress := func(bytesDownloaded, bytesTotal int64) {
+		u.DownloadProgress.Dispatch(UpdateDownloadProgress{
+			BytesDownloaded: bytesDownloaded,
+			BytesTotal:      bytesTotal,
+		})
+	}
+	p := &progressReader{Reader: file, progressCallback: progress, contentLength: length}
 
 	err = u.config.Apply.Apply(p)
 	if err != nil {
 		return errors.Wrap(err, "failed to apply update")
 	}
 	u.PendingUpdate.Ready = true
-	u.config.UpdateReadyCallback()
+	u.UpdateReady.Dispatch(nil)
 	return nil
 }
