@@ -216,6 +216,10 @@ func (f *FicsitCLI) ExportCurrentProfile() error {
 		l.Error("failed to open save dialog", slog.Any("error", err))
 		return errors.Wrapf(err, "failed to open save dialog")
 	}
+	if filename == "" {
+		// User cancelled
+		return nil
+	}
 
 	exportedProfileJSON, err := utils.JSONMarshal(exportedProfile, 2)
 	if err != nil {
