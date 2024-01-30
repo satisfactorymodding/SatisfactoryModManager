@@ -180,17 +180,18 @@ func (s *Settings) SetAnnouncementViewed(announcement string) {
 }
 
 func (s *Settings) SetCacheDir(dir string) error {
+	realDir := dir
 	if dir == "" {
-		dir = viper.GetString("default-cache-dir")
+		realDir = viper.GetString("default-cache-dir")
 	}
-	err := ficsitcli.MoveCacheDir(dir)
+	err := ficsitcli.MoveCacheDir(realDir)
 	if err != nil {
 		slog.Error("failed to set cache dir", slog.Any("error", err))
 		return err
 	}
 	settings.Settings.CacheDir = dir
 	_ = settings.SaveSettings()
-	wailsRuntime.EventsEmit(s.ctx, "cacheDir", dir)
+	wailsRuntime.EventsEmit(s.ctx, "cacheDir", s.GetCacheDir())
 	return nil
 }
 
