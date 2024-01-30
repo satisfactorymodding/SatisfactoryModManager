@@ -30,8 +30,9 @@ If there is any error message, please include it along with the generated debug 
 Check the [modding documentation](https://docs.ficsit.app/satisfactory-modding/latest/ForUsers/SatisfactoryModManager.html)
 for common issues and their solutions.
 
-* Profile and installation records are located in `%APPDATA%\SatisfactoryModManager\`
-* Downloads are cached in `%LOCALAPPDATA%\SatisfactoryModManager\downloadCache\`
+* Profile and installation records are located in `%APPDATA%\ficsit\`
+* Downloads are cached in `%LOCALAPPDATA%\ficsit\downloadCache\`
+* Logs are stored in `%LOCALAPPDATA%\SatisfactoryModManager\logs`
 
 ## Development
 
