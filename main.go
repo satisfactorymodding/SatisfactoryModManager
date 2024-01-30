@@ -44,7 +44,7 @@ func main() {
 	autoupdate.Init()
 
 	autoupdate.Updater.UpdateFound.On(func(pendingUpdate updater.PendingUpdate) {
-		bindings.BindingsInstance.Update.UpdateAvailable(pendingUpdate.Version, pendingUpdate.Changelogs)
+		bindings.BindingsInstance.Update.UpdateAvailable(pendingUpdate.Version.String(), pendingUpdate.Changelogs)
 	})
 
 	autoupdate.Updater.DownloadProgress.On(func(progress updater.UpdateDownloadProgress) {
@@ -136,7 +136,7 @@ func main() {
 
 func init() {
 	// Pass build-time variables to viper
-	if version[0] == 'v' {
+	if len(version) > 0 && version[0] == 'v' {
 		version = version[1:]
 	}
 	viper.Set("version", version)

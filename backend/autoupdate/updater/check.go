@@ -20,7 +20,7 @@ func (u *Updater) CheckForUpdate() error {
 	u.lock.Lock()
 	defer u.lock.Unlock()
 
-	latestVersion, err := u.config.Source.GetLatestVersion()
+	latestVersion, err := u.config.Source.GetLatestVersion(u.config.IncludePrerelease)
 	if err != nil {
 		return errors.Wrap(err, "failed to get latest version")
 	}
@@ -30,24 +30,12 @@ func (u *Updater) CheckForUpdate() error {
 		return errors.Wrapf(err, "failed to parse latest version %s", latestVersion)
 	}
 
-	var pendingSemver *semver.Version
-	if u.PendingUpdate != nil {
-		pendingSemver, err = semver.NewVersion(u.PendingUpdate.Version)
-		if err != nil {
-			return errors.Wrapf(err, "failed to parse pending version %s", u.PendingUpdate.Version)
-		}
-	}
-	currentSemver, err := semver.NewVersion(u.config.CurrentVersion)
-	if err != nil {
-		return errors.Wrapf(err, "failed to parse current version %s", u.config.CurrentVersion)
-	}
-
-	if pendingSemver != nil {
-		if !latestSemver.GreaterThan(pendingSemver) {
+	if u.PendingUpdate != nil && u.PendingUpdate.Version != nil {
+		if !latestSemver.GreaterThan(u.PendingUpdate.Version) {
 			return nil
 		}
 	} else {
-		if !latestSemver.GreaterThan(currentSemver) {
+		if !latestSemver.GreaterThan(u.config.CurrentVersion) {
 			return nil
 		}
 	}
@@ -59,17 +47,17 @@ func (u *Updater) CheckForUpdate() error {
 
 	newChangelogs := make(map[string]string)
 	for version, changelog := range changelogs {
-		semver, err := semver.NewVersion(version)
+		changelogSemver, err := semver.NewVersion(version)
 		if err != nil {
 			return errors.Wrap(err, "failed to parse version")
 		}
-		if semver.GreaterThan(currentSemver) && semver.Compare(latestSemver) <= 0 {
+		if changelogSemver.GreaterThan(u.config.CurrentVersion) && changelogSemver.Compare(latestSemver) <= 0 {
 			newChangelogs[version] = changelog
 		}
 	}
 
 	u.PendingUpdate = &PendingUpdate{
-		Version:    latestVersion,
+		Version:    latestSemver,
 		Changelogs: newChangelogs,
 		Ready:      false,
 	}
@@ -80,9 +68,9 @@ func (u *Updater) CheckForUpdate() error {
 		return nil
 	}
 
-	file, length, err := u.config.Source.GetFile(u.config.File)
+	file, length, err := u.config.Source.GetFile(latestVersion, u.config.File)
 	if err != nil {
-		return errors.Wrap(err, "failed to get file")
+		return errors.Wrapf(err, "failed to get file %s of version %s", u.config.File, latestVersion)
 	}
 	defer file.Close()
 

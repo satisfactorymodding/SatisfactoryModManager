@@ -4,6 +4,8 @@ import (
 	"errors"
 	"sync"
 
+	"github.com/Masterminds/semver/v3"
+
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 )
 
@@ -22,16 +24,17 @@ type Updater struct {
 }
 
 type PendingUpdate struct {
-	Version    string
+	Version    *semver.Version
 	Changelogs map[string]string
 	Ready      bool
 }
 
 type Config struct {
-	Source         Source
-	File           string
-	Apply          Apply
-	CurrentVersion string
+	Source            Source
+	File              string
+	Apply             Apply
+	CurrentVersion    *semver.Version
+	IncludePrerelease bool
 }
 
 func MakeUpdater(config Config) *Updater {

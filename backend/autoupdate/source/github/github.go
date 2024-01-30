@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/Masterminds/semver/v3"
 	"github.com/pkg/errors"
 )
 
@@ -18,16 +19,43 @@ func MakeGithubProvider(repo string) *Provider {
 	}
 }
 
-func (g *Provider) GetLatestVersion() (string, error) {
-	release, err := g.getLatestReleaseData()
-	if err != nil {
-		return "", errors.Wrap(err, "failed to get latest release")
+func (g *Provider) GetLatestVersion(includePrerelease bool) (string, error) {
+	if !includePrerelease {
+		release, err := g.getLatestReleaseData()
+		if err != nil {
+			return "", errors.Wrap(err, "failed to get latest release")
+		}
+		return release.TagName, nil
 	}
-	return release.TagName, nil
+
+	// GitHub does not return pre-releases on the /latest endpoint
+	allReleases, err := g.getReleasesData()
+	var latest *semver.Version
+	var latestTagName string
+	if err != nil {
+		return "", errors.Wrap(err, "failed to get releases")
+	}
+	for _, release := range allReleases {
+		version, err := semver.NewVersion(release.TagName)
+		if err != nil {
+			continue
+		}
+		if !includePrerelease && version.Prerelease() != "" {
+			continue
+		}
+		if latest == nil || version.GreaterThan(latest) {
+			latest = version
+			latestTagName = release.TagName
+		}
+	}
+	if latest == nil {
+		return "", errors.New("no releases found")
+	}
+	return latestTagName, nil
 }
 
-func (g *Provider) GetFile(filename string) (io.ReadCloser, int64, error) {
-	release, err := g.getLatestReleaseData()
+func (g *Provider) GetFile(version string, filename string) (io.ReadCloser, int64, error) {
+	release, err := g.getReleaseData(version)
 	if err != nil {
 		return nil, 0, errors.Wrap(err, "failed to get latest release")
 	}
@@ -86,4 +114,18 @@ func (g *Provider) getReleasesData() ([]Release, error) {
 		return nil, errors.Wrap(err, "failed to decode releases")
 	}
 	return releases, nil
+}
+
+func (g *Provider) getReleaseData(tagName string) (*Release, error) {
+	response, err := http.Get("https://api.github.com/repos/" + g.repo + "/releases/tags/" + tagName)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get releases")
+	}
+	defer response.Body.Close()
+	var release Release
+	err = json.NewDecoder(response.Body).Decode(&release)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to decode releases")
+	}
+	return &release, nil
 }

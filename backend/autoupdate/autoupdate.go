@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/Masterminds/semver/v3"
 	"github.com/spf13/viper"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate/source/github"
@@ -15,9 +16,22 @@ var Updater *updater.Updater
 var checkStarted bool
 
 func Init() {
+	if Updater != nil {
+		return
+	}
+	Updater = updater.MakeUpdater(makeUpdaterConfig())
+}
+
+func makeUpdaterConfig() updater.Config {
+	currentVersion, err := semver.NewVersion(viper.GetString("version"))
+	if err != nil {
+		slog.Error("failed to parse current version, using 0.0.0-unknown", slog.Any("error", err))
+		currentVersion = semver.New(0, 0, 0, "unknown", "")
+	}
 	config := updater.Config{
-		Source:         github.MakeGithubProvider(viper.GetString("github-release-repo")),
-		CurrentVersion: viper.GetString("version"),
+		Source:            github.MakeGithubProvider(viper.GetString("github-release-repo")),
+		CurrentVersion:    currentVersion,
+		IncludePrerelease: currentVersion.Prerelease() != "", // Currently only update to a prerelease if the current version is a prerelease too
 	}
 	updateType := getUpdateType()
 	// Some builds cannot (or should not) auto-update
@@ -25,7 +39,7 @@ func Init() {
 		config.File = updateType.ArtifactName
 		config.Apply = updateType.Apply
 	}
-	Updater = updater.MakeUpdater(config)
+	return config
 }
 
 var (
