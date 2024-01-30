@@ -20,9 +20,9 @@ func init() {
 	// })
 	registerUpdateType("nsis", func() UpdateType {
 		return UpdateType{
-			ArtifactName: "Satisfactory-Mod-Manager-Setup.exe",
+			ArtifactName: "SatisfactoryModManager-Setup.exe",
 			Apply: apply.MakeNsisApply(apply.NsisApplyConfig{
-				InstallerDownloadPath: filepath.Join(viper.GetString("smm-cache-dir"), "Satisfactory-Mod-Manager-Setup.exe"),
+				InstallerDownloadPath: filepath.Join(viper.GetString("smm-cache-dir"), "SatisfactoryModManager-Setup.exe"),
 				IsAllUsers:            isAllUsers(),
 			}),
 		}

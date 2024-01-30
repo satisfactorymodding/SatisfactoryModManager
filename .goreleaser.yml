@@ -42,7 +42,7 @@ builds:
 
   - id: nsis
 
-    binary: Satisfactory-Mod-Manager-Setup
+    binary: SatisfactoryModManager-Setup # This name must match the nsis script OutFile, so the installer overwrites the wails built exe
 
     goos:
       - windows
@@ -68,7 +68,7 @@ archives:
     builds:
       - nsis
     format: binary
-    name_template: Satisfactory-Mod-Manager-Setup # Use existing naming format for now for auto-update support
+    name_template: SatisfactoryModManager-Setup
 
   - id: standalone
     builds:
@@ -89,7 +89,7 @@ release:
 
   header: |
     ## Installation
-    Download and run `Satisfactory-Mod-Manager-Setup.exe` (Windows) or `SatisfactoryModManager_linux_win64` (Linux)
+    Download and run `SatisfactoryModManager-Setup.exe` (Windows) or `SatisfactoryModManager_linux_win64` (Linux)
     If you already have Satisfactory Mod Manager installed, you don't need to download it again, it will auto-update.
     
     ## Changelog
