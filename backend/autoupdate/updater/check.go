@@ -3,6 +3,8 @@
 package updater
 
 import (
+	"log/slog"
+
 	"github.com/Masterminds/semver/v3"
 	"github.com/pkg/errors"
 )
@@ -73,7 +75,12 @@ func (u *Updater) CheckForUpdate() error {
 	}
 	u.config.UpdateFoundCallback(latestVersion, newChangelogs)
 
-	file, length, err := u.config.Source.GetFile()
+	if u.config.File == "" || u.config.Apply == nil {
+		slog.Debug("no update file or apply method specified, not downloading update")
+		return nil
+	}
+
+	file, length, err := u.config.Source.GetFile(u.config.File)
 	if err != nil {
 		return errors.Wrap(err, "failed to get file")
 	}

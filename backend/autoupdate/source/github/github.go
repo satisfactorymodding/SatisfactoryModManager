@@ -9,14 +9,12 @@ import (
 )
 
 type Provider struct {
-	repo            string
-	releaseFilename string
+	repo string
 }
 
-func MakeGithubProvider(repo string, releaseFilename string) *Provider {
+func MakeGithubProvider(repo string) *Provider {
 	return &Provider{
-		repo:            repo,
-		releaseFilename: releaseFilename,
+		repo: repo,
 	}
 }
 
@@ -28,24 +26,24 @@ func (g *Provider) GetLatestVersion() (string, error) {
 	return release.TagName, nil
 }
 
-func (g *Provider) GetFile() (io.ReadCloser, int64, error) {
+func (g *Provider) GetFile(filename string) (io.ReadCloser, int64, error) {
 	release, err := g.getLatestReleaseData()
 	if err != nil {
 		return nil, 0, errors.Wrap(err, "failed to get latest release")
 	}
 	var url string
 	for _, asset := range release.Assets {
-		if asset.Name == g.releaseFilename {
+		if asset.Name == filename {
 			url = asset.BrowserDownloadURL
 			break
 		}
 	}
 	if url == "" {
-		return nil, 0, errors.Errorf("failed to find asset %s", g.releaseFilename)
+		return nil, 0, errors.Errorf("failed to find asset")
 	}
 	response, err := http.Get(url)
 	if err != nil {
-		return nil, 0, errors.Wrapf(err, "failed to download asset %s", g.releaseFilename)
+		return nil, 0, errors.Wrapf(err, "failed to download asset")
 	}
 	return response.Body, response.ContentLength, nil
 }

@@ -18,6 +18,7 @@ type PendingUpdate struct {
 
 type Config struct {
 	Source                   Source
+	File                     string
 	Apply                    Apply
 	CurrentVersion           string
 	UpdateFoundCallback      func(latestVersion string, changelogs map[string]string)

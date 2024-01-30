@@ -15,20 +15,26 @@ var Updater *updater.Updater
 var checkStarted bool
 
 func Init(config Config) {
-	updateType := getUpdateType()
-	if updateType == nil {
-		// No updater for this build type
-		return
-	}
-	Updater = updater.MakeUpdater(updater.Config{
-		Source:                   github.MakeGithubProvider(viper.GetString("github-release-repo"), updateType.ArtifactName),
-		Apply:                    updateType.Apply,
+	updateConfig := updater.Config{
+		Source:                   github.MakeGithubProvider(viper.GetString("github-release-repo")),
 		CurrentVersion:           viper.GetString("version"),
 		UpdateFoundCallback:      config.UpdateFoundCallback,
 		DownloadProgressCallback: config.DownloadProgressCallback,
 		UpdateReadyCallback:      config.UpdateReadyCallback,
-	})
+	}
+	updateType := getUpdateType()
+	// Some builds cannot (or should not) auto-update
+	if updateType != nil {
+		updateConfig.File = updateType.ArtifactName
+		updateConfig.Apply = updateType.Apply
+	}
+	Updater = updater.MakeUpdater(updateConfig)
 }
+
+var (
+	updateCheckTicker *time.Ticker
+	updateCheckStop   = make(chan bool)
+)
 
 func CheckInterval(interval time.Duration) {
 	if checkStarted {
