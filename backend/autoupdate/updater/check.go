@@ -63,7 +63,7 @@ func (u *Updater) CheckForUpdate() error {
 		if err != nil {
 			return errors.Wrap(err, "failed to parse version")
 		}
-		if semver.GreaterThan(currentSemver) {
+		if semver.GreaterThan(currentSemver) && semver.Compare(latestSemver) <= 0 {
 			newChangelogs[version] = changelog
 		}
 	}
