@@ -29,7 +29,7 @@ func makeUpdaterConfig() updater.Config {
 		currentVersion = semver.New(0, 0, 0, "unknown", "")
 	}
 	config := updater.Config{
-		Source:            github.MakeGithubProvider(viper.GetString("github-release-repo")),
+		Source:            github.MakeGithubProvider(viper.GetString("github-release-repo"), "checksums.txt"),
 		CurrentVersion:    currentVersion,
 		IncludePrerelease: currentVersion.Prerelease() != "", // Currently only update to a prerelease if the current version is a prerelease too
 	}

@@ -68,7 +68,7 @@ func (u *Updater) CheckForUpdate() error {
 		return nil
 	}
 
-	file, length, err := u.config.Source.GetFile(latestVersion, u.config.File)
+	file, length, checksum, err := u.config.Source.GetFile(latestVersion, u.config.File)
 	if err != nil {
 		return errors.Wrapf(err, "failed to get file %s of version %s", u.config.File, latestVersion)
 	}
@@ -82,7 +82,7 @@ func (u *Updater) CheckForUpdate() error {
 	}
 	p := &progressReader{Reader: file, progressCallback: progress, contentLength: length}
 
-	err = u.config.Apply.Apply(p)
+	err = u.config.Apply.Apply(p, checksum)
 	if err != nil {
 		return errors.Wrap(err, "failed to apply update")
 	}

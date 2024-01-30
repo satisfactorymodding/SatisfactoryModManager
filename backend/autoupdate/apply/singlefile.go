@@ -15,8 +15,10 @@ func MakeSingleFileApply() *SingleFileApply {
 	return &SingleFileApply{}
 }
 
-func (a *SingleFileApply) Apply(file io.Reader) error {
-	err := selfupdate.Apply(file, selfupdate.Options{})
+func (a *SingleFileApply) Apply(file io.Reader, checksum []byte) error {
+	err := selfupdate.Apply(file, selfupdate.Options{
+		Checksum: checksum,
+	})
 	if err != nil {
 		return errors.Wrap(err, "failed to apply singlefile update")
 	}
