@@ -24,11 +24,12 @@ func MakeNsisApply(config NsisApplyConfig) *NsisApply {
 }
 
 func (a *NsisApply) Apply(file io.Reader) error {
-	fileContent, err := io.ReadAll(file)
+	f, err := os.OpenFile(a.config.InstallerDownloadPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o755)
 	if err != nil {
-		return errors.Wrap(err, "failed to read installer file")
+		return errors.Wrap(err, "failed to open installer file")
 	}
-	err = os.WriteFile(a.config.InstallerDownloadPath, fileContent, 0o755)
+	defer f.Close()
+	_, err = io.Copy(f, file)
 	if err != nil {
 		return errors.Wrap(err, "failed to write installer file")
 	}

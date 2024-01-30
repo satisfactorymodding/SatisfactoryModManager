@@ -2,8 +2,6 @@ package updater
 
 import (
 	"io"
-
-	"github.com/pkg/errors"
 )
 
 type progressReader struct {
@@ -27,5 +25,5 @@ func (pr *progressReader) Read(p []byte) (int, error) {
 		pr.progressCallback(pr.downloaded, pr.downloaded)
 	}
 
-	return n, errors.Wrap(err, "failed to read from reader")
+	return n, err //nolint:wrapcheck
 }
