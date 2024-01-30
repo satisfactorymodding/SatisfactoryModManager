@@ -7,7 +7,7 @@ import (
 func init() {
 	registerUpdateType("standalone", func() UpdateType {
 		return UpdateType{
-			ArtifactName: "SatisfactoryModManager",
+			ArtifactName: "SatisfactoryModManager_linux_amd64",
 			Apply:        apply.MakeSingleFileApply(),
 		}
 	})
