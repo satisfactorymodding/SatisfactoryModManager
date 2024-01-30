@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"embed"
-	"encoding/json"
 	"log/slog"
 	"os"
 	"path"
@@ -12,7 +11,6 @@ import (
 	"time"
 
 	"github.com/lmittmann/tint"
-	"github.com/pkg/errors"
 	slogmulti "github.com/samber/slog-multi"
 	"github.com/spf13/viper"
 	"github.com/tawesoft/golib/v2/dialog"
@@ -25,7 +23,6 @@ import (
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/bindings"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/bindings/ficsitcli"
-	"github.com/satisfactorymodding/SatisfactoryModManager/backend/projectfile"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/settings"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/websocket"
@@ -34,16 +31,13 @@ import (
 //go:embed all:frontend/build
 var assets embed.FS
 
-//go:embed wails.json
-var projectFile []byte
+var (
+	version = "dev"
+	commit  = "unknown"
+	date    = "unknown"
 
-func loadProjectFile() error {
-	err := json.Unmarshal(projectFile, &projectfile.ProjectFile)
-	if err != nil {
-		return errors.Wrap(err, "failed to load project file")
-	}
-	return nil
-}
+	updateMode = "none"
+)
 
 func main() {
 	autoupdate.Init(autoupdate.Config{
@@ -133,11 +127,14 @@ func main() {
 }
 
 func init() {
-	err := loadProjectFile()
-	if err != nil {
-		_ = dialog.Error("Failed to load project file: %s", err.Error())
-		panic(err)
+	// Pass build-time variables to viper
+	if version[0] == 'v' {
+		version = version[1:]
 	}
+	viper.Set("version", version)
+	viper.Set("commit", commit)
+	viper.Set("date", date)
+	viper.Set("update-mode", updateMode)
 
 	// general config
 
@@ -180,7 +177,6 @@ func init() {
 
 	viper.Set("websocket-port", 33642)
 
-	viper.Set("version", projectfile.ProjectFile.Info.ProductVersion)
 	viper.Set("github-release-repo", "satisfactorymodding/SatisfactoryModManager")
 
 	// ficsit-cli config

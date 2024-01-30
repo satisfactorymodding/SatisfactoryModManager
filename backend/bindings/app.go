@@ -11,7 +11,6 @@ import (
 	"github.com/spf13/viper"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/backend/projectfile"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/settings"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 )
@@ -108,7 +107,15 @@ func (a *App) UnexpandMod() bool {
 }
 
 func (a *App) GetVersion() string {
-	return projectfile.Version()
+	return viper.GetString("version")
+}
+
+func (a *App) GetCommit() string {
+	return viper.GetString("commit")
+}
+
+func (a *App) GetDate() string {
+	return viper.GetString("date")
 }
 
 type FileFilter struct {

@@ -6,14 +6,25 @@ import (
 	"io"
 	"os"
 	"strings"
-
-	"github.com/satisfactorymodding/SatisfactoryModManager/backend/projectfile"
 )
 
 var (
 	wailsJSONFilePath = "wails.json"
 	viVersionFilePath = "build/windows/installer/vi_version.nsh"
 )
+
+type Info struct {
+	CompanyName    string  `json:"companyName"`
+	ProductName    string  `json:"productName"`
+	ProductVersion string  `json:"productVersion"`
+	Copyright      *string `json:"copyright"`
+	Comments       *string `json:"comments"`
+}
+
+type Project struct {
+	Name string `json:"name"`
+	Info Info   `json:"info"`
+}
 
 func main() {
 	wailsJSONFile, err := os.Open(wailsJSONFilePath)
@@ -27,7 +38,8 @@ func main() {
 		panic(err)
 	}
 
-	err = json.Unmarshal(projectFile, &projectfile.ProjectFile)
+	var project Project
+	err = json.Unmarshal(projectFile, &project)
 	if err != nil {
 		panic(err)
 	}
@@ -38,7 +50,7 @@ func main() {
 	}
 	defer f.Close()
 
-	version, _, _ := strings.Cut(projectfile.ProjectFile.Info.ProductVersion, "-")
+	version, _, _ := strings.Cut(project.Info.ProductVersion, "-")
 	version, _, _ = strings.Cut(version, "+")
 
 	for strings.Count(version, ".") < 3 {

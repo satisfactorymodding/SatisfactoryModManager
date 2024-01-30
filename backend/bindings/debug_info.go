@@ -17,7 +17,6 @@ import (
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
-	"github.com/satisfactorymodding/SatisfactoryModManager/backend/projectfile"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 )
 
@@ -121,7 +120,7 @@ func addMetadata(writer *zip.Writer) error {
 	}
 
 	metadata := Metadata{
-		SMMVersion:           projectfile.Version(),
+		SMMVersion:           viper.GetString("version"),
 		Installations:        metadataInstalls,
 		SelectedInstallation: selectedMetadataInstall,
 		Profiles:             metadataProfiles,
