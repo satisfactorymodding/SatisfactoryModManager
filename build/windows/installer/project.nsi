@@ -1,18 +1,25 @@
 Unicode true
 
+!addplugindir /x86-ansi ".\NsisMultiUser\Plugins\x86-ansi\"
+!addplugindir /x86-unicode ".\NsisMultiUser\Plugins\x86-unicode\"
+!addincludedir ".\NsisMultiUser\Include\"
+
 !define UNINST_KEY_NAME "${INFO_PRODUCTNAME}"
 !define REQUEST_EXECUTION_LEVEL "user"
 !include "wails_tools.nsh"
 
-!define MULTIUSER_EXECUTIONLEVEL Highest
-!define MULTIUSER_INSTALLMODE_COMMANDLINE 1
-!define MULTIUSER_USE_PROGRAMFILES64 1
-!define MULTIUSER_INSTALLMODE_INSTDIR "${INFO_PRODUCTNAME}"
-!define MULTIUSER_INSTALLMODE_DEFAULT_REGISTRY_KEY "${UNINST_KEY}"
-!define MULTIUSER_INSTALLMODE_DEFAULT_REGISTRY_VALUENAME "UninstallString"
-!define MULTIUSER_INSTALLMODE_INSTDIR_REGISTRY_KEY "${UNINST_KEY}"
-!define MULTIUSER_INSTALLMODE_INSTDIR_REGISTRY_VALUENAME "InstallPath"
-!include MultiUser.nsh
+# Convert wails defines to common names
+!define PRODUCT_NAME "${INFO_PRODUCTNAME}"
+!define VERSION "${INFO_PRODUCTVERSION}"
+!define PROGEXE "${PRODUCT_EXECUTABLE}"
+!define COMPANY_NAME "${INFO_COMPANYNAME}"
+!define URL_INFO_ABOUT "https://github.com/satisfactorymodding/SatisfactoryModManager"
+!define UNINSTALL_FILENAME "uninstall.exe"
+
+!define MULTIUSER_INSTALLMODE_DISPLAYNAME "${PRODUCT_NAME}"
+!define MULTIUSER_INSTALLMODE_ALLOW_ELEVATION_IF_SILENT 1 # We use silent mode when updating
+!define MULTIUSER_INSTALLMODE_64_BIT 1
+!include "NsisMultiUser.nsh"
 
 BrandingText "${INFO_PRODUCTNAME} ${INFO_PRODUCTVERSION}"
 
@@ -36,32 +43,40 @@ VIAddVersionKey "ProductName"     "${INFO_PRODUCTNAME}"
 !define MUI_ABORTWARNING
 
 !include "smm2_uninstall.nsh"
-!include "uninstaller.nsh"
 !include "utils.nsh"
 
-!define MUI_FINISHPAGE_SHOWREADME ""
-!define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
-!define MUI_FINISHPAGE_SHOWREADME_TEXT "Create Desktop Shortcut"
-!define MUI_FINISHPAGE_SHOWREADME_FUNCTION desktopShortcut
-
+# Install pages
+!define MUI_PAGE_CUSTOMFUNCTION_PRE WelcomePagePre
 !insertmacro MUI_PAGE_WELCOME
 
-!define MULTIUSER_PAGE_CUSTOMFUNCTION_PRE MultiUserPagePre
 !insertmacro MULTIUSER_PAGE_INSTALLMODE
 
 !define MUI_PAGE_CUSTOMFUNCTION_PRE DirectoryPagePre
 !insertmacro MUI_PAGE_DIRECTORY
 
 !insertmacro MUI_PAGE_INSTFILES
+
+!define MUI_FINISHPAGE_SHOWREADME ""
+!define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
+!define MUI_FINISHPAGE_SHOWREADME_TEXT "Create Desktop Shortcut"
+!define MUI_FINISHPAGE_SHOWREADME_FUNCTION desktopShortcut
 !insertmacro MUI_PAGE_FINISH
+
+# Uninstall pages
+
+!define MUI_UNABORTWARNING ; Show a confirmation when cancelling the installation
+
+; Pages
+!insertmacro MULTIUSER_UNPAGE_INSTALLMODE
 
 !insertmacro MUI_UNPAGE_INSTFILES
 
+# Language config
 !insertmacro MUI_LANGUAGE "English"
+!insertmacro MULTIUSER_LANGUAGE_INIT
 
-## The following two statements can be used to sign the installer and the uninstaller. The path to the binaries are provided in %1
-#!uninstfinalize 'signtool --file "%1"'
-#!finalize 'signtool --file "%1"'
+# Reserve files
+!insertmacro MUI_RESERVEFILE_LANGDLL
 
 Name "${INFO_PRODUCTNAME}"
 OutFile "..\..\bin\Satisfactory-Mod-Manager-Setup.exe"
@@ -84,15 +99,7 @@ Section
 
     !insertmacro smm2Uninst
 
-    ${If} $MultiUser.InstDir == ""
-        ${If} ${FileExists} "$InstDir\*"
-            Push $INSTDIR
-            Call isEmptyDir
-            Pop $0
-            StrCmp $0 0 0 +2
-            StrCpy $InstDir "$INSTDIR\${MULTIUSER_INSTALLMODE_INSTDIR}"
-        ${EndIf}
-    ${EndIf}
+    Call EnsureEmptyFolder
 
     SetOutPath $INSTDIR
     
@@ -103,7 +110,10 @@ Section
     !insertmacro wails.associateFiles
     !insertmacro wails.associateCustomProtocols
 
-    !insertmacro writeUninstaller
+    WriteUninstaller "$INSTDIR\${UNINSTALL_FILENAME}"
+
+    !insertmacro MULTIUSER_RegistryAddInstallInfo
+    !insertmacro MULTIUSER_RegistryAddInstallSizeInfo
 SectionEnd
 
 Section "uninstall"
@@ -117,22 +127,48 @@ Section "uninstall"
     !insertmacro wails.unassociateFiles
     !insertmacro wails.unassociateCustomProtocols
 
-    !insertmacro deleteUninstaller
+    !insertmacro MULTIUSER_RegistryRemoveInstallInfo
+
+    Delete "$INSTDIR\${UNINSTALL_FILENAME}"
+    RMDir "$INSTDIR"
 SectionEnd
+
+Function EnsureEmptyFolder
+    ${If} $MultiUser.InstallMode == "AllUsers"
+    ${AndIf} $HasPerMachineInstallation = 1
+        Return # Already installed, so just use existing install dir
+    ${EndIf}
+    ${If} $MultiUser.InstallMode == "CurrentUser"
+    ${AndIf} $HasPerUserInstallation = 1
+        Return # Already installed, so just use existing install dir
+    ${EndIf}
+    ${If} ${FileExists} "$InstDir\*"
+        Push $INSTDIR
+        Call isEmptyDir
+        Pop $0
+        StrCmp $0 0 0 +2
+        StrCpy $InstDir "$INSTDIR\${MULTIUSER_INSTALLMODE_INSTDIR}"
+    ${EndIf}
+FunctionEnd
 
 Function desktopShortcut
     CreateShortCut "$DESKTOP\${INFO_PRODUCTNAME}.lnk" "$INSTDIR\${PRODUCT_EXECUTABLE}"
 FunctionEnd
 
-Function MultiUserPagePre
-    ${If} $MultiUser.InstDir != ""
-        Abort
-    ${EndIf}
+Function WelcomePagePre
+    ${if} $InstallShowPagesBeforeComponents == 0
+        Abort ; don't display the Welcome page for the inner instance
+    ${endif}
 FunctionEnd
 
 Function DirectoryPagePre
-    ${If} $MultiUser.InstDir != ""
-        Abort
+    ${If} $MultiUser.InstallMode == "AllUsers"
+    ${AndIf} $HasPerMachineInstallation = 1
+        Abort # Already installed, so just use existing install dir
+    ${EndIf}
+    ${If} $MultiUser.InstallMode == "CurrentUser"
+    ${AndIf} $HasPerUserInstallation = 1
+        Abort # Already installed, so just use existing install dir
     ${EndIf}
 FunctionEnd
 
