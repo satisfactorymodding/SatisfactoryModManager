@@ -16,7 +16,7 @@ type NsisApply struct {
 
 type NsisApplyConfig struct {
 	InstallerDownloadPath string
-	Elevation             bool
+	IsAllUsers            bool
 }
 
 func MakeNsisApply(config NsisApplyConfig) *NsisApply {
@@ -69,9 +69,13 @@ func (a *NsisApply) checkHash(checksum []byte) error {
 
 func (a *NsisApply) OnExit(restart bool) error {
 	arguments := []string{"/S"}
+	if a.config.IsAllUsers {
+		arguments = append(arguments, "/AllUsers")
+	} else {
+		arguments = append(arguments, "/CurrentUser")
+	}
 	if restart {
-		// TODO implement this in my installer
-		arguments = append(arguments, "--force-run")
+		arguments = append(arguments, "/ForceRun")
 	}
 	cmd := exec.Command(a.config.InstallerDownloadPath, arguments...)
 	err := cmd.Start()

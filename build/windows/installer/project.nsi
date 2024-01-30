@@ -116,6 +116,14 @@ Section
     !insertmacro MULTIUSER_RegistryAddInstallSizeInfo
 SectionEnd
 
+Section "-Post"
+	${GetParameters} $R0
+	${GetOptions} $R0 "/ForceRun" $R1
+    ${IfNot} ${errors}
+        Exec '"$INSTDIR\${PRODUCT_EXECUTABLE}"'
+    ${EndIf}
+SectionEnd
+
 Section "uninstall"
     RMDir /r "$AppData\${PRODUCT_EXECUTABLE}" # Remove the WebView2 DataPath
 
