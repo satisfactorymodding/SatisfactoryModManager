@@ -111,6 +111,9 @@ func main() {
 			backend.ProcessArguments(os.Args[1:])
 			autoupdate.CheckInterval(5 * time.Minute)
 		},
+		OnShutdown: func(ctx context.Context) {
+			b.Shutdown(ctx)
+		},
 		Bind: b.GetBindings(),
 		EnumBind: []interface{}{
 			bindings.AllInstallTypes,

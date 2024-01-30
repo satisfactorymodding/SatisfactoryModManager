@@ -63,6 +63,10 @@ func (b *Bindings) Startup(ctx context.Context) {
 	b.debugInfo.startup(ctx)
 }
 
+func (b *Bindings) Shutdown(ctx context.Context) {
+	b.App.shutdown(ctx)
+}
+
 func (b *Bindings) GetBindings() []interface{} {
 	return []interface{}{
 		b.App,
