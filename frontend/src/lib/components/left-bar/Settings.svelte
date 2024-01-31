@@ -1,7 +1,7 @@
 <script lang="ts">
   import { mdiBug, mdiCheck, mdiChevronRight, mdiClipboard, mdiCog, mdiDownload, mdiFolderEdit, mdiTune } from '@mdi/js';
   import { getContextClient } from '@urql/svelte';
-  import { getModalStore, popup, type PopupSettings , ListBox, ListBoxItem } from '@skeletonlabs/skeleton';
+  import { popup, type PopupSettings , ListBox, ListBoxItem } from '@skeletonlabs/skeleton';
   
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { GenerateDebugInfo } from '$wailsjs/go/bindings/DebugInfo';
@@ -10,6 +10,7 @@
   import { GetModNameDocument } from '$lib/generated';
   import type { LaunchButtonType, ViewType } from '$lib/wailsTypesExtensions';
   import { OfflineGetMod } from '$wailsjs/go/ficsitcli/FicsitCLI';
+  import { getModalStore } from '$lib/store/skeletonExtensions';
 
   const modalStore = getModalStore();
 

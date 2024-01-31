@@ -12,11 +12,31 @@
   import { ProgressBar } from '@skeletonlabs/skeleton';
 
   import { progress, selectedInstallMetadata, selectedProfile } from '$lib/store/ficsitCLIStore';
+  import { getModalStore } from '$lib/store/skeletonExtensions';
 
+  // Skeleton passes the parent prop to the modal component, and we would get a warning if the prop is not present here
   export let parent: { onClose: () => void };
 
+  // Just so that it's not unused
+  $: parent;
+
+  const modalStore = getModalStore();
+
   $: if(!$progress) {
-    parent.onClose();
+    // We cannot use parent.onClose because we might not be the top modal
+    // Also this can get triggered multiple times for some reason,
+    // which would cause an error in skeleton, so the modal would not actually be closed
+    close();
+  }
+
+  let closed = false;
+
+  function close() {
+    if (closed) {
+      return;
+    }
+    closed = true;
+    $modalStore = $modalStore.filter((modal) => modal.component !== 'progress');
   }
 
   let title = '';

@@ -1,6 +1,5 @@
 <script lang="ts">
   import { queryStore , getContextClient } from '@urql/svelte';
-  import { getModalStore } from '@skeletonlabs/skeleton';
   import { mdiUpload } from '@mdi/js';
 
   import ModChangelog from '../ModChangelog.svelte';
@@ -15,6 +14,7 @@
   import { OfflineGetModsByReferences, UpdateMods } from '$lib/generated/wailsjs/go/ficsitcli/FicsitCLI';
   import type { ficsitcli } from '$lib/generated/wailsjs/go/models';
   import { SetUpdateIgnore, SetUpdateUnignore } from '$lib/generated/wailsjs/go/bindings/Settings';
+  import { getModalStore } from '$lib/store/skeletonExtensions';
 
   export let parent: {onClose: () => void};
 

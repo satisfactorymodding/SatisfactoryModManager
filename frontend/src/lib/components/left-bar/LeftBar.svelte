@@ -1,7 +1,7 @@
 <script lang="ts">
   import { mdiAlert, mdiCheckCircle, mdiCloseCircle, mdiDownload, mdiFolderOpen, mdiHelpCircle, mdiPencil, mdiPlusCircle, mdiServerNetwork, mdiTrashCan, mdiUpload, mdiWeb } from '@mdi/js';
   import { siDiscord, siGithub } from 'simple-icons/icons';
-  import { getModalStore, popup, type PopupSettings } from '@skeletonlabs/skeleton';
+  import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
   import _ from 'lodash';
 
   import Tooltip from '../Tooltip.svelte';
@@ -20,6 +20,7 @@
   import { OpenExternal } from '$wailsjs/go/bindings/App';
   import { common } from '$wailsjs/go/models';
   import { ExportCurrentProfile } from '$wailsjs/go/ficsitcli/FicsitCLI';
+  import { getModalStore } from '$lib/store/skeletonExtensions';
   
   const modalStore = getModalStore();
 

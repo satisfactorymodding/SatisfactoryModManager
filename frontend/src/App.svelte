@@ -1,7 +1,7 @@
 <script lang="ts">
   import './_global.postcss';
   import { setContextClient } from '@urql/svelte';
-  import { storePopup , initializeStores, Modal, getModalStore } from '@skeletonlabs/skeleton';
+  import { storePopup , initializeStores, Modal } from '@skeletonlabs/skeleton';
   import { computePosition, autoUpdate, offset, shift, flip, arrow, size } from '@floating-ui/dom';
 
   import TitleBar from '$lib/components/TitleBar.svelte';
@@ -14,6 +14,7 @@
   import { installs, invalidInstalls, progress } from '$lib/store/ficsitCLIStore';
   import { konami } from '$lib/store/settingsStore';
   import { expandedMod, error, siteURL } from '$lib/store/generalStore';
+  import { initializeModalStore, getModalStore } from '$lib/store/skeletonExtensions';
   import { GenerateDebugInfo } from '$wailsjs/go/bindings/DebugInfo';
   import ExternalInstallMod from '$lib/components/modals/ExternalInstallMod.svelte';
   import { modalRegistry } from '$lib/components/modals/modalsRegistry';
@@ -22,6 +23,7 @@
   import { supportedProgressTypes } from '$lib/components/modals/ProgressModal.svelte';
 
   initializeStores();
+  initializeModalStore();
 
   storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow, size });
 

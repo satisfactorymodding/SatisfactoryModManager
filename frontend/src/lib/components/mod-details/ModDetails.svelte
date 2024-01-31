@@ -2,7 +2,7 @@
   import { getContextClient, queryStore } from '@urql/svelte';
   import { mdiCheck, mdiChevronDown, mdiImport, mdiRocketLaunch, mdiTestTube, mdiWeb } from '@mdi/js';
   import { minVersion, validRange, sort, coerce, SemVer, parse } from 'semver';
-  import { popup, type PopupSettings, getModalStore } from '@skeletonlabs/skeleton';
+  import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
   import type { SizeOptions } from '@floating-ui/dom';
 
   import ModChangelog from '../modals/ModChangelog.svelte';
@@ -22,6 +22,7 @@
   import { getCompatibility, getVersionCompatibility, type CompatibilityWithSource } from '$lib/utils/modCompatibility';
   import { offline } from '$lib/store/settingsStore';
   import type { ficsitcli } from '$wailsjs/go/models';
+  import { getModalStore } from '$lib/store/skeletonExtensions';
 
   export let focusOnEntry: HTMLElement | undefined = undefined;
 

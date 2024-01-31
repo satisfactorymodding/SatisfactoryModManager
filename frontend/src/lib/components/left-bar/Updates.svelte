@@ -1,11 +1,11 @@
 <script lang="ts">
   import { mdiCheckCircle, mdiSync } from '@mdi/js';
-  import { getModalStore } from '@skeletonlabs/skeleton';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { checkForUpdates, progress, updates, updateCheckInProgress, unignoredUpdates } from '$lib/store/ficsitCLIStore';
   import { CheckForUpdates as CheckForSMMUpdates } from '$wailsjs/go/bindings/Update';
   import { smmUpdate, smmUpdateReady } from '$lib/store/smmUpdateStore';
+  import { getModalStore } from '$lib/store/skeletonExtensions';
 
   const modalStore = getModalStore();
 
