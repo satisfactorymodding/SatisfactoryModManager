@@ -19,6 +19,7 @@
   import { modalRegistry } from '$lib/components/modals/modalsRegistry';
   import ErrorModal from '$lib/components/modals/ErrorModal.svelte';
   import ImportProfile from '$lib/components/modals/profiles/ImportProfile.svelte';
+  import { supportedProgressTypes } from '$lib/components/modals/ProgressModal.svelte';
 
   initializeStores();
 
@@ -77,7 +78,7 @@
 
   $: (() => {
     const currentProgressModalIndex = $modalStore.findIndex((m) => m.component && m.component === 'progress');
-    if ($progress && currentProgressModalIndex === -1){
+    if ($progress && supportedProgressTypes.includes($progress.item) && currentProgressModalIndex === -1){
       // Add it at the beginning instead of the end so it's on top
       $modalStore = [{
         type: 'component',

@@ -1,3 +1,13 @@
+<script context="module" lang="ts">
+  export const supportedProgressTypes = [
+    '__select_install__',
+    '__select_profile__',
+    '__toggle_mods__',
+    '__update__',
+    '__import_profile__',
+  ];
+</script>
+
 <script lang="ts">
   import { ProgressBar } from '@skeletonlabs/skeleton';
 
