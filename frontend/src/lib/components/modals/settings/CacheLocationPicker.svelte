@@ -73,7 +73,7 @@
   }
 </script>
 
-<div style="max-height: calc(100vh - 128px); max-width: calc(100vw - 128px);" class="card flex flex-col gap-2 !min-w-[800px] min-h-[200px]">
+<div style="max-height: calc(100vh - 3rem); max-width: calc(100vw - 3rem);" class="w-[60rem] card flex flex-col gap-2">
   <header class="card-header font-bold text-2xl text-center">
     Change download cache location
   </header>

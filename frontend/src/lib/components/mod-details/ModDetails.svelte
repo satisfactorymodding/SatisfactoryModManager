@@ -256,200 +256,202 @@
   } satisfies PopupSettings;
 </script>
 
-<div class="@container/mod-details h-full flex mods-details w-full bg-surface-200-700-token @3xl/mod-details:text-base text-sm">
-  <div style="border-right-color: rgba(239, 239, 239, 0.12);" class="px-4 py-4 flex flex-col h-full @3xl/mod-details:w-64 w-52 mods-details">
-    <img class="logo w-full" alt="{mod?.name} Logo" src={renderedLogo} />
-    <span class="pt-4 font-bold @3xl/mod-details:text-lg text-base">{mod?.name ?? 'Loading...'}</span>
-    <span class="pt-2 font-light">A mod by:</span>
-    <span
-      bind:this={focusOnEntry}
-      class="font-medium text-primary-600 cursor-pointer"
-      role="button"
-      tabindex="0"
-      on:click={authorClick}
-      on:keypress={authorClick} >{author ?? 'Loading...'}</span>
+<div class="@container/mod-details h-full flex w-full bg-surface-200-700-token @3xl/mod-details:text-base text-sm">
+  <div style="border-right-color: rgba(239, 239, 239, 0.12);" class="p-4 space-y-4 flex flex-col h-full @3xl/mod-details:w-64 w-52 overflow-y-auto">
+    <div class="flex flex-col flex-auto overflow-y-auto space-y-4">
+      <div class="flex flex-col">
+        <img class="logo w-full" alt="{mod?.name} Logo" src={renderedLogo} />
+        <span class="font-bold @3xl/mod-details:text-lg mt-2 text-base">{mod?.name ?? 'Loading...'}</span>
+        <span class="font-light">A mod by:</span>
+        <span
+          bind:this={focusOnEntry}
+          class="font-medium text-primary-600 cursor-pointer"
+          role="button"
+          tabindex="0"
+          on:click={authorClick}
+          on:keypress={authorClick} >{author ?? 'Loading...'}</span>
+      </div>
     
-    <div class="pt-2" use:popup={authorsMenu}>
-      <button class="btn px-4 h-10 text-sm w-full bg-secondary-600">
-        <span class="whitespace-break-spaces">Contributors <span class="text-primary-600">({mod?.authors.length ?? 0})</span></span>
-        <SvgIcon
-          class="h-5 w-5"
-          icon={mdiChevronDown}/>
-      </button>
-    </div>
-    <div class="card shadow-xl min-w-[11rem] z-10 duration-0 overflow-y-auto" data-popup={authorsMenuPopupId}>
-      <!-- 
-      Skeleton's popup close function waits for the tranistion duration...
-      before actually triggering the transition...
-      So we'll just not have a transition...
-      -->
-      
-      <ul>
-        {#each mod?.authors ?? [] as author}
-          <li>
-            <button class="btn w-full h-full space-x-4" on:click={() => $search = `author:"${author.user.username}"`}>
-              <div class="h-12 w-12">
-                {#if 'avatar' in author.user}
-                  <img class="rounded-full w-ful h-full" alt="{author.user.username} Avatar" src={author.user.avatar} />
-                {/if}
-              </div>
-              <div class="flex-auto flex flex-col text-left">
-                <span>{author.user.username}</span>
-                <span>{author.role}</span>
-              </div>
-            </button>
-          </li>
-        {/each}
-      </ul>
-    </div>
-
-    <div class="pt-4">
-      <span>Mod info:</span><br/>
-      <span>Size: </span><span class="font-bold">{size ?? 'Loading...'}</span><br/>
-      {#if (!mod || !('offline' in mod)) && !$offline}
-        <span>Created: </span><span class="font-bold">{mod ? new Date(mod.created_at).toLocaleDateString() : 'Loading...'}</span><br/>
-        <span>Updated: </span><span class="font-bold">{mod ? new Date(mod.last_version_date).toLocaleString() : 'Loading...'}</span><br/>
-        <span>Total downloads: </span><span class="font-bold">{mod?.downloads.toLocaleString() ?? 'Loading...'}</span><br/>
-        <span>Views: </span><span class="font-bold">{mod?.views.toLocaleString() ?? 'Loading...'}</span><br/>
-        <div class="flex h-5">
-          <span>Compatibility: </span>
-          {#if mod?.compatibility}
-            <div class="flex pl-1">
-              <div use:popup={compatEAPopup}>
-                <SvgIcon class="{colorForCompatibilityState(mod.compatibility.EA.state)} w-5" icon={mdiRocketLaunch} />
-              </div>
-              
-              <Tooltip popupId={compatEAPopupId}>
-                <span class="text-base">
-                  This mod has been reported as {mod.compatibility.EA.state} on Early Access.
-                </span>
-                {#if mod.compatibility.EA.note}
-                    <Markdown markdown={mod.compatibility.EA.note} />
-                {:else}
-                  (No further notes provided)
-                {/if}
-              </Tooltip>
-              <div use:popup={compatEXPPopup}>
-                <SvgIcon class="{colorForCompatibilityState(mod.compatibility.EXP.state)} w-5" icon={mdiTestTube} />
-              </div>
-              <Tooltip popupId={compatEXPPopupId}>
-                <span class="text-base">
-                  This mod has been reported as {mod.compatibility.EXP.state} on Experimental.
-                </span>
-                {#if mod.compatibility.EXP.note}
-                    <Markdown markdown={mod.compatibility.EXP.note} />
-                {:else}
-                  (No further notes provided)
-                {/if}
-              </Tooltip>
-            </div>
-          {:else}
-            <span class="font-bold" use:popup={compatUnknownPopup}>&nbsp;Unknown</span>
-            <Tooltip popupId={compatUnknownPopupId}>
-              <span class="text-base">No compatibility information has been reported for this mod yet. Try it out and contact us on the Discord so it can be updated!</span>
-            </Tooltip>
-          {/if}
-        </div>
-      {/if}
-    </div>
-
-    <div class="pt-4">
-      <span>Latest version: </span><span class="font-bold">{latestVersion ?? 'Loading...'}</span><br/>
-      <span>Installed version: </span><span class="font-bold">{installedVersion ?? 'Loading...'}</span><br/>
-      <div class="pt-2" use:popup={changeVersionMenu}>
-        <button
-          class="btn px-4 h-10 text-sm w-full bg-secondary-600"
-          disabled={!$canModify}
-        >
-          <span>Change version</span>
+      <div use:popup={authorsMenu}>
+        <button class="btn px-4 h-10 text-sm w-full bg-secondary-600">
+          <span class="whitespace-break-spaces">Contributors <span class="text-primary-600">({mod?.authors.length ?? 0})</span></span>
           <SvgIcon
             class="h-5 w-5"
             icon={mdiChevronDown}/>
         </button>
       </div>
-      <div class="card shadow-xl min-w-[11rem] z-10 duration-0 overflow-y-auto" data-popup={changeVersionMenuPopupId}>
+      <div class="card shadow-xl min-w-[11rem] z-10 duration-0 overflow-y-auto" data-popup={authorsMenuPopupId}>
         <!-- 
-        Skeleton's popup close function waits for the tranistion duration...
-        before actually triggering the transition...
-        So we'll just not have a transition...
-        -->
-        
+      Skeleton's popup close function waits for the tranistion duration...
+      before actually triggering the transition...
+      So we'll just not have a transition...
+      -->
+      
         <ul>
-          <li>
-            <button class="btn w-full h-full text-left" on:click={() => installVersion(null)}>
-              <div class="w-7 h-7 p-1">
-                {#if manifestVersion === '>=0.0.0'}
-                  <SvgIcon class="h-full w-full" icon={mdiCheck} />
-                {/if}
-              </div>
-              <span class="flex-auto">Any</span>
-            </button>
-          </li>
-          {#each mod?.versions ?? [] as version}
-            <li class="flex">
-              <button class="btn w-full h-full text-left" on:click={() => installVersion(version.version)}>
-                <div class="w-7 h-7 p-1">
-                  {#if manifestVersion === version.version}
-                    <SvgIcon class="h-full w-full" icon={mdiCheck} />
+          {#each mod?.authors ?? [] as author}
+            <li>
+              <button class="btn w-full h-full space-x-4" on:click={() => $search = `author:"${author.user.username}"`}>
+                <div class="h-12 w-12">
+                  {#if 'avatar' in author.user}
+                    <img class="rounded-full w-ful h-full" alt="{author.user.username} Avatar" src={author.user.avatar} />
                   {/if}
                 </div>
-                <span class="flex-auto">{version.version}</span>
-              </button>
-              <button class="btn w-full h-full text-left" on:click={() => installVersion(`>=${version.version}`)}>
-                <span class="flex-auto">or newer</span>
-                <div class="w-7 h-7 p-1">
-                  {#if manifestVersion && manifestVersion !== version.version && validRange(manifestVersion) && minVersion(manifestVersion)?.format() === version.version}
-                    <SvgIcon class="h-full w-full" icon={mdiCheck} />
-                  {/if}
+                <div class="flex-auto flex flex-col text-left">
+                  <span>{author.user.username}</span>
+                  <span>{author.role}</span>
                 </div>
               </button>
             </li>
           {/each}
         </ul>
       </div>
-      {#if (!mod || !('offline' in mod)) && !$offline}
-        <div class="pt-2" use:popup={changelogMenu}>
+
+      <div>
+        <span>Mod info:</span><br/>
+        <span>Size: </span><span class="font-bold">{size ?? 'Loading...'}</span><br/>
+        {#if (!mod || !('offline' in mod)) && !$offline}
+          <span>Created: </span><span class="font-bold">{mod ? new Date(mod.created_at).toLocaleDateString() : 'Loading...'}</span><br/>
+          <span>Updated: </span><span class="font-bold">{mod ? new Date(mod.last_version_date).toLocaleString() : 'Loading...'}</span><br/>
+          <span>Total downloads: </span><span class="font-bold">{mod?.downloads.toLocaleString() ?? 'Loading...'}</span><br/>
+          <span>Views: </span><span class="font-bold">{mod?.views.toLocaleString() ?? 'Loading...'}</span><br/>
+          <div class="flex h-5">
+            <span>Compatibility: </span>
+            {#if mod?.compatibility}
+              <div class="flex pl-1">
+                <div use:popup={compatEAPopup}>
+                  <SvgIcon class="{colorForCompatibilityState(mod.compatibility.EA.state)} w-5" icon={mdiRocketLaunch} />
+                </div>
+              
+                <Tooltip popupId={compatEAPopupId}>
+                  <span class="text-base">
+                    This mod has been reported as {mod.compatibility.EA.state} on Early Access.
+                  </span>
+                  {#if mod.compatibility.EA.note}
+                    <Markdown markdown={mod.compatibility.EA.note} />
+                  {:else}
+                    (No further notes provided)
+                  {/if}
+                </Tooltip>
+                <div use:popup={compatEXPPopup}>
+                  <SvgIcon class="{colorForCompatibilityState(mod.compatibility.EXP.state)} w-5" icon={mdiTestTube} />
+                </div>
+                <Tooltip popupId={compatEXPPopupId}>
+                  <span class="text-base">
+                    This mod has been reported as {mod.compatibility.EXP.state} on Experimental.
+                  </span>
+                  {#if mod.compatibility.EXP.note}
+                    <Markdown markdown={mod.compatibility.EXP.note} />
+                  {:else}
+                    (No further notes provided)
+                  {/if}
+                </Tooltip>
+              </div>
+            {:else}
+              <span class="font-bold" use:popup={compatUnknownPopup}>&nbsp;Unknown</span>
+              <Tooltip popupId={compatUnknownPopupId}>
+                <span class="text-base">No compatibility information has been reported for this mod yet. Try it out and contact us on the Discord so it can be updated!</span>
+              </Tooltip>
+            {/if}
+          </div>
+        {/if}
+      </div>
+
+      <div>
+        <span>Latest version: </span><span class="font-bold">{latestVersion ?? 'Loading...'}</span><br/>
+        <span>Installed version: </span><span class="font-bold">{installedVersion ?? 'Loading...'}</span><br/>
+        <div class="pt-2" use:popup={changeVersionMenu}>
           <button
             class="btn px-4 h-10 text-sm w-full bg-secondary-600"
             disabled={!$canModify}
           >
-            <span>Changelogs</span>
+            <span>Change version</span>
             <SvgIcon
               class="h-5 w-5"
               icon={mdiChevronDown}/>
           </button>
         </div>
-        <div class="card shadow-xl min-w-[11rem] z-10 duration-0 overflow-y-auto" data-popup={changelogMenuPopupId}>
+        <div class="card shadow-xl min-w-[11rem] z-10 duration-0 overflow-y-auto" data-popup={changeVersionMenuPopupId}>
           <!-- 
-          Skeleton's popup close function waits for the tranistion duration...
-          before actually triggering the transition...
-          So we'll just not have a transition...
-          -->
-          
+        Skeleton's popup close function waits for the tranistion duration...
+        before actually triggering the transition...
+        So we'll just not have a transition...
+        -->
+        
           <ul>
+            <li>
+              <button class="btn w-full h-full text-left" on:click={() => installVersion(null)}>
+                <div class="w-7 h-7 p-1">
+                  {#if manifestVersion === '>=0.0.0'}
+                    <SvgIcon class="h-full w-full" icon={mdiCheck} />
+                  {/if}
+                </div>
+                <span class="flex-auto">Any</span>
+              </button>
+            </li>
             {#each mod?.versions ?? [] as version}
-              <li>
-                <button class="btn w-full h-full" on:click={() => modalStore.trigger({ type:'component', component: { ref: ModChangelog, props:{ mod: mod?.mod_reference, versionRange: version.version } } })}>
-                  <span>{version.version}</span>
+              <li class="flex">
+                <button class="btn w-full h-full text-left" on:click={() => installVersion(version.version)}>
+                  <div class="w-7 h-7 p-1">
+                    {#if manifestVersion === version.version}
+                      <SvgIcon class="h-full w-full" icon={mdiCheck} />
+                    {/if}
+                  </div>
+                  <span class="flex-auto">{version.version}</span>
+                </button>
+                <button class="btn w-full h-full text-left" on:click={() => installVersion(`>=${version.version}`)}>
+                  <span class="flex-auto">or newer</span>
+                  <div class="w-7 h-7 p-1">
+                    {#if manifestVersion && manifestVersion !== version.version && validRange(manifestVersion) && minVersion(manifestVersion)?.format() === version.version}
+                      <SvgIcon class="h-full w-full" icon={mdiCheck} />
+                    {/if}
+                  </div>
                 </button>
               </li>
             {/each}
           </ul>
         </div>
-      {/if}
-      <div class="pt-2">
-        <button
-          class="btn px-4 h-10 text-sm w-full bg-primary-900"
-          on:click={() => BrowserOpenURL(ficsitAppLink)}>
-          <span class="whitespace-break-spaces">View on ficsit.app</span>
-          <SvgIcon
-            class="h-5 w-5"
-            icon={mdiWeb}/>
-        </button>
+        {#if (!mod || !('offline' in mod)) && !$offline}
+          <div class="pt-2" use:popup={changelogMenu}>
+            <button
+              class="btn px-4 h-10 text-sm w-full bg-secondary-600"
+              disabled={!$canModify}
+            >
+              <span>Changelogs</span>
+              <SvgIcon
+                class="h-5 w-5"
+                icon={mdiChevronDown}/>
+            </button>
+          </div>
+          <div class="card shadow-xl min-w-[11rem] z-10 duration-0 overflow-y-auto" data-popup={changelogMenuPopupId}>
+            <!-- 
+          Skeleton's popup close function waits for the tranistion duration...
+          before actually triggering the transition...
+          So we'll just not have a transition...
+          -->
+          
+            <ul>
+              {#each mod?.versions ?? [] as version}
+                <li>
+                  <button class="btn w-full h-full" on:click={() => modalStore.trigger({ type:'component', component: { ref: ModChangelog, props:{ mod: mod?.mod_reference, versionRange: version.version } } })}>
+                    <span>{version.version}</span>
+                  </button>
+                </li>
+              {/each}
+            </ul>
+          </div>
+        {/if}
+        <div class="pt-2">
+          <button
+            class="btn px-4 h-10 text-sm w-full bg-primary-900"
+            on:click={() => BrowserOpenURL(ficsitAppLink)}>
+            <span class="whitespace-break-spaces">View on ficsit.app</span>
+            <SvgIcon
+              class="h-5 w-5"
+              icon={mdiWeb}/>
+          </button>
+        </div>
       </div>
     </div>
-
-    <div class="grow"/>
 
     <button
       class="btn px-4 h-8 w-full bg-secondary-600 text-sm"

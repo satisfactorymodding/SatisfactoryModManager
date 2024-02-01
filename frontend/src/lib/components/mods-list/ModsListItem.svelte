@@ -261,7 +261,7 @@
 </script>
 
 <div
-  class="my-1 px-0 @lg/mods-list:h-24 @md/mods-list:h-[5.5rem] h-[4.25rem]"
+  class="my-1 px-0 @xl/mods-list:h-24 @md/mods-list:h-[5.5rem] h-[4.25rem]"
   class:bg-surface-50-900-token={selected}
   class:rounded-lg={selected}
   role="tab"
@@ -280,14 +280,14 @@
   {/if}
   <div class="flex relative h-full" class:-top-full={inProgress}>
     <img
-      class="logo h-full @lg/mods-list:w-24 @md/mods-list:w-[5.5rem] w-[4.25rem]"
+      class="logo h-full @xl/mods-list:w-24 @md/mods-list:w-[5.5rem] w-[4.25rem]"
       class:grayscale={isInstalled && !isEnabled}
       alt="{mod.name} Logo"
       src={renderedLogo} />
     <div class="ml-2 flex flex-col grow w-0 opacity" class:opacity-30={isInstalled && !isEnabled}>
       <div class="flex items-center" use:popup={popupHover}>
         <div class="shrink min-w-[7rem] truncate">
-          <span class="@lg/mods-list:text-xl text-lg font-medium min-w-0 w-full" class:text-error-600={compatibility.state === CompatibilityState.Broken} class:text-warning-500={compatibility.state === CompatibilityState.Damaged}>{mod.name}</span>
+          <span class="@xl/mods-list:text-xl text-lg font-medium min-w-0 w-full" class:text-error-600={compatibility.state === CompatibilityState.Broken} class:text-warning-500={compatibility.state === CompatibilityState.Damaged}>{mod.name}</span>
         </div>
         <div class="shrink-0 hidden @lg/mods-list:block truncate w-[7rem] grow">
           <span class="pl-1">by</span>
@@ -303,32 +303,25 @@
       <div class="truncate @md/mods-list:text-base text-sm hidden @md/mods-list:block">{'short_description' in mod ? mod.short_description : ''}</div>
       <div class="flex">
         {#if !inProgress}
-          <div class="grow w-0 @lg/mods-list:text-base text-sm">
+          <div class="grow w-0 @xl/mods-list:text-base text-sm">
             <div class="truncate text-base @md/mods-list:text-sm block @md/mods-list:hidden">{'short_description' in mod ? mod.short_description : ''}</div>
-            <div class="truncate hidden @md/mods-list:block">
+            <div class="truncate h-5 @md/mods-list:h-4.5 hidden @md/mods-list:flex items-center space-x-1">
               {#if !('offline' in mod) && !('missing' in mod) && (mod?.tags?.length ?? -1 > 0 )}
-                <div class="flex inline-flex items-center justify-items-center @lg/mods-list:w-4 w-3">
-                  <!-- TODO this icon is not vertically centered -->
-                  <SvgIcon class="" icon={mdiTagMultiple}/>
-                </div>
+                <SvgIcon class="pr-1 py-1 @xl/mods-list:w-7 w-6 shrink-0" icon={mdiTagMultiple}/>
                 {#each mod?.tags ?? [] as tag}
-                  <span class="pr-1">#{tag.name}</span>
+                  <span>#{tag.name}</span>
                 {/each}
               {/if}
               &nbsp; <!-- keep div height even when no tags are available -->
             </div>
-            <div class="flex h-5 @md/mods-list:h-4.5">
+            <div class="flex h-5 @md/mods-list:h-4.5 space-x-2">
               {#if !('offline' in mod) && !('missing' in mod)}
-                <div class="w-24 flex items-center">
-                  <div class="pr-1 inline-flex items-center justify-items-center @lg/mods-list:w-7 w-6">
-                    <SvgIcon class="" icon={mdiEye}/>
-                  </div>
+                <div class="w-24 flex items-center space-x-0.5">
+                  <SvgIcon class="pr-1 py-1 @xl/mods-list:w-7 w-6" icon={mdiEye}/>
                   <span>{mod.views.toLocaleString()}</span>
                 </div>
-                <div class="w-24 flex items-center">
-                  <div class="pr-1 inline-flex items-center justify-items-center @lg/mods-list:w-7 w-6">
-                    <SvgIcon class="" icon={mdiDownload}/>
-                  </div>
+                <div class="w-24 flex items-center space-x-0.5">
+                  <SvgIcon class="pr-1 py-1 @xl/mods-list:w-7 w-6" icon={mdiDownload}/>
                   <span>{mod.downloads.toLocaleString()}</span>
                 </div>
               {/if}
@@ -349,6 +342,8 @@
       on:keypress|stopPropagation={() => { /* empty */ }}>
       <ResponsiveButton
         id="enable-{mod.mod_reference}"
+        class="w-8 h-8 @lg/mods-list:mx-1 @xl/mods-list:mx-2"
+        buttonClass="w-full h-full"
         disabled={enableButtonDisabled}
         display={enableButtonDisplay}
         onClickAction={toggleModEnabled}
@@ -356,12 +351,16 @@
       />
       <ResponsiveButton
         id="install-{mod.mod_reference}"
+        class="w-8 h-8 @lg/mods-list:mx-1 @xl/mods-list:mx-2"
+        buttonClass="w-full h-full"
         disabled={installButtonDisabled}
         display={installButtonDisplay}
         onClickAction={toggleModInstalled}
       />
       <ResponsiveButton
         id="favorite-{mod.mod_reference}"
+        class="w-8 h-8 @lg/mods-list:mx-1 @xl/mods-list:mx-2"
+        buttonClass="w-full h-full"
         display={favoriteButtonDisplay}
         onClickAction={toggleModFavorite}
       />

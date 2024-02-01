@@ -2,7 +2,8 @@
   import { mdiBug, mdiCheck, mdiChevronRight, mdiClipboard, mdiCog, mdiDownload, mdiFolderEdit, mdiTune } from '@mdi/js';
   import { getContextClient } from '@urql/svelte';
   import { popup, type PopupSettings , ListBox, ListBoxItem } from '@skeletonlabs/skeleton';
-  
+  import type { SizeOptions } from '@floating-ui/dom';
+
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { GenerateDebugInfo } from '$wailsjs/go/bindings/DebugInfo';
   import { startView, konami, launchButton, queueAutoStart, offline, updateCheckMode } from '$lib/store/settingsStore';
@@ -19,6 +20,13 @@
     target: 'settings-menu',
     middleware: {
       offset: 4,
+      size: {
+        apply({ availableHeight, elements }) {
+          Object.assign(elements.floating.style, {
+            maxHeight: `${availableHeight * 0.8}px`,
+          });
+        },
+      } as SizeOptions,
     },
     placement: 'right-start',
     closeQuery: '[data-popup="settings-menu"] li:not([data-noclose]):not(.section-header)',

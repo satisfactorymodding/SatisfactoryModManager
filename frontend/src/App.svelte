@@ -169,8 +169,8 @@
   {/if}
   <div class="flex grow h-0">
     <LeftBar />
-    <div class="flex w-0 grow">
-      <div class="{$expandedMod ? 'max-w-[42.5rem]' : ''} w-2/5 grow">
+    <div class="flex flex-auto @container/mod-list-wrapper z-[1]">
+      <div class="{$expandedMod && !pendingExpand ? 'w-2/5 hidden @3xl/mod-list-wrapper:block @3xl/mod-list-wrapper:flex-auto' : 'w-full'}" class:max-w-[42.5rem]={!!$expandedMod}>
         <ModsList
           hideMods={noInstallsError || invalidInstallsError}
           on:expandedMod={() => {
@@ -199,11 +199,9 @@
           </div>
         </ModsList>
       </div>
-      {#if $expandedMod}
-        <div class="{pendingExpand ? 'w-0' : 'w-3/5'}" class:grow={!pendingExpand}>
-          <ModDetails bind:focusOnEntry/>
-        </div>
-      {/if}
+      <div class="w-3/5" class:grow={!pendingExpand} class:hidden={!$expandedMod}>
+        <ModDetails bind:focusOnEntry/>
+      </div>
     </div>
   </div>
 </div>

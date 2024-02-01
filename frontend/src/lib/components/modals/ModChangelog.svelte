@@ -2,6 +2,7 @@
   import { getContextClient, queryStore } from '@urql/svelte';
   import { gt, lte } from 'semver';
 
+  import Markdown from '$lib/components/Markdown.svelte';
   import { GetChangelogDocument } from '$lib/generated';
   import { offline } from '$lib/store/settingsStore';
 
@@ -36,11 +37,11 @@
   $: changelogs = versions ? versions.filter((v) => isVersionInRange(v.version)) : [];
 </script>
 
-<div style="width: 500px; max-width: calc(100vw - 32px);" class="card flex flex-col gap-2">
+<div style="max-height: calc(100vh - 3rem); max-width: calc(100vw - 3rem);" class="w-[48rem] card flex flex-col gap-2">
   <header class="card-header font-bold text-2xl text-center">
     {modData?.name ?? 'Loading...'} Changelog
   </header>
-  <section class="p-4">
+  <section class="p-4 overflow-y-auto">
     {#each changelogs as changelog}
       <div class="text-lg font-semibold">v{changelog.version}</div>
       <Markdown markdown={changelog.changelog}/>

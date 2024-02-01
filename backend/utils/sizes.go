@@ -11,10 +11,10 @@ type Position struct {
 }
 
 var (
-	UnexpandedMin     = Size{Width: 850, Height: 750}
+	UnexpandedMin     = Size{Width: 660, Height: 350}
 	UnexpandedMax     = Size{Width: 0, Height: 0}
 	UnexpandedDefault = Size{Width: 950, Height: 950}
-	ExpandedMin       = Size{Width: 1255, Height: 750}
+	ExpandedMin       = Size{Width: 720, Height: 350}
 	ExpandedMax       = Size{Width: 0, Height: 0}
 	ExpandedDefault   = Size{Width: 1300, Height: 950}
 )

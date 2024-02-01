@@ -110,151 +110,142 @@
 </script>
 
 
-<div style="max-height: calc(100vh - 128px); max-width: calc(100vw - 128px);" class="card flex flex-col gap-2 !min-w-[800px] min-h-[400px]">
+<div style="max-height: calc(100vh - 3rem); max-width: calc(100vw - 3rem);" class="card flex flex-col gap-2">
   <header class="card-header font-bold text-2xl text-center">
     Dedicated Servers
   </header>
-  <section class="p-4 flex-auto space-y-4 overflow-y-auto mr-4">
-    <table class="table w-full">
-      <tbody>
-        {#each $remoteServers as remoteServer}
-          <tr>
-            <td class="break-all">{remoteServer}</td>
-            <td>
-              {#if $installsMetadata[remoteServer]?.type}
-                {$installsMetadata[remoteServer].type}
-              {:else}
+  <section class="p-4 flex-auto space-y-4 overflow-y-auto flex">
+    <div class="flex-auto w-full overflow-x-auto overflow-y-auto">
+      <table class="table">
+        <tbody>
+          {#each $remoteServers as remoteServer}
+            <tr>
+              <td class="break-all">{remoteServer}</td>
+              <td>
+                {#if $installsMetadata[remoteServer]?.type}
+                  {$installsMetadata[remoteServer].type}
+                {:else}
+                  <button
+                    class="btn-icon h-6 w-full text-sm"
+                    on:click={() => retryConnect(remoteServer)}
+                    use:popup={installWarningPopups[remoteServer]}>
+                    <SvgIcon
+                      class="!p-0 !m-0 !w-full !h-full text-red-500"
+                      icon={mdiAlert} />
+                  </button>
+                  <Tooltip popupId={installWarningPopupId(remoteServer)}>
+                    <span class="text-base">
+                      Failed to connect to server, click to retry
+                    </span>
+                  </Tooltip>
+                {/if}
+              </td>
+              <td>
+                {#if $installsMetadata[remoteServer]?.version}
+                  CL{$installsMetadata[remoteServer].version}
+                {/if}
+              </td>
+              <td>
                 <button
-                  class="btn-icon h-6 w-full text-sm"
-                  on:click={() => retryConnect(remoteServer)}
-                  use:popup={installWarningPopups[remoteServer]}>
+                  class="btn-icon h-5 w-full"
+                  on:click={() => removeServer(remoteServer)}>
                   <SvgIcon
-                    class="!p-0 !m-0 !w-full !h-full text-red-500"
-                    icon={mdiAlert} />
+                    class="!p-0 !m-0 !w-full !h-full hover:text-red-500"
+                    icon={mdiTrashCan}/>
                 </button>
-                <Tooltip popupId={installWarningPopupId(remoteServer)}>
-                  <span class="text-base">
-                    Failed to connect to server, click to retry
-                  </span>
-                </Tooltip>
-              {/if}
-            </td>
-            <td>
-              {#if $installsMetadata[remoteServer]?.version}
-                CL{$installsMetadata[remoteServer].version}
-              {/if}
-            </td>
-            <td>
-              <button
-                class="btn-icon h-5 w-full"
-                on:click={() => removeServer(remoteServer)}>
-                <SvgIcon
-                  class="!p-0 !m-0 !w-full !h-full hover:text-red-500"
-                  icon={mdiTrashCan}/>
-              </button>
-            </td>
-          </tr>
-        {/each}
-      </tbody>
-    </table>
+              </td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    </div>
   </section>
   <section class="p-4 space-y-4">
-    <div>
-      <div class="flex h-10 items-baseline space-x-4">
-        <Select
-          name="newServerProtocol"
-          class="!h-full w-28 shrink-0"
-          buttonClass="bg-surface-200-700-token px-4 text-sm"
-          itemActiveClass="!bg-surface-300/20"
-          itemClass="bg-surface-50-900-token"
-          itemKey="name"
-          items={remoteTypes}
-          bind:value={newRemoteType}>
-          <svelte:fragment slot="item" let:item>
-            {item.name}
-          </svelte:fragment>
-        </Select>
-        {#if newRemoteType.type === 'remote'}
-          {#if advancedMode}
-            <input
-              class="input !h-full grow mx-4 px-4"
-              placeholder="user:pass@host:port/path"
-              type="text"
-              bind:value={newServerPath}/>
-          {:else}
-            <div class="flex h-10 items-baseline space-x-1 [&>input]:px-4">
-              <input
-                class="input !h-full grow"
-                placeholder="user"
-                type="text"
-                bind:value={newServerUsername}/>
-              <span>:</span>
-              <input
-                class="input !h-full grow mx-4 px-4"
-                placeholder="pass"
-                type="text"
-                bind:value={newServerPassword}/>
-              <span>@</span>
-              <input
-                class="input !h-full grow mx-4 px-4"
-                placeholder="host"
-                type="text"
-                bind:value={newServerHost}/>
-              <span>:</span>
-              <input
-                class="input !h-full grow mx-4 px-4"
-                placeholder="port"
-                type="text"
-                bind:value={newServerPort}/>
-              <span>/</span>
-              <input
-                class="input !h-full grow mx-4 px-4"
-                placeholder="path"
-                type="text"
-                bind:value={newServerPath}/>
-            </div>
-          {/if}
-        {:else}
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 items-start auto-rows-fr">
+      <Select
+        name="newServerProtocol"
+        class="col-span-1 h-full"
+        buttonClass="bg-surface-200-700-token px-4 text-sm"
+        itemActiveClass="!bg-surface-300/20"
+        itemClass="bg-surface-50-900-token"
+        itemKey="name"
+        items={remoteTypes}
+        bind:value={newRemoteType}>
+        <svelte:fragment slot="item" let:item>
+          {item.name}
+        </svelte:fragment>
+      </Select>
+      {#if newRemoteType.type === 'remote'}
+        {#if advancedMode}
           <input
-            class="input !h-full grow mx-4 px-4"
-            placeholder="C:\Path\To\Server"
+            class="input px-4 h-full sm:col-start-2 col-span-2"
+            placeholder="user:pass@host:port/path"
             type="text"
             bind:value={newServerPath}/>
+          <p class="sm:col-start-2 col-span-2">
+            Note that you might have to escape certain characters in the username and password
+          </p>
+        {:else}
+          <input
+            class="input px-4 h-full sm:col-start-2"
+            placeholder="user"
+            type="text"
+            bind:value={newServerUsername}/>
+          <input
+            class="input px-4 h-full"
+            placeholder="pass"
+            type="text"
+            bind:value={newServerPassword}/>
+          <input
+            class="input px-4 h-full sm:col-start-2"
+            placeholder="host"
+            type="text"
+            bind:value={newServerHost}/>
+          <input
+            class="input px-4 h-full"
+            placeholder="port"
+            type="text"
+            bind:value={newServerPort}/>
+          <input
+            class="input px-4 h-full sm:col-start-2 col-span-2"
+            placeholder="path"
+            type="text"
+            bind:value={newServerPath}/>
+          <p class="sm:col-start-2 col-span-2">
+            Complete path: {fullInstallPath}
+          </p>
         {/if}
-        <button
-          class="btn h-full text-sm bg-primary-600 text-secondary-900"
-          disabled={addInProgress}
-          on:click={() => addNewRemoteServer()}>
-          <span>
-            {#if !addInProgress}
-              Add
-            {:else}
-              Validating...
-            {/if}
-          </span>
-          <div class="grow" />
-          <SvgIcon
-            class="h-5 w-5"
-            icon={mdiServerNetwork} />
-        </button>
-      </div>
-    </div>
-    {#if newRemoteType.type === 'remote'}
-      <div class="flex items-baseline space-x-4">
-        <button class="btn h-8 text-sm bg-surface-200-700-token" on:click={() => advancedMode = !advancedMode}>
+        <button class="btn sm:col-start-2 col-span-2 text-sm whitespace-break-spaces bg-surface-200-700-token" on:click={() => advancedMode = !advancedMode}>
           {#if advancedMode}
             Switch to simple mode
           {:else}
             Switch to advanced mode
           {/if}
         </button>
-        {#if newRemoteType.type === 'remote' && !advancedMode}
-          <p>Complete path: {fullInstallPath}</p>
-        {:else}
-          <p>Note that you might have to escape certain characters in the username and password</p>
-        {/if}
-      </div>
-    {/if}
+      {:else}
+        <input
+          class="input px-4 h-full sm:col-start-2 col-span-2"
+          placeholder="C:\Path\To\Server"
+          type="text"
+          bind:value={newServerPath}/>
+      {/if}
+      <button
+        class="btn h-full text-sm bg-primary-600 text-secondary-900 col-start-2 sm:col-start-4 row-start-1"
+        disabled={addInProgress}
+        on:click={() => addNewRemoteServer()}>
+        <span>
+          {#if !addInProgress}
+            Add
+          {:else}
+            Validating...
+          {/if}
+        </span>
+        <div class="grow" />
+        <SvgIcon
+          class="h-5 w-5"
+          icon={mdiServerNetwork} />
+      </button>
+    </div>
     <p>{err}</p>
   </section>
   <footer class="card-footer">

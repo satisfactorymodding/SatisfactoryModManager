@@ -118,11 +118,6 @@
 
 <!-- the if gets executed before this is added to the DOM for some reason if this is below the ifs, so the use:popup would not find the element -->
 <Tooltip disabled={!$offline && !announcements[currentIndex]} {popupId}>
-  <!--
-    fixed allows the popup to be displayed outside the bounds of the parent
-    block opacity-0 ensure that the popup gets a width on first render, otherwise it will be 0px wide and floating-ui will "animate" widening it
-    inert is required when popup is invisible to ignore mouse inputs
-  -->
   <span>
     {#if $offline}
       {offlineAnnouncement.message}

@@ -41,6 +41,9 @@
           });
         },
       } as SizeOptions,
+      shift: {
+        padding: 0,
+      },
     },
     state: ({ state }) => comboboxOpen = state,
     closeQuery: `.${name}-listbox-item`,

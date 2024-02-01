@@ -96,20 +96,20 @@ func (a *App) startup(ctx context.Context) {
 }
 
 func (a *App) ExpandMod() bool {
-	_, height := wailsRuntime.WindowGetSize(a.ctx)
+	width, height := wailsRuntime.WindowGetSize(a.ctx)
 	wailsRuntime.WindowSetMinSize(a.ctx, utils.ExpandedMin.Width, utils.ExpandedMin.Height)
 	wailsRuntime.WindowSetMaxSize(a.ctx, utils.ExpandedMax.Width, utils.ExpandedMax.Height)
-	wailsRuntime.WindowSetSize(a.ctx, settings.Settings.ExpandedSize.Width, height)
+	wailsRuntime.WindowSetSize(a.ctx, max(width, settings.Settings.ExpandedSize.Width), height)
 	a.isExpanded = true
 	return true
 }
 
 func (a *App) UnexpandMod() bool {
 	a.isExpanded = false
-	_, height := wailsRuntime.WindowGetSize(a.ctx)
+	width, height := wailsRuntime.WindowGetSize(a.ctx)
 	wailsRuntime.WindowSetMinSize(a.ctx, utils.UnexpandedMin.Width, utils.UnexpandedMin.Height)
 	wailsRuntime.WindowSetMaxSize(a.ctx, utils.UnexpandedMax.Width, utils.UnexpandedMax.Height)
-	wailsRuntime.WindowSetSize(a.ctx, settings.Settings.UnexpandedSize.Width, height)
+	wailsRuntime.WindowSetSize(a.ctx, min(width, settings.Settings.UnexpandedSize.Width), height)
 	return true
 }
 

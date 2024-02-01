@@ -12,6 +12,7 @@
   export let visible = true;
   let clazz = '';
   export { clazz as class };
+  export let buttonClass = '';
 
   $: popupId = `responsiveButtonHover-${id}`;
 
@@ -26,9 +27,9 @@
 </script>
 
 {#if visible}
-  <div use:popup={popupHover}>
+  <div class={clazz} use:popup={popupHover}>
     <button
-      class="btn-icon min-w-0 w-11 h-11 p-2 group {clazz}"
+      class="btn-icon min-w-0 group {buttonClass}"
       {disabled}
       on:click={onClickAction}>
       <SvgIcon

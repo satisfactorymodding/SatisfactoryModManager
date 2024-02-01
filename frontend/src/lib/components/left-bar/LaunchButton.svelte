@@ -105,9 +105,9 @@
     event: 'hover',
     target: popupId,
     middleware: {
-      offset: 4,
+      offset: 32,
     },
-    placement: 'top',
+    placement: 'top-start',
   } satisfies PopupSettings;
 </script>
 

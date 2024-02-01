@@ -107,41 +107,41 @@
   }
 </script>
 
-<div style="width: 500px; max-width: calc(100vw - 32px);" class="card flex flex-col gap-2">
+<div style="max-height: calc(100vh - 3rem); max-width: calc(100vw - 3rem);" class="w-[48rem] card flex flex-col gap-2">
   <header class="card-header font-bold text-2xl text-center">
     Updates
   </header>
-  <section class="p-4 grow">
+  <section class="px-4">
     <button
       class="btn"
       on:click={() => $showIgnored = !$showIgnored}>
       {$showIgnored ? 'Hide ignored' : 'Show ignored'}
     </button>
-    <div class="grid grid-cols-12">
-      {#each updatesToDisplay as update}
-        <button class="btn p-2 col-span-8 text-left space-x-2" on:click={() => toggleSelected(update)}>
-          <div class="h-full w-6">
-            {#if $selectedUpdates.includes(update)}
-              <SvgIcon class="h-full w-full" icon={mdiUpload} />
-            {/if}
-          </div>
-          <div class="h-full flex-auto flex flex-col content-center">
-            <span>{modNames[update.item] ?? update.item}</span>
-            <span>{update.currentVersion} -> {update.newVersion}</span>
-          </div>
-        </button>
-        <button
-          class="btn col-span-2"
-          on:click={() => $modalStore = [{ type:'component', component:{ ref: ModChangelog, props:{ mod:update.item, versionRange:{ from:update.currentVersion, to:update.newVersion } } } }, ...$modalStore]}>
-          Changelog
-        </button>
-        <button
-          class="btn col-span-2"
-          on:click={() => toggleIgnoreUpdate(update)}>
-          {$unignoredUpdates.includes(update) ? 'Ignore' : 'Unignore'}
-        </button>
-      {/each}
-    </div>
+  </section>
+  <section class="px-4 flex-auto grid grid-cols-12 overflow-y-auto">
+    {#each updatesToDisplay as update}
+      <button class="btn p-2 col-span-8 text-left space-x-2" on:click={() => toggleSelected(update)}>
+        <div class="h-full w-6">
+          {#if $selectedUpdates.includes(update)}
+            <SvgIcon class="h-full w-full" icon={mdiUpload} />
+          {/if}
+        </div>
+        <div class="h-full flex-auto flex flex-col content-center">
+          <span>{modNames[update.item] ?? update.item}</span>
+          <span>{update.currentVersion} -> {update.newVersion}</span>
+        </div>
+      </button>
+      <button
+        class="btn col-span-2"
+        on:click={() => $modalStore = [{ type:'component', component:{ ref: ModChangelog, props:{ mod:update.item, versionRange:{ from:update.currentVersion, to:update.newVersion } } } }, ...$modalStore]}>
+        Changelog
+      </button>
+      <button
+        class="btn col-span-2"
+        on:click={() => toggleIgnoreUpdate(update)}>
+        {$unignoredUpdates.includes(update) ? 'Ignore' : 'Unignore'}
+      </button>
+    {/each}
   </section>
   <footer class="card-footer">
     <button

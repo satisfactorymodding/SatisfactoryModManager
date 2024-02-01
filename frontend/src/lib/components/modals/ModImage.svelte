@@ -8,6 +8,6 @@
   export let imageSrc: string;
 </script>
 
-<div style="max-height: calc(100vh - 128px); max-width: calc(100vw - 128px);" class="card flex flex-col gap-2">
-  <img style="max-height: calc(100vh - 128px); max-width: calc(100vw - 128px);" alt="Mod" src={imageSrc}/>
+<div class="card flex flex-col gap-2">
+  <img style="max-height: calc(100vh - 3rem); max-width: calc(100vw - 3rem);" alt="Mod" src={imageSrc}/>
 </div>
