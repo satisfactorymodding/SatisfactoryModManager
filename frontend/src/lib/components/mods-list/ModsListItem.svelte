@@ -15,7 +15,7 @@
   import { getAuthor } from '$lib/utils/getModAuthor';
   import { getCompatibility, getVersionCompatibility, type CompatibilityWithSource } from '$lib/utils/modCompatibility';
   import { CompatibilityState } from '$lib/generated';
-  import { markdown } from '$lib/utils/markdown';
+  import Markdown from '$lib/components/Markdown.svelte';
   import type { ButtonDisplay } from '$lib/utils/responsiveButton';
   import ResponsiveButton from '$lib/components/ResponsiveButton.svelte';
 
@@ -176,7 +176,7 @@
               compatibility = {
                 state: result.state,
                 note: result.note 
-                  ? `This mod has been reported as ${result.state} on this game version.<br>${markdown(result.note)}` 
+                  ? `This mod has been reported as ${result.state} on this game version.<br>${result.note}` 
                   : `This mod has been reported as ${result.state} on this game version. (No further notes provided)`,
                 source: 'reported',
               };
@@ -373,8 +373,7 @@
   {#if isInstalled && !isEnabled}
     This mod is Disabled. Click the pause icon to Enable it. 
   {:else if compatibility.state !== CompatibilityState.Works}
-    <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-    {@html compatibility.note}
+    <Markdown markdown={compatibility.note ?? ''}/>
   {/if}
 </Tooltip>
 

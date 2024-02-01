@@ -43,7 +43,8 @@
   <section class="p-4">
     {#each changelogs as changelog}
       <div class="text-lg font-semibold">v{changelog.version}</div>
-      <div class="text-base">{changelog.changelog}</div>
+      <Markdown markdown={changelog.changelog}/>
+      <hr />
     {/each}
   </section>
   <footer class="card-footer">

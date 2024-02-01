@@ -8,9 +8,8 @@
   import ModChangelog from '../modals/ModChangelog.svelte';
 
   import Tooltip from '$lib/components/Tooltip.svelte';
-  import ModImage from '$lib/components/modals/ModImage.svelte';
-  import { CompatibilityState, GetModDetailsDocument, GetModReferenceDocument } from '$lib/generated';
-  import { markdown } from '$lib/utils/markdown';
+  import { CompatibilityState, GetModDetailsDocument } from '$lib/generated';
+  import Markdown from '$lib/components/Markdown.svelte';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { bytesToAppropriate } from '$lib/utils/dataFormats';
   import { canModify, lockfileMods, manifestMods, progress , selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
@@ -83,7 +82,6 @@
 
   $: actualLogo = (mod && 'offline' in mod) ? (mod?.logo ? `data:image/png;base64, ${mod?.logo}` : '/images/no_image.webp') : mod?.logo;
   $: renderedLogo = actualLogo || `${$siteURL}/images/no_image.webp`;
-  $: descriptionRendered = (mod && 'full_description' in mod && mod?.full_description) ? markdown(mod.full_description) : undefined;
   $: author = getAuthor(mod);
 
   $: isInstalled = mod && mod.mod_reference in $manifestMods;
@@ -112,7 +110,7 @@
               compatibility = {
                 state: result.state,
                 note: result.note 
-                  ? `This mod has been reported as ${result.state} on this game version.<br>${markdown(result.note)}` 
+                  ? `This mod has been reported as ${result.state} on this game version.<br>${result.note}` 
                   : `This mod has been reported as ${result.state} on this game version. (No further notes provided)`,
                 source: 'reported',
               };
@@ -169,55 +167,6 @@
   $: authorClick = () => {
     $search = `author:"${author}"`;
   };
-
-  // Does not need offline support, since descriptions are disabled in offline mode
-  function handleElementClick(element: HTMLElement) {
-    if(element instanceof HTMLAnchorElement) {
-      const url = new URL(element.href);
-      if(url.hostname === 'ficsit.app' && url.pathname.startsWith('/mod/')) {
-        const modIdOrReference = url.pathname.split('/')[2];
-        if(modIdOrReference) {
-          client.query(GetModReferenceDocument, {
-            modIdOrReference,
-          }).toPromise()
-            .then((result) => {
-              if (result.data?.getModByIdOrReference?.mod_reference) {
-                $expandedMod = result.data.getModByIdOrReference.mod_reference;
-              } else {
-                console.error(`Failed to GetModReferenceDocument for modIdOrReference '${modIdOrReference}', so opening the link '${element.href}' in the browser instead.`);
-                BrowserOpenURL(element.href);
-              }
-            });
-        }
-        return true;
-      }
-      BrowserOpenURL(element.href);
-      return true;
-    }
-    if(element instanceof HTMLImageElement) {
-      modalStore.trigger({
-        type: 'component',
-        component: {
-          ref: ModImage,
-          props: {
-            imageSrc: element.src,
-          },
-        },
-      });
-      return true;
-    }
-    return false;
-  }
-
-  function handleDescriptionClick(event: MouseEvent) {
-    let element: HTMLElement | null = event.target as HTMLElement;
-    while(element) {
-      if(handleElementClick(element)) {
-        event.preventDefault();
-      }
-      element = element.parentElement;
-    }
-  }
 
   const compatEAPopupId = 'mod-details-compat-ea';
 
@@ -375,8 +324,7 @@
                   This mod has been reported as {mod.compatibility.EA.state} on Early Access.
                 </span>
                 {#if mod.compatibility.EA.note}
-                  <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-                  {@html markdown(mod.compatibility.EA.note)}
+                    <Markdown markdown={mod.compatibility.EA.note} />
                 {:else}
                   (No further notes provided)
                 {/if}
@@ -389,8 +337,7 @@
                   This mod has been reported as {mod.compatibility.EXP.state} on Experimental.
                 </span>
                 {#if mod.compatibility.EXP.note}
-                  <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-                  {@html markdown(mod.compatibility.EXP.note)}
+                    <Markdown markdown={mod.compatibility.EXP.note} />
                 {:else}
                   (No further notes provided)
                 {/if}
@@ -513,16 +460,11 @@
       <span>Close</span>
     </button>
   </div>
-  <div class="markdown-content break-words overflow-wrap-anywhere flex-1 px-3 mr-3 my-4 overflow-y-scroll overflow-x-hidden w-0">
+  <div class="break-words overflow-wrap-anywhere flex-1 px-3 mr-3 my-4 overflow-y-scroll overflow-x-hidden w-0">
     {#if $offline}
       <div class="flex items-center justify-center h-full text-center font-bold">Offline mode is enabled. Changelogs and descriptions are not available.</div>
-    {:else if descriptionRendered}
-      <!-- Intercepting mouse clicks for the link interrupter also seems to work for pressing Enter on the keyboard without a specific key handler added -->
-      <!-- svelte-ignore a11y-no-noninteractive-element-interactions a11y-click-events-have-key-events -->
-      <p role="article" on:click={handleDescriptionClick}>
-        <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-        {@html descriptionRendered}
-      </p>
+    {:else if mod && 'full_description' in mod && mod.full_description}
+      <Markdown markdown={mod.full_description} />
     {:else}
       <p>Loading...</p>
     {/if}

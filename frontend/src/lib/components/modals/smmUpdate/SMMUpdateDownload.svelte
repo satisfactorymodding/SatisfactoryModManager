@@ -2,7 +2,7 @@
   import { ProgressBar } from '@skeletonlabs/skeleton';
 
   import { smmUpdate , smmUpdateProgress, smmUpdateReady } from '$lib/store/smmUpdateStore';
-  import { markdown } from '$lib/utils/markdown';
+  import Markdown from '$lib/components/Markdown.svelte';
   import { bytesToAppropriate, secondsToAppropriate } from '$lib/utils/dataFormats';
   import { getModalStore } from '$lib/store/skeletonExtensions';
 
@@ -49,8 +49,7 @@
     <div class="max-h-[500px] overflow-y-auto">
       {#each $smmUpdate?.changelogs ?? [] as changelog}
         <div class="text-xl font-semibold">{changelog.version}</div>
-        <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-        <div class="markdown-content">{@html markdown(filterChangelog(changelog.changelog))}</div>
+        <Markdown markdown={filterChangelog(changelog.changelog)}/>
       {/each}
     </div>
   </section>
