@@ -8,6 +8,7 @@ import { favoriteMods, lockfileMods, manifestMods, selectedInstallMetadata } fro
 import { queuedMods } from '$lib/store/actionQueue';
 import { GetModFiltersOrder, GetModFiltersFilter, SetModFiltersOrder, SetModFiltersFilter } from '$wailsjs/go/bindings/Settings';
 import { getCompatibility } from '$lib/utils/modCompatibility';
+import { installTypeToTargetName } from '$lib/wailsTypesExtensions';
 
 export interface OrderBy {
   name: string;
@@ -39,7 +40,7 @@ export const filterOptions: Filter[] = [
       }
       const gameVersion = installInfo.version;
       const branch = installInfo.branch;
-      const compatibility = await getCompatibility(mod.mod_reference, branch, gameVersion, urqlClient);
+      const compatibility = await getCompatibility(mod.mod_reference, branch, gameVersion, installTypeToTargetName(installInfo.type), urqlClient);
       return compatibility.state !== CompatibilityState.Broken;
     }, 
   },

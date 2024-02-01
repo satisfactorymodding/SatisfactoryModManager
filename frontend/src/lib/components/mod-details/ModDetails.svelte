@@ -22,6 +22,7 @@
   import { offline } from '$lib/store/settingsStore';
   import type { ficsitcli } from '$wailsjs/go/models';
   import { getModalStore } from '$lib/store/skeletonExtensions';
+  import { installTypeToTargetName } from '$lib/wailsTypesExtensions';
 
   export let focusOnEntry: HTMLElement | undefined = undefined;
 
@@ -105,7 +106,7 @@
         if(mod.hidden && !isDependency) {
           compatibility = { state: CompatibilityState.Broken, note: 'This mod was hidden by the author.', source: 'reported' };
         } else {
-          getCompatibility(mod.mod_reference, branch, gameVersion, client).then((result) => {
+          getCompatibility(mod.mod_reference, branch, gameVersion, installTypeToTargetName($selectedInstallMetadata.type), client).then((result) => {
             if (result.source === 'reported') {
               compatibility = {
                 state: result.state,

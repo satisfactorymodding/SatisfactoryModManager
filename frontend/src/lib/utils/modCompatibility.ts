@@ -2,7 +2,7 @@ import { Client } from '@urql/svelte';
 import { coerce, compare, minVersion, satisfies } from 'semver';
 import { get } from 'svelte/store';
 
-import { CompatibilityState, ModReportedCompatibilityDocument, ModVersionsCompatibilityDocument, SmlVersionsCompatibilityDocument, type Compatibility } from '$lib/generated';
+import { CompatibilityState, ModReportedCompatibilityDocument, ModVersionsCompatibilityDocument, SmlVersionsCompatibilityDocument, type Compatibility, GetModVersionTargetsDocument, TargetName } from '$lib/generated';
 import { offline } from '$lib/store/settingsStore';
 import { common } from '$lib/generated/wailsjs/go/models';
 import { OfflineGetMod, OfflineGetSMLVersions } from '$wailsjs/go/ficsitcli/FicsitCLI';
@@ -11,7 +11,10 @@ export interface CompatibilityWithSource extends Compatibility {
   source: 'reported' | 'version';
 }
 
-export async function getCompatibility(modReference: string, gameBranch: common.GameBranch, gameVersion: number, urqlClient: Client): Promise<CompatibilityWithSource> {
+export async function getCompatibility(modReference: string, gameBranch: common.GameBranch, gameVersion: number, gameTarget: TargetName, urqlClient: Client): Promise<CompatibilityWithSource> {
+  if(!await modSupportsTarget(modReference, gameTarget, urqlClient)) {
+    return { state: CompatibilityState.Broken, note: `This mod does not support ${gameTarget}.`, source: 'version' };
+  }
   const reportedCompatibility = await getReportedCompatibility(modReference, gameBranch, urqlClient);
   if(reportedCompatibility) {
     return { ...reportedCompatibility, source: 'reported' };
@@ -22,6 +25,15 @@ export async function getCompatibility(modReference: string, gameBranch: common.
 
 function gameVersionToSemver(version: number): string {
   return coerce(version)!.format();
+}
+
+export async function modSupportsTarget(modReference: string, gameTarget: TargetName, urqlClient: Client): Promise<boolean> {
+  const result = await urqlClient.query(GetModVersionTargetsDocument, { modReference }).toPromise();
+  if(!result.data?.mod) {
+    return false;
+  }
+  const mod = result.data.mod;
+  return mod.versions.some((ver) => ver.targets.some((target) => target?.targetName === gameTarget));
 }
 
 export async function getReportedCompatibility(modReference: string, gameBranch: common.GameBranch, urqlClient: Client): Promise<Compatibility | undefined> {

@@ -13,6 +13,7 @@
   import { CompatibilityState, type Compatibility } from '$lib/generated';
   import { getCompatibility, type CompatibilityWithSource } from '$lib/utils/modCompatibility';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
+  import { installTypeToTargetName } from '$lib/wailsTypesExtensions';
 
   $: isInstallLaunchable = !!$selectedInstallMetadata?.launchPath;
 
@@ -22,11 +23,12 @@
   $: {
     const gameVersion = $selectedInstallMetadata?.version;
     const branch = $selectedInstallMetadata?.branch;
-    if (gameVersion && branch) {
+    const installType = $selectedInstallMetadata?.type;
+    if (gameVersion && branch && installType) {
       compatibilities = {};
       Object.keys($lockfileMods).map(async (modReference) => {
         if (modReference !== 'SML') {
-          compatibilities[modReference] = await getCompatibility(modReference, branch, gameVersion, client);
+          compatibilities[modReference] = await getCompatibility(modReference, branch, gameVersion, installTypeToTargetName(installType), client);
         }
       });
     }

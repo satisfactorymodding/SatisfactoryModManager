@@ -1,0 +1,12 @@
+query GetModVersionTargets($modReference: ModReference!) {
+  mod: getModByReference(modReference: $modReference) {
+    ...ModKey
+    versions(filter: {limit: 100}) {
+      id
+      version
+      targets {
+        targetName
+      }
+    }
+  }
+}

@@ -18,6 +18,7 @@
   import Markdown from '$lib/components/Markdown.svelte';
   import type { ButtonDisplay } from '$lib/utils/responsiveButton';
   import ResponsiveButton from '$lib/components/ResponsiveButton.svelte';
+  import { installTypeToTargetName } from '$lib/wailsTypesExtensions';
 
   export let mod: PartialMod;
 
@@ -171,7 +172,7 @@
         if(mod.hidden && !isDependency) {
           compatibility = { state: CompatibilityState.Broken, note: 'This mod was hidden by the author.', source: 'reported' };
         } else {
-          getCompatibility(mod.mod_reference, branch, gameVersion, client).then((result) => {
+          getCompatibility(mod.mod_reference, branch, gameVersion, installTypeToTargetName($selectedInstallMetadata.type), client).then((result) => {
             if (result.source === 'reported') {
               compatibility = {
                 state: result.state,
