@@ -25,7 +25,9 @@ func Init() {
 func makeUpdaterConfig() updater.Config {
 	currentVersion, err := semver.NewVersion(viper.GetString("version"))
 	if err != nil {
-		slog.Error("failed to parse current version, using 0.0.0-unknown", slog.Any("error", err))
+		if shouldUseUpdater() {
+			slog.Error("failed to parse current version, using 0.0.0-unknown", slog.Any("error", err))
+		}
 		currentVersion = semver.New(0, 0, 0, "unknown", "")
 	}
 	config := updater.Config{
@@ -47,7 +49,17 @@ var (
 	updateCheckStop   = make(chan bool)
 )
 
+func CheckForUpdate() error {
+	if !shouldUseUpdater() {
+		return nil
+	}
+	return Updater.CheckForUpdate()
+}
+
 func CheckInterval(interval time.Duration) {
+	if !shouldUseUpdater() {
+		return
+	}
 	if checkStarted {
 		return
 	}
@@ -74,6 +86,9 @@ func CheckInterval(interval time.Duration) {
 }
 
 func OnExit(restart bool) error {
+	if !shouldUseUpdater() {
+		return nil
+	}
 	close(updateCheckStop)
 	if Updater == nil {
 		// No updater for this build type

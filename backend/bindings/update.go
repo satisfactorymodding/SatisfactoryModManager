@@ -22,7 +22,7 @@ func (u *Update) startup(ctx context.Context) {
 }
 
 func (u *Update) CheckForUpdates() {
-	_ = autoupdate.Updater.CheckForUpdate()
+	_ = autoupdate.CheckForUpdate()
 }
 
 func (u *Update) UpdateAndRestart() {

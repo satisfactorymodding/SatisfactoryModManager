@@ -17,6 +17,10 @@ func registerUpdateType(updateMode string, updateType func() UpdateType) {
 	updateTypes[updateMode] = updateType
 }
 
+func shouldUseUpdater() bool {
+	return viper.Get("update-mode") != "none"
+}
+
 func getUpdateType() *UpdateType {
 	getter := updateTypes[viper.GetString("update-mode")]
 	if getter == nil {
