@@ -34,33 +34,28 @@ var AllBranches = []struct {
 
 var BindingsInstance *Bindings
 
-func MakeBindings() (*Bindings, error) {
+func MakeBindings() *Bindings {
 	if BindingsInstance != nil {
-		return BindingsInstance, nil
-	}
-
-	ficsitCLI, err := ficsitcli.MakeFicsitCLI()
-	if err != nil {
-		return nil, err
+		return BindingsInstance
 	}
 
 	BindingsInstance = &Bindings{
 		App:       MakeApp(),
 		Update:    MakeUpdate(),
-		FicsitCLI: ficsitCLI,
+		FicsitCLI: ficsitcli.MakeFicsitCLI(),
 		settings:  MakeSettings(),
 		debugInfo: MakeDebugInfo(),
 	}
 
-	return BindingsInstance, nil
+	return BindingsInstance
 }
 
-func (b *Bindings) Startup(ctx context.Context) {
+func (b *Bindings) Startup(ctx context.Context) error {
 	b.App.startup(ctx)
 	b.Update.startup(ctx)
-	b.FicsitCLI.Startup(ctx)
 	b.settings.startup(ctx)
 	b.debugInfo.startup(ctx)
+	return b.FicsitCLI.Startup(ctx)
 }
 
 func (b *Bindings) Shutdown(ctx context.Context) {

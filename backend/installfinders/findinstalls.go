@@ -1,5 +1,3 @@
-//go:build !bindings
-
 package installfinders
 
 import (

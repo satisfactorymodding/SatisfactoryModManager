@@ -27,20 +27,16 @@ type FicsitCLI struct {
 	isGameRunning        bool
 }
 
-func MakeFicsitCLI() (*FicsitCLI, error) {
-	f := &FicsitCLI{}
-	err := f.Init()
-	if err != nil {
-		return nil, err
-	}
-	return f, nil
+func MakeFicsitCLI() *FicsitCLI {
+	return &FicsitCLI{}
 }
 
-func (f *FicsitCLI) Startup(ctx context.Context) {
+func (f *FicsitCLI) Startup(ctx context.Context) error {
 	f.ctx = ctx
+	return f.init()
 }
 
-func (f *FicsitCLI) Init() error {
+func (f *FicsitCLI) init() error {
 	if f.ficsitCli != nil {
 		return fmt.Errorf("FicsitCLIWrapper already initialized")
 	}
