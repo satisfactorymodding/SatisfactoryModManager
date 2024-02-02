@@ -11,11 +11,11 @@ import (
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/settings"
 )
 
-func (f *FicsitCLI) GetOffline() bool {
+func (f *ficsitCLI) GetOffline() bool {
 	return f.ficsitCli.Provider.IsOffline()
 }
 
-func (f *FicsitCLI) SetOffline(offline bool) {
+func (f *ficsitCLI) SetOffline(offline bool) {
 	f.ficsitCli.Provider.(*provider.MixedProvider).Offline = offline
 	settings.Settings.Offline = offline
 	_ = settings.SaveSettings()
@@ -41,7 +41,7 @@ type ModVersionDependency struct {
 	Optional     bool   `json:"optional"`
 }
 
-func (f *FicsitCLI) OfflineGetMods() ([]Mod, error) {
+func (f *ficsitCLI) OfflineGetMods() ([]Mod, error) {
 	cache, err := ficsitcache.GetCache()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get cache: %w", err)
@@ -58,7 +58,7 @@ func (f *FicsitCLI) OfflineGetMods() ([]Mod, error) {
 	return mods, nil
 }
 
-func (f *FicsitCLI) OfflineGetModsByReferences(modReferences []string) ([]Mod, error) {
+func (f *ficsitCLI) OfflineGetModsByReferences(modReferences []string) ([]Mod, error) {
 	cache, err := ficsitcache.GetCache()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get cache: %w", err)
@@ -78,7 +78,7 @@ func (f *FicsitCLI) OfflineGetModsByReferences(modReferences []string) ([]Mod, e
 	return mods, nil
 }
 
-func (f *FicsitCLI) OfflineGetMod(modReference string) (Mod, error) {
+func (f *ficsitCLI) OfflineGetMod(modReference string) (Mod, error) {
 	modFiles, err := ficsitcache.GetCacheMod(modReference)
 	if err != nil {
 		return Mod{}, fmt.Errorf("failed to get cache: %w", err)
@@ -94,7 +94,7 @@ type SMLVersion struct {
 	SatisfactoryVersion int    `json:"satisfactory_version"` // TODO
 }
 
-func (f *FicsitCLI) OfflineGetSMLVersions() ([]SMLVersion, error) {
+func (f *ficsitCLI) OfflineGetSMLVersions() ([]SMLVersion, error) {
 	smlFiles, err := ficsitcache.GetCacheMod("SML")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get cache: %w", err)

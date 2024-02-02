@@ -14,8 +14,8 @@ import (
 	"github.com/spf13/viper"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/backend/bindings"
 	appCommon "github.com/satisfactorymodding/SatisfactoryModManager/backend/common"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/ficsitcli"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 )
@@ -55,12 +55,12 @@ func addFactoryGameLog(writer *zip.Writer) error {
 }
 
 func addMetadata(writer *zip.Writer) error {
-	installs := bindings.BindingsInstance.FicsitCLI.GetInstallations()
-	selectedInstallInstance := bindings.BindingsInstance.FicsitCLI.GetSelectedInstall()
+	installs := ficsitcli.FicsitCLI.GetInstallations()
+	selectedInstallInstance := ficsitcli.FicsitCLI.GetSelectedInstall()
 	metadataInstalls := make([]*MetadataInstallation, 0)
 	var selectedMetadataInstall *MetadataInstallation
 	for _, install := range installs {
-		metadata := bindings.BindingsInstance.FicsitCLI.GetInstallationsMetadata()[install]
+		metadata := ficsitcli.FicsitCLI.GetInstallationsMetadata()[install]
 		if metadata == nil {
 			slog.Warn("failed to get metadata for installation", slog.String("path", install))
 			continue
@@ -68,7 +68,7 @@ func addMetadata(writer *zip.Writer) error {
 		i := &MetadataInstallation{
 			Installation: metadata,
 			Name:         fmt.Sprintf("Satisfactory %s (%s)", metadata.Branch, metadata.Launcher),
-			Profile:      bindings.BindingsInstance.FicsitCLI.GetInstallation(install).Profile,
+			Profile:      ficsitcli.FicsitCLI.GetInstallation(install).Profile,
 		}
 		i.Path = utils.RedactPath(i.Path)
 		i.LaunchPath = strings.Join(i.Installation.LaunchPath, " ")
@@ -80,16 +80,16 @@ func addMetadata(writer *zip.Writer) error {
 		}
 	}
 
-	ficsitCliProfileNames := bindings.BindingsInstance.FicsitCLI.GetProfiles()
-	selectedMetadataProfileName := bindings.BindingsInstance.FicsitCLI.GetSelectedProfile()
+	ficsitCliProfileNames := ficsitcli.FicsitCLI.GetProfiles()
+	selectedMetadataProfileName := ficsitcli.FicsitCLI.GetSelectedProfile()
 	metadataProfiles := make([]*ficsitCli.Profile, 0)
 	for _, profileName := range ficsitCliProfileNames {
-		p := bindings.BindingsInstance.FicsitCLI.GetProfile(profileName)
+		p := ficsitcli.FicsitCLI.GetProfile(profileName)
 
 		metadataProfiles = append(metadataProfiles, p)
 	}
 
-	lockfile, err := bindings.BindingsInstance.FicsitCLI.GetSelectedInstallLockfile()
+	lockfile, err := ficsitcli.FicsitCLI.GetSelectedInstallLockfile()
 	if err != nil {
 		return fmt.Errorf("failed to get lockfile: %w", err)
 	}

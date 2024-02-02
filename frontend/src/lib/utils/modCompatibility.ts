@@ -5,7 +5,7 @@ import { get } from 'svelte/store';
 import { CompatibilityState, ModReportedCompatibilityDocument, ModVersionsCompatibilityDocument, SmlVersionsCompatibilityDocument, type Compatibility, GetModVersionTargetsDocument, TargetName } from '$lib/generated';
 import { offline } from '$lib/store/settingsStore';
 import { common } from '$lib/generated/wailsjs/go/models';
-import { OfflineGetMod, OfflineGetSMLVersions } from '$wailsjs/go/ficsitcli/FicsitCLI';
+import { OfflineGetMod, OfflineGetSMLVersions } from '$wailsjs/go/ficsitcli/ficsitCLI';
 
 export interface CompatibilityWithSource extends Compatibility {
   source: 'reported' | 'version';

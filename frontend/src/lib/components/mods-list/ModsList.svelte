@@ -15,7 +15,7 @@
   import { queuedMods } from '$lib/store/actionQueue';
   import { offline, startView } from '$lib/store/settingsStore';
   import { expandedMod } from '$lib/store/generalStore';
-  import { OfflineGetMods } from '$wailsjs/go/ficsitcli/FicsitCLI';
+  import { OfflineGetMods } from '$wailsjs/go/ficsitcli/ficsitCLI';
 
   const dispatch = createEventDispatcher();
 

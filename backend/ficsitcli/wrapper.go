@@ -1,7 +1,6 @@
 package ficsitcli
 
 import (
-	"context"
 	"fmt"
 	"log/slog"
 	"time"
@@ -11,12 +10,12 @@ import (
 	"github.com/satisfactorymodding/ficsit-cli/cli/provider"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
+	appCommon "github.com/satisfactorymodding/SatisfactoryModManager/backend/common"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/settings"
 )
 
-type FicsitCLI struct {
-	ctx                  context.Context
+type ficsitCLI struct {
 	ficsitCli            *cli.GlobalContext
 	installationMetadata map[string]*common.Installation
 	installFindErrors    []error
@@ -24,16 +23,9 @@ type FicsitCLI struct {
 	isGameRunning        bool
 }
 
-func MakeFicsitCLI() *FicsitCLI {
-	return &FicsitCLI{}
-}
+var FicsitCLI = &ficsitCLI{}
 
-func (f *FicsitCLI) Startup(ctx context.Context) error {
-	f.ctx = ctx
-	return f.init()
-}
-
-func (f *FicsitCLI) init() error {
+func (f *ficsitCLI) Init() error {
 	if f.ficsitCli != nil {
 		return fmt.Errorf("FicsitCLIWrapper already initialized")
 	}
@@ -62,18 +54,18 @@ func (f *FicsitCLI) init() error {
 					break
 				}
 			}
-			wailsRuntime.EventsEmit(f.ctx, "isGameRunning", f.isGameRunning)
+			wailsRuntime.EventsEmit(appCommon.AppContext, "isGameRunning", f.isGameRunning)
 		}
 	}()
 	return nil
 }
 
-func (f *FicsitCLI) setProgress(p *Progress) {
+func (f *ficsitCLI) setProgress(p *Progress) {
 	f.progress = p
-	wailsRuntime.EventsEmit(f.ctx, "progress", p)
+	wailsRuntime.EventsEmit(appCommon.AppContext, "progress", p)
 }
 
-func (f *FicsitCLI) isValidInstall(path string) bool {
+func (f *ficsitCLI) isValidInstall(path string) bool {
 	_, ok := f.installationMetadata[path]
 	return ok
 }

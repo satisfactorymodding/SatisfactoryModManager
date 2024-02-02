@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { DeleteProfile } from '$lib/generated/wailsjs/go/ficsitcli/FicsitCLI';
+  import { DeleteProfile } from '$lib/generated/wailsjs/go/ficsitcli/ficsitCLI';
   import { error } from '$lib/store/generalStore';
 
   export let parent: {onClose: () => void};

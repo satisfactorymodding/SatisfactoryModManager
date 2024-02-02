@@ -12,10 +12,11 @@ import (
 	resolver "github.com/satisfactorymodding/ficsit-resolver"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
+	appCommon "github.com/satisfactorymodding/SatisfactoryModManager/backend/common"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 )
 
-func (f *FicsitCLI) SetProfile(profile string) error {
+func (f *ficsitCLI) SetProfile(profile string) error {
 	l := slog.With(slog.String("task", "setProfile"), slog.String("profile", profile))
 
 	selectedInstallation := f.GetSelectedInstall()
@@ -57,7 +58,7 @@ func (f *FicsitCLI) SetProfile(profile string) error {
 	return nil
 }
 
-func (f *FicsitCLI) GetSelectedProfile() *string {
+func (f *ficsitCLI) GetSelectedProfile() *string {
 	selectedInstallation := f.GetSelectedInstall()
 	if selectedInstallation == nil {
 		return nil
@@ -65,7 +66,7 @@ func (f *FicsitCLI) GetSelectedProfile() *string {
 	return &selectedInstallation.Profile
 }
 
-func (f *FicsitCLI) GetProfiles() []string {
+func (f *ficsitCLI) GetProfiles() []string {
 	profileNames := make([]string, 0, len(f.ficsitCli.Profiles.Profiles))
 	for k := range f.ficsitCli.Profiles.Profiles {
 		profileNames = append(profileNames, k)
@@ -74,11 +75,11 @@ func (f *FicsitCLI) GetProfiles() []string {
 	return profileNames
 }
 
-func (f *FicsitCLI) GetProfile(profile string) *cli.Profile {
+func (f *ficsitCLI) GetProfile(profile string) *cli.Profile {
 	return f.ficsitCli.Profiles.GetProfile(profile)
 }
 
-func (f *FicsitCLI) AddProfile(name string) error {
+func (f *ficsitCLI) AddProfile(name string) error {
 	l := slog.With(slog.String("task", "addProfile"), slog.String("profile", name))
 
 	_, err := f.ficsitCli.Profiles.AddProfile(name)
@@ -94,7 +95,7 @@ func (f *FicsitCLI) AddProfile(name string) error {
 	return nil
 }
 
-func (f *FicsitCLI) RenameProfile(oldName string, newName string) error {
+func (f *ficsitCLI) RenameProfile(oldName string, newName string) error {
 	l := slog.With(slog.String("task", "renameProfile"), slog.String("oldName", oldName), slog.String("newName", newName))
 
 	err := f.ficsitCli.Profiles.RenameProfile(f.ficsitCli, oldName, newName)
@@ -111,7 +112,7 @@ func (f *FicsitCLI) RenameProfile(oldName string, newName string) error {
 	return nil
 }
 
-func (f *FicsitCLI) DeleteProfile(name string) error {
+func (f *ficsitCLI) DeleteProfile(name string) error {
 	l := slog.With(slog.String("task", "deleteProfile"), slog.String("profile", name))
 
 	err := f.ficsitCli.Profiles.DeleteProfile(name)
@@ -145,7 +146,7 @@ type ExportedProfileMetadata struct {
 	GameVersion int `json:"gameVersion"`
 }
 
-func (f *FicsitCLI) MakeCurrentExportedProfile() (*ExportedProfile, error) {
+func (f *ficsitCLI) MakeCurrentExportedProfile() (*ExportedProfile, error) {
 	l := slog.With(slog.String("task", "makeCurrentExportedProfile"))
 
 	selectedInstallation := f.GetSelectedInstall()
@@ -192,7 +193,7 @@ func (f *FicsitCLI) MakeCurrentExportedProfile() (*ExportedProfile, error) {
 	}, nil
 }
 
-func (f *FicsitCLI) ExportCurrentProfile() error {
+func (f *ficsitCLI) ExportCurrentProfile() error {
 	l := slog.With(slog.String("task", "exportCurrentProfile"))
 
 	exportedProfile, err := f.MakeCurrentExportedProfile()
@@ -202,7 +203,7 @@ func (f *FicsitCLI) ExportCurrentProfile() error {
 	}
 
 	defaultFileName := fmt.Sprintf("%s-%s.smmprofile", exportedProfile.Profile.Name, time.Now().UTC().Format("2006-01-02-15-04-05"))
-	filename, err := wailsRuntime.SaveFileDialog(f.ctx, wailsRuntime.SaveDialogOptions{
+	filename, err := wailsRuntime.SaveFileDialog(appCommon.AppContext, wailsRuntime.SaveDialogOptions{
 		DefaultFilename: defaultFileName,
 		Filters: []wailsRuntime.FileFilter{
 			{
@@ -234,7 +235,7 @@ func (f *FicsitCLI) ExportCurrentProfile() error {
 	return nil
 }
 
-func (f *FicsitCLI) ReadExportedProfileMetadata(file string) (*ExportedProfileMetadata, error) {
+func (f *ficsitCLI) ReadExportedProfileMetadata(file string) (*ExportedProfileMetadata, error) {
 	l := slog.With(slog.String("task", "readExportedProfileMetadata"), slog.String("file", file))
 
 	fileBytes, err := os.ReadFile(file)
@@ -253,7 +254,7 @@ func (f *FicsitCLI) ReadExportedProfileMetadata(file string) (*ExportedProfileMe
 	return exportedProfile.Metadata, nil
 }
 
-func (f *FicsitCLI) ImportProfile(name string, file string) error {
+func (f *ficsitCLI) ImportProfile(name string, file string) error {
 	l := slog.With(slog.String("task", "importProfile"), slog.String("name", name), slog.String("file", file))
 
 	selectedInstallation := f.GetSelectedInstall()

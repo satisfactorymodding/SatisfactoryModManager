@@ -9,7 +9,7 @@
   import { queuedMods, startQueue } from '$lib/store/actionQueue';
   import { launchButton, queueAutoStart } from '$lib/store/settingsStore';
   import { error, isLaunchingGame } from '$lib/store/generalStore';
-  import { LaunchGame } from '$wailsjs/go/ficsitcli/FicsitCLI';
+  import { LaunchGame } from '$wailsjs/go/ficsitcli/ficsitCLI';
   import { CompatibilityState, type Compatibility } from '$lib/generated';
   import { getCompatibility, type CompatibilityWithSource } from '$lib/utils/modCompatibility';
   import SvgIcon from '$lib/components/SVGIcon.svelte';

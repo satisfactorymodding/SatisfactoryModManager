@@ -16,7 +16,7 @@ type Update struct {
 	NewVersion     string `json:"newVersion"`
 }
 
-func (f *FicsitCLI) CheckForUpdates() ([]Update, error) {
+func (f *ficsitCLI) CheckForUpdates() ([]Update, error) {
 	selectedInstallation := f.GetSelectedInstall()
 
 	if selectedInstallation == nil {
@@ -81,7 +81,7 @@ func (f *FicsitCLI) CheckForUpdates() ([]Update, error) {
 	return updates, nil
 }
 
-func (f *FicsitCLI) UpdateMods(mods []string) error {
+func (f *ficsitCLI) UpdateMods(mods []string) error {
 	l := slog.With(slog.String("task", "updateMods"))
 
 	if f.progress != nil {

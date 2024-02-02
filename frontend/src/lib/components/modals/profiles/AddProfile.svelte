@@ -1,7 +1,7 @@
 <script lang="ts">
   import { newProfileName } from './addProfile';
 
-  import { AddProfile } from '$lib/generated/wailsjs/go/ficsitcli/FicsitCLI';
+  import { AddProfile } from '$lib/generated/wailsjs/go/ficsitcli/ficsitCLI';
   import { selectedProfile } from '$lib/store/ficsitCLIStore';
   import { error } from '$lib/store/generalStore';
 

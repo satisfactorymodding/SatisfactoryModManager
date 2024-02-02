@@ -10,7 +10,7 @@
   import { manifestMods, lockfileMods } from '$lib/store/ficsitCLIStore';
   import { GetModNameDocument } from '$lib/generated';
   import type { LaunchButtonType, ViewType } from '$lib/wailsTypesExtensions';
-  import { OfflineGetMod } from '$wailsjs/go/ficsitcli/FicsitCLI';
+  import { OfflineGetMod } from '$wailsjs/go/ficsitcli/ficsitCLI';
   import { getModalStore } from '$lib/store/skeletonExtensions';
 
   const modalStore = getModalStore();

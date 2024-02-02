@@ -15,7 +15,7 @@
   import { canModify, lockfileMods, manifestMods, progress , selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
   import { error , expandedMod, siteURL } from '$lib/store/generalStore';
   import { search } from '$lib/store/modFiltersStore';
-  import { InstallModVersion, OfflineGetMod } from '$wailsjs/go/ficsitcli/FicsitCLI';
+  import { InstallModVersion, OfflineGetMod } from '$wailsjs/go/ficsitcli/ficsitCLI';
   import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
   import { getAuthor } from '$lib/utils/getModAuthor';
   import { getCompatibility, getVersionCompatibility, type CompatibilityWithSource } from '$lib/utils/modCompatibility';

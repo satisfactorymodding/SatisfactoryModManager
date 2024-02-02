@@ -8,7 +8,7 @@ import (
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 )
 
-func (f *FicsitCLI) GetRemoteInstallations() []string {
+func (f *ficsitCLI) GetRemoteInstallations() []string {
 	paths := make([]string, 0, len(f.installationMetadata))
 	for _, install := range f.GetInstallations() {
 		meta, ok := f.installationMetadata[install]
@@ -23,7 +23,7 @@ func (f *FicsitCLI) GetRemoteInstallations() []string {
 	return paths
 }
 
-func (f *FicsitCLI) AddRemoteServer(path string) error {
+func (f *ficsitCLI) AddRemoteServer(path string) error {
 	installation := f.ficsitCli.Installations.GetInstallation(path)
 	if installation == nil {
 		fallbackProfile := "Default"
@@ -81,7 +81,7 @@ func (f *FicsitCLI) AddRemoteServer(path string) error {
 	return nil
 }
 
-func (f *FicsitCLI) getNextRemoteLauncherName() string {
+func (f *ficsitCLI) getNextRemoteLauncherName() string {
 	existingNumbers := make(map[int]bool)
 	for _, install := range f.GetRemoteInstallations() {
 		metadata := f.installationMetadata[install]
@@ -101,7 +101,7 @@ func (f *FicsitCLI) getNextRemoteLauncherName() string {
 	}
 }
 
-func (f *FicsitCLI) RemoveRemoteServer(path string) error {
+func (f *ficsitCLI) RemoveRemoteServer(path string) error {
 	metadata := f.installationMetadata[path]
 	if metadata == nil {
 		return fmt.Errorf("installation not found")

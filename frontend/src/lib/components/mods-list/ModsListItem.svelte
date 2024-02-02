@@ -10,7 +10,7 @@
   import { favoriteMods, lockfileMods, manifestMods, progress, selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
   import { addQueuedModAction, queuedMods, removeQueuedModAction } from '$lib/store/actionQueue';
   import { error, siteURL } from '$lib/store/generalStore';
-  import { DisableMod, EnableMod, InstallMod, RemoveMod } from '$wailsjs/go/ficsitcli/FicsitCLI';
+  import { DisableMod, EnableMod, InstallMod, RemoveMod } from '$wailsjs/go/ficsitcli/ficsitCLI';
   import { FavoriteMod, UnFavoriteMod } from '$wailsjs/go/settings/settings';
   import { getAuthor } from '$lib/utils/getModAuthor';
   import { getCompatibility, getVersionCompatibility, type CompatibilityWithSource } from '$lib/utils/modCompatibility';

@@ -6,7 +6,7 @@
   import Select from '$lib/components/Select.svelte';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { installsMetadata, remoteServers } from '$lib/store/ficsitCLIStore';
-  import { AddRemoteServer, RemoveRemoteServer } from '$lib/generated/wailsjs/go/ficsitcli/FicsitCLI';
+  import { AddRemoteServer, RemoveRemoteServer } from '$lib/generated/wailsjs/go/ficsitcli/ficsitCLI';
 
   export let parent: { onClose: () => void };
   

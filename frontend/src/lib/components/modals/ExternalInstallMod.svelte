@@ -6,7 +6,7 @@
   import { addQueuedModAction, queuedMods } from '$lib/store/actionQueue';
   import { offline } from '$lib/store/settingsStore';
   import { error } from '$lib/store/generalStore';
-  import { InstallMod, InstallModVersion } from '$wailsjs/go/ficsitcli/FicsitCLI';
+  import { InstallMod, InstallModVersion } from '$wailsjs/go/ficsitcli/ficsitCLI';
 
   export let parent: { onClose: () => void };
 

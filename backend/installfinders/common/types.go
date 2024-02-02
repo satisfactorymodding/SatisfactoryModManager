@@ -46,3 +46,28 @@ func (e InstallFindError) Cause() error {
 }
 
 type InstallFinderFunc func() ([]*Installation, []error)
+
+var AllInstallTypes = []struct {
+	Value  InstallType
+	TSName string
+}{
+	{InstallTypeWindowsClient, "WINDOWS"},
+	{InstallTypeWindowsServer, "WINDOWS_SERVER"},
+	{InstallTypeLinuxServer, "LINUX_SERVER"},
+}
+
+var AllBranches = []struct {
+	Value  GameBranch
+	TSName string
+}{
+	{BranchEarlyAccess, "EARLY_ACCESS"},
+	{BranchExperimental, "EXPERIMENTAL"},
+}
+
+var AllLocationTypes = []struct {
+	Value  LocationType
+	TSName string
+}{
+	{LocationTypeLocal, "LOCAL"},
+	{LocationTypeRemote, "REMOTE"},
+}

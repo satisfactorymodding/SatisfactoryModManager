@@ -19,7 +19,7 @@
   import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
   import { OpenExternal } from '$wailsjs/go/app/app';
   import { common } from '$wailsjs/go/models';
-  import { ExportCurrentProfile } from '$wailsjs/go/ficsitcli/FicsitCLI';
+  import { ExportCurrentProfile } from '$wailsjs/go/ficsitcli/ficsitCLI';
   import { getModalStore } from '$lib/store/skeletonExtensions';
   
   const modalStore = getModalStore();

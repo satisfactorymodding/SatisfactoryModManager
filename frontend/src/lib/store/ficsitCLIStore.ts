@@ -5,7 +5,7 @@ import { isLaunchingGame } from './generalStore';
 import { ignoredUpdates } from './settingsStore';
 
 import type { cli, ficsitcli } from '$wailsjs/go/models';
-import { CheckForUpdates, GetInstallationsMetadata, GetInvalidInstalls, GetProfiles, GetSelectedInstall, GetSelectedProfile, SelectInstall, SetProfile, GetModsEnabled, SetModsEnabled, GetSelectedInstallProfileMods, GetSelectedInstallLockfileMods, GetRemoteInstallations, GetInstallations } from '$wailsjs/go/ficsitcli/FicsitCLI';
+import { CheckForUpdates, GetInstallationsMetadata, GetInvalidInstalls, GetProfiles, GetSelectedInstall, GetSelectedProfile, SelectInstall, SetProfile, GetModsEnabled, SetModsEnabled, GetSelectedInstallProfileMods, GetSelectedInstallLockfileMods, GetRemoteInstallations, GetInstallations } from '$wailsjs/go/ficsitcli/ficsitCLI';
 import { GetFavoriteMods } from '$wailsjs/go/settings/settings';
 
 export const invalidInstalls = binding([], { initialGet: GetInvalidInstalls });

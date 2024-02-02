@@ -1,7 +1,7 @@
 import { binding, bindingTwoWay, bindingTwoWayNoExcept } from './wailsStoreBindings';
 
 import type { LaunchButtonType, ViewType } from '$lib/wailsTypesExtensions';
-import { GetOffline, SetOffline } from '$wailsjs/go/ficsitcli/FicsitCLI';
+import { GetOffline, SetOffline } from '$wailsjs/go/ficsitcli/ficsitCLI';
 import { GetStartView, SetStartView, GetKonami, SetKonami, GetLaunchButton, SetLaunchButton, GetQueueAutoStart, SetQueueAutoStart, GetUpdateCheckMode, SetUpdateCheckMode, GetViewedAnnouncements, GetIgnoredUpdates, GetCacheDir, SetCacheDir } from '$wailsjs/go/settings/settings';
 
 export const startView = bindingTwoWayNoExcept<ViewType | null>(null, { initialGet: GetStartView }, { updateFunction: SetStartView });

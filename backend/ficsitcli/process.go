@@ -13,10 +13,11 @@ import (
 	resolver "github.com/satisfactorymodding/ficsit-resolver"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
+	appCommon "github.com/satisfactorymodding/SatisfactoryModManager/backend/common"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 )
 
-func (f *FicsitCLI) validateInstall(installation *cli.Installation, progressItem string) error {
+func (f *ficsitCLI) validateInstall(installation *cli.Installation, progressItem string) error {
 	if !f.isValidInstall(installation.Path) {
 		return fmt.Errorf("invalid installation: %s", installation.Path)
 	}
@@ -168,31 +169,31 @@ func (f *FicsitCLI) validateInstall(installation *cli.Installation, progressItem
 	return nil
 }
 
-func (f *FicsitCLI) EmitModsChange() {
+func (f *ficsitCLI) EmitModsChange() {
 	lockfileMods, err := f.GetSelectedInstallLockfileMods()
 	if err != nil {
 		slog.Error("failed to load lockfile", slog.Any("error", err))
 		return
 	}
-	wailsRuntime.EventsEmit(f.ctx, "lockfileMods", lockfileMods)
-	wailsRuntime.EventsEmit(f.ctx, "manifestMods", f.GetSelectedInstallProfileMods())
+	wailsRuntime.EventsEmit(appCommon.AppContext, "lockfileMods", lockfileMods)
+	wailsRuntime.EventsEmit(appCommon.AppContext, "manifestMods", f.GetSelectedInstallProfileMods())
 }
 
-func (f *FicsitCLI) EmitGlobals() {
-	if f.ctx == nil {
+func (f *ficsitCLI) EmitGlobals() {
+	if appCommon.AppContext == nil {
 		// This function can be called from AddRemoteServer, which is used during initialization
 		// at which point the context is not set yet.
 		// We can safely ignore this call.
 		return
 	}
-	wailsRuntime.EventsEmit(f.ctx, "installations", f.GetInstallations())
-	wailsRuntime.EventsEmit(f.ctx, "installationsMetadata", f.GetInstallationsMetadata())
-	wailsRuntime.EventsEmit(f.ctx, "remoteServers", f.GetRemoteInstallations())
+	wailsRuntime.EventsEmit(appCommon.AppContext, "installations", f.GetInstallations())
+	wailsRuntime.EventsEmit(appCommon.AppContext, "installationsMetadata", f.GetInstallationsMetadata())
+	wailsRuntime.EventsEmit(appCommon.AppContext, "remoteServers", f.GetRemoteInstallations())
 	profileNames := make([]string, 0, len(f.ficsitCli.Profiles.Profiles))
 	for k := range f.ficsitCli.Profiles.Profiles {
 		profileNames = append(profileNames, k)
 	}
-	wailsRuntime.EventsEmit(f.ctx, "profiles", profileNames)
+	wailsRuntime.EventsEmit(appCommon.AppContext, "profiles", profileNames)
 
 	selectedInstallation := f.GetSelectedInstall()
 
@@ -200,12 +201,12 @@ func (f *FicsitCLI) EmitGlobals() {
 		return
 	}
 
-	wailsRuntime.EventsEmit(f.ctx, "selectedInstallation", selectedInstallation.Path)
-	wailsRuntime.EventsEmit(f.ctx, "selectedProfile", selectedInstallation.Profile)
-	wailsRuntime.EventsEmit(f.ctx, "modsEnabled", !selectedInstallation.Vanilla)
+	wailsRuntime.EventsEmit(appCommon.AppContext, "selectedInstallation", selectedInstallation.Path)
+	wailsRuntime.EventsEmit(appCommon.AppContext, "selectedProfile", selectedInstallation.Profile)
+	wailsRuntime.EventsEmit(appCommon.AppContext, "modsEnabled", !selectedInstallation.Vanilla)
 }
 
-func (f *FicsitCLI) InstallMod(mod string) error {
+func (f *ficsitCLI) InstallMod(mod string) error {
 	if f.progress != nil {
 		return fmt.Errorf("another operation in progress")
 	}
@@ -249,7 +250,7 @@ func (f *FicsitCLI) InstallMod(mod string) error {
 	return nil
 }
 
-func (f *FicsitCLI) InstallModVersion(mod string, version string) error {
+func (f *ficsitCLI) InstallModVersion(mod string, version string) error {
 	if f.progress != nil {
 		return fmt.Errorf("another operation in progress")
 	}
@@ -293,7 +294,7 @@ func (f *FicsitCLI) InstallModVersion(mod string, version string) error {
 	return nil
 }
 
-func (f *FicsitCLI) RemoveMod(mod string) error {
+func (f *ficsitCLI) RemoveMod(mod string) error {
 	if f.progress != nil {
 		return fmt.Errorf("another operation in progress")
 	}
@@ -333,7 +334,7 @@ func (f *FicsitCLI) RemoveMod(mod string) error {
 	return nil
 }
 
-func (f *FicsitCLI) EnableMod(mod string) error {
+func (f *ficsitCLI) EnableMod(mod string) error {
 	if f.progress != nil {
 		return fmt.Errorf("another operation in progress")
 	}
@@ -373,7 +374,7 @@ func (f *FicsitCLI) EnableMod(mod string) error {
 	return nil
 }
 
-func (f *FicsitCLI) DisableMod(mod string) error {
+func (f *ficsitCLI) DisableMod(mod string) error {
 	if f.progress != nil {
 		return fmt.Errorf("another operation in progress")
 	}

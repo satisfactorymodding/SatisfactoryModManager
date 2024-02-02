@@ -23,8 +23,9 @@ import (
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/app"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate"
-	"github.com/satisfactorymodding/SatisfactoryModManager/backend/bindings"
-	"github.com/satisfactorymodding/SatisfactoryModManager/backend/common"
+	appCommon "github.com/satisfactorymodding/SatisfactoryModManager/backend/common"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/ficsitcli"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/settings"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/websocket"
@@ -61,8 +62,6 @@ func main() {
 		}
 	}
 
-	b := bindings.MakeBindings()
-
 	windowStartState := options.Normal
 	if settings.Settings.Maximized {
 		windowStartState = options.Maximised
@@ -88,7 +87,7 @@ func main() {
 			},
 		},
 		OnStartup: func(ctx context.Context) {
-			common.AppContext = ctx
+			appCommon.AppContext = ctx
 
 			// Wails doesn't support setting the window position on init, so we do it here
 			if settings.Settings.WindowPosition != nil {
@@ -99,7 +98,8 @@ func main() {
 
 			app.App.WatchWindow() //nolint:contextcheck
 			go websocket.ListenAndServeWebsocket()
-			err := b.Startup(ctx)
+
+			err := ficsitcli.FicsitCLI.Init() //nolint:contextcheck
 			if err != nil {
 				slog.Error("failed to create bindings", slog.Any("error", err))
 				_ = dialog.Error("Failed to create bindings: %s", err.Error())
@@ -113,10 +113,16 @@ func main() {
 		OnShutdown: func(ctx context.Context) {
 			app.App.StopWindowWatcher()
 		},
-		Bind: append(b.GetBindings(), autoupdate.Updater, settings.Settings, app.App),
+		Bind: []interface{}{
+			app.App,
+			ficsitcli.FicsitCLI,
+			autoupdate.Updater,
+			settings.Settings,
+		},
 		EnumBind: []interface{}{
-			bindings.AllInstallTypes,
-			bindings.AllBranches,
+			common.AllInstallTypes,
+			common.AllBranches,
+			common.AllLocationTypes,
 		},
 		Logger: backend.WailsZeroLogLogger{},
 	})

@@ -7,7 +7,7 @@ import (
 	engineio_types "github.com/zishang520/engine.io/types"
 	"github.com/zishang520/socket.io/socket"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/backend/bindings"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/ficsitcli"
 )
 
 func ListenAndServeWebsocket() {
@@ -22,7 +22,7 @@ func ListenAndServeWebsocket() {
 	_ = io.On("connection", func(data ...any) {
 		client := data[0].(*socket.Socket)
 		_ = client.On("installedMods", func(datas ...any) {
-			lockfile, err := bindings.BindingsInstance.FicsitCLI.GetSelectedInstallLockfile()
+			lockfile, err := ficsitcli.FicsitCLI.GetSelectedInstallLockfile()
 			if err != nil {
 				slog.Error("failed to get lockfile", slog.Any("error", err))
 				return

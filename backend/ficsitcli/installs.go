@@ -15,7 +15,7 @@ import (
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 )
 
-func (f *FicsitCLI) initInstallations() error {
+func (f *ficsitCLI) initInstallations() error {
 	err := f.initLocalInstallationsMetadata()
 	if err != nil {
 		return fmt.Errorf("failed to initialize found installations: %w", err)
@@ -37,7 +37,7 @@ func (f *FicsitCLI) initInstallations() error {
 	return nil
 }
 
-func (f *FicsitCLI) initLocalInstallationsMetadata() error {
+func (f *ficsitCLI) initLocalInstallationsMetadata() error {
 	installs, findErrors := installfinders.FindInstallations()
 
 	f.installFindErrors = findErrors
@@ -74,7 +74,7 @@ func (f *FicsitCLI) initLocalInstallationsMetadata() error {
 	return nil
 }
 
-func (f *FicsitCLI) initRemoteServerInstallationsMetadata() error {
+func (f *ficsitCLI) initRemoteServerInstallationsMetadata() error {
 	for _, installation := range f.GetInstallations() {
 		err := f.checkAndAddExistingRemote(installation)
 		if err != nil {
@@ -88,7 +88,7 @@ func isServerTarget(targetName string) bool {
 	return targetName == "WindowsServer" || targetName == "LinuxServer"
 }
 
-func (f *FicsitCLI) checkAndAddExistingRemote(path string) error {
+func (f *ficsitCLI) checkAndAddExistingRemote(path string) error {
 	slog.Debug("checking whether installation is remote", utils.SlogPath("path", path))
 	installation := f.ficsitCli.Installations.GetInstallation(path)
 	if installation == nil {
@@ -119,7 +119,7 @@ func (f *FicsitCLI) checkAndAddExistingRemote(path string) error {
 	return nil
 }
 
-func (f *FicsitCLI) GetInstallations() []string {
+func (f *ficsitCLI) GetInstallations() []string {
 	installations := make([]string, 0, len(f.ficsitCli.Installations.Installations))
 	for _, installation := range f.ficsitCli.Installations.Installations {
 		// Keep installations that we have metadata for
@@ -141,16 +141,16 @@ func (f *FicsitCLI) GetInstallations() []string {
 	return installations
 }
 
-func (f *FicsitCLI) GetInstallationsMetadata() map[string]*common.Installation {
+func (f *ficsitCLI) GetInstallationsMetadata() map[string]*common.Installation {
 	return f.installationMetadata
 }
 
-func (f *FicsitCLI) GetCurrentInstallationMetadata() *common.Installation {
+func (f *ficsitCLI) GetCurrentInstallationMetadata() *common.Installation {
 	// This function only exists so common.Installation is generated to typescript
 	return f.installationMetadata[f.ficsitCli.Installations.SelectedInstallation]
 }
 
-func (f *FicsitCLI) GetInvalidInstalls() []string {
+func (f *ficsitCLI) GetInvalidInstalls() []string {
 	result := []string{}
 	for _, err := range f.installFindErrors {
 		var installFindErr common.InstallFindError
@@ -161,11 +161,11 @@ func (f *FicsitCLI) GetInvalidInstalls() []string {
 	return result
 }
 
-func (f *FicsitCLI) GetInstallation(path string) *cli.Installation {
+func (f *ficsitCLI) GetInstallation(path string) *cli.Installation {
 	return f.ficsitCli.Installations.GetInstallation(path)
 }
 
-func (f *FicsitCLI) SelectInstall(path string) error {
+func (f *ficsitCLI) SelectInstall(path string) error {
 	l := slog.With(slog.String("task", "selectInstall"), utils.SlogPath("path", path))
 
 	if !f.isValidInstall(path) {
@@ -206,11 +206,11 @@ func (f *FicsitCLI) SelectInstall(path string) error {
 	return nil
 }
 
-func (f *FicsitCLI) GetSelectedInstall() *cli.Installation {
+func (f *ficsitCLI) GetSelectedInstall() *cli.Installation {
 	return f.ficsitCli.Installations.GetInstallation(f.ficsitCli.Installations.SelectedInstallation)
 }
 
-func (f *FicsitCLI) SetModsEnabled(enabled bool) error {
+func (f *ficsitCLI) SetModsEnabled(enabled bool) error {
 	selectedInstallation := f.GetSelectedInstall()
 
 	if selectedInstallation == nil {
@@ -251,12 +251,12 @@ func (f *FicsitCLI) SetModsEnabled(enabled bool) error {
 	return nil
 }
 
-func (f *FicsitCLI) GetModsEnabled() bool {
+func (f *ficsitCLI) GetModsEnabled() bool {
 	selectedInstallation := f.GetSelectedInstall()
 	return selectedInstallation == nil || !selectedInstallation.Vanilla
 }
 
-func (f *FicsitCLI) GetSelectedInstallProfileMods() map[string]cli.ProfileMod {
+func (f *ficsitCLI) GetSelectedInstallProfileMods() map[string]cli.ProfileMod {
 	selectedInstallation := f.GetSelectedInstall()
 	if selectedInstallation == nil {
 		return make(map[string]cli.ProfileMod)
@@ -265,7 +265,7 @@ func (f *FicsitCLI) GetSelectedInstallProfileMods() map[string]cli.ProfileMod {
 	return profile.Mods
 }
 
-func (f *FicsitCLI) GetSelectedInstallLockfileMods() (map[string]resolver.LockedMod, error) {
+func (f *ficsitCLI) GetSelectedInstallLockfileMods() (map[string]resolver.LockedMod, error) {
 	selectedInstallation := f.GetSelectedInstall()
 	if selectedInstallation == nil {
 		return make(map[string]resolver.LockedMod), nil
@@ -280,7 +280,7 @@ func (f *FicsitCLI) GetSelectedInstallLockfileMods() (map[string]resolver.Locked
 	return lockfile.Mods, nil
 }
 
-func (f *FicsitCLI) GetSelectedInstallLockfile() (*resolver.LockFile, error) {
+func (f *ficsitCLI) GetSelectedInstallLockfile() (*resolver.LockFile, error) {
 	selectedInstallation := f.GetSelectedInstall()
 	if selectedInstallation == nil {
 		return nil, nil
@@ -292,7 +292,7 @@ func (f *FicsitCLI) GetSelectedInstallLockfile() (*resolver.LockFile, error) {
 	return lockfile, nil
 }
 
-func (f *FicsitCLI) LaunchGame() {
+func (f *ficsitCLI) LaunchGame() {
 	selectedInstallation := f.GetSelectedInstall()
 	if selectedInstallation == nil {
 		slog.Error("no installation selected")
