@@ -1,6 +1,6 @@
 <script generics="T" lang="ts">
   import { mdiMenuDown } from '@mdi/js';
-  import { popup, type PopupSettings, ListBox, ListBoxItem } from '@skeletonlabs/skeleton';
+  import { popup, type PopupSettings, ListBox, ListBoxItem, focusTrap } from '@skeletonlabs/skeleton';
   import type { SizeOptions } from '@floating-ui/dom';
   import { createEventDispatcher } from 'svelte';
 
@@ -82,7 +82,7 @@
     </button>
   </div>
 
-  <div class="card w-full shadow-xl z-10 duration-0 overflow-y-auto {menuClass}" data-popup={name}>
+  <div class="card w-full shadow-xl z-10 duration-0 overflow-y-auto {menuClass}" data-popup={name} use:focusTrap={comboboxOpen}>
     <!-- 
     Skeleton's popup close function waits for the tranistion duration...
     before actually triggering the transition...
