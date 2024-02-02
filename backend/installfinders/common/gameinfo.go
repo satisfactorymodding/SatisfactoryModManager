@@ -6,6 +6,8 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 )
 
 type installType struct {
@@ -59,7 +61,7 @@ func GetGameInfo(path string) (InstallType, int, error) {
 	for _, info := range gameInfo {
 		executablePath := filepath.Join(path, info.executable)
 		if _, err := os.Stat(executablePath); os.IsNotExist(err) {
-			slog.Debug("game not of type", slog.String("path", executablePath), slog.String("type", string(info.installType)))
+			slog.Debug("game not of type", utils.SlogPath("path", executablePath), slog.String("type", string(info.installType)))
 			continue
 		}
 

@@ -112,6 +112,6 @@ func (a *app) Show() {
 func (a *app) OpenExternal(input string) {
 	err := browser.OpenFile(input)
 	if err != nil {
-		slog.Error("failed to open external", slog.Any("error", err), slog.String("path", input))
+		slog.Error("failed to open external", slog.Any("error", err), utils.SlogPath("path", input))
 	}
 }
