@@ -15,7 +15,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/puzpuzpuz/xsync/v3 v3.0.2
 	github.com/samber/slog-multi v1.0.2
-	github.com/satisfactorymodding/ficsit-cli v0.5.1
+	github.com/satisfactorymodding/ficsit-cli v0.5.1-0.20240201233422-5e9fe2aebbd5
 	github.com/satisfactorymodding/ficsit-resolver v0.0.2
 	github.com/spf13/viper v1.18.1
 	github.com/tawesoft/golib/v2 v2.10.0
