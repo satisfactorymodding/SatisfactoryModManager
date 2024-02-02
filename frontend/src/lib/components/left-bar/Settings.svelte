@@ -5,7 +5,7 @@
   import type { SizeOptions } from '@floating-ui/dom';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
-  import { GenerateDebugInfo } from '$wailsjs/go/bindings/DebugInfo';
+  import { GenerateDebugInfo } from '$wailsjs/go/app/app';
   import { startView, konami, launchButton, queueAutoStart, offline, updateCheckMode } from '$lib/store/settingsStore';
   import { manifestMods, lockfileMods } from '$lib/store/ficsitCLIStore';
   import { GetModNameDocument } from '$lib/generated';

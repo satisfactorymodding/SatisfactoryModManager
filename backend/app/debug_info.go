@@ -1,8 +1,7 @@
-package bindings
+package app
 
 import (
 	"archive/zip"
-	"context"
 	"fmt"
 	"log/slog"
 	"os"
@@ -15,21 +14,11 @@ import (
 	"github.com/spf13/viper"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/bindings"
+	appCommon "github.com/satisfactorymodding/SatisfactoryModManager/backend/common"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 )
-
-type DebugInfo struct {
-	ctx context.Context
-}
-
-func MakeDebugInfo() *DebugInfo {
-	return &DebugInfo{}
-}
-
-func (d *DebugInfo) startup(ctx context.Context) {
-	d.ctx = ctx
-}
 
 type MetadataInstallation struct {
 	*common.Installation
@@ -66,12 +55,12 @@ func addFactoryGameLog(writer *zip.Writer) error {
 }
 
 func addMetadata(writer *zip.Writer) error {
-	installs := BindingsInstance.FicsitCLI.GetInstallations()
-	selectedInstallInstance := BindingsInstance.FicsitCLI.GetSelectedInstall()
+	installs := bindings.BindingsInstance.FicsitCLI.GetInstallations()
+	selectedInstallInstance := bindings.BindingsInstance.FicsitCLI.GetSelectedInstall()
 	metadataInstalls := make([]*MetadataInstallation, 0)
 	var selectedMetadataInstall *MetadataInstallation
 	for _, install := range installs {
-		metadata := BindingsInstance.FicsitCLI.GetInstallationsMetadata()[install]
+		metadata := bindings.BindingsInstance.FicsitCLI.GetInstallationsMetadata()[install]
 		if metadata == nil {
 			slog.Warn("failed to get metadata for installation", slog.String("path", install))
 			continue
@@ -79,7 +68,7 @@ func addMetadata(writer *zip.Writer) error {
 		i := &MetadataInstallation{
 			Installation: metadata,
 			Name:         fmt.Sprintf("Satisfactory %s (%s)", metadata.Branch, metadata.Launcher),
-			Profile:      BindingsInstance.FicsitCLI.GetInstallation(install).Profile,
+			Profile:      bindings.BindingsInstance.FicsitCLI.GetInstallation(install).Profile,
 		}
 		i.Path = utils.RedactPath(i.Path)
 		i.LaunchPath = strings.Join(i.Installation.LaunchPath, " ")
@@ -91,16 +80,16 @@ func addMetadata(writer *zip.Writer) error {
 		}
 	}
 
-	ficsitCliProfileNames := BindingsInstance.FicsitCLI.GetProfiles()
-	selectedMetadataProfileName := BindingsInstance.FicsitCLI.GetSelectedProfile()
+	ficsitCliProfileNames := bindings.BindingsInstance.FicsitCLI.GetProfiles()
+	selectedMetadataProfileName := bindings.BindingsInstance.FicsitCLI.GetSelectedProfile()
 	metadataProfiles := make([]*ficsitCli.Profile, 0)
 	for _, profileName := range ficsitCliProfileNames {
-		p := BindingsInstance.FicsitCLI.GetProfile(profileName)
+		p := bindings.BindingsInstance.FicsitCLI.GetProfile(profileName)
 
 		metadataProfiles = append(metadataProfiles, p)
 	}
 
-	lockfile, err := BindingsInstance.FicsitCLI.GetSelectedInstallLockfile()
+	lockfile, err := bindings.BindingsInstance.FicsitCLI.GetSelectedInstallLockfile()
 	if err != nil {
 		return fmt.Errorf("failed to get lockfile: %w", err)
 	}
@@ -145,7 +134,7 @@ func addMetadata(writer *zip.Writer) error {
 	return nil
 }
 
-func (d *DebugInfo) generateAndSaveDebugInfo(filename string) error {
+func (a *app) generateAndSaveDebugInfo(filename string) error {
 	file, err := os.Create(filename)
 	if err != nil {
 		return fmt.Errorf("failed to create file: %w", err)
@@ -172,9 +161,9 @@ func (d *DebugInfo) generateAndSaveDebugInfo(filename string) error {
 	return nil
 }
 
-func (d *DebugInfo) GenerateDebugInfo() bool {
+func (a *app) GenerateDebugInfo() bool {
 	defaultFileName := fmt.Sprintf("SMMDebug-%s.zip", time.Now().UTC().Format("2006-01-02-15-04-05"))
-	filename, err := wailsRuntime.SaveFileDialog(d.ctx, wailsRuntime.SaveDialogOptions{
+	filename, err := wailsRuntime.SaveFileDialog(appCommon.AppContext, wailsRuntime.SaveDialogOptions{
 		DefaultFilename: defaultFileName,
 		Filters: []wailsRuntime.FileFilter{
 			{
@@ -191,7 +180,7 @@ func (d *DebugInfo) GenerateDebugInfo() bool {
 		return false
 	}
 
-	err = d.generateAndSaveDebugInfo(filename)
+	err = a.generateAndSaveDebugInfo(filename)
 	if err != nil {
 		slog.Error("failed to generate debug info", slog.Any("error", err))
 		return false

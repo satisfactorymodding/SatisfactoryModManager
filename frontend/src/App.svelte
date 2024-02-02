@@ -9,13 +9,12 @@
   import { initializeGraphQLClient } from '$lib/core/graphql';
   import { Environment, EventsOn } from '$wailsjs/runtime';
   import ModDetails from '$lib/components/mod-details/ModDetails.svelte';
-  import { ExpandMod, UnexpandMod } from '$wailsjs/go/app/app';
+  import { ExpandMod, UnexpandMod , GenerateDebugInfo } from '$wailsjs/go/app/app';
   import LeftBar from '$lib/components/left-bar/LeftBar.svelte';
   import { installs, invalidInstalls, progress } from '$lib/store/ficsitCLIStore';
   import { konami } from '$lib/store/settingsStore';
   import { expandedMod, error, siteURL } from '$lib/store/generalStore';
   import { initializeModalStore, getModalStore } from '$lib/store/skeletonExtensions';
-  import { GenerateDebugInfo } from '$wailsjs/go/bindings/DebugInfo';
   import ExternalInstallMod from '$lib/components/modals/ExternalInstallMod.svelte';
   import { modalRegistry } from '$lib/components/modals/modalsRegistry';
   import ErrorModal from '$lib/components/modals/ErrorModal.svelte';

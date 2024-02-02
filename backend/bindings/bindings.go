@@ -9,7 +9,6 @@ import (
 
 type Bindings struct {
 	FicsitCLI *ficsitcli.FicsitCLI
-	debugInfo *DebugInfo
 }
 
 var AllInstallTypes = []struct {
@@ -38,20 +37,17 @@ func MakeBindings() *Bindings {
 
 	BindingsInstance = &Bindings{
 		FicsitCLI: ficsitcli.MakeFicsitCLI(),
-		debugInfo: MakeDebugInfo(),
 	}
 
 	return BindingsInstance
 }
 
 func (b *Bindings) Startup(ctx context.Context) error {
-	b.debugInfo.startup(ctx)
 	return b.FicsitCLI.Startup(ctx)
 }
 
 func (b *Bindings) GetBindings() []interface{} {
 	return []interface{}{
 		b.FicsitCLI,
-		b.debugInfo,
 	}
 }
