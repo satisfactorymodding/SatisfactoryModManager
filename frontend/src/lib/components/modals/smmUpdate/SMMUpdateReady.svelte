@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { UpdateAndRestart } from '$lib/generated/wailsjs/go/bindings/Update';
+  import { UpdateAndRestart } from '$lib/generated/wailsjs/go/autoupdate/autoUpdate';
   import { smmUpdate } from '$lib/store/smmUpdateStore';
 
   export let parent: {onClose: () => void};

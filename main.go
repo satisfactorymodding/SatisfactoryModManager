@@ -20,8 +20,8 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/app"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate"
-	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate/updater"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/bindings"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/bindings/ficsitcli"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/settings"
@@ -43,18 +43,6 @@ var (
 func main() {
 	autoupdate.Init()
 
-	autoupdate.Updater.UpdateFound.On(func(pendingUpdate updater.PendingUpdate) {
-		bindings.BindingsInstance.Update.UpdateAvailable(pendingUpdate.Version.String(), pendingUpdate.Changelogs)
-	})
-
-	autoupdate.Updater.DownloadProgress.On(func(progress updater.UpdateDownloadProgress) {
-		bindings.BindingsInstance.Update.UpdateDownloadProgress(progress.BytesDownloaded, progress.BytesTotal)
-	})
-
-	autoupdate.Updater.UpdateReady.On(func(_ interface{}) {
-		bindings.BindingsInstance.Update.UpdateReady()
-	})
-
 	err := settings.LoadSettings()
 	if err != nil {
 		slog.Error("failed to load settings", slog.Any("error", err))
@@ -72,12 +60,7 @@ func main() {
 		}
 	}
 
-	b, err := bindings.MakeBindings()
-	if err != nil {
-		slog.Error("failed to create bindings", slog.Any("error", err))
-		_ = dialog.Error("Failed to create bindings: %s", err.Error())
-		os.Exit(1)
-	}
+	b := bindings.MakeBindings()
 
 	windowStartState := options.Normal
 	if settings.Settings.Maximized {
@@ -104,17 +87,23 @@ func main() {
 			},
 		},
 		OnStartup: func(ctx context.Context) {
+			app.Context = ctx
 			go websocket.ListenAndServeWebsocket()
-			b.Startup(ctx)
+			err := b.Startup(ctx)
+			if err != nil {
+				slog.Error("failed to create bindings", slog.Any("error", err))
+				_ = dialog.Error("Failed to create bindings: %s", err.Error())
+				os.Exit(1)
+			}
 		},
 		OnDomReady: func(ctx context.Context) {
 			backend.ProcessArguments(os.Args[1:])
-			autoupdate.CheckInterval(5 * time.Minute)
+			autoupdate.Updater.CheckInterval(5 * time.Minute)
 		},
 		OnShutdown: func(ctx context.Context) {
 			b.Shutdown(ctx)
 		},
-		Bind: b.GetBindings(),
+		Bind: append(b.GetBindings(), autoupdate.Updater),
 		EnumBind: []interface{}{
 			bindings.AllInstallTypes,
 			bindings.AllBranches,
@@ -127,7 +116,7 @@ func main() {
 		_ = dialog.Error("Failed to start application: %s", err.Error())
 	}
 
-	err = autoupdate.OnExit(bindings.BindingsInstance.Update.Restart)
+	err = autoupdate.Updater.OnExit()
 	if err != nil {
 		slog.Error("failed to apply update on exit", slog.Any("error", err))
 		_ = dialog.Error("Failed to apply update on exit: %s", err.Error())

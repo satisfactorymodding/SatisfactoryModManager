@@ -6,20 +6,43 @@ import (
 
 	"github.com/Masterminds/semver/v3"
 	"github.com/spf13/viper"
+	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/app"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate/source/github"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate/updater"
 )
 
-var Updater *updater.Updater
+type autoUpdate struct {
+	Updater *updater.Updater
 
-var checkStarted bool
+	enabled bool
+
+	restart bool
+
+	updateCheckTicker *time.Ticker
+	updateCheckStop   chan bool
+}
+
+var Updater *autoUpdate
 
 func Init() {
 	if Updater != nil {
 		return
 	}
-	Updater = updater.MakeUpdater(makeUpdaterConfig())
+	Updater = &autoUpdate{
+		Updater: updater.MakeUpdater(makeUpdaterConfig()),
+		enabled: shouldUseUpdater(),
+	}
+	Updater.Updater.UpdateFound.On(func(update updater.PendingUpdate) {
+		wailsRuntime.EventsEmit(app.Context, "updateAvailable", update.Version.String(), update.Changelogs)
+	})
+	Updater.Updater.DownloadProgress.On(func(progress updater.UpdateDownloadProgress) {
+		wailsRuntime.EventsEmit(app.Context, "updateDownloadProgress", progress.BytesDownloaded, progress.BytesTotal)
+	})
+	Updater.Updater.UpdateReady.On(func(interface{}) {
+		wailsRuntime.EventsEmit(app.Context, "updateReady")
+	})
 }
 
 func makeUpdaterConfig() updater.Config {
@@ -44,38 +67,50 @@ func makeUpdaterConfig() updater.Config {
 	return config
 }
 
-var (
-	updateCheckTicker *time.Ticker
-	updateCheckStop   = make(chan bool)
-)
-
-func CheckForUpdate() error {
-	if !shouldUseUpdater() {
-		return nil
+func (u *autoUpdate) CheckForUpdates() {
+	if !u.enabled {
+		return
 	}
-	return Updater.CheckForUpdate()
+	err := u.Updater.CheckForUpdate()
+	if err != nil {
+		slog.Warn("failed to check for updates", slog.Any("error", err))
+	}
 }
 
-func CheckInterval(interval time.Duration) {
-	if !shouldUseUpdater() {
+func (u *autoUpdate) UpdateAndRestart() {
+	if !u.enabled {
 		return
 	}
-	if checkStarted {
+	u.restart = true
+	wailsRuntime.Quit(app.Context)
+}
+
+func (u *autoUpdate) CheckForUpdate() error {
+	if !u.enabled {
+		return nil
+	}
+	return u.Updater.CheckForUpdate()
+}
+
+func (u *autoUpdate) CheckInterval(interval time.Duration) {
+	if !u.enabled {
 		return
 	}
-	checkStarted = true
-	updateCheckTicker = time.NewTicker(interval)
-	updateCheckStop = make(chan bool)
+	if u.updateCheckTicker != nil {
+		return
+	}
+	u.updateCheckTicker = time.NewTicker(interval)
+	u.updateCheckStop = make(chan bool)
 	go func() {
 		err := Updater.CheckForUpdate()
 		if err != nil {
 			slog.Error("failed to check for update", slog.Any("error", err))
 		}
-		for range updateCheckTicker.C {
+		for range u.updateCheckTicker.C {
 			select {
-			case <-updateCheckStop:
+			case <-u.updateCheckStop:
 				return
-			case <-updateCheckTicker.C:
+			case <-u.updateCheckTicker.C:
 				err := Updater.CheckForUpdate()
 				if err != nil {
 					slog.Error("failed to check for update", slog.Any("error", err))
@@ -85,14 +120,16 @@ func CheckInterval(interval time.Duration) {
 	}()
 }
 
-func OnExit(restart bool) error {
-	if !shouldUseUpdater() {
+func (u *autoUpdate) OnExit() error {
+	if !u.enabled {
 		return nil
 	}
-	close(updateCheckStop)
+	if u.updateCheckTicker != nil {
+		close(u.updateCheckStop)
+	}
 	if Updater == nil {
 		// No updater for this build type
 		return nil
 	}
-	return Updater.OnExit(restart)
+	return u.Updater.OnExit(u.restart)
 }

@@ -3,7 +3,7 @@
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { checkForUpdates, progress, updates, updateCheckInProgress, unignoredUpdates } from '$lib/store/ficsitCLIStore';
-  import { CheckForUpdates as CheckForSMMUpdates } from '$wailsjs/go/bindings/Update';
+  import { CheckForUpdates as CheckForSMMUpdates } from '$wailsjs/go/autoupdate/autoUpdate';
   import { smmUpdate, smmUpdateReady } from '$lib/store/smmUpdateStore';
   import { getModalStore } from '$lib/store/skeletonExtensions';
 
