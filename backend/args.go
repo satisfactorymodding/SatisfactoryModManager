@@ -1,11 +1,10 @@
 package backend
 
 import (
+	"fmt"
 	"log/slog"
 	"net/url"
 	"strings"
-
-	"github.com/pkg/errors"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/bindings"
 )
@@ -32,7 +31,7 @@ func ProcessArguments(args []string) {
 func handleURI(uri string) error {
 	u, err := url.Parse(uri)
 	if err != nil {
-		return errors.Wrap(err, "failed to parse URI")
+		return fmt.Errorf("failed to parse URI: %w", err)
 	}
 	switch u.Host {
 	case "install":
@@ -41,7 +40,7 @@ func handleURI(uri string) error {
 		bindings.BindingsInstance.App.ExternalInstallMod(modID, version)
 		return nil
 	default:
-		return errors.New("unknown URI action " + u.Host)
+		return fmt.Errorf("unknown URI action " + u.Host)
 	}
 }
 
@@ -51,5 +50,5 @@ func handleFile(path string) error {
 		bindings.BindingsInstance.App.ExternalImportProfile(path)
 		return nil
 	}
-	return errors.New("unknown file type " + path)
+	return fmt.Errorf("unknown file type " + path)
 }

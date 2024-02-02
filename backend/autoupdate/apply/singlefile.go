@@ -1,12 +1,12 @@
 package apply
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"syscall"
 
 	"github.com/minio/selfupdate"
-	"github.com/pkg/errors"
 )
 
 type SingleFileApply struct{}
@@ -20,7 +20,7 @@ func (a *SingleFileApply) Apply(file io.Reader, checksum []byte) error {
 		Checksum: checksum,
 	})
 	if err != nil {
-		return errors.Wrap(err, "failed to apply singlefile update")
+		return fmt.Errorf("failed to apply singlefile update: %w", err)
 	}
 	return nil
 }
@@ -29,12 +29,12 @@ func (a *SingleFileApply) OnExit(restart bool) error {
 	if restart {
 		wd, err := os.Getwd()
 		if err != nil {
-			return errors.Wrap(err, "failed to get working directory")
+			return fmt.Errorf("failed to get working directory: %w", err)
 		}
 
 		executable, err := os.Executable()
 		if err != nil {
-			return errors.Wrap(err, "failed to get executable path")
+			return fmt.Errorf("failed to get executable path: %w", err)
 		}
 
 		_, err = os.StartProcess(executable, os.Args, &os.ProcAttr{
@@ -45,7 +45,7 @@ func (a *SingleFileApply) OnExit(restart bool) error {
 		})
 
 		if err != nil {
-			return errors.Wrap(err, "failed to relaunch after update")
+			return fmt.Errorf("failed to relaunch after update: %w", err)
 		}
 	}
 	return nil

@@ -1,9 +1,10 @@
 package ficsitcli
 
 import (
+	"errors"
+	"fmt"
 	"log/slog"
 
-	"github.com/pkg/errors"
 	"github.com/satisfactorymodding/ficsit-cli/cli"
 	resolver "github.com/satisfactorymodding/ficsit-resolver"
 	"github.com/spf13/viper"
@@ -26,7 +27,7 @@ func (f *FicsitCLI) CheckForUpdates() ([]Update, error) {
 	currentLockfile, err := selectedInstallation.LockFile(f.ficsitCli)
 	if err != nil {
 		l.Error("failed to get current lockfile", slog.Any("error", err))
-		return nil, errors.Wrap(err, "failed to get current lockfile")
+		return nil, fmt.Errorf("failed to get current lockfile: %w", err)
 	}
 
 	if currentLockfile == nil {
@@ -40,7 +41,7 @@ func (f *FicsitCLI) CheckForUpdates() ([]Update, error) {
 	gameVersion, err := selectedInstallation.GetGameVersion(f.ficsitCli)
 	if err != nil {
 		l.Error("failed to get game version", slog.Any("error", err))
-		return nil, errors.Wrap(err, "failed to get game version")
+		return nil, fmt.Errorf("failed to get game version: %w", err)
 	}
 
 	updateProfile := &cli.Profile{
@@ -85,13 +86,13 @@ func (f *FicsitCLI) UpdateMods(mods []string) error {
 
 	if f.progress != nil {
 		l.Error("another operation in progress")
-		return errors.New("another operation in progress")
+		return fmt.Errorf("another operation in progress")
 	}
 
 	selectedInstallation := f.GetSelectedInstall()
 
 	if selectedInstallation == nil {
-		return errors.New("no installation selected")
+		return fmt.Errorf("no installation selected")
 	}
 
 	profile := f.GetProfile(selectedInstallation.Profile)

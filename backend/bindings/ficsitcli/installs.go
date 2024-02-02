@@ -1,12 +1,12 @@
 package ficsitcli
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"os/exec"
 	"slices"
 
-	"github.com/pkg/errors"
 	"github.com/satisfactorymodding/ficsit-cli/cli"
 	resolver "github.com/satisfactorymodding/ficsit-resolver"
 
@@ -18,12 +18,12 @@ import (
 func (f *FicsitCLI) initInstallations() error {
 	err := f.initLocalInstallationsMetadata()
 	if err != nil {
-		return errors.Wrap(err, "failed to initialize found installations")
+		return fmt.Errorf("failed to initialize found installations: %w", err)
 	}
 
 	err = f.initRemoteServerInstallationsMetadata()
 	if err != nil {
-		return errors.Wrap(err, "failed to initialize remote server installations")
+		return fmt.Errorf("failed to initialize remote server installations: %w", err)
 	}
 
 	filteredInstalls := f.GetInstallations()
@@ -58,7 +58,7 @@ func (f *FicsitCLI) initLocalInstallationsMetadata() error {
 		if ficsitCliInstall == nil {
 			_, err := f.ficsitCli.Installations.AddInstallation(f.ficsitCli, install.Path, fallbackProfile)
 			if err != nil {
-				return errors.Wrap(err, "failed to add installation")
+				return fmt.Errorf("failed to add installation: %w", err)
 			}
 			createdNewInstalls = true
 		}
@@ -68,7 +68,7 @@ func (f *FicsitCLI) initLocalInstallationsMetadata() error {
 	if createdNewInstalls {
 		err := f.ficsitCli.Installations.Save()
 		if err != nil {
-			return errors.Wrap(err, "failed to save installations")
+			return fmt.Errorf("failed to save installations: %w", err)
 		}
 	}
 	return nil
@@ -177,7 +177,7 @@ func (f *FicsitCLI) SelectInstall(path string) error {
 	installation := f.ficsitCli.Installations.GetInstallation(path)
 	if installation == nil {
 		l.Error("failed to find installation")
-		return errors.Errorf("installation %s not found", path)
+		return fmt.Errorf("installation %s not found", path)
 	}
 
 	f.ficsitCli.Installations.SelectedInstallation = path
@@ -215,7 +215,7 @@ func (f *FicsitCLI) SetModsEnabled(enabled bool) error {
 
 	if selectedInstallation == nil {
 		slog.Error("no installation selected")
-		return errors.New("no installation selected")
+		return fmt.Errorf("no installation selected")
 	}
 	l := slog.With(slog.String("task", "setModsEnabled"), slog.Bool("enabled", enabled), utils.SlogPath("install", selectedInstallation.Path))
 

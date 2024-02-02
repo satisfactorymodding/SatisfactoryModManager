@@ -2,9 +2,8 @@ package lutris
 
 import (
 	"encoding/json"
+	"fmt"
 	"os/exec"
-
-	"github.com/pkg/errors"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/launchers/epic"
@@ -36,14 +35,14 @@ func findInstallations(lutrisCmd []string, launcher string) ([]*common.Installat
 	outputBytes, err := lutrisLj.Output()
 	if err != nil {
 		return nil, []error{
-			errors.Wrap(err, "failed to run lutris -lj"),
+			fmt.Errorf("failed to run lutris -lj: %w", err),
 		}
 	}
 	var lutrisGames []Game
 	err = json.Unmarshal(outputBytes, &lutrisGames)
 	if err != nil {
 		return nil, []error{
-			errors.Wrap(err, "failed to parse lutris -lj output"),
+			fmt.Errorf("failed to parse lutris -lj output: %w", err),
 		}
 	}
 

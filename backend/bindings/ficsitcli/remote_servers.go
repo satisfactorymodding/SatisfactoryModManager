@@ -1,10 +1,9 @@
 package ficsitcli
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
-
-	"github.com/pkg/errors"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 )
@@ -39,18 +38,18 @@ func (f *FicsitCLI) AddRemoteServer(path string) error {
 		var err error
 		installation, err = f.ficsitCli.Installations.AddInstallation(f.ficsitCli, path, fallbackProfile)
 		if err != nil {
-			return errors.Wrap(err, "failed to add installation")
+			return fmt.Errorf("failed to add installation: %w", err)
 		}
 		_ = f.ficsitCli.Installations.Save()
 	}
 	gameVersion, err := installation.GetGameVersion(f.ficsitCli)
 	if err != nil {
-		return errors.Wrap(err, "failed to get game version")
+		return fmt.Errorf("failed to get game version: %w", err)
 	}
 
 	platform, err := installation.GetPlatform(f.ficsitCli)
 	if err != nil {
-		return errors.Wrap(err, "failed to get platform")
+		return fmt.Errorf("failed to get platform: %w", err)
 	}
 	var installType common.InstallType
 	switch platform.TargetName {
@@ -63,7 +62,7 @@ func (f *FicsitCLI) AddRemoteServer(path string) error {
 	}
 
 	if installType == common.InstallTypeWindowsClient {
-		return errors.New("remote server is not a server installation")
+		return fmt.Errorf("remote server is not a server installation")
 	}
 
 	branch := common.BranchEarlyAccess // TODO: Do we have a way to detect this for remote installs?
@@ -105,14 +104,14 @@ func (f *FicsitCLI) getNextRemoteLauncherName() string {
 func (f *FicsitCLI) RemoveRemoteServer(path string) error {
 	metadata := f.installationMetadata[path]
 	if metadata == nil {
-		return errors.New("installation not found")
+		return fmt.Errorf("installation not found")
 	}
 	if metadata.Location != common.LocationTypeRemote {
-		return errors.New("installation is not remote")
+		return fmt.Errorf("installation is not remote")
 	}
 	err := f.ficsitCli.Installations.DeleteInstallation(path)
 	if err != nil {
-		return errors.Wrap(err, "failed to delete installation")
+		return fmt.Errorf("failed to delete installation: %w", err)
 	}
 	delete(f.installationMetadata, path)
 	f.EmitGlobals()

@@ -2,11 +2,10 @@ package common
 
 import (
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"os"
 	"path/filepath"
-
-	"github.com/pkg/errors"
 )
 
 type installType struct {
@@ -66,20 +65,20 @@ func GetGameInfo(path string) (InstallType, int, error) {
 
 		versionFilePath := filepath.Join(path, info.versionPath)
 		if _, err := os.Stat(versionFilePath); os.IsNotExist(err) {
-			return InstallTypeWindowsClient, 0, errors.Errorf("failed to get game info")
+			return InstallTypeWindowsClient, 0, fmt.Errorf("failed to get game info")
 		}
 
 		versionFile, err := os.ReadFile(versionFilePath)
 		if err != nil {
-			return InstallTypeWindowsClient, 0, errors.Wrapf(err, "failed to read version file %s", versionFilePath)
+			return InstallTypeWindowsClient, 0, fmt.Errorf("failed to read version file %s: %w", versionFilePath, err)
 		}
 
 		var versionData GameVersionFile
 		if err := json.Unmarshal(versionFile, &versionData); err != nil {
-			return InstallTypeWindowsClient, 0, errors.Wrapf(err, "failed to parse version file %s", versionFilePath)
+			return InstallTypeWindowsClient, 0, fmt.Errorf("failed to parse version file %s: %w", versionFilePath, err)
 		}
 
 		return info.installType, versionData.Changelist, nil
 	}
-	return InstallTypeWindowsClient, 0, errors.New("failed to get game info")
+	return InstallTypeWindowsClient, 0, fmt.Errorf("failed to get game info")
 }

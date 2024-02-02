@@ -2,10 +2,10 @@ package settings
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 
-	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
@@ -90,25 +90,25 @@ func LoadSettings() error {
 	_, err := os.Stat(settingsFilePath)
 	if err != nil {
 		if !os.IsNotExist(err) {
-			return errors.Wrap(err, "failed to stat settings file")
+			return fmt.Errorf("failed to stat settings file: %w", err)
 		}
 
 		err = SaveSettings()
 		if err != nil {
-			return errors.Wrap(err, "failed to save default settings")
+			return fmt.Errorf("failed to save default settings: %w", err)
 		}
 	}
 
 	settingsFile, err := os.ReadFile(filepath.Join(viper.GetString("smm-local-dir"), settingsFileName))
 	if err != nil {
-		return errors.Wrap(err, "failed to read settings")
+		return fmt.Errorf("failed to read settings: %w", err)
 	}
 
 	if err := json.Unmarshal(settingsFile, &Settings); err != nil {
 		// Settings file might be SMM2 settings, try to load those
 		err = readSMM2Settings(settingsFile)
 		if err != nil {
-			return errors.Wrap(err, "failed to unmarshal settings")
+			return fmt.Errorf("failed to unmarshal settings: %w", err)
 		}
 	}
 
@@ -118,11 +118,11 @@ func LoadSettings() error {
 func SaveSettings() error {
 	settingsFile, err := utils.JSONMarshal(Settings, 2)
 	if err != nil {
-		return errors.Wrap(err, "failed to marshal settings")
+		return fmt.Errorf("failed to marshal settings: %w", err)
 	}
 	err = os.WriteFile(filepath.Join(viper.GetString("smm-local-dir"), settingsFileName), settingsFile, 0o755)
 	if err != nil {
-		return errors.Wrap(err, "failed to write settings")
+		return fmt.Errorf("failed to write settings: %w", err)
 	}
 
 	return nil

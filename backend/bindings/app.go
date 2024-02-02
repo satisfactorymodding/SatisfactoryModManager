@@ -2,12 +2,12 @@ package bindings
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"strings"
 	"time"
 
 	"github.com/pkg/browser"
-	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
@@ -161,7 +161,7 @@ func (a *App) OpenFileDialog(options OpenDialogOptions) (string, error) {
 	}
 	file, err := wailsRuntime.OpenFileDialog(a.ctx, wailsOptions)
 	if err != nil {
-		return "", errors.Wrap(err, "failed to open file dialog")
+		return "", fmt.Errorf("failed to open file dialog: %w", err)
 	}
 	return file, nil
 }
@@ -186,7 +186,7 @@ func (a *App) OpenDirectoryDialog(options OpenDialogOptions) (string, error) {
 	}
 	file, err := wailsRuntime.OpenDirectoryDialog(a.ctx, wailsOptions)
 	if err != nil {
-		return "", errors.Wrap(err, "failed to open directory dialog")
+		return "", fmt.Errorf("failed to open directory dialog: %w", err)
 	}
 	return file, nil
 }

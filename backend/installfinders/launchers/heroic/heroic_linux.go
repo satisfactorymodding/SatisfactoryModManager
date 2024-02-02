@@ -1,11 +1,10 @@
 package heroic
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
-
-	"github.com/pkg/errors"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 )
@@ -21,7 +20,7 @@ func findInstallationsNative() ([]*common.Installation, []error) {
 func findInstallationsFlatpak() ([]*common.Installation, []error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		return nil, []error{errors.Wrap(err, "failed to get user home dir")}
+		return nil, []error{fmt.Errorf("failed to get user home dir: %w", err)}
 	}
 	flatpakXdgConfigHome := filepath.Join(homeDir, ".var", "app", "com.heroicgameslauncher.hgl", "config")
 	return findInstallationsHeroic(false, flatpakXdgConfigHome, "Heroic")
@@ -30,14 +29,14 @@ func findInstallationsFlatpak() ([]*common.Installation, []error) {
 func findInstallationsSnap() ([]*common.Installation, []error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		return nil, []error{errors.Wrap(err, "failed to get user home dir")}
+		return nil, []error{fmt.Errorf("failed to get user home dir: %w", err)}
 	}
 	snapAppDir := filepath.Join(homeDir, "snap", "heroic")
 	var latestSnapRevision int
 	var latestSnapDirName string
 	items, err := os.ReadDir(snapAppDir)
 	if err != nil {
-		return nil, []error{errors.Wrap(err, "failed to read heroic snap dir")}
+		return nil, []error{fmt.Errorf("failed to read heroic snap dir: %w", err)}
 	}
 	for _, item := range items {
 		if item.IsDir() {
@@ -61,7 +60,7 @@ func findInstallationsSnap() ([]*common.Installation, []error) {
 		}
 	}
 	if latestSnapDirName == "" {
-		return nil, []error{errors.New("no heroic snap folders found")}
+		return nil, []error{fmt.Errorf("no heroic snap folders found")}
 	}
 
 	return findInstallationsHeroic(true, filepath.Join(snapAppDir, latestSnapDirName, ".config"), "Heroic")

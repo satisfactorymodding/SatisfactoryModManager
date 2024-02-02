@@ -1,11 +1,10 @@
 package epic
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/pkg/errors"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 )
@@ -17,7 +16,7 @@ func FindInstallationsWine(winePrefix string, launcher string, launchPath []stri
 	epicManifestsPath := filepath.Join(wineWindowsRoot, epicWineManifestPath)
 
 	if _, err := os.Stat(epicManifestsPath); os.IsNotExist(err) {
-		return nil, []error{errors.New("Epic is not installed in " + winePrefix)}
+		return nil, []error{fmt.Errorf("Epic is not installed in " + winePrefix)}
 	}
 
 	return findInstallationsEpic(epicManifestsPath, launcher, func(appName string) []string { return launchPath }, func(path string) string {

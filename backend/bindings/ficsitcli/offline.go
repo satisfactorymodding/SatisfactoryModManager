@@ -1,10 +1,10 @@
 package ficsitcli
 
 import (
+	"fmt"
 	"slices"
 	"strings"
 
-	"github.com/pkg/errors"
 	ficsitcache "github.com/satisfactorymodding/ficsit-cli/cli/cache"
 	"github.com/satisfactorymodding/ficsit-cli/cli/provider"
 
@@ -44,7 +44,7 @@ type ModVersionDependency struct {
 func (f *FicsitCLI) OfflineGetMods() ([]Mod, error) {
 	cache, err := ficsitcache.GetCache()
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to get cache")
+		return nil, fmt.Errorf("failed to get cache: %w", err)
 	}
 
 	mods := make([]Mod, 0)
@@ -61,7 +61,7 @@ func (f *FicsitCLI) OfflineGetMods() ([]Mod, error) {
 func (f *FicsitCLI) OfflineGetModsByReferences(modReferences []string) ([]Mod, error) {
 	cache, err := ficsitcache.GetCache()
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to get cache")
+		return nil, fmt.Errorf("failed to get cache: %w", err)
 	}
 
 	mods := make([]Mod, 0)
@@ -81,10 +81,10 @@ func (f *FicsitCLI) OfflineGetModsByReferences(modReferences []string) ([]Mod, e
 func (f *FicsitCLI) OfflineGetMod(modReference string) (Mod, error) {
 	modFiles, err := ficsitcache.GetCacheMod(modReference)
 	if err != nil {
-		return Mod{}, errors.Wrap(err, "failed to get cache")
+		return Mod{}, fmt.Errorf("failed to get cache: %w", err)
 	}
 	if modFiles == nil {
-		return Mod{}, errors.New("mod not found")
+		return Mod{}, fmt.Errorf("mod not found")
 	}
 	return convertCacheFileToMod(modFiles), nil
 }
@@ -97,10 +97,10 @@ type SMLVersion struct {
 func (f *FicsitCLI) OfflineGetSMLVersions() ([]SMLVersion, error) {
 	smlFiles, err := ficsitcache.GetCacheMod("SML")
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to get cache")
+		return nil, fmt.Errorf("failed to get cache: %w", err)
 	}
 	if smlFiles == nil {
-		return nil, errors.New("SML not found")
+		return nil, fmt.Errorf("SML not found")
 	}
 
 	versions := make([]SMLVersion, 0)

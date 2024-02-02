@@ -2,11 +2,10 @@ package legendary
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
-
-	"github.com/pkg/errors"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/launchers/epic"
@@ -35,16 +34,16 @@ type Data = map[string]Game
 func FindInstallationsIn(legendaryDataPath string, launcher string) ([]*common.Installation, []error) {
 	legendaryInstalledPath := filepath.Join(legendaryDataPath, "installed.json")
 	if _, err := os.Stat(legendaryInstalledPath); os.IsNotExist(err) {
-		return nil, []error{errors.Errorf("%s not installed", launcher)}
+		return nil, []error{fmt.Errorf("%s not installed", launcher)}
 	}
 	var legendaryData Data
 	legendaryDataFile, err := os.ReadFile(legendaryInstalledPath)
 	if err != nil {
-		return nil, []error{errors.Wrap(err, "failed to read legendary installed.json")}
+		return nil, []error{fmt.Errorf("failed to read legendary installed.json: %w", err)}
 	}
 	err = json.Unmarshal(legendaryDataFile, &legendaryData)
 	if err != nil {
-		return nil, []error{errors.Wrap(err, "failed to parse legendary installed.json output")}
+		return nil, []error{fmt.Errorf("failed to parse legendary installed.json output: %w", err)}
 	}
 
 	_, err = exec.LookPath("legendary")
@@ -101,7 +100,7 @@ func getGlobalLegendaryDataPath(xdgConfigHomeEnv string) (string, error) {
 	}
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		return "", errors.Wrap(err, "failed to get user home dir")
+		return "", fmt.Errorf("failed to get user home dir: %w", err)
 	}
 	return filepath.Join(homeDir, ".config", "legendary"), nil
 }

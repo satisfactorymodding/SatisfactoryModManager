@@ -3,13 +3,13 @@ package github
 import (
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
 	"strings"
 
 	"github.com/Masterminds/semver/v3"
-	"github.com/pkg/errors"
 )
 
 type Provider struct {
@@ -28,7 +28,7 @@ func (g *Provider) GetLatestVersion(includePrerelease bool) (string, error) {
 	if !includePrerelease {
 		release, err := g.getLatestReleaseData()
 		if err != nil {
-			return "", errors.Wrap(err, "failed to get latest release")
+			return "", fmt.Errorf("failed to get latest release: %w", err)
 		}
 		return release.TagName, nil
 	}
@@ -38,7 +38,7 @@ func (g *Provider) GetLatestVersion(includePrerelease bool) (string, error) {
 	var latest *semver.Version
 	var latestTagName string
 	if err != nil {
-		return "", errors.Wrap(err, "failed to get releases")
+		return "", fmt.Errorf("failed to get releases: %w", err)
 	}
 	for _, release := range allReleases {
 		version, err := semver.NewVersion(release.TagName)
@@ -54,7 +54,7 @@ func (g *Provider) GetLatestVersion(includePrerelease bool) (string, error) {
 		}
 	}
 	if latest == nil {
-		return "", errors.New("no releases found")
+		return "", fmt.Errorf("no releases found")
 	}
 	return latestTagName, nil
 }
@@ -62,19 +62,19 @@ func (g *Provider) GetLatestVersion(includePrerelease bool) (string, error) {
 func (g *Provider) GetFile(version string, filename string) (io.ReadCloser, int64, []byte, error) {
 	release, err := g.getReleaseData(version)
 	if err != nil {
-		return nil, 0, nil, errors.Wrap(err, "failed to get latest release")
+		return nil, 0, nil, fmt.Errorf("failed to get latest release: %w", err)
 	}
 	fileURL := getAssetURL(release, filename)
 	if fileURL == "" {
-		return nil, 0, nil, errors.Errorf("failed to find asset")
+		return nil, 0, nil, fmt.Errorf("failed to find asset")
 	}
 	checksum, err := g.getFileChecksum(release, filename)
 	if err != nil {
-		return nil, 0, nil, errors.Wrap(err, "failed to get checksum")
+		return nil, 0, nil, fmt.Errorf("failed to get checksum: %w", err)
 	}
 	response, err := http.Get(fileURL)
 	if err != nil {
-		return nil, 0, nil, errors.Wrapf(err, "failed to download asset")
+		return nil, 0, nil, fmt.Errorf("failed to download asset: %w", err)
 	}
 	return response.Body, response.ContentLength, checksum, nil
 }
@@ -91,7 +91,7 @@ func getAssetURL(release *Release, assetName string) string {
 func (g *Provider) GetChangelogs() (map[string]string, error) {
 	releases, err := g.getReleasesData()
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to get latest release")
+		return nil, fmt.Errorf("failed to get latest release: %w", err)
 	}
 	changelogs := make(map[string]string)
 	for _, release := range releases {
@@ -103,13 +103,13 @@ func (g *Provider) GetChangelogs() (map[string]string, error) {
 func (g *Provider) getLatestReleaseData() (*Release, error) {
 	response, err := http.Get("https://api.github.com/repos/" + g.repo + "/releases/latest")
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to get latest release")
+		return nil, fmt.Errorf("failed to get latest release: %w", err)
 	}
 	defer response.Body.Close()
 	var release Release
 	err = json.NewDecoder(response.Body).Decode(&release)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to decode latest release")
+		return nil, fmt.Errorf("failed to decode latest release: %w", err)
 	}
 	return &release, nil
 }
@@ -117,13 +117,13 @@ func (g *Provider) getLatestReleaseData() (*Release, error) {
 func (g *Provider) getReleasesData() ([]Release, error) {
 	response, err := http.Get("https://api.github.com/repos/" + g.repo + "/releases")
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to get releases")
+		return nil, fmt.Errorf("failed to get releases: %w", err)
 	}
 	defer response.Body.Close()
 	var releases []Release
 	err = json.NewDecoder(response.Body).Decode(&releases)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to decode releases")
+		return nil, fmt.Errorf("failed to decode releases: %w", err)
 	}
 	return releases, nil
 }
@@ -131,13 +131,13 @@ func (g *Provider) getReleasesData() ([]Release, error) {
 func (g *Provider) getReleaseData(tagName string) (*Release, error) {
 	response, err := http.Get("https://api.github.com/repos/" + g.repo + "/releases/tags/" + tagName)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to get releases")
+		return nil, fmt.Errorf("failed to get releases: %w", err)
 	}
 	defer response.Body.Close()
 	var release Release
 	err = json.NewDecoder(response.Body).Decode(&release)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to decode releases")
+		return nil, fmt.Errorf("failed to decode releases: %w", err)
 	}
 	return &release, nil
 }
@@ -148,22 +148,22 @@ func (g *Provider) getFileChecksum(release *Release, filename string) ([]byte, e
 	}
 	url := getAssetURL(release, g.checksumArtifact)
 	if url == "" {
-		return nil, errors.Errorf("failed to find checksum asset")
+		return nil, fmt.Errorf("failed to find checksum asset")
 	}
 	response, err := http.Get(url)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to download checksum asset")
+		return nil, fmt.Errorf("failed to download checksum asset: %w", err)
 	}
 	defer response.Body.Close()
 	checksum, err := io.ReadAll(response.Body)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to read checksum")
+		return nil, fmt.Errorf("failed to read checksum: %w", err)
 	}
 	checksums := parseChecksumFile(checksum)
 	if sum, ok := checksums[filename]; ok {
 		return sum, nil
 	}
-	return nil, errors.Errorf("failed to find checksum for file")
+	return nil, fmt.Errorf("failed to find checksum for file")
 }
 
 func parseChecksumFile(checksumFile []byte) map[string][]byte {

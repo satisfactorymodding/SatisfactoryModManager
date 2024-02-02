@@ -1,10 +1,9 @@
 package steam
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
-
-	"github.com/pkg/errors"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 )
@@ -16,11 +15,11 @@ func FindInstallations() ([]*common.Installation, []error) {
 func findInstallationsNative() ([]*common.Installation, []error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		return nil, []error{errors.Wrap(err, "failed to get user home dir")}
+		return nil, []error{fmt.Errorf("failed to get user home dir: %w", err)}
 	}
 	steamPath := filepath.Join(homeDir, ".steam", "steam")
 	if _, err := os.Stat(steamPath); os.IsNotExist(err) {
-		return nil, []error{errors.New("steam not installed")}
+		return nil, []error{fmt.Errorf("steam not installed")}
 	}
 	return findInstallationsSteam(
 		steamPath,
@@ -34,12 +33,12 @@ func findInstallationsNative() ([]*common.Installation, []error) {
 func findInstallationsFlatpak() ([]*common.Installation, []error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		return nil, []error{errors.Wrap(err, "failed to get user home dir")}
+		return nil, []error{fmt.Errorf("failed to get user home dir: %w", err)}
 	}
 
 	steamPath := filepath.Join(homeDir, ".var", "app", "com.valvesoftware.Steam", ".steam", "steam")
 	if _, err := os.Stat(steamPath); os.IsNotExist(err) {
-		return nil, []error{errors.New("steam-flatpak not installed")}
+		return nil, []error{fmt.Errorf("steam-flatpak not installed")}
 	}
 	return findInstallationsSteam(
 		steamPath,

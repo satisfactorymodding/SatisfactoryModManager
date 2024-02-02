@@ -1,7 +1,7 @@
 package legendary
 
 import (
-	"github.com/pkg/errors"
+	"fmt"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 )
@@ -9,7 +9,7 @@ import (
 func FindInstallations() ([]*common.Installation, []error) {
 	legendaryDataPath, err := getGlobalLegendaryDataPath("")
 	if err != nil {
-		return nil, []error{errors.Wrap(err, "failed to get legendary config path")}
+		return nil, []error{fmt.Errorf("failed to get legendary config path: %w", err)}
 	}
 	return FindInstallationsIn(legendaryDataPath, "Legendary")
 }

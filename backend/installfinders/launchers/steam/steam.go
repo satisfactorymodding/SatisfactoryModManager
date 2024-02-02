@@ -1,13 +1,13 @@
 package steam
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
 	"strconv"
 
 	"github.com/andygrunwald/vdf"
-	"github.com/pkg/errors"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 )
@@ -20,13 +20,13 @@ func findInstallationsSteam(steamPath string, launcher string, executable []stri
 
 	libraryFoldersF, err := os.Open(libraryFoldersManifestPath)
 	if err != nil {
-		return nil, []error{errors.Wrap(err, "failed to open library folders manifest")}
+		return nil, []error{fmt.Errorf("failed to open library folders manifest: %w", err)}
 	}
 
 	parser := vdf.NewParser(libraryFoldersF)
 	libraryFoldersManifest, err := parser.Parse()
 	if err != nil {
-		return nil, []error{errors.Wrap(err, "failed to parse library folders manifest")}
+		return nil, []error{fmt.Errorf("failed to parse library folders manifest: %w", err)}
 	}
 
 	var libraryFoldersList map[string]interface{}
@@ -36,7 +36,7 @@ func findInstallationsSteam(steamPath string, launcher string, executable []stri
 	} else if _, ok := libraryFoldersManifest["libraryfolders"]; ok {
 		libraryFoldersList = libraryFoldersManifest["libraryfolders"].(map[string]interface{})
 	} else {
-		return nil, []error{errors.New("failed to find library folders in manifest")}
+		return nil, []error{fmt.Errorf("failed to find library folders in manifest")}
 	}
 
 	libraryFolders := []string{
@@ -76,19 +76,19 @@ func findInstallationsSteam(steamPath string, launcher string, executable []stri
 
 			manifestF, err := os.Open(manifestPath)
 			if err != nil {
-				findErrors = append(findErrors, errors.Wrapf(err, "failed to open manifest file %s", manifestPath))
+				findErrors = append(findErrors, fmt.Errorf("failed to open manifest file %s: %w", manifestPath, err))
 				continue
 			}
 
 			parser := vdf.NewParser(manifestF)
 			manifest, err := parser.Parse()
 			if err != nil {
-				findErrors = append(findErrors, errors.Wrapf(err, "failed to parse manifest file %s", manifestPath))
+				findErrors = append(findErrors, fmt.Errorf("failed to parse manifest file %s: %w", manifestPath, err))
 				continue
 			}
 
 			if _, ok := manifest["AppState"]; !ok {
-				findErrors = append(findErrors, errors.Errorf("Failed to find AppState in manifest %s", manifestPath))
+				findErrors = append(findErrors, fmt.Errorf("Failed to find AppState in manifest %s", manifestPath))
 				continue
 			}
 
@@ -112,7 +112,7 @@ func findInstallationsSteam(steamPath string, launcher string, executable []stri
 				if betakey == "experimental" {
 					branch = common.BranchExperimental
 				} else {
-					findErrors = append(findErrors, errors.Errorf("Unknown beta key %s", betakey))
+					findErrors = append(findErrors, fmt.Errorf("Unknown beta key %s", betakey))
 				}
 			}
 

@@ -1,12 +1,12 @@
 package ficsitcli
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"time"
 
 	"github.com/dustin/go-humanize"
-	"github.com/pkg/errors"
 	"github.com/puzpuzpuz/xsync/v3"
 	"github.com/satisfactorymodding/ficsit-cli/cli"
 	ficsitUtils "github.com/satisfactorymodding/ficsit-cli/utils"
@@ -207,13 +207,13 @@ func (f *FicsitCLI) EmitGlobals() {
 
 func (f *FicsitCLI) InstallMod(mod string) error {
 	if f.progress != nil {
-		return errors.New("another operation in progress")
+		return fmt.Errorf("another operation in progress")
 	}
 
 	selectedInstallation := f.GetSelectedInstall()
 
 	if selectedInstallation == nil {
-		return errors.New("no installation selected")
+		return fmt.Errorf("no installation selected")
 	}
 
 	l := slog.With(slog.String("task", "installMod"), slog.String("mod", mod), utils.SlogPath("install", selectedInstallation.Path))
@@ -224,7 +224,7 @@ func (f *FicsitCLI) InstallMod(mod string) error {
 	profileErr := profile.AddMod(mod, ">=0.0.0")
 	if profileErr != nil {
 		l.Error("failed to add mod", slog.Any("error", profileErr))
-		return errors.Wrapf(profileErr, "failed to add mod: %s@latest", mod)
+		return fmt.Errorf("failed to add mod: %s@latest: %w", mod, profileErr)
 	}
 
 	f.progress = &Progress{
@@ -251,13 +251,13 @@ func (f *FicsitCLI) InstallMod(mod string) error {
 
 func (f *FicsitCLI) InstallModVersion(mod string, version string) error {
 	if f.progress != nil {
-		return errors.New("another operation in progress")
+		return fmt.Errorf("another operation in progress")
 	}
 
 	selectedInstallation := f.GetSelectedInstall()
 
 	if selectedInstallation == nil {
-		return errors.New("no installation selected")
+		return fmt.Errorf("no installation selected")
 	}
 
 	l := slog.With(slog.String("task", "installModVersion"), slog.String("mod", mod), slog.String("version", version), utils.SlogPath("install", selectedInstallation.Path))
@@ -268,7 +268,7 @@ func (f *FicsitCLI) InstallModVersion(mod string, version string) error {
 	profileErr := profile.AddMod(mod, version)
 	if profileErr != nil {
 		l.Error("failed to add mod", slog.Any("error", profileErr))
-		return errors.Wrapf(profileErr, "failed to add mod: %s@%s", mod, version)
+		return fmt.Errorf("failed to add mod: %s@%s: %w", mod, version, profileErr)
 	}
 
 	f.progress = &Progress{
@@ -295,13 +295,13 @@ func (f *FicsitCLI) InstallModVersion(mod string, version string) error {
 
 func (f *FicsitCLI) RemoveMod(mod string) error {
 	if f.progress != nil {
-		return errors.New("another operation in progress")
+		return fmt.Errorf("another operation in progress")
 	}
 
 	selectedInstallation := f.GetSelectedInstall()
 
 	if selectedInstallation == nil {
-		return errors.New("no installation selected")
+		return fmt.Errorf("no installation selected")
 	}
 
 	l := slog.With(slog.String("task", "removeMod"), slog.String("mod", mod), utils.SlogPath("install", selectedInstallation.Path))
@@ -335,13 +335,13 @@ func (f *FicsitCLI) RemoveMod(mod string) error {
 
 func (f *FicsitCLI) EnableMod(mod string) error {
 	if f.progress != nil {
-		return errors.New("another operation in progress")
+		return fmt.Errorf("another operation in progress")
 	}
 
 	selectedInstallation := f.GetSelectedInstall()
 
 	if selectedInstallation == nil {
-		return errors.New("no installation selected")
+		return fmt.Errorf("no installation selected")
 	}
 
 	l := slog.With(slog.String("task", "enableMod"), slog.String("mod", mod), utils.SlogPath("install", selectedInstallation.Path))
@@ -375,13 +375,13 @@ func (f *FicsitCLI) EnableMod(mod string) error {
 
 func (f *FicsitCLI) DisableMod(mod string) error {
 	if f.progress != nil {
-		return errors.New("another operation in progress")
+		return fmt.Errorf("another operation in progress")
 	}
 
 	selectedInstallation := f.GetSelectedInstall()
 
 	if selectedInstallation == nil {
-		return errors.New("no installation selected")
+		return fmt.Errorf("no installation selected")
 	}
 
 	l := slog.With(slog.String("task", "disableMod"), slog.String("mod", mod), utils.SlogPath("install", selectedInstallation.Path))

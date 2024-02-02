@@ -1,11 +1,10 @@
 package utils
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
-
-	"github.com/pkg/errors"
 )
 
 func IsIn(dir, path string) bool {
@@ -54,7 +53,7 @@ func CopyRecursive(from, to string) error {
 func MoveRecursive(from, to string) (bool, error) {
 	err := CopyRecursive(from, to)
 	if err != nil {
-		return false, errors.Wrapf(err, "failed to copy %s to %s", from, to)
+		return false, fmt.Errorf("failed to copy %s to %s: %w", from, to, err)
 	}
 	err = filepath.Walk(from, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -80,7 +79,7 @@ func MoveRecursive(from, to string) (bool, error) {
 		return nil
 	})
 	if err != nil {
-		return true, errors.Wrapf(err, "failed to remove %s", from)
+		return true, fmt.Errorf("failed to remove %s: %w", from, err)
 	}
 	return true, nil
 }

@@ -1,7 +1,7 @@
 package updater
 
 import (
-	"errors"
+	"fmt"
 	"sync"
 
 	"github.com/Masterminds/semver/v3"
@@ -48,7 +48,7 @@ func (u *Updater) OnExit(restart bool) error {
 	defer u.lock.Unlock()
 	if u.PendingUpdate == nil {
 		if restart {
-			return errors.New("restart requested but no update is present")
+			return fmt.Errorf("restart requested but no update is present")
 		}
 		return nil
 	}
@@ -59,7 +59,7 @@ func (u *Updater) OnExit(restart bool) error {
 	// Though, applying the update might have errored, meaning the update is not actually ready
 	if !u.PendingUpdate.Ready {
 		if restart {
-			return errors.New("restart requested but update is not ready")
+			return fmt.Errorf("restart requested but update is not ready")
 		}
 		return nil
 	}

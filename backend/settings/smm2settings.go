@@ -2,8 +2,7 @@ package settings
 
 import (
 	"encoding/json"
-
-	"github.com/pkg/errors"
+	"fmt"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 )
@@ -48,7 +47,7 @@ func readSMM2Settings(data []byte) error {
 	s := smm2Settings{}
 	err := json.Unmarshal(data, &s)
 	if err != nil {
-		return errors.Wrap(err, "failed to unmarshal SMM2 settings")
+		return fmt.Errorf("failed to unmarshal SMM2 settings: %w", err)
 	}
 
 	if s.WindowLocation != nil {

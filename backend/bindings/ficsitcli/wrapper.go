@@ -2,12 +2,12 @@ package ficsitcli
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"os"
 	"time"
 
 	"github.com/mitchellh/go-ps"
-	"github.com/pkg/errors"
 	"github.com/satisfactorymodding/ficsit-cli/cli"
 	"github.com/satisfactorymodding/ficsit-cli/cli/provider"
 	"github.com/spf13/viper"
@@ -42,17 +42,17 @@ func (f *FicsitCLI) Startup(ctx context.Context) {
 
 func (f *FicsitCLI) Init() error {
 	if f.ficsitCli != nil {
-		return errors.New("FicsitCLIWrapper already initialized")
+		return fmt.Errorf("FicsitCLIWrapper already initialized")
 	}
 	var err error
 	f.ficsitCli, err = cli.InitCLI(false)
 	if err != nil {
-		return errors.Wrap(err, "failed to initialize ficsit-cli")
+		return fmt.Errorf("failed to initialize ficsit-cli: %w", err)
 	}
 	f.ficsitCli.Provider.(*provider.MixedProvider).Offline = settings.Settings.Offline
 	err = f.initInstallations()
 	if err != nil {
-		return errors.Wrap(err, "failed to initialize installations")
+		return fmt.Errorf("failed to initialize installations: %w", err)
 	}
 	gameRunningTicker := time.NewTicker(5 * time.Second)
 	go func() {
@@ -89,11 +89,11 @@ func ValidateCacheDir(dir string) error {
 	stat, err := os.Stat(dir)
 	if err != nil {
 		if !os.IsNotExist(err) {
-			return errors.Wrapf(err, "failed to stat %s", dir)
+			return fmt.Errorf("failed to stat %s: %w", dir, err)
 		}
 	} else {
 		if !stat.IsDir() {
-			return errors.Errorf("%s is not a directory", dir)
+			return fmt.Errorf("%s is not a directory", dir)
 		}
 	}
 	return nil
@@ -112,16 +112,16 @@ func MoveCacheDir(newDir string) error {
 	err = os.MkdirAll(newDir, 0o755)
 	if err != nil {
 		if !os.IsExist(err) {
-			return errors.Wrapf(err, "failed to create %s", newDir)
+			return fmt.Errorf("failed to create %s: %w", newDir, err)
 		}
 	}
 
 	items, err := os.ReadDir(newDir)
 	if err != nil {
-		return errors.Wrapf(err, "failed to check if directory %s is empty", newDir)
+		return fmt.Errorf("failed to check if directory %s is empty: %w", newDir, err)
 	}
 	if len(items) > 0 {
-		return errors.Errorf("directory %s is not empty", newDir)
+		return fmt.Errorf("directory %s is not empty", newDir)
 	}
 
 	oldCacheDir := viper.GetString("cache-dir")
@@ -144,10 +144,10 @@ func moveCacheData(oldCacheDir, newDir string) error {
 			// Nothing to move
 			return nil
 		}
-		return errors.Wrapf(err, "failed to stat %s", oldCacheDir)
+		return fmt.Errorf("failed to stat %s: %w", oldCacheDir, err)
 	}
 	if !oldStat.IsDir() {
-		return errors.Errorf("%s is not a directory", oldCacheDir)
+		return fmt.Errorf("%s is not a directory", oldCacheDir)
 	}
 
 	// Perform the move atomically

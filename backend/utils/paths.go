@@ -1,23 +1,22 @@
 package utils
 
 import (
+	"fmt"
 	"log/slog"
 	"net/url"
 	"os"
-
-	"github.com/pkg/errors"
 )
 
 func EnsureDirExists(path string) error {
 	_, err := os.Stat(path)
 	if err != nil {
 		if !os.IsNotExist(err) {
-			return errors.Wrapf(err, "failed to stat path %s", path)
+			return fmt.Errorf("failed to stat path %s: %w", path, err)
 		}
 
 		err = os.MkdirAll(path, 0o755)
 		if err != nil {
-			return errors.Wrapf(err, "failed to create directory %s", path)
+			return fmt.Errorf("failed to create directory %s: %w", path, err)
 		}
 	}
 	return nil

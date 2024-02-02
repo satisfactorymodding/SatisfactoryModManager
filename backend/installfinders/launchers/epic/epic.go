@@ -6,8 +6,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/pkg/errors"
-
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 )
 
@@ -45,7 +43,7 @@ func GetEpicBranch(appName string) (common.GameBranch, error) {
 	case ExperimentalDedicatedServerAppName:
 		return common.BranchExperimental, nil
 	default:
-		return "", errors.New("unknown branch for " + appName)
+		return "", fmt.Errorf("unknown branch for " + appName)
 	}
 }
 
@@ -59,12 +57,12 @@ func findInstallationsEpic(epicManifestsPath string, launcher string, launchPath
 	}
 
 	if _, err := os.Stat(epicManifestsPath); os.IsNotExist(err) {
-		return nil, []error{errors.New("Epic is not installed")}
+		return nil, []error{fmt.Errorf("Epic is not installed")}
 	}
 
 	manifests, err := os.ReadDir(epicManifestsPath)
 	if err != nil {
-		return nil, []error{errors.Wrap(err, "failed to list Epic manifests")}
+		return nil, []error{fmt.Errorf("failed to list Epic manifests: %w", err)}
 	}
 
 	installs := make([]*common.Installation, 0)
@@ -80,13 +78,13 @@ func findInstallationsEpic(epicManifestsPath string, launcher string, launchPath
 
 		manifestData, err := os.ReadFile(manifestPath)
 		if err != nil {
-			findErrors = append(findErrors, errors.Wrapf(err, "failed to read Epic manifest %s", manifestName))
+			findErrors = append(findErrors, fmt.Errorf("failed to read Epic manifest %s: %w", manifestName, err))
 			continue
 		}
 
 		var epicManifest Manifest
 		if err := json.Unmarshal(manifestData, &epicManifest); err != nil {
-			findErrors = append(findErrors, errors.Wrapf(err, "failed to parse Epic manifest %s", manifestName))
+			findErrors = append(findErrors, fmt.Errorf("failed to parse Epic manifest %s: %w", manifestName, err))
 			continue
 		}
 
@@ -100,13 +98,13 @@ func findInstallationsEpic(epicManifestsPath string, launcher string, launchPath
 		gameManifestPath := processPath(filepath.Join(epicManifest.ManifestLocation, gameManifestName))
 		gameManifestData, err := os.ReadFile(gameManifestPath)
 		if err != nil {
-			findErrors = append(findErrors, errors.Wrapf(err, "failed to read Epic game manifest %s", gameManifestName))
+			findErrors = append(findErrors, fmt.Errorf("failed to read Epic game manifest %s: %w", gameManifestName, err))
 			continue
 		}
 
 		var epicGameManifest GameManifest
 		if err := json.Unmarshal(gameManifestData, &epicGameManifest); err != nil {
-			findErrors = append(findErrors, errors.Wrapf(err, "failed to parse Epic game manifest %s", gameManifestName))
+			findErrors = append(findErrors, fmt.Errorf("failed to parse Epic game manifest %s: %w", gameManifestName, err))
 			continue
 		}
 
@@ -115,7 +113,7 @@ func findInstallationsEpic(epicManifestsPath string, launcher string, launchPath
 			epicGameManifest.AppName != epicManifest.MainGameAppName {
 			findErrors = append(findErrors, common.InstallFindError{
 				Path:  installLocation,
-				Inner: errors.New("mismatching manifest data"),
+				Inner: fmt.Errorf("mismatching manifest data"),
 			})
 			continue
 		}

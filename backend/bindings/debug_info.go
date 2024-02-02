@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
 	ficsitCli "github.com/satisfactorymodding/ficsit-cli/cli"
 	"github.com/spf13/viper"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
@@ -54,12 +53,12 @@ func addFactoryGameLog(writer *zip.Writer) error {
 	if runtime.GOOS == "windows" {
 		cacheDir, err := os.UserCacheDir()
 		if err != nil {
-			return errors.Wrap(err, "failed to get user cache dir")
+			return fmt.Errorf("failed to get user cache dir: %w", err)
 		}
 		err = utils.AddFileToZip(writer, path.Join(cacheDir, "FactoryGame", "Saved", "Logs", "FactoryGame.log"), "FactoryGame.log")
 		if err != nil {
 			if !os.IsNotExist(err) {
-				return errors.Wrap(err, "failed to add file to zip")
+				return fmt.Errorf("failed to add file to zip: %w", err)
 			}
 		}
 	}
@@ -103,7 +102,7 @@ func addMetadata(writer *zip.Writer) error {
 
 	lockfile, err := BindingsInstance.FicsitCLI.GetSelectedInstallLockfile()
 	if err != nil {
-		return errors.Wrap(err, "failed to get lockfile")
+		return fmt.Errorf("failed to get lockfile: %w", err)
 	}
 
 	metadataInstalledMods := make(map[string]string)
@@ -131,17 +130,17 @@ func addMetadata(writer *zip.Writer) error {
 
 	metadataBytes, err := utils.JSONMarshal(metadata, 2)
 	if err != nil {
-		return errors.Wrap(err, "failed to marshal metadata")
+		return fmt.Errorf("failed to marshal metadata: %w", err)
 	}
 
 	metadataFile, err := writer.Create("metadata.json")
 	if err != nil {
-		return errors.Wrap(err, "failed to create metadata file")
+		return fmt.Errorf("failed to create metadata file: %w", err)
 	}
 
 	_, err = metadataFile.Write(metadataBytes)
 	if err != nil {
-		return errors.Wrap(err, "failed to write metadata")
+		return fmt.Errorf("failed to write metadata: %w", err)
 	}
 	return nil
 }
@@ -149,7 +148,7 @@ func addMetadata(writer *zip.Writer) error {
 func (d *DebugInfo) generateAndSaveDebugInfo(filename string) error {
 	file, err := os.Create(filename)
 	if err != nil {
-		return errors.Wrap(err, "failed to create file")
+		return fmt.Errorf("failed to create file: %w", err)
 	}
 	defer file.Close()
 	writer := zip.NewWriter(file)
@@ -157,17 +156,17 @@ func (d *DebugInfo) generateAndSaveDebugInfo(filename string) error {
 
 	err = addFactoryGameLog(writer)
 	if err != nil {
-		return errors.Wrap(err, "failed to add FactoryGame.log to debuginfo zip")
+		return fmt.Errorf("failed to add FactoryGame.log to debuginfo zip: %w", err)
 	}
 
 	err = addMetadata(writer)
 	if err != nil {
-		return errors.Wrap(err, "failed to add metadata to debuginfo zip")
+		return fmt.Errorf("failed to add metadata to debuginfo zip: %w", err)
 	}
 
 	err = utils.AddFileToZip(writer, viper.GetString("log-file"), "SatisfactoryModManager.log")
 	if err != nil {
-		return errors.Wrap(err, "failed to add SatisfactoryModManager.log to debuginfo zip")
+		return fmt.Errorf("failed to add SatisfactoryModManager.log to debuginfo zip: %w", err)
 	}
 
 	return nil

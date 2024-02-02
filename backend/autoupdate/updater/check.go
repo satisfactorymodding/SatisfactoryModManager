@@ -3,10 +3,10 @@
 package updater
 
 import (
+	"fmt"
 	"log/slog"
 
 	"github.com/Masterminds/semver/v3"
-	"github.com/pkg/errors"
 )
 
 func (u *Updater) CheckForUpdate() error {
@@ -22,12 +22,12 @@ func (u *Updater) CheckForUpdate() error {
 
 	latestVersion, err := u.config.Source.GetLatestVersion(u.config.IncludePrerelease)
 	if err != nil {
-		return errors.Wrap(err, "failed to get latest version")
+		return fmt.Errorf("failed to get latest version: %w", err)
 	}
 
 	latestSemver, err := semver.NewVersion(latestVersion)
 	if err != nil {
-		return errors.Wrapf(err, "failed to parse latest version %s", latestVersion)
+		return fmt.Errorf("failed to parse latest version %s: %w", latestVersion, err)
 	}
 
 	if u.PendingUpdate != nil && u.PendingUpdate.Version != nil {
@@ -42,14 +42,14 @@ func (u *Updater) CheckForUpdate() error {
 
 	changelogs, err := u.config.Source.GetChangelogs()
 	if err != nil {
-		return errors.Wrap(err, "failed to get changelogs")
+		return fmt.Errorf("failed to get changelogs: %w", err)
 	}
 
 	newChangelogs := make(map[string]string)
 	for version, changelog := range changelogs {
 		changelogSemver, err := semver.NewVersion(version)
 		if err != nil {
-			return errors.Wrap(err, "failed to parse version")
+			return fmt.Errorf("failed to parse version: %w", err)
 		}
 		if changelogSemver.GreaterThan(u.config.CurrentVersion) && changelogSemver.Compare(latestSemver) <= 0 {
 			newChangelogs[version] = changelog
@@ -70,7 +70,7 @@ func (u *Updater) CheckForUpdate() error {
 
 	file, length, checksum, err := u.config.Source.GetFile(latestVersion, u.config.File)
 	if err != nil {
-		return errors.Wrapf(err, "failed to get file %s of version %s", u.config.File, latestVersion)
+		return fmt.Errorf("failed to get file %s of version %s: %w", u.config.File, latestVersion, err)
 	}
 	defer file.Close()
 
@@ -84,7 +84,7 @@ func (u *Updater) CheckForUpdate() error {
 
 	err = u.config.Apply.Apply(p, checksum)
 	if err != nil {
-		return errors.Wrap(err, "failed to apply update")
+		return fmt.Errorf("failed to apply update: %w", err)
 	}
 	u.PendingUpdate.Ready = true
 	u.UpdateReady.Dispatch(nil)
