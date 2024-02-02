@@ -17,7 +17,7 @@
   import { installs, profiles, canModify, selectedInstallMetadata, selectedInstall, selectedProfile, modsEnabled, installsMetadata } from '$lib/store/ficsitCLIStore';
   import { error, siteURL } from '$lib/store/generalStore';
   import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
-  import { OpenExternal } from '$wailsjs/go/bindings/App';
+  import { OpenExternal } from '$wailsjs/go/app/app';
   import { common } from '$wailsjs/go/models';
   import { ExportCurrentProfile } from '$wailsjs/go/ficsitcli/FicsitCLI';
   import { getModalStore } from '$lib/store/skeletonExtensions';

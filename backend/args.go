@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/backend/bindings"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/app"
 )
 
 func ProcessArguments(args []string) {
@@ -25,7 +25,7 @@ func ProcessArguments(args []string) {
 			slog.Error("failed to handle file", slog.Any("error", err), slog.String("path", args[0]))
 		}
 	}
-	bindings.BindingsInstance.App.Show()
+	app.App.Show()
 }
 
 func handleURI(uri string) error {
@@ -37,7 +37,7 @@ func handleURI(uri string) error {
 	case "install":
 		modID := u.Query().Get("modID")
 		version := u.Query().Get("version")
-		bindings.BindingsInstance.App.ExternalInstallMod(modID, version)
+		app.App.ExternalInstallMod(modID, version)
 		return nil
 	default:
 		return fmt.Errorf("unknown URI action " + u.Host)
@@ -47,7 +47,7 @@ func handleURI(uri string) error {
 func handleFile(path string) error {
 	if strings.HasSuffix(path, ".smmprofile") {
 		println(path)
-		bindings.BindingsInstance.App.ExternalImportProfile(path)
+		app.App.ExternalImportProfile(path)
 		return nil
 	}
 	return fmt.Errorf("unknown file type " + path)

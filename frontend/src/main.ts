@@ -1,6 +1,6 @@
 import App from './App.svelte';
 
-import { GetAPIEndpoint, GetSiteEndpoint } from '$wailsjs/go/bindings/App';
+import { GetAPIEndpoint, GetSiteEndpoint } from '$wailsjs/go/app/app';
 
 const app = new App({
   target: document.getElementById('app')!,

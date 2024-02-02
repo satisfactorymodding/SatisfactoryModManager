@@ -8,9 +8,9 @@ import (
 	"github.com/spf13/viper"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/backend/app"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate/source/github"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate/updater"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/common"
 )
 
 type autoUpdate struct {
@@ -35,13 +35,13 @@ func Init() {
 		enabled: shouldUseUpdater(),
 	}
 	Updater.Updater.UpdateFound.On(func(update updater.PendingUpdate) {
-		wailsRuntime.EventsEmit(app.Context, "updateAvailable", update.Version.String(), update.Changelogs)
+		wailsRuntime.EventsEmit(common.AppContext, "updateAvailable", update.Version.String(), update.Changelogs)
 	})
 	Updater.Updater.DownloadProgress.On(func(progress updater.UpdateDownloadProgress) {
-		wailsRuntime.EventsEmit(app.Context, "updateDownloadProgress", progress.BytesDownloaded, progress.BytesTotal)
+		wailsRuntime.EventsEmit(common.AppContext, "updateDownloadProgress", progress.BytesDownloaded, progress.BytesTotal)
 	})
 	Updater.Updater.UpdateReady.On(func(interface{}) {
-		wailsRuntime.EventsEmit(app.Context, "updateReady")
+		wailsRuntime.EventsEmit(common.AppContext, "updateReady")
 	})
 }
 
@@ -82,7 +82,7 @@ func (u *autoUpdate) UpdateAndRestart() {
 		return
 	}
 	u.restart = true
-	wailsRuntime.Quit(app.Context)
+	wailsRuntime.Quit(common.AppContext)
 }
 
 func (u *autoUpdate) CheckForUpdate() error {

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { profileFilepath, profileName } from './importProfile';
 
-  import { OpenFileDialog } from '$lib/generated/wailsjs/go/bindings/App';
+  import { OpenFileDialog } from '$lib/generated/wailsjs/go/app/app';
   import { ImportProfile, ReadExportedProfileMetadata } from '$lib/generated/wailsjs/go/ficsitcli/FicsitCLI';
   import type { ficsitcli } from '$lib/generated/wailsjs/go/models';
   import { error } from '$lib/store/generalStore';

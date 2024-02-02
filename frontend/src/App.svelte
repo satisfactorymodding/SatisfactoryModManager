@@ -9,7 +9,7 @@
   import { initializeGraphQLClient } from '$lib/core/graphql';
   import { Environment, EventsOn } from '$wailsjs/runtime';
   import ModDetails from '$lib/components/mod-details/ModDetails.svelte';
-  import { ExpandMod, UnexpandMod } from '$wailsjs/go/bindings/App';
+  import { ExpandMod, UnexpandMod } from '$wailsjs/go/app/app';
   import LeftBar from '$lib/components/left-bar/LeftBar.svelte';
   import { installs, invalidInstalls, progress } from '$lib/store/ficsitCLIStore';
   import { konami } from '$lib/store/settingsStore';

@@ -17,12 +17,14 @@ import (
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 	"gopkg.in/natefinch/lumberjack.v2"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/app"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/bindings"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/common"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/settings"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/websocket"
@@ -81,12 +83,21 @@ func main() {
 		SingleInstanceLock: &options.SingleInstanceLock{
 			UniqueId: "SatisfactoryModManager_b04ab4c3-450f-48f4-ab14-af6d7adc5416",
 			OnSecondInstanceLaunch: func(secondInstanceData options.SecondInstanceData) {
-				b.App.Show()
+				app.App.Show()
 				backend.ProcessArguments(secondInstanceData.Args)
 			},
 		},
 		OnStartup: func(ctx context.Context) {
-			app.Context = ctx
+			common.AppContext = ctx
+
+			// Wails doesn't support setting the window position on init, so we do it here
+			if settings.Settings.WindowPosition != nil {
+				wailsRuntime.WindowSetPosition(ctx,
+					settings.Settings.WindowPosition.X,
+					settings.Settings.WindowPosition.Y)
+			}
+
+			app.App.WatchWindow() //nolint:contextcheck
 			go websocket.ListenAndServeWebsocket()
 			err := b.Startup(ctx)
 			if err != nil {
@@ -96,13 +107,13 @@ func main() {
 			}
 		},
 		OnDomReady: func(ctx context.Context) {
-			backend.ProcessArguments(os.Args[1:])
+			backend.ProcessArguments(os.Args[1:]) //nolint:contextcheck
 			autoupdate.Updater.CheckInterval(5 * time.Minute)
 		},
 		OnShutdown: func(ctx context.Context) {
-			b.Shutdown(ctx)
+			app.App.StopWindowWatcher()
 		},
-		Bind: append(b.GetBindings(), autoupdate.Updater, settings.Settings),
+		Bind: append(b.GetBindings(), autoupdate.Updater, settings.Settings, app.App),
 		EnumBind: []interface{}{
 			bindings.AllInstallTypes,
 			bindings.AllBranches,

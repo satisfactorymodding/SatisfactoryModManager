@@ -4,7 +4,7 @@
   import SvgIcon from './SVGIcon.svelte';
 
   import { Quit, WindowMinimise, WindowToggleMaximise } from '$wailsjs/runtime';
-  import { GetVersion } from '$wailsjs/go/bindings/App';
+  import { GetVersion } from '$wailsjs/go/app/app';
 
   function minimize() {
     WindowMinimise();

@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/viper"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/backend/app"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/common"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 )
 
@@ -145,7 +145,7 @@ func (s *settings) SetModFiltersFilter(filter string) {
 }
 
 func (s *settings) emitFavoriteMods() {
-	wailsRuntime.EventsEmit(app.Context, "favoriteMods", s.FavoriteMods)
+	wailsRuntime.EventsEmit(common.AppContext, "favoriteMods", s.FavoriteMods)
 }
 
 func (s *settings) GetStartView() View {
@@ -191,7 +191,7 @@ func (s *settings) GetIgnoredUpdates() map[string][]string {
 func (s *settings) SetUpdateIgnore(modReference string, version string) {
 	s.IgnoredUpdates[modReference] = append(s.IgnoredUpdates[modReference], version)
 	_ = SaveSettings()
-	wailsRuntime.EventsEmit(app.Context, "ignoredUpdates", s.IgnoredUpdates)
+	wailsRuntime.EventsEmit(common.AppContext, "ignoredUpdates", s.IgnoredUpdates)
 }
 
 func (s *settings) SetUpdateUnignore(modReference string, version string) {
@@ -208,7 +208,7 @@ func (s *settings) SetUpdateUnignore(modReference string, version string) {
 	}
 	s.IgnoredUpdates[modReference] = append(versions[:idx], versions[idx+1:]...)
 	_ = SaveSettings()
-	wailsRuntime.EventsEmit(app.Context, "ignoredUpdates", s.IgnoredUpdates)
+	wailsRuntime.EventsEmit(common.AppContext, "ignoredUpdates", s.IgnoredUpdates)
 }
 
 func (s *settings) GetUpdateCheckMode() UpdateCheckMode {
@@ -237,7 +237,7 @@ func (s *settings) SetAnnouncementViewed(announcement string) {
 	}
 	s.ViewedAnnouncements = append(s.ViewedAnnouncements, announcement)
 	_ = SaveSettings()
-	wailsRuntime.EventsEmit(app.Context, "viewedAnnouncements", s.ViewedAnnouncements)
+	wailsRuntime.EventsEmit(common.AppContext, "viewedAnnouncements", s.ViewedAnnouncements)
 }
 
 func (s *settings) SetCacheDir(dir string) error {
@@ -252,7 +252,7 @@ func (s *settings) SetCacheDir(dir string) error {
 	}
 	s.CacheDir = dir
 	_ = SaveSettings()
-	wailsRuntime.EventsEmit(app.Context, "cacheDir", s.GetCacheDir())
+	wailsRuntime.EventsEmit(common.AppContext, "cacheDir", s.GetCacheDir())
 	return nil
 }
 

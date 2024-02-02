@@ -1,5 +1,9 @@
 package app
 
-import "context"
+type app struct {
+	IsExpanded bool
 
-var Context context.Context
+	stopSizeWatcher chan bool
+}
+
+var App = &app{}
