@@ -13,7 +13,7 @@
   import { GetModNamesDocument } from '$lib/generated';
   import { OfflineGetModsByReferences, UpdateMods } from '$lib/generated/wailsjs/go/ficsitcli/FicsitCLI';
   import type { ficsitcli } from '$lib/generated/wailsjs/go/models';
-  import { SetUpdateIgnore, SetUpdateUnignore } from '$lib/generated/wailsjs/go/bindings/Settings';
+  import { SetUpdateIgnore, SetUpdateUnignore } from '$lib/generated/wailsjs/go/settings/settings';
   import { getModalStore } from '$lib/store/skeletonExtensions';
 
   export let parent: {onClose: () => void};

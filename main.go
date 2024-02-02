@@ -23,7 +23,6 @@ import (
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/app"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/bindings"
-	"github.com/satisfactorymodding/SatisfactoryModManager/backend/bindings/ficsitcli"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/settings"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/websocket"
@@ -52,7 +51,7 @@ func main() {
 	}
 
 	if settings.Settings.CacheDir != "" {
-		err = ficsitcli.ValidateCacheDir(settings.Settings.CacheDir)
+		err = settings.ValidateCacheDir(settings.Settings.CacheDir)
 		if err != nil {
 			slog.Error("failed to set cache dir", slog.Any("error", err))
 		} else {
@@ -103,7 +102,7 @@ func main() {
 		OnShutdown: func(ctx context.Context) {
 			b.Shutdown(ctx)
 		},
-		Bind: append(b.GetBindings(), autoupdate.Updater),
+		Bind: append(b.GetBindings(), autoupdate.Updater, settings.Settings),
 		EnumBind: []interface{}{
 			bindings.AllInstallTypes,
 			bindings.AllBranches,

@@ -7,7 +7,7 @@
   import Announcement from '$lib/components/announcements/Announcement.svelte';
   import { viewedAnnouncements , offline } from '$lib/store/settingsStore';
   import { AnnouncementImportance, GetAnnouncementsDocument, SmrHealthcheckDocument, type Announcement as AnnouncementType } from '$lib/generated';
-  import { SetAnnouncementViewed } from '$wailsjs/go/bindings/Settings';
+  import { SetAnnouncementViewed } from '$wailsjs/go/settings/settings';
   
   const client = getContextClient();
 

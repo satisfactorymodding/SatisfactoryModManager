@@ -6,7 +6,7 @@ import { bindingTwoWayNoExcept } from './wailsStoreBindings';
 import { CompatibilityState, type GetModsQuery } from '$lib/generated';
 import { favoriteMods, lockfileMods, manifestMods, selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
 import { queuedMods } from '$lib/store/actionQueue';
-import { GetModFiltersOrder, GetModFiltersFilter, SetModFiltersOrder, SetModFiltersFilter } from '$wailsjs/go/bindings/Settings';
+import { GetModFiltersOrder, GetModFiltersFilter, SetModFiltersOrder, SetModFiltersFilter } from '$wailsjs/go/settings/settings';
 import { getCompatibility } from '$lib/utils/modCompatibility';
 import { installTypeToTargetName } from '$lib/wailsTypesExtensions';
 

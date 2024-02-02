@@ -10,7 +10,6 @@ import (
 type Bindings struct {
 	App       *App
 	FicsitCLI *ficsitcli.FicsitCLI
-	settings  *Settings
 	debugInfo *DebugInfo
 }
 
@@ -41,7 +40,6 @@ func MakeBindings() *Bindings {
 	BindingsInstance = &Bindings{
 		App:       MakeApp(),
 		FicsitCLI: ficsitcli.MakeFicsitCLI(),
-		settings:  MakeSettings(),
 		debugInfo: MakeDebugInfo(),
 	}
 
@@ -50,7 +48,6 @@ func MakeBindings() *Bindings {
 
 func (b *Bindings) Startup(ctx context.Context) error {
 	b.App.startup(ctx)
-	b.settings.startup(ctx)
 	b.debugInfo.startup(ctx)
 	return b.FicsitCLI.Startup(ctx)
 }
@@ -63,7 +60,6 @@ func (b *Bindings) GetBindings() []interface{} {
 	return []interface{}{
 		b.App,
 		b.FicsitCLI,
-		b.settings,
 		b.debugInfo,
 	}
 }

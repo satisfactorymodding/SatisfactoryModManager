@@ -11,7 +11,7 @@
   import { addQueuedModAction, queuedMods, removeQueuedModAction } from '$lib/store/actionQueue';
   import { error, siteURL } from '$lib/store/generalStore';
   import { DisableMod, EnableMod, InstallMod, RemoveMod } from '$wailsjs/go/ficsitcli/FicsitCLI';
-  import { FavoriteMod, UnFavoriteMod } from '$wailsjs/go/bindings/Settings';
+  import { FavoriteMod, UnFavoriteMod } from '$wailsjs/go/settings/settings';
   import { getAuthor } from '$lib/utils/getModAuthor';
   import { getCompatibility, getVersionCompatibility, type CompatibilityWithSource } from '$lib/utils/modCompatibility';
   import { CompatibilityState } from '$lib/generated';
