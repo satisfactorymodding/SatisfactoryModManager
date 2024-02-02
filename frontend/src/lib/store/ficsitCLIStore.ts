@@ -59,12 +59,12 @@ export const updateCheckInProgress = writable(false);
 
 export async function checkForUpdates() {
   updateCheckInProgress.set(true);
-  const result = await CheckForUpdates();
-  updateCheckInProgress.set(false);
-  if(result instanceof Error) {
-    throw result;
+  try {
+    const result = await CheckForUpdates();
+    updates.set(result ?? []);
+  } finally {
+    updateCheckInProgress.set(false);
   }
-  updates.set(result ?? []);
 }
 
-setInterval(checkForUpdates, 1000 * 60 * 5); // Check for updates every 5 minutes
+setInterval(() => checkForUpdates().catch(console.error), 1000 * 60 * 5); // Check for updates every 5 minutes

@@ -10,9 +10,9 @@
   const modalStore = getModalStore();
 
   function checkForAllUpdates() {
-    checkForUpdates();
+    checkForUpdates().catch(console.error);
     if(!$smmUpdate || $smmUpdateReady) {
-      CheckForSMMUpdates();
+      CheckForSMMUpdates().catch(console.error);
     }
   }
 
