@@ -1,10 +1,12 @@
 <script lang="ts">
   export let popupId: string;
+  let clazz = '';
+  export { clazz as class };
   export let disabled = false;
 </script>
 
 <div
-  class="rounded-token z-10 fixed py-2 px-4 bg-[#0d0d0d] block opacity-0 max-w-[30rem] text-base whitespace-break-spaces duration-500"
+  class="rounded-token z-10 fixed py-2 px-4 bg-[#0d0d0d] block opacity-0 max-w-[30rem] text-base whitespace-break-spaces duration-500 {clazz}"
   class:!hidden={disabled}
   data-popup={popupId}
   inert>

@@ -53,7 +53,8 @@
   $: reportedIncompatible = Object.keys($lockfileMods).filter((modReference) => reportedCompatibilities[modReference]?.state === CompatibilityState.Broken);
   $: reportedPossiblyCompatible = Object.keys($lockfileMods).filter((modReference) => reportedCompatibilities[modReference]?.state === CompatibilityState.Damaged);
 
-  $: launchButtonColor = (versionIncompatible.length > 0 || reportedIncompatible.length > 0) ? 'error' : ((versionPossiblyCompatible.length > 0 || reportedPossiblyCompatible.length > 0) ? 'warning' : '');
+  $: launchButtonError = versionIncompatible.length > 0 || reportedIncompatible.length > 0;
+  $: launchButtonWarning = !launchButtonError && (versionPossiblyCompatible.length > 0 || reportedPossiblyCompatible.length > 0);
   $: areOperationsQueued = !$queueAutoStart && $queuedMods.length > 0;
 
   function launchGame() {
@@ -107,7 +108,7 @@
     event: 'hover',
     target: popupId,
     middleware: {
-      offset: 32,
+      offset: 4,
     },
     placement: 'top-start',
   } satisfies PopupSettings;
@@ -135,7 +136,10 @@
     </button>
   {:else if $launchButton === 'normal' || $isGameRunning || $isLaunchingGame}
     <button
-      class="btn h-8 w-full text-sm bg-primary-900"
+      class="btn h-8 w-full text-sm"
+      class:bg-error-500={launchButtonError}
+      class:bg-primary-900={!launchButtonError && !launchButtonWarning}
+      class:bg-warning-500={launchButtonWarning}
       disabled={!!$progress || $isGameRunning || $isLaunchingGame}
       on:click={() => launchGame()}
     >
@@ -208,7 +212,7 @@
     </div>
   {/if}
 </center>
-<Tooltip {popupId}>
+<Tooltip class="!mt-0" {popupId}>
   {#if versionIncompatible.length > 0 || versionPossiblyCompatible.length > 0 || reportedIncompatible.length > 0 || reportedPossiblyCompatible.length > 0}
     <span>You have:</span>
     <ul class="list-disc pl-5">
