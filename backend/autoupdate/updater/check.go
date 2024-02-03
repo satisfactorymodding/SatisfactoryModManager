@@ -28,7 +28,7 @@ func (u *Updater) CheckForUpdate() error {
 		return fmt.Errorf("failed to parse latest version %s: %w", latestVersion, err)
 	}
 
-	if u.PendingUpdate != nil && u.PendingUpdate.Version != nil {
+	if u.PendingUpdate != nil && u.PendingUpdate.Version != nil && u.PendingUpdate.Ready {
 		if !latestSemver.GreaterThan(u.PendingUpdate.Version) {
 			return nil
 		}
