@@ -4,6 +4,7 @@ before:
   hooks:
     - go generate -x -tags tools ./...
     - go mod tidy
+    - ./.github/convertWailsJsonPaths.sh
 
 ### Build
 
