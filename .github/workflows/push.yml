@@ -10,18 +10,7 @@ env:
 
 jobs:
   build:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-        include:
-          - os: ubuntu-latest
-            artifactName: linux
-            buildArgs: ''
-          - os: windows-latest
-            artifactName: windows
-            buildArgs: -nsis
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -40,25 +29,24 @@ jobs:
           cache-dependency-path: frontend
 
       - name: Install additional dependencies
-        if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt update
-          sudo apt -y install libgtk-3-dev libwebkit2gtk-4.0-dev
+          sudo apt -y install libgtk-3-dev libwebkit2gtk-4.0-dev nsis
 
       - name: Install Wails
         run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
 
-      - name: Generate files
-        run: go generate -x -tags tools ./...
-      
-      - name: Build
-        run: wails build ${{ matrix.buildArgs }}
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v5
+        with:
+          version: latest
+          args: release --snapshot -p 1 --clean # Multiple Wails builds cannot be executed in parallel
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.artifactName }}
-          path: build/bin/*
+          name: all-builds
+          path: dist/**/*
   
   lint-backend:
     strategy:

@@ -82,6 +82,9 @@ checksum:
 
 ### Release
 
+snapshot:
+  name_template: '{{ .Version }}+{{ if ne .Branch "master" }}{{ .Branch }}.{{ end }}{{ .ShortCommit }}'
+
 release:  
   draft: true
   name_template: "{{.ProjectName}} v{{.Version}}"
