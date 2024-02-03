@@ -209,13 +209,6 @@
     target: authorsMenuPopupId,
     middleware: {
       offset: 4,
-      size: {
-        apply({ availableHeight, elements }) {
-          Object.assign(elements.floating.style, {
-            maxHeight: `${availableHeight * 0.8}px`,
-          });
-        },
-      } as SizeOptions,
     },
     placement: 'bottom',
   } satisfies PopupSettings;
@@ -230,7 +223,7 @@
       size: {
         apply({ availableHeight, elements }) {
           Object.assign(elements.floating.style, {
-            maxHeight: `${availableHeight * 0.8}px`,
+            maxHeight: `calc(${availableHeight}px - 1rem)`,
           });
         },
       } as SizeOptions,
@@ -248,7 +241,7 @@
       size: {
         apply({ availableHeight, elements }) {
           Object.assign(elements.floating.style, {
-            maxHeight: `${availableHeight * 0.8}px`,
+            maxHeight: `calc(${availableHeight}px - 1rem)`,
           });
         },
       } as SizeOptions,
@@ -281,7 +274,7 @@
             icon={mdiChevronDown}/>
         </button>
       </div>
-      <div class="card shadow-xl min-w-[11rem] z-10 duration-0 overflow-y-auto" data-popup={authorsMenuPopupId}>
+      <div class="card shadow-xl min-w-[11rem] z-10 duration-0 overflow-y-auto max-h-[95vh] !mt-0" data-popup={authorsMenuPopupId}>
         <!-- 
       Skeleton's popup close function waits for the tranistion duration...
       before actually triggering the transition...
@@ -371,12 +364,12 @@
               icon={mdiChevronDown}/>
           </button>
         </div>
-        <div class="card shadow-xl min-w-[11rem] z-10 duration-0 overflow-y-auto" data-popup={changeVersionMenuPopupId}>
+        <div class="card shadow-xl min-w-[11rem] z-10 duration-0 overflow-y-auto !mt-0" data-popup={changeVersionMenuPopupId}>
           <!-- 
-        Skeleton's popup close function waits for the tranistion duration...
-        before actually triggering the transition...
-        So we'll just not have a transition...
-        -->
+          Skeleton's popup close function waits for the tranistion duration...
+          before actually triggering the transition...
+          So we'll just not have a transition...
+          -->
         
           <ul>
             <li>
@@ -423,12 +416,12 @@
                 icon={mdiChevronDown}/>
             </button>
           </div>
-          <div class="card shadow-xl min-w-[11rem] z-10 duration-0 overflow-y-auto" data-popup={changelogMenuPopupId}>
+          <div class="card shadow-xl min-w-[11rem] z-10 duration-0 overflow-y-auto !mt-0" data-popup={changelogMenuPopupId}>
             <!-- 
-          Skeleton's popup close function waits for the tranistion duration...
-          before actually triggering the transition...
-          So we'll just not have a transition...
-          -->
+            Skeleton's popup close function waits for the tranistion duration...
+            before actually triggering the transition...
+            So we'll just not have a transition...
+            -->
           
             <ul>
               {#each mod?.versions ?? [] as version}

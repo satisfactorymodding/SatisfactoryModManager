@@ -2,7 +2,6 @@
   import { mdiBug, mdiCheck, mdiChevronRight, mdiClipboard, mdiCog, mdiDownload, mdiFolderEdit, mdiTune } from '@mdi/js';
   import { getContextClient } from '@urql/svelte';
   import { popup, type PopupSettings , ListBox, ListBoxItem } from '@skeletonlabs/skeleton';
-  import type { SizeOptions } from '@floating-ui/dom';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { GenerateDebugInfo } from '$wailsjs/go/app/app';
@@ -20,13 +19,6 @@
     target: 'settings-menu',
     middleware: {
       offset: 4,
-      size: {
-        apply({ availableHeight, elements }) {
-          Object.assign(elements.floating.style, {
-            maxHeight: `${availableHeight * 0.8}px`,
-          });
-        },
-      } as SizeOptions,
     },
     placement: 'right-start',
     closeQuery: '[data-popup="settings-menu"] li:not([data-noclose]):not(.section-header)',
@@ -286,7 +278,7 @@
   </div>
 
   <!-- main settings menu starts here -->
-  <div class="card shadow-xl z-10 duration-0 overflow-y-auto py-2" data-popup="settings-menu">
+  <div class="card shadow-xl z-10 duration-0 overflow-y-auto py-2 max-h-[95vh]" data-popup="settings-menu">
     <!-- 
     Skeleton's popup close function waits for the tranistion duration...
     before actually triggering the transition...

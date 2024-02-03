@@ -37,7 +37,7 @@
       size: {
         apply({ availableHeight, elements }) {
           Object.assign(elements.floating.style, {
-            maxHeight: `${availableHeight * 0.8}px`,
+            maxHeight: `calc(${availableHeight}px - 1rem)`,
           });
         },
       } as SizeOptions,
@@ -82,7 +82,7 @@
     </button>
   </div>
 
-  <div class="card w-full shadow-xl z-10 duration-0 overflow-y-auto {menuClass}" data-popup={name} use:focusTrap={comboboxOpen}>
+  <div class="card w-full shadow-xl z-10 duration-0 overflow-y-auto !mt-0 {menuClass}" data-popup={name} use:focusTrap={comboboxOpen}>
     <!-- 
     Skeleton's popup close function waits for the tranistion duration...
     before actually triggering the transition...
