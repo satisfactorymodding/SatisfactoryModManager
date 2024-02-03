@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"syscall"
 
 	"github.com/minio/selfupdate"
@@ -32,7 +33,7 @@ func (a *SingleFileApply) OnExit(restart bool) error {
 			return fmt.Errorf("failed to get working directory: %w", err)
 		}
 
-		executable, err := os.Executable()
+		executable, err := exec.LookPath(os.Args[0])
 		if err != nil {
 			return fmt.Errorf("failed to get executable path: %w", err)
 		}
