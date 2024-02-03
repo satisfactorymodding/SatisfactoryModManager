@@ -60,7 +60,7 @@ builds:
       - -X autoupdate.updateMode=nsis
 
     flags:
-      - nsis
+      - -nsis
 
 ### Package
 
