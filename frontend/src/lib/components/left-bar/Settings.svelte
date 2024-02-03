@@ -5,7 +5,7 @@
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { GenerateDebugInfo } from '$wailsjs/go/app/app';
-  import { startView, konami, launchButton, queueAutoStart, offline, updateCheckMode } from '$lib/store/settingsStore';
+  import { startView, konami, launchButton, queueAutoStart, offline, updateCheckMode, version } from '$lib/store/settingsStore';
   import { manifestMods, lockfileMods } from '$lib/store/ficsitCLIStore';
   import { GetModNameDocument } from '$lib/generated';
   import type { LaunchButtonType, ViewType } from '$lib/wailsTypesExtensions';
@@ -377,6 +377,11 @@
           </button>
         </li>
       {/if}
+      <hr class="divider" />
+      <li class="section-header">
+        <span class="h-5 w-5" />
+        <span class="flex-auto text-white/40">v{$version}</span>
+      </li>
     </ul>
   </div>
 </div>

@@ -4,7 +4,7 @@
   import SvgIcon from './SVGIcon.svelte';
 
   import { Quit, WindowMinimise, WindowToggleMaximise } from '$wailsjs/runtime';
-  import { GetVersion } from '$wailsjs/go/app/app';
+  import { version } from '$lib/store/settingsStore';
 
   function minimize() {
     WindowMinimise();
@@ -18,11 +18,6 @@
     Quit();
   }
 
-  let version = '0.0.0';
-  GetVersion().then((v) => {
-    version = v;
-  });
-
   let isMaximized = false;
 </script>
 
@@ -30,7 +25,7 @@
   <div class="dragregion grow flex items-center">
     <img class="h-7 pl-4 pr-2" alt="SMM Icon" src="/images/smm_icon_small.png" />
     <div>
-      <span class="app-title pt-3 text-base">Satisfactory Mod Manager v{version}</span>
+      <span class="app-title pt-3 text-base">Satisfactory Mod Manager v{$version}</span>
     </div>
   </div>
 
