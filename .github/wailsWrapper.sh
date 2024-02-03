@@ -16,6 +16,11 @@ while [[ $# -gt 0 ]]; do
       shift # past argument
       shift # past value
       ;;
+    .)
+      # wails does not like the module path as an argument
+      # it ignores everything after the first non-flag argument
+      shift # past argument
+      ;;
     *)
       ARGS+=("$1") # save arg
       shift # past argument
@@ -31,7 +36,7 @@ if [ -n "$OUTPUT_FULL_PATH" ]; then
   ARGS+=("$OUTPUT_FILENAME")
 fi
 
-wails build "${ARGS[@]}"
+wails "${ARGS[@]}"
 
 if [ -n "$OUTPUT_FULL_PATH" ]; then
   cp "build/bin/$OUTPUT_FILENAME" "$OUTPUT_FULL_PATH"
