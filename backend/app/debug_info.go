@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"path"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
@@ -44,7 +44,7 @@ func addFactoryGameLog(writer *zip.Writer) error {
 		if err != nil {
 			return fmt.Errorf("failed to get user cache dir: %w", err)
 		}
-		err = utils.AddFileToZip(writer, path.Join(cacheDir, "FactoryGame", "Saved", "Logs", "FactoryGame.log"), "FactoryGame.log")
+		err = utils.AddFileToZip(writer, filepath.Join(cacheDir, "FactoryGame", "Saved", "Logs", "FactoryGame.log"), "FactoryGame.log")
 		if err != nil {
 			if !os.IsNotExist(err) {
 				return fmt.Errorf("failed to add file to zip: %w", err)

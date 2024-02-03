@@ -3,7 +3,6 @@ package steam
 import (
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"strconv"
 
@@ -40,7 +39,7 @@ func findInstallationsSteam(steamPath string, launcher string, executable []stri
 	}
 
 	libraryFolders := []string{
-		path.Clean(steamPath),
+		filepath.Clean(steamPath),
 	}
 
 	for key, val := range libraryFoldersList {

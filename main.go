@@ -5,7 +5,6 @@ import (
 	"embed"
 	"log/slog"
 	"os"
-	"path"
 	"path/filepath"
 	"runtime"
 	"time"
@@ -157,7 +156,7 @@ func init() {
 	case "windows":
 		baseLocalDir = os.Getenv("APPDATA")
 	case "linux":
-		baseLocalDir = path.Join(os.Getenv("HOME"), ".local", "share")
+		baseLocalDir = filepath.Join(os.Getenv("HOME"), ".local", "share")
 	default:
 		slog.Error("unsupported OS", slog.String("os", runtime.GOOS))
 		_ = dialog.Error("Unsupported OS: %s", runtime.GOOS)
