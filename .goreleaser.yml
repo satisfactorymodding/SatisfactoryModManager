@@ -5,6 +5,9 @@ before:
     - go generate -x -tags tools ./...
     - go mod tidy
     - ./.github/convertWailsJsonPaths.sh
+    - wails generate module
+    - pnpm -C frontend install
+    - pnpm -C frontend build
 
 ### Build
 
@@ -24,6 +27,11 @@ builds:
       - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
       # Auto-update mode
       - -X main.updateMode=standalone
+
+    flags:
+      - -s
+      - -skipbindings
+
   
   - id: package-manager
 
@@ -40,6 +48,10 @@ builds:
       - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
       # Auto-update mode
       - -X main.updateMode=package-manager
+
+    flags:
+      - -s
+      - -skipbindings
 
   - id: nsis
 
@@ -60,6 +72,8 @@ builds:
       - -X autoupdate.updateMode=nsis
 
     flags:
+      - -s
+      - -skipbindings
       - -nsis
 
 ### Package
