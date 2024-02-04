@@ -208,11 +208,17 @@ func init() {
 	_ = level.UnmarshalText([]byte(viper.GetString("log")))
 
 	handlers := make([]slog.Handler, 0)
-	handlers = append(handlers, tint.NewHandler(os.Stdout, &tint.Options{
-		Level:      level,
-		AddSource:  true,
-		TimeFormat: time.RFC3339,
-	}))
+
+	if _, err = os.Stdout.Stat(); err == nil {
+		// Only add the stdout handler if it is writable.
+		// Otherwise, the fanout handler would have the first handler error,
+		// and will not get to use the file handler.
+		handlers = append(handlers, tint.NewHandler(os.Stdout, &tint.Options{
+			Level:      level,
+			AddSource:  true,
+			TimeFormat: time.RFC3339,
+		}))
+	}
 
 	if viper.GetString("log-file") != "" {
 		logFile := &lumberjack.Logger{
