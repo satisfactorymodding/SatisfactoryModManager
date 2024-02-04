@@ -5,6 +5,8 @@ before:
     - go generate -x -tags tools ./...
     - go mod tidy
     - ./.github/convertWailsJsonPaths.sh
+    - mkdir -p frontend/build
+    - touch frontend/build/.gitkeep
     - wails generate module
     - pnpm -C frontend install
     - pnpm -C frontend build
