@@ -23,22 +23,27 @@ type ficsitCLI struct {
 	isGameRunning        bool
 }
 
-var FicsitCLI = &ficsitCLI{}
+var FicsitCLI *ficsitCLI
 
-func (f *ficsitCLI) Init() error {
-	if f.ficsitCli != nil {
-		return fmt.Errorf("FicsitCLIWrapper already initialized")
+func Init() error {
+	if FicsitCLI != nil {
+		return nil
 	}
-	var err error
-	f.ficsitCli, err = cli.InitCLI(false)
+	ficsitCli, err := cli.InitCLI(false)
 	if err != nil {
 		return fmt.Errorf("failed to initialize ficsit-cli: %w", err)
 	}
-	f.ficsitCli.Provider.(*provider.MixedProvider).Offline = settings.Settings.Offline
-	err = f.initInstallations()
+	ficsitCli.Provider.(*provider.MixedProvider).Offline = settings.Settings.Offline
+
+	FicsitCLI = &ficsitCLI{ficsitCli: ficsitCli}
+	err = FicsitCLI.initInstallations()
 	if err != nil {
 		return fmt.Errorf("failed to initialize installations: %w", err)
 	}
+	return nil
+}
+
+func (f *ficsitCLI) StartGameRunningWatcher() {
 	gameRunningTicker := time.NewTicker(5 * time.Second)
 	go func() {
 		for range gameRunningTicker.C {
@@ -57,7 +62,6 @@ func (f *ficsitCLI) Init() error {
 			wailsRuntime.EventsEmit(appCommon.AppContext, "isGameRunning", f.isGameRunning)
 		}
 	}()
-	return nil
 }
 
 func (f *ficsitCLI) setProgress(p *Progress) {

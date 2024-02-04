@@ -61,6 +61,13 @@ func main() {
 		}
 	}
 
+	err = ficsitcli.Init()
+	if err != nil {
+		slog.Error("failed to initialize ficsit-cli", slog.Any("error", err))
+		_ = dialog.Error("Failed to initialize ficsit-cli: %s", err.Error())
+		os.Exit(1)
+	}
+
 	windowStartState := options.Normal
 	if settings.Settings.Maximized {
 		windowStartState = options.Maximised
@@ -98,12 +105,7 @@ func main() {
 			app.App.WatchWindow() //nolint:contextcheck
 			go websocket.ListenAndServeWebsocket()
 
-			err := ficsitcli.FicsitCLI.Init() //nolint:contextcheck
-			if err != nil {
-				slog.Error("failed to create bindings", slog.Any("error", err))
-				_ = dialog.Error("Failed to create bindings: %s", err.Error())
-				os.Exit(1)
-			}
+			ficsitcli.FicsitCLI.StartGameRunningWatcher() //nolint:contextcheck
 		},
 		OnDomReady: func(ctx context.Context) {
 			backend.ProcessArguments(os.Args[1:]) //nolint:contextcheck
