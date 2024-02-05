@@ -2,7 +2,7 @@
   import { mdiMenuDown } from '@mdi/js';
   import { popup, type PopupSettings, ListBox, ListBoxItem, focusTrap } from '@skeletonlabs/skeleton';
   import type { SizeOptions } from '@floating-ui/dom';
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, tick } from 'svelte';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
 
@@ -49,6 +49,19 @@
     closeQuery: `.${name}-listbox-item`,
   } as PopupSettings;
 
+  let selectMenu: HTMLDivElement;
+  $: if (comboboxOpen) {
+    const selectedItem = selectMenu.querySelector('[aria-selected=true].listbox-item') as HTMLDivElement | null;
+    const firstItem = selectMenu.querySelector('.listbox-item') as HTMLDivElement | null;
+    tick().then(() => {
+      if (selectedItem) {
+        selectedItem.focus();
+      } else {
+        firstItem?.focus();
+      }
+    });
+  }
+
   // eslint-disable-next-line no-undef
   const dispatch = createEventDispatcher<{change: T}>();
 
@@ -82,7 +95,11 @@
     </button>
   </div>
 
-  <div class="card w-full shadow-xl z-10 duration-0 overflow-y-auto !mt-0 {menuClass}" data-popup={name} use:focusTrap={comboboxOpen}>
+  <div
+    bind:this={selectMenu}
+    class="card w-full shadow-xl z-10 duration-0 overflow-y-auto !mt-0 {menuClass}"
+    data-popup={name}
+    use:focusTrap={comboboxOpen}>
     <!-- 
     Skeleton's popup close function waits for the tranistion duration...
     before actually triggering the transition...
