@@ -96,11 +96,7 @@ func main() {
 			appCommon.AppContext = ctx
 
 			// Wails doesn't support setting the window position on init, so we do it here
-			if settings.Settings.WindowPosition != nil {
-				wailsRuntime.WindowSetPosition(ctx,
-					settings.Settings.WindowPosition.X,
-					settings.Settings.WindowPosition.Y)
-			}
+			loadWindowLocation(ctx)
 
 			app.App.WatchWindow() //nolint:contextcheck
 			go websocket.ListenAndServeWebsocket()
@@ -137,6 +133,23 @@ func main() {
 	if err != nil {
 		slog.Error("failed to apply update on exit", slog.Any("error", err))
 		_ = dialog.Error("Failed to apply update on exit: %s", err.Error())
+	}
+}
+
+func loadWindowLocation(ctx context.Context) {
+	if settings.Settings.WindowPosition != nil {
+		// Setting the window location is relative to the current monitor,
+		// but we save it as absolute position.
+
+		wailsRuntime.WindowSetPosition(ctx, 0, 0)
+
+		// Get the location the window was actually placed at
+		monitorLeft, monitorTop := wailsRuntime.WindowGetPosition(ctx)
+
+		x := settings.Settings.WindowPosition.X - monitorLeft
+		y := settings.Settings.WindowPosition.Y - monitorTop
+
+		wailsRuntime.WindowSetPosition(ctx, x, y)
 	}
 }
 
