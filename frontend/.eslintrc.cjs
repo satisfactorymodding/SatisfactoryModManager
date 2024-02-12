@@ -76,9 +76,11 @@ module.exports = {
     '@stylistic/quote-props': ['error', 'as-needed', { keywords: false, unnecessary: true, numbers: false }],
     '@stylistic/semi': ['error', 'always'],
     '@stylistic/comma-dangle': ['error', 'always-multiline'],
+    '@stylistic/comma-spacing': 'error',
     '@stylistic/object-curly-spacing': ['error', 'always'],
     // imports
-    'import/order': ['error', { 'newlines-between': 'always' }],
+    'sort-imports': ['error', { ignoreDeclarationSort: true }],
+    'import/order': ['error', { 'newlines-between': 'always', alphabetize: { order: 'asc' } }],
     'import/newline-after-import': ['error'],
     'import/no-duplicates': ['error'],
   },

@@ -1,26 +1,26 @@
 <script lang="ts">
   import { mdiAlert, mdiCheckCircle, mdiCloseCircle, mdiDownload, mdiFolderOpen, mdiHelpCircle, mdiPencil, mdiPlusCircle, mdiServerNetwork, mdiTrashCan, mdiUpload, mdiWeb } from '@mdi/js';
-  import { siDiscord, siGithub } from 'simple-icons/icons';
-  import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
+  import { type PopupSettings, popup } from '@skeletonlabs/skeleton';
   import _ from 'lodash';
+  import { siDiscord, siGithub } from 'simple-icons/icons';
 
   import Tooltip from '../Tooltip.svelte';
-  import RenameProfile from '../modals/profiles/RenameProfile.svelte';
   import DeleteProfile from '../modals/profiles/DeleteProfile.svelte';
+  import RenameProfile from '../modals/profiles/RenameProfile.svelte';
 
+  import LaunchButton from './LaunchButton.svelte';
   import Settings from './Settings.svelte';
   import Updates from './Updates.svelte';
-  import LaunchButton from './LaunchButton.svelte';
 
-  import Select from '$lib/components/Select.svelte';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
-  import { installs, profiles, canModify, selectedInstallMetadata, selectedInstall, selectedProfile, modsEnabled, installsMetadata } from '$lib/store/ficsitCLIStore';
+  import Select from '$lib/components/Select.svelte';
+  import { canModify, installs, installsMetadata, modsEnabled, profiles, selectedInstall, selectedInstallMetadata, selectedProfile } from '$lib/store/ficsitCLIStore';
   import { error, siteURL } from '$lib/store/generalStore';
-  import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
-  import { OpenExternal } from '$wailsjs/go/app/app';
-  import { common } from '$wailsjs/go/models';
-  import { ExportCurrentProfile } from '$wailsjs/go/ficsitcli/ficsitCLI';
   import { getModalStore } from '$lib/store/skeletonExtensions';
+  import { OpenExternal } from '$wailsjs/go/app/app';
+  import { ExportCurrentProfile } from '$wailsjs/go/ficsitcli/ficsitCLI';
+  import { common } from '$wailsjs/go/models';
+  import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
   
   const modalStore = getModalStore();
 

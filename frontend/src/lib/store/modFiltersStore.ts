@@ -1,14 +1,14 @@
-import { get, writable } from 'svelte/store';
 import type { Client } from '@urql/svelte';
+import { get, writable } from 'svelte/store';
 
 import { bindingTwoWayNoExcept } from './wailsStoreBindings';
 
 import { CompatibilityState, type GetModsQuery } from '$lib/generated';
-import { favoriteMods, lockfileMods, manifestMods, selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
 import { queuedMods } from '$lib/store/actionQueue';
-import { GetModFiltersOrder, GetModFiltersFilter, SetModFiltersOrder, SetModFiltersFilter } from '$wailsjs/go/settings/settings';
+import { favoriteMods, lockfileMods, manifestMods, selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
 import { getCompatibility } from '$lib/utils/modCompatibility';
 import { installTypeToTargetName } from '$lib/wailsTypesExtensions';
+import { GetModFiltersFilter, GetModFiltersOrder, SetModFiltersFilter, SetModFiltersOrder } from '$wailsjs/go/settings/settings';
 
 export interface OrderBy {
   name: string;

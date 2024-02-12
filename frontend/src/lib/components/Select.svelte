@@ -1,7 +1,7 @@
 <script generics="T" lang="ts">
-  import { mdiMenuDown } from '@mdi/js';
-  import { popup, type PopupSettings, ListBox, ListBoxItem, focusTrap } from '@skeletonlabs/skeleton';
   import type { SizeOptions } from '@floating-ui/dom';
+  import { mdiMenuDown } from '@mdi/js';
+  import { ListBox, ListBoxItem, type PopupSettings, focusTrap, popup } from '@skeletonlabs/skeleton';
   import { createEventDispatcher, tick } from 'svelte';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';

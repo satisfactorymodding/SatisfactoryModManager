@@ -1,19 +1,19 @@
 <script lang="ts">
-  import { queryStore , getContextClient } from '@urql/svelte';
   import { mdiUpload } from '@mdi/js';
+  import { getContextClient, queryStore } from '@urql/svelte';
 
   import ModChangelog from '../ModChangelog.svelte';
 
   import { selectedUpdates, showIgnored } from './updatesStore';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
-  import { canModify, unignoredUpdates, updateCheckInProgress, updates } from '$lib/store/ficsitCLIStore';
-  import { error } from '$lib/store/generalStore';
-  import { ignoredUpdates, offline } from '$lib/store/settingsStore';
   import { GetModNamesDocument } from '$lib/generated';
   import { OfflineGetModsByReferences, UpdateMods } from '$lib/generated/wailsjs/go/ficsitcli/ficsitCLI';
   import type { ficsitcli } from '$lib/generated/wailsjs/go/models';
   import { SetUpdateIgnore, SetUpdateUnignore } from '$lib/generated/wailsjs/go/settings/settings';
+  import { canModify, unignoredUpdates, updateCheckInProgress, updates } from '$lib/store/ficsitCLIStore';
+  import { error } from '$lib/store/generalStore';
+  import { ignoredUpdates, offline } from '$lib/store/settingsStore';
   import { getModalStore } from '$lib/store/skeletonExtensions';
 
   export let parent: { onClose: () => void };

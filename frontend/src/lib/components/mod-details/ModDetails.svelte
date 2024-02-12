@@ -1,28 +1,28 @@
 <script lang="ts">
-  import { getContextClient, queryStore } from '@urql/svelte';
-  import { mdiCheck, mdiChevronDown, mdiImport, mdiRocketLaunch, mdiTestTube, mdiWeb } from '@mdi/js';
-  import { minVersion, validRange, sort, coerce, SemVer, parse } from 'semver';
-  import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
   import type { SizeOptions } from '@floating-ui/dom';
+  import { mdiCheck, mdiChevronDown, mdiImport, mdiRocketLaunch, mdiTestTube, mdiWeb } from '@mdi/js';
+  import { type PopupSettings, popup } from '@skeletonlabs/skeleton';
+  import { getContextClient, queryStore } from '@urql/svelte';
+  import { SemVer, coerce, minVersion, parse, sort, validRange } from 'semver';
 
   import ModChangelog from '../modals/ModChangelog.svelte';
 
-  import Tooltip from '$lib/components/Tooltip.svelte';
-  import { CompatibilityState, GetModDetailsDocument } from '$lib/generated';
   import Markdown from '$lib/components/Markdown.svelte';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
-  import { bytesToAppropriate } from '$lib/utils/dataFormats';
-  import { canModify, lockfileMods, manifestMods, progress , selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
-  import { error , expandedMod, siteURL } from '$lib/store/generalStore';
+  import Tooltip from '$lib/components/Tooltip.svelte';
+  import { CompatibilityState, GetModDetailsDocument } from '$lib/generated';
+  import { canModify, lockfileMods, manifestMods, progress, selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
+  import { error, expandedMod, siteURL } from '$lib/store/generalStore';
   import { search } from '$lib/store/modFiltersStore';
-  import { InstallModVersion, OfflineGetMod } from '$wailsjs/go/ficsitcli/ficsitCLI';
-  import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
-  import { getAuthor } from '$lib/utils/getModAuthor';
-  import { getCompatibility, getVersionCompatibility, type CompatibilityWithSource } from '$lib/utils/modCompatibility';
   import { offline } from '$lib/store/settingsStore';
-  import type { ficsitcli } from '$wailsjs/go/models';
   import { getModalStore } from '$lib/store/skeletonExtensions';
+  import { bytesToAppropriate } from '$lib/utils/dataFormats';
+  import { getAuthor } from '$lib/utils/getModAuthor';
+  import { type CompatibilityWithSource, getCompatibility, getVersionCompatibility } from '$lib/utils/modCompatibility';
   import { installTypeToTargetName } from '$lib/wailsTypesExtensions';
+  import { InstallModVersion, OfflineGetMod } from '$wailsjs/go/ficsitcli/ficsitCLI';
+  import type { ficsitcli } from '$wailsjs/go/models';
+  import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
 
   export let focusOnEntry: HTMLElement | undefined = undefined;
 

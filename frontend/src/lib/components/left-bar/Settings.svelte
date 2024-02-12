@@ -1,16 +1,16 @@
 <script lang="ts">
   import { mdiBug, mdiCheck, mdiCheckboxBlankOutline, mdiCheckboxMarkedOutline, mdiChevronRight, mdiClipboard, mdiCog, mdiDownload, mdiFolderEdit, mdiTune } from '@mdi/js';
+  import { ListBox, ListBoxItem, type PopupSettings, popup } from '@skeletonlabs/skeleton';
   import { getContextClient } from '@urql/svelte';
-  import { popup, type PopupSettings , ListBox, ListBoxItem } from '@skeletonlabs/skeleton';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
-  import { GenerateDebugInfo } from '$wailsjs/go/app/app';
-  import { debug, startView, konami, launchButton, queueAutoStart, offline, updateCheckMode, version } from '$lib/store/settingsStore';
-  import { manifestMods, lockfileMods } from '$lib/store/ficsitCLIStore';
   import { GetModNameDocument } from '$lib/generated';
-  import type { LaunchButtonType, ViewType } from '$lib/wailsTypesExtensions';
-  import { OfflineGetMod } from '$wailsjs/go/ficsitcli/ficsitCLI';
+  import { lockfileMods, manifestMods } from '$lib/store/ficsitCLIStore';
+  import { debug, konami, launchButton, offline, queueAutoStart, startView, updateCheckMode, version } from '$lib/store/settingsStore';
   import { getModalStore } from '$lib/store/skeletonExtensions';
+  import type { LaunchButtonType, ViewType } from '$lib/wailsTypesExtensions';
+  import { GenerateDebugInfo } from '$wailsjs/go/app/app';
+  import { OfflineGetMod } from '$wailsjs/go/ficsitcli/ficsitCLI';
 
   const modalStore = getModalStore();
 

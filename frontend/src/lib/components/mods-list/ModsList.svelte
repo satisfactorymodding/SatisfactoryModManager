@@ -1,20 +1,20 @@
 <script lang="ts">
   import { getContextClient } from '@urql/svelte';
-  import _ from 'lodash';
   import Fuse from 'fuse.js';
+  import _ from 'lodash';
   import { createEventDispatcher } from 'svelte';
 
   import ModListFilters from './ModsListFilters.svelte';
 
-  import AnnouncementsBar from '$lib/components/announcements/AnnouncementsBar.svelte';
-  import { GetModsDocument, GetModCountDocument } from '$lib/generated';
   import VirtualList from '$lib/components/VirtualList.svelte';
+  import AnnouncementsBar from '$lib/components/announcements/AnnouncementsBar.svelte';
   import ModsListItem from '$lib/components/mods-list/ModsListItem.svelte';
-  import { filter, order, search, type PartialMod, type OfflineMod } from '$lib/store/modFiltersStore';
-  import { favoriteMods, lockfileMods, manifestMods } from '$lib/store/ficsitCLIStore';
+  import { GetModCountDocument, GetModsDocument } from '$lib/generated';
   import { queuedMods } from '$lib/store/actionQueue';
-  import { offline, startView } from '$lib/store/settingsStore';
+  import { favoriteMods, lockfileMods, manifestMods } from '$lib/store/ficsitCLIStore';
   import { expandedMod } from '$lib/store/generalStore';
+  import { type OfflineMod, type PartialMod, filter, order, search } from '$lib/store/modFiltersStore';
+  import { offline, startView } from '$lib/store/settingsStore';
   import { OfflineGetMods } from '$wailsjs/go/ficsitcli/ficsitCLI';
 
   const dispatch = createEventDispatcher();

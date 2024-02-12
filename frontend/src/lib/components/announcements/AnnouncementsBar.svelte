@@ -1,12 +1,12 @@
 <script lang="ts">
+  import { type PopupSettings, popup } from '@skeletonlabs/skeleton';
   import { getContextClient, queryStore } from '@urql/svelte';
   import Carousel from 'svelte-carousel';
-  import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
 
   import Tooltip from '$lib/components/Tooltip.svelte';
   import Announcement from '$lib/components/announcements/Announcement.svelte';
-  import { viewedAnnouncements , offline } from '$lib/store/settingsStore';
-  import { AnnouncementImportance, GetAnnouncementsDocument, SmrHealthcheckDocument, type Announcement as AnnouncementType } from '$lib/generated';
+  import { AnnouncementImportance, type Announcement as AnnouncementType, GetAnnouncementsDocument, SmrHealthcheckDocument } from '$lib/generated';
+  import { offline, viewedAnnouncements } from '$lib/store/settingsStore';
   import { SetAnnouncementViewed } from '$wailsjs/go/settings/settings';
   
   const client = getContextClient();

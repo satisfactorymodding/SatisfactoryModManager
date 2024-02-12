@@ -1,7 +1,7 @@
-import type { Client } from '@urql/svelte';
-import { createClient, fetchExchange } from '@urql/svelte';
 import { cacheExchange } from '@urql/exchange-graphcache';
 import { persistedExchange } from '@urql/exchange-persisted';
+import type { Client } from '@urql/svelte';
+import { createClient, fetchExchange } from '@urql/svelte';
 
 import schema from '$lib/generated/graphql.schema.urql.json';
 

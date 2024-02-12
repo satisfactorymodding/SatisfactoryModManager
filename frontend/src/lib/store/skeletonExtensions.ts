@@ -1,4 +1,4 @@
-import { type ModalStore, getModalStore as getSkeletonModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
+import { type ModalSettings, type ModalStore, getModalStore as getSkeletonModalStore } from '@skeletonlabs/skeleton';
 import _ from 'lodash';
 import { getContext, setContext } from 'svelte';
 import { get, writable } from 'svelte/store';

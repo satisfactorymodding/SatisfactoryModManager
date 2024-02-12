@@ -1,9 +1,9 @@
 <script lang="ts">
   import { mdiFilter, mdiSort } from '@mdi/js';
 
-  import { filter, filterOptions, order, orderByOptions, search } from '$lib/store/modFiltersStore';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import Select from '$lib/components/Select.svelte';
+  import { filter, filterOptions, order, orderByOptions, search } from '$lib/store/modFiltersStore';
 </script>
 
 <div class="px-5 py-2 flex @container/mod-list-filters">

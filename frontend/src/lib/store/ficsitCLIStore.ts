@@ -1,11 +1,11 @@
-import { writable, derived } from 'svelte/store';
+import { derived, writable } from 'svelte/store';
 
-import { binding, bindingTwoWay } from './wailsStoreBindings';
 import { isLaunchingGame } from './generalStore';
 import { ignoredUpdates } from './settingsStore';
+import { binding, bindingTwoWay } from './wailsStoreBindings';
 
+import { CheckForUpdates, GetInstallations, GetInstallationsMetadata, GetInvalidInstalls, GetModsEnabled, GetProfiles, GetRemoteInstallations, GetSelectedInstall, GetSelectedInstallLockfileMods, GetSelectedInstallProfileMods, GetSelectedProfile, SelectInstall, SetModsEnabled, SetProfile } from '$wailsjs/go/ficsitcli/ficsitCLI';
 import type { cli, ficsitcli } from '$wailsjs/go/models';
-import { CheckForUpdates, GetInstallationsMetadata, GetInvalidInstalls, GetProfiles, GetSelectedInstall, GetSelectedProfile, SelectInstall, SetProfile, GetModsEnabled, SetModsEnabled, GetSelectedInstallProfileMods, GetSelectedInstallLockfileMods, GetRemoteInstallations, GetInstallations } from '$wailsjs/go/ficsitcli/ficsitCLI';
 import { GetFavoriteMods } from '$wailsjs/go/settings/settings';
 
 export const invalidInstalls = binding([], { initialGet: GetInvalidInstalls });

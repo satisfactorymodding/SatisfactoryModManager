@@ -2,9 +2,9 @@ import { Client } from '@urql/svelte';
 import { coerce, compare, minVersion, satisfies } from 'semver';
 import { get } from 'svelte/store';
 
-import { CompatibilityState, ModReportedCompatibilityDocument, ModVersionsCompatibilityDocument, SmlVersionsCompatibilityDocument, type Compatibility, GetModVersionTargetsDocument, TargetName } from '$lib/generated';
-import { offline } from '$lib/store/settingsStore';
+import { type Compatibility, CompatibilityState, GetModVersionTargetsDocument, ModReportedCompatibilityDocument, ModVersionsCompatibilityDocument, SmlVersionsCompatibilityDocument, TargetName } from '$lib/generated';
 import { common } from '$lib/generated/wailsjs/go/models';
+import { offline } from '$lib/store/settingsStore';
 import { OfflineGetMod, OfflineGetSMLVersions } from '$wailsjs/go/ficsitcli/ficsitCLI';
 
 export interface CompatibilityWithSource extends Compatibility {

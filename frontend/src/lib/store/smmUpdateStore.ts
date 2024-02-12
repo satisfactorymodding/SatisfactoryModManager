@@ -1,5 +1,5 @@
-import { readable } from 'svelte/store';
 import { compare } from 'semver';
+import { readable } from 'svelte/store';
 
 import { EventsOn } from '$wailsjs/runtime/runtime';
 

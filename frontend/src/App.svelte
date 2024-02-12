@@ -1,25 +1,25 @@
 <script lang="ts">
   import './_global.postcss';
+  import { arrow, autoUpdate, computePosition, flip, offset, shift, size } from '@floating-ui/dom';
+  import { Modal, initializeStores, storePopup } from '@skeletonlabs/skeleton';
   import { setContextClient } from '@urql/svelte';
-  import { storePopup , initializeStores, Modal } from '@skeletonlabs/skeleton';
-  import { computePosition, autoUpdate, offset, shift, flip, arrow, size } from '@floating-ui/dom';
 
   import TitleBar from '$lib/components/TitleBar.svelte';
+  import LeftBar from '$lib/components/left-bar/LeftBar.svelte';
+  import ModDetails from '$lib/components/mod-details/ModDetails.svelte';
+  import ErrorModal from '$lib/components/modals/ErrorModal.svelte';
+  import ExternalInstallMod from '$lib/components/modals/ExternalInstallMod.svelte';
+  import { supportedProgressTypes } from '$lib/components/modals/ProgressModal.svelte';
+  import { modalRegistry } from '$lib/components/modals/modalsRegistry';
+  import ImportProfile from '$lib/components/modals/profiles/ImportProfile.svelte';
   import ModsList from '$lib/components/mods-list/ModsList.svelte';
   import { initializeGraphQLClient } from '$lib/core/graphql';
-  import { Environment, EventsOn } from '$wailsjs/runtime';
-  import ModDetails from '$lib/components/mod-details/ModDetails.svelte';
-  import { ExpandMod, UnexpandMod , GenerateDebugInfo } from '$wailsjs/go/app/app';
-  import LeftBar from '$lib/components/left-bar/LeftBar.svelte';
   import { installs, invalidInstalls, progress } from '$lib/store/ficsitCLIStore';
+  import { error, expandedMod, siteURL } from '$lib/store/generalStore';
   import { konami } from '$lib/store/settingsStore';
-  import { expandedMod, error, siteURL } from '$lib/store/generalStore';
-  import { initializeModalStore, getModalStore } from '$lib/store/skeletonExtensions';
-  import ExternalInstallMod from '$lib/components/modals/ExternalInstallMod.svelte';
-  import { modalRegistry } from '$lib/components/modals/modalsRegistry';
-  import ErrorModal from '$lib/components/modals/ErrorModal.svelte';
-  import ImportProfile from '$lib/components/modals/profiles/ImportProfile.svelte';
-  import { supportedProgressTypes } from '$lib/components/modals/ProgressModal.svelte';
+  import { getModalStore, initializeModalStore } from '$lib/store/skeletonExtensions';
+  import { ExpandMod, GenerateDebugInfo, UnexpandMod } from '$wailsjs/go/app/app';
+  import { Environment, EventsOn } from '$wailsjs/runtime';
 
   initializeStores();
   initializeModalStore();

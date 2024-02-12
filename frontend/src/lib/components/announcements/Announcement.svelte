@@ -1,8 +1,8 @@
 <script lang="ts">
   import { mdiAlertOutline, mdiInformationOutline } from '@mdi/js';
 
-  import { AnnouncementImportance, type Announcement } from '$lib/generated';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
+  import { type Announcement, AnnouncementImportance } from '$lib/generated';
   import { viewedAnnouncements } from '$lib/store/settingsStore';
 
   export let announcement: Pick<Announcement, 'id' | 'importance' | 'message'>;

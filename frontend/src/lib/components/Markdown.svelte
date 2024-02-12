@@ -4,10 +4,10 @@
   import ModImage from './modals/ModImage.svelte';
 
   import { GetModReferenceDocument } from '$lib/generated';
-  import { markdown as renderMarkdown } from '$lib/utils/markdown';
-  import { expandedMod } from '$lib/store/generalStore';
   import { BrowserOpenURL } from '$lib/generated/wailsjs/runtime/runtime';
+  import { expandedMod } from '$lib/store/generalStore';
   import { getModalStore } from '$lib/store/skeletonExtensions';
+  import { markdown as renderMarkdown } from '$lib/utils/markdown';
 
   export let markdown: string;
 

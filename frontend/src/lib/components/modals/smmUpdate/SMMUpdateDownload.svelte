@@ -1,10 +1,10 @@
 <script lang="ts">
   import { ProgressBar } from '@skeletonlabs/skeleton';
 
-  import { smmUpdate , smmUpdateProgress, smmUpdateReady } from '$lib/store/smmUpdateStore';
   import Markdown from '$lib/components/Markdown.svelte';
-  import { bytesToAppropriate, secondsToAppropriate } from '$lib/utils/dataFormats';
   import { getModalStore } from '$lib/store/skeletonExtensions';
+  import { smmUpdate, smmUpdateProgress, smmUpdateReady } from '$lib/store/smmUpdateStore';
+  import { bytesToAppropriate, secondsToAppropriate } from '$lib/utils/dataFormats';
 
   export let parent: { onClose: () => void };
 

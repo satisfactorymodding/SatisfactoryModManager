@@ -1,24 +1,24 @@
 <script lang="ts">
-  import { mdiDownload, mdiEye, mdiStar, mdiPlay, mdiPause, mdiTrashCan, mdiTrayFull, mdiTrayMinus, mdiSync, mdiLinkLock, mdiArchiveCheck, mdiPauseCircle, mdiPlayCircle, mdiStarMinus, mdiStarPlus, mdiStarOutline, mdiTagMultiple } from '@mdi/js';
-  import { createEventDispatcher } from 'svelte';
+  import { mdiArchiveCheck, mdiDownload, mdiEye, mdiLinkLock, mdiPause, mdiPauseCircle, mdiPlay, mdiPlayCircle, mdiStar, mdiStarMinus, mdiStarOutline, mdiStarPlus, mdiSync, mdiTagMultiple, mdiTrashCan, mdiTrayFull, mdiTrayMinus } from '@mdi/js';
+  import { type PopupSettings, ProgressBar, popup } from '@skeletonlabs/skeleton';
   import { getContextClient } from '@urql/svelte';
-  import { popup, type PopupSettings , ProgressBar } from '@skeletonlabs/skeleton';
+  import { createEventDispatcher } from 'svelte';
 
+  import Markdown from '$lib/components/Markdown.svelte';
+  import ResponsiveButton from '$lib/components/ResponsiveButton.svelte';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
-  import { search, type PartialMod } from '$lib/store/modFiltersStore';
-  import { favoriteMods, lockfileMods, manifestMods, progress, selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
+  import { CompatibilityState } from '$lib/generated';
   import { addQueuedModAction, queuedMods, removeQueuedModAction } from '$lib/store/actionQueue';
+  import { favoriteMods, lockfileMods, manifestMods, progress, selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
   import { error, siteURL } from '$lib/store/generalStore';
+  import { type PartialMod, search } from '$lib/store/modFiltersStore';
+  import { getAuthor } from '$lib/utils/getModAuthor';
+  import { type CompatibilityWithSource, getCompatibility, getVersionCompatibility } from '$lib/utils/modCompatibility';
+  import type { ButtonDisplay } from '$lib/utils/responsiveButton';
+  import { installTypeToTargetName } from '$lib/wailsTypesExtensions';
   import { DisableMod, EnableMod, InstallMod, RemoveMod } from '$wailsjs/go/ficsitcli/ficsitCLI';
   import { FavoriteMod, UnFavoriteMod } from '$wailsjs/go/settings/settings';
-  import { getAuthor } from '$lib/utils/getModAuthor';
-  import { getCompatibility, getVersionCompatibility, type CompatibilityWithSource } from '$lib/utils/modCompatibility';
-  import { CompatibilityState } from '$lib/generated';
-  import Markdown from '$lib/components/Markdown.svelte';
-  import type { ButtonDisplay } from '$lib/utils/responsiveButton';
-  import ResponsiveButton from '$lib/components/ResponsiveButton.svelte';
-  import { installTypeToTargetName } from '$lib/wailsTypesExtensions';
 
   export let mod: PartialMod;
 

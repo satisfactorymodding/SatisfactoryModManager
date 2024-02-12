@@ -1,19 +1,19 @@
 <script lang="ts">
-  import { getContextClient } from '@urql/svelte';
   import { mdiOpenInNew, mdiTrayFull } from '@mdi/js';
-  import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
+  import { type PopupSettings, popup } from '@skeletonlabs/skeleton';
+  import { getContextClient } from '@urql/svelte';
 
   import Tooltip from '../Tooltip.svelte';
 
-  import { selectedInstallMetadata, isGameRunning, lockfileMods, progress } from '$lib/store/ficsitCLIStore';
-  import { queuedMods, startQueue } from '$lib/store/actionQueue';
-  import { launchButton, queueAutoStart } from '$lib/store/settingsStore';
-  import { error, isLaunchingGame } from '$lib/store/generalStore';
-  import { LaunchGame } from '$wailsjs/go/ficsitcli/ficsitCLI';
-  import { CompatibilityState, type Compatibility } from '$lib/generated';
-  import { getCompatibility, type CompatibilityWithSource } from '$lib/utils/modCompatibility';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
+  import { type Compatibility, CompatibilityState } from '$lib/generated';
+  import { queuedMods, startQueue } from '$lib/store/actionQueue';
+  import { isGameRunning, lockfileMods, progress, selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
+  import { error, isLaunchingGame } from '$lib/store/generalStore';
+  import { launchButton, queueAutoStart } from '$lib/store/settingsStore';
+  import { type CompatibilityWithSource, getCompatibility } from '$lib/utils/modCompatibility';
   import { installTypeToTargetName } from '$lib/wailsTypesExtensions';
+  import { LaunchGame } from '$wailsjs/go/ficsitcli/ficsitCLI';
 
   $: isInstallLaunchable = !!$selectedInstallMetadata?.launchPath;
 

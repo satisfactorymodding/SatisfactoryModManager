@@ -2,10 +2,10 @@
   import { getContextClient, queryStore } from '@urql/svelte';
 
   import { GetModSummaryDocument } from '$lib/generated';
-  import { manifestMods } from '$lib/store/ficsitCLIStore';
   import { addQueuedModAction, queuedMods } from '$lib/store/actionQueue';
-  import { offline } from '$lib/store/settingsStore';
+  import { manifestMods } from '$lib/store/ficsitCLIStore';
   import { error } from '$lib/store/generalStore';
+  import { offline } from '$lib/store/settingsStore';
   import { InstallMod, InstallModVersion } from '$wailsjs/go/ficsitcli/ficsitCLI';
 
   export let parent: { onClose: () => void };
