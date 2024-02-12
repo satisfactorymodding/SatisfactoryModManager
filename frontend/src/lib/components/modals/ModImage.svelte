@@ -1,6 +1,6 @@
 <script lang="ts">
   // Skeleton passes the parent prop to the modal component, and we would get a warning if the prop is not present here
-  export let parent: {onClose: () => void};
+  export let parent: { onClose: () => void };
 
   // Just so that it's not unused
   $: parent;

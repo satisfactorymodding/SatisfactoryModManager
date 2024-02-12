@@ -6,7 +6,7 @@
   import { GetChangelogDocument } from '$lib/generated';
   import { offline } from '$lib/store/settingsStore';
 
-  export let parent: {onClose: () => void};
+  export let parent: { onClose: () => void };
 
   export let mod: string;
   export let versionRange: string | { from: string, to: string };

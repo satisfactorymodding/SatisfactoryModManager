@@ -2,7 +2,7 @@
   import { DeleteProfile } from '$lib/generated/wailsjs/go/ficsitcli/ficsitCLI';
   import { error } from '$lib/store/generalStore';
 
-  export let parent: {onClose: () => void};
+  export let parent: { onClose: () => void };
 
   export let profile: string;
 

@@ -63,7 +63,7 @@
   }
 
   // eslint-disable-next-line no-undef
-  const dispatch = createEventDispatcher<{change: T}>();
+  const dispatch = createEventDispatcher<{ change: T }>();
 
   function onChange({ target }: Event) {
     const newValue = (target as HTMLButtonElement).value;

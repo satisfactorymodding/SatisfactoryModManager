@@ -2,10 +2,12 @@ module.exports = {
   root: true,
   extends: [
     'eslint:recommended',
+    'plugin:@stylistic/disable-legacy',
   ],
   plugins: [
     '@typescript-eslint',
     'import',
+    '@stylistic',
   ],
   parserOptions: {
     sourceType: 'module',
@@ -26,17 +28,19 @@ module.exports = {
         parser: '@typescript-eslint/parser',
       },
       rules: {
-        'svelte/indent': ['error', { indent: 2 }],
+        /// linting
         'svelte/valid-compile': ['error', { ignoreWarnings: true }],
+        'svelte/no-extra-reactive-curlies': 'warn',
+        'svelte/html-self-closing': 'error',
+        '@typescript-eslint/no-unused-vars': 'warn',
+        /// formatting
+        '@stylistic/indent': 'off',
+        'svelte/indent': ['error', { indent: 2 }],
         'svelte/first-attribute-linebreak': 'warn',
         'svelte/max-attributes-per-line': ['warn', { singleline: 3 }],
         'svelte/mustache-spacing': 'warn',
-        'svelte/no-extra-reactive-curlies': 'warn',
         'svelte/no-spaces-around-equal-signs-in-attribute': 'error',
         'svelte/sort-attributes': 'warn',
-        'svelte/html-self-closing': 'error',
-        '@typescript-eslint/no-unused-vars': 'warn',
-        indent: 'off',
       },
     },
     {
@@ -60,16 +64,20 @@ module.exports = {
     node: true,
   },
   rules: {
-    'no-multi-spaces': 'error',
-    indent: ['error', 2],
-    quotes: ['error', 'single'],
+    /// linting
     curly: ['error', 'multi-line'],
-    'no-extra-semi': 'error',
     'no-var': 'error',
-    'quote-props': ['error', 'as-needed', { keywords: false, unnecessary: true, numbers: false }],
-    semi: ['error', 'always'],
-    'comma-dangle': ['error', 'always-multiline'],
-    'object-curly-spacing': ['error', 'always'],
+    /// formatting
+    // general
+    '@stylistic/no-multi-spaces': 'error',
+    '@stylistic/indent': ['error', 2],
+    '@stylistic/quotes': ['error', 'single'],
+    '@stylistic/no-extra-semi': 'error',
+    '@stylistic/quote-props': ['error', 'as-needed', { keywords: false, unnecessary: true, numbers: false }],
+    '@stylistic/semi': ['error', 'always'],
+    '@stylistic/comma-dangle': ['error', 'always-multiline'],
+    '@stylistic/object-curly-spacing': ['error', 'always'],
+    // imports
     'import/order': ['error', { 'newlines-between': 'always' }],
     'import/newline-after-import': ['error'],
     'import/no-duplicates': ['error'],

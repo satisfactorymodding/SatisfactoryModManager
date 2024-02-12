@@ -1,7 +1,7 @@
 <script lang="ts">
   import { GenerateDebugInfo } from '$lib/generated/wailsjs/go/app/app';
 
-  export let parent: {onClose: () => void};
+  export let parent: { onClose: () => void };
 
   export let error: string;
 </script>

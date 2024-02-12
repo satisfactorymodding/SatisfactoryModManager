@@ -16,7 +16,7 @@
   import { SetUpdateIgnore, SetUpdateUnignore } from '$lib/generated/wailsjs/go/settings/settings';
   import { getModalStore } from '$lib/store/skeletonExtensions';
 
-  export let parent: {onClose: () => void};
+  export let parent: { onClose: () => void };
 
   const modalStore = getModalStore();
 

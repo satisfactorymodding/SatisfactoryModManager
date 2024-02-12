@@ -44,12 +44,12 @@ export async function getReportedCompatibility(modReference: string, gameBranch:
   const mod = result.data.getModByReference;
   if(mod.compatibility) {
     switch(gameBranch) {
-    case common.GameBranch.EARLY_ACCESS:
-      return mod.compatibility.EA;
-    case common.GameBranch.EXPERIMENTAL:
-      return mod.compatibility.EXP;
-    default:
-      throw new Error('Invalid game branch');
+      case common.GameBranch.EARLY_ACCESS:
+        return mod.compatibility.EA;
+      case common.GameBranch.EXPERIMENTAL:
+        return mod.compatibility.EXP;
+      default:
+        throw new Error('Invalid game branch');
     }
   }
   return undefined;

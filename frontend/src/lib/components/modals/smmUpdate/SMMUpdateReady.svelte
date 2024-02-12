@@ -2,7 +2,7 @@
   import { UpdateAndRestart } from '$lib/generated/wailsjs/go/autoupdate/autoUpdate';
   import { smmUpdate } from '$lib/store/smmUpdateStore';
 
-  export let parent: {onClose: () => void};
+  export let parent: { onClose: () => void };
 </script>
 
 <div style="max-height: calc(100vh - 3rem); max-width: calc(100vw - 3rem);" class="w-[48rem] card flex flex-col gap-2">

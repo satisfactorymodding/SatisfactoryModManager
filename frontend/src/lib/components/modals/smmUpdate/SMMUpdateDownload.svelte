@@ -6,7 +6,7 @@
   import { bytesToAppropriate, secondsToAppropriate } from '$lib/utils/dataFormats';
   import { getModalStore } from '$lib/store/skeletonExtensions';
 
-  export let parent: {onClose: () => void};
+  export let parent: { onClose: () => void };
 
   const modalStore = getModalStore();
 

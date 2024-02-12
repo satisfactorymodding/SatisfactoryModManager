@@ -4,7 +4,7 @@
   import { OpenDirectoryDialog } from '$lib/generated/wailsjs/go/app/app';
   import { cacheDir } from '$lib/store/settingsStore';
 
-  export let parent: {onClose: () => void};
+  export let parent: { onClose: () => void };
 
   let cacheError: string | null = null;
   

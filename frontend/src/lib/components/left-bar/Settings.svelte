@@ -34,7 +34,7 @@
     closeQuery: '[data-popup="start-view-menu"] .listbox-item',
   } satisfies PopupSettings;
 
-  let views: {id: ViewType, name: string}[] = [
+  let views: { id: ViewType, name: string }[] = [
     {
       id: 'compact',
       name: 'Compact',
@@ -55,7 +55,7 @@
     closeQuery: '[data-popup="update-check-mode-menu"] .listbox-item',
   } satisfies PopupSettings;
 
-  let updateCheckModes: {id: 'launch'|'exit'|'ask', name: string}[] = [
+  let updateCheckModes: { id: 'launch'|'exit'|'ask', name: string }[] = [
     {
       id: 'launch',
       name: 'On start',
@@ -80,7 +80,7 @@
     closeQuery: '[data-popup="queue-mode-menu"] .listbox-item',
   } satisfies PopupSettings;
 
-  let queueModes: {id: boolean, name: string}[] = [
+  let queueModes: { id: boolean, name: string }[] = [
     {
       id: true,
       name: 'Start immediately',
@@ -101,7 +101,7 @@
     closeQuery: '[data-popup="launch-button-menu"] .listbox-item',
   } satisfies PopupSettings;
 
-  let launchButtons: {id: LaunchButtonType, name: string}[] = [
+  let launchButtons: { id: LaunchButtonType, name: string }[] = [
     {
       id: 'normal',
       name: 'Normal',

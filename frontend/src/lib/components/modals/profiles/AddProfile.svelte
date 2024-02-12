@@ -5,7 +5,7 @@
   import { selectedProfile } from '$lib/store/ficsitCLIStore';
   import { error } from '$lib/store/generalStore';
 
-  export let parent: {onClose: () => void};
+  export let parent: { onClose: () => void };
 
   async function finishAddProfile() {
     try {

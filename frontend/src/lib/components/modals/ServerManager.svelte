@@ -10,7 +10,7 @@
 
   export let parent: { onClose: () => void };
   
-  type RemoteType = ({ type: 'remote'; protocol: string; } | { type: 'local' }) & { name: string; }
+  type RemoteType = ({ type: 'remote'; protocol: string; } | { type: 'local' }) & { name: string; };
 
   const remoteTypes: RemoteType[] = [
     { type: 'remote', protocol: 'ftp://', name: 'FTP' },

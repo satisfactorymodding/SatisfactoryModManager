@@ -5,7 +5,7 @@
   import { error } from '$lib/store/generalStore';
   import { profiles } from '$lib/store/ficsitCLIStore';
 
-  export let parent: {onClose: () => void};
+  export let parent: { onClose: () => void };
 
   export let profile: string;
 
