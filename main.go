@@ -163,8 +163,6 @@ func init() {
 	viper.Set("date", date)
 	viper.Set("update-mode", updateMode)
 
-	// general config
-
 	var baseLocalDir string
 
 	switch runtime.GOOS {
@@ -185,40 +183,42 @@ func init() {
 		panic(err)
 	}
 
+	// ficsit-cli config
+
+	viper.Set("profiles-file", "profiles.json")
+	viper.Set("installations-file", "installations.json")
+	viper.Set("api-base", "https://api.ficsit.app")
+	viper.Set("graphql-api", "/v2/query")
+	viper.Set("concurrent-downloads", 5)
+
 	cacheDir := filepath.Clean(filepath.Join(baseCacheDir, "ficsit"))
 	_ = utils.EnsureDirExists(cacheDir)
 	viper.Set("cache-dir", cacheDir)
-	viper.Set("default-cache-dir", cacheDir)
-
-	smmCacheDir := filepath.Clean(filepath.Join(baseCacheDir, "SatisfactoryModManager"))
-	_ = utils.EnsureDirExists(smmCacheDir)
-	viper.Set("smm-cache-dir", smmCacheDir)
 
 	localDir := filepath.Clean(filepath.Join(baseLocalDir, "ficsit"))
 	_ = utils.EnsureDirExists(localDir)
 	viper.Set("local-dir", localDir)
 
+	// SMM config
+
+	smmCacheDir := filepath.Clean(filepath.Join(baseCacheDir, "SatisfactoryModManager"))
+	_ = utils.EnsureDirExists(smmCacheDir)
+	viper.Set("smm-cache-dir", smmCacheDir)
+
 	smmLocalDir := filepath.Clean(filepath.Join(baseLocalDir, "SatisfactoryModManager"))
 	_ = utils.EnsureDirExists(smmLocalDir)
 	viper.Set("smm-local-dir", smmLocalDir)
+
+	viper.Set("default-cache-dir", cacheDir)
 
 	viper.Set("websocket-port", 33642)
 
 	viper.Set("github-release-repo", "satisfactorymodding/SatisfactoryModManager")
 
-	// ficsit-cli config
-	viper.Set("profiles-file", "profiles.json")
-	viper.Set("installations-file", "installations.json")
-	viper.Set("api-base", "https://api.ficsit.app")
-	viper.Set("graphql-api", "/v2/query")
+	// logging
 
 	viper.Set("log", "info")
 	viper.Set("log-file", filepath.Join(smmCacheDir, "logs", "SatisfactoryModManager.log"))
-
-	viper.Set("concurrent-downloads", 5)
-
-	level := slog.LevelInfo
-	_ = level.UnmarshalText([]byte(viper.GetString("log")))
 
 	handlers := make([]slog.Handler, 0)
 
@@ -227,7 +227,7 @@ func init() {
 		// Otherwise, the fanout handler would have the first handler error,
 		// and will not get to use the file handler.
 		handlers = append(handlers, tint.NewHandler(os.Stdout, &tint.Options{
-			Level:      level,
+			Level:      viperLogLevel{},
 			AddSource:  true,
 			TimeFormat: time.RFC3339,
 		}))
@@ -241,8 +241,20 @@ func init() {
 			MaxAge:     30, // days
 		}
 
-		handlers = append(handlers, slog.NewJSONHandler(logFile, nil))
+		handlers = append(handlers, slog.NewJSONHandler(logFile, &slog.HandlerOptions{
+			Level: viperLogLevel{},
+		}))
 	}
 
 	slog.SetDefault(slog.New(slogmulti.Fanout(handlers...)))
+}
+
+type viperLogLevel struct {
+	defaultLevel slog.Level
+}
+
+func (v viperLogLevel) Level() slog.Level {
+	level := v.defaultLevel
+	_ = level.UnmarshalText([]byte(viper.GetString("log")))
+	return level
 }
