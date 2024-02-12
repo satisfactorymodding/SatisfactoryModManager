@@ -1,4 +1,4 @@
-name: Build for win and linux
+name: Push
 
 on:
   push:
@@ -20,7 +20,7 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
 
-      - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v3
         with:
           version: ${{ env.PNPM_VERSION }}
 
@@ -45,7 +45,7 @@ jobs:
           args: release --snapshot -p 1 --clean # Multiple Wails builds cannot be executed in parallel
 
       - name: Archive artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: all-builds
           path: dist/**/*
@@ -63,7 +63,7 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
       
-      - uses: golangci/golangci-lint-action@v3
+      - uses: golangci/golangci-lint-action@v4
         with:
           version: v1.54
           only-new-issues: true
@@ -79,7 +79,7 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
 
-      - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v3
         with:
           version: ${{ env.PNPM_VERSION }}
 
