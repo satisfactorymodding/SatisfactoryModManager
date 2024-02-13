@@ -4,15 +4,20 @@
   import { AddProfile } from '$lib/generated/wailsjs/go/ficsitcli/ficsitCLI';
   import { selectedProfile } from '$lib/store/ficsitCLIStore';
   import { error } from '$lib/store/generalStore';
+  import { getModalStore } from '$lib/store/skeletonExtensions';
 
   export let parent: { onClose: () => void };
+
+  const modalStore = getModalStore();
 
   async function finishAddProfile() {
     try {
       await AddProfile($newProfileName);
       await selectedProfile.asyncSet($newProfileName);
+
       $newProfileName = '';
-      parent.onClose();
+
+      modalStore.close('addProfile');
     } catch(e) {
       if (e instanceof Error) {
         $error = e.message;
