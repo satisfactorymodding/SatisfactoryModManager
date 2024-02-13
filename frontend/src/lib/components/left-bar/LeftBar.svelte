@@ -233,7 +233,7 @@
             <SvgIcon class="!w-5 !h-5 text-warning-500" icon={mdiPencil}/>
           </button>
           <button
-            disabled={!$canModify}
+            disabled={!$canModify || $profiles.length === 1}
             on:click|stopPropagation={() => modalStore.trigger({ type:'component', component: { ref: DeleteProfile, props: { profile: item } } })}
           >
             <SvgIcon class="!w-5 !h-5 text-error-700" icon={mdiTrashCan}/>
