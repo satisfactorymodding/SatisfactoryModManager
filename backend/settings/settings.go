@@ -57,6 +57,8 @@ type settings struct {
 	LaunchButton string `json:"launchButton,omitempty"`
 
 	CacheDir string `json:"cacheDir,omitempty"`
+
+	Debug bool `json:"debug,omitempty"`
 }
 
 var Settings = &settings{
@@ -83,6 +85,8 @@ var Settings = &settings{
 
 	Konami:       false,
 	LaunchButton: "normal",
+
+	Debug: false,
 }
 
 func (s *settings) FavoriteMod(modReference string) (bool, error) {
@@ -238,6 +242,15 @@ func (s *settings) SetAnnouncementViewed(announcement string) {
 	s.ViewedAnnouncements = append(s.ViewedAnnouncements, announcement)
 	_ = SaveSettings()
 	wailsRuntime.EventsEmit(common.AppContext, "viewedAnnouncements", s.ViewedAnnouncements)
+}
+
+func (s *settings) GetDebug() bool {
+	return s.Debug
+}
+
+func (s *settings) SetDebug(value bool) {
+	slog.Info("changing debug mode state", slog.Bool("value", value))
+	s.Debug = value
 }
 
 func (s *settings) SetCacheDir(dir string) error {

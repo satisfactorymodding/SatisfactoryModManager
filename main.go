@@ -217,7 +217,6 @@ func init() {
 
 	// logging
 
-	viper.Set("log", "info")
 	viper.Set("log-file", filepath.Join(smmCacheDir, "logs", "SatisfactoryModManager.log"))
 
 	handlers := make([]slog.Handler, 0)
@@ -227,7 +226,7 @@ func init() {
 		// Otherwise, the fanout handler would have the first handler error,
 		// and will not get to use the file handler.
 		handlers = append(handlers, tint.NewHandler(os.Stdout, &tint.Options{
-			Level:      viperLogLevel{},
+			Level:      settingsLogLevel{},
 			AddSource:  true,
 			TimeFormat: time.RFC3339,
 		}))
@@ -242,19 +241,18 @@ func init() {
 		}
 
 		handlers = append(handlers, slog.NewJSONHandler(logFile, &slog.HandlerOptions{
-			Level: viperLogLevel{},
+			Level: settingsLogLevel{},
 		}))
 	}
 
 	slog.SetDefault(slog.New(slogmulti.Fanout(handlers...)))
 }
 
-type viperLogLevel struct {
-	defaultLevel slog.Level
-}
+type settingsLogLevel struct{}
 
-func (v viperLogLevel) Level() slog.Level {
-	level := v.defaultLevel
-	_ = level.UnmarshalText([]byte(viper.GetString("log")))
-	return level
+func (v settingsLogLevel) Level() slog.Level {
+	if settings.Settings.Debug {
+		return slog.LevelDebug
+	}
+	return slog.LevelInfo
 }

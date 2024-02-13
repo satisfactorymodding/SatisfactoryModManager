@@ -1,9 +1,9 @@
 import { binding, bindingTwoWay, bindingTwoWayNoExcept } from './wailsStoreBindings';
 
-import { GetDebug, GetVersion, SetDebug } from '$lib/generated/wailsjs/go/app/app';
+import { GetVersion } from '$lib/generated/wailsjs/go/app/app';
 import type { LaunchButtonType, ViewType } from '$lib/wailsTypesExtensions';
 import { GetOffline, SetOffline } from '$wailsjs/go/ficsitcli/ficsitCLI';
-import { GetCacheDir, GetIgnoredUpdates, GetKonami, GetLaunchButton, GetQueueAutoStart, GetStartView, GetUpdateCheckMode, GetViewedAnnouncements, SetCacheDir, SetKonami, SetLaunchButton, SetQueueAutoStart, SetStartView, SetUpdateCheckMode } from '$wailsjs/go/settings/settings';
+import { GetCacheDir, GetDebug, GetIgnoredUpdates, GetKonami, GetLaunchButton, GetQueueAutoStart, GetStartView, GetUpdateCheckMode, GetViewedAnnouncements, SetCacheDir, SetDebug, SetKonami, SetLaunchButton, SetQueueAutoStart, SetStartView, SetUpdateCheckMode } from '$wailsjs/go/settings/settings';
 
 export const startView = bindingTwoWayNoExcept<ViewType | null>(null, { initialGet: GetStartView }, { updateFunction: SetStartView });
 
