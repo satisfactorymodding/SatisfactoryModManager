@@ -283,7 +283,7 @@
         <button
           class="btn w-1/2 bg-surface-200-700-token px-4 h-8 text-sm"
           disabled={!$canModify}
-          on:click={() => {modalStore.trigger({ type: 'component', component: 'importProfile' });}}
+          on:click={() => modalStore.trigger({ type: 'component', component: 'importProfile' })}
         >
           <span>
             Import
@@ -296,7 +296,7 @@
         <button
           class="btn w-1/2 bg-surface-200-700-token px-4 h-8 text-sm"
           disabled={!$canModify}
-          on:click={() => { exportCurrentProfile(); }}
+          on:click={() => exportCurrentProfile()}
         >
           <span>
             Export

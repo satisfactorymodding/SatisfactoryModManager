@@ -70,6 +70,7 @@ module.exports = {
     /// formatting
     // general
     '@stylistic/no-multi-spaces': 'error',
+    '@stylistic/brace-style': ['error', '1tbs', { allowSingleLine: true }],
     '@stylistic/indent': ['error', 2],
     '@stylistic/quotes': ['error', 'single'],
     '@stylistic/no-extra-semi': 'error',

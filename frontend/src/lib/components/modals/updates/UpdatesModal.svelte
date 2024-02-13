@@ -41,7 +41,7 @@
   }, {} as Record<string, string>) ?? {};
 
   $: if($offline) {
-    OfflineGetModsByReferences($updates.map((u) => u.item).filter((u) => u !== 'SML') as string[]).then((mods) => { modNamesQueryResult = mods; });
+    OfflineGetModsByReferences($updates.map((u) => u.item).filter((u) => u !== 'SML') as string[]).then((mods) => modNamesQueryResult = mods);
   } else {
     modNamesQueryResult = $modNamesQuery.data?.getMods?.mods;
   }

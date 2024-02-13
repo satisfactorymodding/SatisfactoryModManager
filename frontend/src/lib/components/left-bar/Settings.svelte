@@ -363,7 +363,7 @@
       </li>
       <hr class="divider" />
       <li>
-        <button on:click={() => { $offline = !$offline; }}>
+        <button on:click={() => $offline = !$offline}>
           <span class="h-5 w-5"/>
           <span class="flex-auto">Go {$offline ? 'online' : 'offline'}</span>
           <span class="h-5 w-5"/>
