@@ -1,14 +1,21 @@
 <script lang="ts">
-  import { mdiFilter, mdiSort } from '@mdi/js';
+  import { mdiClose, mdiFilter, mdiSort } from '@mdi/js';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import Select from '$lib/components/Select.svelte';
   import { filter, filterOptions, order, orderByOptions, search } from '$lib/store/modFiltersStore';
 </script>
 
-<div class="px-5 py-1 flex @container/mod-list-filters">
-  <div class="grow mr-2">
-    <input class="w-full bg-transparent border-b-[1px] border-secondary-500 hover:border-secondary-50 focus:border-primary-600 duration-500 placeholder-secondary-400 placeholder:font-medium outline-none !ring-0 h-8 transition-colors" placeholder="Search mods" bind:value={$search}/>
+<div class="px-5 py-1 flex @container/mod-list-filters items-center">
+  <div class="grow mr-2 inline-flex items-center">
+    <input class="grow bg-transparent border-b-[1px] pr-5 border-secondary-500 hover:border-secondary-50 focus:border-primary-600 duration-500 placeholder-secondary-400 placeholder:font-medium outline-none !ring-0 h-8 transition-colors" placeholder="Search mods" bind:value={$search}/>
+    <button
+      class="-ml-5 my-2 pb-0.5 opacity-0 transition-opacity"
+      class:!opacity-100={$search}
+      class:pointer-events-none={!$search}
+      on:click={() => $search = ''}>
+      <SvgIcon class="h-5 w-5 text-error-500/80" icon={mdiClose} />
+    </button>
   </div>
   <div class="flex grow shrink-0 min-w-[10rem] w-0 @lg/mod-list-filters:min-w-[21rem]">
     <Select
