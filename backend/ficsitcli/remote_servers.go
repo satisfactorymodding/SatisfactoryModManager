@@ -26,17 +26,8 @@ func (f *ficsitCLI) GetRemoteInstallations() []string {
 func (f *ficsitCLI) AddRemoteServer(path string) error {
 	installation := f.ficsitCli.Installations.GetInstallation(path)
 	if installation == nil {
-		fallbackProfile := "Default"
-		if f.ficsitCli.Profiles.GetProfile(fallbackProfile) == nil {
-			// Pick first profile found
-			for name := range f.ficsitCli.Profiles.Profiles {
-				fallbackProfile = name
-				break
-			}
-		}
-
 		var err error
-		installation, err = f.ficsitCli.Installations.AddInstallation(f.ficsitCli, path, fallbackProfile)
+		installation, err = f.ficsitCli.Installations.AddInstallation(f.ficsitCli, path, f.GetFallbackProfile())
 		if err != nil {
 			return fmt.Errorf("failed to add installation: %w", err)
 		}

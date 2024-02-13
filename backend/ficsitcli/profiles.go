@@ -79,6 +79,33 @@ func (f *ficsitCLI) GetProfile(profile string) *cli.Profile {
 	return f.ficsitCli.Profiles.GetProfile(profile)
 }
 
+func (f *ficsitCLI) GetFallbackProfile() string {
+	fallbackProfile := cli.DefaultProfileName
+	if f.ficsitCli.Profiles.GetProfile(fallbackProfile) == nil {
+		// Pick first profile found
+		for name := range f.ficsitCli.Profiles.Profiles {
+			fallbackProfile = name
+			break
+		}
+	}
+	return fallbackProfile
+}
+
+func (f *ficsitCLI) GetFallbackProfileExcept(profile string) string {
+	fallbackProfile := cli.DefaultProfileName
+	if f.ficsitCli.Profiles.GetProfile(fallbackProfile) == nil {
+		// Pick first profile found, that is not excluded
+		for name := range f.ficsitCli.Profiles.Profiles {
+			if name == profile {
+				continue
+			}
+			fallbackProfile = name
+			break
+		}
+	}
+	return fallbackProfile
+}
+
 func (f *ficsitCLI) AddProfile(name string) error {
 	l := slog.With(slog.String("task", "addProfile"), slog.String("profile", name))
 
@@ -115,6 +142,14 @@ func (f *ficsitCLI) RenameProfile(oldName string, newName string) error {
 func (f *ficsitCLI) DeleteProfile(name string) error {
 	l := slog.With(slog.String("task", "deleteProfile"), slog.String("profile", name))
 
+	// ficsit-cli always sets installs that use the deleted profile to Default, which might not exist
+	fallbackProfile := f.GetFallbackProfileExcept(name)
+	for _, installation := range f.ficsitCli.Installations.Installations {
+		if installation.Profile == name {
+			_ = installation.SetProfile(f.ficsitCli, fallbackProfile)
+		}
+	}
+
 	err := f.ficsitCli.Profiles.DeleteProfile(name)
 	if err != nil {
 		l.Error("failed to delete profile", slog.Any("error", err))
@@ -122,12 +157,6 @@ func (f *ficsitCLI) DeleteProfile(name string) error {
 	}
 
 	_ = f.ficsitCli.Profiles.Save()
-
-	for _, install := range f.ficsitCli.Installations.Installations {
-		if install.Profile == name {
-			install.Profile = cli.DefaultProfileName
-		}
-	}
 
 	_ = f.ficsitCli.Installations.Save()
 

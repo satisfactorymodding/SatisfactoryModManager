@@ -43,14 +43,7 @@ func (f *ficsitCLI) initLocalInstallationsMetadata() error {
 	f.installFindErrors = findErrors
 	f.installationMetadata = make(map[string]*common.Installation)
 
-	fallbackProfile := "Default"
-	if f.ficsitCli.Profiles.GetProfile(fallbackProfile) == nil {
-		// Pick first profile found
-		for name := range f.ficsitCli.Profiles.Profiles {
-			fallbackProfile = name
-			break
-		}
-	}
+	fallbackProfile := f.GetFallbackProfile()
 
 	createdNewInstalls := false
 	for _, install := range installs {
@@ -262,6 +255,9 @@ func (f *ficsitCLI) GetSelectedInstallProfileMods() map[string]cli.ProfileMod {
 		return make(map[string]cli.ProfileMod)
 	}
 	profile := f.GetProfile(selectedInstallation.Profile)
+	if profile == nil {
+		return make(map[string]cli.ProfileMod)
+	}
 	return profile.Mods
 }
 
