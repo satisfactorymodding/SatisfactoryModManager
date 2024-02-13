@@ -133,7 +133,7 @@
       </button>
       <button
         class="btn col-span-2"
-        on:click={() => $modalStore = [{ type:'component', component:{ ref: ModChangelog, props:{ mod:update.item, versionRange:{ from:update.currentVersion, to:update.newVersion } } } }, ...$modalStore]}>
+        on:click={() => modalStore.trigger({ type:'component', component:{ ref: ModChangelog, props:{ mod:update.item, versionRange:{ from:update.currentVersion, to:update.newVersion } } } }, true)}>
         Changelog
       </button>
       <button

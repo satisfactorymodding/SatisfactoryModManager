@@ -36,7 +36,7 @@
       return;
     }
     closed = true;
-    $modalStore = $modalStore.filter((modal) => modal.component !== 'progress');
+    modalStore.close('progress');
   }
 
   let title = '';

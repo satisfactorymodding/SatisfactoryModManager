@@ -77,22 +77,18 @@
 
   const modalStore = getModalStore();
 
-  $: (() => {
-    const currentProgressModalIndex = $modalStore.findIndex((m) => m.component && m.component === 'progress');
-    if ($progress && supportedProgressTypes.includes($progress.item) && currentProgressModalIndex === -1){
-      // Add it at the beginning instead of the end so it's on top
-      $modalStore = [{
-        type: 'component',
-        component: 'progress',
-        meta: {
-          persistent: true,
-        },
-      }, ...$modalStore];
-    }
-  })();
+  $: if($progress && supportedProgressTypes.includes($progress.item)) {
+    modalStore.triggerUnique({
+      type: 'component',
+      component: 'progress',
+      meta: {
+        persistent: true,
+      },
+    }, true);
+  }
 
   $: if($error) {
-    $modalStore = [{
+    modalStore.trigger({
       type: 'component',
       component: {
         ref: ErrorModal,
@@ -100,7 +96,7 @@
           error: $error,
         },
       },
-    }, ...$modalStore];
+    }, true);
     $error = null;
   }
 

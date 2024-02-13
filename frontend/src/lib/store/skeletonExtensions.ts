@@ -1,9 +1,15 @@
-import { type ModalSettings, type ModalStore, getModalStore as getSkeletonModalStore } from '@skeletonlabs/skeleton';
+import { type ModalSettings, type ModalStore as SkeletonModalStore, getModalStore as getSkeletonModalStore } from '@skeletonlabs/skeleton';
 import _ from 'lodash';
 import { getContext, setContext } from 'svelte';
 import { get, writable } from 'svelte/store';
 
 const MODAL_STORE_KEY = 'modalStore-extension';
+
+type ModalStore = SkeletonModalStore & {
+  trigger: (modal: ModalSettings, top?: boolean) => void;
+  triggerUnique: (modal: ModalSettings, top?: boolean) => void;
+  close: (component: string) => void;
+};
 
 export function getModalStore(): ModalStore {
   const modalStore = getContext<ModalStore | undefined>(MODAL_STORE_KEY);
@@ -30,12 +36,13 @@ export function initializeModalStore(): ModalStore {
 // while the actual modal to be displayed is missing. The modal would show up on the next rerender, but that's weird.
 // So we'll use a proxy store that only flushes to the skeleton modalStore at most at 10ms intervals, which seems to not cause the issue.
 // 1ms also seems to work, but 10ms is not a noticeable delay.
-function modalService(skeletonModalStore: ModalStore) {
+function modalService(skeletonModalStore: SkeletonModalStore) {
   const proxyStore = writable<ModalSettings[]>(get(skeletonModalStore));
   
   const propagate = _.debounce(() => skeletonModalStore.set(get(proxyStore)), 10);
 
   return {
+    // proxies
     subscribe: proxyStore.subscribe,
     set(mStore: ModalSettings[]) {
       proxyStore.set(mStore);
@@ -46,16 +53,23 @@ function modalService(skeletonModalStore: ModalStore) {
       propagate();
     },
     /** Append to end of queue. */
-    trigger(modal: ModalSettings) {
+    trigger(modal: ModalSettings, top = false) {
       proxyStore.update((mStore) => {
-        mStore.push(modal);
+        if (top) {
+          mStore.unshift(modal);
+        } else {
+          mStore.push(modal);
+        }
         return mStore;
       });
       propagate();
     },
     /**  Remove first item in queue. */
-    close() {
+    close(component = '') {
       proxyStore.update((mStore) => {
+        if(component) {
+          return mStore.filter((m) => m.component !== component);
+        }
         if (mStore.length > 0) mStore.shift();
         return mStore;
       });
@@ -65,6 +79,14 @@ function modalService(skeletonModalStore: ModalStore) {
     clear() {
       proxyStore.set([]);
       propagate();
+    },
+
+    // extensions
+    triggerUnique(modal: ModalSettings, top = false) {
+      const index = get(proxyStore).findIndex((m) => _.isEqual(m, modal));
+      if (index === -1) {
+        this.trigger(modal, top);
+      }
     },
   } as ModalStore;
 }
