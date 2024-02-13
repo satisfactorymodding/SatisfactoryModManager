@@ -224,7 +224,22 @@
         items={_.orderBy($profiles)}
         value={$selectedProfile ?? ''}
         on:change={profileSelectChanged}
-      />
+      >
+        <svelte:fragment slot="itemTrail" let:item>
+          <button
+            disabled={!$canModify}
+            on:click|stopPropagation={() => modalStore.trigger({ type:'component', component: { ref: RenameProfile, props: { profile: item } } })}
+          >
+            <SvgIcon class="!w-5 !h-5 text-warning-500" icon={mdiPencil}/>
+          </button>
+          <button
+            disabled={!$canModify}
+            on:click|stopPropagation={() => modalStore.trigger({ type:'component', component: { ref: DeleteProfile, props: { profile: item } } })}
+          >
+            <SvgIcon class="!w-5 !h-5 text-error-700" icon={mdiTrashCan}/>
+          </button>
+        </svelte:fragment>
+      </Select>
   
       <div class="flex w-full gap-1">
         <button
