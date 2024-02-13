@@ -6,7 +6,7 @@
   import { filter, filterOptions, order, orderByOptions, search } from '$lib/store/modFiltersStore';
 </script>
 
-<div class="px-5 py-2 flex @container/mod-list-filters">
+<div class="px-5 py-1 flex @container/mod-list-filters">
   <div class="grow mr-2">
     <input class="w-full bg-transparent border-b-[1px] border-secondary-500 hover:border-secondary-50 focus:border-primary-600 duration-500 placeholder-secondary-400 placeholder:font-medium outline-none !ring-0 h-8 transition-colors" placeholder="Search mods" bind:value={$search}/>
   </div>
