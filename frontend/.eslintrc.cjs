@@ -32,7 +32,7 @@ module.exports = {
         'svelte/valid-compile': ['error', { ignoreWarnings: true }],
         'svelte/no-extra-reactive-curlies': 'warn',
         'svelte/html-self-closing': 'error',
-        '@typescript-eslint/no-unused-vars': 'warn',
+        '@typescript-eslint/no-unused-vars': ['warn', { varsIgnorePattern: '^_', argsIgnorePattern: '^_' }],
         /// formatting
         '@stylistic/indent': 'off',
         'svelte/indent': ['error', { indent: 2 }],
@@ -50,7 +50,7 @@ module.exports = {
         'plugin:@typescript-eslint/recommended',
       ],
       rules: {
-        '@typescript-eslint/no-unused-vars': 'warn',
+        '@typescript-eslint/no-unused-vars': ['warn', { varsIgnorePattern: '^_', argsIgnorePattern: '^_' }],
       },
     },
     {

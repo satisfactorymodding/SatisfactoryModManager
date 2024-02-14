@@ -1,4 +1,5 @@
 <script generics="T" lang="ts">
+  import _ from 'lodash';
   import { tick } from 'svelte';
 
   // eslint-disable-next-line no-undef
@@ -23,17 +24,18 @@
     }
   }
 
-
   function updateHeightMap() {
     const virtualRows = Array.from(container?.children ?? []);
     virtualRows.forEach((elem, idx) => {
       heightMap[start + idx] = elem.clientHeight;
     });
-    
-    const setHeights = heightMap.filter((x) => !!x);
-    const averageHeight = setHeights.reduce((acc, curr) => acc + curr, 0) / setHeights.length;
-    
-    heightMap = heightMap.map((x) => x ?? (itemHeight ?? averageHeight));
+  }
+
+  $: knownHeights = heightMap.filter((x) => !!x);
+  $: averageHeight = knownHeights.reduce((acc, curr) => acc + curr, 0) / knownHeights.length;
+
+  function getHeight(item: number): number {
+    return heightMap[item] ?? (itemHeight ?? averageHeight);
   }
 
   let viewportHeight: number;
@@ -51,14 +53,14 @@
     
     let height = 0;
     let newStart = 0;
-    while(newStart < items.length && height + heightMap[newStart] < scrollTop) {
-      height += heightMap[newStart];
+    while(newStart < items.length && height + getHeight(newStart) < scrollTop) {
+      height += getHeight(newStart);
       newStart++;
     }
 
     let newEnd = newStart;
     while(newEnd < items.length && height < scrollTop + viewport.clientHeight) {
-      height += heightMap[newStart];
+      height += getHeight(newEnd);
       newEnd++;
     }
 
@@ -80,9 +82,13 @@
     }
   }
 
-  $: top = heightMap.slice(0, start).reduce((acc, curr) => acc + curr, 0);
-  $: bottom = heightMap.slice(end).reduce((acc, curr) => acc + curr, 0);
+  $: top = _.range(0, start).map(getHeight).reduce((acc, curr) => acc + curr, 0);
+  $: bottom = _.range(end, heightMap.length).map(getHeight).reduce((acc, curr) => acc + curr, 0);
   $: visibleItems = items.map((data, index) => ({ index, data })).slice(start, end);
+
+  function itemCreated(_element: HTMLElement) {
+    updateHeightMap();
+  }
 </script>
 
 <div
@@ -97,7 +103,7 @@
     class={containerClass}
   >
     {#each visibleItems as item (item.index)}
-      <div class="overflow-hidden">
+      <div class="overflow-hidden" use:itemCreated>
         <slot item={item.data}>Missing template</slot>
       </div>
     {/each}
