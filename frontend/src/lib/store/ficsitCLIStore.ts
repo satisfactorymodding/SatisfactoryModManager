@@ -12,7 +12,7 @@ export const invalidInstalls = binding([], { initialGet: GetInvalidInstalls });
 
 export const installs = binding([], { initialGet: GetInstallations, updateEvent: 'installations', allowNull: false });
 export const installsMetadata = binding({}, { initialGet: GetInstallationsMetadata, updateEvent: 'installationsMetadata', allowNull: false });
-export const selectedInstall = bindingTwoWay(null, { initialGet: () => GetSelectedInstall().then((i) => i?.path ?? null), updateEvent: 'selectedInstall' }, { updateFunction: SelectInstall });
+export const selectedInstall = bindingTwoWay(null, { initialGet: () => GetSelectedInstall().then((i) => i?.path ?? null), updateEvent: 'selectedInstallation' }, { updateFunction: SelectInstall });
 export const selectedInstallMetadata = derived([installsMetadata, selectedInstall], ([$installsMetadata, $selectedInstallPath]) => {
   return $installsMetadata[$selectedInstallPath ?? '__invalid__install__'] ?? null;
 });
