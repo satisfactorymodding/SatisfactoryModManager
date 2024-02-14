@@ -4,7 +4,7 @@
   import { OpenFileDialog } from '$lib/generated/wailsjs/go/app/app';
   import { ImportProfile, ReadExportedProfileMetadata } from '$lib/generated/wailsjs/go/ficsitcli/ficsitCLI';
   import type { ficsitcli } from '$lib/generated/wailsjs/go/models';
-  import { profiles } from '$lib/store/ficsitCLIStore';
+  import { profiles, selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
   import { error } from '$lib/store/generalStore';
 
   export let parent: { onClose: () => void };
@@ -93,6 +93,13 @@
         value={$profileFilepath}
         on:click={() => pickImportProfileFile()}
       />
+      {#if importProfileMetadata}
+        {#if importProfileMetadata.gameVersion < ($selectedInstallMetadata?.info?.version ?? 0)}
+          <p>
+            This profile was created with a newer version of the game. It may not be compatible with this version.
+          </p>
+        {/if}
+      {/if}
       {#if pickerError}
         <p>
           {pickerError}

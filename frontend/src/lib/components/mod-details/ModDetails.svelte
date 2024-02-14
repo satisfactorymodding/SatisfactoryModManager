@@ -11,15 +11,13 @@
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
   import { CompatibilityState, GetModDetailsDocument } from '$lib/generated';
-  import { canModify, lockfileMods, manifestMods, progress, selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
+  import { canModify, lockfileMods, manifestMods } from '$lib/store/ficsitCLIStore';
   import { error, expandedMod, siteURL } from '$lib/store/generalStore';
   import { search } from '$lib/store/modFiltersStore';
   import { offline } from '$lib/store/settingsStore';
   import { getModalStore } from '$lib/store/skeletonExtensions';
   import { bytesToAppropriate } from '$lib/utils/dataFormats';
   import { getAuthor } from '$lib/utils/getModAuthor';
-  import { type CompatibilityWithSource, getCompatibility, getVersionCompatibility } from '$lib/utils/modCompatibility';
-  import { installTypeToTargetName } from '$lib/wailsTypesExtensions';
   import { InstallModVersion, OfflineGetMod } from '$wailsjs/go/ficsitcli/ficsitCLI';
   import type { ficsitcli } from '$wailsjs/go/models';
   import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
@@ -85,51 +83,12 @@
   $: renderedLogo = actualLogo || `${$siteURL}/images/no_image.webp`;
   $: author = getAuthor(mod);
 
-  $: isInstalled = mod && mod.mod_reference in $manifestMods;
-  $: isEnabled = mod && mod.mod_reference in $lockfileMods;
-  $: isDependency = !isInstalled && isEnabled;
-  $: inProgress = $progress?.item === mod?.mod_reference;
-
   $: size = mod ? bytesToAppropriate(mod.versions[0]?.size ?? 0) : undefined;
 
   $: latestVersion = mod?.versions?.length ? sort(mod.versions.map((v) => parse(v.version) ?? coerce(v.version)).filter((v) => !!v) as SemVer[]).reverse()[0] : 'N/A';
   $: installedVersion = (mod && $lockfileMods[mod.mod_reference]?.version) ?? 'Not installed';
 
   $: ficsitAppLink = `${$siteURL}/mod/${$expandedMod}`;
-
-  let compatibility: CompatibilityWithSource = { state: CompatibilityState.Works, source: 'reported' };
-  $: if(mod) {
-    const gameVersion = $selectedInstallMetadata?.version;
-    const branch = $selectedInstallMetadata?.branch;
-    if(gameVersion && branch) {
-      if(!('offline' in mod)) {
-        if(mod.hidden && !isDependency) {
-          compatibility = { state: CompatibilityState.Broken, note: 'This mod was hidden by the author.', source: 'reported' };
-        } else {
-          getCompatibility(mod.mod_reference, branch, gameVersion, installTypeToTargetName($selectedInstallMetadata.type), client).then((result) => {
-            if (result.source === 'reported') {
-              compatibility = {
-                state: result.state,
-                note: result.note 
-                  ? `This mod has been reported as ${result.state} on this game version.<br>${result.note}` 
-                  : `This mod has been reported as ${result.state} on this game version. (No further notes provided)`,
-                source: 'reported',
-              };
-            } else {
-              compatibility = result;
-            }
-          });
-        }
-      } else {
-        getVersionCompatibility(mod.mod_reference, gameVersion, client).then((result) => {
-          compatibility = {
-            ...result,
-            source: 'version',
-          };
-        });
-      }
-    }
-  }
 
   function colorForCompatibilityState(state?: CompatibilityState) {
     switch(state) {
