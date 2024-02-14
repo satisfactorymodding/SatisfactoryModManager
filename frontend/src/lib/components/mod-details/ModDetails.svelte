@@ -365,10 +365,7 @@
         </div>
         {#if (!mod || !('offline' in mod)) && !$offline}
           <div class="pt-2" use:popup={changelogMenu}>
-            <button
-              class="btn px-4 h-10 text-sm w-full bg-secondary-600"
-              disabled={!$canModify}
-            >
+            <button class="btn px-4 h-10 text-sm w-full bg-secondary-600">
               <span>Changelogs</span>
               <SvgIcon
                 class="h-5 w-5"

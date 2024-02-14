@@ -14,7 +14,7 @@
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import Select from '$lib/components/Select.svelte';
-  import { canModify, installs, installsMetadata, modsEnabled, profiles, selectedInstall, selectedProfile } from '$lib/store/ficsitCLIStore';
+  import { canChangeInstall, canModify, installs, installsMetadata, modsEnabled, profiles, selectedInstall, selectedProfile } from '$lib/store/ficsitCLIStore';
   import { error, siteURL } from '$lib/store/generalStore';
   import { getModalStore } from '$lib/store/skeletonExtensions';
   import { OpenExternal } from '$wailsjs/go/app/app';
@@ -120,7 +120,7 @@
         name="installsCombobox"
         class="w-full h-8"
         buttonClass="bg-surface-200-700-token px-4 text-sm"
-        disabled={!$canModify}
+        disabled={!$canChangeInstall}
         itemActiveClass="!bg-surface-300/20"
         itemClass="bg-surface-50-900-token"
         items={_.orderBy($installs)}

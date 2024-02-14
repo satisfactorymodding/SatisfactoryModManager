@@ -53,6 +53,14 @@ export const canModify = derived([isGameRunning, progress, isLaunchingGame, inst
   return !$isGameRunning && !$progress && !$isLaunchingGame && $installs.length > 0 && $selectedInstallMetadata?.state === ficsitcli.InstallState.VALID;
 });
 
+export const canChangeInstall = derived([isGameRunning, progress, isLaunchingGame, installs], ([$isGameRunning, $progress, $isLaunchingGame, $installs]) => {
+  return !$isGameRunning && !$progress && !$isLaunchingGame && $installs.length > 0;
+});
+
+export const canInstallMods = derived([isGameRunning, isLaunchingGame, installs, selectedInstallMetadata], ([$isGameRunning, $isLaunchingGame, $installs, $selectedInstallMetadata]) => {
+  return !$isGameRunning && !$isLaunchingGame && $installs.length > 0 && $selectedInstallMetadata?.state === ficsitcli.InstallState.VALID;
+});
+
 export const updates = writable<ficsitcli.Update[]>([]);
 export const unignoredUpdates = derived([updates, ignoredUpdates], ([$updates, $ignoredUpdates]) => $updates.filter((u) => !$ignoredUpdates[u.item]?.includes(u.newVersion)));
 export const updateCheckInProgress = writable(false);

@@ -10,7 +10,7 @@
   import Tooltip from '$lib/components/Tooltip.svelte';
   import { CompatibilityState } from '$lib/generated';
   import { addQueuedModAction, queuedMods, removeQueuedModAction } from '$lib/store/actionQueue';
-  import { favoriteMods, lockfileMods, manifestMods, progress, selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
+  import { canInstallMods, favoriteMods, lockfileMods, manifestMods, progress, selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
   import { error, siteURL } from '$lib/store/generalStore';
   import { type PartialMod, search } from '$lib/store/modFiltersStore';
   import { getAuthor } from '$lib/utils/getModAuthor';
@@ -139,7 +139,7 @@
     return display;
   })();
 
-  $: controlButtonsDisabled = isDependency || (compatibility.state === CompatibilityState.Broken && compatibility.source === 'version' && !isInstalled);
+  $: controlButtonsDisabled = !$canInstallMods || isDependency || (compatibility.state === CompatibilityState.Broken && compatibility.source === 'version' && !isInstalled);
   $: installButtonDisabled = controlButtonsDisabled || queuedEnable || inProgress;
   $: enableButtonDisabled = controlButtonsDisabled || queuedInstall || inProgress;
 
