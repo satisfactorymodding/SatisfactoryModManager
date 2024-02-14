@@ -51,7 +51,10 @@ func (f *ficsitCLI) RemoveRemoteServer(path string) error {
 	if !ok {
 		return fmt.Errorf("installation not found")
 	}
-	if metadata.Info == nil || metadata.Info.Location != common.LocationTypeRemote {
+	if metadata.State == InstallStateLoading {
+		return fmt.Errorf("installation is still loading")
+	}
+	if metadata.Info != nil && metadata.Info.Location != common.LocationTypeRemote {
 		return fmt.Errorf("installation is not remote")
 	}
 	err := f.ficsitCli.Installations.DeleteInstallation(path)
