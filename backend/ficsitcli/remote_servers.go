@@ -2,18 +2,16 @@ package ficsitcli
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 )
 
 func (f *ficsitCLI) GetRemoteInstallations() []string {
-	paths := make([]string, 0, len(f.installationMetadata))
+	paths := make([]string, 0, f.installationMetadata.Size())
 	for _, install := range f.GetInstallations() {
-		meta, ok := f.installationMetadata[install]
-		if ok {
-			if meta.Location != common.LocationTypeRemote {
+		meta, ok := f.installationMetadata.Load(install)
+		if ok && meta.Info != nil {
+			if meta.Info.Location != common.LocationTypeRemote {
 				continue
 			}
 		}
@@ -24,87 +22,43 @@ func (f *ficsitCLI) GetRemoteInstallations() []string {
 }
 
 func (f *ficsitCLI) AddRemoteServer(path string) error {
-	installation := f.ficsitCli.Installations.GetInstallation(path)
-	if installation == nil {
-		var err error
-		installation, err = f.ficsitCli.Installations.AddInstallation(f.ficsitCli, path, f.GetFallbackProfile())
-		if err != nil {
-			return fmt.Errorf("failed to add installation: %w", err)
-		}
-		_ = f.ficsitCli.Installations.Save()
+	if f.ficsitCli.Installations.GetInstallation(path) != nil {
+		return fmt.Errorf("installation already exists")
 	}
-	gameVersion, err := installation.GetGameVersion(f.ficsitCli)
+	installation, err := f.ficsitCli.Installations.AddInstallation(f.ficsitCli, path, f.GetFallbackProfile())
 	if err != nil {
-		return fmt.Errorf("failed to get game version: %w", err)
+		return fmt.Errorf("failed to add installation: %w", err)
 	}
+	_ = f.ficsitCli.Installations.Save()
 
-	platform, err := installation.GetPlatform(f.ficsitCli)
+	meta, err := f.getRemoteServerMetadata(installation)
 	if err != nil {
-		return fmt.Errorf("failed to get platform: %w", err)
-	}
-	var installType common.InstallType
-	switch platform.TargetName {
-	case "Windows":
-		installType = common.InstallTypeWindowsClient
-	case "WindowsServer":
-		installType = common.InstallTypeWindowsServer
-	case "LinuxServer":
-		installType = common.InstallTypeLinuxServer
+		return fmt.Errorf("failed to get remote server metadata: %w", err)
 	}
 
-	if installType == common.InstallTypeWindowsClient {
-		return fmt.Errorf("remote server is not a server installation")
-	}
-
-	branch := common.BranchEarlyAccess // TODO: Do we have a way to detect this for remote installs?
-
-	f.installationMetadata[path] = &common.Installation{
-		Path:     installation.Path,
-		Type:     installType,
-		Location: common.LocationTypeRemote,
-		Branch:   branch,
-		Version:  gameVersion,
-		Launcher: f.getNextRemoteLauncherName(),
-	}
+	f.installationMetadata.Store(path, installationMetadata{
+		State: InstallStateValid,
+		Info:  meta,
+	})
 
 	f.EmitGlobals()
 
 	return nil
 }
 
-func (f *ficsitCLI) getNextRemoteLauncherName() string {
-	existingNumbers := make(map[int]bool)
-	for _, install := range f.GetRemoteInstallations() {
-		metadata := f.installationMetadata[install]
-		if metadata != nil {
-			if strings.HasPrefix(metadata.Launcher, "Remote ") {
-				num, err := strconv.Atoi(strings.TrimPrefix(metadata.Launcher, "Remote "))
-				if err == nil {
-					existingNumbers[num] = true
-				}
-			}
-		}
-	}
-	for i := 1; ; i++ {
-		if !existingNumbers[i] {
-			return "Remote " + strconv.Itoa(i)
-		}
-	}
-}
-
 func (f *ficsitCLI) RemoveRemoteServer(path string) error {
-	metadata := f.installationMetadata[path]
-	if metadata == nil {
+	metadata, ok := f.installationMetadata.Load(path)
+	if !ok {
 		return fmt.Errorf("installation not found")
 	}
-	if metadata.Location != common.LocationTypeRemote {
+	if metadata.Info == nil || metadata.Info.Location != common.LocationTypeRemote {
 		return fmt.Errorf("installation is not remote")
 	}
 	err := f.ficsitCli.Installations.DeleteInstallation(path)
 	if err != nil {
 		return fmt.Errorf("failed to delete installation: %w", err)
 	}
-	delete(f.installationMetadata, path)
+	f.installationMetadata.Delete(path)
 	f.EmitGlobals()
 	return nil
 }

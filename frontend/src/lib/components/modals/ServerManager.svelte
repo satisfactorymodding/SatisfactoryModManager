@@ -1,11 +1,12 @@
 <script lang="ts">
-  import { mdiAlert, mdiServerNetwork, mdiTrashCan } from '@mdi/js';
+  import { mdiAlert, mdiLoading, mdiServerNetwork, mdiTrashCan } from '@mdi/js';
   import { type PopupSettings, popup } from '@skeletonlabs/skeleton';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import Select from '$lib/components/Select.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
-  import { AddRemoteServer, RemoveRemoteServer } from '$lib/generated/wailsjs/go/ficsitcli/ficsitCLI';
+  import { AddRemoteServer, FetchRemoteServerMetadata, RemoveRemoteServer } from '$lib/generated/wailsjs/go/ficsitcli/ficsitCLI';
+  import { ficsitcli } from '$lib/generated/wailsjs/go/models';
   import { installsMetadata, remoteServers } from '$lib/store/ficsitCLIStore';
 
   export let parent: { onClose: () => void };
@@ -83,7 +84,7 @@
 
   async function retryConnect(server: string) {
     try {
-      await AddRemoteServer(server);
+      await FetchRemoteServerMetadata(server);
     } catch (e) {
       if(e instanceof Error) {
         err = e.message;
@@ -122,27 +123,46 @@
             <tr>
               <td class="break-all">{remoteServer}</td>
               <td>
-                {#if $installsMetadata[remoteServer]?.type}
-                  {$installsMetadata[remoteServer].type}
+                {#if $installsMetadata[remoteServer]?.state === ficsitcli.InstallState.VALID}
+                  {$installsMetadata[remoteServer].info?.type}
                 {:else}
-                  <button
-                    class="btn-icon h-6 w-full text-sm"
-                    on:click={() => retryConnect(remoteServer)}
-                    use:popup={installWarningPopups[remoteServer]}>
-                    <SvgIcon
-                      class="!p-0 !m-0 !w-full !h-full text-red-500"
-                      icon={mdiAlert} />
-                  </button>
                   <Tooltip popupId={installWarningPopupId(remoteServer)}>
                     <span class="text-base">
-                      Failed to connect to server, click to retry
+                      {#if $installsMetadata[remoteServer]?.state === ficsitcli.InstallState.LOADING}
+                        Loading...
+                      {:else if $installsMetadata[remoteServer]?.state === ficsitcli.InstallState.INVALID}
+                        SMM cannot manage this install
+                      {:else}
+                        Failed to connect to server, click to retry
+                      {/if}
                     </span>
                   </Tooltip>
+                  <div
+                    class="h-6 w-full text-sm"
+                    use:popup={installWarningPopups[remoteServer]}>
+                    {#if $installsMetadata[remoteServer]?.state === ficsitcli.InstallState.LOADING}
+                      <SvgIcon
+                        class="!p-0 !m-0 !w-full !h-full animate-spin text-primary-600"
+                        icon={mdiLoading} />
+                    {:else if $installsMetadata[remoteServer]?.state === ficsitcli.InstallState.INVALID}
+                      <SvgIcon
+                        class="!p-0 !m-0 !w-full !h-full text-red-500"
+                        icon={mdiAlert} />
+                    {:else}
+                      <button
+                        class="btn-icon h-6 w-full"
+                        on:click={() => retryConnect(remoteServer)}>
+                        <SvgIcon
+                          class="!p-0 !m-0 !w-full !h-full text-red-500"
+                          icon={mdiAlert} />
+                      </button>
+                    {/if}
+                  </div>
                 {/if}
               </td>
               <td>
-                {#if $installsMetadata[remoteServer]?.version}
-                  CL{$installsMetadata[remoteServer].version}
+                {#if $installsMetadata[remoteServer]?.info?.version}
+                  CL{$installsMetadata[remoteServer].info?.version}
                 {/if}
               </td>
               <td>

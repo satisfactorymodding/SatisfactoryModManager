@@ -6,18 +6,18 @@ import (
 	"time"
 
 	"github.com/mitchellh/go-ps"
+	"github.com/puzpuzpuz/xsync/v3"
 	"github.com/satisfactorymodding/ficsit-cli/cli"
 	"github.com/satisfactorymodding/ficsit-cli/cli/provider"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
 	appCommon "github.com/satisfactorymodding/SatisfactoryModManager/backend/common"
-	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/settings"
 )
 
 type ficsitCLI struct {
 	ficsitCli            *cli.GlobalContext
-	installationMetadata map[string]*common.Installation
+	installationMetadata *xsync.MapOf[string, installationMetadata]
 	installFindErrors    []error
 	progress             *Progress
 	isGameRunning        bool
@@ -35,7 +35,7 @@ func Init() error {
 	}
 	ficsitCli.Provider.(*provider.MixedProvider).Offline = settings.Settings.Offline
 
-	FicsitCLI = &ficsitCLI{ficsitCli: ficsitCli}
+	FicsitCLI = &ficsitCLI{ficsitCli: ficsitCli, installationMetadata: xsync.NewMapOf[string, installationMetadata]()}
 	err = FicsitCLI.initInstallations()
 	if err != nil {
 		return fmt.Errorf("failed to initialize installations: %w", err)
@@ -70,6 +70,6 @@ func (f *ficsitCLI) setProgress(p *Progress) {
 }
 
 func (f *ficsitCLI) isValidInstall(path string) bool {
-	_, ok := f.installationMetadata[path]
-	return ok
+	meta, ok := f.installationMetadata.Load(path)
+	return ok && meta.State != InstallStateInvalid
 }

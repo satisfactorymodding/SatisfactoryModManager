@@ -34,13 +34,11 @@ export const filterOptions: Filter[] = [
   { 
     name: 'Compatible',
     func: async (mod: PartialMod, urqlClient: Client) => { 
-      const installInfo = get(selectedInstallMetadata);
+      const installInfo = get(selectedInstallMetadata).info;
       if(!installInfo) {
         return false;
       }
-      const gameVersion = installInfo.version;
-      const branch = installInfo.branch;
-      const compatibility = await getCompatibility(mod.mod_reference, branch, gameVersion, installTypeToTargetName(installInfo.type), urqlClient);
+      const compatibility = await getCompatibility(mod.mod_reference, installInfo.branch, installInfo.version, installTypeToTargetName(installInfo.type), urqlClient);
       return compatibility.state !== CompatibilityState.Broken;
     }, 
   },

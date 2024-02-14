@@ -15,20 +15,18 @@
   import { installTypeToTargetName } from '$lib/wailsTypesExtensions';
   import { LaunchGame } from '$wailsjs/go/ficsitcli/ficsitCLI';
 
-  $: isInstallLaunchable = !!$selectedInstallMetadata?.launchPath;
+  $: isInstallLaunchable = !!$selectedInstallMetadata?.info?.launchPath;
 
   const client = getContextClient();
 
   let compatibilities: Record<string, CompatibilityWithSource> = {};
   $: {
-    const gameVersion = $selectedInstallMetadata?.version;
-    const branch = $selectedInstallMetadata?.branch;
-    const installType = $selectedInstallMetadata?.type;
-    if (gameVersion && branch && installType) {
+    const info = $selectedInstallMetadata?.info;
+    if (info) {
       compatibilities = {};
       Object.keys($lockfileMods).map(async (modReference) => {
         if (modReference !== 'SML') {
-          compatibilities[modReference] = await getCompatibility(modReference, branch, gameVersion, installTypeToTargetName(installType), client);
+          compatibilities[modReference] = await getCompatibility(modReference, info.branch, info.version, installTypeToTargetName(info.type), client);
         }
       });
     }

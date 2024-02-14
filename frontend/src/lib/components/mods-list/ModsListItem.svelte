@@ -165,14 +165,13 @@
 
   let compatibility: CompatibilityWithSource = { state: CompatibilityState.Works, source: 'reported' };
   $: {
-    const gameVersion = $selectedInstallMetadata?.version;
-    const branch = $selectedInstallMetadata?.branch;
-    if(gameVersion && branch) {
+    const info = $selectedInstallMetadata?.info;
+    if(info) {
       if(!('offline' in mod) && !('missing' in mod)) {
         if(mod.hidden && !isDependency) {
           compatibility = { state: CompatibilityState.Broken, note: 'This mod was hidden by the author.', source: 'reported' };
         } else {
-          getCompatibility(mod.mod_reference, branch, gameVersion, installTypeToTargetName($selectedInstallMetadata.type), client).then((result) => {
+          getCompatibility(mod.mod_reference, info.branch, info.version, installTypeToTargetName(info.type), client).then((result) => {
             if (result.source === 'reported') {
               compatibility = {
                 state: result.state,
@@ -189,7 +188,7 @@
       } else if('missing' in mod) {
         compatibility = { state: CompatibilityState.Broken, note: 'This mod is no longer available on ficsit.app. You may want to remove it.', source: 'version' };
       } else {
-        getVersionCompatibility(mod.mod_reference, gameVersion, client).then((result) => {
+        getVersionCompatibility(mod.mod_reference, info.version, client).then((result) => {
           compatibility = {
             ...result,
             source: 'version',

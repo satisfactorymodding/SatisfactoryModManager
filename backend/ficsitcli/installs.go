@@ -5,142 +5,70 @@ import (
 	"fmt"
 	"log/slog"
 	"os/exec"
-	"slices"
 
 	"github.com/satisfactorymodding/ficsit-cli/cli"
 	resolver "github.com/satisfactorymodding/ficsit-resolver"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 )
 
 func (f *ficsitCLI) initInstallations() error {
+	for _, install := range f.ficsitCli.Installations.Installations {
+		f.installationMetadata.Store(install.Path, installationMetadata{
+			State: InstallStateUnknown,
+			Info:  nil,
+		})
+	}
+
 	err := f.initLocalInstallationsMetadata()
 	if err != nil {
 		return fmt.Errorf("failed to initialize found installations: %w", err)
 	}
 
-	err = f.initRemoteServerInstallationsMetadata()
-	if err != nil {
-		return fmt.Errorf("failed to initialize remote server installations: %w", err)
-	}
+	// This may take a while, so we do it in the background
+	go f.initRemoteServerInstallationsMetadata()
 
-	filteredInstalls := f.GetInstallations()
-	if len(filteredInstalls) > 0 {
-		if !slices.Contains(filteredInstalls, f.ficsitCli.Installations.SelectedInstallation) {
+	// Even if the remote server metadata is not yet available, we can still do this
+	f.ensureSelectedInstallationIsValid()
+
+	return nil
+}
+
+func (f *ficsitCLI) ensureSelectedInstallationIsValid() {
+	if !f.isValidInstall(f.ficsitCli.Installations.SelectedInstallation) {
+		filteredInstalls := f.GetInstallations()
+		if len(filteredInstalls) > 0 {
 			f.ficsitCli.Installations.SelectedInstallation = filteredInstalls[0]
 			_ = f.ficsitCli.Installations.Save()
+			f.EmitGlobals()
 		}
 	}
-
-	return nil
-}
-
-func (f *ficsitCLI) initLocalInstallationsMetadata() error {
-	installs, findErrors := installfinders.FindInstallations()
-
-	f.installFindErrors = findErrors
-	f.installationMetadata = make(map[string]*common.Installation)
-
-	fallbackProfile := f.GetFallbackProfile()
-
-	createdNewInstalls := false
-	for _, install := range installs {
-		ficsitCliInstall := f.ficsitCli.Installations.GetInstallation(install.Path)
-		if ficsitCliInstall == nil {
-			_, err := f.ficsitCli.Installations.AddInstallation(f.ficsitCli, install.Path, fallbackProfile)
-			if err != nil {
-				return fmt.Errorf("failed to add installation: %w", err)
-			}
-			createdNewInstalls = true
-		}
-		f.installationMetadata[install.Path] = install
-	}
-
-	if createdNewInstalls {
-		err := f.ficsitCli.Installations.Save()
-		if err != nil {
-			return fmt.Errorf("failed to save installations: %w", err)
-		}
-	}
-	return nil
-}
-
-func (f *ficsitCLI) initRemoteServerInstallationsMetadata() error {
-	for _, installation := range f.GetInstallations() {
-		err := f.checkAndAddExistingRemote(installation)
-		if err != nil {
-			slog.Warn("failed to check and add existing remote", slog.Any("error", err), utils.SlogPath("path", installation))
-		}
-	}
-	return nil
-}
-
-func isServerTarget(targetName string) bool {
-	return targetName == "WindowsServer" || targetName == "LinuxServer"
-}
-
-func (f *ficsitCLI) checkAndAddExistingRemote(path string) error {
-	slog.Debug("checking whether installation is remote", utils.SlogPath("path", path))
-	installation := f.ficsitCli.Installations.GetInstallation(path)
-	if installation == nil {
-		return nil
-	}
-	if _, ok := f.installationMetadata[installation.Path]; ok {
-		// Already have metadata for this install
-		return nil
-	}
-	platform, err := installation.GetPlatform(f.ficsitCli)
-	if err != nil {
-		// Maybe the server is unreachable at the moment
-		// We will keep this install for now
-		slog.Info("failed to get platform", slog.Any("error", err), utils.SlogPath("path", installation.Path))
-	} else if !isServerTarget(platform.TargetName) {
-		// Not a server, but a local install, should already have metadata
-		return nil
-	}
-	if err := f.AddRemoteServer(path); err != nil {
-		slog.Warn("could not connect to remote server, adding placeholder metadata", slog.Any("error", err), utils.SlogPath("path", installation.Path))
-
-		f.installationMetadata[path] = &common.Installation{
-			Path:     installation.Path,
-			Location: common.LocationTypeRemote,
-			Launcher: f.getNextRemoteLauncherName(),
-		}
-	}
-	return nil
 }
 
 func (f *ficsitCLI) GetInstallations() []string {
 	installations := make([]string, 0, len(f.ficsitCli.Installations.Installations))
 	for _, installation := range f.ficsitCli.Installations.Installations {
-		// Keep installations that we have metadata for
-		if _, ok := f.installationMetadata[installation.Path]; !ok {
-			// Keep installations that are remote servers
-			// Even if we don't have metadata for them
-			platform, err := installation.GetPlatform(f.ficsitCli)
-			if err != nil {
-				// Maybe the server is unreachable at the moment
-				// We will keep this install for now
-				slog.Info("failed to get platform", slog.Any("error", err), utils.SlogPath("path", installation.Path))
-			} else if !isServerTarget(platform.TargetName) {
-				// Not a server, but a local install, should already have metadata
-				continue
-			}
+		if !f.isValidInstall(installation.Path) {
+			continue
 		}
 		installations = append(installations, installation.Path)
 	}
 	return installations
 }
 
-func (f *ficsitCLI) GetInstallationsMetadata() map[string]*common.Installation {
-	return f.installationMetadata
+func (f *ficsitCLI) GetInstallationsMetadata() map[string]installationMetadata {
+	rawMap := make(map[string]installationMetadata, len(f.ficsitCli.Installations.Installations))
+	f.installationMetadata.Range(func(key string, value installationMetadata) bool {
+		rawMap[key] = value
+		return true
+	})
+	return rawMap
 }
 
-func (f *ficsitCLI) GetCurrentInstallationMetadata() *common.Installation {
-	// This function only exists so common.Installation is generated to typescript
-	return f.installationMetadata[f.ficsitCli.Installations.SelectedInstallation]
+func (f *ficsitCLI) GetCurrentInstallationMetadata() installationMetadata {
+	meta, _ := f.installationMetadata.Load(f.ficsitCli.Installations.SelectedInstallation)
+	return meta
 }
 
 func (f *ficsitCLI) GetInvalidInstalls() []string {
@@ -294,12 +222,12 @@ func (f *ficsitCLI) LaunchGame() {
 		slog.Error("no installation selected")
 		return
 	}
-	metadata := f.installationMetadata[selectedInstallation.Path]
-	if metadata == nil {
+	metadata, ok := f.installationMetadata.Load(selectedInstallation.Path)
+	if !ok || metadata.Info == nil {
 		slog.Error("no metadata for installation")
 		return
 	}
-	cmd := exec.Command(metadata.LaunchPath[0], metadata.LaunchPath[1:]...)
+	cmd := exec.Command(metadata.Info.LaunchPath[0], metadata.Info.LaunchPath[1:]...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		slog.Error("failed to launch game", slog.Any("error", err), slog.String("cmd", cmd.String()), slog.String("output", string(out)))

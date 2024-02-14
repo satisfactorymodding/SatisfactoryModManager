@@ -5,7 +5,7 @@ import { ignoredUpdates } from './settingsStore';
 import { binding, bindingTwoWay } from './wailsStoreBindings';
 
 import { CheckForUpdates, GetInstallations, GetInstallationsMetadata, GetInvalidInstalls, GetModsEnabled, GetProfiles, GetRemoteInstallations, GetSelectedInstall, GetSelectedInstallLockfileMods, GetSelectedInstallProfileMods, GetSelectedProfile, SelectInstall, SetModsEnabled, SetProfile } from '$wailsjs/go/ficsitcli/ficsitCLI';
-import type { cli, ficsitcli } from '$wailsjs/go/models';
+import { type cli, ficsitcli } from '$wailsjs/go/models';
 import { GetFavoriteMods } from '$wailsjs/go/settings/settings';
 
 export const invalidInstalls = binding([], { initialGet: GetInvalidInstalls });
@@ -49,8 +49,8 @@ export const favoriteMods = binding<string[]>([], { updateEvent: 'favoriteMods',
 
 export const isGameRunning = binding(false, { updateEvent: 'isGameRunning', allowNull: false });
 
-export const canModify = derived([isGameRunning, progress, isLaunchingGame, installs], ([$isGameRunning, $progress, $isLaunchingGame, $installs]) => {
-  return !$isGameRunning && !$progress && !$isLaunchingGame && $installs.length > 0;
+export const canModify = derived([isGameRunning, progress, isLaunchingGame, installs, selectedInstallMetadata], ([$isGameRunning, $progress, $isLaunchingGame, $installs, $selectedInstallMetadata]) => {
+  return !$isGameRunning && !$progress && !$isLaunchingGame && $installs.length > 0 && $selectedInstallMetadata?.state === ficsitcli.InstallState.VALID;
 });
 
 export const updates = writable<ficsitcli.Update[]>([]);

@@ -61,13 +61,13 @@ func addMetadata(writer *zip.Writer) error {
 	var selectedMetadataInstall *MetadataInstallation
 	for _, install := range installs {
 		metadata := ficsitcli.FicsitCLI.GetInstallationsMetadata()[install]
-		if metadata == nil {
+		if metadata.Info == nil {
 			slog.Warn("failed to get metadata for installation", utils.SlogPath("path", install))
 			continue
 		}
 		i := &MetadataInstallation{
-			Installation: metadata,
-			Name:         fmt.Sprintf("Satisfactory %s (%s)", metadata.Branch, metadata.Launcher),
+			Installation: metadata.Info,
+			Name:         fmt.Sprintf("Satisfactory %s (%s)", metadata.Info.Branch, metadata.Info.Branch),
 			Profile:      ficsitcli.FicsitCLI.GetInstallation(install).Profile,
 		}
 		i.Path = utils.RedactPath(i.Path)

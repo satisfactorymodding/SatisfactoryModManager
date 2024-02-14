@@ -44,7 +44,7 @@
   $: title = (() => {
     switch ($progress?.item) {
       case '__select_install__':
-        return `Selecting install ${$selectedInstallMetadata?.branch} (${$selectedInstallMetadata?.launcher}) - CL${$selectedInstallMetadata?.version}`;
+        return `Selecting install ${$selectedInstallMetadata?.info?.branch} (${$selectedInstallMetadata?.info?.launcher}) - CL${$selectedInstallMetadata?.info?.version}`;
       case '__select_profile__':
         return `Selecting profile ${$selectedProfile}`;
       case '__toggle_mods__':

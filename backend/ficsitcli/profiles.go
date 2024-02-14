@@ -202,10 +202,10 @@ func (f *ficsitCLI) MakeCurrentExportedProfile() (*ExportedProfile, error) {
 		return nil, fmt.Errorf("failed to get lockfile: %w", err)
 	}
 
-	installMetadata := f.installationMetadata[selectedInstallation.Path]
+	installMetadata, ok := f.installationMetadata.Load(selectedInstallation.Path)
 	var gameVersion int
-	if installMetadata != nil {
-		gameVersion = installMetadata.Version
+	if ok && installMetadata.Info != nil {
+		gameVersion = installMetadata.Info.Version
 	}
 	metadata := &ExportedProfileMetadata{
 		GameVersion: gameVersion,

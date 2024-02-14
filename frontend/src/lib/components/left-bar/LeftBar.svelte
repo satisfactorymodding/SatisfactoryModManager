@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { mdiAlert, mdiCheckCircle, mdiCloseCircle, mdiDownload, mdiFolderOpen, mdiHelpCircle, mdiPencil, mdiPlusCircle, mdiServerNetwork, mdiTrashCan, mdiUpload, mdiWeb } from '@mdi/js';
+  import { mdiAlert, mdiCheckCircle, mdiCloseCircle, mdiDownload, mdiFolderOpen, mdiHelpCircle, mdiLoading, mdiPencil, mdiPlusCircle, mdiServerNetwork, mdiTrashCan, mdiUpload, mdiWeb } from '@mdi/js';
   import { type PopupSettings, popup } from '@skeletonlabs/skeleton';
   import _ from 'lodash';
   import { siDiscord, siGithub } from 'simple-icons/icons';
@@ -14,12 +14,12 @@
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import Select from '$lib/components/Select.svelte';
-  import { canModify, installs, installsMetadata, modsEnabled, profiles, selectedInstall, selectedInstallMetadata, selectedProfile } from '$lib/store/ficsitCLIStore';
+  import { canModify, installs, installsMetadata, modsEnabled, profiles, selectedInstall, selectedProfile } from '$lib/store/ficsitCLIStore';
   import { error, siteURL } from '$lib/store/generalStore';
   import { getModalStore } from '$lib/store/skeletonExtensions';
   import { OpenExternal } from '$wailsjs/go/app/app';
   import { ExportCurrentProfile } from '$wailsjs/go/ficsitcli/ficsitCLI';
-  import { common } from '$wailsjs/go/models';
+  import { common, ficsitcli } from '$wailsjs/go/models';
   import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
   
   const modalStore = getModalStore();
@@ -68,17 +68,18 @@
   }
 
   async function setModsEnabled(enabled: boolean) {
-    if ($selectedInstallMetadata) {
-      try {
-        await modsEnabled.asyncSet(enabled);
-      } catch(e) {
-        if (e instanceof Error) {
-          $error = e.message;
-        } else if (typeof e === 'string') {
-          $error = e;
-        } else {
-          $error = 'Unknown error';
-        }
+    if (!$selectedInstallPathInit) {
+      return;
+    }
+    try {
+      await modsEnabled.asyncSet(enabled);
+    } catch(e) {
+      if (e instanceof Error) {
+        $error = e.message;
+      } else if (typeof e === 'string') {
+        $error = e;
+      } else {
+        $error = 'Unknown error';
       }
     }
   }
@@ -97,26 +98,13 @@
     }
   }
 
-  function installPathPopupId(install: string) {
+  function installOptionPopupId(install: string) {
     return `install-path-${install.replace(/[^a-zA-Z0-9]/g, '-')}`;
   }
 
-  $: installPathPopups = $installs.map((i) => [i, {
+  $: installOptionPopups = $installs.map((i) => [i, {
     event: 'hover',
-    target: installPathPopupId(i),
-    middleware: {
-      offset: 4,
-    },
-    placement: 'right',
-  } as PopupSettings]).reduce((acc, [k, v]) => ({ ...acc, [k as string]: v as PopupSettings }), {} as Record<string, PopupSettings>);
-
-  function installWarningPopupId(install: string) {
-    return `install-warning-${install}`;
-  }
-
-  $: installWarningPopups = $installs.map((i) => [i, {
-    event: 'hover',
-    target: installWarningPopupId(i),
+    target: installOptionPopupId(i),
     middleware: {
       offset: 4,
     },
@@ -141,41 +129,59 @@
       >
         <svelte:fragment slot="item" let:item>
           <span>
-            {#if $installsMetadata[item]?.branch && $installsMetadata[item]?.type}
-              {$installsMetadata[item]?.branch}{$installsMetadata[item]?.type !== common.InstallType.WINDOWS ? ' - DS' : ''}
+            {#if $installsMetadata[item]?.state === ficsitcli.InstallState.VALID}
+              {$installsMetadata[item].info?.branch}{$installsMetadata[item].info?.type !== common.InstallType.WINDOWS ? ' - DS' : ''}
+              ({$installsMetadata[item]?.info?.launcher})
+            {:else if $installsMetadata[item]?.state === ficsitcli.InstallState.LOADING}
+              Loading...
+            {:else if $installsMetadata[item]?.state === ficsitcli.InstallState.INVALID}
+              Invalid
             {:else}
               Unknown
             {/if}
-            ({$installsMetadata[item]?.launcher})
           </span>
         </svelte:fragment>
         <svelte:fragment slot="itemTrail" let:item>
-          {#if $installsMetadata[item]?.branch && $installsMetadata[item]?.type}
-            <Tooltip popupId={installPathPopupId(item)}>
-              {item}
-            </Tooltip>
-            <button
-              class="!w-5 !h-5"
-              on:click|stopPropagation={() => OpenExternal(item)}
-              use:popup={installPathPopups[item]} >
-              <SvgIcon class="!w-full !h-full" icon={mdiFolderOpen}/>
-            </button>
-          {:else}
-            <div class="!w-5 !h-5" use:popup={installWarningPopups[item]}>
-              <SvgIcon class="!w-full !h-full" icon={mdiAlert}/>
+          <Tooltip popupId={installOptionPopupId(item)}>
+            <div class="flex flex-col">
+              <span>{item}</span>
+              {#if $installsMetadata[item]?.state === ficsitcli.InstallState.VALID}
+                <!-- nothing extra -->
+              {:else if $installsMetadata[item]?.state === ficsitcli.InstallState.LOADING}
+                <span>Status: Loading...</span>
+              {:else if $installsMetadata[item]?.state === ficsitcli.InstallState.INVALID}
+                <span>Status: SMM cannot manage this install</span>
+              {:else}
+                <span>Status: Could not get information about this install</span>
+              {/if}
             </div>
-            <Tooltip popupId={installWarningPopupId(item)}>
-              {item}
-            </Tooltip>
-          {/if}
+          </Tooltip>
+          <button
+            class="!w-5 !h-5"
+            on:click|stopPropagation={() => OpenExternal(item)}
+            use:popup={installOptionPopups[item]} >
+            {#if $installsMetadata[item]?.state === ficsitcli.InstallState.VALID}
+              <SvgIcon class="!w-full !h-full" icon={mdiFolderOpen}/>
+            {:else if $installsMetadata[item]?.state === ficsitcli.InstallState.LOADING}
+              <SvgIcon class="!w-full !h-full animate-spin text-primary-600" icon={mdiLoading}/>
+            {:else if $installsMetadata[item]?.state === ficsitcli.InstallState.INVALID}
+              <SvgIcon class="!w-full !h-full" icon={mdiAlert}/>
+            {:else}
+              <SvgIcon class="!w-full !h-full" icon={mdiAlert}/>
+            {/if}
+          </button>
         </svelte:fragment>
         <svelte:fragment slot="selected" let:item>
-          {#if $installsMetadata[item]?.branch && $installsMetadata[item]?.type}
-            {$installsMetadata[item]?.branch}{$installsMetadata[item]?.type !== common.InstallType.WINDOWS ? ' - DS' : ''}
+          {#if $installsMetadata[item]?.state === ficsitcli.InstallState.VALID}
+            {$installsMetadata[item].info?.branch}{$installsMetadata[item].info?.type !== common.InstallType.WINDOWS ? ' - DS' : ''}
+            ({$installsMetadata[item]?.info?.launcher})
+          {:else if $installsMetadata[item]?.state === ficsitcli.InstallState.LOADING}
+            Loading...
+          {:else if $installsMetadata[item]?.state === ficsitcli.InstallState.INVALID}
+            Invalid
           {:else}
             Unknown
           {/if}
-          ({$installsMetadata[item]?.launcher})
         </svelte:fragment>
       </Select>
       
