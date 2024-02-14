@@ -326,7 +326,6 @@
       <Settings />
       <button
         class="btn w-full bg-surface-200-700-token px-4 h-8 text-sm"
-        disabled={!$canModify}
         on:click={() => BrowserOpenURL('https://docs.ficsit.app/satisfactory-modding/latest/ForUsers/SatisfactoryModManager.html')}
       >
         <span>
