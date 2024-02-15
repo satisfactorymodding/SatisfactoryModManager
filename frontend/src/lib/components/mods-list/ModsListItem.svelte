@@ -13,6 +13,7 @@
   import { canInstallMods, favoriteMods, lockfileMods, manifestMods, progress, selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
   import { error, siteURL } from '$lib/store/generalStore';
   import { type PartialMod, search } from '$lib/store/modFiltersStore';
+  import { largeNumberFormat } from '$lib/utils/dataFormats';
   import { getAuthor } from '$lib/utils/getModAuthor';
   import { type CompatibilityWithSource, getCompatibility, getVersionCompatibility } from '$lib/utils/modCompatibility';
   import type { ButtonDisplay } from '$lib/utils/responsiveButton';
@@ -261,7 +262,7 @@
 </script>
 
 <div
-  class="my-1 px-0 @xl/mods-list:h-24 @md/mods-list:h-[5.5rem] h-[4.25rem]"
+  class="my-1 px-0 @md/mods-list:h-[5.5rem] h-[4.25rem] overflow-hidden"
   class:bg-surface-50-900-token={selected}
   class:rounded-lg={selected}
   role="tab"
@@ -278,17 +279,20 @@
         value={$progress?.progress === -1 ? undefined : $progress?.progress}/>
     </div>
   {/if}
-  <div class="flex relative h-full" class:-top-full={inProgress}>
+  <div class="flex relative h-full space-x-2" class:-top-full={inProgress}>
     <img
-      class="logo h-full @xl/mods-list:w-24 @md/mods-list:w-[5.5rem] w-[4.25rem]"
+      class="logo h-full @md/mods-list:w-[5.5rem] w-[4.25rem]"
       class:grayscale={isInstalled && !isEnabled}
       alt="{mod.name} Logo"
       src={renderedLogo} />
-    <div class="ml-2 flex flex-col grow w-0 opacity" class:opacity-30={isInstalled && !isEnabled}>
+    <div class="flex flex-col h-full grow w-0" class:opacity-30={isInstalled && !isEnabled}>
       <div class="flex items-center" use:popup={popupHover}>
-        <div class="shrink min-w-[7rem] truncate">
-          <span class="@xl/mods-list:text-xl text-lg font-medium min-w-0 w-full" class:text-error-600={compatibility.state === CompatibilityState.Broken} class:text-warning-500={compatibility.state === CompatibilityState.Damaged}>{mod.name}</span>
-        </div>
+        <span 
+          class="shrink min-w-[7rem] truncate text-lg font-medium !leading-6" 
+          class:text-error-600={compatibility.state === CompatibilityState.Broken}
+          class:text-warning-500={compatibility.state === CompatibilityState.Damaged}>
+          {mod.name}
+        </span>
         <div class="shrink-0 hidden @lg/mods-list:block truncate w-[7rem] grow">
           <span class="pl-1">by</span>
           <!-- We could offer keyboard navigation for clicking this, but it's a waste of the user's time while nagivating via keyboard. If they want to search by author, they could enter the mod description pane -->
@@ -300,37 +304,36 @@
             on:keypress|stopPropagation={authorClick}>{author}</span>
         </div>
       </div>
-      <div class="truncate @md/mods-list:text-base text-sm hidden @md/mods-list:block">{'short_description' in mod ? mod.short_description : ''}</div>
-      <div class="flex">
-        {#if !inProgress}
-          <div class="grow w-0 @xl/mods-list:text-base text-sm">
-            <div class="truncate text-base @md/mods-list:text-sm block @md/mods-list:hidden">{'short_description' in mod ? mod.short_description : ''}</div>
-            <div class="truncate h-5 @md/mods-list:h-4.5 hidden @md/mods-list:flex items-center space-x-1">
-              {#if !('offline' in mod) && !('missing' in mod) && (mod?.tags?.length ?? -1 > 0 )}
-                <SvgIcon class="pr-1 py-1 @xl/mods-list:w-7 w-6 shrink-0" icon={mdiTagMultiple}/>
-                {#each mod?.tags ?? [] as tag}
-                  <span>#{tag.name}</span>
-                {/each}
-              {/if}
-              &nbsp; <!-- keep div height even when no tags are available -->
-            </div>
-            <div class="flex h-5 @md/mods-list:h-4.5 space-x-2">
-              {#if !('offline' in mod) && !('missing' in mod)}
-                <div class="w-24 flex items-center space-x-0.5">
-                  <SvgIcon class="pr-1 py-1 @xl/mods-list:w-7 w-6" icon={mdiEye}/>
-                  <span>{mod.views.toLocaleString()}</span>
-                </div>
-                <div class="w-24 flex items-center space-x-0.5">
-                  <SvgIcon class="pr-1 py-1 @xl/mods-list:w-7 w-6" icon={mdiDownload}/>
-                  <span>{mod.downloads.toLocaleString()}</span>
-                </div>
-              {/if}
-            </div>
+      <div class="flex flex-col grow h-0 overflow-hidden justify-around flex-wrap">
+        <div class="truncate w-full @md/mods-list:text-base text-sm">{'short_description' in mod ? mod.short_description : ''}</div>
+        <div class="truncate w-full h-5 hidden @md/mods-list:flex items-center space-x-1">
+          <SvgIcon class="w-5 shrink-0" icon={mdiTagMultiple}/>
+          {#if !('offline' in mod) && !('missing' in mod) && (mod?.tags?.length ?? -1 > 0 )}
+            {#each mod?.tags ?? [] as tag}
+              <span>#{tag.name}</span>
+            {/each}
+          {:else}
+            <span>(none available)</span>
+          {/if}
+        </div>
+        <div class="text-sm w-full">
+          <div class="flex h-5 space-x-2">
+            {#if !('offline' in mod) && !('missing' in mod)}
+              <div class="w-16 flex items-center space-x-1">
+                <SvgIcon class="w-4 @md/mods-list:w-5" icon={mdiEye}/>
+                <span>{largeNumberFormat(mod.views)}</span>
+              </div>
+              <div class="w-16 flex items-center space-x-1">
+                <SvgIcon class="w-4 @md/mods-list:w-5" icon={mdiDownload}/>
+                <span>{largeNumberFormat(mod.downloads)}</span>
+              </div>
+            {/if}
           </div>
-        {:else}
-          <span>{$progress?.message}</span>
-        {/if}
+        </div>
       </div>
+      {#if inProgress}
+        <span class="shrink-0 text-sm">{$progress?.message}</span>
+      {/if}
     </div>
     <!-- The purpose of the event handlers here are to prevent navigating to the mod's page when clicking on one of the sub-buttons of the div. Thus, it shouldn't be focusable despite having "interactions" -->
     <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
@@ -342,7 +345,7 @@
       on:keypress|stopPropagation={() => { /* empty */ }}>
       <ResponsiveButton
         id="enable-{mod.mod_reference}"
-        class="w-8 h-8 @lg/mods-list:mx-1 @xl/mods-list:mx-2"
+        class="w-8 h-8 @lg/mods-list:mx-1"
         buttonClass="w-full h-full"
         disabled={enableButtonDisabled}
         display={enableButtonDisplay}
@@ -351,7 +354,7 @@
       />
       <ResponsiveButton
         id="install-{mod.mod_reference}"
-        class="w-8 h-8 @lg/mods-list:mx-1 @xl/mods-list:mx-2"
+        class="w-8 h-8 @lg/mods-list:mx-1"
         buttonClass="w-full h-full"
         disabled={installButtonDisabled}
         display={installButtonDisplay}
@@ -359,7 +362,7 @@
       />
       <ResponsiveButton
         id="favorite-{mod.mod_reference}"
-        class="w-8 h-8 @lg/mods-list:mx-1 @xl/mods-list:mx-2"
+        class="w-8 h-8 @lg/mods-list:mx-1"
         buttonClass="w-full h-full"
         display={favoriteButtonDisplay}
         onClickAction={toggleModFavorite}

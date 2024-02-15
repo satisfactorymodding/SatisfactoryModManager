@@ -1,3 +1,8 @@
+export const largeNumberFormat = Intl.NumberFormat(undefined, { notation: 'compact' }).format;
+
+// We cannot use the units mode of NumberFormat, since it is not aware of different names for larger units
+// For 1 TB, it uses 1 BB (1 billion bytes), and for 1000 seconds it uses 1Ks (1 thousand seconds)
+
 export function roundWithDecimals(number: number, decimals = 0): number {
   return Math.round(number * (10 ** decimals)) / (10 ** decimals);
 }
