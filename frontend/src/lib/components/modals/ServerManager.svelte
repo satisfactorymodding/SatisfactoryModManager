@@ -46,6 +46,8 @@
 
   let addInProgress = false;
 
+  $: authString = encodeURIComponent(newServerUsername) + (newServerPassword ? ':' + encodeURIComponent(newServerPassword) : '');
+
   $: fullInstallPath = (() => {
     if (newRemoteType.type === 'local') {
       return newServerPath;
@@ -53,7 +55,7 @@
     if (advancedMode) {
       return newRemoteType.protocol + newServerPath;
     }
-    return newRemoteType.protocol + encodeURIComponent(newServerUsername) + ':' + encodeURIComponent(newServerPassword) + '@' + newServerHost + ':' + newServerPort + '/' + newServerPath;
+    return newRemoteType.protocol + authString + '@' + newServerHost + ':' + newServerPort + '/' + newServerPath;
   })();
 
   async function addNewRemoteServer() {
