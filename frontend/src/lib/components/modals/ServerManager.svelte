@@ -1,6 +1,7 @@
 <script lang="ts">
   import { mdiAlert, mdiLoading, mdiServerNetwork, mdiTrashCan } from '@mdi/js';
   import { type PopupSettings, popup } from '@skeletonlabs/skeleton';
+  import _ from 'lodash';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import Select from '$lib/components/Select.svelte';
@@ -48,6 +49,8 @@
 
   $: authString = encodeURIComponent(newServerUsername) + (newServerPassword ? ':' + encodeURIComponent(newServerPassword) : '');
 
+  $: trimmedPath = _.trimStart(newServerPath, '/');
+
   $: fullInstallPath = (() => {
     if (newRemoteType.type === 'local') {
       return newServerPath;
@@ -55,11 +58,21 @@
     if (advancedMode) {
       return newRemoteType.protocol + newServerPath;
     }
-    return newRemoteType.protocol + authString + '@' + newServerHost + ':' + newServerPort + '/' + newServerPath;
+    return newRemoteType.protocol + authString + '@' + newServerHost + ':' + newServerPort + '/' + trimmedPath;
+  })();
+
+  $: isValid = (() => {
+    if (newRemoteType.type === 'local') {
+      return newServerPath.length > 0;
+    }
+    if (advancedMode) {
+      return newServerPath.length > 0;
+    }
+    return newServerUsername.length > 0 && newServerHost.length > 0 && newServerPort.length > 0;
   })();
 
   async function addNewRemoteServer() {
-    if (!newServerPath) {
+    if (!isValid) {
       return;
     }
     try {
@@ -253,7 +266,7 @@
       {/if}
       <button
         class="btn h-full text-sm bg-primary-600 text-secondary-900 col-start-2 sm:col-start-4 row-start-1"
-        disabled={addInProgress}
+        disabled={addInProgress || !isValid}
         on:click={() => addNewRemoteServer()}>
         <span>
           {#if !addInProgress}
