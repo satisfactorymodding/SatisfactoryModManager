@@ -12,11 +12,11 @@
 
   export let parent: { onClose: () => void };
   
-  type RemoteType = ({ type: 'remote'; protocol: string; } | { type: 'local' }) & { name: string; };
+  type RemoteType = ({ type: 'remote'; protocol: string; defaultPort: string; } | { type: 'local' }) & { name: string; };
 
   const remoteTypes: RemoteType[] = [
-    { type: 'remote', protocol: 'ftp://', name: 'FTP' },
-    { type: 'remote', protocol: 'sftp://', name: 'SFTP' },
+    { type: 'remote', protocol: 'ftp://', name: 'FTP', defaultPort: '21' },
+    { type: 'remote', protocol: 'sftp://', name: 'SFTP', defaultPort: '22' },
     { type: 'local', name: 'Path' },
   ];
 
@@ -48,6 +48,7 @@
   let addInProgress = false;
 
   $: authString = encodeURIComponent(newServerUsername) + (newServerPassword ? ':' + encodeURIComponent(newServerPassword) : '');
+  $: actualPort = newRemoteType.type === 'remote' ? (newServerPort.length > 0 ? newServerPort : newRemoteType.defaultPort) : '';
 
   $: trimmedPath = _.trimStart(newServerPath, '/');
 
@@ -58,7 +59,7 @@
     if (advancedMode) {
       return newRemoteType.protocol + newServerPath;
     }
-    return newRemoteType.protocol + authString + '@' + newServerHost + ':' + newServerPort + '/' + trimmedPath;
+    return newRemoteType.protocol + authString + '@' + newServerHost + ':' + actualPort + '/' + trimmedPath;
   })();
 
   $: isValid = (() => {
@@ -68,7 +69,7 @@
     if (advancedMode) {
       return newServerPath.length > 0;
     }
-    return newServerUsername.length > 0 && newServerHost.length > 0 && newServerPort.length > 0;
+    return newServerUsername.length > 0 && newServerHost.length > 0;
   })();
 
   async function addNewRemoteServer() {
@@ -238,7 +239,7 @@
             bind:value={newServerHost}/>
           <input
             class="input px-4 h-full"
-            placeholder="port"
+            placeholder="port (default: {newRemoteType.defaultPort})"
             type="text"
             bind:value={newServerPort}/>
           <input
