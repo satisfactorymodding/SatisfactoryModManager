@@ -88,7 +88,7 @@
           </span>
         </slot>
       {/if}
-      <div class="grow" />
+      <div class="grow w-0" />
       <SvgIcon
         class="h-5 w-5 p-0.5 {comboboxOpen ? 'text-primary-600 -scale-y-100' : ''} transition-all shrink-0"
         icon={mdiMenuDown} />
