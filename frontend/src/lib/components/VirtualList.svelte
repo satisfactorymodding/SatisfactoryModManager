@@ -43,6 +43,7 @@
   $: if(viewport) {
     // Add or remove elements when the viewport height changes
     viewportHeight;
+    items;
     updateVisible();
   }
 
@@ -64,26 +65,12 @@
       newEnd++;
     }
 
-    newStart = Math.max(newStart - bench, 0);
-    newEnd = Math.min(newEnd + bench, items.length);
-
-    const old_start = start;
-
-    start = newStart;
-    end = newEnd;
-    
-    // prevent jumping if we scrolled up
-    // this became an issue when using using skeleton popups as tooltips,
-    // specifically when calling window.getComputedStyle(tooltipElement).<anyPropertyHere>
-    // I have no idea why that causes this issue
-    if (start < old_start) {
-      await tick();
-      viewport.scrollTo({ top: scrollTop, behavior: 'instant' });
-    }
+    start = Math.max(newStart - bench, 0);
+    end = Math.min(newEnd + bench, items.length);
   }
 
   $: top = _.range(0, start).map(getHeight).reduce((acc, curr) => acc + curr, 0);
-  $: bottom = _.range(end, heightMap.length).map(getHeight).reduce((acc, curr) => acc + curr, 0);
+  $: bottom = _.range(end, items.length).map(getHeight).reduce((acc, curr) => acc + curr, 0);
   $: visibleItems = items.map((data, index) => ({ index, data })).slice(start, end);
 
   function itemCreated(_element: HTMLElement) {
@@ -93,14 +80,16 @@
 
 <div
   bind:this={viewport}
+  style="overflow-anchor: none"
   class="relative overflow-y-scroll h-full {clazz}"
   bind:offsetHeight={viewportHeight}
   on:scroll={updateVisible}
 >
   <div
     bind:this={container}
-    style="padding-top: {top}px; padding-bottom: {bottom}px;"
-    class={containerClass}
+    style:padding-top="{top}px"
+    style:padding-bottom="{bottom}px"
+    class="overflow-hidden {containerClass}"
   >
     {#each visibleItems as item (item.index)}
       <div class="overflow-hidden" use:itemCreated>
