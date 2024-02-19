@@ -280,7 +280,7 @@
                     This mod has been reported as {mod.compatibility.EA.state} on Early Access.
                   </span>
                   {#if mod.compatibility.EA.note}
-                    <Markdown markdown={mod.compatibility.EA.note} />
+                    <Markdown class="[&>p]:my-0" markdown={mod.compatibility.EA.note} />
                   {:else}
                     (No further notes provided)
                   {/if}
@@ -293,7 +293,7 @@
                     This mod has been reported as {mod.compatibility.EXP.state} on Experimental.
                   </span>
                   {#if mod.compatibility.EXP.note}
-                    <Markdown markdown={mod.compatibility.EXP.note} />
+                    <Markdown class="[&>p]:my-0" markdown={mod.compatibility.EXP.note} />
                   {:else}
                     (No further notes provided)
                   {/if}

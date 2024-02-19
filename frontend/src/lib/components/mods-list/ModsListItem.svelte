@@ -257,7 +257,7 @@
     middleware: {
       offset: 4,
     },
-    placement: 'bottom-end',
+    placement: 'bottom-start',
   } satisfies PopupSettings;
 </script>
 
@@ -375,7 +375,7 @@
   {#if isInstalled && !isEnabled}
     This mod is Disabled. Click the pause icon to Enable it. 
   {:else if compatibility.state !== CompatibilityState.Works}
-    <Markdown markdown={compatibility.note ?? ''}/>
+    <Markdown class="[&>p]:my-0" markdown={compatibility.note ?? ''}/>
   {/if}
 </Tooltip>
 
