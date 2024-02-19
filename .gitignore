@@ -1,5 +1,6 @@
 ﻿build/bin
 dist
+*.syso
 
 # Created by https://www.toptal.com/developers/gitignore/api/goland+all,go,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=goland+all,go,visualstudiocode

@@ -1,7 +1,12 @@
 build
-package.json.md5
-wailsjs
 graphql.schema.json
+
+# wails generated files
+package.json.md5
+src/lib/generated/wailsjs
+
+# vite temp files
+vite.config.ts.timestamp*
 
 # VS Code
 .vscode/*
