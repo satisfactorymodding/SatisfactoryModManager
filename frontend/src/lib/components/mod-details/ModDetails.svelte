@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { SizeOptions } from '@floating-ui/dom';
   import { mdiCheck, mdiChevronDown, mdiImport, mdiRocketLaunch, mdiTestTube, mdiWeb } from '@mdi/js';
-  import { type PopupSettings, popup } from '@skeletonlabs/skeleton';
   import { getContextClient, queryStore } from '@urql/svelte';
   import { SemVer, coerce, minVersion, parse, sort, validRange } from 'semver';
 
@@ -11,11 +10,11 @@
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
   import { CompatibilityState, GetModDetailsDocument } from '$lib/generated';
+  import { type PopupSettings, getModalStore, popup } from '$lib/skeletonExtensions';
   import { canModify, lockfileMods, manifestMods } from '$lib/store/ficsitCLIStore';
   import { error, expandedMod, siteURL } from '$lib/store/generalStore';
   import { search } from '$lib/store/modFiltersStore';
   import { offline } from '$lib/store/settingsStore';
-  import { getModalStore } from '$lib/store/skeletonExtensions';
   import { bytesToAppropriate } from '$lib/utils/dataFormats';
   import { getAuthor } from '$lib/utils/getModAuthor';
   import { InstallModVersion, OfflineGetMod } from '$wailsjs/go/ficsitcli/ficsitCLI';

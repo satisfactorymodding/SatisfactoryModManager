@@ -1,13 +1,13 @@
 <script lang="ts">
   import { mdiBug, mdiCheck, mdiCheckboxBlankOutline, mdiCheckboxMarkedOutline, mdiChevronRight, mdiClipboard, mdiCog, mdiDownload, mdiFolderEdit, mdiTune } from '@mdi/js';
-  import { ListBox, ListBoxItem, type PopupSettings, popup } from '@skeletonlabs/skeleton';
+  import { ListBox, ListBoxItem } from '@skeletonlabs/skeleton';
   import { getContextClient } from '@urql/svelte';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { GetModNameDocument } from '$lib/generated';
+  import { type PopupSettings, getModalStore, popup } from '$lib/skeletonExtensions';
   import { lockfileMods, manifestMods } from '$lib/store/ficsitCLIStore';
   import { debug, konami, launchButton, offline, queueAutoStart, startView, updateCheckMode, version } from '$lib/store/settingsStore';
-  import { getModalStore } from '$lib/store/skeletonExtensions';
   import type { LaunchButtonType, ViewType } from '$lib/wailsTypesExtensions';
   import { GenerateDebugInfo } from '$wailsjs/go/app/app';
   import { OfflineGetMod } from '$wailsjs/go/ficsitcli/ficsitCLI';

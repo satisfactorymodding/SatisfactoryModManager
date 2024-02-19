@@ -1,10 +1,11 @@
 <script generics="T" lang="ts">
   import type { SizeOptions } from '@floating-ui/dom';
   import { mdiMenuDown } from '@mdi/js';
-  import { ListBox, ListBoxItem, type PopupSettings, focusTrap, popup } from '@skeletonlabs/skeleton';
+  import { ListBox, ListBoxItem, focusTrap } from '@skeletonlabs/skeleton';
   import { createEventDispatcher, tick } from 'svelte';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
+  import { type PopupSettings, popup } from '$lib/skeletonExtensions';
 
   export let name: string;
   // eslint-disable-next-line no-undef

@@ -2,8 +2,8 @@
   import { mdiCheckCircle, mdiSync } from '@mdi/js';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
+  import { getModalStore } from '$lib/skeletonExtensions';
   import { checkForUpdates, progress, unignoredUpdates, updateCheckInProgress, updates } from '$lib/store/ficsitCLIStore';
-  import { getModalStore } from '$lib/store/skeletonExtensions';
   import { smmUpdate, smmUpdateReady } from '$lib/store/smmUpdateStore';
   import { CheckForUpdates as CheckForSMMUpdates } from '$wailsjs/go/autoupdate/autoUpdate';
 

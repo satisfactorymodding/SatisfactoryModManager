@@ -11,10 +11,10 @@
   import { OfflineGetModsByReferences, UpdateMods } from '$lib/generated/wailsjs/go/ficsitcli/ficsitCLI';
   import type { ficsitcli } from '$lib/generated/wailsjs/go/models';
   import { SetUpdateIgnore, SetUpdateUnignore } from '$lib/generated/wailsjs/go/settings/settings';
+  import { getModalStore } from '$lib/skeletonExtensions';
   import { canModify, unignoredUpdates, updateCheckInProgress, updates } from '$lib/store/ficsitCLIStore';
   import { error } from '$lib/store/generalStore';
   import { ignoredUpdates, offline } from '$lib/store/settingsStore';
-  import { getModalStore } from '$lib/store/skeletonExtensions';
 
   export let parent: { onClose: () => void };
 

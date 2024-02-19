@@ -14,10 +14,10 @@
   import ImportProfile from '$lib/components/modals/profiles/ImportProfile.svelte';
   import ModsList from '$lib/components/mods-list/ModsList.svelte';
   import { initializeGraphQLClient } from '$lib/core/graphql';
+  import { getModalStore, initializeModalStore } from '$lib/skeletonExtensions';
   import { installs, invalidInstalls, progress } from '$lib/store/ficsitCLIStore';
   import { error, expandedMod, siteURL } from '$lib/store/generalStore';
   import { konami } from '$lib/store/settingsStore';
-  import { getModalStore, initializeModalStore } from '$lib/store/skeletonExtensions';
   import { ExpandMod, GenerateDebugInfo, UnexpandMod } from '$wailsjs/go/app/app';
   import { Environment, EventsOn } from '$wailsjs/runtime';
 

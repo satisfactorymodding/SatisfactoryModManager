@@ -1,6 +1,6 @@
 <script lang="ts">
   import { mdiArchiveCheck, mdiDownload, mdiEye, mdiLinkLock, mdiPause, mdiPauseCircle, mdiPlay, mdiPlayCircle, mdiStar, mdiStarMinus, mdiStarOutline, mdiStarPlus, mdiSync, mdiTagMultiple, mdiTrashCan, mdiTrayFull, mdiTrayMinus } from '@mdi/js';
-  import { type PopupSettings, ProgressBar, popup } from '@skeletonlabs/skeleton';
+  import { ProgressBar } from '@skeletonlabs/skeleton';
   import { getContextClient } from '@urql/svelte';
   import { createEventDispatcher } from 'svelte';
 
@@ -9,6 +9,7 @@
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
   import { CompatibilityState } from '$lib/generated';
+  import { type PopupSettings, popup } from '$lib/skeletonExtensions';
   import { addQueuedModAction, queuedMods, removeQueuedModAction } from '$lib/store/actionQueue';
   import { canInstallMods, favoriteMods, lockfileMods, manifestMods, progress, selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
   import { error, siteURL } from '$lib/store/generalStore';

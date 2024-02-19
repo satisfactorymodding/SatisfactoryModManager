@@ -14,9 +14,9 @@
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import Select from '$lib/components/Select.svelte';
+  import { getModalStore } from '$lib/skeletonExtensions';
   import { canChangeInstall, canModify, installs, installsMetadata, modsEnabled, profiles, selectedInstall, selectedProfile } from '$lib/store/ficsitCLIStore';
   import { error, siteURL } from '$lib/store/generalStore';
-  import { getModalStore } from '$lib/store/skeletonExtensions';
   import { OpenExternal } from '$wailsjs/go/app/app';
   import { ExportCurrentProfile } from '$wailsjs/go/ficsitcli/ficsitCLI';
   import { common, ficsitcli } from '$wailsjs/go/models';

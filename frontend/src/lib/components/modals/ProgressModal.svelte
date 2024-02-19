@@ -11,8 +11,8 @@
 <script lang="ts">
   import { ProgressBar } from '@skeletonlabs/skeleton';
 
+  import { getModalStore } from '$lib/skeletonExtensions';
   import { progress, selectedInstallMetadata, selectedProfile } from '$lib/store/ficsitCLIStore';
-  import { getModalStore } from '$lib/store/skeletonExtensions';
 
   // Skeleton passes the parent prop to the modal component, and we would get a warning if the prop is not present here
   export let parent: { onClose: () => void };

@@ -1,12 +1,12 @@
 <script lang="ts">
   import { mdiOpenInNew, mdiTrayFull } from '@mdi/js';
-  import { type PopupSettings, popup } from '@skeletonlabs/skeleton';
   import { getContextClient } from '@urql/svelte';
 
   import Tooltip from '../Tooltip.svelte';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { type Compatibility, CompatibilityState } from '$lib/generated';
+  import { type PopupSettings, popup } from '$lib/skeletonExtensions';
   import { queuedMods, startQueue } from '$lib/store/actionQueue';
   import { isGameRunning, lockfileMods, progress, selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
   import { error, isLaunchingGame } from '$lib/store/generalStore';

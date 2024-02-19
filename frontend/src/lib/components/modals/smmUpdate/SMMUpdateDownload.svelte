@@ -2,7 +2,7 @@
   import { ProgressBar } from '@skeletonlabs/skeleton';
 
   import Markdown from '$lib/components/Markdown.svelte';
-  import { getModalStore } from '$lib/store/skeletonExtensions';
+  import { getModalStore } from '$lib/skeletonExtensions';
   import { smmUpdate, smmUpdateProgress, smmUpdateReady } from '$lib/store/smmUpdateStore';
   import { bytesToAppropriate, secondsToAppropriate } from '$lib/utils/dataFormats';
 

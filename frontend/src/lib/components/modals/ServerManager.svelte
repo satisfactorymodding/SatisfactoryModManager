@@ -1,6 +1,5 @@
 <script lang="ts">
   import { mdiAlert, mdiLoading, mdiServerNetwork, mdiTrashCan } from '@mdi/js';
-  import { type PopupSettings, popup } from '@skeletonlabs/skeleton';
   import _ from 'lodash';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
@@ -8,6 +7,7 @@
   import Tooltip from '$lib/components/Tooltip.svelte';
   import { AddRemoteServer, FetchRemoteServerMetadata, RemoveRemoteServer } from '$lib/generated/wailsjs/go/ficsitcli/ficsitCLI';
   import { ficsitcli } from '$lib/generated/wailsjs/go/models';
+  import { type PopupSettings, popup } from '$lib/skeletonExtensions';
   import { installsMetadata, remoteServers } from '$lib/store/ficsitCLIStore';
 
   export let parent: { onClose: () => void };

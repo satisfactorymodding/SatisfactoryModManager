@@ -1,8 +1,7 @@
 <script lang="ts">
-  import { type PopupSettings, popup } from '@skeletonlabs/skeleton';
-
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
+  import { type PopupSettings, popup } from '$lib/skeletonExtensions';
   import type { ButtonDisplay } from '$lib/utils/responsiveButton';
 
   export let id: string;
