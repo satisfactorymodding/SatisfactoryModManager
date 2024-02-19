@@ -136,10 +136,6 @@ func (f *ficsitCLI) UpdateMods(mods []string) error {
 
 	if err != nil {
 		l.Error("failed to validate installation", slog.Any("error", err))
-		var solvingError resolver.DependencyResolverError
-		if errors.As(err, &solvingError) {
-			return solvingError
-		}
 		return err
 	}
 
