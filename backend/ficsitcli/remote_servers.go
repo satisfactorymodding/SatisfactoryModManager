@@ -2,8 +2,10 @@ package ficsitcli
 
 import (
 	"fmt"
+	"log/slog"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 )
 
 func (f *ficsitCLI) GetRemoteInstallations() []string {
@@ -25,11 +27,17 @@ func (f *ficsitCLI) AddRemoteServer(path string) error {
 	if f.ficsitCli.Installations.GetInstallation(path) != nil {
 		return fmt.Errorf("installation already exists")
 	}
+	l := slog.With(slog.String("task", "addRemoteServer"), utils.SlogPath("path", path))
+
 	installation, err := f.ficsitCli.Installations.AddInstallation(f.ficsitCli, path, f.GetFallbackProfile())
 	if err != nil {
 		return fmt.Errorf("failed to add installation: %w", err)
 	}
-	_ = f.ficsitCli.Installations.Save()
+
+	err = f.ficsitCli.Installations.Save()
+	if err != nil {
+		l.Error("failed to save installations", slog.Any("error", err))
+	}
 
 	meta, err := f.getRemoteServerMetadata(installation)
 	if err != nil {

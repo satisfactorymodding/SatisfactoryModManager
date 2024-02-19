@@ -217,7 +217,12 @@ func (f *ficsitCLI) InstallMod(mod string) error {
 		return fmt.Errorf("no installation selected")
 	}
 
-	l := slog.With(slog.String("task", "installMod"), slog.String("mod", mod), utils.SlogPath("install", selectedInstallation.Path))
+	l := slog.With(
+		slog.String("task", "installMod"),
+		slog.String("mod", mod),
+		utils.SlogPath("install", selectedInstallation.Path),
+		slog.String("profile", selectedInstallation.Profile),
+	)
 
 	profileName := selectedInstallation.Profile
 	profile := f.GetProfile(profileName)
@@ -226,6 +231,11 @@ func (f *ficsitCLI) InstallMod(mod string) error {
 	if profileErr != nil {
 		l.Error("failed to add mod", slog.Any("error", profileErr))
 		return fmt.Errorf("failed to add mod: %s@latest: %w", mod, profileErr)
+	}
+
+	err := f.ficsitCli.Profiles.Save()
+	if err != nil {
+		l.Error("failed to save profile", slog.Any("error", err))
 	}
 
 	f.progress = &Progress{
@@ -244,8 +254,6 @@ func (f *ficsitCLI) InstallMod(mod string) error {
 		l.Error("failed to install", slog.Any("error", installErr))
 		return installErr
 	}
-
-	_ = f.ficsitCli.Profiles.Save()
 
 	return nil
 }
@@ -261,15 +269,25 @@ func (f *ficsitCLI) InstallModVersion(mod string, version string) error {
 		return fmt.Errorf("no installation selected")
 	}
 
-	l := slog.With(slog.String("task", "installModVersion"), slog.String("mod", mod), slog.String("version", version), utils.SlogPath("install", selectedInstallation.Path))
+	l := slog.With(
+		slog.String("task", "installModVersion"),
+		slog.String("mod", mod),
+		slog.String("version", version),
+		utils.SlogPath("install", selectedInstallation.Path),
+		slog.String("profile", selectedInstallation.Profile),
+	)
 
-	profileName := selectedInstallation.Profile
-	profile := f.GetProfile(profileName)
+	profile := f.GetProfile(selectedInstallation.Profile)
 
 	profileErr := profile.AddMod(mod, version)
 	if profileErr != nil {
 		l.Error("failed to add mod", slog.Any("error", profileErr))
 		return fmt.Errorf("failed to add mod: %s@%s: %w", mod, version, profileErr)
+	}
+
+	err := f.ficsitCli.Profiles.Save()
+	if err != nil {
+		l.Error("failed to save profile", slog.Any("error", err))
 	}
 
 	f.progress = &Progress{
@@ -288,8 +306,6 @@ func (f *ficsitCLI) InstallModVersion(mod string, version string) error {
 		l.Error("failed to install", slog.Any("error", installErr))
 		return installErr
 	}
-
-	_ = f.ficsitCli.Profiles.Save()
 
 	return nil
 }
@@ -305,12 +321,21 @@ func (f *ficsitCLI) RemoveMod(mod string) error {
 		return fmt.Errorf("no installation selected")
 	}
 
-	l := slog.With(slog.String("task", "removeMod"), slog.String("mod", mod), utils.SlogPath("install", selectedInstallation.Path))
+	l := slog.With(
+		slog.String("task", "removeMod"),
+		slog.String("mod", mod),
+		utils.SlogPath("install", selectedInstallation.Path),
+		slog.String("profile", selectedInstallation.Profile),
+	)
 
-	profileName := selectedInstallation.Profile
-	profile := f.GetProfile(profileName)
+	profile := f.GetProfile(selectedInstallation.Profile)
 
 	profile.RemoveMod(mod)
+
+	err := f.ficsitCli.Profiles.Save()
+	if err != nil {
+		l.Error("failed to save profile", slog.Any("error", err))
+	}
 
 	f.progress = &Progress{
 		Item:     mod,
@@ -329,8 +354,6 @@ func (f *ficsitCLI) RemoveMod(mod string) error {
 		return installErr
 	}
 
-	_ = f.ficsitCli.Profiles.Save()
-
 	return nil
 }
 
@@ -345,12 +368,21 @@ func (f *ficsitCLI) EnableMod(mod string) error {
 		return fmt.Errorf("no installation selected")
 	}
 
-	l := slog.With(slog.String("task", "enableMod"), slog.String("mod", mod), utils.SlogPath("install", selectedInstallation.Path))
+	l := slog.With(
+		slog.String("task", "enableMod"),
+		slog.String("mod", mod),
+		utils.SlogPath("install", selectedInstallation.Path),
+		slog.String("profile", selectedInstallation.Profile),
+	)
 
-	profileName := selectedInstallation.Profile
-	profile := f.GetProfile(profileName)
+	profile := f.GetProfile(selectedInstallation.Profile)
 
 	profile.SetModEnabled(mod, true)
+
+	err := f.ficsitCli.Profiles.Save()
+	if err != nil {
+		l.Error("failed to save profile", slog.Any("error", err))
+	}
 
 	f.progress = &Progress{
 		Item:     mod,
@@ -369,8 +401,6 @@ func (f *ficsitCLI) EnableMod(mod string) error {
 		return installErr
 	}
 
-	_ = f.ficsitCli.Profiles.Save()
-
 	return nil
 }
 
@@ -385,12 +415,21 @@ func (f *ficsitCLI) DisableMod(mod string) error {
 		return fmt.Errorf("no installation selected")
 	}
 
-	l := slog.With(slog.String("task", "disableMod"), slog.String("mod", mod), utils.SlogPath("install", selectedInstallation.Path))
+	l := slog.With(
+		slog.String("task", "disableMod"),
+		slog.String("mod", mod),
+		utils.SlogPath("install", selectedInstallation.Path),
+		slog.String("profile", selectedInstallation.Profile),
+	)
 
-	profileName := selectedInstallation.Profile
-	profile := f.GetProfile(profileName)
+	profile := f.GetProfile(selectedInstallation.Profile)
 
 	profile.SetModEnabled(mod, false)
+
+	err := f.ficsitCli.Profiles.Save()
+	if err != nil {
+		l.Error("failed to save profile", slog.Any("error", err))
+	}
 
 	f.progress = &Progress{
 		Item:     mod,
@@ -408,8 +447,6 @@ func (f *ficsitCLI) DisableMod(mod string) error {
 		l.Error("failed to install", slog.Any("error", installErr))
 		return installErr
 	}
-
-	_ = f.ficsitCli.Profiles.Save()
 
 	return nil
 }

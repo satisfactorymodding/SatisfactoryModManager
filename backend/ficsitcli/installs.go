@@ -40,7 +40,10 @@ func (f *ficsitCLI) ensureSelectedInstallationIsValid() {
 		filteredInstalls := f.GetInstallations()
 		if len(filteredInstalls) > 0 {
 			f.ficsitCli.Installations.SelectedInstallation = filteredInstalls[0]
-			_ = f.ficsitCli.Installations.Save()
+			err := f.ficsitCli.Installations.Save()
+			if err != nil {
+				slog.Error("failed to save selected installation", slog.Any("error", err))
+			}
 			f.EmitGlobals()
 		}
 	}
@@ -102,7 +105,10 @@ func (f *ficsitCLI) SelectInstall(path string) error {
 	}
 
 	f.ficsitCli.Installations.SelectedInstallation = path
-	_ = f.ficsitCli.Installations.Save()
+	err := f.ficsitCli.Installations.Save()
+	if err != nil {
+		l.Error("failed to save selected installation", slog.Any("error", err))
+	}
 
 	selectedInstallation := f.GetSelectedInstall()
 
@@ -148,7 +154,10 @@ func (f *ficsitCLI) SetModsEnabled(enabled bool) error {
 	}
 
 	selectedInstallation.Vanilla = !enabled
-	_ = f.ficsitCli.Installations.Save()
+	err := f.ficsitCli.Installations.Save()
+	if err != nil {
+		l.Error("failed to save vanilla state of install", slog.Any("error", err))
+	}
 
 	f.EmitGlobals()
 

@@ -107,7 +107,12 @@ func (f *ficsitCLI) UpdateMods(mods []string) error {
 		}
 	}
 
-	err := selectedInstallation.UpdateMods(f.ficsitCli, mods)
+	err := f.ficsitCli.Profiles.Save()
+	if err != nil {
+		l.Error("failed to save profile", slog.Any("error", err))
+	}
+
+	err = selectedInstallation.UpdateMods(f.ficsitCli, mods)
 	if err != nil {
 		l.Error("failed to update mods", slog.Any("error", err))
 		var solvingError resolver.DependencyResolverError
@@ -137,8 +142,6 @@ func (f *ficsitCLI) UpdateMods(mods []string) error {
 		}
 		return err
 	}
-
-	_ = f.ficsitCli.Profiles.Save()
 
 	return nil
 }

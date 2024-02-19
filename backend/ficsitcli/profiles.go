@@ -34,7 +34,11 @@ func (f *ficsitCLI) SetProfile(profile string) error {
 		l.Error("failed to set profile", slog.Any("error", err))
 		return fmt.Errorf("failed to set profile: %w", err)
 	}
-	_ = f.ficsitCli.Installations.Save()
+
+	err = f.ficsitCli.Installations.Save()
+	if err != nil {
+		l.Error("failed to save installations", slog.Any("error", err))
+	}
 
 	f.EmitGlobals()
 
@@ -115,7 +119,10 @@ func (f *ficsitCLI) AddProfile(name string) error {
 		return fmt.Errorf("failed to add profile: %s: %w", name, err)
 	}
 
-	_ = f.ficsitCli.Profiles.Save()
+	err = f.ficsitCli.Profiles.Save()
+	if err != nil {
+		l.Error("failed to save profile", slog.Any("error", err))
+	}
 
 	f.EmitGlobals()
 
@@ -131,8 +138,16 @@ func (f *ficsitCLI) RenameProfile(oldName string, newName string) error {
 		return fmt.Errorf("failed to rename profile: %s -> %s: %w", oldName, newName, err)
 	}
 
-	_ = f.ficsitCli.Profiles.Save()
-	_ = f.ficsitCli.Installations.Save() // Installs using the old name will be updated
+	err = f.ficsitCli.Profiles.Save()
+	if err != nil {
+		l.Error("failed to save profile", slog.Any("error", err))
+	}
+
+	// Installs using the old name will be updated
+	err = f.ficsitCli.Installations.Save()
+	if err != nil {
+		l.Error("failed to save installations", slog.Any("error", err))
+	}
 
 	f.EmitGlobals()
 
@@ -156,9 +171,16 @@ func (f *ficsitCLI) DeleteProfile(name string) error {
 		return fmt.Errorf("failed to delete profile: %s: %w", name, err)
 	}
 
-	_ = f.ficsitCli.Profiles.Save()
+	err = f.ficsitCli.Profiles.Save()
+	if err != nil {
+		l.Error("failed to save profile", slog.Any("error", err))
+	}
 
-	_ = f.ficsitCli.Installations.Save()
+	// Installs using the profile will be updated
+	err = f.ficsitCli.Installations.Save()
+	if err != nil {
+		l.Error("failed to save installations", slog.Any("error", err))
+	}
 
 	f.EmitGlobals()
 
@@ -346,7 +368,10 @@ func (f *ficsitCLI) ImportProfile(name string, file string) error {
 		return installErr
 	}
 
-	_ = f.ficsitCli.Profiles.Save()
+	err = f.ficsitCli.Profiles.Save()
+	if err != nil {
+		l.Error("failed to save profile", slog.Any("error", err))
+	}
 
 	return nil
 }
