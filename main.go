@@ -9,15 +9,12 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/lmittmann/tint"
-	slogmulti "github.com/samber/slog-multi"
 	"github.com/spf13/viper"
 	"github.com/tawesoft/golib/v2/dialog"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
-	"gopkg.in/natefinch/lumberjack.v2"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/app"
@@ -25,6 +22,7 @@ import (
 	appCommon "github.com/satisfactorymodding/SatisfactoryModManager/backend/common"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/ficsitcli"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/logging"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/settings"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/websocket"
@@ -42,6 +40,8 @@ var (
 )
 
 func main() {
+	logging.Init()
+
 	autoupdate.Init()
 
 	err := settings.LoadSettings()
@@ -219,41 +219,4 @@ func init() {
 	// logging
 
 	viper.Set("log-file", filepath.Join(smmCacheDir, "logs", "SatisfactoryModManager.log"))
-
-	handlers := make([]slog.Handler, 0)
-
-	if _, err = os.Stdout.Stat(); err == nil {
-		// Only add the stdout handler if it is writable.
-		// Otherwise, the fanout handler would have the first handler error,
-		// and will not get to use the file handler.
-		handlers = append(handlers, tint.NewHandler(os.Stdout, &tint.Options{
-			Level:      settingsLogLevel{},
-			AddSource:  true,
-			TimeFormat: time.RFC3339,
-		}))
-	}
-
-	if viper.GetString("log-file") != "" {
-		logFile := &lumberjack.Logger{
-			Filename:   viper.GetString("log-file"),
-			MaxSize:    10, // megabytes
-			MaxBackups: 5,
-			MaxAge:     30, // days
-		}
-
-		handlers = append(handlers, slog.NewJSONHandler(logFile, &slog.HandlerOptions{
-			Level: settingsLogLevel{},
-		}))
-	}
-
-	slog.SetDefault(slog.New(slogmulti.Fanout(handlers...)))
-}
-
-type settingsLogLevel struct{}
-
-func (v settingsLogLevel) Level() slog.Level {
-	if settings.Settings.Debug {
-		return slog.LevelDebug
-	}
-	return slog.LevelInfo
 }
