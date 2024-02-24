@@ -41,7 +41,11 @@ func Init() {
 	}
 
 	slog.SetDefault(
-		slog.New(slogmulti.Fanout(handlers...)),
+		slog.New(
+			slogmulti.
+				Pipe(slogmulti.NewHandleInlineMiddleware(redactGamePathCredentialsMiddleware)).
+				Handler(slogmulti.Fanout(handlers...)),
+		),
 	)
 }
 

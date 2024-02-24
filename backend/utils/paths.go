@@ -2,7 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"log/slog"
 	"net/url"
 	"os"
 )
@@ -36,8 +35,4 @@ func RedactPath(path string) string {
 		parsed.Host = "******"
 	}
 	return parsed.String()
-}
-
-func SlogPath(key string, path string) slog.Attr {
-	return slog.String(key, RedactPath(path))
 }

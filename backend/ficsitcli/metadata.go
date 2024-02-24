@@ -12,7 +12,6 @@ import (
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
-	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 )
 
 func (f *ficsitCLI) initLocalInstallationsMetadata() error {
@@ -107,7 +106,7 @@ func (f *ficsitCLI) fetchRemoteInstallationMetadata(installation *cli.Installati
 			State: InstallStateUnknown,
 			Info:  nil,
 		})
-		slog.Warn("failed to get remote server metadata", slog.Any("error", err), utils.SlogPath("path", installation.Path))
+		slog.Warn("failed to get remote server metadata", slog.Any("error", err), slog.String("path", installation.Path))
 		return
 	}
 

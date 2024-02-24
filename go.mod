@@ -14,6 +14,7 @@ require (
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8
 	github.com/puzpuzpuz/xsync/v3 v3.0.2
+	github.com/samber/lo v1.39.0
 	github.com/samber/slog-multi v1.0.2
 	github.com/satisfactorymodding/ficsit-cli v0.5.1-0.20240201233422-5e9fe2aebbd5
 	github.com/satisfactorymodding/ficsit-resolver v0.0.2
@@ -68,7 +69,6 @@ require (
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
-	github.com/samber/lo v1.39.0 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect

@@ -62,7 +62,7 @@ func addMetadata(writer *zip.Writer) error {
 	for _, install := range installs {
 		metadata := ficsitcli.FicsitCLI.GetInstallationsMetadata()[install]
 		if metadata.Info == nil {
-			slog.Warn("failed to get metadata for installation", utils.SlogPath("path", install))
+			slog.Warn("failed to get metadata for installation", slog.String("path", install))
 			continue
 		}
 		i := &MetadataInstallation{

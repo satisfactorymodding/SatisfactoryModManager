@@ -10,7 +10,6 @@ import (
 	resolver "github.com/satisfactorymodding/ficsit-resolver"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
-	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 )
 
 func (f *ficsitCLI) initInstallations() error {
@@ -90,7 +89,7 @@ func (f *ficsitCLI) GetInstallation(path string) *cli.Installation {
 }
 
 func (f *ficsitCLI) SelectInstall(path string) error {
-	l := slog.With(slog.String("task", "selectInstall"), utils.SlogPath("path", path))
+	l := slog.With(slog.String("task", "selectInstall"), slog.String("path", path))
 
 	if !f.isValidInstall(path) {
 		return fmt.Errorf("invalid installation: %s", path)
@@ -144,7 +143,7 @@ func (f *ficsitCLI) SetModsEnabled(enabled bool) error {
 		slog.Error("no installation selected")
 		return fmt.Errorf("no installation selected")
 	}
-	l := slog.With(slog.String("task", "setModsEnabled"), slog.Bool("enabled", enabled), utils.SlogPath("install", selectedInstallation.Path))
+	l := slog.With(slog.String("task", "setModsEnabled"), slog.Bool("enabled", enabled), slog.String("install", selectedInstallation.Path))
 
 	var message string
 	if enabled {

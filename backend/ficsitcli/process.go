@@ -220,7 +220,7 @@ func (f *ficsitCLI) InstallMod(mod string) error {
 	l := slog.With(
 		slog.String("task", "installMod"),
 		slog.String("mod", mod),
-		utils.SlogPath("install", selectedInstallation.Path),
+		slog.String("install", selectedInstallation.Path),
 		slog.String("profile", selectedInstallation.Profile),
 	)
 
@@ -273,7 +273,7 @@ func (f *ficsitCLI) InstallModVersion(mod string, version string) error {
 		slog.String("task", "installModVersion"),
 		slog.String("mod", mod),
 		slog.String("version", version),
-		utils.SlogPath("install", selectedInstallation.Path),
+		slog.String("install", selectedInstallation.Path),
 		slog.String("profile", selectedInstallation.Profile),
 	)
 
@@ -324,7 +324,7 @@ func (f *ficsitCLI) RemoveMod(mod string) error {
 	l := slog.With(
 		slog.String("task", "removeMod"),
 		slog.String("mod", mod),
-		utils.SlogPath("install", selectedInstallation.Path),
+		slog.String("install", selectedInstallation.Path),
 		slog.String("profile", selectedInstallation.Profile),
 	)
 
@@ -371,7 +371,7 @@ func (f *ficsitCLI) EnableMod(mod string) error {
 	l := slog.With(
 		slog.String("task", "enableMod"),
 		slog.String("mod", mod),
-		utils.SlogPath("install", selectedInstallation.Path),
+		slog.String("install", selectedInstallation.Path),
 		slog.String("profile", selectedInstallation.Profile),
 	)
 
@@ -418,7 +418,7 @@ func (f *ficsitCLI) DisableMod(mod string) error {
 	l := slog.With(
 		slog.String("task", "disableMod"),
 		slog.String("mod", mod),
-		utils.SlogPath("install", selectedInstallation.Path),
+		slog.String("install", selectedInstallation.Path),
 		slog.String("profile", selectedInstallation.Profile),
 	)
 

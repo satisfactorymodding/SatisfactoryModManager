@@ -5,7 +5,6 @@ import (
 	"log/slog"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
-	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 )
 
 func (f *ficsitCLI) GetRemoteInstallations() []string {
@@ -27,7 +26,7 @@ func (f *ficsitCLI) AddRemoteServer(path string) error {
 	if f.ficsitCli.Installations.GetInstallation(path) != nil {
 		return fmt.Errorf("installation already exists")
 	}
-	l := slog.With(slog.String("task", "addRemoteServer"), utils.SlogPath("path", path))
+	l := slog.With(slog.String("task", "addRemoteServer"), slog.String("path", path))
 
 	installation, err := f.ficsitCli.Installations.AddInstallation(f.ficsitCli, path, f.GetFallbackProfile())
 	if err != nil {
