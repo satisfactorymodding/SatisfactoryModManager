@@ -74,7 +74,7 @@ builds:
       # The default args
       - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
       # Auto-update mode
-      - -X autoupdate.updateMode=nsis
+      - -X main.updateMode=nsis
 
     flags:
       - -s
