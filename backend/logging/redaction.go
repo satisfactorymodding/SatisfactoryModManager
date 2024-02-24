@@ -48,5 +48,10 @@ func redactPaths(attr slog.Attr) slog.Attr {
 }
 
 func isGamePath(str string) bool {
-	return ficsitcli.FicsitCLI.GetInstallation(str) != nil
+	if ficsitcli.FicsitCLI != nil {
+		return ficsitcli.FicsitCLI.GetInstallation(str) != nil
+	}
+	// if ficsitcli is not initialized, we can't know if it's a game path
+	// so any code running before that should not log game paths
+	return false
 }
