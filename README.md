@@ -38,7 +38,7 @@ for common issues and their solutions.
 
 ### Dependencies
 
-* [Go 1.21](https://go.dev/doc/install)
+* [Go 1.22](https://go.dev/doc/install)
 * [pnpm](https://pnpm.io/installation)
 * [nodejs](https://nodejs.org/en/download/)
 * Wails (`go install github.com/wailsapp/wails/v2/cmd/wails@latest`)
