@@ -46,6 +46,7 @@
   let advancedMode = false;
 
   let addInProgress = false;
+  let maskPassword = true;
 
   $: authString = encodeURIComponent(newServerUsername) + (newServerPassword ? ':' + encodeURIComponent(newServerPassword) : '');
   $: actualPort = newRemoteType.type === 'remote' ? (newServerPort.length > 0 ? newServerPort : newRemoteType.defaultPort) : '';
@@ -62,6 +63,24 @@
     return newRemoteType.protocol + authString + '@' + newServerHost + ':' + actualPort + '/' + trimmedPath;
   })();
 
+  $: displayPath = (() => {
+    if (newRemoteType.type === 'local') {
+      return newServerPath;
+    }
+    if (advancedMode) {
+      return newRemoteType.protocol + newServerPath;
+    }
+    if (maskPassword) {
+      return newRemoteType.protocol + encodeURIComponent(newServerUsername) + ':*****@' + newServerHost + ':' + actualPort + '/' + trimmedPath;
+    }
+    return newRemoteType.protocol + authString + '@' + newServerHost + ':' + actualPort + '/' + trimmedPath;
+  })();
+  $: passInputType = (() => {
+    if (maskPassword) {
+      return "password"
+    }
+    return "text"
+  })
   $: isValid = (() => {
     if (newRemoteType.type === 'local') {
       return newServerPath.length > 0;
@@ -124,6 +143,10 @@
     },
     placement: 'bottom',
   } as PopupSettings]).reduce((acc, [k, v]) => ({ ...acc, [k as string]: v as PopupSettings }), {} as Record<string, PopupSettings>);
+
+  function toggleMaskPassword() {
+    maskPassword = !maskPassword;
+  }
 </script>
 
 
@@ -227,11 +250,19 @@
             placeholder="user"
             type="text"
             bind:value={newServerUsername}/>
-          <input
+          {#if maskPassword}
+            <input
+              class="input px-4 h-full"
+              placeholder="pass"
+              type="password"
+            bind:value={newServerPassword}/>
+          {:else}
+            <input
             class="input px-4 h-full"
             placeholder="pass"
-            type="password"
+            type="text"
             bind:value={newServerPassword}/>
+          {/if}
           <input
             class="input px-4 h-full sm:col-start-2"
             placeholder="host"
@@ -248,7 +279,7 @@
             type="text"
             bind:value={newServerPath}/>
           <p class="sm:col-start-2 col-span-2">
-            Complete path: {encodeURIComponent(newServerUsername) + ':*****@' + newServerHost + ':' + actualPort + '/' + trimmedPath}
+            Complete path: {displayPath}
           </p>
         {/if}
         <button class="btn sm:col-start-2 col-span-2 text-sm whitespace-break-spaces bg-surface-200-700-token" on:click={() => advancedMode = !advancedMode}>
@@ -280,6 +311,18 @@
         <SvgIcon
           class="h-5 w-5"
           icon={mdiServerNetwork} />
+      </button>
+      <button
+        class="btn h-full text-sm bg-primary-600 text-secondary-900 col-start-2 sm:col-start-4 row-start-2"
+        disabled={addInProgress}
+        on:click={() => toggleMaskPassword()}>
+        <span>
+          {#if maskPassword}
+            Show Password
+          {:else}
+            Hide Password
+          {/if}
+        </span>
       </button>
     </div>
     <p>{err}</p>
