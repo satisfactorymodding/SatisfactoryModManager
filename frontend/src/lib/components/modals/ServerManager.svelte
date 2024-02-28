@@ -75,12 +75,7 @@
     }
     return newRemoteType.protocol + authString + '@' + newServerHost + ':' + actualPort + '/' + trimmedPath;
   })();
-  $: passInputType = (() => {
-    if (maskPassword) {
-      return "password"
-    }
-    return "text"
-  })
+
   $: isValid = (() => {
     if (newRemoteType.type === 'local') {
       return newServerPath.length > 0;
