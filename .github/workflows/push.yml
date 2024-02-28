@@ -2,6 +2,7 @@ name: Push
 
 on:
   push:
+  pull_request:
 
 env:
   GO_VERSION: "1.22"
