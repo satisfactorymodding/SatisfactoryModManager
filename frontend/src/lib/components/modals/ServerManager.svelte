@@ -230,7 +230,7 @@
           <input
             class="input px-4 h-full"
             placeholder="pass"
-            type="text"
+            type="password"
             bind:value={newServerPassword}/>
           <input
             class="input px-4 h-full sm:col-start-2"
@@ -248,7 +248,7 @@
             type="text"
             bind:value={newServerPath}/>
           <p class="sm:col-start-2 col-span-2">
-            Complete path: {fullInstallPath}
+            Complete path: {encodeURIComponent(newServerUsername) + ':*****@' + newServerHost + ':' + actualPort + '/' + trimmedPath}
           </p>
         {/if}
         <button class="btn sm:col-start-2 col-span-2 text-sm whitespace-break-spaces bg-surface-200-700-token" on:click={() => advancedMode = !advancedMode}>
