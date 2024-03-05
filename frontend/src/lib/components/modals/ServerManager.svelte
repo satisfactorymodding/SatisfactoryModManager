@@ -254,10 +254,10 @@
               bind:value={newServerPassword}/>
           {:else}
             <input
-            class="input px-4 h-full"
-            placeholder="pass"
-            type="text"
-            bind:value={newServerPassword}/>
+              class="input px-4 h-full"
+              placeholder="pass"
+              type="text"
+              bind:value={newServerPassword}/>
           {/if}
           <input
             class="input px-4 h-full sm:col-start-2"
