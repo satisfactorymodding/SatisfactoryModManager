@@ -309,7 +309,6 @@
       </button>
       <button
         class="btn h-full text-sm bg-primary-600 text-secondary-900 col-start-2 sm:col-start-4 row-start-2"
-        disabled={addInProgress}
         on:click={() => toggleMaskPassword()}>
         <span>
           {#if maskPassword}
