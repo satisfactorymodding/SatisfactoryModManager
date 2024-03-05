@@ -245,12 +245,13 @@
             placeholder="user"
             type="text"
             bind:value={newServerUsername}/>
+          <!-- This is a conditional because the type var cant be dynamic with bind:value -->
           {#if maskPassword}
             <input
               class="input px-4 h-full"
               placeholder="pass"
               type="password"
-            bind:value={newServerPassword}/>
+              bind:value={newServerPassword}/>
           {:else}
             <input
             class="input px-4 h-full"
