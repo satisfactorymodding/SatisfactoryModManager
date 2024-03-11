@@ -155,7 +155,7 @@
         <tbody>
           {#each $remoteServers as remoteServer}
             <tr>
-              <td class="break-all">{remoteServer}</td>
+              <td class="break-all">{($installsMetadata[remoteServer].info?.path)?.replace(/(.*?:\/\/.*?:)(.*?)(?=@|$)/, '$1********')}</td>
               <td>
                 {#if $installsMetadata[remoteServer]?.state === ficsitcli.InstallState.VALID}
                   {$installsMetadata[remoteServer].info?.type}
