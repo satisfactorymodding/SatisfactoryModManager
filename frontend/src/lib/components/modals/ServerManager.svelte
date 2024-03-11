@@ -46,6 +46,7 @@
   let advancedMode = false;
 
   let addInProgress = false;
+  let maskPassword = true;
 
   $: authString = encodeURIComponent(newServerUsername) + (newServerPassword ? ':' + encodeURIComponent(newServerPassword) : '');
   $: actualPort = newRemoteType.type === 'remote' ? (newServerPort.length > 0 ? newServerPort : newRemoteType.defaultPort) : '';
@@ -58,6 +59,19 @@
     }
     if (advancedMode) {
       return newRemoteType.protocol + newServerPath;
+    }
+    return newRemoteType.protocol + authString + '@' + newServerHost + ':' + actualPort + '/' + trimmedPath;
+  })();
+
+  $: displayPath = (() => {
+    if (newRemoteType.type === 'local') {
+      return newServerPath;
+    }
+    if (advancedMode) {
+      return newRemoteType.protocol + newServerPath;
+    }
+    if (maskPassword) {
+      return newRemoteType.protocol + encodeURIComponent(newServerUsername) + ':*****@' + newServerHost + ':' + actualPort + '/' + trimmedPath;
     }
     return newRemoteType.protocol + authString + '@' + newServerHost + ':' + actualPort + '/' + trimmedPath;
   })();
@@ -124,6 +138,10 @@
     },
     placement: 'bottom',
   } as PopupSettings]).reduce((acc, [k, v]) => ({ ...acc, [k as string]: v as PopupSettings }), {} as Record<string, PopupSettings>);
+
+  function toggleMaskPassword() {
+    maskPassword = !maskPassword;
+  }
 </script>
 
 
@@ -137,7 +155,7 @@
         <tbody>
           {#each $remoteServers as remoteServer}
             <tr>
-              <td class="break-all">{remoteServer}</td>
+              <td class="break-all">{($installsMetadata[remoteServer].info?.path)?.replace(/(.*?:\/\/.*?:)(.*?)(?=@|$)/, '$1********')}</td>
               <td>
                 {#if $installsMetadata[remoteServer]?.state === ficsitcli.InstallState.VALID}
                   {$installsMetadata[remoteServer].info?.type}
@@ -227,11 +245,20 @@
             placeholder="user"
             type="text"
             bind:value={newServerUsername}/>
-          <input
-            class="input px-4 h-full"
-            placeholder="pass"
-            type="text"
-            bind:value={newServerPassword}/>
+          <!-- This is a conditional because the type var cant be dynamic with bind:value -->
+          {#if maskPassword}
+            <input
+              class="input px-4 h-full"
+              placeholder="pass"
+              type="password"
+              bind:value={newServerPassword}/>
+          {:else}
+            <input
+              class="input px-4 h-full"
+              placeholder="pass"
+              type="text"
+              bind:value={newServerPassword}/>
+          {/if}
           <input
             class="input px-4 h-full sm:col-start-2"
             placeholder="host"
@@ -248,7 +275,7 @@
             type="text"
             bind:value={newServerPath}/>
           <p class="sm:col-start-2 col-span-2">
-            Complete path: {fullInstallPath}
+            Complete path: {displayPath}
           </p>
         {/if}
         <button class="btn sm:col-start-2 col-span-2 text-sm whitespace-break-spaces bg-surface-200-700-token" on:click={() => advancedMode = !advancedMode}>
@@ -280,6 +307,17 @@
         <SvgIcon
           class="h-5 w-5"
           icon={mdiServerNetwork} />
+      </button>
+      <button
+        class="btn h-full text-sm bg-primary-600 text-secondary-900 col-start-2 sm:col-start-4 row-start-2"
+        on:click={() => toggleMaskPassword()}>
+        <span>
+          {#if maskPassword}
+            Show Password
+          {:else}
+            Hide Password
+          {/if}
+        </span>
       </button>
     </div>
     <p>{err}</p>
