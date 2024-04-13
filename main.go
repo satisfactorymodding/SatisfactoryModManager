@@ -167,14 +167,16 @@ func init() {
 	var baseLocalDir string
 
 	switch runtime.GOOS {
-	case "windows":
-		baseLocalDir = os.Getenv("APPDATA")
 	case "linux":
 		baseLocalDir = filepath.Join(os.Getenv("HOME"), ".local", "share")
 	default:
-		slog.Error("unsupported OS", slog.String("os", runtime.GOOS))
-		_ = dialog.Error("Unsupported OS: %s", runtime.GOOS)
-		os.Exit(1)
+		var err error
+		baseLocalDir, err = os.UserConfigDir()
+		if err != nil {
+			slog.Error("failed to get config dir", slog.Any("error", err))
+			_ = dialog.Error("Failed to get config dir", err.Error())
+			os.Exit(1)
+		}
 	}
 
 	viper.Set("base-local-dir", baseLocalDir)
