@@ -4,7 +4,6 @@ before:
   hooks:
     - go generate -x -tags tools ./...
     - go mod tidy
-    - ./.github/convertWailsJsonPaths.sh
 
     # Apparently only wails build generates the embedded directory
     - mkdir -p frontend/build
