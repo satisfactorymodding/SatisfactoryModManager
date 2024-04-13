@@ -22,14 +22,18 @@ func FindInstallations() ([]*common.Installation, []error) {
 	}
 
 	steamPath := filepath.Dir(steamExePath)
-	return findInstallationsSteam(
+	return FindInstallationsSteam(
 		steamPath,
 		"Steam",
-		[]string{
-			"cmd",
-			"/C",
-			"start",
-			"",
+		func(steamApp string) []string {
+			return []string{
+				"cmd",
+				"/C",
+				"start",
+				"",
+				steamApp,
+			}
 		},
+		nil,
 	)
 }

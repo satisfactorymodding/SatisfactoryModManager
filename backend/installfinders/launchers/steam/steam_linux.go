@@ -21,12 +21,16 @@ func findInstallationsNative() ([]*common.Installation, []error) {
 	if _, err := os.Stat(steamPath); os.IsNotExist(err) {
 		return nil, []error{fmt.Errorf("steam not installed")}
 	}
-	return findInstallationsSteam(
+	return FindInstallationsSteam(
 		steamPath,
 		"Steam",
-		[]string{
-			"steam",
+		func(steamApp string) []string {
+			return []string{
+				"steam",
+				steamApp,
+			}
 		},
+		nil,
 	)
 }
 
@@ -40,13 +44,17 @@ func findInstallationsFlatpak() ([]*common.Installation, []error) {
 	if _, err := os.Stat(steamPath); os.IsNotExist(err) {
 		return nil, []error{fmt.Errorf("steam-flatpak not installed")}
 	}
-	return findInstallationsSteam(
+	return FindInstallationsSteam(
 		steamPath,
 		"Steam",
-		[]string{
-			"flatpak",
-			"run",
-			"com.valvesoftware.Steam",
+		func(steamApp string) []string {
+			return []string{
+				"flatpak",
+				"run",
+				"com.valvesoftware.Steam",
+				steamApp,
+			}
 		},
+		nil,
 	)
 }
