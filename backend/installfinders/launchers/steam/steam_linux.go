@@ -9,7 +9,7 @@ import (
 )
 
 func FindInstallations() ([]*common.Installation, []error) {
-	return common.FindAll(findInstallationsNative, findInstallationsFlatpak)
+	return common.FindAll(findInstallationsNative, findInstallationsFlatpak, findInstallationsSnap)
 }
 
 func findInstallationsNative() ([]*common.Installation, []error) {
@@ -26,6 +26,30 @@ func findInstallationsNative() ([]*common.Installation, []error) {
 		"Steam",
 		func(steamApp string) []string {
 			return []string{
+				"steam",
+				steamApp,
+			}
+		},
+		nil,
+	)
+}
+
+func findInstallationsSnap() ([]*common.Installation, []error) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return nil, []error{fmt.Errorf("failed to get user home dir: %w", err)}
+	}
+	steamPath := filepath.Join(homeDir, "snap", "steam", "common", ".local", "share", "Steam")
+	if _, err := os.Stat(steamPath); os.IsNotExist(err) {
+		return nil, []error{fmt.Errorf("steam-snap not installed")}
+	}
+	return FindInstallationsSteam(
+		steamPath,
+		"Steam",
+		func(steamApp string) []string {
+			return []string{
+				"snap",
+				"run",
 				"steam",
 				steamApp,
 			}
