@@ -94,7 +94,7 @@ archives:
     builds:
       - standalone
     format: binary
-    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}"
+    name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if eq .Os "darwin" }}.zip{{ end }}'
 
 checksum:
   name_template: 'checksums.txt'
