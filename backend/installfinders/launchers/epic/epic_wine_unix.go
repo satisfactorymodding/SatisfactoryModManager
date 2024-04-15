@@ -1,10 +1,11 @@
+//go:build unix
+
 package epic
 
 import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 )
@@ -19,7 +20,5 @@ func FindInstallationsWine(winePrefix string, launcher string, launchPath []stri
 		return nil, []error{fmt.Errorf("Epic is not installed in " + winePrefix)}
 	}
 
-	return FindInstallationsEpic(epicManifestsPath, launcher, func(appName string) []string { return launchPath }, func(path string) string {
-		return filepath.Join(wineWindowsRoot, strings.ToLower(path[0:1])+strings.ReplaceAll(path[1:], "\\", "/"))
-	})
+	return FindInstallationsEpic(epicManifestsPath, launcher, func(appName string) []string { return launchPath }, common.WinePathProcessor(winePrefix))
 }

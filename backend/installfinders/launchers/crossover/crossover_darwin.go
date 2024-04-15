@@ -5,9 +5,9 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/launchers"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/launchers/steam"
 )
 
@@ -16,7 +16,11 @@ var (
 	crossoverSteamPath           = filepath.Join("c:", "Program Files (x86)", "Steam") // Will get run through processPath, so it will be added to the dosdevices path
 )
 
-func FindInstallations() ([]*common.Installation, []error) {
+func init() {
+	launchers.Add("CrossOver", crossover)
+}
+
+func crossover() ([]*common.Installation, []error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return nil, []error{fmt.Errorf("failed to get user home dir: %w", err)}
@@ -37,10 +41,7 @@ func FindInstallations() ([]*common.Installation, []error) {
 			continue
 		}
 		bottleRoot := filepath.Join(bottlesPath, bottle.Name())
-
-		processPath := func(path string) string {
-			return filepath.Join(bottleRoot, "dosdevices", strings.ToLower(path[0:1])+strings.ReplaceAll(path[1:], "\\", "/"))
-		}
+		processPath := common.WinePathProcessor(bottleRoot)
 
 		if _, err := os.Stat(processPath(crossoverSteamPath)); os.IsNotExist(err) {
 			slog.Debug("Skipping bottle without Steam", slog.String("bottle", bottle.Name()))

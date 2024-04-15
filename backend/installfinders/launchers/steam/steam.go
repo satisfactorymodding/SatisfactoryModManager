@@ -95,7 +95,7 @@ func FindInstallationsSteam(steamPath string, launcher string, launchPath func(s
 			}
 
 			if _, ok := manifest["AppState"]; !ok {
-				findErrors = append(findErrors, fmt.Errorf("Failed to find AppState in manifest %s", manifestPath))
+				findErrors = append(findErrors, fmt.Errorf("failed to find AppState in manifest %s", manifestPath))
 				continue
 			}
 
@@ -119,7 +119,7 @@ func FindInstallationsSteam(steamPath string, launcher string, launchPath func(s
 				if betakey == "experimental" {
 					branch = common.BranchExperimental
 				} else {
-					findErrors = append(findErrors, fmt.Errorf("Unknown beta key %s", betakey))
+					findErrors = append(findErrors, fmt.Errorf("unknown beta key %s", betakey))
 				}
 			}
 

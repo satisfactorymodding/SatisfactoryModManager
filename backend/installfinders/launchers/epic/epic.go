@@ -57,7 +57,7 @@ func FindInstallationsEpic(epicManifestsPath string, launcher string, launchPath
 	}
 
 	if _, err := os.Stat(epicManifestsPath); os.IsNotExist(err) {
-		return nil, []error{fmt.Errorf("Epic is not installed")}
+		return nil, []error{fmt.Errorf("epic is not installed")}
 	}
 
 	manifests, err := os.ReadDir(epicManifestsPath)
