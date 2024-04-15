@@ -6,6 +6,9 @@ Unicode true
 
 !define UNINST_KEY_NAME "${INFO_PRODUCTNAME}"
 !define REQUEST_EXECUTION_LEVEL "user"
+!define INFO_PROJECTNAME "Satisfactory Mod Manager"
+!define INFO_COMPANYNAME "Satisfactory Modding"
+!define INFO_PRODUCTNAME "Satisfactory Mod Manager"
 !include "wails_tools.nsh"
 
 # Convert wails defines to common names
