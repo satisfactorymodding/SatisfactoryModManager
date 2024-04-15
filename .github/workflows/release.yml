@@ -12,61 +12,6 @@ env:
 
 jobs:
   release:
-    name: Release
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - uses: actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
-
-      - uses: pnpm/action-setup@v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-          cache-dependency-path: frontend
-
-      - name: Install additional dependencies
-        run: |
-          sudo apt update
-          sudo apt -y install libgtk-3-dev libwebkit2gtk-4.0-dev
-          
-          # We need nsis 3.09
-          # which fixes the installer not working
-          # when mandatory ASLR is enabled
-          # if the installer is built on linux
-          # https://sourceforge.net/p/nsis/bugs/1283/#e303/e90f/b81f
-          #
-          # But the latest version in the ubuntu 22.04 repository is 3.08...
-          # Sooo... we add the 23.10 repository to get nsis 3.09
-          # and hope nothing else breaks
-          # (because nsis 3.09 also requires gcc13 and a newer version of libc6,
-          # but in theory no other packages should be installed that would break the OS)
-          #
-          # But until 24.04 is released, and github updates the runners to it
-          # it's either this, building nsis from source,
-          # or setting up a 23.10 container that the whole job runs in,
-          # so it would need to be set up the same way regular runner images are
-          # And I sure know which of these options is the least effort
-          
-          sudo echo "deb http://archive.ubuntu.com/ubuntu/ mantic main universe" >> /etc/apt/sources.list
-          sudo apt update
-          sudo apt -y install nsis
-
-      - name: Install Wails
-        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
-
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v5
-        with:
-          version: latest
-          args: release -p 1 --clean # Multiple Wails builds cannot be executed in parallel
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    uses: ./.github/workflows/build-base.yml
+    with:
+      release: true
