@@ -18,11 +18,9 @@ before:
 builds:
   - id: standalone
 
-    goos:
-      - linux
-      - darwin
-    goarch:
-      - amd64
+    targets:
+      - linux_amd64
+      - darwin_universal
 
     # Wails v2 apps cannot be built using regular go build, and must use wails build
     # However, wails takes only the filename as the -o argument, so we use a wrapper that handles that
