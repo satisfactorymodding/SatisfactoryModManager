@@ -97,15 +97,21 @@ jobs:
       - name: Install Wails
         run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
 
-      - uses: actions/checkout@v4
-        with:
-          repository: mircearoata/goreleaser
-          ref: split-merge
-          path: goreleaser-src
+      - name: Download goreleaser
+        if: startsWith(matrix.platform.runs-on, 'ubuntu')
+        run: |
+          gh release download --repo mircearoata/goreleaser --pattern goreleaser-linux --output $(go env GOPATH)/bin/goreleaser
+          chmod +x $(go env GOPATH)/bin/goreleaser
+        env:
+          GH_TOKEN: ${{ github.token }}
 
-      - name: Install goreleaser
-        working-directory: goreleaser-src
-        run: go install
+      - name: Download goreleaser
+        if: startsWith(matrix.platform.runs-on, 'macos')
+        run: |
+          gh release download --repo mircearoata/goreleaser --pattern goreleaser-darwin --output $(go env GOPATH)/bin/goreleaser
+          chmod +x $(go env GOPATH)/bin/goreleaser
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Run GoReleaser ${{ inputs.release && 'Release' || 'Snapshot' }}
         run: goreleaser release --split --clean ${{ matrix.platform.goreleaser_args }} ${{ needs.configure-build.outputs.goreleaser_args }}
@@ -148,15 +154,12 @@ jobs:
           name: build-darwin
           path: dist
 
-      - uses: actions/checkout@v4
-        with:
-          repository: mircearoata/goreleaser
-          ref: split-merge
-          path: goreleaser-src
-
-      - name: Install goreleaser
-        working-directory: goreleaser-src
-        run: go install
+      - name: Download goreleaser
+        run: |
+          gh release download --repo mircearoata/goreleaser --pattern goreleaser-linux --output $(go env GOPATH)/bin/goreleaser
+          chmod +x $(go env GOPATH)/bin/goreleaser
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Run GoReleaser ${{ inputs.release && 'Release' || 'Snapshot' }} merge
         run: goreleaser continue --merge ${{ needs.configure-build.outputs.goreleaser_args }}
