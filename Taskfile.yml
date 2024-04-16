@@ -26,6 +26,7 @@ tasks:
         cmd: |
           {{ if ne .OUTPUT_FILENAME "" }}
             pushd "build/bin" || exit 1
+            codesign --force --deep -s - "{{.OUTPUT_FILENAME}}.app" # If a universal binary is generated, the signature is lost
             zip -r "{{.OUTPUT_FILENAME}}.zip" "{{.OUTPUT_FILENAME}}.app" # zip would add the .zip extension anyway
             mv "{{.OUTPUT_FILENAME}}.zip" "{{.OUTPUT_FILENAME}}"
             popd || exit 1
