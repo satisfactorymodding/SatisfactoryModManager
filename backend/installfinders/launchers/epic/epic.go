@@ -47,7 +47,7 @@ func GetEpicBranch(appName string) (common.GameBranch, error) {
 	}
 }
 
-func findInstallationsEpic(epicManifestsPath string, launcher string, launchPath func(appName string) []string, processPath func(path string) string) ([]*common.Installation, []error) {
+func FindInstallationsEpic(epicManifestsPath string, launcher string, launchPath func(appName string) []string, processPath func(path string) string) ([]*common.Installation, []error) {
 	if launchPath == nil {
 		launchPath = func(appName string) []string { return nil }
 	}

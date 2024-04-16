@@ -10,7 +10,7 @@ import (
 var epicManifestsFolder = filepath.Join(os.Getenv("PROGRAMDATA"), "Epic", "EpicGamesLauncher", "Data", "Manifests")
 
 func FindInstallations() ([]*common.Installation, []error) {
-	return findInstallationsEpic(epicManifestsFolder, "Epic Games", func(appName string) []string {
+	return FindInstallationsEpic(epicManifestsFolder, "Epic Games", func(appName string) []string {
 		return []string{
 			"cmd",
 			"/C",
