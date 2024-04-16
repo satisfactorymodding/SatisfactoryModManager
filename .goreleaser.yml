@@ -22,9 +22,7 @@ builds:
       - linux_amd64
       - darwin_universal
 
-    # Wails v2 apps cannot be built using regular go build, and must use wails build
-    # However, wails takes only the filename as the -o argument, so we use a wrapper that handles that
-    gobinary: "./.github/wailsWrapper.sh"
+    gobinary: task
     ldflags:
       # The default args
       - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
@@ -32,6 +30,7 @@ builds:
       - -X main.updateMode=standalone
 
     flags:
+      - -- # Marker for task to interpret remaining arguments as CLI_ARGS
       - -s
       - -skipbindings
 
@@ -43,9 +42,7 @@ builds:
     goarch:
       - amd64
 
-    # Wails v2 apps cannot be built using regular go build, and must use wails build
-    # However, wails takes only the filename as the -o argument, so we use a wrapper that handles that
-    gobinary: "./.github/wailsWrapper.sh"
+    gobinary: task
     ldflags:
       # The default args
       - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
@@ -53,6 +50,7 @@ builds:
       - -X main.updateMode=package-manager
 
     flags:
+      - -- # Marker for task to interpret remaining arguments as CLI_ARGS
       - -s
       - -skipbindings
 
@@ -65,9 +63,7 @@ builds:
     goarch:
       - amd64
 
-    # Wails v2 apps cannot be built using regular go build, and must use wails build
-    # However, wails takes only the filename as the -o argument, so we use a wrapper that handles that
-    gobinary: "./.github/wailsWrapper.sh"
+    gobinary: task
     ldflags:
       # The default args
       - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
@@ -75,6 +71,7 @@ builds:
       - -X main.updateMode=nsis
 
     flags:
+      - -- # Marker for task to interpret remaining arguments as CLI_ARGS
       - -s
       - -skipbindings
       - -nsis
