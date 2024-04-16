@@ -1,35 +1,13 @@
-run-name: Build ${{ inputs.release && 'and release' || '' }}
-
 on:
   workflow_call:
     inputs:
-      release:
+      goreleaser_args:
         required: false
-        type: boolean
-        default: false
-
-env:
-  GO_VERSION: "1.22"
-  NODE_VERSION: "18"
-  PNPM_VERSION: "8.6.1"
+        type: string
+        default: --snapshot
 
 jobs:
-  configure-build:
-    runs-on: ubuntu-latest
-    outputs:
-      goreleaser_args: ${{ steps.set-goreleaser-args.outputs.goreleaser_args }}
-    steps:
-      - name: Set GoReleaser args
-        id: set-goreleaser-args
-        run: |
-          GORELEASER_ARGS=""
-          if [ "${{ inputs.release || '' }}" != "true" ]; then
-              GORELEASER_ARGS="--snapshot ${GORELEASER_ARGS}"
-          fi
-          echo "goreleaser_args=${GORELEASER_ARGS}" >> "$GITHUB_OUTPUT"
-  prepare-build:
-    needs:
-      - configure-build
+  build:
     strategy:
       matrix:
         platform:
@@ -47,19 +25,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
-
-      - uses: pnpm/action-setup@v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-          cache-dependency-path: frontend
+      - uses: ./.github/actions/setup
 
       - name: Install additional dependencies
         if: matrix.platform.os == 'linux'
@@ -67,31 +33,15 @@ jobs:
           sudo apt update
           sudo apt -y install libgtk-3-dev libwebkit2gtk-4.0-dev
 
-      - name: Install Wails
-        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
-
       - name: Install Task
         uses: arduino/setup-task@v2
         with:
           version: 3.x
 
-      - name: Download goreleaser
-        if: ${{ startsWith(matrix.platform.runs-on, 'windows') }}
-        run: |
-          gh release download --repo mircearoata/goreleaser --pattern "goreleaser-${{matrix.platform.os}}.exe" --output "$(go env GOPATH)/bin/goreleaser.exe"
-        env:
-          GH_TOKEN: ${{ github.token }}
-
-      - name: Download goreleaser
-        if: ${{ !startsWith(matrix.platform.runs-on, 'windows') }}
-        run: |
-          gh release download --repo mircearoata/goreleaser --pattern "goreleaser-${{matrix.platform.os}}" --output "$(go env GOPATH)/bin/goreleaser"
-          chmod +x $(go env GOPATH)/bin/goreleaser
-        env:
-          GH_TOKEN: ${{ github.token }}
-
-      - name: Run GoReleaser ${{ inputs.release && 'Release' || 'Snapshot' }}
-        run: goreleaser release --split --clean ${{ matrix.platform.goreleaser_args }} ${{ needs.configure-build.outputs.goreleaser_args }}
+      - name: Run GoReleaser ${{ inputs.goreleaser_args }}
+        uses: ./.github/actions/goreleaser
+        with:
+          args: release --split --clean ${{ matrix.platform.goreleaser_args }} ${{ inputs.goreleaser_args }}
         env:
           GGOOS: ${{ matrix.platform.os }}
 
@@ -101,17 +51,17 @@ jobs:
           name: build-${{ matrix.platform.os }}
           path: dist/**/*
 
-  finalize-build:
+  finalize:
     runs-on: ubuntu-latest
-    needs: [configure-build, prepare-build]
+    needs: build
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-go@v5
+      - uses: ./.github/actions/setup
         with:
-          go-version: ${{ env.GO_VERSION }}
+          go-only: true
 
       - name: Download windows artifacts
         uses: actions/download-artifact@v4
@@ -131,17 +81,12 @@ jobs:
           name: build-darwin
           path: dist
 
-      - name: Download goreleaser
-        run: |
-          gh release download --repo mircearoata/goreleaser --pattern "goreleaser-linux" --output "$(go env GOPATH)/bin/goreleaser"
-          chmod +x $(go env GOPATH)/bin/goreleaser
+      - name: Run GoReleaser Merge ${{ inputs.goreleaser_args }}
+        uses: ./.github/actions/goreleaser
+        with:
+          args: continue --merge ${{ inputs.goreleaser_args }}
         env:
-          GH_TOKEN: ${{ github.token }}
-
-      - name: Run GoReleaser ${{ inputs.release && 'Release' || 'Snapshot' }} merge
-        run: goreleaser continue --merge ${{ needs.configure-build.outputs.goreleaser_args }}
-        env:
-          GITHUB_TOKEN: ${{ inputs.release && secrets.GITHUB_TOKEN || '' }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v4

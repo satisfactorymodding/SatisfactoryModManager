@@ -1,0 +1,31 @@
+name: 'setup'
+description: 'Setup project dependencies'
+inputs:
+  go-only:
+    description: 'Whether to only setup go'
+    required: false
+    default: 'false'
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/setup-go@v5
+      with:
+        go-version: 1.22
+
+    - uses: pnpm/action-setup@v3
+      if: ${{ inputs.go-only != 'true' }}
+      with:
+        version: 8.6.1
+
+    - uses: actions/setup-node@v4
+      if: ${{ inputs.go-only != 'true' }}
+      with:
+        node-version: 18
+        cache: 'pnpm'
+        cache-dependency-path: frontend
+
+    - name: Install Wails
+      if: ${{ inputs.go-only != 'true' }}
+      shell: bash
+      run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.8.0
+

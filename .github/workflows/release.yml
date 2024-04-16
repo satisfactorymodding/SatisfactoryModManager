@@ -5,13 +5,8 @@ on:
     tags:
       - v*
 
-env:
-  GO_VERSION: "1.22"
-  NODE_VERSION: "18"
-  PNPM_VERSION: "8.6.1"
-
 jobs:
   release:
     uses: ./.github/workflows/build-base.yml
     with:
-      release: true
+      goreleaser_args: ''
