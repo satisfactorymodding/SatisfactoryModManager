@@ -61,6 +61,15 @@ func main() {
 		}
 	}
 
+	err = os.Setenv("HTTP_PROXY", settings.Settings.Proxy)
+	if err != nil {
+		slog.Error("failed to set HTTP_PROXY", slog.Any("error", err))
+	}
+	err = os.Setenv("HTTPS_PROXY", settings.Settings.Proxy)
+	if err != nil {
+		slog.Error("failed to set HTTPS_PROXY", slog.Any("error", err))
+	}
+
 	err = ficsitcli.Init()
 	if err != nil {
 		slog.Error("failed to initialize ficsit-cli", slog.Any("error", err))
@@ -147,6 +156,14 @@ func main() {
 	if err != nil {
 		slog.Error("failed to apply update on exit", slog.Any("error", err))
 		_ = dialog.Error("Failed to apply update on exit: %s", err.Error())
+	}
+
+	if app.App.Restart && !autoupdate.Updater.HasRestarted() {
+		err := utils.Restart()
+		if err != nil {
+			slog.Error("failed to restart", slog.Any("error", err))
+			_ = dialog.Error("Failed to restart: %s", err.Error())
+		}
 	}
 }
 

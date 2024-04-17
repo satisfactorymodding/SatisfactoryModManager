@@ -135,3 +135,7 @@ func (u *autoUpdate) OnExit() error {
 	}
 	return u.Updater.OnExit(u.restart)
 }
+
+func (u *autoUpdate) HasRestarted() bool {
+	return u.restart && u.Updater.PendingUpdate != nil && u.Updater.PendingUpdate.Ready
+}

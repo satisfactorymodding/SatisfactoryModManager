@@ -53,6 +53,8 @@ type settings struct {
 
 	Offline bool `json:"offline,omitempty"`
 
+	Proxy string `json:"proxy,omitempty"`
+
 	Konami       bool   `json:"konami,omitempty"`
 	LaunchButton string `json:"launchButton,omitempty"`
 
@@ -251,6 +253,15 @@ func (s *settings) GetDebug() bool {
 func (s *settings) SetDebug(value bool) {
 	slog.Info("changing debug mode state", slog.Bool("value", value))
 	s.Debug = value
+}
+
+func (s *settings) GetProxy() string {
+	return s.Proxy
+}
+
+func (s *settings) SetProxy(value string) {
+	s.Proxy = value
+	_ = SaveSettings()
 }
 
 func (s *settings) SetCacheDir(dir string) error {
