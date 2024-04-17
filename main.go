@@ -14,7 +14,6 @@ import (
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
-	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/app"
@@ -25,6 +24,7 @@ import (
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/logging"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/settings"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/wailsextras"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/websocket"
 )
 
@@ -96,7 +96,9 @@ func main() {
 			appCommon.AppContext = ctx
 
 			// Wails doesn't support setting the window position on init, so we do it here
-			loadWindowLocation(ctx)
+			if settings.Settings.WindowPosition != nil {
+				wailsextras.WindowSetPosition(ctx, settings.Settings.WindowPosition.X, settings.Settings.WindowPosition.Y)
+			}
 
 			app.App.WatchWindow() //nolint:contextcheck
 			go websocket.ListenAndServeWebsocket()
@@ -134,23 +136,6 @@ func main() {
 	if err != nil {
 		slog.Error("failed to apply update on exit", slog.Any("error", err))
 		_ = dialog.Error("Failed to apply update on exit: %s", err.Error())
-	}
-}
-
-func loadWindowLocation(ctx context.Context) {
-	if settings.Settings.WindowPosition != nil {
-		// Setting the window location is relative to the current monitor,
-		// but we save it as absolute position.
-
-		wailsRuntime.WindowSetPosition(ctx, 0, 0)
-
-		// Get the location the window was actually placed at
-		monitorLeft, monitorTop := wailsRuntime.WindowGetPosition(ctx)
-
-		x := settings.Settings.WindowPosition.X - monitorLeft
-		y := settings.Settings.WindowPosition.Y - monitorTop
-
-		wailsRuntime.WindowSetPosition(ctx, x, y)
 	}
 }
 
