@@ -66,11 +66,19 @@ func (u *Updater) CheckForUpdate() error {
 		return nil
 	}
 
-	file, length, checksum, err := u.config.Source.GetFile(latestVersion, u.config.File)
+	file, length, err := u.config.Source.GetFile(latestVersion, u.config.File)
 	if err != nil {
 		return fmt.Errorf("failed to get file %s of version %s: %w", u.config.File, latestVersion, err)
 	}
 	defer file.Close()
+
+	var checksum []byte
+	if u.config.Checksum != nil {
+		checksum, err = u.config.Checksum.GetChecksumForFile(u.config.Source, latestVersion, u.config.File)
+		if err != nil {
+			return fmt.Errorf("failed to get checksum for file %s of version %s: %w", u.config.File, latestVersion, err)
+		}
+	}
 
 	progress := func(bytesDownloaded, bytesTotal int64) {
 		u.DownloadProgress.Dispatch(UpdateDownloadProgress{

@@ -32,6 +32,7 @@ type PendingUpdate struct {
 type Config struct {
 	Source            Source
 	File              string
+	Checksum          ChecksumSource
 	Apply             Apply
 	CurrentVersion    *semver.Version
 	IncludePrerelease bool
