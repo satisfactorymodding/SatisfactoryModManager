@@ -73,6 +73,17 @@ func main() {
 		windowStartState = options.Maximised
 	}
 
+	if len(os.Args) > 1 && os.Args[1] == "wipe-mods" {
+		includeRemote := len(os.Args) > 2 && os.Args[2] == "remote"
+		err := ficsitcli.FicsitCLI.WipeMods(includeRemote)
+		if err != nil {
+			slog.Error("failed to wipe mods", slog.Any("error", err))
+			_ = dialog.Error("Failed to wipe mods: %s", err.Error())
+			os.Exit(1)
+		}
+		return
+	}
+
 	// Create application with options
 	err = wails.Run(&options.App{
 		Title:            "SatisfactoryModManager",

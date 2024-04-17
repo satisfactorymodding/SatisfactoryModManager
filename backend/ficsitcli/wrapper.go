@@ -12,6 +12,7 @@ import (
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
 	appCommon "github.com/satisfactorymodding/SatisfactoryModManager/backend/common"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/settings"
 )
 
@@ -72,4 +73,29 @@ func (f *ficsitCLI) setProgress(p *Progress) {
 func (f *ficsitCLI) isValidInstall(path string) bool {
 	meta, ok := f.installationMetadata.Load(path)
 	return ok && meta.State != InstallStateInvalid
+}
+
+func (f *ficsitCLI) WipeMods(includeRemote bool) error {
+	for _, i := range f.ficsitCli.Installations.Installations {
+		if !includeRemote {
+			meta, ok := f.installationMetadata.Load(i.Path)
+			if !ok {
+				// If the metadata is not registered yet, it is definitely not a local installation
+				continue
+			}
+			if meta.Info == nil {
+				// If the metadata is not available, it is definitely not a local installation
+				continue
+			}
+			if meta.Info.Location != common.LocationTypeLocal {
+				continue
+			}
+		}
+
+		err := i.Wipe()
+		if err != nil {
+			return fmt.Errorf("failed to wipe installation %s: %w", i.Path, err)
+		}
+	}
+	return nil
 }

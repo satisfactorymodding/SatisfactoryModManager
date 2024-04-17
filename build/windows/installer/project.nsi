@@ -73,6 +73,8 @@ VIAddVersionKey "ProductName"     "${INFO_PRODUCTNAME}"
 ; Pages
 !insertmacro MULTIUSER_UNPAGE_INSTALLMODE
 
+!insertmacro MUI_UNPAGE_COMPONENTS
+
 !insertmacro MUI_UNPAGE_INSTFILES
 
 # Language config
@@ -138,7 +140,11 @@ Section "-Post"
     ${EndIf}
 SectionEnd
 
-Section "uninstall"
+Section /o "un.Remove installed mods" un_Wipe
+    ExecWait '"$INSTDIR\${PRODUCT_EXECUTABLE}" "wipe-mods"'
+SectionEnd
+
+Section "-un.install"
     RMDir /r "$AppData\${PRODUCT_EXECUTABLE}" # Remove the WebView2 DataPath
 
     RMDir /r $INSTDIR
@@ -162,6 +168,12 @@ LangString DESC_DesktopShortcut ${LANG_ENGLISH} "Add a shortcut to the Desktop."
 !insertmacro MUI_DESCRIPTION_TEXT ${startShortcut} $(DESC_StartShortcut)
 !insertmacro MUI_DESCRIPTION_TEXT ${desktopShortcut} $(DESC_DesktopShortcut)
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
+
+LangString DESC_WipeMods ${LANG_ENGLISH} "Remove installed mods from all local Satisfactory installations. Remote servers will not be affected. The profiles and app settings will remain intact, so they can be reused in a future installation."
+
+!insertmacro MUI_UNFUNCTION_DESCRIPTION_BEGIN
+!insertmacro MUI_DESCRIPTION_TEXT ${un_Wipe} $(DESC_WipeMods)
+!insertmacro MUI_UNFUNCTION_DESCRIPTION_END
 
 Function ComponentsPre
     Call DisableShortcutsOnExisting
