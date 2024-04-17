@@ -68,6 +68,10 @@ func (f *ficsitCLI) RemoveRemoteServer(path string) error {
 	if err != nil {
 		return fmt.Errorf("failed to delete installation: %w", err)
 	}
+	err = f.ficsitCli.Installations.Save()
+	if err != nil {
+		slog.Error("failed to save installations", slog.Any("error", err))
+	}
 	f.installationMetadata.Delete(path)
 	f.EmitGlobals()
 	return nil
