@@ -24,6 +24,7 @@ require (
 	golang.org/x/exp v0.0.0-20231214170342-aacd6d4b4611
 	golang.org/x/sys v0.16.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
+	howett.net/plist v1.0.1
 )
 
 require (
