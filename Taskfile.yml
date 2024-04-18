@@ -4,7 +4,7 @@ version: 3
 
 tasks:
   build:
-#    silent: true
+    silent: true
     vars:
       OUTPUT_FULL_PATH: '{{ $args := (splitArgs .CLI_ARGS) }}{{ range $i, $a := $args }}{{ if eq $a "-o" }}{{ index $args (add $i 1) }}{{ end }}{{ end }}'
       OUTPUT_FILENAME: '{{ if ne .OUTPUT_FULL_PATH "" }}{{ base (toSlash .OUTPUT_FULL_PATH) }}{{ end }}'
@@ -36,3 +36,10 @@ tasks:
             mkdir -p "{{ osDir .OUTPUT_FULL_PATH }}"
             cp -r "build/bin/{{.OUTPUT_FILENAME}}" "{{.OUTPUT_FULL_PATH}}"
           {{ end }}
+
+  lint:
+    silent: true
+    cmds:
+      - GOOS=windows  golangci-lint run
+      - GOOS=linux    golangci-lint run
+      - GOOS=darwin   golangci-lint run
