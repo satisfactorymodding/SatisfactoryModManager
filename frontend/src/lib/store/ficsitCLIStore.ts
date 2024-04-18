@@ -94,14 +94,50 @@ export const progressTitle = derived(progress, ($progress) => {
 const downloadTimeSeries = timeSeries(5000);
 const extractTimeSeries = timeSeries(5000);
 
+const STATS_UPDATE_INTERVAL = { speed: 0, eta: 500 };
+const downloadStats = writable({ speed: 0, eta: 0 as number | undefined });
+const extractStats = writable({ speed: 0, eta: 0 as number | undefined });
+const lastStatsUpdate = { speed: 0, eta: 0 };
+
+progress.subscribe(($progress) => {
+  if (!$progress) {
+    downloadTimeSeries.clear();
+    extractTimeSeries.clear();
+  } else {
+    const { 
+      download,
+      extract,
+    } = getTasksTotal($progress.tasks);
+  
+    downloadTimeSeries.addValue(download.current);
+    extractTimeSeries.addValue(extract.current);
+
+    const downloadSpeed = downloadTimeSeries.getDerivative() ?? 0;
+    const extractSpeed = extractTimeSeries.getDerivative() ?? 0;
+    const downloadETA = downloadSpeed !== 0 ? (download.total - download.current) / downloadSpeed : undefined;
+    const extractETA = extractSpeed !== 0 ? (extract.total - extract.current) / extractSpeed : undefined;
+
+    if (Date.now() - lastStatsUpdate.speed > STATS_UPDATE_INTERVAL.speed) {
+      downloadStats.set({ speed: downloadSpeed, eta: get(downloadStats).eta });
+      extractStats.set({ speed: extractSpeed, eta: get(extractStats).eta });
+      lastStatsUpdate.speed = Date.now();
+    }
+    if (Date.now() - lastStatsUpdate.eta > STATS_UPDATE_INTERVAL.eta) {
+      downloadStats.set({ speed: get(downloadStats).speed, eta: downloadETA });
+      extractStats.set({ speed: get(extractStats).speed, eta: extractETA });
+      lastStatsUpdate.eta = Date.now();
+    }
+  }
+});
+
 export const progressMessage = derived(progress, ($progress) => {
   if (!$progress) return '';
   
   const { 
-    download, 
-    extract, 
-    downloadingMods, 
-    extractingMods, 
+    download,
+    extract,
+    downloadingMods,
+    extractingMods,
   } = getTasksTotal($progress.tasks);
 
   if (download.total === 0 && extract.total === 0) {
@@ -135,23 +171,21 @@ export const progressMessage = derived(progress, ($progress) => {
   if (download.current !== download.total) {
     // Downloading something, prioritize that
     const completeMods = downloadingMods.filter((m) => m.complete);
-    const bytesPerSecond = downloadTimeSeries.getDerivative() ?? 0;
-    const timeLeft = bytesPerSecond !== 0 ? (download.total - download.current) / bytesPerSecond : undefined;
+    const { speed, eta } = get(downloadStats);
     return `Downloading \
             ${completeMods.length}/${downloadingMods.length} mods: \
             ${bytesToAppropriate(download.current)}/${bytesToAppropriate(download.total)}, \
-            ${bytesToAppropriate(bytesPerSecond)}/s, \
-            ${timeLeft !== undefined ? (timeLeft !== 0 ? secondsToAppropriate(timeLeft) : 'soon™') : '...'}`;
+            ${bytesToAppropriate(speed)}/s, \
+            ${eta !== undefined ? (eta !== 0 ? secondsToAppropriate(eta) : 'soon™') : '...'}`;
   }
   // Not downloading anything
   const completeMods = extractingMods.filter((m) => m.complete);
-  const bytesPerSecond = extractTimeSeries.getDerivative() ?? 0;
-  const timeLeft = bytesPerSecond !== 0 ? (extract.total - extract.current) / bytesPerSecond : undefined;
+  const { speed, eta } = get(extractStats);
   return `Extracting \
           ${completeMods.length}/${extractingMods.length} mods: \
           ${bytesToAppropriate(extract.current)}/${bytesToAppropriate(extract.total)}, \
-          ${bytesToAppropriate(bytesPerSecond)}/s, \
-          ${timeLeft !== undefined ? (timeLeft !== 0 ? secondsToAppropriate(timeLeft) : 'soon™') : '...'}`;
+          ${bytesToAppropriate(speed)}/s, \
+          ${eta !== undefined ? (eta !== 0 ? secondsToAppropriate(eta) : 'soon™') : '...'}`;
 });
 
 export const progressPercent = derived(progress, ($progress) => {
