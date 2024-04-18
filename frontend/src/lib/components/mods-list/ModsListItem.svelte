@@ -9,9 +9,10 @@
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
   import { CompatibilityState } from '$lib/generated';
+  import { ficsitcli } from '$lib/generated/wailsjs/go/models';
   import { type PopupSettings, popup } from '$lib/skeletonExtensions';
   import { addQueuedModAction, queuedMods, removeQueuedModAction } from '$lib/store/actionQueue';
-  import { canInstallMods, favoriteMods, lockfileMods, manifestMods, progress, selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
+  import { canInstallMods, favoriteMods, lockfileMods, manifestMods, progress, progressMessage, progressPercent, selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
   import { error, siteURL } from '$lib/store/generalStore';
   import { type PartialMod, search } from '$lib/store/modFiltersStore';
   import { largeNumberFormat } from '$lib/utils/dataFormats';
@@ -42,10 +43,17 @@
   $: renderedLogo = actualLogo || `${$siteURL}/images/no_image.webp`;
   $: author = ('offline' in mod || 'missing' in mod) ? mod.authors[0] : getAuthor(mod);
 
+  const modActions = [
+    ficsitcli.Action.INSTALL,
+    ficsitcli.Action.UNINSTALL,
+    ficsitcli.Action.ENABLE,
+    ficsitcli.Action.DISABLE,
+  ];
+
   $: isInstalled = mod.mod_reference in $manifestMods;
   $: isEnabled = $manifestMods[mod.mod_reference]?.enabled ?? mod.mod_reference in $lockfileMods;
   $: isDependency = !isInstalled && isEnabled;
-  $: inProgress = $progress?.item === mod.mod_reference;
+  $: inProgress = !!$progress && modActions.includes($progress.action) && $progress.item.name === mod.mod_reference;
   $: queued = $queuedMods.some((q) => q.mod === mod.mod_reference);
   $: queuedInstall = $queuedMods.some((q) => q.mod === mod.mod_reference && (q.action === 'install' || q.action === 'remove'));
   $: queuedEnable = $queuedMods.some((q) => q.mod === mod.mod_reference && (q.action === 'enable' || q.action === 'disable'));
@@ -277,7 +285,7 @@
         max={1}
         meter="bg-surface-50-900-token"
         track="bg-surface-200-700-token"
-        value={$progress?.progress === -1 ? undefined : $progress?.progress}/>
+        value={$progressPercent}/>
     </div>
   {/if}
   <div class="flex relative h-full space-x-2" class:-top-full={inProgress}>
@@ -333,7 +341,7 @@
         </div>
       </div>
       {#if inProgress}
-        <span class="shrink-0 text-sm">{$progress?.message}</span>
+        <span class="shrink-0 text-sm">{$progressMessage}</span>
       {/if}
     </div>
     <!-- The purpose of the event handlers here are to prevent navigating to the mod's page when clicking on one of the sub-buttons of the div. Thus, it shouldn't be focusable despite having "interactions" -->

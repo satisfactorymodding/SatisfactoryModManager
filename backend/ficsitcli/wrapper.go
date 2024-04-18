@@ -65,6 +65,11 @@ func (f *ficsitCLI) StartGameRunningWatcher() {
 	}()
 }
 
+func (f *ficsitCLI) GetProgress() *Progress {
+	// This function exists to ensure the Progress type is exported to typescript
+	return f.progress
+}
+
 func (f *ficsitCLI) setProgress(p *Progress) {
 	f.progress = p
 	wailsRuntime.EventsEmit(appCommon.AppContext, "progress", p)

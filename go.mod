@@ -5,7 +5,6 @@ go 1.22
 require (
 	github.com/Masterminds/semver/v3 v3.2.1
 	github.com/andygrunwald/vdf v1.1.0
-	github.com/dustin/go-humanize v1.0.1
 	github.com/kbinani/screenshot v0.0.0-20230812210009-b87d31814237
 	github.com/lmittmann/tint v1.0.3
 	github.com/minio/selfupdate v0.6.0

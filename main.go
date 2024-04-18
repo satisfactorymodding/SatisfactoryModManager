@@ -143,6 +143,7 @@ func main() {
 			common.AllBranches,
 			common.AllLocationTypes,
 			ficsitcli.AllInstallationStates,
+			ficsitcli.AllActionTypes,
 		},
 		Logger: backend.WailsZeroLogLogger{},
 	})

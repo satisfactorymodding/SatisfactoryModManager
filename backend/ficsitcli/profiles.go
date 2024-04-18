@@ -42,17 +42,13 @@ func (f *ficsitCLI) SetProfile(profile string) error {
 
 	f.EmitGlobals()
 
-	f.progress = &Progress{
-		Item:     "__select_profile__",
-		Message:  "Validating install",
-		Progress: -1,
-	}
+	f.progress = newProgress(ActionSelectProfile, newSimpleItem(profile))
 
 	f.setProgress(f.progress)
 
 	defer f.setProgress(nil)
 
-	installErr := f.validateInstall(selectedInstallation, "__select_profile__")
+	installErr := f.validateInstall(selectedInstallation)
 
 	if installErr != nil {
 		l.Error("failed to validate installation", slog.Any("error", installErr))
@@ -350,17 +346,13 @@ func (f *ficsitCLI) ImportProfile(name string, file string) error {
 
 	f.EmitGlobals()
 
-	f.progress = &Progress{
-		Item:     "__import_profile__",
-		Message:  "Validating install",
-		Progress: -1,
-	}
+	f.progress = newProgress(ActionImportProfile, newSimpleItem(name))
 
 	f.setProgress(f.progress)
 
 	defer f.setProgress(nil)
 
-	installErr := f.validateInstall(selectedInstallation, "__import_profile__")
+	installErr := f.validateInstall(selectedInstallation)
 
 	if installErr != nil {
 		_ = f.ficsitCli.Profiles.DeleteProfile(name)

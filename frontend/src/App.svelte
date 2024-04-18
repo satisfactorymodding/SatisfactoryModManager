@@ -77,7 +77,7 @@
 
   const modalStore = getModalStore();
 
-  $: if($progress && supportedProgressTypes.includes($progress.item)) {
+  $: if($progress && supportedProgressTypes.includes($progress.action)) {
     modalStore.triggerUnique({
       type: 'component',
       component: 'progress',

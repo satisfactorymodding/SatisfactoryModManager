@@ -113,17 +113,13 @@ func (f *ficsitCLI) SelectInstall(path string) error {
 
 	f.EmitGlobals()
 
-	f.progress = &Progress{
-		Item:     "__select_install__",
-		Message:  "Validating install",
-		Progress: -1,
-	}
+	f.progress = newProgress(ActionSelectInstall, newSimpleItem(path))
 
 	f.setProgress(f.progress)
 
 	defer f.setProgress(nil)
 
-	installErr := f.validateInstall(selectedInstallation, "__select_install__")
+	installErr := f.validateInstall(selectedInstallation)
 
 	if installErr != nil {
 		l.Error("failed to validate install", slog.Any("error", installErr))
@@ -145,13 +141,6 @@ func (f *ficsitCLI) SetModsEnabled(enabled bool) error {
 	}
 	l := slog.With(slog.String("task", "setModsEnabled"), slog.Bool("enabled", enabled), slog.String("install", selectedInstallation.Path))
 
-	var message string
-	if enabled {
-		message = "Enabling mods"
-	} else {
-		message = "Disabling mods"
-	}
-
 	selectedInstallation.Vanilla = !enabled
 	err := f.ficsitCli.Installations.Save()
 	if err != nil {
@@ -160,17 +149,17 @@ func (f *ficsitCLI) SetModsEnabled(enabled bool) error {
 
 	f.EmitGlobals()
 
-	f.progress = &Progress{
-		Item:     "__toggle_mods__",
-		Message:  message,
-		Progress: -1,
+	if enabled {
+		f.progress = newProgress(ActionToggleMods, newSimpleItem("true"))
+	} else {
+		f.progress = newProgress(ActionToggleMods, newSimpleItem("false"))
 	}
 
 	f.setProgress(f.progress)
 
 	defer f.setProgress(nil)
 
-	installErr := f.validateInstall(selectedInstallation, "__toggle_mods__")
+	installErr := f.validateInstall(selectedInstallation)
 
 	if installErr != nil {
 		l.Error("failed to validate install", slog.Any("error", installErr))

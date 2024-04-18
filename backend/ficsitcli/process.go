@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/dustin/go-humanize"
 	"github.com/puzpuzpuz/xsync/v3"
 	"github.com/satisfactorymodding/ficsit-cli/cli"
 	ficsitUtils "github.com/satisfactorymodding/ficsit-cli/utils"
@@ -14,10 +13,9 @@ import (
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
 	appCommon "github.com/satisfactorymodding/SatisfactoryModManager/backend/common"
-	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 )
 
-func (f *ficsitCLI) validateInstall(installation *cli.Installation, progressItem string) error {
+func (f *ficsitCLI) validateInstall(installation *cli.Installation) error {
 	if !f.isValidInstall(installation.Path) {
 		return fmt.Errorf("invalid installation: %s", installation.Path)
 	}
@@ -42,93 +40,35 @@ func (f *ficsitCLI) validateInstall(installation *cli.Installation, progressItem
 	defer progressTicker.Stop()
 	defer close(done)
 
-	downloadProgressTracker := utils.NewProgressTracker(time.Second * 5)
-	extractProgressTracker := utils.NewProgressTracker(time.Second * 5)
-
 	go func() {
 		for {
 			select {
 			case <-done:
 				return
 			case <-progressTicker.C:
-				downloadBytesProgress := ficsitUtils.GenericProgress{}
-				extractBytesProgress := ficsitUtils.GenericProgress{}
-				downloadModsProgress := ficsitUtils.GenericProgress{}
-				extractModsProgress := ficsitUtils.GenericProgress{}
+				newTasks := make(map[string]ProgressTask)
 
-				hasDownloading := false
-
-				modProgresses.Range(func(key string, value modProgress) bool {
-					if value.downloadProgress.Total != 0 {
-						downloadModsProgress.Total++
-						if value.complete || !value.downloading {
-							downloadModsProgress.Completed++
-						}
-						if !value.complete && value.downloading {
-							hasDownloading = true
+				modProgresses.Range(func(modAndVersion string, progress modProgress) bool {
+					if progress.downloadProgress.Total != 0 {
+						newTasks[fmt.Sprintf("%s:download", modAndVersion)] = ProgressTask{
+							Current: progress.downloadProgress.Completed,
+							Total:   progress.downloadProgress.Total,
 						}
 					}
-					// Extraction progress is not available while the mod is still being downloaded,
-					// but we should still count it as an extraction that has to execute.
-					if value.downloadProgress.Total != 0 || value.extractProgress.Total != 0 {
-						extractModsProgress.Total++
-						if value.complete {
-							extractModsProgress.Completed++
+					if progress.downloadProgress.Total != 0 || progress.extractProgress.Total != 0 {
+						newTasks[fmt.Sprintf("%s:extract", modAndVersion)] = ProgressTask{
+							Current: progress.extractProgress.Completed,
+							Total:   progress.extractProgress.Total,
 						}
 					}
-
-					downloadBytesProgress.Completed += value.downloadProgress.Completed
-					downloadBytesProgress.Total += value.downloadProgress.Total
-					extractBytesProgress.Completed += value.extractProgress.Completed
-					extractBytesProgress.Total += value.extractProgress.Total
-
 					return true
 				})
 
-				downloadProgressTracker.Add(downloadBytesProgress.Completed)
-				downloadProgressTracker.Total = downloadBytesProgress.Total
-				extractProgressTracker.Add(extractBytesProgress.Completed)
-				extractProgressTracker.Total = extractBytesProgress.Total
-
-				if hasDownloading {
-					if downloadBytesProgress.Total != 0 {
-						eta := downloadProgressTracker.ETA().Round(time.Second)
-						etaText := eta.String()
-						if eta == 0 {
-							etaText = "soon™"
-						}
-						f.setProgress(&Progress{
-							Item: progressItem,
-							Message: fmt.Sprintf(
-								"Downloading %d/%d mods: %s/%s, %s/s, %s",
-								downloadModsProgress.Completed, downloadModsProgress.Total,
-								humanize.Bytes(uint64(downloadBytesProgress.Completed)), humanize.Bytes(uint64(downloadBytesProgress.Total)),
-								humanize.Bytes(uint64(downloadProgressTracker.Speed())),
-								etaText,
-							),
-							Progress: downloadBytesProgress.Percentage(),
-						})
-					}
-				} else {
-					if extractBytesProgress.Total != 0 {
-						eta := extractProgressTracker.ETA().Round(time.Second)
-						etaText := eta.String()
-						if eta == 0 {
-							etaText = "soon™"
-						}
-						f.setProgress(&Progress{
-							Item: progressItem,
-							Message: fmt.Sprintf(
-								"Extracting %d/%d mods: %s/%s, %s/s, %s",
-								extractModsProgress.Completed, extractModsProgress.Total,
-								humanize.Bytes(uint64(extractBytesProgress.Completed)), humanize.Bytes(uint64(extractBytesProgress.Total)),
-								humanize.Bytes(uint64(extractProgressTracker.Speed())),
-								etaText,
-							),
-							Progress: extractBytesProgress.Percentage(),
-						})
-					}
-				}
+				f.setProgress(&Progress{
+					Action: f.progress.Action,
+					Item:   f.progress.Item,
+					Tasks:  newTasks,
+				})
 			}
 		}
 	}()
@@ -139,7 +79,8 @@ func (f *ficsitCLI) validateInstall(installation *cli.Installation, progressItem
 				// Although this wouldn't cause any issues in the progress generation above, we can ignore this update.
 				continue
 			}
-			modProgresses.Compute(update.Item.Mod, func(oldValue modProgress, loaded bool) (modProgress, bool) {
+			itemName := fmt.Sprintf("%s@%s", update.Item.Mod, update.Item.Version)
+			modProgresses.Compute(itemName, func(oldValue modProgress, loaded bool) (modProgress, bool) {
 				if oldValue.complete {
 					// Sometimes extract updates are received after the mod is marked as complete.
 					return oldValue, false
@@ -238,17 +179,13 @@ func (f *ficsitCLI) InstallMod(mod string) error {
 		l.Error("failed to save profile", slog.Any("error", err))
 	}
 
-	f.progress = &Progress{
-		Item:     mod,
-		Message:  "Finding the best version to install",
-		Progress: -1,
-	}
+	f.progress = newProgress(ActionInstall, newSimpleItem(mod))
 
 	f.setProgress(f.progress)
 
 	defer f.setProgress(nil)
 
-	installErr := f.validateInstall(selectedInstallation, mod)
+	installErr := f.validateInstall(selectedInstallation)
 
 	if installErr != nil {
 		l.Error("failed to install", slog.Any("error", installErr))
@@ -290,17 +227,13 @@ func (f *ficsitCLI) InstallModVersion(mod string, version string) error {
 		l.Error("failed to save profile", slog.Any("error", err))
 	}
 
-	f.progress = &Progress{
-		Item:     mod,
-		Message:  "Finding the best version to install",
-		Progress: -1,
-	}
+	f.progress = newProgress(ActionInstall, newItem(mod, version))
 
 	f.setProgress(f.progress)
 
 	defer f.setProgress(nil)
 
-	installErr := f.validateInstall(selectedInstallation, mod)
+	installErr := f.validateInstall(selectedInstallation)
 
 	if installErr != nil {
 		l.Error("failed to install", slog.Any("error", installErr))
@@ -337,17 +270,13 @@ func (f *ficsitCLI) RemoveMod(mod string) error {
 		l.Error("failed to save profile", slog.Any("error", err))
 	}
 
-	f.progress = &Progress{
-		Item:     mod,
-		Message:  "Checking for mods that are no longer needed",
-		Progress: -1,
-	}
+	f.progress = newProgress(ActionUninstall, newSimpleItem(mod))
 
 	f.setProgress(f.progress)
 
 	defer f.setProgress(nil)
 
-	installErr := f.validateInstall(selectedInstallation, mod)
+	installErr := f.validateInstall(selectedInstallation)
 
 	if installErr != nil {
 		l.Error("failed to install", slog.Any("error", installErr))
@@ -384,17 +313,13 @@ func (f *ficsitCLI) EnableMod(mod string) error {
 		l.Error("failed to save profile", slog.Any("error", err))
 	}
 
-	f.progress = &Progress{
-		Item:     mod,
-		Message:  "Finding the best version to install",
-		Progress: -1,
-	}
+	f.progress = newProgress(ActionEnable, newSimpleItem(mod))
 
 	f.setProgress(f.progress)
 
 	defer f.setProgress(nil)
 
-	installErr := f.validateInstall(selectedInstallation, mod)
+	installErr := f.validateInstall(selectedInstallation)
 
 	if installErr != nil {
 		l.Error("failed to install", slog.Any("error", installErr))
@@ -431,17 +356,13 @@ func (f *ficsitCLI) DisableMod(mod string) error {
 		l.Error("failed to save profile", slog.Any("error", err))
 	}
 
-	f.progress = &Progress{
-		Item:     mod,
-		Message:  "Checking for mods that are no longer needed",
-		Progress: -1,
-	}
+	f.progress = newProgress(ActionDisable, newSimpleItem(mod))
 
 	f.setProgress(f.progress)
 
 	defer f.setProgress(nil)
 
-	installErr := f.validateInstall(selectedInstallation, mod)
+	installErr := f.validateInstall(selectedInstallation)
 
 	if installErr != nil {
 		l.Error("failed to install", slog.Any("error", installErr))

@@ -112,6 +112,12 @@ func (f *ficsitCLI) UpdateMods(mods []string) error {
 		l.Error("failed to save profile", slog.Any("error", err))
 	}
 
+	f.progress = newProgress(ActionUpdate, noItem)
+
+	f.setProgress(f.progress)
+
+	defer f.setProgress(nil)
+
 	err = selectedInstallation.UpdateMods(f.ficsitCli, mods)
 	if err != nil {
 		l.Error("failed to update mods", slog.Any("error", err))
@@ -122,17 +128,7 @@ func (f *ficsitCLI) UpdateMods(mods []string) error {
 		return err //nolint:wrapcheck
 	}
 
-	f.progress = &Progress{
-		Item:     "__update__",
-		Message:  "Updating...",
-		Progress: -1,
-	}
-
-	f.setProgress(f.progress)
-
-	defer f.setProgress(nil)
-
-	err = f.validateInstall(selectedInstallation, "__update__")
+	err = f.validateInstall(selectedInstallation)
 
 	if err != nil {
 		l.Error("failed to validate installation", slog.Any("error", err))
