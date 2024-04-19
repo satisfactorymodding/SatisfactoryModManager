@@ -89,6 +89,15 @@ func (f *ficsitCLI) GetInstallation(path string) *cli.Installation {
 }
 
 func (f *ficsitCLI) SelectInstall(path string) error {
+	if !f.actionMutex.TryLock() {
+		return fmt.Errorf("another operation in progress")
+	}
+	defer f.actionMutex.Unlock()
+
+	f.setProgress(newProgress(ActionSelectInstall, newSimpleItem(path)))
+
+	defer f.setProgress(nil)
+
 	l := slog.With(slog.String("task", "selectInstall"), slog.String("path", path))
 
 	if !f.isValidInstall(path) {
@@ -113,12 +122,6 @@ func (f *ficsitCLI) SelectInstall(path string) error {
 
 	f.EmitGlobals()
 
-	f.progress = newProgress(ActionSelectInstall, newSimpleItem(path))
-
-	f.setProgress(f.progress)
-
-	defer f.setProgress(nil)
-
 	installErr := f.validateInstall(selectedInstallation)
 
 	if installErr != nil {
@@ -133,6 +136,19 @@ func (f *ficsitCLI) GetSelectedInstall() *cli.Installation {
 }
 
 func (f *ficsitCLI) SetModsEnabled(enabled bool) error {
+	if !f.actionMutex.TryLock() {
+		return fmt.Errorf("another operation in progress")
+	}
+	defer f.actionMutex.Unlock()
+
+	if enabled {
+		f.setProgress(newProgress(ActionToggleMods, newSimpleItem("true")))
+	} else {
+		f.setProgress(newProgress(ActionToggleMods, newSimpleItem("false")))
+	}
+
+	defer f.setProgress(nil)
+
 	selectedInstallation := f.GetSelectedInstall()
 
 	if selectedInstallation == nil {
@@ -148,16 +164,6 @@ func (f *ficsitCLI) SetModsEnabled(enabled bool) error {
 	}
 
 	f.EmitGlobals()
-
-	if enabled {
-		f.progress = newProgress(ActionToggleMods, newSimpleItem("true"))
-	} else {
-		f.progress = newProgress(ActionToggleMods, newSimpleItem("false"))
-	}
-
-	f.setProgress(f.progress)
-
-	defer f.setProgress(nil)
 
 	installErr := f.validateInstall(selectedInstallation)
 

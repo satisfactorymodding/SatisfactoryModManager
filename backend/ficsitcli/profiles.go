@@ -17,6 +17,15 @@ import (
 )
 
 func (f *ficsitCLI) SetProfile(profile string) error {
+	if !f.actionMutex.TryLock() {
+		return fmt.Errorf("another operation in progress")
+	}
+	defer f.actionMutex.Unlock()
+
+	f.setProgress(newProgress(ActionSelectProfile, newSimpleItem(profile)))
+
+	defer f.setProgress(nil)
+
 	l := slog.With(slog.String("task", "setProfile"), slog.String("profile", profile))
 
 	selectedInstallation := f.GetSelectedInstall()
@@ -41,12 +50,6 @@ func (f *ficsitCLI) SetProfile(profile string) error {
 	}
 
 	f.EmitGlobals()
-
-	f.progress = newProgress(ActionSelectProfile, newSimpleItem(profile))
-
-	f.setProgress(f.progress)
-
-	defer f.setProgress(nil)
 
 	installErr := f.validateInstall(selectedInstallation)
 
@@ -302,6 +305,15 @@ func (f *ficsitCLI) ReadExportedProfileMetadata(file string) (*ExportedProfileMe
 }
 
 func (f *ficsitCLI) ImportProfile(name string, file string) error {
+	if !f.actionMutex.TryLock() {
+		return fmt.Errorf("another operation in progress")
+	}
+	defer f.actionMutex.Unlock()
+
+	f.setProgress(newProgress(ActionImportProfile, newSimpleItem(name)))
+
+	defer f.setProgress(nil)
+
 	l := slog.With(slog.String("task", "importProfile"), slog.String("name", name), slog.String("file", file))
 
 	selectedInstallation := f.GetSelectedInstall()
@@ -345,12 +357,6 @@ func (f *ficsitCLI) ImportProfile(name string, file string) error {
 	}
 
 	f.EmitGlobals()
-
-	f.progress = newProgress(ActionImportProfile, newSimpleItem(name))
-
-	f.setProgress(f.progress)
-
-	defer f.setProgress(nil)
 
 	installErr := f.validateInstall(selectedInstallation)
 

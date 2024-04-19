@@ -82,12 +82,16 @@ func (f *ficsitCLI) CheckForUpdates() ([]Update, error) {
 }
 
 func (f *ficsitCLI) UpdateMods(mods []string) error {
-	l := slog.With(slog.String("task", "updateMods"))
-
-	if f.progress != nil {
-		l.Error("another operation in progress")
+	if !f.actionMutex.TryLock() {
 		return fmt.Errorf("another operation in progress")
 	}
+	defer f.actionMutex.Unlock()
+
+	f.setProgress(newProgress(ActionUpdate, noItem))
+
+	defer f.setProgress(nil)
+
+	l := slog.With(slog.String("task", "updateMods"))
 
 	selectedInstallation := f.GetSelectedInstall()
 
@@ -111,12 +115,6 @@ func (f *ficsitCLI) UpdateMods(mods []string) error {
 	if err != nil {
 		l.Error("failed to save profile", slog.Any("error", err))
 	}
-
-	f.progress = newProgress(ActionUpdate, noItem)
-
-	f.setProgress(f.progress)
-
-	defer f.setProgress(nil)
 
 	err = selectedInstallation.UpdateMods(f.ficsitCli, mods)
 	if err != nil {

@@ -3,6 +3,7 @@ package ficsitcli
 import (
 	"fmt"
 	"log/slog"
+	"sync"
 	"time"
 
 	"github.com/mitchellh/go-ps"
@@ -22,6 +23,7 @@ type ficsitCLI struct {
 	installFindErrors    []error
 	progress             *Progress
 	isGameRunning        bool
+	actionMutex          sync.Mutex
 }
 
 var FicsitCLI *ficsitCLI

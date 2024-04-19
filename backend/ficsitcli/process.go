@@ -148,9 +148,14 @@ func (f *ficsitCLI) EmitGlobals() {
 }
 
 func (f *ficsitCLI) InstallMod(mod string) error {
-	if f.progress != nil {
+	if !f.actionMutex.TryLock() {
 		return fmt.Errorf("another operation in progress")
 	}
+	defer f.actionMutex.Unlock()
+
+	f.setProgress(newProgress(ActionInstall, newSimpleItem(mod)))
+
+	defer f.setProgress(nil)
 
 	selectedInstallation := f.GetSelectedInstall()
 
@@ -179,12 +184,6 @@ func (f *ficsitCLI) InstallMod(mod string) error {
 		l.Error("failed to save profile", slog.Any("error", err))
 	}
 
-	f.progress = newProgress(ActionInstall, newSimpleItem(mod))
-
-	f.setProgress(f.progress)
-
-	defer f.setProgress(nil)
-
 	installErr := f.validateInstall(selectedInstallation)
 
 	if installErr != nil {
@@ -196,9 +195,14 @@ func (f *ficsitCLI) InstallMod(mod string) error {
 }
 
 func (f *ficsitCLI) InstallModVersion(mod string, version string) error {
-	if f.progress != nil {
+	if !f.actionMutex.TryLock() {
 		return fmt.Errorf("another operation in progress")
 	}
+	defer f.actionMutex.Unlock()
+
+	f.setProgress(newProgress(ActionInstall, newItem(mod, version)))
+
+	defer f.setProgress(nil)
 
 	selectedInstallation := f.GetSelectedInstall()
 
@@ -227,12 +231,6 @@ func (f *ficsitCLI) InstallModVersion(mod string, version string) error {
 		l.Error("failed to save profile", slog.Any("error", err))
 	}
 
-	f.progress = newProgress(ActionInstall, newItem(mod, version))
-
-	f.setProgress(f.progress)
-
-	defer f.setProgress(nil)
-
 	installErr := f.validateInstall(selectedInstallation)
 
 	if installErr != nil {
@@ -244,9 +242,14 @@ func (f *ficsitCLI) InstallModVersion(mod string, version string) error {
 }
 
 func (f *ficsitCLI) RemoveMod(mod string) error {
-	if f.progress != nil {
+	if !f.actionMutex.TryLock() {
 		return fmt.Errorf("another operation in progress")
 	}
+	defer f.actionMutex.Unlock()
+
+	f.setProgress(newProgress(ActionUninstall, newSimpleItem(mod)))
+
+	defer f.setProgress(nil)
 
 	selectedInstallation := f.GetSelectedInstall()
 
@@ -270,12 +273,6 @@ func (f *ficsitCLI) RemoveMod(mod string) error {
 		l.Error("failed to save profile", slog.Any("error", err))
 	}
 
-	f.progress = newProgress(ActionUninstall, newSimpleItem(mod))
-
-	f.setProgress(f.progress)
-
-	defer f.setProgress(nil)
-
 	installErr := f.validateInstall(selectedInstallation)
 
 	if installErr != nil {
@@ -287,9 +284,14 @@ func (f *ficsitCLI) RemoveMod(mod string) error {
 }
 
 func (f *ficsitCLI) EnableMod(mod string) error {
-	if f.progress != nil {
+	if !f.actionMutex.TryLock() {
 		return fmt.Errorf("another operation in progress")
 	}
+	defer f.actionMutex.Unlock()
+
+	f.setProgress(newProgress(ActionEnable, newSimpleItem(mod)))
+
+	defer f.setProgress(nil)
 
 	selectedInstallation := f.GetSelectedInstall()
 
@@ -313,12 +315,6 @@ func (f *ficsitCLI) EnableMod(mod string) error {
 		l.Error("failed to save profile", slog.Any("error", err))
 	}
 
-	f.progress = newProgress(ActionEnable, newSimpleItem(mod))
-
-	f.setProgress(f.progress)
-
-	defer f.setProgress(nil)
-
 	installErr := f.validateInstall(selectedInstallation)
 
 	if installErr != nil {
@@ -330,9 +326,14 @@ func (f *ficsitCLI) EnableMod(mod string) error {
 }
 
 func (f *ficsitCLI) DisableMod(mod string) error {
-	if f.progress != nil {
+	if !f.actionMutex.TryLock() {
 		return fmt.Errorf("another operation in progress")
 	}
+	defer f.actionMutex.Unlock()
+
+	f.setProgress(newProgress(ActionDisable, newSimpleItem(mod)))
+
+	defer f.setProgress(nil)
 
 	selectedInstallation := f.GetSelectedInstall()
 
@@ -355,12 +356,6 @@ func (f *ficsitCLI) DisableMod(mod string) error {
 	if err != nil {
 		l.Error("failed to save profile", slog.Any("error", err))
 	}
-
-	f.progress = newProgress(ActionDisable, newSimpleItem(mod))
-
-	f.setProgress(f.progress)
-
-	defer f.setProgress(nil)
 
 	installErr := f.validateInstall(selectedInstallation)
 
