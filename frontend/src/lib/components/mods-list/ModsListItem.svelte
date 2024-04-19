@@ -59,18 +59,18 @@
   $: queuedEnable = $queuedMods.some((q) => q.mod === mod.mod_reference && (q.action === 'enable' || q.action === 'disable'));
   
   $: installButtonDisplay = ((): ButtonDisplay => {
-    if (isDependency) {
-      return {
-        icon: mdiLinkLock,
-        iconHover: mdiLinkLock,
-        tooltip: 'This mod is installed a dependency of another mod. It cannot be installed or removed on its own.',
-      };
-    }
     if (inProgress) {
       return {
         icon: mdiSync,
         iconHover: mdiSync,
         tooltip: 'Wait for the current operation to complete.',
+      };
+    }
+    if (isDependency) {
+      return {
+        icon: mdiLinkLock,
+        iconHover: mdiLinkLock,
+        tooltip: 'This mod is installed a dependency of another mod. It cannot be installed or removed on its own.',
       };
     }
     if (queuedInstall) {
