@@ -21,7 +21,6 @@ type ficsitCLI struct {
 	ficsitCli            *cli.GlobalContext
 	installationMetadata *xsync.MapOf[string, installationMetadata]
 	installFindErrors    []error
-	progress             *Progress
 	isGameRunning        bool
 	actionMutex          sync.Mutex
 }
@@ -67,14 +66,46 @@ func (f *ficsitCLI) StartGameRunningWatcher() {
 	}()
 }
 
+// GetProgress exists only to ensure the Progress type is exported to typescript. It returns nil
 func (f *ficsitCLI) GetProgress() *Progress {
-	// This function exists to ensure the Progress type is exported to typescript
-	return f.progress
+	return nil
 }
 
-func (f *ficsitCLI) setProgress(p *Progress) {
-	f.progress = p
-	wailsRuntime.EventsEmit(appCommon.AppContext, "progress", p)
+func (f *ficsitCLI) EmitModsChange() {
+	lockfileMods, err := f.GetSelectedInstallLockfileMods()
+	if err != nil {
+		slog.Error("failed to load lockfile", slog.Any("error", err))
+		return
+	}
+	wailsRuntime.EventsEmit(appCommon.AppContext, "lockfileMods", lockfileMods)
+	wailsRuntime.EventsEmit(appCommon.AppContext, "manifestMods", f.GetSelectedInstallProfileMods())
+}
+
+func (f *ficsitCLI) EmitGlobals() {
+	if appCommon.AppContext == nil {
+		// This function can be called from AddRemoteServer, which is used during initialization
+		// at which point the context is not set yet.
+		// We can safely ignore this call.
+		return
+	}
+	wailsRuntime.EventsEmit(appCommon.AppContext, "installations", f.GetInstallations())
+	wailsRuntime.EventsEmit(appCommon.AppContext, "installationsMetadata", f.GetInstallationsMetadata())
+	wailsRuntime.EventsEmit(appCommon.AppContext, "remoteServers", f.GetRemoteInstallations())
+	profileNames := make([]string, 0, len(f.ficsitCli.Profiles.Profiles))
+	for k := range f.ficsitCli.Profiles.Profiles {
+		profileNames = append(profileNames, k)
+	}
+	wailsRuntime.EventsEmit(appCommon.AppContext, "profiles", profileNames)
+
+	selectedInstallation := f.GetSelectedInstall()
+
+	if selectedInstallation == nil {
+		return
+	}
+
+	wailsRuntime.EventsEmit(appCommon.AppContext, "selectedInstallation", selectedInstallation.Path)
+	wailsRuntime.EventsEmit(appCommon.AppContext, "selectedProfile", selectedInstallation.Profile)
+	wailsRuntime.EventsEmit(appCommon.AppContext, "modsEnabled", !selectedInstallation.Vanilla)
 }
 
 func (f *ficsitCLI) isValidInstall(path string) bool {
