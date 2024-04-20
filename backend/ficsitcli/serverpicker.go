@@ -1,24 +1,39 @@
 package ficsitcli
 
 import (
+	"errors"
 	"fmt"
+	"io/fs"
+	"net/url"
+	"path"
 	"path/filepath"
+	"runtime"
+	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/satisfactorymodding/ficsit-cli/cli/disk"
+	psUtilDisk "github.com/shirou/gopsutil/v3/disk"
+	"golang.org/x/sync/errgroup"
 )
 
-var ServerPicker = &serverPicker{
-	disks: make(map[string]disk.Disk),
+type serverPicker struct {
+	disks              map[string]diskData
+	nextServerPickerID int
 }
 
-type serverPicker struct {
-	disks              map[string]disk.Disk
-	nextServerPickerID int
+type diskData struct {
+	disk    disk.Disk
+	isLocal bool
+}
+
+var ServerPicker = &serverPicker{
+	disks: make(map[string]diskData),
 }
 
 type PickerDirectory struct {
 	Name           string `json:"name"`
+	Path           string `json:"path"`
 	IsValidInstall bool   `json:"isValidInstall"`
 }
 
@@ -33,6 +48,25 @@ func (s *serverPicker) getID() string {
 	return strconv.Itoa(id)
 }
 
+func (*serverPicker) GetPathSeparator() string {
+	return string(filepath.Separator)
+}
+
+var remoteSchemes = map[string]struct{}{
+	"ftp":  {},
+	"sftp": {},
+}
+
+func isLocal(path string) (bool, error) {
+	parsed, err := url.Parse(path)
+	if err != nil {
+		return false, fmt.Errorf("failed to parse path: %w", err)
+	}
+
+	_, ok := remoteSchemes[parsed.Scheme]
+	return !ok, nil
+}
+
 func (s *serverPicker) StartPicker(path string) (string, error) {
 	id := s.getID()
 
@@ -41,7 +75,15 @@ func (s *serverPicker) StartPicker(path string) (string, error) {
 		return "", fmt.Errorf("failed to create: %w", err)
 	}
 
-	s.disks[id] = d
+	local, err := isLocal(path)
+	if err != nil {
+		return "", fmt.Errorf("failed to check if local: %w", err)
+	}
+
+	s.disks[id] = diskData{
+		disk:    d,
+		isLocal: local,
+	}
 
 	return id, nil
 }
@@ -54,7 +96,7 @@ func (s *serverPicker) StopPicker(id string) error {
 	return nil
 }
 
-func (s *serverPicker) TryPick(id string, path string) (PickerResult, error) {
+func (s *serverPicker) TryPick(id string, pickPath string) (PickerResult, error) {
 	d, ok := s.disks[id]
 	if !ok {
 		return PickerResult{}, fmt.Errorf("no such disk: %s", id)
@@ -64,32 +106,86 @@ func (s *serverPicker) TryPick(id string, path string) (PickerResult, error) {
 		Items: make([]PickerDirectory, 0),
 	}
 
+	if d.isLocal && pickPath == "\\" && runtime.GOOS == "windows" {
+		// On windows, the root does not exist, and instead we need to list partitions
+		partitions, err := psUtilDisk.Partitions(false)
+		if err != nil {
+			return PickerResult{}, fmt.Errorf("failed to get partitions: %w", err)
+		}
+		for _, partition := range partitions {
+			validInstall, err := isValidInstall(d.disk, filepath.Join(pickPath, partition.Mountpoint))
+			if err != nil {
+				return PickerResult{}, fmt.Errorf("failed to check if valid install: %w", err)
+			}
+
+			result.Items = append(result.Items, PickerDirectory{
+				Name:           partition.Mountpoint,
+				Path:           partition.Mountpoint,
+				IsValidInstall: validInstall,
+			})
+		}
+		return result, nil
+	}
+
 	var err error
 
-	result.IsValidInstall, err = isValidInstall(d, path)
+	result.IsValidInstall, err = isValidInstall(d.disk, pickPath)
 	if err != nil {
 		return PickerResult{}, fmt.Errorf("failed to check if valid install: %w", err)
 	}
 
-	entries, err := d.ReadDir(path)
+	entries, err := d.disk.ReadDir(pickPath)
 	if err != nil {
 		return PickerResult{}, fmt.Errorf("failed reading directory: %w", err)
 	}
+
+	var wg errgroup.Group
+	// We only read the channel after all items have been added,
+	// so it must be buffered to avoid a deadlock
+	itemsChan := make(chan PickerDirectory, len(entries))
+
 	for _, entry := range entries {
 		if !entry.IsDir() {
 			continue
 		}
 
-		validInstall, err := isValidInstall(d, filepath.Join(path, entry.Name()))
-		if err != nil {
-			return PickerResult{}, fmt.Errorf("failed to check if valid install: %w", err)
-		}
+		wg.TryGo(func() error {
+			validInstall, err := isValidInstall(d.disk, filepath.Join(pickPath, entry.Name()))
+			if err != nil {
+				if errors.Is(err, fs.ErrPermission) {
+					return nil
+				}
+				return fmt.Errorf("failed to check if valid install: %w", err)
+			}
 
-		result.Items = append(result.Items, PickerDirectory{
-			Name:           entry.Name(),
-			IsValidInstall: validInstall,
+			var fullPath string
+			if d.isLocal {
+				fullPath = filepath.Join(pickPath, entry.Name())
+			} else {
+				fullPath = path.Join(pickPath, entry.Name())
+			}
+
+			itemsChan <- PickerDirectory{
+				Name:           entry.Name(),
+				Path:           fullPath,
+				IsValidInstall: validInstall,
+			}
+			return nil
 		})
 	}
+
+	if err := wg.Wait(); err != nil {
+		return PickerResult{}, err //nolint:wrapCheck
+	}
+	close(itemsChan)
+
+	for item := range itemsChan {
+		result.Items = append(result.Items, item)
+	}
+
+	slices.SortFunc(result.Items, func(i, j PickerDirectory) int {
+		return strings.Compare(i.Name, j.Name)
+	})
 
 	return result, nil
 }

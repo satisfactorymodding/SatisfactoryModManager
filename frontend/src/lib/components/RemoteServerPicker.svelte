@@ -4,14 +4,40 @@
   import { onDestroy } from 'svelte';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
-  import { StartPicker, StopPicker, TryPick } from '$lib/generated/wailsjs/go/ficsitcli/serverPicker';
+  import { GetPathSeparator, StartPicker, StopPicker, TryPick } from '$lib/generated/wailsjs/go/ficsitcli/serverPicker';
+  import type { ficsitcli } from '$lib/generated/wailsjs/go/models';
 
 
   export let basePath: string;
   export let disabled = false;
   
-  let currentBasePath = '';
+  let currentBasePath: string | null = null;
   let pickerId = '';
+
+  let platformPathSeparator = '/';
+
+  GetPathSeparator().then((sep) => {
+    platformPathSeparator = sep;
+  });
+
+  $: isLocalPath = (() => {
+    try {
+      const url = new URL(basePath);
+      if (url.protocol === 'ftp:' || url.protocol === 'sftp:') {
+        return false;
+      }
+      return true;
+    } catch {
+      // If not parsable as a URL, it is definitely a local path
+      return true;
+    }
+  })();
+
+  $: pathSeparator = isLocalPath ? platformPathSeparator : '/';
+
+  function parentPath(path: string) {
+    return path.split(pathSeparator).slice(0, -1).join(pathSeparator);
+  }
 
   async function stopPicker() {
     if (pickerId) {
@@ -39,18 +65,12 @@
 
   $: if (disabled) {
     stopPicker();
-    currentBasePath = '';
+    currentBasePath = null;
   }
 
   onDestroy(() => {
     stopPicker();
   });
-
-  interface PickerDirectory {
-    path: string;
-    name: string;
-    isValidInstall: boolean;
-  }
 
   let displayedItems: { path: string; name: string; isValidInstall: boolean }[] = [];
 
@@ -64,7 +84,7 @@
     const forPath = path;
     const forPickerId = pickerId;
     try {
-      let { isValidInstall } = await TryPick(pickerId, path + '/');
+      let { isValidInstall } = await TryPick(pickerId, path + pathSeparator);
       // If the path has changed since the request was made,
       // or the picker has been stopped, ignore the response
       if (path !== forPath || pickerId !== forPickerId) {
@@ -90,11 +110,11 @@
     checkValid();
   }
 
-  $: trimmedPath = path.endsWith('/') ? path.slice(0, -1) : path;
+  $: trimmedPath = path.endsWith(pathSeparator) ? path.slice(0, -1) : path;
 
   let displayedPath = '';
   $: if (!pendingValidCheck) {
-    displayedPath = valid ? trimmedPath.split('/').slice(0, -1).join('/') : trimmedPath;
+    displayedPath = valid ? parentPath(trimmedPath) : trimmedPath;
   }
 
   let pendingDisplay = false;
@@ -106,17 +126,13 @@
     const forPath = displayedPath;
     const forPickerId = pickerId;
     try {
-      let { items } = await TryPick(pickerId, displayedPath + '/');
+      let { items } = await TryPick(pickerId, displayedPath + pathSeparator);
       // If the path has changed since the request was made,
       // or the picker has been stopped, ignore the response
       if (displayedPath !== forPath || pickerId !== forPickerId) {
         return;
       }
-      displayedItems = items.map((d) => ({
-        path: displayedPath + '/' + d.name,
-        name: d.name,
-        isValidInstall: d.isValidInstall,
-      }));
+      displayedItems = items;
       error = null;
     } catch (e) {
       // If the path has changed since the request was made,
@@ -135,7 +151,7 @@
     updateDisplay();
   }
 
-  function select(item: PickerDirectory) {
+  function select(item: ficsitcli.PickerDirectory) {
     valid = item.isValidInstall;
     path = item.path;
   }
@@ -146,7 +162,7 @@
 
 <div class="relative">
   <div class="flex flex-col w-full card bg-surface-200-700-token">
-    <button class="w-full btn !scale-100" disabled={displayedPath.length <= 1 || pendingDisplay || pendingValidCheck} on:click={() => { path = displayedPath.split('/').slice(0, -1).join('/'); valid = false; }}>
+    <button class="w-full btn !scale-100" disabled={displayedPath.length <= 1 || pendingDisplay || pendingValidCheck} on:click={() => { path = parentPath(displayedPath); valid = false; }}>
       <SvgIcon
         class="h-5 w-5"
         icon={mdiSubdirectoryArrowLeft} />

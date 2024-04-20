@@ -292,6 +292,13 @@
           placeholder="C:\Path\To\Server"
           type="text"
           bind:value={newServerPath}/>
+        <div class="sm:col-start-2 col-span-2">
+          <RemoteServerPicker
+            basePath=""
+            bind:path={newServerPath}
+            bind:valid={isPathValid}
+          />
+        </div>
       {/if}
       <button
         class="btn h-full text-sm bg-primary-600 text-secondary-900 col-start-2 sm:col-start-4 row-start-1"
