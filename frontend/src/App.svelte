@@ -73,6 +73,9 @@
     } else {
       noInstallsError = true;
     }
+  } else {
+    invalidInstallsError = false;
+    noInstallsError = false;
   }
 
   const modalStore = getModalStore();
