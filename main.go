@@ -137,6 +137,7 @@ func main() {
 			ficsitcli.FicsitCLI,
 			autoupdate.Updater,
 			settings.Settings,
+			ficsitcli.ServerPicker,
 		},
 		EnumBind: []interface{}{
 			common.AllInstallTypes,
