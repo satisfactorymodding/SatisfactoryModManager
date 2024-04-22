@@ -4,6 +4,7 @@ import (
 	"context"
 	"embed"
 	"log/slog"
+	"net/url"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -61,13 +62,22 @@ func main() {
 		}
 	}
 
-	err = os.Setenv("HTTP_PROXY", settings.Settings.Proxy)
-	if err != nil {
-		slog.Error("failed to set HTTP_PROXY", slog.Any("error", err))
-	}
-	err = os.Setenv("HTTPS_PROXY", settings.Settings.Proxy)
-	if err != nil {
-		slog.Error("failed to set HTTPS_PROXY", slog.Any("error", err))
+	if settings.Settings.Proxy != "" {
+		// webkit honors these env vars, even if they are an empty string,
+		// so we must ensure they are valid
+		_, err := url.Parse(settings.Settings.Proxy)
+		if err != nil {
+			slog.Error("skipping setting proxy, invalid URL", slog.Any("error", err))
+		} else {
+			err = os.Setenv("HTTP_PROXY", settings.Settings.Proxy)
+			if err != nil {
+				slog.Error("failed to set HTTP_PROXY", slog.Any("error", err))
+			}
+			err = os.Setenv("HTTPS_PROXY", settings.Settings.Proxy)
+			if err != nil {
+				slog.Error("failed to set HTTPS_PROXY", slog.Any("error", err))
+			}
+		}
 	}
 
 	err = ficsitcli.Init()
