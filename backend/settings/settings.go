@@ -46,7 +46,7 @@ type settings struct {
 	FavoriteMods []string        `json:"favoriteMods,omitempty"`
 	ModFilters   SavedModFilters `json:"modFilters,omitempty"`
 
-	QueueAutoStart      bool                `json:"queueAutoStart,omitempty"`
+	QueueAutoStart      bool                `json:"queueAutoStart"`
 	IgnoredUpdates      map[string][]string `json:"ignoredUpdates,omitempty"`
 	UpdateCheckMode     UpdateCheckMode     `json:"updateCheckMode,omitempty"`
 	ViewedAnnouncements []string            `json:"viewedAnnouncements,omitempty"`
