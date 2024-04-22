@@ -45,12 +45,19 @@
       pickerId = '';
     }
   }
+
+  let setupError: string | null = null;
   
   const restartPicker = _.debounce(async () => {
     await stopPicker();
     if (!disabled) {
-      pickerId = await StartPicker(basePath);
-      currentBasePath = basePath;
+      try {
+        pickerId = await StartPicker(basePath);
+        currentBasePath = basePath;
+        setupError = null;
+      } catch (e) {
+        setupError = e as string;
+      }
     }
   // TODO: handle errors
   }, 1000);
@@ -189,12 +196,14 @@
       {/if}
     {/if}
   </div>
-  {#if (((pendingDisplay || pendingValidCheck) && !valid) || error) && !disabled}
+  {#if (((pendingDisplay || pendingValidCheck) && !valid) || error || setupError) && !disabled}
     <div class="w-full h-full flex justify-center card items-center absolute top-0 !bg-surface-600/80">
       {#if ((pendingDisplay || pendingValidCheck) && !valid)}
         <SvgIcon
           class="h-10 w-10 animate-spin text-primary-600"
           icon={mdiLoading} />
+      {:else if setupError}
+        <div class="text-error-500">{setupError}</div>
       {:else}
         <div class="text-error-500">Failed to list directory</div>
       {/if}
