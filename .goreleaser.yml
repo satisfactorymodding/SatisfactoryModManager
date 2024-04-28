@@ -19,6 +19,7 @@ builds:
   - id: standalone
 
     targets:
+      - windows_amd64
       - linux_amd64
       - darwin_universal
 
