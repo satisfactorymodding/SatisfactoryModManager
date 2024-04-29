@@ -8,7 +8,8 @@
   let proxyURL = $proxy;
   let saving = false;
 
-  $: canSave = proxyURL !== $proxy && !$progress && !saving;
+  $: canChange = !$progress && !saving;
+  $: canSave = proxyURL !== $proxy && canChange;
 
   async function setProxy() {
     saving = true;
@@ -34,7 +35,7 @@
         />
         <button
           class="btn shrink-0 text-primary-600"
-          disabled={!canSave}
+          disabled={!canChange}
           on:click={() => { proxyURL = ''; setProxy(); }}>
           <span>Remove proxy</span>
           <div class="grow" />
