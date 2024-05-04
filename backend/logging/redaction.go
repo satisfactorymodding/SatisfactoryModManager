@@ -5,12 +5,29 @@ import (
 	"log/slog"
 
 	"github.com/samber/lo"
+	slogmulti "github.com/samber/slog-multi"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/ficsitcli"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 )
 
-func redactGamePathCredentialsMiddleware(ctx context.Context, record slog.Record, next func(context.Context, slog.Record) error) error {
+type redactGamePathCredentialsMiddleware struct {
+	next slog.Handler
+}
+
+func newRedactGamePathCredentialsMiddleware() slogmulti.Middleware {
+	return func(next slog.Handler) slog.Handler {
+		return &redactGamePathCredentialsMiddleware{
+			next: next,
+		}
+	}
+}
+
+func (r redactGamePathCredentialsMiddleware) Enabled(ctx context.Context, level slog.Level) bool {
+	return r.next.Enabled(ctx, level)
+}
+
+func (r redactGamePathCredentialsMiddleware) Handle(ctx context.Context, record slog.Record) error {
 	attrs := make([]slog.Attr, 0, record.NumAttrs())
 
 	record.Attrs(func(attr slog.Attr) bool {
@@ -22,7 +39,22 @@ func redactGamePathCredentialsMiddleware(ctx context.Context, record slog.Record
 	record = slog.NewRecord(record.Time, record.Level, record.Message, record.PC)
 	record.AddAttrs(attrs...)
 
-	return next(ctx, record)
+	return r.next.Handle(ctx, record) //nolint:wrapcheck
+}
+
+func (r redactGamePathCredentialsMiddleware) WithAttrs(attrs []slog.Attr) slog.Handler {
+	for i := range attrs {
+		attrs[i] = redactPaths(attrs[i])
+	}
+	return &redactGamePathCredentialsMiddleware{
+		next: r.next.WithAttrs(attrs),
+	}
+}
+
+func (r redactGamePathCredentialsMiddleware) WithGroup(name string) slog.Handler {
+	return &redactGamePathCredentialsMiddleware{
+		next: r.next.WithGroup(name),
+	}
 }
 
 func redactPaths(attr slog.Attr) slog.Attr {
