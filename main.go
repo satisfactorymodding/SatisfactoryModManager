@@ -4,6 +4,7 @@ import (
 	"context"
 	"embed"
 	"log/slog"
+	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -42,6 +43,11 @@ var (
 )
 
 func main() {
+	// Set user agent for http requests from backend
+	// We cannot set the frontend's user agent, because wails does not expose that,
+	// but it does append wails.io to determine which asset requests come from inside the app, and which are external
+	http.DefaultTransport = &withUserAgent{inner: http.DefaultTransport}
+
 	logging.Init()
 
 	autoupdate.Init()
@@ -66,6 +72,8 @@ func main() {
 	if settings.Settings.Proxy != "" {
 		// webkit honors these env vars, even if they are an empty string,
 		// so we must ensure they are valid
+		// We could instead set the proxy of the http.DefaultTransport,
+		// but applying the proxy to the frontend too is better
 		_, err := url.Parse(settings.Settings.Proxy)
 		if err != nil {
 			slog.Error("skipping setting proxy, invalid URL", slog.Any("error", err))
@@ -269,4 +277,13 @@ func init() {
 	// logging
 
 	viper.Set("log-file", filepath.Join(smmCacheDir, "logs", "SatisfactoryModManager.log"))
+}
+
+type withUserAgent struct {
+	inner http.RoundTripper
+}
+
+func (c *withUserAgent) RoundTrip(req *http.Request) (*http.Response, error) {
+	req.Header.Set("User-Agent", "SatisfactoryModManager/"+viper.GetString("version"))
+	return c.inner.RoundTrip(req) //nolint:wrapcheck
 }
