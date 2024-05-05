@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { isUpdateOnStart } from './smmUpdate';
+
   import { UpdateAndRestart } from '$lib/generated/wailsjs/go/autoupdate/autoUpdate';
   import { smmUpdate } from '$lib/store/smmUpdateStore';
 
@@ -13,11 +15,13 @@
     <span class="text-base">Update ready to install</span>
   </section>
   <footer class="card-footer">
-    <button
-      class="btn"
-      on:click={parent.onClose}>
-      Cancel
-    </button>
+    {#if !$isUpdateOnStart}
+      <button
+        class="btn"
+        on:click={parent.onClose}>
+        Cancel
+      </button>
+    {/if}
     <button
       class="btn text-primary-600"
       on:click={() => UpdateAndRestart()}>

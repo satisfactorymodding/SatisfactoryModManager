@@ -19,6 +19,7 @@ import (
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/app"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate/updater"
 	appCommon "github.com/satisfactorymodding/SatisfactoryModManager/backend/common"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/ficsitcli"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
@@ -103,6 +104,19 @@ func main() {
 		return
 	}
 
+	startUpdateFound := false
+	if settings.Settings.UpdateCheckMode == settings.UpdateOnLaunch {
+		foundOrError := make(chan bool)
+		autoupdate.Updater.Updater.UpdateFound.Once(func(_ updater.PendingUpdate) {
+			foundOrError <- true
+		})
+		go func() {
+			autoupdate.Updater.CheckForUpdates()
+			foundOrError <- false
+		}()
+		startUpdateFound = <-foundOrError
+	}
+
 	// Create application with options
 	err = wails.Run(&options.App{
 		Title:            "SatisfactoryModManager",
@@ -136,6 +150,15 @@ func main() {
 			ficsitcli.FicsitCLI.StartGameRunningWatcher() //nolint:contextcheck
 		},
 		OnDomReady: func(ctx context.Context) {
+			if startUpdateFound {
+				if autoupdate.Updater.Updater.PendingUpdate != nil && autoupdate.Updater.Updater.PendingUpdate.Ready {
+					autoupdate.Updater.UpdateAndRestart() //nolint:contextcheck
+				} else {
+					autoupdate.Updater.Updater.UpdateReady.Once(func(_ interface{}) {
+						autoupdate.Updater.UpdateAndRestart()
+					})
+				}
+			}
 			backend.ProcessArguments(os.Args[1:]) //nolint:contextcheck
 			autoupdate.Updater.CheckInterval(5 * time.Minute)
 		},

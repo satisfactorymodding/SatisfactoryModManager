@@ -2,6 +2,8 @@
   import { ProgressBar } from '@skeletonlabs/skeleton';
   import { compare } from 'semver';
 
+  import { isUpdateOnStart } from './smmUpdate';
+
   import Markdown from '$lib/components/Markdown.svelte';
   import { getModalStore } from '$lib/skeletonExtensions';
   import { smmUpdate, smmUpdateProgress, smmUpdateProgressStats, smmUpdateReady } from '$lib/store/smmUpdateStore';
@@ -56,11 +58,13 @@
       <hr />
     {/each}
   </section>
-  <footer class="card-footer">
-    <button
-      class="btn"
-      on:click={parent.onClose}>
-      Cancel
-    </button>
-  </footer>
+  {#if !$isUpdateOnStart}
+    <footer class="card-footer">
+      <button
+        class="btn"
+        on:click={parent.onClose}>
+        Close
+      </button>
+    </footer>
+  {/if}
 </div>

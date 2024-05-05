@@ -12,12 +12,14 @@
   import { supportedProgressTypes } from '$lib/components/modals/ProgressModal.svelte';
   import { modalRegistry } from '$lib/components/modals/modalsRegistry';
   import ImportProfile from '$lib/components/modals/profiles/ImportProfile.svelte';
+  import { isUpdateOnStart } from '$lib/components/modals/smmUpdate/smmUpdate';
   import ModsList from '$lib/components/mods-list/ModsList.svelte';
   import { initializeGraphQLClient } from '$lib/core/graphql';
   import { getModalStore, initializeModalStore } from '$lib/skeletonExtensions';
   import { installs, invalidInstalls, progress } from '$lib/store/ficsitCLIStore';
   import { error, expandedMod, siteURL } from '$lib/store/generalStore';
-  import { konami } from '$lib/store/settingsStore';
+  import { konami, updateCheckMode } from '$lib/store/settingsStore';
+  import { smmUpdate, smmUpdateReady } from '$lib/store/smmUpdateStore';
   import { ExpandMod, GenerateDebugInfo, UnexpandMod } from '$wailsjs/go/app/app';
   import { Environment, EventsOn } from '$wailsjs/runtime';
 
@@ -88,6 +90,44 @@
         persistent: true,
       },
     }, true);
+  }
+
+  let checkStart: boolean | undefined = undefined;
+  const updateCheckModeInit = updateCheckMode.isInit;
+  $: if ($updateCheckModeInit && checkStart === undefined) {
+    checkStart = $updateCheckMode === 'launch';
+  }
+
+  const smmUpdateInit = smmUpdate.isInit;
+  $: if ($smmUpdateInit && checkStart) {
+    checkStart = false;
+    if ($smmUpdate) {
+      $isUpdateOnStart = true;
+      if ($smmUpdateReady) {
+        modalStore.trigger({
+          type: 'component',
+          component: 'smmUpdateReady',
+          meta: {
+            persistent: true,
+          },
+        });
+      } else {
+        modalStore.trigger({
+          type: 'component',
+          component: 'smmUpdateDownload',
+          meta: {
+            persistent: true,
+          },
+        });      
+      }
+    }
+  }
+  
+  $: if ($smmUpdateReady && $updateCheckMode === 'ask') {
+    modalStore.trigger({
+      type: 'component',
+      component: 'smmUpdateReady',
+    });
   }
 
   $: if($error) {
