@@ -25,14 +25,14 @@
 
   let onlineMods: PartialMod[] = [];
   async function fetchAllModsOnline() {
-    const result = await client.query(GetModCountDocument, {}).toPromise();
+    const result = await client.query(GetModCountDocument, {}, { requestPolicy: 'network-only' }).toPromise();
     const count = result.data?.getMods.count;
-    if (count) {
+    if (count && count !== onlineMods.length) {
       const pages = Math.ceil(count / MODS_PER_PAGE);
 
       onlineMods = (await Promise.all(Array.from({ length: pages }).map(async (_, i) => {
         const offset = i * MODS_PER_PAGE;
-        const modsPage = await client.query(GetModsDocument, { offset, limit: MODS_PER_PAGE }).toPromise();
+        const modsPage = await client.query(GetModsDocument, { offset, limit: MODS_PER_PAGE }, { requestPolicy: 'network-only' }).toPromise();
         return modsPage.data?.getMods.mods ?? [];
       }))).flat();
     }
@@ -46,10 +46,20 @@
     } as OfflineMod));
   }
   
+  let onlineRefreshInterval: number | undefined;
+  
   $: if($offline !== null) {
     fetchAllModsOffline();
+    if (!onlineRefreshInterval) {
+      clearInterval(onlineRefreshInterval);
+      onlineRefreshInterval = undefined;
+    }
     if(!$offline) {
       fetchAllModsOnline();
+      // setInterval returns NodeJS.Timeout, but that's not the case for the browser
+      // eslint-disable-next-line
+      // @ts-ignore
+      onlineRefreshInterval = setInterval(fetchAllModsOnline, 5 * 60 * 1000); // 5 minutes
     }
   }
 
