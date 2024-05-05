@@ -23,18 +23,24 @@
 
   const client = getContextClient();
 
+  let fetchingMods = false;
   let onlineMods: PartialMod[] = [];
   async function fetchAllModsOnline() {
-    const result = await client.query(GetModCountDocument, {}, { requestPolicy: 'network-only' }).toPromise();
-    const count = result.data?.getMods.count;
-    if (count && count !== onlineMods.length) {
-      const pages = Math.ceil(count / MODS_PER_PAGE);
+    try {
+      const result = await client.query(GetModCountDocument, {}, { requestPolicy: 'network-only' }).toPromise();
+      const count = result.data?.getMods.count;
+      if (count && count !== onlineMods.length) {
+        fetchingMods = true;
+        const pages = Math.ceil(count / MODS_PER_PAGE);
 
-      onlineMods = (await Promise.all(Array.from({ length: pages }).map(async (_, i) => {
-        const offset = i * MODS_PER_PAGE;
-        const modsPage = await client.query(GetModsDocument, { offset, limit: MODS_PER_PAGE }, { requestPolicy: 'network-only' }).toPromise();
-        return modsPage.data?.getMods.mods ?? [];
-      }))).flat();
+        onlineMods = (await Promise.all(Array.from({ length: pages }).map(async (_, i) => {
+          const offset = i * MODS_PER_PAGE;
+          const modsPage = await client.query(GetModsDocument, { offset, limit: MODS_PER_PAGE }, { requestPolicy: 'network-only' }).toPromise();
+          return modsPage.data?.getMods.mods ?? [];
+        }))).flat();
+      }
+    } finally {
+      fetchingMods = false;
     }
   }
 
@@ -47,7 +53,7 @@
   }
   
   let onlineRefreshInterval: number | undefined;
-  
+
   $: if($offline !== null) {
     fetchAllModsOffline();
     if (!onlineRefreshInterval) {
@@ -160,7 +166,12 @@
     <slot />
   {:else}
     <div style="position: relative;" class="py-4 grow h-0 mods-list @container/mods-list bg-surface-200-700-token">
-      <div class="mr-4 h-full">
+      <div class="mr-4 h-full flex flex-col">
+        {#if fetchingMods}
+          <div class="flex items-center justify-center">
+            <div class="animate-spin rounded-full aspect-square h-8 border-t-2 border-b-2 border-primary-500"/>
+          </div>
+        {/if}
         <VirtualList containerClass="mx-4" items={displayMods} let:item={mod}>
           <ModsListItem
             {mod}

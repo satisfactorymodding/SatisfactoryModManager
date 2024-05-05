@@ -6,6 +6,8 @@
 
   import ModChangelog from '../modals/ModChangelog.svelte';
 
+  import ModDetailsEntry from './ModDetailsEntry.svelte';
+
   import Markdown from '$lib/components/Markdown.svelte';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
@@ -85,8 +87,8 @@
 
   $: size = mod ? bytesToAppropriate(mod.versions[0]?.size ?? 0) : undefined;
 
-  $: latestVersion = mod?.versions?.length ? sort(mod.versions.map((v) => parse(v.version) ?? coerce(v.version)).filter((v) => !!v) as SemVer[]).reverse()[0] : 'N/A';
-  $: installedVersion = (mod && $lockfileMods[mod.mod_reference]?.version) ?? 'Not installed';
+  $: latestVersion = mod ? (mod.versions.length ? sort(mod.versions.map((v) => parse(v.version) ?? coerce(v.version)).filter((v) => !!v) as SemVer[]).reverse()[0] : 'N/A') : undefined;
+  $: installedVersion = mod ? ($lockfileMods[mod.mod_reference]?.version ?? 'Not installed') : undefined;
 
   $: ficsitAppLink = `${$siteURL}/mod/${$expandedMod}`;
 
@@ -123,6 +125,9 @@
   }
 
   $: authorClick = () => {
+    if (!author) {
+      return;
+    }
     $search = `author:"${author}"`;
   };
 
@@ -212,20 +217,32 @@
     <div class="flex flex-col flex-auto overflow-y-auto space-y-4">
       <div class="flex flex-col">
         <img class="logo w-full" alt="{mod?.name} Logo" src={renderedLogo} />
-        <span class="font-bold @3xl/mod-details:text-lg mt-2 text-base">{mod?.name ?? 'Loading...'}</span>
+        <span 
+          class="font-bold @3xl/mod-details:text-lg mt-2 text-base"
+          class:animate-pulse={!mod}
+          class:placeholder={!mod}
+        >
+          {mod?.name ?? ''}
+        </span>
         <span class="font-light">A mod by:</span>
         <span
           bind:this={focusOnEntry}
           class="font-medium text-primary-600 cursor-pointer"
+          class:animate-pulse={!mod}
+          class:placeholder={!mod}
           role="button"
           tabindex="0"
           on:click={authorClick}
-          on:keypress={authorClick} >{author ?? 'Loading...'}</span>
+          on:keypress={authorClick} 
+        >
+          {author ?? ''}
+        </span>
       </div>
     
       <div use:popup={authorsMenu}>
         <button class="btn px-4 h-10 text-sm w-full bg-secondary-600">
-          <span class="whitespace-break-spaces">Contributors <span class="text-primary-600">({mod?.authors.length ?? 0})</span></span>
+          <span class="whitespace-break-spaces">Contributors <span class="text-primary-600">
+            (<span class:animate-pulse={!mod} class:placeholder={!mod}>{mod ? (mod.authors.length ?? 0) : '    '}</span>)</span></span>
           <SvgIcon
             class="h-5 w-5"
             icon={mdiChevronDown}/>
@@ -233,10 +250,10 @@
       </div>
       <div class="card shadow-xl min-w-[11rem] z-10 duration-0 overflow-y-auto max-h-[95vh] !mt-0" data-popup={authorsMenuPopupId}>
         <!-- 
-      Skeleton's popup close function waits for the tranistion duration...
-      before actually triggering the transition...
-      So we'll just not have a transition...
-      -->
+        Skeleton's popup close function waits for the tranistion duration...
+        before actually triggering the transition...
+        So we'll just not have a transition...
+        -->
       
         <ul>
           {#each mod?.authors ?? [] as author}
@@ -259,14 +276,13 @@
 
       <div>
         <span>Mod info:</span><br/>
-        <span>Size: </span><span class="font-bold">{size ?? 'Loading...'}</span><br/>
+        <ModDetailsEntry label="Size" loading={!mod}>{size ?? ''}</ModDetailsEntry>
         {#if (!mod || !('offline' in mod)) && !$offline}
-          <span>Created: </span><span class="font-bold">{mod ? new Date(mod.created_at).toLocaleDateString() : 'Loading...'}</span><br/>
-          <span>Updated: </span><span class="font-bold">{mod ? new Date(mod.last_version_date).toLocaleString() : 'Loading...'}</span><br/>
-          <span>Total downloads: </span><span class="font-bold">{mod?.downloads.toLocaleString() ?? 'Loading...'}</span><br/>
-          <span>Views: </span><span class="font-bold">{mod?.views.toLocaleString() ?? 'Loading...'}</span><br/>
-          <div class="flex h-5">
-            <span>Compatibility: </span>
+          <ModDetailsEntry label="Created" loading={!mod}>{mod ? new Date(mod.created_at).toLocaleDateString() : ''}</ModDetailsEntry>
+          <ModDetailsEntry label="Updated" loading={!mod}>{mod ? new Date(mod.last_version_date).toLocaleString() : ''}</ModDetailsEntry>
+          <ModDetailsEntry label="Total downloads" loading={!mod}>{mod?.downloads.toLocaleString() ?? ''}</ModDetailsEntry>
+          <ModDetailsEntry label="Views" loading={!mod}>{mod?.views.toLocaleString() ?? ''}</ModDetailsEntry>
+          <ModDetailsEntry label="Compatibility" loading={!mod}>
             {#if mod?.compatibility}
               <div class="flex pl-1">
                 <div use:popup={compatEAPopup}>
@@ -297,19 +313,19 @@
                   {/if}
                 </Tooltip>
               </div>
-            {:else}
+            {:else if mod}
               <span class="font-bold" use:popup={compatUnknownPopup}>&nbsp;Unknown</span>
               <Tooltip popupId={compatUnknownPopupId}>
                 <span class="text-base">No compatibility information has been reported for this mod yet. Try it out and contact us on the Discord so it can be updated!</span>
               </Tooltip>
             {/if}
-          </div>
+          </ModDetailsEntry>
         {/if}
       </div>
 
       <div>
-        <span>Latest version: </span><span class="font-bold">{latestVersion ?? 'Loading...'}</span><br/>
-        <span>Installed version: </span><span class="font-bold">{installedVersion ?? 'Loading...'}</span><br/>
+        <ModDetailsEntry label="Latest version" loading={!mod}>{latestVersion ?? ''}</ModDetailsEntry>
+        <ModDetailsEntry label="Installed version" loading={!mod}>{installedVersion ?? ''}</ModDetailsEntry>
         <div class="pt-2" use:popup={changeVersionMenu}>
           <button
             class="btn px-4 h-10 text-sm w-full bg-secondary-600"
@@ -416,7 +432,21 @@
     {:else if mod && 'full_description' in mod && mod.full_description}
       <Markdown markdown={mod.full_description} />
     {:else}
-      <p>Loading...</p>
+      <div class="p-4 space-y-4 h-full flex flex-col">
+        <div class="placeholder" />
+        <div class="grid grid-cols-3 gap-4 md:gap-8">
+          <div class="placeholder" />
+          <div class="placeholder" />
+          <div class="placeholder" />
+        </div>
+        <div class="grid grid-cols-4 gap-2 md:gap-4">
+          <div class="placeholder" />
+          <div class="placeholder" />
+          <div class="placeholder" />
+          <div class="placeholder" />
+        </div>
+        <div class="placeholder grow" />
+      </div>
     {/if}
   </div>
 </div>
