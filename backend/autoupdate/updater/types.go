@@ -13,6 +13,6 @@ type ChecksumSource interface {
 }
 
 type Apply interface {
-	Apply(file io.Reader, checksum []byte) error
-	OnExit(restart bool) error
+	Download(file io.Reader, checksum []byte) error
+	Apply(restart bool) error
 }

@@ -1,12 +1,13 @@
 package apply
 
 import (
-	"crypto/sha256"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
-	"slices"
+	"path/filepath"
+
+	"github.com/minio/selfupdate"
 )
 
 type NsisApply struct {
@@ -24,49 +25,30 @@ func MakeNsisApply(config NsisApplyConfig) *NsisApply {
 	}
 }
 
-func (a *NsisApply) Apply(file io.Reader, checksum []byte) error {
-	err := a.writeInstaller(file)
+func (a *NsisApply) Download(file io.Reader, checksum []byte) error {
+	// Use selfupdate to download and verify the update
+	err := selfupdate.PrepareAndCheckBinary(file, selfupdate.Options{
+		TargetPath: a.config.InstallerDownloadPath,
+		Checksum:   checksum,
+	})
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to download nsis update: %w", err)
 	}
 
-	return a.checkHash(checksum)
-}
+	// Variables as used by selfupdate
+	updateDir := filepath.Dir(a.config.InstallerDownloadPath)
+	filename := filepath.Base(a.config.InstallerDownloadPath)
+	newPath := filepath.Join(updateDir, fmt.Sprintf(".%s.new", filename))
 
-func (a *NsisApply) writeInstaller(file io.Reader) error {
-	f, err := os.OpenFile(a.config.InstallerDownloadPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o755)
+	// Ensure that the installer is actually at the expected path
+	err = os.Rename(newPath, a.config.InstallerDownloadPath)
 	if err != nil {
-		return fmt.Errorf("failed to open installer file: %w", err)
-	}
-	defer f.Close()
-	_, err = io.Copy(f, file)
-	if err != nil {
-		return fmt.Errorf("failed to write installer file: %w", err)
+		return fmt.Errorf("failed to rename nsis update: %w", err)
 	}
 	return nil
 }
 
-func (a *NsisApply) checkHash(checksum []byte) error {
-	if checksum == nil {
-		return nil
-	}
-	f, err := os.Open(a.config.InstallerDownloadPath)
-	if err != nil {
-		return fmt.Errorf("failed to open installer file: %w", err)
-	}
-	defer f.Close()
-	data, err := io.ReadAll(f)
-	if err != nil {
-		return fmt.Errorf("failed to read installer file: %w", err)
-	}
-	installerHash := sha256.Sum256(data)
-	if !slices.Equal(installerHash[:], checksum) {
-		return fmt.Errorf("installer hash does not match")
-	}
-	return nil
-}
-
-func (a *NsisApply) OnExit(restart bool) error {
+func (a *NsisApply) Apply(restart bool) error {
 	arguments := []string{"/S"}
 	if a.config.IsAllUsers {
 		arguments = append(arguments, "/AllUsers")

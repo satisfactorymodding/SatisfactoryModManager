@@ -28,20 +28,10 @@ func MakeDarwinAppApply(config DarwinApplyConfig) *DarwinAppApply {
 	}
 }
 
-func (a *DarwinAppApply) Apply(file io.Reader, checksum []byte) error {
-	executable, err := exec.LookPath(os.Args[0])
+func (a *DarwinAppApply) Download(file io.Reader, checksum []byte) error {
+	appDir, err := getAppDir()
 	if err != nil {
-		return fmt.Errorf("failed to get executable path: %w", err)
-	}
-
-	// The archive contains a .app directory, so we need to find the .app directory to replace
-	appDir := executable
-	for !strings.HasSuffix(filepath.Base(appDir), ".app") && appDir != filepath.Dir(appDir) {
-		appDir = filepath.Dir(appDir)
-	}
-
-	if !strings.HasSuffix(filepath.Base(appDir), ".app") {
-		return fmt.Errorf("failed to find .app directory")
+		return fmt.Errorf("failed to get app directory: %w", err)
 	}
 
 	options := selfupdate.Options{
@@ -105,15 +95,23 @@ func (a *DarwinAppApply) Apply(file io.Reader, checksum []byte) error {
 		return fmt.Errorf("failed to remove darwin update tmp: %w", err)
 	}
 
+	return nil
+}
+
+func (a *DarwinAppApply) Apply(restart bool) error {
+	appDir, err := getAppDir()
+	if err != nil {
+		return fmt.Errorf("failed to get app directory: %w", err)
+	}
+
+	options := selfupdate.Options{
+		TargetPath: appDir,
+	}
+
 	err = selfupdate.CommitBinary(options)
 	if err != nil {
 		return fmt.Errorf("failed to commit darwin update: %w", err)
 	}
-
-	return nil
-}
-
-func (a *DarwinAppApply) OnExit(restart bool) error {
 	if restart {
 		wd, err := os.Getwd()
 		if err != nil {
@@ -137,4 +135,23 @@ func (a *DarwinAppApply) OnExit(restart bool) error {
 		}
 	}
 	return nil
+}
+
+func getAppDir() (string, error) {
+	executable, err := exec.LookPath(os.Args[0])
+	if err != nil {
+		return "", fmt.Errorf("failed to get executable path: %w", err)
+	}
+
+	// The archive contains a .app directory, so we need to find the .app directory to replace
+	appDir := executable
+	for !strings.HasSuffix(filepath.Base(appDir), ".app") && appDir != filepath.Dir(appDir) {
+		appDir = filepath.Dir(appDir)
+	}
+
+	if !strings.HasSuffix(filepath.Base(appDir), ".app") {
+		return "", fmt.Errorf("executable not in .app directory")
+	}
+
+	return appDir, nil
 }

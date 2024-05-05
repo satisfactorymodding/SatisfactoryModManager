@@ -66,5 +66,5 @@ func (u *Updater) OnExit(restart bool) error {
 	}
 
 	// Now the update is definitely ready
-	return u.config.Apply.OnExit(restart)
+	return u.config.Apply.Apply(restart)
 }

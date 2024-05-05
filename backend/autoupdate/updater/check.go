@@ -88,7 +88,7 @@ func (u *Updater) CheckForUpdate() error {
 	}
 	p := &progressReader{Reader: file, progressCallback: progress, contentLength: length}
 
-	err = u.config.Apply.Apply(p, checksum)
+	err = u.config.Apply.Download(p, checksum)
 	if err != nil {
 		return fmt.Errorf("failed to apply update: %w", err)
 	}
