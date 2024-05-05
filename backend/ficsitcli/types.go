@@ -1,6 +1,9 @@
 package ficsitcli
 
-import "github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
+import (
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
+)
 
 type InstallState string
 
@@ -31,19 +34,14 @@ const (
 )
 
 type Progress struct {
-	Action Action                  `json:"action"`
-	Item   ProgressItem            `json:"item"`
-	Tasks  map[string]ProgressTask `json:"tasks"`
+	Action Action                    `json:"action"`
+	Item   ProgressItem              `json:"item"`
+	Tasks  map[string]utils.Progress `json:"tasks"`
 }
 
 type ProgressItem struct {
 	Name    string `json:"name"`
 	Version string `json:"version"`
-}
-
-type ProgressTask struct {
-	Current int64 `json:"current"`
-	Total   int64 `json:"total"`
 }
 
 var noItem = ProgressItem{}
@@ -65,7 +63,7 @@ func newProgress(action Action, item ProgressItem) *Progress {
 	return &Progress{
 		Action: action,
 		Item:   item,
-		Tasks:  make(map[string]ProgressTask),
+		Tasks:  make(map[string]utils.Progress),
 	}
 }
 

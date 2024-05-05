@@ -1,44 +1,22 @@
 import { compare } from 'semver';
-import { readable } from 'svelte/store';
+import { derived, readable } from 'svelte/store';
 
+import { binding } from './wailsStoreBindings';
+
+import { progressStats } from '$lib/utils/progress';
+import { PendingUpdate } from '$wailsjs/go/autoupdate/autoUpdate';
+import type { autoupdate, utils } from '$wailsjs/go/models';
 import { EventsOn } from '$wailsjs/runtime/runtime';
-
-
-export interface SMMUpdate {
-  newVersion: string;
-  changelogs: {
-    version: string;
-    changelog: string;
-  }[];
-}
-
-export interface SMMUpdateProgress {
-  downloaded: number;
-  total: number;
-  speed: number;
-}
   
+export const smmUpdate = binding<autoupdate.PendingUpdate | null>(null, { initialGet: PendingUpdate, updateEvent: 'updateAvailable' });
 
-export const smmUpdate = readable<SMMUpdate | null>(null, (set) => {
-  EventsOn('updateAvailable', (newVersion: string, changelogs: Record<string, string>) => {
-    set({ newVersion, changelogs: Object.entries(changelogs).map(([version, changelog]) => ({ version, changelog })).sort((a, b) => -compare(a.version, b.version)) });
-  });
+export const smmUpdateChangelogs = derived(smmUpdate, ($smmUpdate) => {
+  return $smmUpdate ? Object.entries($smmUpdate.changelogs).map(([version, changelog]) => ({ version, changelog })).sort((a, b) => -compare(a.version, b.version)) : null;
 });
 
-export const smmUpdateProgress = readable<SMMUpdateProgress | null>(null, (set) => {
-  const pastDownloaded: { downloaded: number; time: number }[] = [];
-  const speedTimeframe = 1000 * 5;
-  EventsOn('updateDownloadProgress', (downloaded: number, total: number) => {
-    pastDownloaded.push({
-      downloaded,
-      time: Date.now(),
-    });
-    setTimeout(() => {
-      pastDownloaded.shift();
-    }, speedTimeframe);
-    set({ downloaded, total, speed: pastDownloaded.length > 0 ? (downloaded - pastDownloaded[0].downloaded) / ((Date.now() - pastDownloaded[0].time) / 1000) : 0 });
-  });
-});
+export const smmUpdateProgress = binding<utils.Progress | null>(null, { updateEvent: 'updateDownloadProgress' });
+
+export const smmUpdateProgressStats = progressStats(smmUpdateProgress);
 
 export const smmUpdateReady = readable<boolean>(false, (set) => {
   EventsOn('updateReady', () => {

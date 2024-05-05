@@ -1,9 +1,10 @@
 <script lang="ts">
   import { ProgressBar } from '@skeletonlabs/skeleton';
+  import { compare } from 'semver';
 
   import Markdown from '$lib/components/Markdown.svelte';
   import { getModalStore } from '$lib/skeletonExtensions';
-  import { smmUpdate, smmUpdateProgress, smmUpdateReady } from '$lib/store/smmUpdateStore';
+  import { smmUpdate, smmUpdateProgress, smmUpdateProgressStats, smmUpdateReady } from '$lib/store/smmUpdateStore';
   import { bytesToAppropriate, secondsToAppropriate } from '$lib/utils/dataFormats';
 
   export let parent: { onClose: () => void };
@@ -19,7 +20,10 @@
     return changelog.slice(startIndex);
   }
 
-  $: eta = ($smmUpdateProgress && $smmUpdateProgress.speed) ? ($smmUpdateProgress.total - $smmUpdateProgress.downloaded) / $smmUpdateProgress.speed : -1;
+  $: speed = $smmUpdateProgressStats?.speed ?? 0;
+  $: eta = $smmUpdateProgressStats?.eta ?? 0;
+
+  $: changelogs = $smmUpdate ? Object.entries($smmUpdate.changelogs).map(([version, changelog]) => ({ version, changelog })).sort((a, b) => -compare(a.version, b.version)) : [];
 
   $: if($smmUpdateReady) {
     modalStore.trigger({
@@ -32,7 +36,7 @@
 
 <div style="max-height: calc(100vh - 3rem); max-width: calc(100vw - 3rem);" class="w-[48rem] card flex flex-col gap-2">
   <header class="card-header font-bold text-2xl text-center">
-    SMM Update Available - {$smmUpdate?.newVersion}
+    SMM Update Available - {$smmUpdate?.version}
   </header>
   {#if !$smmUpdateReady && $smmUpdateProgress}
     <section class="p-4">
@@ -41,12 +45,12 @@
         class="h-4 w-full"
         max={$smmUpdateProgress.total}
         meter="bg-primary-600"
-        value={$smmUpdateProgress.total ? $smmUpdateProgress.downloaded : undefined}/>
-      <div class="text-base">Downloading update: {bytesToAppropriate($smmUpdateProgress.downloaded)} / {bytesToAppropriate($smmUpdateProgress.total)}, {bytesToAppropriate($smmUpdateProgress.speed)}/s, ETA {eta >= 0 ? secondsToAppropriate(eta) : 'N/A'}</div>
+        value={$smmUpdateProgress.total ? $smmUpdateProgress.current : undefined}/>
+      <div class="text-base">Downloading update: {bytesToAppropriate($smmUpdateProgress.current)} / {bytesToAppropriate($smmUpdateProgress.total)}, {bytesToAppropriate(speed)}/s, ETA {eta >= 0 ? secondsToAppropriate(eta) : 'soon™'}</div>
     </section>
   {/if}
   <section class="p-4 overflow-y-auto">
-    {#each $smmUpdate?.changelogs ?? [] as changelog}
+    {#each changelogs ?? [] as changelog}
       <div class="text-xl font-semibold">{changelog.version}</div>
       <Markdown markdown={filterChangelog(changelog.changelog)}/>
       <hr />

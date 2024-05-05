@@ -12,6 +12,7 @@ import (
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate/source/github"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate/updater"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/common"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 )
 
 type autoUpdate struct {
@@ -36,13 +37,25 @@ func Init() {
 		enabled: shouldUseUpdater(),
 	}
 	Updater.Updater.UpdateFound.On(func(update updater.PendingUpdate) {
-		wailsRuntime.EventsEmit(common.AppContext, "updateAvailable", update.Version.String(), update.Changelogs)
+		if common.AppContext != nil {
+			wailsRuntime.EventsEmit(common.AppContext, "updateAvailable", &PendingUpdate{
+				Version:    update.Version.String(),
+				Changelogs: update.Changelogs,
+			})
+		}
 	})
 	Updater.Updater.DownloadProgress.On(func(progress updater.UpdateDownloadProgress) {
-		wailsRuntime.EventsEmit(common.AppContext, "updateDownloadProgress", progress.BytesDownloaded, progress.BytesTotal)
+		if common.AppContext != nil {
+			wailsRuntime.EventsEmit(common.AppContext, "updateDownloadProgress", &utils.Progress{
+				Current: progress.BytesDownloaded,
+				Total:   progress.BytesTotal,
+			})
+		}
 	})
 	Updater.Updater.UpdateReady.On(func(interface{}) {
-		wailsRuntime.EventsEmit(common.AppContext, "updateReady")
+		if common.AppContext != nil {
+			wailsRuntime.EventsEmit(common.AppContext, "updateReady")
+		}
 	})
 }
 
@@ -67,6 +80,24 @@ func makeUpdaterConfig() updater.Config {
 		config.Apply = updateType.Apply
 	}
 	return config
+}
+
+type PendingUpdate struct {
+	Version    string            `json:"version"`
+	Changelogs map[string]string `json:"changelogs"`
+}
+
+func (u *autoUpdate) PendingUpdate() *PendingUpdate {
+	if !u.enabled {
+		return nil
+	}
+	if u.Updater.PendingUpdate == nil {
+		return nil
+	}
+	return &PendingUpdate{
+		Version:    u.Updater.PendingUpdate.Version.String(),
+		Changelogs: u.Updater.PendingUpdate.Changelogs,
+	}
 }
 
 func (u *autoUpdate) CheckForUpdates() {

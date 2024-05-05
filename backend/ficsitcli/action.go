@@ -12,11 +12,12 @@ import (
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/common"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 )
 
 type taskUpdate struct {
 	taskName string
-	progress ProgressTask
+	progress utils.Progress
 }
 
 func (f *ficsitCLI) action(action Action, item ProgressItem, run func(*slog.Logger, chan<- taskUpdate) error) error {
@@ -39,7 +40,7 @@ func (f *ficsitCLI) action(action Action, item ProgressItem, run func(*slog.Logg
 	defer close(done)
 
 	progress := newProgress(action, item)
-	tasks := xsync.NewMapOf[string, ProgressTask]()
+	tasks := xsync.NewMapOf[string, utils.Progress]()
 	go func() {
 		wailsRuntime.EventsEmit(common.AppContext, "progress", progress)
 		defer wailsRuntime.EventsEmit(common.AppContext, "progress", nil)
@@ -52,7 +53,7 @@ func (f *ficsitCLI) action(action Action, item ProgressItem, run func(*slog.Logg
 			case <-done:
 				return
 			case <-progressTicker.C:
-				tasks.Range(func(key string, value ProgressTask) bool {
+				tasks.Range(func(key string, value utils.Progress) bool {
 					progress.Tasks[key] = value
 					return true
 				})
@@ -96,7 +97,7 @@ func (f *ficsitCLI) validateInstall(installation *cli.Installation, taskChannel 
 			case cli.InstallUpdateTypeModDownload:
 				taskChannel <- taskUpdate{
 					taskName: fmt.Sprintf("%s:download", update.Item.Mod),
-					progress: ProgressTask{
+					progress: utils.Progress{
 						Current: update.Progress.Completed,
 						Total:   update.Progress.Total,
 					},
@@ -104,7 +105,7 @@ func (f *ficsitCLI) validateInstall(installation *cli.Installation, taskChannel 
 			case cli.InstallUpdateTypeModExtract:
 				taskChannel <- taskUpdate{
 					taskName: fmt.Sprintf("%s:extract", update.Item.Mod),
-					progress: ProgressTask{
+					progress: utils.Progress{
 						Current: update.Progress.Completed,
 						Total:   update.Progress.Total,
 					},

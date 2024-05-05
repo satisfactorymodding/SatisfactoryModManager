@@ -5,9 +5,9 @@ import { ignoredUpdates } from './settingsStore';
 import { binding, bindingTwoWay } from './wailsStoreBindings';
 
 import { bytesToAppropriate, secondsToAppropriate } from '$lib/utils/dataFormats';
-import { timeSeries } from '$lib/utils/timeSeries';
+import { progressStats } from '$lib/utils/progress';
 import { CheckForUpdates, GetInstallations, GetInstallationsMetadata, GetInvalidInstalls, GetModsEnabled, GetProfiles, GetRemoteInstallations, GetSelectedInstall, GetSelectedInstallLockfileMods, GetSelectedInstallProfileMods, GetSelectedProfile, SelectInstall, SetModsEnabled, SetProfile } from '$wailsjs/go/ficsitcli/ficsitCLI';
-import { type cli, common, ficsitcli } from '$wailsjs/go/models';
+import { type cli, common, ficsitcli, type utils } from '$wailsjs/go/models';
 import { GetFavoriteMods } from '$wailsjs/go/settings/settings';
 
 export const invalidInstalls = binding([], { initialGet: GetInvalidInstalls });
@@ -91,124 +91,14 @@ export const progressTitle = derived(progress, ($progress) => {
   }
 });
 
-const downloadTimeSeries = timeSeries(5000);
-const extractTimeSeries = timeSeries(5000);
-
-const STATS_UPDATE_INTERVAL = { speed: 0, eta: 500 };
-const downloadStats = writable({ speed: 0, eta: 0 as number | undefined });
-const extractStats = writable({ speed: 0, eta: 0 as number | undefined });
-const lastStatsUpdate = { speed: 0, eta: 0 };
-
-progress.subscribe(($progress) => {
-  if (!$progress) {
-    downloadTimeSeries.clear();
-    extractTimeSeries.clear();
-  } else {
-    const { 
-      download,
-      extract,
-    } = getTasksTotal($progress.tasks);
+const totalTasks = derived(progress, ($progress) => {
+  if (!$progress) return null;
   
-    downloadTimeSeries.addValue(download.current);
-    extractTimeSeries.addValue(extract.current);
-
-    const downloadSpeed = downloadTimeSeries.getDerivative() ?? 0;
-    const extractSpeed = extractTimeSeries.getDerivative() ?? 0;
-    const downloadETA = downloadSpeed !== 0 ? (download.total - download.current) / downloadSpeed : undefined;
-    const extractETA = extractSpeed !== 0 ? (extract.total - extract.current) / extractSpeed : undefined;
-
-    if (Date.now() - lastStatsUpdate.speed > STATS_UPDATE_INTERVAL.speed) {
-      downloadStats.set({ speed: downloadSpeed, eta: get(downloadStats).eta });
-      extractStats.set({ speed: extractSpeed, eta: get(extractStats).eta });
-      lastStatsUpdate.speed = Date.now();
-    }
-    if (Date.now() - lastStatsUpdate.eta > STATS_UPDATE_INTERVAL.eta) {
-      downloadStats.set({ speed: get(downloadStats).speed, eta: downloadETA });
-      extractStats.set({ speed: get(extractStats).speed, eta: extractETA });
-      lastStatsUpdate.eta = Date.now();
-    }
-  }
-});
-
-export const progressMessage = derived(progress, ($progress) => {
-  if (!$progress) return '';
-  
-  const { 
-    download,
-    extract,
-    downloadingMods,
-    extractingMods,
-  } = getTasksTotal($progress.tasks);
-
-  if (download.total === 0 && extract.total === 0) {
-    // Not downloading and not extracting, so nothing started yet
-    const isRemoteInstall = get(installsMetadata)[$progress.item.name]?.info?.location === common.LocationType.REMOTE;
-    switch ($progress.action) {
-      case ficsitcli.Action.INSTALL:
-      case ficsitcli.Action.ENABLE:
-        return 'Finding the best version to install';
-      case ficsitcli.Action.UNINSTALL:
-      case ficsitcli.Action.DISABLE:
-        return 'Checking for mods that are no longer needed';
-      case ficsitcli.Action.SELECT_INSTALL:
-      case ficsitcli.Action.SELECT_PROFILE:
-      case ficsitcli.Action.IMPORT_PROFILE:
-        return `Validating install... ${isRemoteInstall ? '(this may take a while for remote servers)' : ''}`;
-      case ficsitcli.Action.UPDATE:
-        return 'Updating...';
-      case ficsitcli.Action.TOGGLE_MODS:
-        if ($progress.item.name === 'true') {
-          return 'Restoring mods...';
-        } else {
-          return 'Removing mods...';
-        }
-    }
-  }
-  
-  downloadTimeSeries.addValue(download.current);
-  extractTimeSeries.addValue(extract.current);
-
-  if (download.current !== download.total) {
-    // Downloading something, prioritize that
-    const completeMods = downloadingMods.filter((m) => m.complete);
-    const { speed, eta } = get(downloadStats);
-    return `Downloading \
-            ${completeMods.length}/${downloadingMods.length} mods: \
-            ${bytesToAppropriate(download.current)}/${bytesToAppropriate(download.total)}, \
-            ${bytesToAppropriate(speed)}/s, \
-            ${eta !== undefined ? (eta !== 0 ? secondsToAppropriate(eta) : 'soon™') : '...'}`;
-  }
-  // Not downloading anything
-  const completeMods = extractingMods.filter((m) => m.complete);
-  const { speed, eta } = get(extractStats);
-  return `Extracting \
-          ${completeMods.length}/${extractingMods.length} mods: \
-          ${bytesToAppropriate(extract.current)}/${bytesToAppropriate(extract.total)}, \
-          ${bytesToAppropriate(speed)}/s, \
-          ${eta !== undefined ? (eta !== 0 ? secondsToAppropriate(eta) : 'soon™') : '...'}`;
-});
-
-export const progressPercent = derived(progress, ($progress) => {
-  if (!$progress) return undefined;
-  const { download, extract } = getTasksTotal($progress.tasks);
-  if (download.total === 0 && extract.total === 0) {
-    // Not downloading and not extracting, so nothing started yet
-    return undefined;
-  }
-  if (download.current !== download.total) {
-    // Downloading something, prioritize that
-    return download.current / download.total;
-  }
-  // Not downloading anything
-  return extract.current / extract.total;
-});
-
-function getTasksTotal(tasks: ficsitcli.Progress['tasks']) {
-  const download = { current: 0, total: 0 } as ficsitcli.ProgressTask;
-  const extract = { current: 0, total: 0 } as ficsitcli.ProgressTask;
+  const download = { current: 0, total: 0 } as utils.Progress;
+  const extract = { current: 0, total: 0 } as utils.Progress;
   const downloadingMods = [] as { name: string; version: string; complete: boolean }[];
   const extractingMods = [] as { name: string; version: string; complete: boolean }[];
-  for (const [modVersionTask, status] of Object.entries(tasks)) {
+  for (const [modVersionTask, status] of Object.entries($progress.tasks)) {
     const [modVersion, task] = modVersionTask.split(':');
     const [name, version] = modVersion.split('@');
     if (task === 'download') {
@@ -222,4 +112,83 @@ function getTasksTotal(tasks: ficsitcli.Progress['tasks']) {
     }
   }
   return { download, extract, downloadingMods, extractingMods };
-}
+});
+
+const STATS_UPDATE_INTERVAL = { speed: 0, eta: 500 };
+const downloadStats = progressStats(derived(totalTasks, ($totalTasks) => $totalTasks?.download ?? null), { updateInterval: STATS_UPDATE_INTERVAL });
+const extractStats = progressStats(derived(totalTasks, ($totalTasks) => $totalTasks?.extract ?? null), { updateInterval: STATS_UPDATE_INTERVAL });
+
+const placeholderProgressMessage = derived(progress, ($progress) => {
+  if (!$progress) return null;
+  const isRemoteInstall = get(installsMetadata)[$progress.item.name]?.info?.location === common.LocationType.REMOTE;
+  switch ($progress.action) {
+    case ficsitcli.Action.INSTALL:
+    case ficsitcli.Action.ENABLE:
+      return 'Finding the best version to install';
+    case ficsitcli.Action.UNINSTALL:
+    case ficsitcli.Action.DISABLE:
+      return 'Checking for mods that are no longer needed';
+    case ficsitcli.Action.SELECT_INSTALL:
+    case ficsitcli.Action.SELECT_PROFILE:
+    case ficsitcli.Action.IMPORT_PROFILE:
+      return `Validating install... ${isRemoteInstall ? '(this may take a while for remote servers)' : ''}`;
+    case ficsitcli.Action.UPDATE:
+      return 'Updating...';
+    case ficsitcli.Action.TOGGLE_MODS:
+      if ($progress.item.name === 'true') {
+        return 'Restoring mods...';
+      } else {
+        return 'Removing mods...';
+      }
+  }
+});
+
+export const progressMessage = derived([placeholderProgressMessage, totalTasks, downloadStats, extractStats], ([$placeholderProgressMessage, $totalTasks, $downloadStats, $extractStats]) => {
+  if (!$placeholderProgressMessage || !$totalTasks) return '';
+  
+  const { 
+    download,
+    extract,
+    downloadingMods,
+    extractingMods,
+  } = $totalTasks;
+
+  if (download.total === 0 && extract.total === 0) {
+    // Not downloading and not extracting, so nothing started yet
+    return $placeholderProgressMessage;
+  }
+
+  if (download.current !== download.total) {
+    // Downloading something, prioritize that
+    const completeMods = downloadingMods.filter((m) => m.complete);
+    const { speed, eta } = $downloadStats;
+    return `Downloading \
+            ${completeMods.length}/${downloadingMods.length} mods: \
+            ${bytesToAppropriate(download.current)}/${bytesToAppropriate(download.total)}, \
+            ${bytesToAppropriate(speed)}/s, \
+            ${eta !== undefined ? (eta !== 0 ? secondsToAppropriate(eta) : 'soon™') : '...'}`;
+  }
+  // Not downloading anything
+  const completeMods = extractingMods.filter((m) => m.complete);
+  const { speed, eta } = $extractStats;
+  return `Extracting \
+          ${completeMods.length}/${extractingMods.length} mods: \
+          ${bytesToAppropriate(extract.current)}/${bytesToAppropriate(extract.total)}, \
+          ${bytesToAppropriate(speed)}/s, \
+          ${eta !== undefined ? (eta !== 0 ? secondsToAppropriate(eta) : 'soon™') : '...'}`;
+});
+
+export const progressPercent = derived(totalTasks, ($totalTasks) => {
+  if (!$totalTasks) return undefined;
+  const { download, extract } = $totalTasks;
+  if (download.total === 0 && extract.total === 0) {
+    // Not downloading and not extracting, so nothing started yet
+    return undefined;
+  }
+  if (download.current !== download.total) {
+    // Downloading something, prioritize that
+    return download.current / download.total;
+  }
+  // Not downloading anything
+  return extract.current / extract.total;
+});

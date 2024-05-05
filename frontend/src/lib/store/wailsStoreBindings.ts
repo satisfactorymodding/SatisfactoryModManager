@@ -30,6 +30,8 @@ function oneWayWritableBinding<T, D>(defaultValue: D, mainToRenderer: {
 
   if(initialGet) {
     initialGet().then(setData).then(() => initialized.set(true));
+  } else {
+    initialized.set(true);
   }
 
   return {

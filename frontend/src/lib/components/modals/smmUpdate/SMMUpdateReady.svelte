@@ -7,7 +7,7 @@
 
 <div style="max-height: calc(100vh - 3rem); max-width: calc(100vw - 3rem);" class="w-[48rem] card flex flex-col gap-2">
   <header class="card-header font-bold text-2xl text-center">
-    SMM Update Ready - {$smmUpdate?.newVersion}
+    SMM Update Ready - {$smmUpdate?.version}
   </header>
   <section class="p-4 flex-auto">
     <span class="text-base">Update ready to install</span>
