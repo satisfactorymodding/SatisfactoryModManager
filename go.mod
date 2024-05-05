@@ -13,7 +13,7 @@ require (
 	github.com/puzpuzpuz/xsync/v3 v3.0.2
 	github.com/samber/lo v1.39.0
 	github.com/samber/slog-multi v1.0.2
-	github.com/satisfactorymodding/ficsit-cli v0.5.1-0.20240201233422-5e9fe2aebbd5
+	github.com/satisfactorymodding/ficsit-cli v0.5.1-0.20240505210117-d051b5800ad7
 	github.com/satisfactorymodding/ficsit-resolver v0.0.2
 	github.com/shirou/gopsutil/v3 v3.24.3
 	github.com/spf13/viper v1.18.1
@@ -22,7 +22,7 @@ require (
 	github.com/zishang520/engine.io v1.5.12
 	github.com/zishang520/socket.io v1.3.2
 	golang.org/x/exp v0.0.0-20231214170342-aacd6d4b4611
-	golang.org/x/sync v0.5.0
+	golang.org/x/sync v0.6.0
 	golang.org/x/sys v0.18.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	howett.net/plist v1.0.1
