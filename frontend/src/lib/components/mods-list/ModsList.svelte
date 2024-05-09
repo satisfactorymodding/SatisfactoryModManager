@@ -12,14 +12,14 @@
   import { GetModCountDocument, GetModsDocument } from '$lib/generated';
   import { queuedMods } from '$lib/store/actionQueue';
   import { favoriteMods, lockfileMods, manifestMods } from '$lib/store/ficsitCLIStore';
-  import { expandedMod } from '$lib/store/generalStore';
+  import { expandedMod, hasFetchedMods } from '$lib/store/generalStore';
   import { type OfflineMod, type PartialMod, filter, order, search } from '$lib/store/modFiltersStore';
   import { offline, startView } from '$lib/store/settingsStore';
   import { OfflineGetMods } from '$wailsjs/go/ficsitcli/ficsitCLI';
 
   const dispatch = createEventDispatcher();
 
-  const MODS_PER_PAGE = 50;
+  const MODS_PER_PAGE = 100;
 
   const client = getContextClient();
 
@@ -41,6 +41,7 @@
       }
     } finally {
       fetchingMods = false;
+      $hasFetchedMods = true;
     }
   }
 
@@ -66,6 +67,8 @@
       // eslint-disable-next-line
       // @ts-ignore
       onlineRefreshInterval = setInterval(fetchAllModsOnline, 5 * 60 * 1000); // 5 minutes
+    } else {
+      $hasFetchedMods = true;
     }
   }
 

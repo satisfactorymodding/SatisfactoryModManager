@@ -9,7 +9,7 @@
   import { type PopupSettings, popup } from '$lib/skeletonExtensions';
   import { queuedMods, startQueue } from '$lib/store/actionQueue';
   import { isGameRunning, lockfileMods, progress, selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
-  import { error, isLaunchingGame } from '$lib/store/generalStore';
+  import { error, hasFetchedMods, isLaunchingGame } from '$lib/store/generalStore';
   import { launchButton, queueAutoStart } from '$lib/store/settingsStore';
   import { type CompatibilityWithSource, getCompatibility } from '$lib/utils/modCompatibility';
   import { installTypeToTargetName } from '$lib/wailsTypesExtensions';
@@ -22,13 +22,14 @@
   let compatibilities: Record<string, CompatibilityWithSource> = {};
   $: {
     const info = $selectedInstallMetadata?.info;
-    if (info) {
-      compatibilities = {};
+    if (info && $hasFetchedMods) {
+      const newCompatibilities: typeof compatibilities = {};
       Object.keys($lockfileMods).map(async (modReference) => {
         if (modReference !== 'SML') {
-          compatibilities[modReference] = await getCompatibility(modReference, info.branch, info.version, installTypeToTargetName(info.type), client);
+          newCompatibilities[modReference] = await getCompatibility(modReference, info.branch, info.version, installTypeToTargetName(info.type), client);
         }
       });
+      compatibilities = newCompatibilities;
     }
   }
 

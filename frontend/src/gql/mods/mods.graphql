@@ -34,6 +34,17 @@ query GetMods($offset: Int!, $limit: Int!) {
           note
         }
       }
+      versions {
+        id
+        version
+        dependencies {
+          mod_id
+          condition
+        }
+        targets {
+          targetName
+        }
+      }
     }
   }
 }
