@@ -192,6 +192,9 @@ func main() {
 			ficsitcli.AllActionTypes,
 		},
 		Logger: backend.WailsZeroLogLogger{},
+		Debug: options.Debug{
+			OpenInspectorOnStartup: true,
+		},
 	})
 
 	if err != nil {
