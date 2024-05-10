@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"sync"
 	"time"
 
 	"github.com/spf13/viper"
@@ -158,17 +159,20 @@ func main() {
 			ficsitcli.FicsitCLI.StartGameRunningWatcher() //nolint:contextcheck
 		},
 		OnDomReady: func(ctx context.Context) {
-			if startUpdateFound {
-				if autoupdate.Updater.Updater.PendingUpdate != nil && autoupdate.Updater.Updater.PendingUpdate.Ready {
-					autoupdate.Updater.UpdateAndRestart() //nolint:contextcheck
-				} else {
-					autoupdate.Updater.Updater.UpdateReady.Once(func(_ interface{}) {
-						autoupdate.Updater.UpdateAndRestart()
-					})
+			// OnDomReady is called on every refresh
+			sync.OnceFunc(func() {
+				if startUpdateFound {
+					if autoupdate.Updater.Updater.PendingUpdate != nil && autoupdate.Updater.Updater.PendingUpdate.Ready {
+						autoupdate.Updater.UpdateAndRestart() //nolint:contextcheck
+					} else {
+						autoupdate.Updater.Updater.UpdateReady.Once(func(_ interface{}) {
+							autoupdate.Updater.UpdateAndRestart()
+						})
+					}
 				}
-			}
-			backend.ProcessArguments(os.Args[1:]) //nolint:contextcheck
-			autoupdate.Updater.CheckInterval(5 * time.Minute)
+				backend.ProcessArguments(os.Args[1:]) //nolint:contextcheck
+				autoupdate.Updater.CheckInterval(5 * time.Minute)
+			})()
 		},
 		OnShutdown: func(ctx context.Context) {
 			app.App.StopWindowWatcher()
