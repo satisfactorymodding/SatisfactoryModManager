@@ -19,7 +19,8 @@ jobs:
 
       - uses: ./.github/actions/setup
         with:
-          go-only: true
+          frontend: false
+          skip-wails: true
       
       - uses: golangci/golangci-lint-action@v4
         with:
