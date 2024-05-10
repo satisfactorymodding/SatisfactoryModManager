@@ -13,7 +13,7 @@
   import { queuedMods } from '$lib/store/actionQueue';
   import { favoriteMods, lockfileMods, manifestMods } from '$lib/store/ficsitCLIStore';
   import { expandedMod, hasFetchedMods } from '$lib/store/generalStore';
-  import { type OfflineMod, type PartialMod, filter, order, search } from '$lib/store/modFiltersStore';
+  import { type OfflineMod, type PartialMod, filter, filterOptions, order, search } from '$lib/store/modFiltersStore';
   import { offline, startView } from '$lib/store/settingsStore';
   import { OfflineGetMods } from '$wailsjs/go/ficsitcli/ficsitCLI';
 
@@ -175,16 +175,35 @@
             <div class="animate-spin rounded-full aspect-square h-8 border-t-2 border-b-2 border-primary-500"/>
           </div>
         {/if}
-        <VirtualList containerClass="mx-4" items={displayMods} let:item={mod}>
-          <ModsListItem
-            {mod}
-            selected={$expandedMod == mod.mod_reference}
-            on:click={() => {
-              $expandedMod = mod.mod_reference;
-              dispatch('expandedMod', mod.mod_reference);
-            }}
-          />
-        </VirtualList>
+        {#if displayMods.length === 0 && !fetchingMods && $hasFetchedMods}
+          <div class="flex flex-col h-full items-center justify-center">
+            {#if mods.length !== 0}
+              <p class="text-xl text-center text-surface-400-700-token">No mods matching your filters</p>
+              <button
+                class="btn variant-filled-primary mt-4"
+                on:click={() => {
+                  $search = '';
+                  $filter = filterOptions[0];
+                }}
+              >
+                Show all
+              </button>
+            {:else}
+              <p class="text-xl text-center text-surface-400-700-token">No mods found</p>
+            {/if}
+          </div>
+        {:else}
+          <VirtualList containerClass="mx-4" items={displayMods} let:item={mod}>
+            <ModsListItem
+              {mod}
+              selected={$expandedMod == mod.mod_reference}
+              on:click={() => {
+                $expandedMod = mod.mod_reference;
+                dispatch('expandedMod', mod.mod_reference);
+              }}
+            />
+          </VirtualList>
+        {/if}
       </div>
     </div>
   {/if}
