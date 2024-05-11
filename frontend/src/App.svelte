@@ -30,9 +30,6 @@
 
   let frameless = false;
   Environment().then((env) => {
-    if (env.buildType !== 'dev') {
-      document.addEventListener('contextmenu', (event) => event.preventDefault());
-    }
     if (env.platform === 'windows') {
       frameless = true;
     }
