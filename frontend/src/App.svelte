@@ -45,22 +45,24 @@
 
   setContextClient(initializeGraphQLClient(apiEndpointURL));
 
+  let windowStateChanging = false;
   let windowExpanded = false;
 
-  $: if ($expandedMod) {
-    ExpandMod().then(() => {
+  function setExpanded(value: boolean) {
+    if (windowExpanded === value) return;
+    if (windowStateChanging) return;
+    windowStateChanging = true;
+    const op = value ? ExpandMod : UnexpandMod;
+    op().then(() => {
+      // wait a bit to prevent flickering
       setTimeout(() => {
-        windowExpanded = true;
+        windowExpanded = value;
+        windowStateChanging = false;
       }, 100);
     });
-  } else {
-    windowExpanded = false;
-    setTimeout(() => {
-      UnexpandMod();
-    }, 100);
   }
 
-  $: pendingExpand = $expandedMod && !windowExpanded;
+  $: setExpanded(!!$expandedMod);
 
   let invalidInstallsError = false;
   let noInstallsError = false;
@@ -208,7 +210,7 @@
   <div class="flex grow h-0">
     <LeftBar />
     <div class="flex flex-auto @container/mod-list-wrapper z-[1]">
-      <div class="{$expandedMod && !pendingExpand ? 'w-2/5 hidden @3xl/mod-list-wrapper:block @3xl/mod-list-wrapper:flex-auto' : 'w-full'}" class:max-w-[42.5rem]={!!$expandedMod}>
+      <div class="{$expandedMod && !windowStateChanging ? 'w-2/5 hidden @3xl/mod-list-wrapper:block @3xl/mod-list-wrapper:flex-auto' : 'w-full'}" class:max-w-[42.5rem]={!!$expandedMod}>
         <ModsList
           hideMods={noInstallsError || invalidInstallsError}
           on:expandedMod={() => {
@@ -237,7 +239,7 @@
           </div>
         </ModsList>
       </div>
-      <div class="w-3/5" class:grow={!pendingExpand} class:hidden={!$expandedMod}>
+      <div class="w-3/5" class:grow={!windowStateChanging} class:hidden={!$expandedMod || windowStateChanging}>
         <ModDetails bind:focusOnEntry/>
       </div>
     </div>
