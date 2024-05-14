@@ -2,6 +2,7 @@ package legendary
 
 import (
 	"fmt"
+	"os/exec"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/launchers"
@@ -13,6 +14,22 @@ func init() {
 		if err != nil {
 			return nil, []error{fmt.Errorf("failed to get legendary config path: %w", err)}
 		}
-		return FindInstallationsIn(legendaryDataPath, "Legendary")
+
+		_, err = exec.LookPath("legendary")
+		canLaunchLegendary := err == nil
+
+		return FindInstallationsIn(
+			legendaryDataPath,
+			"Legendary",
+			common.MakeLauncherPlatform(
+				common.NativePlatform(),
+				func(appName string) []string {
+					if !canLaunchLegendary {
+						return nil
+					}
+					return []string{"legendary", "launch", appName}
+				},
+			),
+		)
 	})
 }

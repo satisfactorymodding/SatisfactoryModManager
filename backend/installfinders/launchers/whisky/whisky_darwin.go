@@ -18,7 +18,6 @@ var (
 	whiskyConfigRelativePath         = filepath.Join("Library", "Preferences", "com.isaacmarovitz.Whisky.plist")
 	whiskyDefaultBottlesRelativePath = filepath.Join("Library", "Containers", "com.isaacmarovitz.Whisky", "Bottles")
 	whiskyBottleVMRelativePath       = "BottleVM.plist"
-	whiskySteamPath                  = filepath.Join("c:", "Program Files (x86)", "Steam") // Will get run through processPath, so it will be added to the dosdevices path
 )
 
 func init() {
@@ -59,20 +58,8 @@ func whisky() ([]*common.Installation, []error) {
 	installations := make([]*common.Installation, 0)
 	errors := make([]error, 0)
 	for _, bottleRoot := range bottlesToCheck {
-		processPath := common.WinePathProcessor(bottleRoot)
+		bottleInstalls, bottleErrs := steam.FindInstallationsWine(bottleRoot, "Whisky", nil)
 
-		if _, err := os.Stat(processPath(whiskySteamPath)); os.IsNotExist(err) {
-			slog.Debug("Skipping bottle without Steam", slog.String("bottle", bottleRoot))
-			continue
-		}
-		bottleInstalls, bottleErrs := steam.FindInstallationsSteam(
-			whiskySteamPath,
-			"Whisky",
-			func(steamApp string) []string {
-				return nil
-			},
-			processPath,
-		)
 		installations = append(installations, bottleInstalls...)
 		if bottleErrs != nil {
 			errors = append(errors, bottleErrs...)

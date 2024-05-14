@@ -16,7 +16,6 @@ import (
 var (
 	crossoverConfigRelativePath         = filepath.Join("Library", "Preferences", "com.codeweavers.CrossOver.plist")
 	crossoverDefaultBottlesRelativePath = filepath.Join("Library", "Application Support", "Crossover", "Bottles")
-	crossoverSteamPath                  = filepath.Join("c:", "Program Files (x86)", "Steam") // Will get run through processPath, so it will be added to the dosdevices path
 )
 
 func init() {
@@ -45,20 +44,7 @@ func crossover() ([]*common.Installation, []error) {
 			continue
 		}
 		bottleRoot := filepath.Join(bottlesPath, bottle.Name())
-		processPath := common.WinePathProcessor(bottleRoot)
-
-		if _, err := os.Stat(processPath(crossoverSteamPath)); os.IsNotExist(err) {
-			slog.Debug("Skipping bottle without Steam", slog.String("bottle", bottle.Name()))
-			continue
-		}
-		bottleInstalls, bottleErrs := steam.FindInstallationsSteam(
-			crossoverSteamPath,
-			"CrossOver",
-			func(steamApp string) []string {
-				return nil
-			},
-			processPath,
-		)
+		bottleInstalls, bottleErrs := steam.FindInstallationsWine(bottleRoot, "CrossOver", nil)
 		installations = append(installations, bottleInstalls...)
 		if bottleErrs != nil {
 			errors = append(errors, bottleErrs...)

@@ -20,16 +20,17 @@ func init() {
 		return FindInstallationsSteam(
 			steamPath,
 			"Steam",
-			func(steamApp string) []string {
-				return []string{
-					"cmd",
-					"/C",
-					"start",
-					"",
-					steamApp,
-				}
-			},
-			nil,
+			common.MakeLauncherPlatform(
+				common.NativePlatform(),
+				func(steamApp string) []string {
+					return []string{
+						"cmd",
+						"/C",
+						"start",
+						"",
+						steamApp,
+					}
+				}),
 		)
 	})
 }

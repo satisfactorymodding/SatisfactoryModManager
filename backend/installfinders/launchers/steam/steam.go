@@ -13,17 +13,9 @@ import (
 
 var manifests = []string{"appmanifest_526870.acf", "appmanifest_1690800.acf"}
 
-func FindInstallationsSteam(steamPath string, launcher string, launchPath func(steamApp string) []string, processPath func(path string) string) ([]*common.Installation, []error) {
-	if launchPath == nil {
-		launchPath = func(appName string) []string { return nil }
-	}
-
-	if processPath == nil {
-		processPath = func(path string) string { return path }
-	}
-
+func FindInstallationsSteam(steamPath string, launcher string, platform common.LauncherPlatform) ([]*common.Installation, []error) {
 	steamAppsPath := filepath.Join(steamPath, "steamapps")
-	libraryFoldersManifestPath := processPath(filepath.Join(steamAppsPath, "libraryfolders.vdf"))
+	libraryFoldersManifestPath := platform.ProcessPath(filepath.Join(steamAppsPath, "libraryfolders.vdf"))
 
 	libraryFoldersF, err := os.Open(libraryFoldersManifestPath)
 	if err != nil {
@@ -75,7 +67,7 @@ func FindInstallationsSteam(steamPath string, launcher string, launchPath func(s
 
 	for _, libraryFolder := range libraryFolders {
 		for _, manifest := range manifests {
-			manifestPath := processPath(filepath.Join(libraryFolder, "steamapps", manifest))
+			manifestPath := platform.ProcessPath(filepath.Join(libraryFolder, "steamapps", manifest))
 
 			if _, err := os.Stat(manifestPath); os.IsNotExist(err) {
 				continue
@@ -130,7 +122,7 @@ func FindInstallationsSteam(steamPath string, launcher string, launchPath func(s
 				Location:   common.LocationTypeLocal,
 				Branch:     branch,
 				Launcher:   launcher,
-				LaunchPath: launchPath(`steam://rungameid/526870`),
+				LaunchPath: platform.LauncherCommand(`steam://rungameid/526870`),
 			})
 		}
 	}

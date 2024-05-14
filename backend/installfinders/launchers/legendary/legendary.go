@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
@@ -31,7 +30,7 @@ type Game struct {
 
 type Data = map[string]Game
 
-func FindInstallationsIn(legendaryDataPath string, launcher string) ([]*common.Installation, []error) {
+func FindInstallationsIn(legendaryDataPath string, launcher string, platform common.LauncherPlatform) ([]*common.Installation, []error) {
 	legendaryInstalledPath := filepath.Join(legendaryDataPath, "installed.json")
 	if _, err := os.Stat(legendaryInstalledPath); os.IsNotExist(err) {
 		return nil, []error{fmt.Errorf("%s not installed", launcher)}
@@ -46,17 +45,16 @@ func FindInstallationsIn(legendaryDataPath string, launcher string) ([]*common.I
 		return nil, []error{fmt.Errorf("failed to parse legendary installed.json output: %w", err)}
 	}
 
-	_, err = exec.LookPath("legendary")
-	canLaunchLegendary := err == nil
-
 	installs := make([]*common.Installation, 0)
 	var findErrors []error
 
 	for _, legendaryGame := range legendaryData {
-		installType, version, err := common.GetGameInfo(legendaryGame.InstallPath)
+		installLocation := filepath.Clean(legendaryGame.InstallPath)
+
+		installType, version, err := common.GetGameInfo(installLocation)
 		if err != nil {
 			findErrors = append(findErrors, common.InstallFindError{
-				Path:  legendaryGame.InstallPath,
+				Path:  installLocation,
 				Inner: err,
 			})
 			continue
@@ -65,24 +63,20 @@ func FindInstallationsIn(legendaryDataPath string, launcher string) ([]*common.I
 		branch, err := epic.GetEpicBranch(legendaryGame.AppName)
 		if err != nil {
 			findErrors = append(findErrors, common.InstallFindError{
-				Path:  legendaryGame.InstallPath,
+				Path:  installLocation,
 				Inner: err,
 			})
 			continue
 		}
 
-		var launchPath []string
-		if canLaunchLegendary {
-			launchPath = []string{"legendary", "launch", legendaryGame.AppName}
-		}
 		installs = append(installs, &common.Installation{
-			Path:       filepath.Clean(legendaryGame.InstallPath),
+			Path:       installLocation,
 			Version:    version,
 			Type:       installType,
 			Location:   common.LocationTypeLocal,
 			Branch:     branch,
 			Launcher:   launcher,
-			LaunchPath: launchPath,
+			LaunchPath: platform.LauncherCommand(legendaryGame.AppName),
 		})
 	}
 	return installs, findErrors

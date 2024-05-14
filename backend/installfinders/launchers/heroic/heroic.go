@@ -15,7 +15,7 @@ func findInstallationsHeroic(snap bool, xdgConfigHomeEnv string, launcher string
 		return nil, []error{fmt.Errorf("failed to get heroic legendary config paths: %w", err)}
 	}
 
-	return legendary.FindInstallationsIn(legendaryDataPath, launcher)
+	return legendary.FindInstallationsIn(legendaryDataPath, launcher, common.MakeLauncherPlatform(common.NativePlatform(), nil))
 }
 
 func getHeroicLegendaryConfigPath(snap bool, xdgConfigHomeEnv string) (string, error) {

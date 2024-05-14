@@ -23,15 +23,16 @@ func init() {
 		return FindInstallationsSteam(
 			steamPath,
 			"Steam",
-			func(steamApp string) []string {
-				return []string{
-					"flatpak",
-					"run",
-					"com.valvesoftware.Steam",
-					steamApp,
-				}
-			},
-			nil,
+			common.MakeLauncherPlatform(
+				common.NativePlatform(),
+				func(steamApp string) []string {
+					return []string{
+						"flatpak",
+						"run",
+						"com.valvesoftware.Steam",
+						steamApp,
+					}
+				}),
 		)
 	})
 }

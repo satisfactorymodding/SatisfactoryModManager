@@ -13,12 +13,15 @@ import (
 var epicWineManifestPath = filepath.Join("c:", "ProgramData", "Epic", "EpicGamesLauncher", "Data", "Manifests")
 
 func FindInstallationsWine(winePrefix string, launcher string, launchPath []string) ([]*common.Installation, []error) {
-	wineWindowsRoot := filepath.Join(winePrefix, "dosdevices")
-	epicManifestsPath := filepath.Join(wineWindowsRoot, epicWineManifestPath)
+	platform := common.WineLauncherPlatform(winePrefix)
 
-	if _, err := os.Stat(epicManifestsPath); os.IsNotExist(err) {
+	if _, err := os.Stat(platform.ProcessPath(epicWineManifestPath)); os.IsNotExist(err) {
 		return nil, []error{fmt.Errorf("Epic is not installed in " + winePrefix)}
 	}
 
-	return FindInstallationsEpic(epicManifestsPath, launcher, func(appName string) []string { return launchPath }, common.WinePathProcessor(winePrefix))
+	return FindInstallationsEpic(
+		epicWineManifestPath,
+		launcher,
+		common.MakeLauncherPlatform(platform, func(_ string) []string { return launchPath }),
+	)
 }
