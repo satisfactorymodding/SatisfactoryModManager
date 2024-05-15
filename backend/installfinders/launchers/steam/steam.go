@@ -91,9 +91,27 @@ func FindInstallationsSteam(steamPath string, launcher string, platform common.L
 				continue
 			}
 
-			fullInstallationPath := processPath(filepath.Join(libraryFolder, "steamapps", "common", manifest["AppState"].(map[string]interface{})["installdir"].(string)))
+			appState := manifest["AppState"].(map[string]interface{})
 
-			installType, version, err := common.GetGameInfo(fullInstallationPath)
+			fullInstallationPath := platform.ProcessPath(filepath.Join(libraryFolder, "steamapps", "common", appState["installdir"].(string)))
+
+			gamePlatform := platform.Platform
+			if platform.Os() != "windows" {
+				// The game might be running under Proton
+				// There's no appmanifest field that would specify it, but if the proton prefix exists,
+				// the game is most likely running under Proton.
+				gameProtonPrefix := platform.ProcessPath(filepath.Join(steamPath, "steamapps", "compatdata", appState["appid"].(string), "pfx"))
+				_, err := os.Stat(gameProtonPrefix)
+				if err != nil && !os.IsNotExist(err) {
+					findErrors = append(findErrors, fmt.Errorf("failed to find proton prefix for game %s: %w", appState["appid"].(string), err))
+					continue
+				}
+				if err == nil {
+					gamePlatform = common.WineLauncherPlatform(gameProtonPrefix)
+				}
+			}
+
+			installType, version, savedPath, err := common.GetGameInfo(fullInstallationPath, gamePlatform)
 			if err != nil {
 				findErrors = append(findErrors, common.InstallFindError{
 					Path:  fullInstallationPath,
@@ -123,6 +141,8 @@ func FindInstallationsSteam(steamPath string, launcher string, platform common.L
 				Branch:     branch,
 				Launcher:   launcher,
 				LaunchPath: platform.LauncherCommand(`steam://rungameid/526870`),
+				// pass wine platform if necessary, as platform here is going to be native
+				SavedPath: savedPath,
 			})
 		}
 	}

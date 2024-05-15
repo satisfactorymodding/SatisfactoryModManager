@@ -122,7 +122,10 @@ func FindInstallationsEpic(epicManifestsPath string, launcher string, platform c
 			continue
 		}
 
-		installType, version, err := common.GetGameInfo(installLocation)
+		// Epic can only launch games of the same platform
+		gamePlatform := platform.Platform
+
+		installType, version, savedPath, err := common.GetGameInfo(installLocation, gamePlatform)
 		if err != nil {
 			findErrors = append(findErrors, common.InstallFindError{
 				Path:  installLocation,
@@ -148,6 +151,7 @@ func FindInstallationsEpic(epicManifestsPath string, launcher string, platform c
 			Branch:     branch,
 			Launcher:   launcher,
 			LaunchPath: platform.LauncherCommand(epicManifest.MainGameAppName),
+			SavedPath:  savedPath,
 		})
 	}
 

@@ -2,6 +2,7 @@ package common
 
 type Platform interface {
 	ProcessPath(path string) string
+	CacheDir() (string, error)
 	Os() string
 }
 

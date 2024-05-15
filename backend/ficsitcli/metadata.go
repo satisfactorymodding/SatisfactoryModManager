@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"path"
 	"strconv"
 	"strings"
 	"sync"
@@ -161,12 +162,13 @@ func (f *ficsitCLI) getRemoteServerMetadata(installation *cli.Installation) (*co
 	branch := common.BranchEarlyAccess // TODO: Do we have a way to detect this for remote installs?
 
 	return &common.Installation{
-		Path:     installation.Path,
-		Type:     installType,
-		Location: common.LocationTypeRemote,
-		Branch:   branch,
-		Version:  gameVersion,
-		Launcher: f.getNextRemoteLauncherName(),
+		Path:      installation.Path,
+		Type:      installType,
+		Location:  common.LocationTypeRemote,
+		Branch:    branch,
+		Version:   gameVersion,
+		Launcher:  f.getNextRemoteLauncherName(),
+		SavedPath: path.Join(installation.BasePath(), "FactoryGame", "Saved"),
 	}, nil
 }
 

@@ -30,6 +30,7 @@ type Installation struct {
 	Branch     GameBranch   `json:"branch"`
 	Launcher   string       `json:"launcher"`
 	LaunchPath []string     `json:"launchPath"`
+	SavedPath  string       `json:"-"`
 }
 
 type InstallFindError struct {

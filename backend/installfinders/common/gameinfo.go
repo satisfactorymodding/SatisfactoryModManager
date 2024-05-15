@@ -55,7 +55,7 @@ type GameVersionFile struct {
 	BuildID              string `json:"BuildId"`
 }
 
-func GetGameInfo(path string) (InstallType, int, error) {
+func GetGameInfo(path string, platform Platform) (InstallType, int, string, error) {
 	for _, info := range gameInfo {
 		executablePath := filepath.Join(path, info.executable)
 		if _, err := os.Stat(executablePath); os.IsNotExist(err) {
@@ -65,20 +65,33 @@ func GetGameInfo(path string) (InstallType, int, error) {
 
 		versionFilePath := filepath.Join(path, info.versionPath)
 		if _, err := os.Stat(versionFilePath); os.IsNotExist(err) {
-			return InstallTypeWindowsClient, 0, fmt.Errorf("failed to get game info")
+			return InstallTypeWindowsClient, 0, "", fmt.Errorf("failed to get game info")
 		}
 
 		versionFile, err := os.ReadFile(versionFilePath)
 		if err != nil {
-			return InstallTypeWindowsClient, 0, fmt.Errorf("failed to read version file %s: %w", versionFilePath, err)
+			return InstallTypeWindowsClient, 0, "", fmt.Errorf("failed to read version file %s: %w", versionFilePath, err)
 		}
 
 		var versionData GameVersionFile
 		if err := json.Unmarshal(versionFile, &versionData); err != nil {
-			return InstallTypeWindowsClient, 0, fmt.Errorf("failed to parse version file %s: %w", versionFilePath, err)
+			return InstallTypeWindowsClient, 0, "", fmt.Errorf("failed to parse version file %s: %w", versionFilePath, err)
 		}
 
-		return info.installType, versionData.Changelist, nil
+		return info.installType, versionData.Changelist, getGameSavedDir(path, info.installType, platform), nil
 	}
-	return InstallTypeWindowsClient, 0, fmt.Errorf("failed to get game info")
+	return InstallTypeWindowsClient, 0, "", fmt.Errorf("failed to get game info")
+}
+
+func getGameSavedDir(gamePath string, install InstallType, platform Platform) string {
+	if install == InstallTypeWindowsClient {
+		cacheDir, err := platform.CacheDir()
+		if err != nil {
+			slog.Error("failed to get cache dir", slog.Any("error", err))
+			return ""
+		}
+
+		return filepath.Join(cacheDir, "FactoryGame", "Saved")
+	}
+	return filepath.Join(gamePath, "FactoryGame", "Saved")
 }

@@ -21,6 +21,7 @@ func init() {
 		return FindInstallationsIn(
 			legendaryDataPath,
 			"Legendary",
+			nil,
 			common.MakeLauncherPlatform(
 				common.NativePlatform(),
 				func(appName string) []string {

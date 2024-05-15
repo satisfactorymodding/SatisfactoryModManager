@@ -30,6 +30,7 @@ func init() {
 func findInstallations(lutrisCmd []string, launcher string) ([]*common.Installation, []error) {
 	lutrisLjCmd := makeLutrisCmd(lutrisCmd, "-lj")
 	lutrisLj := exec.Command(lutrisLjCmd[0], lutrisLjCmd[1:]...)
+	lutrisLj.Env = append(lutrisLj.Env, "LUTRIS_SKIP_INIT=1")
 	outputBytes, err := lutrisLj.Output()
 	if err != nil {
 		return nil, []error{
