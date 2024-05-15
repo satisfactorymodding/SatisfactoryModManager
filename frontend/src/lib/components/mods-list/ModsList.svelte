@@ -193,7 +193,11 @@
             {/if}
           </div>
         {:else}
-          <VirtualList containerClass="mx-4" items={displayMods} let:item={mod}>
+          <VirtualList
+            itemClass="mx-4"
+            itemHeight={84}
+            items={displayMods}
+            let:item={mod}>
             <ModsListItem
               {mod}
               selected={$expandedMod == mod.mod_reference}

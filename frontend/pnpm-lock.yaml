@@ -20,6 +20,9 @@ dependencies:
   '@tailwindcss/container-queries':
     specifier: ^0.1.1
     version: 0.1.1(tailwindcss@3.3.6)
+  '@tanstack/svelte-virtual':
+    specifier: ^3.5.0
+    version: 3.5.0(svelte@4.2.8)
   '@urql/exchange-graphcache':
     specifier: ^6.4.0
     version: 6.4.0(graphql@16.8.1)
@@ -2496,6 +2499,19 @@ packages:
       tailwindcss: '>=3.2.0'
     dependencies:
       tailwindcss: 3.3.6
+    dev: false
+
+  /@tanstack/svelte-virtual@3.5.0(svelte@4.2.8):
+    resolution: {integrity: sha512-9fgqDeYV+5WBv/jar67Oy5Ddg3kbz43dPRHrIRk/dE9QinI4aCnWwM8VrjK7DDcw9zWAyj6BVC3miLMwyLNbAw==}
+    peerDependencies:
+      svelte: ^3.48.0 || ^4.0.0
+    dependencies:
+      '@tanstack/virtual-core': 3.5.0
+      svelte: 4.2.8
+    dev: false
+
+  /@tanstack/virtual-core@3.5.0:
+    resolution: {integrity: sha512-KnPRCkQTyqhanNC0K63GBG3wA8I+D1fQuVnAvcBF8f13akOKeQp1gSbu6f77zCxhEk727iV5oQnbHLYzHrECLg==}
     dev: false
 
   /@tsconfig/svelte@5.0.2:
