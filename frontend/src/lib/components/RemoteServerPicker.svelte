@@ -165,6 +165,12 @@
 
   // If the path is root and it is a valid install, don't list contents of root
   $: actualDisplayedItems = (valid && displayedPath === trimmedPath) ? [{ path: '', name: '(root)', isValidInstall: true }] : displayedItems;
+
+  function isSamePath(path1: string, path2: string) {
+    let parts1 = _.compact(path1.split(pathSeparator));
+    let parts2 = _.compact(path2.split(pathSeparator));
+    return _.isEqual(parts1, parts2);
+  }
 </script>
 
 <div class="relative">
@@ -180,7 +186,7 @@
         {#each actualDisplayedItems as item}
           <button
             class="w-full btn !scale-100"
-            class:variant-ghost-primary={path.startsWith(item.path) && valid}
+            class:variant-ghost-primary={isSamePath(path, item.path) && valid}
             disabled={pendingDisplay || pendingValidCheck}
             on:click={() => select(item)}>
             <SvgIcon
