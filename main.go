@@ -17,6 +17,7 @@ import (
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v2/pkg/options/linux"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/app"
@@ -34,6 +35,9 @@ import (
 
 //go:embed all:frontend/build
 var assets embed.FS
+
+//go:embed build/appicon.png
+var iconBytes []byte
 
 var (
 	version = "dev"
@@ -144,6 +148,10 @@ func main() {
 				app.App.Show()
 				backend.ProcessArguments(secondInstanceData.Args)
 			},
+		},
+		Linux: &linux.Options{
+			Icon:        iconBytes,
+			ProgramName: "Satisfactory Mod Manager",
 		},
 		OnStartup: func(ctx context.Context) {
 			appCommon.AppContext = ctx
