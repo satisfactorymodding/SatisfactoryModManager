@@ -45,7 +45,8 @@
       {#each vitems as row, idx (row.index)}
         <div
           bind:this={virtualItemEls[idx]}
-          class="overflow-hidden {itemClass}">
+          class="overflow-hidden {itemClass}"
+          data-index={row.index}>
           <slot item={items[row.index]}>Missing template</slot>
         </div>
       {/each}
