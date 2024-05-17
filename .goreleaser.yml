@@ -91,6 +91,10 @@ archives:
       - standalone
     format: binary
     name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if eq .Os "darwin" }}.zip{{ end }}'
+    format_overrides:
+      # Skip the windows standalone build, as it is not ready yet
+      - goos: windows
+        format: none
 
 checksum:
   name_template: 'checksums.txt'
