@@ -48,6 +48,7 @@ var (
 )
 
 func main() {
+	slog.Info("starting Satisfactory Mod Manager", slog.Any("version", version), slog.Any("commit", commit), slog.Any("date", date))
 	// Set user agent for http requests from backend
 	// We cannot set the frontend's user agent, because wails does not expose that,
 	// but it does append wails.io to determine which asset requests come from inside the app, and which are external
@@ -234,6 +235,8 @@ func main() {
 			_ = dialog.Error("Failed to restart: %s", err.Error())
 		}
 	}
+
+	slog.Info("exiting Satisfactory Mod Manager")
 }
 
 func init() {
