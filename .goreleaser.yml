@@ -111,6 +111,12 @@ release:
   # Include all artifacts: windows-nsis, standalone
 
   header: |
+    ### Note: this is a prerelease, and things might not work as expected. There might be differences between SMM v2 and SMM v3. If you encounter any issues, let us know on discord, or create an issue here. At the moment, SMM v2 will not auto-update to SMM v3, so while you cannot have both installed at once, you are still able to rollback if you run into major issues.
+
     ## Installation
-    Download and run `SatisfactoryModManager-Setup.exe` (Windows) or `SatisfactoryModManager_linux_win64` (Linux)
+  
+    |  Windows | Linux | MacOS |
+    |---|---|---|
+    | [Download](https://github.com/satisfactorymodding/SatisfactoryModManager/releases/download/v{{.Version}}/SatisfactoryModManager-Setup.exe) | [Download](https://github.com/satisfactorymodding/SatisfactoryModManager/releases/download/v{{.Version}}/SatisfactoryModManager_linux_amd64) |  [Download](https://github.com/satisfactorymodding/SatisfactoryModManager/releases/download/v{{.Version}}/SatisfactoryModManager_darwin_universal.zip) |
+    
     If you already have Satisfactory Mod Manager installed, you don't need to download it again, it will auto-update.
