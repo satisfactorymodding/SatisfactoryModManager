@@ -3,7 +3,7 @@
   import { arrow, autoUpdate, computePosition, flip, offset, shift, size } from '@floating-ui/dom';
   import { Modal, initializeStores, storePopup } from '@skeletonlabs/skeleton';
   import { FormatIcu } from '@tolgee/format-icu';
-  import { FormatSimple, Tolgee, TolgeeProvider } from '@tolgee/svelte';
+  import { DevTools, FormatSimple, Tolgee, TolgeeProvider } from '@tolgee/svelte';
   import { setContextClient } from '@urql/svelte';
 
   import T, { translationElementPart } from '$lib/components/T.svelte';
@@ -33,10 +33,16 @@
   storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow, size });
   
   const tolgee = Tolgee()
+    .use(DevTools())
     .use(FormatSimple())
     .use(FormatIcu())
     .init({
       language: 'en',
+      fallbackLanguage: 'en',
+      
+      apiUrl: import.meta.env.VITE_TOLGEE_API_URL,
+      apiKey: import.meta.env.VITE_TOLGEE_API_KEY,
+
       staticData: i18n,
     });
 

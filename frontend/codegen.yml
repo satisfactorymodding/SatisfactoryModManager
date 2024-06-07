@@ -2,7 +2,7 @@ overwrite: true
 schema: 'https://api.ficsit.app/v2/query'
 documents: 'src/**/*.graphql'
 generates:
-  ./src/lib/generated/graphql.ts:
+  ./src/lib/generated/graphql/graphql.ts:
     plugins:
       - add:
           content: '/* eslint-disable */'
@@ -11,7 +11,7 @@ generates:
       - 'typed-document-node'
     config:
       useTypeImports: true
-  ./src/lib/generated/graphql.schema.urql.json:
+  ./src/lib/generated/graphql/graphql.schema.urql.json:
     plugins:
       - 'urql-introspection'
     config:

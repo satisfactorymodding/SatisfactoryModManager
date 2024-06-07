@@ -6,14 +6,18 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "postinstall": "run-s graphql-codegen",
+    "postinstall": "run-p graphql-codegen translations",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch",
     "lint": "eslint --ignore-path .gitignore .",
     "format": "eslint --ignore-path .gitignore --fix .",
     "graphql-codegen": "graphql-codegen --config codegen.yml",
     "graphql-codegen:watch": "graphql-codegen --config codegen.yml --watch",
-    "generate:watch": "run-p graphql-codegen:watch"
+    "generate:watch": "run-p graphql-codegen:watch",
+    "translations": "node ./tools/translations.cjs",
+    "translations:pull": "tolgee pull -s untranslated -s translated -s reviewed",
+    "translations:compare": "tolgee compare",
+    "translations:sync": "tolgee sync -Y"
   },
   "dependencies": {
     "@floating-ui/dom": "^1.6.0",
@@ -65,6 +69,7 @@
     "@types/semver": "^7.5.6",
     "@typescript-eslint/eslint-plugin": "^6.13.2",
     "@typescript-eslint/parser": "^6.13.2",
+    "dotenv": "^16.4.5",
     "eslint": "^8.55.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.29.0",
