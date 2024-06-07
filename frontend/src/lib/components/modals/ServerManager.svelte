@@ -6,10 +6,10 @@
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import Select from '$lib/components/Select.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
-  import { AddRemoteServer, FetchRemoteServerMetadata, RemoveRemoteServer } from '$lib/generated/wailsjs/go/ficsitcli/ficsitCLI';
-  import { ficsitcli } from '$lib/generated/wailsjs/go/models';
   import { type PopupSettings, popup } from '$lib/skeletonExtensions';
   import { installsMetadata, remoteServers } from '$lib/store/ficsitCLIStore';
+  import { AddRemoteServer, FetchRemoteServerMetadata, RemoveRemoteServer } from '$wailsjs/go/ficsitcli/ficsitCLI';
+  import { ficsitcli } from '$wailsjs/go/models';
 
   export let parent: { onClose: () => void };
   

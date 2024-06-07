@@ -1,8 +1,8 @@
 <script lang="ts">
   import { isUpdateOnStart } from './smmUpdate';
 
-  import { UpdateAndRestart } from '$lib/generated/wailsjs/go/autoupdate/autoUpdate';
   import { smmUpdate } from '$lib/store/smmUpdateStore';
+  import { UpdateAndRestart } from '$wailsjs/go/autoupdate/autoUpdate';
 
   export let parent: { onClose: () => void };
 </script>

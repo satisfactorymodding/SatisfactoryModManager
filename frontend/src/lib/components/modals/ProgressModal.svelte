@@ -1,5 +1,5 @@
 <script context="module" lang="ts">
-  import { ficsitcli } from '$lib/generated/wailsjs/go/models';
+  import { ficsitcli } from '$wailsjs/go/models';
 
   export const supportedProgressTypes = [
     ficsitcli.Action.SELECT_INSTALL,

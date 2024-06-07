@@ -4,13 +4,12 @@
   import { getContextClient, queryStore } from '@urql/svelte';
   import { SemVer, coerce, minVersion, parse, sort, validRange } from 'semver';
 
-  import ModChangelog from '../modals/ModChangelog.svelte';
-
   import ModDetailsEntry from './ModDetailsEntry.svelte';
 
   import Markdown from '$lib/components/Markdown.svelte';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
+  import ModChangelog from '$lib/components/modals/ModChangelog.svelte';
   import { CompatibilityState, GetModDetailsDocument } from '$lib/generated';
   import { type PopupSettings, getModalStore, popup } from '$lib/skeletonExtensions';
   import { addQueuedModAction } from '$lib/store/actionQueue';

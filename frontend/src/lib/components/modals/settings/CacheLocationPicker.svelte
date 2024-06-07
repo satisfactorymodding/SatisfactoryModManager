@@ -1,8 +1,8 @@
 <script lang="ts">
   import { newCacheLocation } from './cacheLocationPicker';
 
-  import { OpenDirectoryDialog } from '$lib/generated/wailsjs/go/app/app';
   import { cacheDir } from '$lib/store/settingsStore';
+  import { OpenDirectoryDialog } from '$wailsjs/go/app/app';
 
   export let parent: { onClose: () => void };
 

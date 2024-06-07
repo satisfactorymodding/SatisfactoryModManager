@@ -57,6 +57,12 @@ module.exports = {
       files: ['*.js', '*.cjs'],
       parser: 'espree',
     },
+    {
+      files: ['src/lib/components/*'],
+      rules: {
+        'no-restricted-imports': ['error', { patterns: ['.*'] }],
+      },
+    },
   ],
   env: {
     browser: true,
@@ -84,5 +90,6 @@ module.exports = {
     'import/order': ['error', { 'newlines-between': 'always', alphabetize: { order: 'asc' } }],
     'import/newline-after-import': ['error'],
     'import/no-duplicates': ['error'],
+    'no-restricted-imports': ['error', { patterns: ['*/lib/*', '..*', '**/wailsjs/**/*'] }],
   },
 };

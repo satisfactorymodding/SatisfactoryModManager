@@ -1,10 +1,10 @@
 <script lang="ts">
   import { newProfileName } from './addProfile';
 
-  import { AddProfile } from '$lib/generated/wailsjs/go/ficsitcli/ficsitCLI';
   import { getModalStore } from '$lib/skeletonExtensions';
   import { selectedProfile } from '$lib/store/ficsitCLIStore';
   import { error } from '$lib/store/generalStore';
+  import { AddProfile } from '$wailsjs/go/ficsitcli/ficsitCLI';
 
   export let parent: { onClose: () => void };
 

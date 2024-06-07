@@ -2,9 +2,8 @@
   import { mdiOpenInNew, mdiTrayFull } from '@mdi/js';
   import { getContextClient } from '@urql/svelte';
 
-  import Tooltip from '../Tooltip.svelte';
-
   import SvgIcon from '$lib/components/SVGIcon.svelte';
+  import Tooltip from '$lib/components/Tooltip.svelte';
   import { type Compatibility, CompatibilityState } from '$lib/generated';
   import { type PopupSettings, popup } from '$lib/skeletonExtensions';
   import { queuedMods, startQueue } from '$lib/store/actionQueue';

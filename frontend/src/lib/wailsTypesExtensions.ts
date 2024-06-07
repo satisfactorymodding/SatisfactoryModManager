@@ -1,5 +1,6 @@
 import { TargetName } from './generated';
-import { common } from './generated/wailsjs/go/models';
+
+import { common } from '$wailsjs/go/models';
 
 export type ViewType = 'compact' | 'expanded';
 

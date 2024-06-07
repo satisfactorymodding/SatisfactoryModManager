@@ -5,10 +5,10 @@
   import { createEventDispatcher } from 'svelte';
 
   import ModListFilters from './ModsListFilters.svelte';
+  import ModsListItem from './ModsListItem.svelte';
 
   import VirtualList from '$lib/components/VirtualList.svelte';
   import AnnouncementsBar from '$lib/components/announcements/AnnouncementsBar.svelte';
-  import ModsListItem from '$lib/components/mods-list/ModsListItem.svelte';
   import { GetModCountDocument, GetModsDocument } from '$lib/generated';
   import { queuedMods } from '$lib/store/actionQueue';
   import { favoriteMods, lockfileMods, manifestMods } from '$lib/store/ficsitCLIStore';

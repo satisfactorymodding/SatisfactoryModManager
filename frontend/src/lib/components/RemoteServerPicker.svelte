@@ -4,8 +4,8 @@
   import { onDestroy } from 'svelte';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
-  import { GetPathSeparator, StartPicker, StopPicker, TryPick } from '$lib/generated/wailsjs/go/ficsitcli/serverPicker';
-  import type { ficsitcli } from '$lib/generated/wailsjs/go/models';
+  import { GetPathSeparator, StartPicker, StopPicker, TryPick } from '$wailsjs/go/ficsitcli/serverPicker';
+  import type { ficsitcli } from '$wailsjs/go/models';
 
 
   export let basePath: string;

@@ -2,19 +2,18 @@
   import { mdiUpload } from '@mdi/js';
   import { getContextClient, queryStore } from '@urql/svelte';
 
-  import ModChangelog from '../ModChangelog.svelte';
-
   import { selectedUpdates, showIgnored } from './updatesStore';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
+  import ModChangelog from '$lib/components/modals/ModChangelog.svelte';
   import { GetModNamesDocument } from '$lib/generated';
-  import { OfflineGetModsByReferences, UpdateMods } from '$lib/generated/wailsjs/go/ficsitcli/ficsitCLI';
-  import type { ficsitcli } from '$lib/generated/wailsjs/go/models';
-  import { SetUpdateIgnore, SetUpdateUnignore } from '$lib/generated/wailsjs/go/settings/settings';
   import { getModalStore } from '$lib/skeletonExtensions';
   import { canModify, unignoredUpdates, updateCheckInProgress, updates } from '$lib/store/ficsitCLIStore';
   import { error } from '$lib/store/generalStore';
   import { ignoredUpdates, offline } from '$lib/store/settingsStore';
+  import { OfflineGetModsByReferences, UpdateMods } from '$wailsjs/go/ficsitcli/ficsitCLI';
+  import type { ficsitcli } from '$wailsjs/go/models';
+  import { SetUpdateIgnore, SetUpdateUnignore } from '$wailsjs/go/settings/settings';
 
   export let parent: { onClose: () => void };
 

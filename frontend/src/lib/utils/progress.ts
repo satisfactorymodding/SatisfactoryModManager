@@ -2,7 +2,7 @@ import { type Readable, get, writable } from 'svelte/store';
 
 import { timeSeries } from './timeSeries';
 
-import type { utils } from '$lib/generated/wailsjs/go/models';
+import type { utils } from '$wailsjs/go/models';
 
 export function progressStats(progress: Readable<utils.Progress | null>, options?: { statsInterval?: number; updateInterval?: { speed?: number; eta?: number } }): Readable<{ speed: number; eta: number | undefined }> {
   const finalOptions = {

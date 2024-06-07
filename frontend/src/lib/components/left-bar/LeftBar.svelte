@@ -4,16 +4,15 @@
   import _ from 'lodash';
   import { siDiscord, siGithub } from 'simple-icons/icons';
 
-  import Tooltip from '../Tooltip.svelte';
-  import DeleteProfile from '../modals/profiles/DeleteProfile.svelte';
-  import RenameProfile from '../modals/profiles/RenameProfile.svelte';
-
   import LaunchButton from './LaunchButton.svelte';
   import Settings from './Settings.svelte';
   import Updates from './Updates.svelte';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import Select from '$lib/components/Select.svelte';
+  import Tooltip from '$lib/components/Tooltip.svelte';
+  import DeleteProfile from '$lib/components/modals/profiles/DeleteProfile.svelte';
+  import RenameProfile from '$lib/components/modals/profiles/RenameProfile.svelte';
   import { getModalStore } from '$lib/skeletonExtensions';
   import { canChangeInstall, canModify, installs, installsMetadata, modsEnabled, profiles, selectedInstall, selectedProfile } from '$lib/store/ficsitCLIStore';
   import { error, siteURL } from '$lib/store/generalStore';

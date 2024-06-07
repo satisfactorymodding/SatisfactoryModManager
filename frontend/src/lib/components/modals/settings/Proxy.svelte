@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { CloseAndRestart } from '$lib/generated/wailsjs/go/app/app';
   import { progress } from '$lib/store/ficsitCLIStore';
   import { proxy } from '$lib/store/settingsStore';
+  import { CloseAndRestart } from '$wailsjs/go/app/app';
 
   export let parent: { onClose: () => void };
   

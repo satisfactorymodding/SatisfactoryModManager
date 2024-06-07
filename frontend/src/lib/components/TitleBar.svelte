@@ -1,8 +1,7 @@
 <script lang="ts">
   import { mdiWindowClose, mdiWindowMaximize, mdiWindowMinimize, mdiWindowRestore } from '@mdi/js';
 
-  import SvgIcon from './SVGIcon.svelte';
-
+  import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { version } from '$lib/store/settingsStore';
   import { Quit, WindowMinimise, WindowToggleMaximise } from '$wailsjs/runtime';
 

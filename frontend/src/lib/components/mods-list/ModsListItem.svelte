@@ -9,7 +9,6 @@
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
   import { CompatibilityState } from '$lib/generated';
-  import { ficsitcli } from '$lib/generated/wailsjs/go/models';
   import { type PopupSettings, popup } from '$lib/skeletonExtensions';
   import { addQueuedModAction, queuedMods, removeQueuedModAction } from '$lib/store/actionQueue';
   import { canInstallMods, favoriteMods, lockfileMods, manifestMods, progress, progressMessage, progressPercent, selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
@@ -21,6 +20,7 @@
   import type { ButtonDisplay } from '$lib/utils/responsiveButton';
   import { installTypeToTargetName } from '$lib/wailsTypesExtensions';
   import { DisableMod, EnableMod, InstallMod, RemoveMod } from '$wailsjs/go/ficsitcli/ficsitCLI';
+  import { ficsitcli } from '$wailsjs/go/models';
   import { FavoriteMod, UnFavoriteMod } from '$wailsjs/go/settings/settings';
 
   export let mod: PartialMod;

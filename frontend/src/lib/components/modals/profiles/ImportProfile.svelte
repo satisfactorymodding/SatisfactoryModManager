@@ -1,11 +1,11 @@
 <script lang="ts">
   import { profileFilepath, profileName } from './importProfile';
 
-  import { OpenFileDialog } from '$lib/generated/wailsjs/go/app/app';
-  import { ImportProfile, ReadExportedProfileMetadata } from '$lib/generated/wailsjs/go/ficsitcli/ficsitCLI';
-  import type { ficsitcli } from '$lib/generated/wailsjs/go/models';
   import { profiles, selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
   import { error } from '$lib/store/generalStore';
+  import { OpenFileDialog } from '$wailsjs/go/app/app';
+  import { ImportProfile, ReadExportedProfileMetadata } from '$wailsjs/go/ficsitcli/ficsitCLI';
+  import type { ficsitcli } from '$wailsjs/go/models';
 
   export let parent: { onClose: () => void };
 
