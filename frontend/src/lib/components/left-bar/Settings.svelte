@@ -5,10 +5,10 @@
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import T from '$lib/components/T.svelte';
-  import { GetModNameDocument } from '$lib/generated';
+  import { GetModNameDocument, i18n } from '$lib/generated';
   import { type PopupSettings, getModalStore, popup } from '$lib/skeletonExtensions';
   import { lockfileMods, manifestMods } from '$lib/store/ficsitCLIStore';
-  import { debug, konami, launchButton, offline, queueAutoStart, startView, updateCheckMode, version } from '$lib/store/settingsStore';
+  import { debug, konami, language, launchButton, offline, queueAutoStart, startView, updateCheckMode, version } from '$lib/store/settingsStore';
   import type { LaunchButtonType, ViewType } from '$lib/wailsTypesExtensions';
   import { GenerateDebugInfo } from '$wailsjs/go/app/app';
   import { OfflineGetMod } from '$wailsjs/go/ficsitcli/ficsitCLI';
@@ -116,6 +116,18 @@
       name: 'Launch Button',
     },
   ];
+
+  const languageMenu = {
+    event: 'click',
+    target: 'language-menu',
+    middleware: {
+      offset: 4,
+    },
+    placement: 'right-start',
+    closeQuery: '[data-popup="language-menu"] .listbox-item',
+  } satisfies PopupSettings;
+
+  let languages: string[] = Object.keys(i18n);
   
   const urqlClient = getContextClient();
 
@@ -158,6 +170,11 @@
       modListString += `${mod.friendlyName} ${mod.modReference} ${mod.version}\n`;
     });
     navigator.clipboard.writeText(modListString.trim());
+  }
+
+  function localeName(locale: string) {
+    if (!locale) return 'N/A';
+    return new Intl.DisplayNames([locale], { type: 'language' }).of(locale);
   }
 </script>
 
@@ -279,6 +296,36 @@
       </ListBox>
     </ul>
   </div>
+  <div class="card shadow-xl w-56 z-10 duration-0 overflow-y-auto" data-popup="language-menu">
+    <!-- 
+    Skeleton's popup close function waits for the tranistion duration...
+    before actually triggering the transition...
+    So we'll just not have a transition...
+    -->
+    <ul class="menu">
+      <ListBox class="w-full" rounded="rounded-none" spacing="space-y-0">
+        {#each languages as item}
+          <ListBoxItem
+            name="language"
+            class="bg-surface-50-900-token"
+            active=""
+            value={item}
+            bind:group={$language}>
+            <!-- TODO: dynamic flags -->
+            <!-- <span slot="lead" class="h-5 w-5 block">
+              {localeFlag(item)}
+            </span> -->
+            {localeName(item)}
+            <span slot="trail" class="h-5 w-5 block">
+              {#if $language === item}
+                <SvgIcon class="h-full w-full" icon={mdiCheck}/>
+              {/if}
+            </span>
+          </ListBoxItem>
+        {/each}
+      </ListBox>
+    </ul>
+  </div>
 
   <!-- main settings menu starts here -->
   <div class="card shadow-xl z-10 duration-0 overflow-y-auto py-2 max-h-[95vh]" data-popup="settings-menu">
@@ -330,6 +377,19 @@
         <span class="flex-auto">
           <T defaultValue="Settings" keyName="settings.settings"/>
         </span>
+      </li>
+      <hr class="divider" />
+      <li data-noclose use:popup={languageMenu}>
+        <button>
+          <span class="h-5 w-5"/>
+          <span class="flex-auto">
+            <T defaultValue="Language" keyName="settings.language"/>
+          </span>
+          <span>{localeName($language)}</span>
+          <span class="h-5 w-5">
+            <SvgIcon class="h-full w-full" icon={mdiChevronRight}/>
+          </span>
+        </button>
       </li>
       <hr class="divider" />
       <li data-noclose use:popup={updateCheckModeMenu}>

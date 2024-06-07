@@ -22,7 +22,7 @@
   import { getModalStore, initializeModalStore } from '$lib/skeletonExtensions';
   import { installs, invalidInstalls, progress } from '$lib/store/ficsitCLIStore';
   import { error, expandedMod, siteURL } from '$lib/store/generalStore';
-  import { konami, updateCheckMode } from '$lib/store/settingsStore';
+  import { konami, language, updateCheckMode } from '$lib/store/settingsStore';
   import { smmUpdate, smmUpdateReady } from '$lib/store/smmUpdateStore';
   import { ExpandMod, GenerateDebugInfo, UnexpandMod } from '$wailsjs/go/app/app';
   import { Environment, EventsOn } from '$wailsjs/runtime';
@@ -45,6 +45,8 @@
 
       staticData: i18n,
     });
+  
+  $: tolgee.changeLanguage($language);
 
   let frameless = false;
   Environment().then((env) => {

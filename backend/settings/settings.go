@@ -53,6 +53,8 @@ type settings struct {
 
 	Offline bool `json:"offline,omitempty"`
 
+	Language string `json:"language,omitempty"`
+
 	Proxy string `json:"proxy,omitempty"`
 
 	Konami       bool   `json:"konami,omitempty"`
@@ -244,6 +246,15 @@ func (s *settings) SetAnnouncementViewed(announcement string) {
 	s.ViewedAnnouncements = append(s.ViewedAnnouncements, announcement)
 	_ = SaveSettings()
 	wailsRuntime.EventsEmit(common.AppContext, "viewedAnnouncements", s.ViewedAnnouncements)
+}
+
+func (s *settings) GetLanguage() string {
+	return s.Language
+}
+
+func (s *settings) SetLanguage(value string) {
+	s.Language = value
+	_ = SaveSettings()
 }
 
 func (s *settings) GetDebug() bool {
