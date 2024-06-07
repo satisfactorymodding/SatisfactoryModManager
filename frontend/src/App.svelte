@@ -2,6 +2,8 @@
   import './_global.postcss';
   import { arrow, autoUpdate, computePosition, flip, offset, shift, size } from '@floating-ui/dom';
   import { Modal, initializeStores, storePopup } from '@skeletonlabs/skeleton';
+  import { FormatIcu } from '@tolgee/format-icu';
+  import { FormatSimple, Tolgee, TolgeeProvider } from '@tolgee/svelte';
   import { setContextClient } from '@urql/svelte';
 
   import TitleBar from '$lib/components/TitleBar.svelte';
@@ -15,6 +17,7 @@
   import { isUpdateOnStart } from '$lib/components/modals/smmUpdate/smmUpdate';
   import ModsList from '$lib/components/mods-list/ModsList.svelte';
   import { initializeGraphQLClient } from '$lib/core/graphql';
+  import { i18n } from '$lib/generated';
   import { getModalStore, initializeModalStore } from '$lib/skeletonExtensions';
   import { installs, invalidInstalls, progress } from '$lib/store/ficsitCLIStore';
   import { error, expandedMod, siteURL } from '$lib/store/generalStore';
@@ -27,6 +30,14 @@
   initializeModalStore();
 
   storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow, size });
+  
+  const tolgee = Tolgee()
+    .use(FormatSimple())
+    .use(FormatIcu())
+    .init({
+      language: 'en',
+      staticData: i18n,
+    });
 
   let frameless = false;
   Environment().then((env) => {
@@ -200,48 +211,52 @@
   });
 </script>
 
-<div class="flex flex-col h-screen w-screen select-none">
-  {#if frameless}
-    <TitleBar />
-  {/if}
-  <div class="flex grow h-0">
-    <LeftBar />
-    <div class="flex flex-auto @container/mod-list-wrapper z-[1]">
-      <div class="{$expandedMod && !windowStateChanging ? 'w-2/5 hidden @3xl/mod-list-wrapper:block @3xl/mod-list-wrapper:flex-auto' : 'w-full'}" class:max-w-[42.5rem]={!!$expandedMod}>
-        <ModsList
-          hideMods={noInstallsError || invalidInstallsError}
-          on:expandedMod={() => {
-            focusOnEntry.focus();
-          }}>
-          <div class="card my-auto mr-4">
-            <header class="card-header font-bold text-2xl text-center">
-              {#if noInstallsError}
-                No Satisfactory installs found
-              {:else}
-                {$invalidInstalls.length} invalid Satisfactory install{$invalidInstalls.length !== 1 ? 's' : ''} found
-              {/if}
-            </header>
-            <section class="p-4">
-              <p class="text-base text-center">
-                Seems wrong? Click the button below and send the generated zip file on the <a class="text-primary-600 underline" href="https://discord.gg/xkVJ73E">modding discord</a> in #help-using-mods.
-              </p>
-            </section>
-            <footer class="card-footer">
-              <button
-                class="btn text-primary-600 w-full"
-                on:click={GenerateDebugInfo}>
-                Generate debug info
-              </button>
-            </footer>
-          </div>
-        </ModsList>
-      </div>
-      <div class="w-3/5" class:grow={!windowStateChanging} class:hidden={!$expandedMod || windowStateChanging}>
-        <ModDetails bind:focusOnEntry/>
+<TolgeeProvider {tolgee}>
+  <div class="flex flex-col h-screen w-screen select-none">
+    {#if frameless}
+      <TitleBar />
+    {/if}
+    <div class="flex grow h-0">
+      <LeftBar />
+      <div class="flex flex-auto @container/mod-list-wrapper z-[1]">
+        <div class="{$expandedMod && !windowStateChanging ? 'w-2/5 hidden @3xl/mod-list-wrapper:block @3xl/mod-list-wrapper:flex-auto' : 'w-full'}" class:max-w-[42.5rem]={!!$expandedMod}>
+          <ModsList
+            hideMods={noInstallsError || invalidInstallsError}
+            on:expandedMod={() => {
+              focusOnEntry.focus();
+            }}>
+            <div class="card my-auto mr-4">
+              <header class="card-header font-bold text-2xl text-center">
+                {#if noInstallsError}
+                  No Satisfactory installs found
+                {:else}
+                  {$invalidInstalls.length} invalid Satisfactory install{$invalidInstalls.length !== 1 ? 's' : ''} found
+                {/if}
+              </header>
+              <section class="p-4">
+                <p class="text-base text-center">
+                  Seems wrong? Click the button below and send the generated zip file on the <a class="text-primary-600 underline" href="https://discord.gg/xkVJ73E">modding discord</a> in #help-using-mods.
+                </p>
+              </section>
+              <footer class="card-footer">
+                <button
+                  class="btn text-primary-600 w-full"
+                  on:click={GenerateDebugInfo}>
+                  Generate debug info
+                </button>
+              </footer>
+            </div>
+          </ModsList>
+        </div>
+        <div class="w-3/5" class:grow={!windowStateChanging} class:hidden={!$expandedMod || windowStateChanging}>
+          <ModDetails bind:focusOnEntry/>
+        </div>
       </div>
     </div>
   </div>
-</div>
+  
+  <Modal components={modalRegistry} />
+</TolgeeProvider>
 
 <!--
   skeleton modals don't provide a way to make them persistent (i.e. ignore mouse clicks outside and escape key)
@@ -250,4 +265,3 @@
 <svelte:window
   on:keydown|capture|nonpassive={modalKeyDown}
   on:mousedown|capture|nonpassive={modalMouseDown} />
-<Modal components={modalRegistry} />

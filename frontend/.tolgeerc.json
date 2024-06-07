@@ -1,0 +1,9 @@
+{
+  "$schema": "https://tolgee.io/cli-schema.json",
+  "projectId": 4,
+  "apiUrl": "https://translate.ficsit.app",
+  "patterns": ["./src/**/*.ts?(x)", "./src/**/*.svelte"],
+  "pull": {
+    "path": "./src/lib/generated/i18n"
+  }
+}
