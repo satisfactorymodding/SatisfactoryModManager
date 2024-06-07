@@ -6,6 +6,7 @@
   import { FormatSimple, Tolgee, TolgeeProvider } from '@tolgee/svelte';
   import { setContextClient } from '@urql/svelte';
 
+  import T, { translationElementPart } from '$lib/components/T.svelte';
   import TitleBar from '$lib/components/TitleBar.svelte';
   import LeftBar from '$lib/components/left-bar/LeftBar.svelte';
   import ModDetails from '$lib/components/mod-details/ModDetails.svelte';
@@ -228,21 +229,30 @@
             <div class="card my-auto mr-4">
               <header class="card-header font-bold text-2xl text-center">
                 {#if noInstallsError}
-                  No Satisfactory installs found
+                  <T defaultValue="No Satisfactory installs found" keyName="error.no_installs" />
                 {:else}
-                  {$invalidInstalls.length} invalid Satisfactory install{$invalidInstalls.length !== 1 ? 's' : ''} found
+                  <T defaultValue={'{invalidInstalls} invalid Satisfactory {invalidInstalls, plural, one {install} other {installs}} found'} keyName="error.invalid_installs" params={{ invalidInstalls: $invalidInstalls.length }} />
                 {/if}
               </header>
               <section class="p-4">
                 <p class="text-base text-center">
-                  Seems wrong? Click the button below and send the generated zip file on the <a class="text-primary-600 underline" href="https://discord.gg/xkVJ73E">modding discord</a> in #help-using-mods.
+                  <T
+                    defaultValue="Seems wrong? Click the button below and send the generated zip file on the <1>modding discord</1> in #help-using-mods."
+                    keyName="error.help"
+                    parts={[
+                      translationElementPart('a', {
+                        href: 'https://discord.gg/xkVJ73E',
+                        class: 'text-primary-600 underline',
+                      }),
+                    ]}
+                  />
                 </p>
               </section>
               <footer class="card-footer">
                 <button
                   class="btn text-primary-600 w-full"
                   on:click={GenerateDebugInfo}>
-                  Generate debug info
+                  <T defaultValue="Generate debug info" keyName="error.generate_debug_info" />
                 </button>
               </footer>
             </div>
@@ -254,7 +264,7 @@
       </div>
     </div>
   </div>
-  
+
   <Modal components={modalRegistry} />
 </TolgeeProvider>
 

@@ -1,10 +1,12 @@
 <script lang="ts">
   import { mdiUpload } from '@mdi/js';
+  import { getTranslate } from '@tolgee/svelte';
   import { getContextClient, queryStore } from '@urql/svelte';
 
   import { selectedUpdates, showIgnored } from './updatesStore';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
+  import T from '$lib/components/T.svelte';
   import ModChangelog from '$lib/components/modals/ModChangelog.svelte';
   import { GetModNamesDocument } from '$lib/generated';
   import { getModalStore } from '$lib/skeletonExtensions';
@@ -16,6 +18,8 @@
   import { SetUpdateIgnore, SetUpdateUnignore } from '$wailsjs/go/settings/settings';
 
   export let parent: { onClose: () => void };
+
+  const { t } = getTranslate();
 
   const modalStore = getModalStore();
 
@@ -108,13 +112,13 @@
 
 <div style="max-height: calc(100vh - 3rem); max-width: calc(100vw - 3rem);" class="w-[48rem] card flex flex-col gap-2">
   <header class="card-header font-bold text-2xl text-center">
-    Updates
+    <T defaultValue="Updates" keyName="updates.title" />
   </header>
   <section class="px-4">
     <button
       class="btn"
       on:click={() => $showIgnored = !$showIgnored}>
-      {$showIgnored ? 'Hide ignored' : 'Show ignored'}
+      {$showIgnored ? $t('updates.hide-ignored', 'Hide ignored') : $t('updates.show-ignored', 'Show ignored')}
     </button>
   </section>
   <section class="px-4 flex-auto grid grid-cols-12 overflow-y-auto">
@@ -133,12 +137,12 @@
       <button
         class="btn col-span-2"
         on:click={() => modalStore.trigger({ type:'component', component:{ ref: ModChangelog, props:{ mod:update.item, versionRange:{ from:update.currentVersion, to:update.newVersion } } } }, true)}>
-        Changelog
+        <T defaultValue="Changelog" keyName="updates.changelog" />
       </button>
       <button
         class="btn col-span-2"
         on:click={() => toggleIgnoreUpdate(update)}>
-        {$unignoredUpdates.includes(update) ? 'Ignore' : 'Unignore'}
+        {$unignoredUpdates.includes(update) ? $t('updates.ignore', 'Ignore') : $t('updates.unignore', 'Unignore')}
       </button>
     {/each}
   </section>
@@ -146,19 +150,19 @@
     <button
       class="btn"
       on:click={parent.onClose}>
-      Cancel
+      <T defaultValue="Cancel" keyName="common.cancel" />
     </button>
     <button
       class="btn"
       disabled={!$canModify || $updateCheckInProgress || updatesToDisplay.length == 0}
       on:click={() => updateAll()}>
-      Update All
+      <T defaultValue="Update All" keyName="updates.update-all" />
     </button>
     <button
       class="btn"
       disabled={!$canModify || $updateCheckInProgress || updatesToDisplay.length == 0 || $selectedUpdates.length == 0}
       on:click={() => updateSelected()}>
-      Update Selected
+      <T defaultValue="Update Selected" keyName="updates.update-selected" />
     </button>
   </footer>
 </div>

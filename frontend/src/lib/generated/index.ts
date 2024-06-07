@@ -1,2 +1,2 @@
 export * from './graphql';
-export * as i18n from './i18n';
+export * from './i18n';

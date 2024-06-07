@@ -4,6 +4,7 @@
   import { onDestroy } from 'svelte';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
+  import T from '$lib/components/T.svelte';
   import { GetPathSeparator, StartPicker, StopPicker, TryPick } from '$wailsjs/go/ficsitcli/serverPicker';
   import type { ficsitcli } from '$wailsjs/go/models';
 
@@ -198,7 +199,9 @@
         {/each}
       </div>
       {#if validError && !pendingValidCheck && !error}
-        <div class="text-error-500 p-4">Failed to check if selected path is a valid server</div>
+        <div class="text-error-500 p-4">
+          <T defaultValue="Failed to check if selected path is a valid server" keyName="server-picker.failed-valid-check"/>
+        </div>
       {/if}
     {/if}
   </div>
@@ -211,7 +214,9 @@
       {:else if setupError}
         <div class="text-error-500">{setupError}</div>
       {:else}
-        <div class="text-error-500">Failed to list directory</div>
+        <div class="text-error-500">
+          <T defaultValue="Failed to list directory" keyName="server-picker.failed-list-dir"/>
+        </div>
       {/if}
     </div>
   {/if}

@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { SizeOptions } from '@floating-ui/dom';
   import { mdiCheck, mdiChevronDown, mdiImport, mdiRocketLaunch, mdiTestTube, mdiWeb } from '@mdi/js';
+  import { getTranslate } from '@tolgee/svelte';
   import { getContextClient, queryStore } from '@urql/svelte';
   import { SemVer, coerce, minVersion, parse, sort, validRange } from 'semver';
 
@@ -8,6 +9,7 @@
 
   import Markdown from '$lib/components/Markdown.svelte';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
+  import T from '$lib/components/T.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
   import ModChangelog from '$lib/components/modals/ModChangelog.svelte';
   import { CompatibilityState, GetModDetailsDocument } from '$lib/generated';
@@ -24,6 +26,8 @@
   import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
 
   export let focusOnEntry: HTMLElement | undefined = undefined;
+
+  const { t } = getTranslate();
 
   const modalStore = getModalStore();
 
@@ -223,7 +227,7 @@
         >
           {mod?.name ?? ''}
         </span>
-        <span class="font-light">A mod by:</span>
+        <span class="font-light"><T defaultValue="A mod by:" keyName="mod-details.mod-author" /></span>
         <span
           bind:this={focusOnEntry}
           class="font-medium text-primary-600 cursor-pointer"
@@ -277,11 +281,11 @@
         <span>Mod info:</span><br/>
         <ModDetailsEntry label="Size" loading={!mod}>{size ?? ''}</ModDetailsEntry>
         {#if (!mod || !('offline' in mod)) && !$offline}
-          <ModDetailsEntry label="Created" loading={!mod}>{mod ? new Date(mod.created_at).toLocaleDateString() : ''}</ModDetailsEntry>
-          <ModDetailsEntry label="Updated" loading={!mod}>{mod ? new Date(mod.last_version_date).toLocaleString() : ''}</ModDetailsEntry>
-          <ModDetailsEntry label="Total downloads" loading={!mod}>{mod?.downloads.toLocaleString() ?? ''}</ModDetailsEntry>
-          <ModDetailsEntry label="Views" loading={!mod}>{mod?.views.toLocaleString() ?? ''}</ModDetailsEntry>
-          <ModDetailsEntry label="Compatibility" loading={!mod}>
+          <ModDetailsEntry label={$t('mod-details.created', 'Created')} loading={!mod}>{mod ? new Date(mod.created_at).toLocaleDateString() : ''}</ModDetailsEntry>
+          <ModDetailsEntry label={$t('mod-details.updated', 'Updated')} loading={!mod}>{mod ? new Date(mod.last_version_date).toLocaleString() : ''}</ModDetailsEntry>
+          <ModDetailsEntry label={$t('mod-details.downloads', 'Total downloads')} loading={!mod}>{mod?.downloads.toLocaleString() ?? ''}</ModDetailsEntry>
+          <ModDetailsEntry label={$t('mod-details.views', 'Views')} loading={!mod}>{mod?.views.toLocaleString() ?? ''}</ModDetailsEntry>
+          <ModDetailsEntry label={$t('mod-details.compatibility', 'Compatibility')} loading={!mod}>
             {#if mod?.compatibility}
               <div class="flex pl-1">
                 <div use:popup={compatEAPopup}>
@@ -290,12 +294,12 @@
               
                 <Tooltip popupId={compatEAPopupId}>
                   <span class="text-base">
-                    This mod has been reported as {mod.compatibility.EA.state} on Early Access.
+                    <T defaultValue={'This mod has been reported as {state} on {branch}.'} keyName="mod-details.compatibility-branch" params={{ state: mod.compatibility.EA.state, branch: 'Early Access' }} />
                   </span>
                   {#if mod.compatibility.EA.note}
                     <Markdown class="[&>p]:my-0" markdown={mod.compatibility.EA.note} />
                   {:else}
-                    (No further notes provided)
+                    <T defaultValue="(No further notes provided)" keyName="mod-details.compatibility-no-notes" />
                   {/if}
                 </Tooltip>
                 <div use:popup={compatEXPPopup}>
@@ -303,19 +307,23 @@
                 </div>
                 <Tooltip popupId={compatEXPPopupId}>
                   <span class="text-base">
-                    This mod has been reported as {mod.compatibility.EXP.state} on Experimental.
+                    <T defaultValue={'This mod has been reported as {state} on {branch}.'} keyName="mod-details.compatibility-branch" params={{ state: mod.compatibility.EXP.state, branch: 'Experimental' }} />
                   </span>
                   {#if mod.compatibility.EXP.note}
                     <Markdown class="[&>p]:my-0" markdown={mod.compatibility.EXP.note} />
                   {:else}
-                    (No further notes provided)
+                    <T defaultValue="(No further notes provided)" keyName="mod-details.compatibility-no-notes" />
                   {/if}
                 </Tooltip>
               </div>
             {:else if mod}
-              <span class="font-bold" use:popup={compatUnknownPopup}>&nbsp;Unknown</span>
+              <span class="font-bold" use:popup={compatUnknownPopup}>
+                <T defaultValue="Unknown" keyName="mod-details.compatibility-unknown" />
+              </span>
               <Tooltip popupId={compatUnknownPopupId}>
-                <span class="text-base">No compatibility information has been reported for this mod yet. Try it out and contact us on the Discord so it can be updated!</span>
+                <span class="text-base">                  
+                  <T defaultValue="No compatibility information has been reported for this mod yet. Try it out and contact us on the Discord so it can be updated!" keyName="mod-details.compatibility-unknown-tooltip" />
+                </span>
               </Tooltip>
             {/if}
           </ModDetailsEntry>
@@ -323,14 +331,16 @@
       </div>
 
       <div>
-        <ModDetailsEntry label="Latest version" loading={!mod}>{latestVersion ?? ''}</ModDetailsEntry>
-        <ModDetailsEntry label="Installed version" loading={!mod}>{installedVersion ?? ''}</ModDetailsEntry>
+        <ModDetailsEntry label={$t('mod-details.latest-version', 'Latest version')} loading={!mod}>{latestVersion ?? ''}</ModDetailsEntry>
+        <ModDetailsEntry label={$t('mod-details.installed-version', 'Installed version')} loading={!mod}>{installedVersion ?? ''}</ModDetailsEntry>
         <div class="pt-2" use:popup={changeVersionMenu}>
           <button
             class="btn px-4 h-10 text-sm w-full bg-secondary-600"
             disabled={!$canModify}
           >
-            <span>Change version</span>
+            <span>
+              <T defaultValue="Change version" keyName="mod-details.change-version" />
+            </span>
             <SvgIcon
               class="h-5 w-5"
               icon={mdiChevronDown}/>
@@ -351,7 +361,9 @@
                     <SvgIcon class="h-full w-full" icon={mdiCheck} />
                   {/if}
                 </div>
-                <span class="flex-auto">Any</span>
+                <span class="flex-auto">
+                  <T defaultValue="Any" keyName="mod-details.change-version-any" />
+                </span>
               </button>
             </li>
             {#each mod?.versions ?? [] as version}
@@ -365,7 +377,9 @@
                   <span class="flex-auto">{version.version}</span>
                 </button>
                 <button class="btn w-full h-full text-left" on:click={() => installVersion(`>=${version.version}`)}>
-                  <span class="flex-auto">or newer</span>
+                  <span class="flex-auto">
+                    <T defaultValue="or newer" keyName="mod-details.change-version-or-newer" />
+                  </span>
                   <div class="w-7 h-7 p-1">
                     {#if manifestVersion && manifestVersion !== version.version && validRange(manifestVersion) && minVersion(manifestVersion)?.format() === version.version}
                       <SvgIcon class="h-full w-full" icon={mdiCheck} />
@@ -379,7 +393,9 @@
         {#if (!mod || !('offline' in mod)) && !$offline}
           <div class="pt-2" use:popup={changelogMenu}>
             <button class="btn px-4 h-10 text-sm w-full bg-secondary-600">
-              <span>Changelogs</span>
+              <span>
+                <T defaultValue="Changelogs" keyName="mod-details.changelogs" />
+              </span>
               <SvgIcon
                 class="h-5 w-5"
                 icon={mdiChevronDown}/>
@@ -407,7 +423,9 @@
           <button
             class="btn px-4 h-10 text-sm w-full bg-primary-900"
             on:click={() => BrowserOpenURL(ficsitAppLink)}>
-            <span class="whitespace-break-spaces">View on ficsit.app</span>
+            <span class="whitespace-break-spaces">
+              <T defaultValue="View on ficsit.app" keyName="mod-details.view-on-ficsit-app" />
+            </span>
             <SvgIcon
               class="h-5 w-5"
               icon={mdiWeb}/>
@@ -422,12 +440,16 @@
       <SvgIcon
         class="h-5 w-5 -scale-x-100"
         icon={mdiImport}/>
-      <span>Close</span>
+      <span>
+        <T defaultValue="Close" keyName="common.close" />
+      </span>
     </button>
   </div>
   <div class="break-words overflow-wrap-anywhere flex-1 px-3 mr-3 my-4 overflow-y-scroll overflow-x-hidden w-0">
     {#if $offline}
-      <div class="flex items-center justify-center h-full text-center font-bold">Offline mode is enabled. Changelogs and descriptions are not available.</div>
+      <div class="flex items-center justify-center h-full text-center font-bold">
+        <T defaultValue="Offline mode is enabled. Changelogs and descriptions are not available." keyName="mod-details.offline-mode" />
+      </div>
     {:else if mod && 'full_description' in mod && mod.full_description}
       <Markdown markdown={mod.full_description} />
     {:else}

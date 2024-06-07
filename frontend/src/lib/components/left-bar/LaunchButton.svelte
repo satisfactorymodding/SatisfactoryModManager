@@ -3,6 +3,7 @@
   import { getContextClient } from '@urql/svelte';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
+  import T from '$lib/components/T.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
   import { type Compatibility, CompatibilityState } from '$lib/generated';
   import { type PopupSettings, popup } from '$lib/skeletonExtensions';
@@ -118,7 +119,9 @@
       class="btn h-8 w-full text-sm bg-error-500"
       on:click={() => startQueue()}
     >
-      <span>Apply {$queuedMods.length} change{$queuedMods.length !== 1 ? 's' : ''}</span>
+      <span>
+        <T defaultValue={'Apply {queued, plural, one {one change} other {# changes}'} keyName="launch-button.apply-queued" params={{ queued: $queuedMods.length }}/>
+      </span>
       <div class="grow" />
       <SvgIcon
         class="h-5 w-5"
@@ -129,7 +132,9 @@
       class="btn h-8 w-full text-sm bg-surface-200-700-token"
       disabled
     >
-      <span>SMM can't launch this install</span>
+      <span>
+        <T defaultValue="SMM can't launch this install" keyName="launch-button.cant-launch"/>
+      </span>
       <div class="grow" />
     </button>
   {:else if $launchButton === 'normal' || $isGameRunning || $isLaunchingGame}
@@ -141,7 +146,9 @@
       disabled={!!$progress || $isGameRunning || $isLaunchingGame}
       on:click={() => launchGame()}
     >
-      <span>Play Satisfactory</span>
+      <span>
+        <T defaultValue="Play Satisfactory" keyName="launch-button.play"/>
+      </span>
       <div class="grow" />
       <SvgIcon
         class="h-5 w-5"
@@ -212,49 +219,78 @@
 </center>
 <Tooltip class="!mt-0" {popupId}>
   {#if versionIncompatible.length > 0 || versionPossiblyCompatible.length > 0 || reportedIncompatible.length > 0 || reportedPossiblyCompatible.length > 0}
-    <span>You have:</span>
+    <span>
+      <T defaultValue="You have:" keyName="launch-button.you-have-warning-mods"/>
+    </span>
     <ul class="list-disc pl-5">
       {#if versionIncompatible.length > 0}
         <li>
           <span>
-            {versionIncompatible.length} incompatible mod{versionIncompatible.length > 1 ? 's' : ''} which will either not load or crash your game
+            <T defaultValue={'{versionIncompatible} incompatible {versionIncompatible, plural, one {mod} other {mods}} which will not load or crash our game'} keyName="launch-button.incompatible-mods" params={{ versionIncompatible: versionIncompatible.length }}/>
           </span>
         </li>
       {/if}
       {#if reportedIncompatible.length > 0}
         <li>
           <span>
-            {reportedIncompatible.length} mod{reportedIncompatible.length > 1 ? 's' : ''} that {reportedIncompatible.length > 1 ? 'are' : 'is'} reported as Broken on this game version. Read the mod{reportedIncompatible.length > 1 ? 's\'' : '\'s'} description or compatibility notes for more information.
+            <T
+              defaultValue={'{reportedIncompatible, plural, one {One mod} other {# mods}} that {reportedIncompatible, plural, one {is} other {are}} reported as Broken on this game version. Read the {versionIncompatible, plural, one {mod\'s} other {mods\'}} description or compatibility notes for more information'}
+              keyName="launch-button.reported-incompatible-mods"
+              params={{ reportedIncompatible: reportedIncompatible.length }}/>
           </span>
         </li>
       {/if}
       {#if versionPossiblyCompatible.length > 0}
         <li>
           <span>
-            {versionPossiblyCompatible.length} mod{versionPossiblyCompatible.length > 1 ? 's' : ''} that {versionPossiblyCompatible.length > 1 ? 'are' : 'is'} likely incompatible with your game
+            <T
+              defaultValue={'{versionPossiblyCompatible, plural, one {One mod} other {# mods}} that {versionPossiblyCompatible, plural, one {is} other {are}} likely incompatible with your game'} 
+              keyName="launch-button.possibly-incompatible-mods"
+              params={{ versionPossiblyCompatible: versionPossiblyCompatible.length }}/>
           </span>
         </li>
       {/if}
       {#if reportedPossiblyCompatible.length > 0}
         <li>
           <span>
-            {reportedPossiblyCompatible.length} mod{reportedPossiblyCompatible.length > 1 ? 's' : ''} that {reportedPossiblyCompatible.length > 1 ? 'are' : 'is'} reported as Damaged on this game version. Read the mod{reportedPossiblyCompatible.length > 1 ? 's\'' : '\'s'} description or compatibility notes for more information.
+            <T
+              defaultValue={'{reportedPossiblyCompatible, plural, one {One mod} other {# mods}} that {reportedPossiblyCompatible, plural, one {is} other {are}} reported as Damaged on this game version. Read the {versionIncompatible, plural, one {mod\'s} other {mods\'}} description or compatibility notes for more information'}
+              keyName="launch-button.reported-possibly-compatible-mods"
+              params={{ reportedPossiblyCompatible: reportedPossiblyCompatible.length }}/>
           </span>
         </li>
       {/if}
     </ul>
-    <span>Are you sure you want to launch?</span>
+    <span>
+      <T defaultValue="Are you sure you want to launch?" keyName="launch-button.are-you-sure-warning"/>
+    </span>
   {:else if areOperationsQueued}
-    <span>Changes have not yet been made to your mod files. Click the button above to apply the changes you have queued.<br/><br/>(You're in Queue "Start manually" mode)</span>
+    <span>
+      <T defaultValue="Changes have not yet been made to your mod files. Click the button above to apply the changes you have queued." keyName="launch-button.changes-queued"/>
+      <br/><br/>
+      <T defaultValue={'(You\'re in Queue "Start manually" mode)'} keyName="launch-button.queue-manual"/>
+    </span>
   {:else if $isGameRunning}
-    <span>Your game launcher is reporting that the game is already running (or still in the process of closing).</span>
+    <span>
+      <T defaultValue="Your game launcher is reporting that the game is already running (or still in the process of closing)." keyName="launch-button.game-running"/>
+    </span>
   {:else if $isLaunchingGame}
-    <span>Launch in progress...</span>
+    <span>
+      <T defaultValue="Launch in progress..." keyName="launch-button.launch-in-progress"/>
+    </span>
   {:else if !!$progress}
-    <span>An operation is already in progress.</span>
+    <span>
+      <T defaultValue="An operation is already in progress." keyName="launch-button.operation-in-progress"/>
+    </span>
   {:else if !isInstallLaunchable}
-    <span>The Mod Manager is not capable of launching this install type, but it will still manage the mod files for you. Launch Satisfactory using your usual game launcher.</span>
+    <span>
+      <T defaultValue="The Mod Manager is not capable of launching this install type, but it will still manage the mod files for you. Launch Satisfactory using your usual game launcher." keyName="launch-button.cant-launch"/>
+    </span>
   {:else}
-    <span>You're ready to rumble!<br/><br/>Note: The Mod Manager has already finished installing the mod files for you. You could launch the game using your usual game launcher and mods would still be loaded.</span>
+    <span>
+      <T defaultValue="You're ready to rumble!" keyName="launch-button.ready"/>
+      <br/><br/>
+      <T defaultValue="Note: The Mod Manager has already finished installing the mod files for you. You could launch the game using your usual game launcher and mods would still be loaded." keyName="launch-button.ready-note"/>
+    </span>
   {/if}
 </Tooltip>

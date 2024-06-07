@@ -1,7 +1,9 @@
 <script lang="ts">
+  import { getTranslate } from '@tolgee/svelte';
   import { getContextClient, queryStore } from '@urql/svelte';
   import Carousel from 'svelte-carousel';
 
+  import T from '$lib/components/T.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
   import Announcement from '$lib/components/announcements/Announcement.svelte';
   import { AnnouncementImportance, type Announcement as AnnouncementType, GetAnnouncementsDocument, SmrHealthcheckDocument } from '$lib/generated';
@@ -9,6 +11,8 @@
   import { offline, viewedAnnouncements } from '$lib/store/settingsStore';
   import { SetAnnouncementViewed } from '$wailsjs/go/settings/settings';
   
+  const { t } = getTranslate();
+
   const client = getContextClient();
 
   $: healthcheckStore = queryStore({
@@ -51,14 +55,14 @@
 
   const offlineAnnouncement: ViewableAnnouncement = {
     id: '__offline__',
-    message: 'You are currently offline. Some features may be unavailable. (To reconnect, use Mod Manager Settings > Go Online)',
+    message: $t('announcement.offline', 'You are currently offline. Some features may be unavailable. (To reconnect, use Mod Manager Settings > Go Online)'),
     importance: AnnouncementImportance.Info,
     viewable: false,
   };
 
   const healthcheckFailAnnouncement: ViewableAnnouncement = {
     id: '__healthcheck__',
-    message: 'Could not reach ficsit.app. Check your internet connection or consider using the offline mode. (Mod Manager Settings > Go Offline)',
+    message: $t('announcement.healthcheck', 'Could not reach ficsit.app. Check your internet connection or consider using the offline mode. (Mod Manager Settings > Go Offline)'),
     importance: AnnouncementImportance.Warning,
     viewable: false,
   };
@@ -137,7 +141,9 @@
           role="button"
           tabindex="0"
           on:click={goOnline}
-          on:keypress={goOnline}>Go Online</span>
+          on:keypress={goOnline}>
+          <T defaultValue="Go Online" keyName="announcement.go-online" />
+        </span>
       </div>
     </Announcement>
   </div>
@@ -164,7 +170,9 @@
                     role="button"
                     tabindex="0"
                     on:click={goOffline}
-                    on:keypress={goOffline}>Go Offline</span>
+                    on:keypress={goOffline}>
+                    <T defaultValue="Go Offline" keyName="announcement.go-offline" />
+                  </span>
                 </div>
               {:else}
                 {announcement.message}

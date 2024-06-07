@@ -3,10 +3,12 @@
   import Fuse from 'fuse.js';
   import _ from 'lodash';
   import { createEventDispatcher } from 'svelte';
+  import '@tolgee/svelte'; // Import so that the tolgee cli parses this file
 
   import ModListFilters from './ModsListFilters.svelte';
   import ModsListItem from './ModsListItem.svelte';
 
+  import T from '$lib/components/T.svelte';
   import VirtualList from '$lib/components/VirtualList.svelte';
   import AnnouncementsBar from '$lib/components/announcements/AnnouncementsBar.svelte';
   import { GetModCountDocument, GetModsDocument } from '$lib/generated';
@@ -178,7 +180,7 @@
         {#if displayMods.length === 0 && !fetchingMods && $hasFetchedMods}
           <div class="flex flex-col h-full items-center justify-center">
             {#if mods.length !== 0}
-              <p class="text-xl text-center text-surface-400-700-token">No mods matching your filters</p>
+              <p class="text-xl text-center text-surface-400-700-token"><T defaultValue="No mods matching your filters" keyName="mods-list.no-mods-filtered"/></p>
               <button
                 class="btn variant-filled-primary mt-4"
                 on:click={() => {
@@ -186,10 +188,10 @@
                   $filter = filterOptions[0];
                 }}
               >
-                Show all
+                <T defaultValue="Show all" keyName="mods-list.show-all"/>
               </button>
             {:else}
-              <p class="text-xl text-center text-surface-400-700-token">No mods found</p>
+              <p class="text-xl text-center text-surface-400-700-token"><T defaultValue="No mods found" keyName="mods-list.no-mods-found"/></p>
             {/if}
           </div>
         {:else}

@@ -10,6 +10,7 @@
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import Select from '$lib/components/Select.svelte';
+  import T from '$lib/components/T.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
   import DeleteProfile from '$lib/components/modals/profiles/DeleteProfile.svelte';
   import RenameProfile from '$lib/components/modals/profiles/RenameProfile.svelte';
@@ -114,7 +115,9 @@
 <div class="flex flex-col h-full p-4 space-y-4 h-md:space-y-8 left-bar w-[22rem] min-w-[22rem] ">
   <div class="flex flex-col flex-auto h-full w-full space-y-4 h-md:space-y-8 overflow-y-auto">
     <div class="flex flex-col gap-2">
-      <span class="pl-4 sticky top-0 z-[1] bg-surface-50-900-token">Game version</span>
+      <span class="pl-4 sticky top-0 z-[1] bg-surface-50-900-token">
+        <T defaultValue="Game version" keyName="left-bar.game-version"/>
+      </span>
       <Select
         name="installsCombobox"
         class="w-full h-8"
@@ -132,11 +135,11 @@
               {$installsMetadata[item].info?.branch}{$installsMetadata[item].info?.type !== common.InstallType.WINDOWS ? ' - DS' : ''}
               ({$installsMetadata[item]?.info?.launcher})
             {:else if $installsMetadata[item]?.state === ficsitcli.InstallState.LOADING}
-              Loading...
+              <T defaultValue="Loading..." keyName="left-bar.install-loading"/>
             {:else if $installsMetadata[item]?.state === ficsitcli.InstallState.INVALID}
-              Invalid
+              <T defaultValue="Invalid" keyName="left-bar.install-invalid"/>
             {:else}
-              Unknown
+              <T defaultValue="Unknown" keyName="left-bar.install-unknown"/>
             {/if}
           </span>
         </svelte:fragment>
@@ -147,11 +150,17 @@
               {#if $installsMetadata[item]?.state === ficsitcli.InstallState.VALID}
                 <!-- nothing extra -->
               {:else if $installsMetadata[item]?.state === ficsitcli.InstallState.LOADING}
-                <span>Status: Loading...</span>
+                <span>
+                  <T defaultValue="Status: Loading..." keyName="left-bar.install-loading-tooltip"/>
+                </span>
               {:else if $installsMetadata[item]?.state === ficsitcli.InstallState.INVALID}
-                <span>Status: SMM cannot manage this install</span>
+                <span>
+                  <T defaultValue="Status: SMM cannot manage this install" keyName="left-bar.install-invalid-tooltip"/>
+                </span>
               {:else}
-                <span>Status: Could not get information about this install</span>
+                <span>
+                  <T defaultValue="Status: Could not get information about this install" keyName="left-bar.install-unknown-tooltip"/>
+                </span>
               {/if}
             </div>
           </Tooltip>
@@ -175,11 +184,11 @@
             {$installsMetadata[item].info?.branch}{$installsMetadata[item].info?.type !== common.InstallType.WINDOWS ? ' - DS' : ''}
             ({$installsMetadata[item]?.info?.launcher})
           {:else if $installsMetadata[item]?.state === ficsitcli.InstallState.LOADING}
-            Loading...
+            <T defaultValue="Loading..." keyName="left-bar.install-loading"/>
           {:else if $installsMetadata[item]?.state === ficsitcli.InstallState.INVALID}
-            Invalid
+            <T defaultValue="Invalid" keyName="left-bar.install-invalid"/>
           {:else}
-            Unknown
+            <T defaultValue="Unknown" keyName="left-bar.install-unknown"/>
           {/if}
         </svelte:fragment>
       </Select>
@@ -193,7 +202,7 @@
             on:click={() => setModsEnabled(false)}
           >
             <span>
-              Mods off
+              <T defaultValue="Mods off" keyName="left-bar.mods-off"/>
             </span>
             <div class="grow"/>
             <SvgIcon
@@ -206,7 +215,7 @@
             disabled={!$canModify}
             on:click={() => setModsEnabled(true)}>
             <span>
-              Mods on
+              <T defaultValue="Mods on" keyName="left-bar.mods-on"/>
             </span>
             <div class="grow"/>
             <SvgIcon
@@ -217,7 +226,9 @@
       </div>
     </div>
     <div class="flex flex-col gap-2">
-      <span class="pl-4 sticky top-0 z-[1] bg-surface-50-900-token">Profile</span>
+      <span class="pl-4 sticky top-0 z-[1] bg-surface-50-900-token">
+        <T defaultValue="Profile" keyName="left-bar.profile"/>
+      </span>
       
       <Select
         name="profileCombobox"
@@ -252,7 +263,7 @@
           disabled={!$canModify}
           on:click={() => modalStore.trigger({ type:'component', component: 'addProfile' })}>
           <span>
-            Add
+            <T defaultValue="Add" keyName="common.add"/>
           </span>
           <div class="grow"/>
           <SvgIcon
@@ -264,7 +275,7 @@
           disabled={!$canModify}
           on:click={() => modalStore.trigger({ type:'component', component: { ref: RenameProfile, props: { profile: $selectedProfile } } })}>
           <span>
-            Rename
+            <T defaultValue="Rename" keyName="common.rename"/>
           </span>
           <div class="grow"/>
           <SvgIcon
@@ -276,7 +287,7 @@
           disabled={!$canModify || $profiles.length === 1}
           on:click={() => modalStore.trigger({ type:'component', component: { ref: DeleteProfile, props: { profile: $selectedProfile } } })}>
           <span>
-            Delete
+            <T defaultValue="Delete" keyName="common.delete"/>
           </span>
           <div class="grow"/>
           <SvgIcon
@@ -291,7 +302,7 @@
           on:click={() => modalStore.trigger({ type: 'component', component: 'importProfile' })}
         >
           <span>
-            Import
+            <T defaultValue="Import" keyName="common.import"/>
           </span>
           <div class="grow"/>
           <SvgIcon
@@ -304,7 +315,7 @@
           on:click={() => exportCurrentProfile()}
         >
           <span>
-            Export
+            <T defaultValue="Export" keyName="left-bar.export"/>
           </span>
           <div class="grow"/>
           <SvgIcon
@@ -314,15 +325,21 @@
       </div>
     </div>
     <div class="flex flex-col gap-2">
-      <span class="pl-4 sticky top-0 z-[1] bg-surface-50-900-token">Updates</span>
+      <span class="pl-4 sticky top-0 z-[1] bg-surface-50-900-token">
+        <T defaultValue="Updates" keyName="left-bar.updates"/>
+      </span>
       <Updates />
     </div>
     <div class="flex flex-col gap-2">
-      <span class="pl-4 sticky top-0 z-[1] bg-surface-50-900-token">Other</span>
+      <span class="pl-4 sticky top-0 z-[1] bg-surface-50-900-token">
+        <T defaultValue="Other" keyName="left-bar.other"/>
+      </span>
       <button
         class="btn px-4 h-8 w-full text-sm bg-surface-200-700-token"
         on:click={() => modalStore.trigger({ type: 'component', component: 'serverManager' })}>
-        <span>Manage Servers</span>
+        <span>
+          <T defaultValue="Manage Servers" keyName="left-bar.manage-servers"/>
+        </span>
         <div class="grow" />
         <SvgIcon
           class="h-5 w-5"
@@ -334,7 +351,7 @@
         on:click={() => BrowserOpenURL('https://docs.ficsit.app/satisfactory-modding/latest/ForUsers/SatisfactoryModManager.html')}
       >
         <span>
-          Help
+          <T defaultValue="Help" keyName="left-bar.help"/>
         </span>
         <div class="grow"/>
         <SvgIcon
@@ -348,7 +365,7 @@
         class="btn w-full bg-surface-200-700-token px-4 h-8 text-sm"
         on:click={() => BrowserOpenURL($siteURL)}>
         <span>
-          ficsit.app (Mod Repository)
+          <T defaultValue="ficsit.app (Mod Repository)" keyName="left-bar.ficsit-app"/>
         </span>
         <div class="grow" />
         <SvgIcon
@@ -359,7 +376,7 @@
         class="btn w-full bg-surface-200-700-token px-4 h-8 text-sm"
         on:click={() => BrowserOpenURL('https://discord.gg/xkVJ73E')}>
         <span>
-          Satisfactory Modding Discord
+          <T defaultValue="Satisfactory Modding Discord" keyName="left-bar.satisfactory-modding-discord"/>
         </span>
         <div class="grow" />
         <SvgIcon
@@ -370,7 +387,7 @@
         class="btn w-full bg-surface-200-700-token px-4 h-8 text-sm"
         on:click={() => BrowserOpenURL('https://github.com/satisfactorymodding/SatisfactoryModManager')} >
         <span>
-          SMM GitHub
+          <T defaultValue="SMM GitHub" keyName="left-bar.smm-github"/>
         </span>
         <div class="grow" />
         <SvgIcon

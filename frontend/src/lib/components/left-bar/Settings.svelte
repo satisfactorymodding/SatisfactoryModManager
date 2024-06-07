@@ -4,6 +4,7 @@
   import { getContextClient } from '@urql/svelte';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
+  import T from '$lib/components/T.svelte';
   import { GetModNameDocument } from '$lib/generated';
   import { type PopupSettings, getModalStore, popup } from '$lib/skeletonExtensions';
   import { lockfileMods, manifestMods } from '$lib/store/ficsitCLIStore';
@@ -164,7 +165,9 @@
   <div class="w-full h-8" use:popup={settingsMenu}>
     <button class="btn px-4 h-full w-full text-sm bg-surface-200-700-token"
     >
-      <span>Mod Manager Settings</span>
+      <span>
+        <T defaultValue="Mod Manager Settings" keyName="settings.title"/>
+      </span>
       <div class="grow" />
       <SvgIcon
         class="h-5 w-5"
@@ -293,7 +296,9 @@
       <li>
         <button on:click={() => GenerateDebugInfo()}>
           <span class="h-5 w-5"/>
-          <span class="flex-auto">Generate debug info</span>
+          <span class="flex-auto">
+            <T defaultValue="Generate debug info" keyName="settings.generate-debug-info"/>
+          </span>
           <span class="h-5 w-5"><SvgIcon class="h-full w-full" icon={mdiDownload}/></span>
         </button>
       </li>
@@ -301,7 +306,9 @@
       <li>
         <button on:click={() => copyModList()}>
           <span class="h-5 w-5"/>
-          <span class="flex-auto">Copy mod list</span>
+          <span class="flex-auto">
+            <T defaultValue="Copy mod list" keyName="settings.copy-mod-list"/>
+          </span>
           <span class="h-5 w-5"><SvgIcon class="h-full w-full" icon={mdiClipboard}/></span>
         </button>
       </li>
@@ -309,7 +316,9 @@
       <li>
         <button on:click={() => $debug = !$debug}>
           <span class="h-5 w-5"/>
-          <span class="flex-auto">SMM debug logging</span>
+          <span class="flex-auto">
+            <T defaultValue="SMM debug logging" keyName="settings.smm-debug-logging"/>
+          </span>
           <span class="h-5 w-5">
             <span class="h-5 w-5"><SvgIcon class="h-full w-full" icon={$debug ? mdiCheckboxMarkedOutline : mdiCheckboxBlankOutline}/></span>
           </span>
@@ -318,13 +327,17 @@
       <hr class="divider" />
       <li class="section-header">
         <span class="h-5 w-5"><SvgIcon class="h-full w-full" icon={mdiCog}/></span>
-        <span class="flex-auto">Settings</span>
+        <span class="flex-auto">
+          <T defaultValue="Settings" keyName="settings.settings"/>
+        </span>
       </li>
       <hr class="divider" />
       <li data-noclose use:popup={updateCheckModeMenu}>
         <button>
           <span class="h-5 w-5"/>
-          <span class="flex-auto">Update check</span>
+          <span class="flex-auto">
+            <T defaultValue="Update check" keyName="settings.update-check"/>
+          </span>
           <span>{updateCheckModes.find((m) => m.id === $updateCheckMode)?.name}</span>
           <span class="h-5 w-5">
             <SvgIcon class="h-full w-full" icon={mdiChevronRight}/>
@@ -335,7 +348,9 @@
       <li data-noclose use:popup={queueModeMenu}>
         <button>
           <span class="h-5 w-5"/>
-          <span class="flex-auto">Queue</span>
+          <span class="flex-auto">
+            <T defaultValue="Queue" keyName="settings.queue"/>
+          </span>
           <span>{queueModes.find((m) => m.id === $queueAutoStart)?.name}</span>
           <span class="h-5 w-5">
             <SvgIcon class="h-full w-full" icon={mdiChevronRight}/>
@@ -346,7 +361,9 @@
       <li data-noclose use:popup={startViewMenu}>
         <button>
           <span class="h-5 w-5"/>
-          <span class="flex-auto">Start view</span>
+          <span class="flex-auto">
+            <T defaultValue="Start view" keyName="settings.start-view"/>
+          </span>
           <span>{views.find((m) => m.id === $startView)?.name}</span>
           <span class="h-5 w-5">
             <SvgIcon class="h-full w-full" icon={mdiChevronRight}/>
@@ -357,7 +374,9 @@
       <li>
         <button on:click={() => modalStore.trigger({ type: 'component', component: 'cacheLocationPicker' })}>
           <span class="h-5 w-5"/>
-          <span class="flex-auto">Change cache location</span>
+          <span class="flex-auto">
+            <T defaultValue="Change cache location" keyName="settings.change-cache-location"/>
+          </span>
           <span class="h-5 w-5"><SvgIcon class="h-full w-full" icon={mdiFolderEdit}/></span>
         </button>
       </li>
@@ -365,7 +384,9 @@
       <li>
         <button on:click={() => modalStore.trigger({ type: 'component', component: 'proxy' })}>
           <span class="h-5 w-5"/>
-          <span class="flex-auto">Set proxy</span>
+          <span class="flex-auto">
+            <T defaultValue="Set proxy" keyName="settings.set-proxy"/>
+          </span>
           <span class="h-5 w-5"><SvgIcon class="h-full w-full" icon={mdiLanConnect}/></span>
         </button>
       </li>
@@ -373,7 +394,9 @@
       <li>
         <button on:click={() => $offline = !$offline}>
           <span class="h-5 w-5"/>
-          <span class="flex-auto">Go {$offline ? 'online' : 'offline'}</span>
+          <span class="flex-auto">
+            <T defaultValue={'Go {offline, select, true {online} other {offline}}'} keyName="settings.go-online-offline" params={{ offline: $offline ? 'true': 'false' }}/>
+          </span>
           <span class="h-5 w-5"/>
         </button>
       </li>
@@ -381,13 +404,17 @@
         <hr class="divider" />
         <li class="section-header">
           <span class="h-5 w-5"><SvgIcon class="h-full w-full" icon={mdiCog}/></span>
-          <span class="flex-auto">Secret settings</span>
+          <span class="flex-auto">
+            <T defaultValue="Secret settings" keyName="settings.secret-settings"/>
+          </span>
         </li>
         <hr class="divider" />
         <li data-noclose use:popup={launchButtonMenu}>
           <button>
             <span class="h-5 w-5"/>
-            <span class="flex-auto">Launch button</span>
+            <span class="flex-auto">
+              <T defaultValue="Launch button" keyName="settings.launch-button"/>
+            </span>
             <span>{launchButtons.find((l) => l.id === $launchButton)?.name ?? ''}</span>
             <span class="h-5 w-5">
               <SvgIcon class="h-full w-full" icon={mdiChevronRight}/>
