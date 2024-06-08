@@ -1,4 +1,6 @@
 <script lang="ts">
+  import '@tolgee/svelte'; // Import so that the tolgee cli parses this file
+
   import T from '$lib/components/T.svelte';
   import { error } from '$lib/store/generalStore';
   import { DeleteProfile } from '$wailsjs/go/ficsitcli/ficsitCLI';

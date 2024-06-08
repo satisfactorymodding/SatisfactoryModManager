@@ -2,6 +2,7 @@
   import { mdiBug, mdiCheck, mdiCheckboxBlankOutline, mdiCheckboxMarkedOutline, mdiChevronRight, mdiClipboard, mdiCog, mdiDownload, mdiFolderEdit, mdiLanConnect, mdiTune } from '@mdi/js';
   import { ListBox, ListBoxItem } from '@skeletonlabs/skeleton';
   import { getContextClient } from '@urql/svelte';
+  import '@tolgee/svelte'; // Import so that the tolgee cli parses this file
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import T from '$lib/components/T.svelte';
