@@ -80,16 +80,15 @@
     Wrap button in a div so that the trigger node location does not change.    
     -->
     <button class="btn w-full h-full {buttonClass}" {disabled}>
-      {#if $$slots.selected}
-        <slot name="selected" item={value} />
-      {:else}
-        <slot name="item" item={value}>
-          <span>
+      <div class="grow flex justify-start min-w-0">
+        {#if $$slots.selected}
+          <slot name="selected" item={value} />
+        {:else}
+          <slot name="item" item={value}>
             {value}
-          </span>
-        </slot>
-      {/if}
-      <div class="grow w-0" />
+          </slot>
+        {/if}
+      </div>
       <SvgIcon
         class="h-5 w-5 p-0.5 {comboboxOpen ? 'text-primary-600 -scale-y-100' : ''} transition-all shrink-0"
         icon={mdiMenuDown} />
@@ -106,7 +105,11 @@
     before actually triggering the transition...
     So we'll just not have a transition...
     -->
-    <ListBox class="w-full" rounded="rounded-none" spacing="space-y-0">
+    <ListBox
+      class="w-full"
+      regionDefault="overflow-x-hidden"
+      rounded="rounded-none"
+      spacing="space-y-0">
       {#each items as item}
         <ListBoxItem
           {name}

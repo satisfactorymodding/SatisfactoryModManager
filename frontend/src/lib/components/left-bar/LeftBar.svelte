@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { mdiAlert, mdiCheckCircle, mdiCloseCircle, mdiDownload, mdiFolderOpen, mdiHelpCircle, mdiLoading, mdiPencil, mdiPlusCircle, mdiServerNetwork, mdiTrashCan, mdiUpload, mdiWeb } from '@mdi/js';
+  import { mdiAlert, mdiCheckCircle, mdiCloseCircle, mdiDownload, mdiFolderOpen, mdiHelp, mdiHelpCircle, mdiLoading, mdiMonitor, mdiPencil, mdiPlusCircle, mdiServer, mdiServerNetwork, mdiTrashCan, mdiUpload, mdiWeb } from '@mdi/js';
   import { type PopupSettings, popup } from '@skeletonlabs/skeleton';
   import _ from 'lodash';
   import { siDiscord, siGithub } from 'simple-icons/icons';
@@ -110,6 +110,19 @@
     },
     placement: 'right',
   } as PopupSettings]).reduce((acc, [k, v]) => ({ ...acc, [k as string]: v as PopupSettings }), {} as Record<string, PopupSettings>);
+
+
+  function iconForInstallType(type?: common.InstallType) {
+    switch (type) {
+      case common.InstallType.WINDOWS:
+        return mdiMonitor;
+      case common.InstallType.WINDOWS_SERVER:
+      case common.InstallType.LINUX_SERVER:
+        return mdiServer;
+      default:
+        return mdiHelp;
+    }
+  }
 </script>
 
 <div class="flex flex-col h-full p-4 space-y-4 h-md:space-y-8 left-bar w-[22rem] min-w-[22rem] ">
@@ -130,10 +143,13 @@
         on:change={installSelectChanged}
       >
         <svelte:fragment slot="item" let:item>
-          <span>
+          <span class="flex items-center min-w-0">
             {#if $installsMetadata[item]?.state === ficsitcli.InstallState.VALID}
-              {$installsMetadata[item].info?.branch}{$installsMetadata[item].info?.type !== common.InstallType.WINDOWS ? ' - DS' : ''}
-              ({$installsMetadata[item]?.info?.launcher})
+              <SvgIcon class="!w-5 !h-5 mr-2 shrink-0" icon={iconForInstallType($installsMetadata[item].info?.type)}/>
+              <span class="truncate min-w-0">
+                {$installsMetadata[item]?.info?.launcher}
+              </span>
+              <span class="shrink-0 ml-1">({#if $installsMetadata[item]?.info?.location === common.LocationType.LOCAL}{$installsMetadata[item]?.info?.branch}{:else}CL{$installsMetadata[item]?.info?.version}{/if})</span>
             {:else if $installsMetadata[item]?.state === ficsitcli.InstallState.LOADING}
               <T defaultValue="Loading..." keyName="left-bar.install-loading"/>
             {:else if $installsMetadata[item]?.state === ficsitcli.InstallState.INVALID}
@@ -178,18 +194,6 @@
               <SvgIcon class="!w-full !h-full" icon={mdiAlert}/>
             {/if}
           </button>
-        </svelte:fragment>
-        <svelte:fragment slot="selected" let:item>
-          {#if $installsMetadata[item]?.state === ficsitcli.InstallState.VALID}
-            {$installsMetadata[item].info?.branch}{$installsMetadata[item].info?.type !== common.InstallType.WINDOWS ? ' - DS' : ''}
-            ({$installsMetadata[item]?.info?.launcher})
-          {:else if $installsMetadata[item]?.state === ficsitcli.InstallState.LOADING}
-            <T defaultValue="Loading..." keyName="left-bar.install-loading"/>
-          {:else if $installsMetadata[item]?.state === ficsitcli.InstallState.INVALID}
-            <T defaultValue="Invalid" keyName="left-bar.install-invalid"/>
-          {:else}
-            <T defaultValue="Unknown" keyName="left-bar.install-unknown"/>
-          {/if}
         </svelte:fragment>
       </Select>
       
