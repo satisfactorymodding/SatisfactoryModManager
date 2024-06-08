@@ -46,6 +46,8 @@ type settings struct {
 	FavoriteMods []string        `json:"favoriteMods,omitempty"`
 	ModFilters   SavedModFilters `json:"modFilters,omitempty"`
 
+	RemoteNames map[string]string `json:"remoteNames,omitempty"`
+
 	QueueAutoStart      bool                `json:"queueAutoStart"`
 	IgnoredUpdates      map[string][]string `json:"ignoredUpdates,omitempty"`
 	UpdateCheckMode     UpdateCheckMode     `json:"updateCheckMode,omitempty"`
@@ -79,6 +81,8 @@ var Settings = &settings{
 		Order:  "Last updated",
 		Filter: "Compatible",
 	},
+
+	RemoteNames: map[string]string{},
 
 	QueueAutoStart:      true,
 	IgnoredUpdates:      map[string][]string{},

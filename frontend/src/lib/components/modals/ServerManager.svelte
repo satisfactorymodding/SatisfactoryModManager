@@ -10,7 +10,7 @@
   import Tooltip from '$lib/components/Tooltip.svelte';
   import { type PopupSettings, popup } from '$lib/skeletonExtensions';
   import { installsMetadata, remoteServers } from '$lib/store/ficsitCLIStore';
-  import { AddRemoteServer, FetchRemoteServerMetadata, RemoveRemoteServer } from '$wailsjs/go/ficsitcli/ficsitCLI';
+  import { AddRemoteServer, FetchRemoteServerMetadata, GetNextRemoteLauncherName, RemoveRemoteServer } from '$wailsjs/go/ficsitcli/ficsitCLI';
   import { ficsitcli } from '$wailsjs/go/models';
 
   export let parent: { onClose: () => void };
@@ -47,6 +47,9 @@
   let newServerPort = '';
   let newServerPath = '';
   let err = '';
+
+  let defaultRemoteName = '';
+  let remoteName = '';
 
   let advancedMode = false;
 
@@ -106,7 +109,7 @@
     try {
       err = '';
       addInProgress = true;
-      await AddRemoteServer(fullInstallPath);
+      await AddRemoteServer(fullInstallPath, remoteName);
       newServerUsername = '';
       newServerPassword = '';
       newServerHost = '';
@@ -143,6 +146,13 @@
     return `remote-server-warning-${install}`;
   }
 
+  $: {
+    remoteServers;
+    (async () => {
+      defaultRemoteName = await GetNextRemoteLauncherName();
+    })();
+  }
+
   $: installWarningPopups = $remoteServers.map((i) => [i, {
     event: 'hover',
     target: installWarningPopupId(i),
@@ -164,6 +174,7 @@
         <tbody>
           {#each $remoteServers as remoteServer}
             <tr>
+              <td class="break-all">{$installsMetadata[remoteServer].info?.launcher}</td>
               <td class="break-all">{remoteServer}</td>
               <td>
                 {#if $installsMetadata[remoteServer]?.state === ficsitcli.InstallState.VALID}
@@ -304,8 +315,13 @@
           />
         </div>
       {/if}
+      <input
+        class="input px-4 h-full col-start-4 row-start-1"
+        placeholder={$t('server-manager.name-placeholder', 'Name (default: {default})', { default: defaultRemoteName })}
+        type="text"
+        bind:value={remoteName}/>
       <button
-        class="btn h-full text-sm bg-primary-600 text-secondary-900 col-start-2 sm:col-start-4 row-start-1"
+        class="btn h-full text-sm bg-primary-600 text-secondary-900 col-start-2 sm:col-start-4 row-start-2"
         disabled={addInProgress || !isValid}
         on:click={() => addNewRemoteServer()}>
         <span>
