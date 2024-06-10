@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { mdiAlert, mdiLoading, mdiServerNetwork, mdiTrashCan } from '@mdi/js';
+  import { mdiAlert, mdiEyeOffOutline, mdiEyeOutline, mdiLoading, mdiServerNetwork, mdiTrashCan } from '@mdi/js';
   import { getTranslate } from '@tolgee/svelte';
   import _ from 'lodash';
 
@@ -163,10 +163,6 @@
     placement: 'bottom',
   } as PopupSettings]).reduce((acc, [k, v]) => ({ ...acc, [k as string]: v as PopupSettings }), {} as Record<string, PopupSettings>);
 
-  function toggleMaskPassword() {
-    maskPassword = !maskPassword;
-  }
-
   function redactRemoteURL(path: string) {
     return path.replace(/(?<=.+:\/\/)(?:(.+?)(?::.*?)?)?(?=@)/, '$1:********');
   }
@@ -274,20 +270,25 @@
             placeholder={$t('server-manager.username-placeholder', 'username')}
             type="text"
             bind:value={newServerUsername}/>
-          <!-- This is a conditional because the type var cant be dynamic with bind:value -->
-          {#if maskPassword}
-            <input
-              class="input px-4 h-full"
-              placeholder={$t('server-manager.password-placeholder', 'password')}
-              type="password"
-              bind:value={newServerPassword}/>
-          {:else}
-            <input
-              class="input px-4 h-full"
-              placeholder={$t('server-manager.password-placeholder', 'password')}
-              type="text"
-              bind:value={newServerPassword}/>
-          {/if}
+          <div class="input-group h-full grid-cols-[1fr_auto]">
+            <!-- This is a conditional because svelte doesn't allow dynamic type with bind:value -->
+            {#if maskPassword}
+              <input
+                class="px-4 h-full !outline-none"
+                placeholder={$t('server-manager.password-placeholder', 'password')}
+                type="password"
+                bind:value={newServerPassword}/>
+            {:else}
+              <input
+                class="px-4 h-full !outline-none"
+                placeholder={$t('server-manager.password-placeholder', 'password')}
+                type="text"
+                bind:value={newServerPassword}/>
+            {/if}
+            <button class="!outline-none" on:click={() => maskPassword = !maskPassword}>
+              <SvgIcon class="!w-4 !h-4" icon={maskPassword ? mdiEyeOutline : mdiEyeOffOutline} />
+            </button>
+          </div>
           <input
             class="input px-4 h-full sm:col-start-2"
             placeholder={$t('server-manager.host-placeholder', 'host')}
@@ -353,17 +354,6 @@
         <SvgIcon
           class="h-5 w-5"
           icon={mdiServerNetwork} />
-      </button>
-      <button
-        class="btn h-full text-sm bg-primary-600 text-secondary-900 col-start-2 sm:col-start-4 row-start-3"
-        on:click={() => toggleMaskPassword()}>
-        <span>
-          {#if maskPassword}
-            <T defaultValue="Show Password" keyName="server-manager.show-password" />
-          {:else}
-            <T defaultValue="Hide Password" keyName="server-manager.hide-password" />
-          {/if}
-        </span>
       </button>
     </div>
     <p>{err}</p>
