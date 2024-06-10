@@ -52,22 +52,3 @@ jobs:
         run: |
           pnpm lint
           pnpm check
-
-  update-translations:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: ./.github/actions/setup
-        with:
-          backend: false
-
-      - name: Install dependencies
-        working-directory: frontend
-        run: pnpm install
-
-      - name: Update translation keys
-        working-directory: frontend
-        run: |
-          pnpm translations:compare -ak ${{ secrets.TOLGEE_KEY }}
-          pnpm translations:sync -ak ${{ secrets.TOLGEE_KEY }}
