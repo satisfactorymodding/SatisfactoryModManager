@@ -5,6 +5,7 @@ import ServerManager from './ServerManager.svelte';
 import AddProfile from './profiles/AddProfile.svelte';
 import ImportProfile from './profiles/ImportProfile.svelte';
 import CacheLocationPicker from './settings/CacheLocationPicker.svelte';
+import Proxy from './settings/Proxy.svelte';
 import SMMUpdateDownload from './smmUpdate/SMMUpdateDownload.svelte';
 import SMMUpdateReady from './smmUpdate/SMMUpdateReady.svelte';
 import UpdatesModal from './updates/UpdatesModal.svelte';
@@ -19,5 +20,6 @@ export const modalRegistry = {
   modUpdates: { ref: UpdatesModal } as ModalComponent,
   smmUpdateDownload: { ref: SMMUpdateDownload } as ModalComponent,
   smmUpdateReady: { ref: SMMUpdateReady } as ModalComponent,
+  proxy: { ref: Proxy } as ModalComponent,
 };
 							

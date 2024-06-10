@@ -4,9 +4,12 @@ import (
 	"context"
 	"embed"
 	"log/slog"
+	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"runtime"
+	"sync"
 	"time"
 
 	"github.com/spf13/viper"
@@ -14,22 +17,27 @@ import (
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
-	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
+	"github.com/wailsapp/wails/v2/pkg/options/linux"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/app"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/autoupdate/updater"
 	appCommon "github.com/satisfactorymodding/SatisfactoryModManager/backend/common"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/ficsitcli"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/logging"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/settings"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/wailsextras"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/websocket"
 )
 
 //go:embed all:frontend/build
 var assets embed.FS
+
+//go:embed build/appicon.png
+var iconBytes []byte
 
 var (
 	version = "dev"
@@ -41,6 +49,12 @@ var (
 
 func main() {
 	logging.Init()
+
+	slog.Info("starting Satisfactory Mod Manager", slog.Any("version", version), slog.Any("commit", commit), slog.Any("date", date))
+	// Set user agent for http requests from backend
+	// We cannot set the frontend's user agent, because wails does not expose that,
+	// but it does append wails.io to determine which asset requests come from inside the app, and which are external
+	http.DefaultTransport = &withUserAgent{inner: http.DefaultTransport}
 
 	autoupdate.Init()
 
@@ -61,6 +75,26 @@ func main() {
 		}
 	}
 
+	if settings.Settings.Proxy != "" {
+		// webkit honors these env vars, even if they are an empty string,
+		// so we must ensure they are valid
+		// We could instead set the proxy of the http.DefaultTransport,
+		// but applying the proxy to the frontend too is better
+		_, err := url.Parse(settings.Settings.Proxy)
+		if err != nil {
+			slog.Error("skipping setting proxy, invalid URL", slog.Any("error", err))
+		} else {
+			err = os.Setenv("HTTP_PROXY", settings.Settings.Proxy)
+			if err != nil {
+				slog.Error("failed to set HTTP_PROXY", slog.Any("error", err))
+			}
+			err = os.Setenv("HTTPS_PROXY", settings.Settings.Proxy)
+			if err != nil {
+				slog.Error("failed to set HTTPS_PROXY", slog.Any("error", err))
+			}
+		}
+	}
+
 	err = ficsitcli.Init()
 	if err != nil {
 		slog.Error("failed to initialize ficsit-cli", slog.Any("error", err))
@@ -71,6 +105,30 @@ func main() {
 	windowStartState := options.Normal
 	if settings.Settings.Maximized {
 		windowStartState = options.Maximised
+	}
+
+	if len(os.Args) > 1 && os.Args[1] == "wipe-mods" {
+		includeRemote := len(os.Args) > 2 && os.Args[2] == "remote"
+		err := ficsitcli.FicsitCLI.WipeMods(includeRemote)
+		if err != nil {
+			slog.Error("failed to wipe mods", slog.Any("error", err))
+			_ = dialog.Error("Failed to wipe mods: %s", err.Error())
+			os.Exit(1)
+		}
+		return
+	}
+
+	startUpdateFound := false
+	if settings.Settings.UpdateCheckMode == settings.UpdateOnLaunch {
+		foundOrError := make(chan bool)
+		autoupdate.Updater.Updater.UpdateFound.Once(func(_ updater.PendingUpdate) {
+			foundOrError <- true
+		})
+		go func() {
+			autoupdate.Updater.CheckForUpdates()
+			foundOrError <- false
+		}()
+		startUpdateFound = <-foundOrError
 	}
 
 	// Create application with options
@@ -92,11 +150,17 @@ func main() {
 				backend.ProcessArguments(secondInstanceData.Args)
 			},
 		},
+		Linux: &linux.Options{
+			Icon:        iconBytes,
+			ProgramName: "Satisfactory Mod Manager",
+		},
 		OnStartup: func(ctx context.Context) {
 			appCommon.AppContext = ctx
 
 			// Wails doesn't support setting the window position on init, so we do it here
-			loadWindowLocation(ctx)
+			if settings.Settings.WindowPosition != nil {
+				wailsextras.WindowSetPosition(ctx, settings.Settings.WindowPosition.X, settings.Settings.WindowPosition.Y)
+			}
 
 			app.App.WatchWindow() //nolint:contextcheck
 			go websocket.ListenAndServeWebsocket()
@@ -104,8 +168,31 @@ func main() {
 			ficsitcli.FicsitCLI.StartGameRunningWatcher() //nolint:contextcheck
 		},
 		OnDomReady: func(ctx context.Context) {
-			backend.ProcessArguments(os.Args[1:]) //nolint:contextcheck
-			autoupdate.Updater.CheckInterval(5 * time.Minute)
+			// OnDomReady is called on every refresh
+			sync.OnceFunc(func() {
+				// Wails doesn't expose the user agent configuration, it only uses wails.io for dev app/browser detection
+				// I don't really feel like properly implementing this into wails2, with wails3 around the corner
+				// which will no longer rely on wails.io being in the user agent, so the current code that sets it to wails.io
+				// can be replaced with a configurable value
+				// But for now, hacky reflection it is, to append our own user agent
+				// On Windows and Linux, this can be done on startup,
+				// but for Darwin, it uses evaluateJavaScript to get the default user agent,
+				// and that crashes if the webview is not yet ready
+				// The only requests made before this are the initial asset requests, for which we don't really care about the user agent
+				wailsextras.AddUserAgent("SatisfactoryModManager", viper.GetString("version"))
+
+				if startUpdateFound {
+					if autoupdate.Updater.Updater.PendingUpdate != nil && autoupdate.Updater.Updater.PendingUpdate.Ready {
+						autoupdate.Updater.UpdateAndRestart() //nolint:contextcheck
+					} else {
+						autoupdate.Updater.Updater.UpdateReady.Once(func(_ interface{}) {
+							autoupdate.Updater.UpdateAndRestart()
+						})
+					}
+				}
+				backend.ProcessArguments(os.Args[1:]) //nolint:contextcheck
+				autoupdate.Updater.CheckInterval(5 * time.Minute)
+			})()
 		},
 		OnShutdown: func(ctx context.Context) {
 			app.App.StopWindowWatcher()
@@ -115,14 +202,19 @@ func main() {
 			ficsitcli.FicsitCLI,
 			autoupdate.Updater,
 			settings.Settings,
+			ficsitcli.ServerPicker,
 		},
 		EnumBind: []interface{}{
 			common.AllInstallTypes,
 			common.AllBranches,
 			common.AllLocationTypes,
 			ficsitcli.AllInstallationStates,
+			ficsitcli.AllActionTypes,
 		},
 		Logger: backend.WailsZeroLogLogger{},
+		Debug: options.Debug{
+			OpenInspectorOnStartup: true,
+		},
 	})
 
 	if err != nil {
@@ -135,23 +227,16 @@ func main() {
 		slog.Error("failed to apply update on exit", slog.Any("error", err))
 		_ = dialog.Error("Failed to apply update on exit: %s", err.Error())
 	}
-}
 
-func loadWindowLocation(ctx context.Context) {
-	if settings.Settings.WindowPosition != nil {
-		// Setting the window location is relative to the current monitor,
-		// but we save it as absolute position.
-
-		wailsRuntime.WindowSetPosition(ctx, 0, 0)
-
-		// Get the location the window was actually placed at
-		monitorLeft, monitorTop := wailsRuntime.WindowGetPosition(ctx)
-
-		x := settings.Settings.WindowPosition.X - monitorLeft
-		y := settings.Settings.WindowPosition.Y - monitorTop
-
-		wailsRuntime.WindowSetPosition(ctx, x, y)
+	if app.App.Restart && !autoupdate.Updater.HasRestarted() {
+		err := utils.Restart()
+		if err != nil {
+			slog.Error("failed to restart", slog.Any("error", err))
+			_ = dialog.Error("Failed to restart: %s", err.Error())
+		}
 	}
+
+	slog.Info("exiting Satisfactory Mod Manager")
 }
 
 func init() {
@@ -167,14 +252,16 @@ func init() {
 	var baseLocalDir string
 
 	switch runtime.GOOS {
-	case "windows":
-		baseLocalDir = os.Getenv("APPDATA")
 	case "linux":
 		baseLocalDir = filepath.Join(os.Getenv("HOME"), ".local", "share")
 	default:
-		slog.Error("unsupported OS", slog.String("os", runtime.GOOS))
-		_ = dialog.Error("Unsupported OS: %s", runtime.GOOS)
-		os.Exit(1)
+		var err error
+		baseLocalDir, err = os.UserConfigDir()
+		if err != nil {
+			slog.Error("failed to get config dir", slog.Any("error", err))
+			_ = dialog.Error("Failed to get config dir", err.Error())
+			os.Exit(1)
+		}
 	}
 
 	viper.Set("base-local-dir", baseLocalDir)
@@ -219,4 +306,13 @@ func init() {
 	// logging
 
 	viper.Set("log-file", filepath.Join(smmCacheDir, "logs", "SatisfactoryModManager.log"))
+}
+
+type withUserAgent struct {
+	inner http.RoundTripper
+}
+
+func (c *withUserAgent) RoundTrip(req *http.Request) (*http.Response, error) {
+	req.Header.Set("User-Agent", "SatisfactoryModManager/"+viper.GetString("version"))
+	return c.inner.RoundTrip(req) //nolint:wrapcheck
 }

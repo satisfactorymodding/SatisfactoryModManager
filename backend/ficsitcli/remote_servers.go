@@ -5,6 +5,7 @@ import (
 	"log/slog"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/settings"
 )
 
 func (f *ficsitCLI) GetRemoteInstallations() []string {
@@ -22,7 +23,7 @@ func (f *ficsitCLI) GetRemoteInstallations() []string {
 	return paths
 }
 
-func (f *ficsitCLI) AddRemoteServer(path string) error {
+func (f *ficsitCLI) AddRemoteServer(path string, name string) error {
 	if f.ficsitCli.Installations.GetInstallation(path) != nil {
 		return fmt.Errorf("installation already exists")
 	}
@@ -38,10 +39,19 @@ func (f *ficsitCLI) AddRemoteServer(path string) error {
 		l.Error("failed to save installations", slog.Any("error", err))
 	}
 
+	if name != "" {
+		settings.Settings.RemoteNames[remoteKey(installation.Path)] = name
+	}
+
 	meta, err := f.getRemoteServerMetadata(installation)
 	if err != nil {
+		if name != "" {
+			delete(settings.Settings.RemoteNames, remoteKey(installation.Path))
+		}
 		return fmt.Errorf("failed to get remote server metadata: %w", err)
 	}
+
+	_ = settings.SaveSettings()
 
 	f.installationMetadata.Store(path, installationMetadata{
 		State: InstallStateValid,
@@ -68,7 +78,16 @@ func (f *ficsitCLI) RemoveRemoteServer(path string) error {
 	if err != nil {
 		return fmt.Errorf("failed to delete installation: %w", err)
 	}
+	err = f.ficsitCli.Installations.Save()
+	if err != nil {
+		slog.Error("failed to save installations", slog.Any("error", err))
+	}
 	f.installationMetadata.Delete(path)
+
+	delete(settings.Settings.RemoteNames, remoteKey(path))
+	_ = settings.SaveSettings()
+
 	f.EmitGlobals()
+
 	return nil
 }

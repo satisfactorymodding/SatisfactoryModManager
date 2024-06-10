@@ -3,9 +3,9 @@ import { coerce, compare, minVersion, satisfies } from 'semver';
 import { get } from 'svelte/store';
 
 import { type Compatibility, CompatibilityState, GetModVersionTargetsDocument, ModReportedCompatibilityDocument, ModVersionsCompatibilityDocument, SmlVersionsCompatibilityDocument, TargetName } from '$lib/generated';
-import { common } from '$lib/generated/wailsjs/go/models';
 import { offline } from '$lib/store/settingsStore';
 import { OfflineGetMod, OfflineGetSMLVersions } from '$wailsjs/go/ficsitcli/ficsitCLI';
+import { common } from '$wailsjs/go/models';
 
 export interface CompatibilityWithSource extends Compatibility {
   source: 'reported' | 'version';

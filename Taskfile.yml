@@ -1,0 +1,47 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+---
+version: 3
+
+tasks:
+  build:
+    silent: true
+    vars:
+      OUTPUT_FULL_PATH: '{{ $args := (splitArgs .CLI_ARGS) }}{{ range $i, $a := $args }}{{ if eq $a "-o" }}{{ index $args (add $i 1) }}{{ end }}{{ end }}'
+      OUTPUT_FILENAME: '{{ if ne .OUTPUT_FULL_PATH "" }}{{ base (toSlash .OUTPUT_FULL_PATH) }}{{ end }}'
+      WAILS_ARGS: '
+        {{ $rawArgs := (splitArgs .CLI_ARGS) }}
+        {{ $args := without $rawArgs "." "-o" .OUTPUT_FULL_PATH }}
+        {{ $GOOS := (env "GOOS") }}
+        {{ $GOARCH := (env "GOARCH") }}
+        {{ range $args }}
+        {{ shellQuote . }}
+        {{ end }}
+        {{ if ne $GOOS "" }}-platform {{ $GOOS }}{{ if ne $GOARCH "" }}/{{ $GOARCH }}{{ end }}{{ end }}
+        {{ if ne .OUTPUT_FILENAME "" }}-o {{ .OUTPUT_FILENAME }}{{ end }}
+      '
+    cmds:
+      - GOOS="" GOARCH="" wails build {{.WAILS_ARGS}}
+      - platforms:
+          - darwin
+        cmd: |
+          {{ if ne .OUTPUT_FILENAME "" }}
+            pushd "build/bin" || exit 1
+            codesign --force --deep -s - "{{.OUTPUT_FILENAME}}.app" # If a universal binary is generated, the signature is lost
+            zip -r "{{.OUTPUT_FILENAME}}.zip" "{{.OUTPUT_FILENAME}}.app" # zip would add the .zip extension anyway
+            mv "{{.OUTPUT_FILENAME}}.zip" "{{.OUTPUT_FILENAME}}"
+            popd || exit 1
+          {{ end }}
+      - cmd: |
+          {{ if ne .OUTPUT_FILENAME "" }}
+            mkdir -p "{{ osDir .OUTPUT_FULL_PATH }}"
+            cp -r "build/bin/{{.OUTPUT_FILENAME}}" "{{.OUTPUT_FULL_PATH}}"
+          {{ end }}
+
+  lint:
+    silent: true
+    preconditions:
+      - golangci-lint --version | grep -q 1.54
+    cmds:
+      - GOOS=windows  golangci-lint run
+      - GOOS=linux    golangci-lint run
+      - GOOS=darwin   golangci-lint run

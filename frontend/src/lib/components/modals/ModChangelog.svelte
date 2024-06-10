@@ -3,6 +3,7 @@
   import { gt, lte } from 'semver';
 
   import Markdown from '$lib/components/Markdown.svelte';
+  import T, { translationElementPart } from '$lib/components/T.svelte';
   import { GetChangelogDocument } from '$lib/generated';
   import { offline } from '$lib/store/settingsStore';
 
@@ -39,7 +40,14 @@
 
 <div style="max-height: calc(100vh - 3rem); max-width: calc(100vw - 3rem);" class="w-[48rem] card flex flex-col gap-2">
   <header class="card-header font-bold text-2xl text-center">
-    {modData?.name ?? 'Loading...'} Changelog
+    <T 
+      defaultValue={'<1>{mod}</1> Changelog'}
+      keyName="mod-changelog.title"
+      params={{ mod: modData?.name ?? ' ' }}
+      parts={[
+        translationElementPart('span', { class: !modData?.name ? 'animate-pulse placeholder' : '' }),
+      ]}
+    />
   </header>
   <section class="p-4 overflow-y-auto">
     {#each changelogs as changelog}
@@ -52,7 +60,7 @@
     <button
       class="btn"
       on:click={parent.onClose}>
-      Close
+      <T defaultValue="Close" keyName="common.close"/>
     </button>
   </footer>
 </div>

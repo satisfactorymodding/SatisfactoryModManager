@@ -1,13 +1,10 @@
 module github.com/satisfactorymodding/SatisfactoryModManager
 
-go 1.21
-
-toolchain go1.21.5
+go 1.22
 
 require (
 	github.com/Masterminds/semver/v3 v3.2.1
 	github.com/andygrunwald/vdf v1.1.0
-	github.com/dustin/go-humanize v1.0.1
 	github.com/kbinani/screenshot v0.0.0-20230812210009-b87d31814237
 	github.com/lmittmann/tint v1.0.3
 	github.com/minio/selfupdate v0.6.0
@@ -16,15 +13,21 @@ require (
 	github.com/puzpuzpuz/xsync/v3 v3.0.2
 	github.com/samber/lo v1.39.0
 	github.com/samber/slog-multi v1.0.2
-	github.com/satisfactorymodding/ficsit-cli v0.5.1-0.20240201233422-5e9fe2aebbd5
+	github.com/satisfactorymodding/ficsit-cli v0.5.1-0.20240505210117-d051b5800ad7
 	github.com/satisfactorymodding/ficsit-resolver v0.0.2
+	github.com/shirou/gopsutil/v3 v3.24.3
 	github.com/spf13/viper v1.18.1
 	github.com/tawesoft/golib/v2 v2.10.0
+	github.com/wailsapp/go-webview2 v1.0.10
 	github.com/wailsapp/wails/v2 v2.8.0
 	github.com/zishang520/engine.io v1.5.12
 	github.com/zishang520/socket.io v1.3.2
-	golang.org/x/sys v0.16.0
+	golang.org/x/exp v0.0.0-20231214170342-aacd6d4b4611
+	golang.org/x/sync v0.6.0
+	golang.org/x/sys v0.18.0
+	gopkg.in/ini.v1 v1.67.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
+	howett.net/plist v1.0.1
 )
 
 require (
@@ -64,6 +67,7 @@ require (
 	github.com/pelletier/go-toml/v2 v2.1.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pkg/sftp v1.13.6 // indirect
+	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	github.com/pterm/pterm v0.12.72 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
@@ -80,17 +84,14 @@ require (
 	github.com/vektah/gqlparser/v2 v2.5.10 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
-	github.com/wailsapp/go-webview2 v1.0.10 // indirect
 	github.com/wailsapp/mimetype v1.4.1 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
+	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	github.com/zishang520/engine.io-go-parser v1.2.3 // indirect
 	github.com/zishang520/socket.io-go-parser v1.0.4 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/crypto v0.18.0 // indirect
-	golang.org/x/exp v0.0.0-20231214170342-aacd6d4b4611 // indirect
-	golang.org/x/net v0.20.0 // indirect
-	golang.org/x/sync v0.5.0 // indirect
+	golang.org/x/crypto v0.21.0 // indirect
+	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
-	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

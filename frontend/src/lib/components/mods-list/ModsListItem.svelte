@@ -1,17 +1,19 @@
 <script lang="ts">
   import { mdiArchiveCheck, mdiDownload, mdiEye, mdiLinkLock, mdiPause, mdiPauseCircle, mdiPlay, mdiPlayCircle, mdiStar, mdiStarMinus, mdiStarOutline, mdiStarPlus, mdiSync, mdiTagMultiple, mdiTrashCan, mdiTrayFull, mdiTrayMinus } from '@mdi/js';
   import { ProgressBar } from '@skeletonlabs/skeleton';
+  import { getTranslate } from '@tolgee/svelte';
   import { getContextClient } from '@urql/svelte';
   import { createEventDispatcher } from 'svelte';
 
   import Markdown from '$lib/components/Markdown.svelte';
   import ResponsiveButton from '$lib/components/ResponsiveButton.svelte';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
+  import T from '$lib/components/T.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
   import { CompatibilityState } from '$lib/generated';
   import { type PopupSettings, popup } from '$lib/skeletonExtensions';
   import { addQueuedModAction, queuedMods, removeQueuedModAction } from '$lib/store/actionQueue';
-  import { canInstallMods, favoriteMods, lockfileMods, manifestMods, progress, selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
+  import { canInstallMods, favoriteMods, lockfileMods, manifestMods, progress, progressMessage, progressPercent, selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
   import { error, siteURL } from '$lib/store/generalStore';
   import { type PartialMod, search } from '$lib/store/modFiltersStore';
   import { largeNumberFormat } from '$lib/utils/dataFormats';
@@ -20,9 +22,12 @@
   import type { ButtonDisplay } from '$lib/utils/responsiveButton';
   import { installTypeToTargetName } from '$lib/wailsTypesExtensions';
   import { DisableMod, EnableMod, InstallMod, RemoveMod } from '$wailsjs/go/ficsitcli/ficsitCLI';
+  import { ficsitcli } from '$wailsjs/go/models';
   import { FavoriteMod, UnFavoriteMod } from '$wailsjs/go/settings/settings';
 
   export let mod: PartialMod;
+
+  const { t } = getTranslate();
 
   const client = getContextClient();
 
@@ -42,27 +47,34 @@
   $: renderedLogo = actualLogo || `${$siteURL}/images/no_image.webp`;
   $: author = ('offline' in mod || 'missing' in mod) ? mod.authors[0] : getAuthor(mod);
 
+  const modActions = [
+    ficsitcli.Action.INSTALL,
+    ficsitcli.Action.UNINSTALL,
+    ficsitcli.Action.ENABLE,
+    ficsitcli.Action.DISABLE,
+  ];
+
   $: isInstalled = mod.mod_reference in $manifestMods;
   $: isEnabled = $manifestMods[mod.mod_reference]?.enabled ?? mod.mod_reference in $lockfileMods;
   $: isDependency = !isInstalled && isEnabled;
-  $: inProgress = $progress?.item === mod.mod_reference;
+  $: inProgress = !!$progress && modActions.includes($progress.action) && $progress.item.name === mod.mod_reference;
   $: queued = $queuedMods.some((q) => q.mod === mod.mod_reference);
   $: queuedInstall = $queuedMods.some((q) => q.mod === mod.mod_reference && (q.action === 'install' || q.action === 'remove'));
   $: queuedEnable = $queuedMods.some((q) => q.mod === mod.mod_reference && (q.action === 'enable' || q.action === 'disable'));
   
   $: installButtonDisplay = ((): ButtonDisplay => {
-    if (isDependency) {
-      return {
-        icon: mdiLinkLock,
-        iconHover: mdiLinkLock,
-        tooltip: 'This mod is installed a dependency of another mod. It cannot be installed or removed on its own.',
-      };
-    }
     if (inProgress) {
       return {
         icon: mdiSync,
         iconHover: mdiSync,
-        tooltip: 'Wait for the current operation to complete.',
+        tooltip: $t('mod-list-item.wait', 'Wait for the current operation to complete.'),
+      };
+    }
+    if (isDependency) {
+      return {
+        icon: mdiLinkLock,
+        iconHover: mdiLinkLock,
+        tooltip: $t('mod-list-item.dependency', 'This mod is installed a dependency of another mod. It cannot be installed or removed on its own.'),
       };
     }
     if (queuedInstall) {
@@ -71,8 +83,8 @@
         iconHover: mdiTrayMinus,
         iconHoverClass: 'text-red-500',
         tooltip: isInstalled ?
-          'This mod is queued to be uninstalled. Click to cancel the operation.' :
-            'This mod is queued to be installed. Click to cancel the operation.',
+          $t('mod-list-item.queued-uninstall', 'This mod is queued to be uninstalled. Click to cancel the operation.') :
+            $t('mod-list-item.queued-install', 'This mod is queued to be installed. Click to cancel the operation.'),
       };
     }
 
@@ -80,7 +92,7 @@
       icon: mdiDownload,
       iconHover: mdiDownload,
       iconHoverClass: 'text-primary-600',
-      tooltip: 'Click to install this mod.',
+      tooltip: $t('mod-list-item.install', 'Click to install this mod.'),
     };
     if (isInstalled) {
       display = {
@@ -88,23 +100,23 @@
         iconClass: 'text-primary-600',
         iconHover: mdiTrashCan,
         iconHoverClass: 'text-red-500',
-        tooltip: 'This mod is installed on this profile. Click to uninstall it.',
+        tooltip: $t('mod-list-item.uninstall', 'This mod is installed on this profile. Click to uninstall this mod.'),
       };
     } else if (compatibility.state !== CompatibilityState.Works) {
-      if (installButtonDisabled) {
-        display.tooltip = 'You can\'t install this mod. Reason:';
+      if (compatibility.state === CompatibilityState.Broken && compatibility.source === 'version') {
+        display.tooltip = $t('mod-list-item.not-installable', 'You can\'t install this mod. Reason:');
       } else {
-        display.tooltip = 'There are problems reported with this mod, but you can try to install it anyways. Details:';
+        display.tooltip = $t('mod-list-item.compatibility-warning', 'There are problems reported with this mod, but you can try to install it anyways. Details:');
       }
       if (compatibility.note) {
         display.tooltipHtml = '<br/>' + compatibility.note;
       } else {
         // TODO compatibility.note should always be non-null here, what should our fallback text be if it's not?
-        display.tooltip += ' (None specified)';
+        display.tooltip += $t('mod.list-item.compatibility-note-none', ' (None specified)');
       }
     }
     if (queued) {
-      display.tooltip = 'This mod is already queued for another operation.';
+      display.tooltip = $t('mod-list-item.queued', 'This mod is already queued for another operation.');
       delete display.tooltipHtml;
     }
     return display;
@@ -117,8 +129,8 @@
         iconHover: mdiTrayMinus,
         iconHoverClass: 'text-red-500',
         tooltip: isEnabled ?
-          'This mod is queued to be Disabled. Click to cancel the operation.' :
-            'This mod is queued to be Enabled. Click to cancel the operation.',
+          $t('mod-list-item.disable-queued', 'This mod is queued to be Disabled. Click to cancel the operation.') :
+            $t('mod-list-item.enable-queued', 'This mod is queued to be Enabled. Click to cancel the operation.'),
       };
     }
 
@@ -126,17 +138,17 @@
       icon: mdiPause,
       iconHover: mdiPlayCircle,
       iconHoverClass: 'text-primary-600',
-      tooltip: 'This mod is Disabled on this profile. Click to Enable it.',
+      tooltip: $t('mod-list-item.enable', 'Click to enable this mod.'),
     };
     if (isEnabled) {
       display = {
         icon: mdiPlay,
         iconHover: mdiPauseCircle,
-        tooltip: 'This mod is Enabled on this profile. Click to Disable it, which prevents it from loading when you start the game, but still keeps it a part of this profile.',
+        tooltip: $t('mod-list-item.disable', 'This mod is Enabled on this profile. Click to Disable it, which prevents it from loading when you start the game, but still keeps it a part of this profile.'),
       };
     }
     if (queued) {
-      display.tooltip = 'This mod is already queued for another operation.';
+      display.tooltip = $t('mod-list-item.queued', 'This mod is already queued for another operation.');
     }
     return display;
   })();
@@ -153,15 +165,14 @@
         icon: mdiStar,
         iconHover: mdiStarMinus,
         iconClass: 'text-warning-500',
-        tooltip: 'This mod is Favorited. Click to remove it from your favorites.',
+        tooltip: $t('mod-list-item.unfavorite', 'Click to remove this mod from your Favorites.'),
       };
     }
     return {
       icon: mdiStarOutline,
       iconHover: mdiStarPlus,
       iconHoverClass: 'text-warning-500',
-      tooltip: 'Click to add this mod to your Favorites.',
-      tooltipHtml: 'Having a mod Favorited is unrelated to whether or not it\'s installed - it\'s a way to keep track of a mod for later regardless of what Profile you have selected.',
+      tooltip: $t('mod-list-item.favorite', 'Click to add this mod to your Favorites. Having a mod Favorited is unrelated to whether or not it\'s installed - it\'s a way to keep track of a mod for later regardless of what Profile you have selected.'),
     };
   })();
 
@@ -171,15 +182,17 @@
     if(info) {
       if(!('offline' in mod) && !('missing' in mod)) {
         if(mod.hidden && !isDependency) {
-          compatibility = { state: CompatibilityState.Broken, note: 'This mod was hidden by the author.', source: 'reported' };
+          compatibility = { state: CompatibilityState.Broken, note: $t('mod-list-item.hidden', 'This mod was hidden by the author.'), source: 'reported' };
         } else {
           getCompatibility(mod.mod_reference, info.branch, info.version, installTypeToTargetName(info.type), client).then((result) => {
             if (result.source === 'reported') {
               compatibility = {
                 state: result.state,
-                note: result.note 
-                  ? `This mod has been reported as ${result.state} on this game version.<br>${result.note}` 
-                  : `This mod has been reported as ${result.state} on this game version. (No further notes provided)`,
+                // note: result.note 
+                //   ? `This mod has been reported as ${result.state} on this game version.<br>${result.note}` 
+                //   : `This mod has been reported as ${result.state} on this game version. (No further notes provided)`,
+                note: $t('mod-list-item.compatibility-note', 'This mod has been reported as {state} on this game version.', { state: result.state }) 
+                  + result.note ? '<br>' + result.note : ' ' + $t('mod-list-item.compatibility-note-none', '(No further notes provided)'),
                 source: 'reported',
               };
             } else {
@@ -188,7 +201,7 @@
           });
         }
       } else if('missing' in mod) {
-        compatibility = { state: CompatibilityState.Broken, note: 'This mod is no longer available on ficsit.app. You may want to remove it.', source: 'version' };
+        compatibility = { state: CompatibilityState.Broken, note: $t('mod-list-item.unavailable', 'This mod is no longer available on ficsit.app. You may want to remove it.'), source: 'version' };
       } else {
         getVersionCompatibility(mod.mod_reference, info.version, client).then((result) => {
           compatibility = {
@@ -277,7 +290,7 @@
         max={1}
         meter="bg-surface-50-900-token"
         track="bg-surface-200-700-token"
-        value={$progress?.progress === -1 ? undefined : $progress?.progress}/>
+        value={$progressPercent}/>
     </div>
   {/if}
   <div class="flex relative h-full space-x-2" class:-top-full={inProgress}>
@@ -295,7 +308,7 @@
           {mod.name}
         </span>
         <div class="shrink-0 hidden @lg/mods-list:block truncate w-[7rem] grow">
-          <span class="pl-1">by</span>
+          <span class="pl-1"><T defaultValue="by" keyName="mod-list-item.by-author" /></span>
           <!-- We could offer keyboard navigation for clicking this, but it's a waste of the user's time while nagivating via keyboard. If they want to search by author, they could enter the mod description pane -->
           <span
             class="text-primary-600 whitespace-nowrap"
@@ -314,7 +327,7 @@
               <span>#{tag.name}</span>
             {/each}
           {:else}
-            <span>(none available)</span>
+            <span><T defaultValue="(none available)" keyName="mod-list-item.no-tags" /></span>
           {/if}
         </div>
         <div class="text-sm w-full">
@@ -333,7 +346,7 @@
         </div>
       </div>
       {#if inProgress}
-        <span class="shrink-0 text-sm">{$progress?.message}</span>
+        <span class="shrink-0 text-sm">{$progressMessage}</span>
       {/if}
     </div>
     <!-- The purpose of the event handlers here are to prevent navigating to the mod's page when clicking on one of the sub-buttons of the div. Thus, it shouldn't be focusable despite having "interactions" -->
@@ -374,7 +387,7 @@
 
 <Tooltip disabled={!(isInstalled && !isEnabled) && compatibility.state === CompatibilityState.Works} {popupId}>
   {#if isInstalled && !isEnabled}
-    This mod is Disabled. Click the pause icon to Enable it. 
+    <T defaultValue="This mod is Disabled. Click the pause icon to Enable it." keyName="mod-list-item.disabled-tooltip" />
   {:else if compatibility.state !== CompatibilityState.Works}
     <Markdown class="[&>p]:my-0" markdown={compatibility.note ?? ''}/>
   {/if}

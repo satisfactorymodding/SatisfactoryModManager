@@ -1,0 +1,91 @@
+on:
+  workflow_call:
+    inputs:
+      goreleaser_args:
+        required: false
+        type: string
+        default: --snapshot
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        platform:
+          - os: linux
+            runs-on: ubuntu-latest
+          - os: windows
+            runs-on: windows-latest
+            goreleaser_args: "-p 1" # Wails packaging for windows cannot handle parallel builds
+          - os: darwin
+            runs-on: macos-latest
+            goreleaser_args: "-p 1" # Wails packaging for darwin cannot handle parallel builds
+    runs-on: ${{ matrix.platform.runs-on }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup
+
+      - name: Install Task
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run GoReleaser ${{ inputs.goreleaser_args }}
+        uses: ./.github/actions/goreleaser
+        with:
+          args: release --split --clean ${{ matrix.platform.goreleaser_args }} ${{ inputs.goreleaser_args }}
+        env:
+          GGOOS: ${{ matrix.platform.os }}
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.platform.os }}
+          path: dist/**/*
+
+  finalize:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup
+        with:
+          backend: false
+          frontend: false
+
+      - name: Download windows artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-windows
+          path: dist
+
+      - name: Download linux artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-linux
+          path: dist
+
+      - name: Download darwin artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-darwin
+          path: dist
+
+      - name: Run GoReleaser Merge ${{ inputs.goreleaser_args }}
+        uses: ./.github/actions/goreleaser
+        with:
+          args: continue --merge ${{ inputs.goreleaser_args }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-all
+          path: dist/**/*

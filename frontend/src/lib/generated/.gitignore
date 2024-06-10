@@ -1,2 +1,5 @@
-graphql.schema.urql.json
-graphql.ts
+*
+!*/
+
+!/index.ts
+!graphql/index.ts

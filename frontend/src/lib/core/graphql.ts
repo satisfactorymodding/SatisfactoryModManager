@@ -3,7 +3,7 @@ import { persistedExchange } from '@urql/exchange-persisted';
 import type { Client } from '@urql/svelte';
 import { createClient, fetchExchange } from '@urql/svelte';
 
-import schema from '$lib/generated/graphql.schema.urql.json';
+import { schema } from '$lib/generated';
 
 export function initializeGraphQLClient(apiEndpointURL: string): Client {
   return createClient({

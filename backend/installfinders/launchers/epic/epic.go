@@ -47,20 +47,12 @@ func GetEpicBranch(appName string) (common.GameBranch, error) {
 	}
 }
 
-func findInstallationsEpic(epicManifestsPath string, launcher string, launchPath func(appName string) []string, processPath func(path string) string) ([]*common.Installation, []error) {
-	if launchPath == nil {
-		launchPath = func(appName string) []string { return nil }
+func FindInstallationsEpic(epicManifestsPath string, launcher string, platform common.LauncherPlatform) ([]*common.Installation, []error) {
+	if _, err := os.Stat(platform.ProcessPath(epicManifestsPath)); os.IsNotExist(err) {
+		return nil, []error{fmt.Errorf("epic is not installed")}
 	}
 
-	if processPath == nil {
-		processPath = func(path string) string { return path }
-	}
-
-	if _, err := os.Stat(epicManifestsPath); os.IsNotExist(err) {
-		return nil, []error{fmt.Errorf("Epic is not installed")}
-	}
-
-	manifests, err := os.ReadDir(epicManifestsPath)
+	manifests, err := os.ReadDir(platform.ProcessPath(epicManifestsPath))
 	if err != nil {
 		return nil, []error{fmt.Errorf("failed to list Epic manifests: %w", err)}
 	}
@@ -92,10 +84,10 @@ func findInstallationsEpic(epicManifestsPath string, launcher string, launchPath
 			continue
 		}
 
-		installLocation := processPath(epicManifest.InstallLocation)
+		installLocation := platform.ProcessPath(epicManifest.InstallLocation)
 
 		gameManifestName := fmt.Sprintf("%s.mancpn", epicManifest.InstallationGUID)
-		gameManifestPath := processPath(filepath.Join(epicManifest.ManifestLocation, gameManifestName))
+		gameManifestPath := platform.ProcessPath(filepath.Join(epicManifest.ManifestLocation, gameManifestName))
 		gameManifestData, err := os.ReadFile(gameManifestPath)
 		if err != nil {
 			findErrors = append(findErrors, fmt.Errorf("failed to read Epic game manifest %s: %w", gameManifestName, err))
@@ -130,7 +122,10 @@ func findInstallationsEpic(epicManifestsPath string, launcher string, launchPath
 			continue
 		}
 
-		installType, version, err := common.GetGameInfo(installLocation)
+		// Epic can only launch games of the same platform
+		gamePlatform := platform.Platform
+
+		installType, version, savedPath, err := common.GetGameInfo(installLocation, gamePlatform)
 		if err != nil {
 			findErrors = append(findErrors, common.InstallFindError{
 				Path:  installLocation,
@@ -155,7 +150,8 @@ func findInstallationsEpic(epicManifestsPath string, launcher string, launchPath
 			Location:   common.LocationTypeLocal,
 			Branch:     branch,
 			Launcher:   launcher,
-			LaunchPath: launchPath(epicManifest.MainGameAppName),
+			LaunchPath: platform.LauncherCommand(epicManifest.MainGameAppName),
+			SavedPath:  savedPath,
 		})
 	}
 

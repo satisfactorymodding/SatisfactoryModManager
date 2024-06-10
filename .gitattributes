@@ -1,2 +1,4 @@
 # Linters require Unix-style line endings
 * text=auto eol=lf
+# Exclude vendored nsis library from stats
+build/windows/installer/NsisMultiUser/** linguist-vendored

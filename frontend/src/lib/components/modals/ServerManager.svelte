@@ -1,17 +1,22 @@
 <script lang="ts">
   import { mdiAlert, mdiLoading, mdiServerNetwork, mdiTrashCan } from '@mdi/js';
+  import { getTranslate } from '@tolgee/svelte';
   import _ from 'lodash';
 
+  import RemoteServerPicker from '$lib/components/RemoteServerPicker.svelte';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import Select from '$lib/components/Select.svelte';
+  import T from '$lib/components/T.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
-  import { AddRemoteServer, FetchRemoteServerMetadata, RemoveRemoteServer } from '$lib/generated/wailsjs/go/ficsitcli/ficsitCLI';
-  import { ficsitcli } from '$lib/generated/wailsjs/go/models';
   import { type PopupSettings, popup } from '$lib/skeletonExtensions';
   import { installsMetadata, remoteServers } from '$lib/store/ficsitCLIStore';
+  import { AddRemoteServer, FetchRemoteServerMetadata, GetNextRemoteLauncherName, RemoveRemoteServer } from '$wailsjs/go/ficsitcli/ficsitCLI';
+  import { ficsitcli } from '$wailsjs/go/models';
 
   export let parent: { onClose: () => void };
   
+  const { t } = getTranslate();
+
   type RemoteType = ({ type: 'remote'; protocol: string; defaultPort: string; } | { type: 'local' }) & { name: string; };
 
   const remoteTypes: RemoteType[] = [
@@ -43,6 +48,9 @@
   let newServerPath = '';
   let err = '';
 
+  let defaultRemoteName = '';
+  let remoteName = '';
+
   let advancedMode = false;
 
   let addInProgress = false;
@@ -63,20 +71,17 @@
     return newRemoteType.protocol + authString + '@' + newServerHost + ':' + actualPort + '/' + trimmedPath;
   })();
 
-  $: displayPath = (() => {
+  $: baseServerPath = (() => {
     if (newRemoteType.type === 'local') {
       return newServerPath;
     }
     if (advancedMode) {
       return newRemoteType.protocol + newServerPath;
     }
-    if (maskPassword) {
-      return newRemoteType.protocol + encodeURIComponent(newServerUsername) + ':*****@' + newServerHost + ':' + actualPort + '/' + trimmedPath;
-    }
-    return newRemoteType.protocol + authString + '@' + newServerHost + ':' + actualPort + '/' + trimmedPath;
+    return newRemoteType.protocol + authString + '@' + newServerHost + ':' + actualPort;
   })();
 
-  $: isValid = (() => {
+  $: isBaseValid = (() => {
     if (newRemoteType.type === 'local') {
       return newServerPath.length > 0;
     }
@@ -86,6 +91,18 @@
     return newServerUsername.length > 0 && newServerHost.length > 0;
   })();
 
+  let isPathValid = false;
+
+  $: isValid = (() => {
+    if (newRemoteType.type === 'local') {
+      return newServerPath.length > 0;
+    }
+    if (advancedMode) {
+      return newServerPath.length > 0;
+    }
+    return newServerUsername.length > 0 && newServerHost.length > 0 && isPathValid;
+  })();
+
   async function addNewRemoteServer() {
     if (!isValid) {
       return;
@@ -93,7 +110,7 @@
     try {
       err = '';
       addInProgress = true;
-      await AddRemoteServer(fullInstallPath);
+      await AddRemoteServer(fullInstallPath, remoteName);
       newServerUsername = '';
       newServerPassword = '';
       newServerHost = '';
@@ -130,6 +147,13 @@
     return `remote-server-warning-${install}`;
   }
 
+  $: {
+    remoteServers;
+    (async () => {
+      defaultRemoteName = await GetNextRemoteLauncherName();
+    })();
+  }
+
   $: installWarningPopups = $remoteServers.map((i) => [i, {
     event: 'hover',
     target: installWarningPopupId(i),
@@ -147,7 +171,7 @@
 
 <div style="max-height: calc(100vh - 3rem); max-width: calc(100vw - 3rem);" class="card flex flex-col gap-2">
   <header class="card-header font-bold text-2xl text-center">
-    Dedicated Servers
+    <T defaultValue="Dedicated Servers" keyName="server-manager.title" />
   </header>
   <section class="p-4 flex-auto space-y-4 overflow-y-auto flex">
     <div class="flex-auto w-full overflow-x-auto overflow-y-auto">
@@ -155,6 +179,7 @@
         <tbody>
           {#each $remoteServers as remoteServer}
             <tr>
+              <td class="break-all">{$installsMetadata[remoteServer].info?.launcher}</td>
               <td class="break-all">{($installsMetadata[remoteServer].info?.path)?.replace(/(.*?:\/\/.*?:)(.*?)(?=@|$)/, '$1********')}</td>
               <td>
                 {#if $installsMetadata[remoteServer]?.state === ficsitcli.InstallState.VALID}
@@ -163,11 +188,11 @@
                   <Tooltip popupId={installWarningPopupId(remoteServer)}>
                     <span class="text-base">
                       {#if $installsMetadata[remoteServer]?.state === ficsitcli.InstallState.LOADING}
-                        Loading...
+                        <T defaultValue="Loading..." keyName="server-manager.loading" />
                       {:else if $installsMetadata[remoteServer]?.state === ficsitcli.InstallState.INVALID}
-                        SMM cannot manage this install
+                        <T defaultValue="SMM cannot manage this install" keyName="server-manager.invalid" />
                       {:else}
-                        Failed to connect to server, click to retry
+                        <T defaultValue="Failed to connect to server, click to retry" keyName="server-manager.failed-to-connect" />
                       {/if}
                     </span>
                   </Tooltip>
@@ -214,8 +239,8 @@
       </table>
     </div>
   </section>
-  <section class="p-4 space-y-4">
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 items-start auto-rows-fr">
+  <section class="p-4 space-y-4 overflow-y-auto">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 items-start auto-rows-[minmax(2.5rem,_max-content)]">
       <Select
         name="newServerProtocol"
         class="col-span-1 h-full"
@@ -233,74 +258,91 @@
         {#if advancedMode}
           <input
             class="input px-4 h-full sm:col-start-2 col-span-2"
-            placeholder="user:pass@host:port/path"
+            placeholder={$t('server-manager.advanced-path-placeholder', 'user:pass@host:port/path')}
             type="text"
             bind:value={newServerPath}/>
           <p class="sm:col-start-2 col-span-2">
-            Note that you might have to escape certain characters in the username and password
+            <T defaultValue="Note that you might have to escape certain characters in the username and password" keyName="server-manager.advanced-note" />
           </p>
         {:else}
           <input
             class="input px-4 h-full sm:col-start-2"
-            placeholder="user"
+            placeholder={$t('server-manager.username-placeholder', 'username')}
             type="text"
             bind:value={newServerUsername}/>
           <!-- This is a conditional because the type var cant be dynamic with bind:value -->
           {#if maskPassword}
             <input
               class="input px-4 h-full"
-              placeholder="pass"
+              placeholder={$t('server-manager.password-placeholder', 'password')}
               type="password"
               bind:value={newServerPassword}/>
           {:else}
             <input
               class="input px-4 h-full"
-              placeholder="pass"
+              placeholder={$t('server-manager.password-placeholder', 'password')}
               type="text"
               bind:value={newServerPassword}/>
           {/if}
           <input
             class="input px-4 h-full sm:col-start-2"
-            placeholder="host"
+            placeholder={$t('server-manager.host-placeholder', 'host')}
             type="text"
             bind:value={newServerHost}/>
           <input
             class="input px-4 h-full"
-            placeholder="port (default: {newRemoteType.defaultPort})"
+            placeholder={$t('server-manager.port-placeholder', 'port (default: {default})', { default: newRemoteType.defaultPort })}
             type="text"
             bind:value={newServerPort}/>
           <input
             class="input px-4 h-full sm:col-start-2 col-span-2"
-            placeholder="path"
+            placeholder={$t('server-manager.path-placeholder', 'path')}
             type="text"
             bind:value={newServerPath}/>
-          <p class="sm:col-start-2 col-span-2">
-            Complete path: {displayPath}
-          </p>
+          <div class="sm:col-start-2 col-span-2">
+            <RemoteServerPicker
+              basePath={baseServerPath}
+              disabled={!isBaseValid}
+              bind:path={newServerPath}
+              bind:valid={isPathValid}
+            />
+          </div>
         {/if}
-        <button class="btn sm:col-start-2 col-span-2 text-sm whitespace-break-spaces bg-surface-200-700-token" on:click={() => advancedMode = !advancedMode}>
+        <button class="btn sm:col-start-1 col-span-1 row-start-2 text-sm whitespace-break-spaces bg-surface-200-700-token" on:click={() => advancedMode = !advancedMode}>
           {#if advancedMode}
-            Switch to simple mode
+            <T defaultValue="Switch to simple mode" keyName="server-manager.switch-to-simple" />
           {:else}
-            Switch to advanced mode
+            <T defaultValue="Switch to advanced mode" keyName="server-manager.switch-to-advanced" />
           {/if}
         </button>
       {:else}
         <input
           class="input px-4 h-full sm:col-start-2 col-span-2"
-          placeholder="C:\Path\To\Server"
+          placeholder={$t('server-manager.local-path-placeholder', 'C:\\Path\\To\\Server')}
           type="text"
           bind:value={newServerPath}/>
+        <div class="sm:col-start-2 col-span-2">
+          <RemoteServerPicker
+            basePath=""
+            bind:path={newServerPath}
+            bind:valid={isPathValid}
+          />
+        </div>
       {/if}
+      <input
+        class="input px-4 h-full col-start-4 row-start-1"
+        placeholder={$t('server-manager.name-placeholder', 'Name (default: {default})', { default: defaultRemoteName })}
+        type="text"
+        bind:value={remoteName}/>
       <button
-        class="btn h-full text-sm bg-primary-600 text-secondary-900 col-start-2 sm:col-start-4 row-start-1"
+        class="btn h-full text-sm bg-primary-600 text-secondary-900 col-start-2 sm:col-start-4 row-start-2"
         disabled={addInProgress || !isValid}
         on:click={() => addNewRemoteServer()}>
         <span>
           {#if !addInProgress}
-            Add
+            <T defaultValue="Add" keyName="server-manager.add" />
           {:else}
-            Validating...
+            <T defaultValue="Validating..." keyName="server-manager.validating" />
           {/if}
         </span>
         <div class="grow" />
@@ -309,13 +351,13 @@
           icon={mdiServerNetwork} />
       </button>
       <button
-        class="btn h-full text-sm bg-primary-600 text-secondary-900 col-start-2 sm:col-start-4 row-start-2"
+        class="btn h-full text-sm bg-primary-600 text-secondary-900 col-start-2 sm:col-start-4 row-start-3"
         on:click={() => toggleMaskPassword()}>
         <span>
           {#if maskPassword}
-            Show Password
+            <T defaultValue="Show Password" keyName="server-manager.show-password" />
           {:else}
-            Hide Password
+            <T defaultValue="Hide Password" keyName="server-manager.hide-password" />
           {/if}
         </span>
       </button>
@@ -326,7 +368,7 @@
     <button
       class="btn h-8 w-full text-sm bg-surface-200-700-token"
       on:click={parent.onClose}>
-      Close
+      <T defaultValue="Close" keyName="common.close" />
     </button>
   </footer>
 </div>

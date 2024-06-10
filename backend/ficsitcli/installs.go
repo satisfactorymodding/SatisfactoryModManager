@@ -89,47 +89,36 @@ func (f *ficsitCLI) GetInstallation(path string) *cli.Installation {
 }
 
 func (f *ficsitCLI) SelectInstall(path string) error {
-	l := slog.With(slog.String("task", "selectInstall"), slog.String("path", path))
+	return f.action(ActionSelectInstall, newSimpleItem(path), func(l *slog.Logger, taskUpdates chan<- taskUpdate) error {
+		if !f.isValidInstall(path) {
+			return fmt.Errorf("invalid installation: %s", path)
+		}
+		if f.ficsitCli.Installations.SelectedInstallation == path {
+			return nil
+		}
+		installation := f.ficsitCli.Installations.GetInstallation(path)
+		if installation == nil {
+			return fmt.Errorf("installation %s not found", path)
+		}
 
-	if !f.isValidInstall(path) {
-		return fmt.Errorf("invalid installation: %s", path)
-	}
-	if f.ficsitCli.Installations.SelectedInstallation == path {
+		f.ficsitCli.Installations.SelectedInstallation = path
+		err := f.ficsitCli.Installations.Save()
+		if err != nil {
+			l.Error("failed to save selected installation", slog.Any("error", err))
+		}
+
+		selectedInstallation := f.GetSelectedInstall()
+
+		f.EmitGlobals()
+
+		installErr := f.validateInstall(selectedInstallation, taskUpdates)
+
+		if installErr != nil {
+			l.Error("failed to validate install", slog.Any("error", installErr))
+			return installErr
+		}
 		return nil
-	}
-	installation := f.ficsitCli.Installations.GetInstallation(path)
-	if installation == nil {
-		l.Error("failed to find installation")
-		return fmt.Errorf("installation %s not found", path)
-	}
-
-	f.ficsitCli.Installations.SelectedInstallation = path
-	err := f.ficsitCli.Installations.Save()
-	if err != nil {
-		l.Error("failed to save selected installation", slog.Any("error", err))
-	}
-
-	selectedInstallation := f.GetSelectedInstall()
-
-	f.EmitGlobals()
-
-	f.progress = &Progress{
-		Item:     "__select_install__",
-		Message:  "Validating install",
-		Progress: -1,
-	}
-
-	f.setProgress(f.progress)
-
-	defer f.setProgress(nil)
-
-	installErr := f.validateInstall(selectedInstallation, "__select_install__")
-
-	if installErr != nil {
-		l.Error("failed to validate install", slog.Any("error", installErr))
-		return installErr
-	}
-	return nil
+	})
 }
 
 func (f *ficsitCLI) GetSelectedInstall() *cli.Installation {
@@ -137,47 +126,38 @@ func (f *ficsitCLI) GetSelectedInstall() *cli.Installation {
 }
 
 func (f *ficsitCLI) SetModsEnabled(enabled bool) error {
-	selectedInstallation := f.GetSelectedInstall()
-
-	if selectedInstallation == nil {
-		slog.Error("no installation selected")
-		return fmt.Errorf("no installation selected")
-	}
-	l := slog.With(slog.String("task", "setModsEnabled"), slog.Bool("enabled", enabled), slog.String("install", selectedInstallation.Path))
-
-	var message string
+	var item ProgressItem
 	if enabled {
-		message = "Enabling mods"
+		item = newSimpleItem("true")
 	} else {
-		message = "Disabling mods"
+		item = newSimpleItem("false")
 	}
+	return f.action(ActionToggleMods, item, func(l *slog.Logger, taskUpdates chan<- taskUpdate) error {
+		selectedInstallation := f.GetSelectedInstall()
 
-	selectedInstallation.Vanilla = !enabled
-	err := f.ficsitCli.Installations.Save()
-	if err != nil {
-		l.Error("failed to save vanilla state of install", slog.Any("error", err))
-	}
+		if selectedInstallation == nil {
+			return fmt.Errorf("no installation selected")
+		}
 
-	f.EmitGlobals()
+		l = l.With(slog.String("install", selectedInstallation.Path))
 
-	f.progress = &Progress{
-		Item:     "__toggle_mods__",
-		Message:  message,
-		Progress: -1,
-	}
+		selectedInstallation.Vanilla = !enabled
+		err := f.ficsitCli.Installations.Save()
+		if err != nil {
+			l.Error("failed to save vanilla state of install", slog.Any("error", err))
+		}
 
-	f.setProgress(f.progress)
+		f.EmitGlobals()
 
-	defer f.setProgress(nil)
+		installErr := f.validateInstall(selectedInstallation, taskUpdates)
 
-	installErr := f.validateInstall(selectedInstallation, "__toggle_mods__")
+		if installErr != nil {
+			l.Error("failed to validate install", slog.Any("error", installErr))
+			return installErr
+		}
 
-	if installErr != nil {
-		l.Error("failed to validate install", slog.Any("error", installErr))
-		return installErr
-	}
-
-	return nil
+		return nil
+	})
 }
 
 func (f *ficsitCLI) GetModsEnabled() bool {

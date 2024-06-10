@@ -6,6 +6,7 @@ import (
 	"os/exec"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/launchers"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/launchers/epic"
 )
 
@@ -17,21 +18,19 @@ type Game struct {
 	Directory string `json:"directory"`
 }
 
-func FindInstallations() ([]*common.Installation, []error) {
-	return common.FindAll(findInstallationsNative, findInstallationsFlatpak)
-}
-
-func findInstallationsNative() ([]*common.Installation, []error) {
-	return findInstallations([]string{"lutris"}, "Lutris")
-}
-
-func findInstallationsFlatpak() ([]*common.Installation, []error) {
-	return findInstallations([]string{"flatpak", "run", "net.lutris.Lutris"}, "Lutris")
+func init() {
+	launchers.Add("Lutris", func() ([]*common.Installation, []error) {
+		return findInstallations([]string{"lutris"}, "Lutris")
+	})
+	launchers.Add("Lutris-flatpak", func() ([]*common.Installation, []error) {
+		return findInstallations([]string{"flatpak", "run", "net.lutris.Lutris"}, "Lutris")
+	})
 }
 
 func findInstallations(lutrisCmd []string, launcher string) ([]*common.Installation, []error) {
 	lutrisLjCmd := makeLutrisCmd(lutrisCmd, "-lj")
 	lutrisLj := exec.Command(lutrisLjCmd[0], lutrisLjCmd[1:]...)
+	lutrisLj.Env = append(lutrisLj.Env, "LUTRIS_SKIP_INIT=1")
 	outputBytes, err := lutrisLj.Output()
 	if err != nil {
 		return nil, []error{

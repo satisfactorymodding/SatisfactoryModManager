@@ -2,8 +2,11 @@
   import './_global.postcss';
   import { arrow, autoUpdate, computePosition, flip, offset, shift, size } from '@floating-ui/dom';
   import { Modal, initializeStores, storePopup } from '@skeletonlabs/skeleton';
+  import { FormatIcu } from '@tolgee/format-icu';
+  import { DevTools, FormatSimple, Tolgee, TolgeeProvider } from '@tolgee/svelte';
   import { setContextClient } from '@urql/svelte';
 
+  import T, { translationElementPart } from '$lib/components/T.svelte';
   import TitleBar from '$lib/components/TitleBar.svelte';
   import LeftBar from '$lib/components/left-bar/LeftBar.svelte';
   import ModDetails from '$lib/components/mod-details/ModDetails.svelte';
@@ -12,12 +15,15 @@
   import { supportedProgressTypes } from '$lib/components/modals/ProgressModal.svelte';
   import { modalRegistry } from '$lib/components/modals/modalsRegistry';
   import ImportProfile from '$lib/components/modals/profiles/ImportProfile.svelte';
+  import { isUpdateOnStart } from '$lib/components/modals/smmUpdate/smmUpdate';
   import ModsList from '$lib/components/mods-list/ModsList.svelte';
   import { initializeGraphQLClient } from '$lib/core/graphql';
+  import { i18n } from '$lib/generated';
   import { getModalStore, initializeModalStore } from '$lib/skeletonExtensions';
   import { installs, invalidInstalls, progress } from '$lib/store/ficsitCLIStore';
   import { error, expandedMod, siteURL } from '$lib/store/generalStore';
-  import { konami } from '$lib/store/settingsStore';
+  import { konami, language, updateCheckMode } from '$lib/store/settingsStore';
+  import { smmUpdate, smmUpdateReady } from '$lib/store/smmUpdateStore';
   import { ExpandMod, GenerateDebugInfo, UnexpandMod } from '$wailsjs/go/app/app';
   import { Environment, EventsOn } from '$wailsjs/runtime';
 
@@ -25,12 +31,25 @@
   initializeModalStore();
 
   storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow, size });
+  
+  const tolgee = Tolgee()
+    .use(DevTools())
+    .use(FormatSimple())
+    .use(FormatIcu())
+    .init({
+      language: 'en',
+      fallbackLanguage: 'en',
+      
+      apiUrl: import.meta.env.VITE_TOLGEE_API_URL,
+      apiKey: import.meta.env.VITE_TOLGEE_API_KEY,
+
+      staticData: i18n,
+    });
+  
+  $: tolgee.changeLanguage($language);
 
   let frameless = false;
   Environment().then((env) => {
-    if (env.buildType !== 'dev') {
-      document.addEventListener('contextmenu', (event) => event.preventDefault());
-    }
     if (env.platform === 'windows') {
       frameless = true;
     }
@@ -43,22 +62,24 @@
 
   setContextClient(initializeGraphQLClient(apiEndpointURL));
 
+  let windowStateChanging = false;
   let windowExpanded = false;
 
-  $: if ($expandedMod) {
-    ExpandMod().then(() => {
+  function setExpanded(value: boolean) {
+    if (windowExpanded === value) return;
+    if (windowStateChanging) return;
+    windowStateChanging = true;
+    const op = value ? ExpandMod : UnexpandMod;
+    op().then(() => {
+      // wait a bit to prevent flickering
       setTimeout(() => {
-        windowExpanded = true;
+        windowExpanded = value;
+        windowStateChanging = false;
       }, 100);
     });
-  } else {
-    windowExpanded = false;
-    setTimeout(() => {
-      UnexpandMod();
-    }, 100);
   }
 
-  $: pendingExpand = $expandedMod && !windowExpanded;
+  $: setExpanded(!!$expandedMod);
 
   let invalidInstallsError = false;
   let noInstallsError = false;
@@ -73,11 +94,14 @@
     } else {
       noInstallsError = true;
     }
+  } else {
+    invalidInstallsError = false;
+    noInstallsError = false;
   }
 
   const modalStore = getModalStore();
 
-  $: if($progress && supportedProgressTypes.includes($progress.item)) {
+  $: if($progress && supportedProgressTypes.includes($progress.action)) {
     modalStore.triggerUnique({
       type: 'component',
       component: 'progress',
@@ -85,6 +109,44 @@
         persistent: true,
       },
     }, true);
+  }
+
+  let checkStart: boolean | undefined = undefined;
+  const updateCheckModeInit = updateCheckMode.isInit;
+  $: if ($updateCheckModeInit && checkStart === undefined) {
+    checkStart = $updateCheckMode === 'launch';
+  }
+
+  const smmUpdateInit = smmUpdate.isInit;
+  $: if ($smmUpdateInit && checkStart) {
+    checkStart = false;
+    if ($smmUpdate) {
+      $isUpdateOnStart = true;
+      if ($smmUpdateReady) {
+        modalStore.trigger({
+          type: 'component',
+          component: 'smmUpdateReady',
+          meta: {
+            persistent: true,
+          },
+        });
+      } else {
+        modalStore.trigger({
+          type: 'component',
+          component: 'smmUpdateDownload',
+          meta: {
+            persistent: true,
+          },
+        });      
+      }
+    }
+  }
+  
+  $: if ($smmUpdateReady && $updateCheckMode === 'ask') {
+    modalStore.trigger({
+      type: 'component',
+      component: 'smmUpdateReady',
+    });
   }
 
   $: if($error) {
@@ -158,48 +220,61 @@
   });
 </script>
 
-<div class="flex flex-col h-screen w-screen select-none">
-  {#if frameless}
-    <TitleBar />
-  {/if}
-  <div class="flex grow h-0">
-    <LeftBar />
-    <div class="flex flex-auto @container/mod-list-wrapper z-[1]">
-      <div class="{$expandedMod && !pendingExpand ? 'w-2/5 hidden @3xl/mod-list-wrapper:block @3xl/mod-list-wrapper:flex-auto' : 'w-full'}" class:max-w-[42.5rem]={!!$expandedMod}>
-        <ModsList
-          hideMods={noInstallsError || invalidInstallsError}
-          on:expandedMod={() => {
-            focusOnEntry.focus();
-          }}>
-          <div class="card my-auto mr-4">
-            <header class="card-header font-bold text-2xl text-center">
-              {#if noInstallsError}
-                No Satisfactory installs found
-              {:else}
-                {$invalidInstalls.length} invalid Satisfactory install{$invalidInstalls.length !== 1 ? 's' : ''} found
-              {/if}
-            </header>
-            <section class="p-4">
-              <p class="text-base text-center">
-                Seems wrong? Click the button below and send the generated zip file on the <a class="text-primary-600 underline" href="https://discord.gg/xkVJ73E">modding discord</a> in #help-using-mods.
-              </p>
-            </section>
-            <footer class="card-footer">
-              <button
-                class="btn text-primary-600 w-full"
-                on:click={GenerateDebugInfo}>
-                Generate debug info
-              </button>
-            </footer>
-          </div>
-        </ModsList>
-      </div>
-      <div class="w-3/5" class:grow={!pendingExpand} class:hidden={!$expandedMod}>
-        <ModDetails bind:focusOnEntry/>
+<TolgeeProvider {tolgee}>
+  <div class="flex flex-col h-screen w-screen select-none">
+    {#if frameless}
+      <TitleBar />
+    {/if}
+    <div class="flex grow h-0">
+      <LeftBar />
+      <div class="flex flex-auto @container/mod-list-wrapper z-[1]">
+        <div class="{$expandedMod && !windowStateChanging ? 'w-2/5 hidden @3xl/mod-list-wrapper:block @3xl/mod-list-wrapper:flex-auto' : 'w-full'}" class:max-w-[42.5rem]={!!$expandedMod}>
+          <ModsList
+            hideMods={noInstallsError || invalidInstallsError}
+            on:expandedMod={() => {
+              focusOnEntry.focus();
+            }}>
+            <div class="card my-auto mr-4">
+              <header class="card-header font-bold text-2xl text-center">
+                {#if noInstallsError}
+                  <T defaultValue="No Satisfactory installs found" keyName="error.no_installs" />
+                {:else}
+                  <T defaultValue={'{invalidInstalls} invalid Satisfactory {invalidInstalls, plural, one {install} other {installs}} found'} keyName="error.invalid_installs" params={{ invalidInstalls: $invalidInstalls.length }} />
+                {/if}
+              </header>
+              <section class="p-4">
+                <p class="text-base text-center">
+                  <T
+                    defaultValue="Seems wrong? Click the button below and send the generated zip file on the <1>modding discord</1> in #help-using-mods."
+                    keyName="error.help"
+                    parts={[
+                      translationElementPart('a', {
+                        href: 'https://discord.gg/xkVJ73E',
+                        class: 'text-primary-600 underline',
+                      }),
+                    ]}
+                  />
+                </p>
+              </section>
+              <footer class="card-footer">
+                <button
+                  class="btn text-primary-600 w-full"
+                  on:click={GenerateDebugInfo}>
+                  <T defaultValue="Generate debug info" keyName="error.generate_debug_info" />
+                </button>
+              </footer>
+            </div>
+          </ModsList>
+        </div>
+        <div class="w-3/5" class:grow={!windowStateChanging} class:hidden={!$expandedMod || windowStateChanging}>
+          <ModDetails bind:focusOnEntry/>
+        </div>
       </div>
     </div>
   </div>
-</div>
+
+  <Modal components={modalRegistry} />
+</TolgeeProvider>
 
 <!--
   skeleton modals don't provide a way to make them persistent (i.e. ignore mouse clicks outside and escape key)
@@ -208,4 +283,3 @@
 <svelte:window
   on:keydown|capture|nonpassive={modalKeyDown}
   on:mousedown|capture|nonpassive={modalMouseDown} />
-<Modal components={modalRegistry} />

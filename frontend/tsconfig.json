@@ -23,6 +23,7 @@
 				"./src/lib/generated/wailsjs/*"
 			]
 		},
+    "types": ["vite/client"],
   },
 	"include": ["src/**/*.ts", "src/**/*.js", "src/**/*.svelte", "*.ts"],
 	"exclude": ["src/lib/generated/wailsjs/**/*"]

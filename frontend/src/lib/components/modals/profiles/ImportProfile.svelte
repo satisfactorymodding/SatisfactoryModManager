@@ -1,13 +1,18 @@
 <script lang="ts">
+  import { getTranslate } from '@tolgee/svelte';
+
   import { profileFilepath, profileName } from './importProfile';
 
-  import { OpenFileDialog } from '$lib/generated/wailsjs/go/app/app';
-  import { ImportProfile, ReadExportedProfileMetadata } from '$lib/generated/wailsjs/go/ficsitcli/ficsitCLI';
-  import type { ficsitcli } from '$lib/generated/wailsjs/go/models';
+  import T from '$lib/components/T.svelte';
   import { profiles, selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
   import { error } from '$lib/store/generalStore';
+  import { OpenFileDialog } from '$wailsjs/go/app/app';
+  import { ImportProfile, ReadExportedProfileMetadata } from '$wailsjs/go/ficsitcli/ficsitCLI';
+  import type { ficsitcli } from '$wailsjs/go/models';
 
   export let parent: { onClose: () => void };
+
+  const { t } = getTranslate();
 
   export let filepath = '';
 
@@ -72,19 +77,19 @@
 
 <div style="max-height: calc(100vh - 3rem); max-width: calc(100vw - 3rem);" class="w-[40rem] card flex flex-col gap-2">
   <header class="card-header font-bold text-2xl text-center">
-    Import profile
+    <T defaultValue="Import profile" keyName="profiles.import.title" />
   </header>
   <section class="p-4 grow space-y-2">
     <label class="label w-full">
-      <span>Profile name</span>
+      <span><T defaultValue="Profile name" keyName="profiles.import.profile-name" /></span>
       <input
         class="input px-4 py-2"
-        placeholder="My New Profile"
+        placeholder={$t('profiles.import.profile-name-placeholder', 'New Profile Name')}
         type="text"
         bind:value={$profileName}/>
     </label>
     <label class="label w-full">
-      <span>Profile file</span>
+      <span><T defaultValue="Profile file" keyName="profiles.import.profile-file" /></span>
       <input
         class="input px-4 py-2 hover:!cursor-pointer"
         class:input-error={!!pickerError || newProfileNameExists}
@@ -96,7 +101,7 @@
       {#if importProfileMetadata}
         {#if importProfileMetadata.gameVersion < ($selectedInstallMetadata?.info?.version ?? 0)}
           <p>
-            This profile was created with a newer version of the game. It may not be compatible with this version.
+            <T defaultValue="This profile was created with a newer version of the game. It may not be compatible with this version." keyName="profiles.import.profile-version-warning" />
           </p>
         {/if}
       {/if}
@@ -111,13 +116,13 @@
     <button
       class="btn"
       on:click={parent.onClose}>
-      Cancel
+      <T defaultValue="Cancel" keyName="common.cancel" />
     </button>
     <button
       class="btn text-primary-600"
       disabled={!$profileName || !$profileFilepath || !!pickerError || newProfileNameExists}
       on:click={finishImportProfile}>
-      Import
+      <T defaultValue="Import" keyName="common.import" />
     </button>
   </footer>
 </div>

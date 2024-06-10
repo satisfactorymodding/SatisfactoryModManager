@@ -6,6 +6,9 @@ Unicode true
 
 !define UNINST_KEY_NAME "${INFO_PRODUCTNAME}"
 !define REQUEST_EXECUTION_LEVEL "user"
+!define INFO_PROJECTNAME "Satisfactory Mod Manager"
+!define INFO_COMPANYNAME "Satisfactory Modding"
+!define INFO_PRODUCTNAME "Satisfactory Mod Manager"
 !include "wails_tools.nsh"
 
 # Convert wails defines to common names
@@ -54,12 +57,13 @@ VIAddVersionKey "ProductName"     "${INFO_PRODUCTNAME}"
 !define MUI_PAGE_CUSTOMFUNCTION_PRE DirectoryPagePre
 !insertmacro MUI_PAGE_DIRECTORY
 
+!define MUI_PAGE_CUSTOMFUNCTION_PRE ComponentsPre
+!insertmacro MUI_PAGE_COMPONENTS
+
 !insertmacro MUI_PAGE_INSTFILES
 
-!define MUI_FINISHPAGE_SHOWREADME ""
-!define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
-!define MUI_FINISHPAGE_SHOWREADME_TEXT "Create Desktop Shortcut"
-!define MUI_FINISHPAGE_SHOWREADME_FUNCTION desktopShortcut
+!define MUI_FINISHPAGE_RUN "SatisfactoryModManager.exe"
+!define MUI_FINISHPAGE_RUN_NOTCHECKED
 !insertmacro MUI_PAGE_FINISH
 
 # Uninstall pages
@@ -68,6 +72,8 @@ VIAddVersionKey "ProductName"     "${INFO_PRODUCTNAME}"
 
 ; Pages
 !insertmacro MULTIUSER_UNPAGE_INSTALLMODE
+
+!insertmacro MUI_UNPAGE_COMPONENTS
 
 !insertmacro MUI_UNPAGE_INSTFILES
 
@@ -87,6 +93,10 @@ Function .onInit
     ; The original wails.checkArchitecture macro adds an unnecessary requirement on Windows 10
     ; !insertmacro wails.checkArchitecture
     !insertmacro MULTIUSER_INIT
+    
+    IfSilent 0 +1
+    Call DisableShortcutsOnExisting
+
 FunctionEnd
 
 Function un.onInit
@@ -105,8 +115,6 @@ Section
     
     !insertmacro wails.files
 
-    CreateShortcut "$SMPROGRAMS\${INFO_PRODUCTNAME}.lnk" "$INSTDIR\${PRODUCT_EXECUTABLE}"
-
     !insertmacro wails.associateFiles
     !insertmacro wails.associateCustomProtocols
 
@@ -114,6 +122,14 @@ Section
 
     !insertmacro MULTIUSER_RegistryAddInstallInfo
     !insertmacro MULTIUSER_RegistryAddInstallSizeInfo
+SectionEnd
+
+Section "Start Menu Shortcut" startShortcut
+    CreateShortcut "$SMPROGRAMS\${INFO_PRODUCTNAME}.lnk" "$INSTDIR\${PRODUCT_EXECUTABLE}"
+SectionEnd
+
+Section "Desktop Shortcut" desktopShortcut
+    CreateShortCut "$DESKTOP\${INFO_PRODUCTNAME}.lnk" "$INSTDIR\${PRODUCT_EXECUTABLE}"
 SectionEnd
 
 Section "-Post"
@@ -124,7 +140,11 @@ Section "-Post"
     ${EndIf}
 SectionEnd
 
-Section "uninstall"
+Section /o "un.Remove installed mods" un_Wipe
+    ExecWait '"$INSTDIR\${PRODUCT_EXECUTABLE}" "wipe-mods"'
+SectionEnd
+
+Section "-un.install"
     RMDir /r "$AppData\${PRODUCT_EXECUTABLE}" # Remove the WebView2 DataPath
 
     RMDir /r $INSTDIR
@@ -140,6 +160,44 @@ Section "uninstall"
     Delete "$INSTDIR\${UNINSTALL_FILENAME}"
     RMDir "$INSTDIR"
 SectionEnd
+
+LangString DESC_StartShortcut ${LANG_ENGLISH} "Add a shortcut to the Start Menu."
+LangString DESC_DesktopShortcut ${LANG_ENGLISH} "Add a shortcut to the Desktop."
+
+!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+!insertmacro MUI_DESCRIPTION_TEXT ${startShortcut} $(DESC_StartShortcut)
+!insertmacro MUI_DESCRIPTION_TEXT ${desktopShortcut} $(DESC_DesktopShortcut)
+!insertmacro MUI_FUNCTION_DESCRIPTION_END
+
+LangString DESC_WipeMods ${LANG_ENGLISH} "Remove installed mods from all local Satisfactory installations. Remote servers will not be affected. The profiles and app settings will remain intact, so they can be reused in a future installation."
+
+!insertmacro MUI_UNFUNCTION_DESCRIPTION_BEGIN
+!insertmacro MUI_DESCRIPTION_TEXT ${un_Wipe} $(DESC_WipeMods)
+!insertmacro MUI_UNFUNCTION_DESCRIPTION_END
+
+Function ComponentsPre
+    Call DisableShortcutsOnExisting
+FunctionEnd
+
+Function DisableShortcutsOnExisting
+    ${If} $MultiUser.InstallMode == "AllUsers"
+    ${AndIf} $HasPerMachineInstallation = 0
+        Return # New install
+    ${EndIf}
+    ${If} $MultiUser.InstallMode == "CurrentUser"
+    ${AndIf} $HasPerUserInstallation = 0
+        Return # New install
+    ${EndIf}
+    ; Existing install
+    ; Disable the start menu and desktop shortcuts if the user is updating
+    SectionGetFlags ${startShortcut} $0
+    IntOp $0 $0 & ${SECTION_OFF}
+    SectionSetFlags ${startShortcut} $0
+    
+    SectionGetFlags ${desktopShortcut} $0
+    IntOp $0 $0 & ${SECTION_OFF}
+    SectionSetFlags ${desktopShortcut} $0
+FunctionEnd
 
 Function EnsureEmptyFolder
     ${If} $MultiUser.InstallMode == "AllUsers"
@@ -157,10 +215,6 @@ Function EnsureEmptyFolder
         StrCmp $0 0 0 +2
         StrCpy $InstDir "$INSTDIR\${MULTIUSER_INSTALLMODE_INSTDIR}"
     ${EndIf}
-FunctionEnd
-
-Function desktopShortcut
-    CreateShortCut "$DESKTOP\${INFO_PRODUCTNAME}.lnk" "$INSTDIR\${PRODUCT_EXECUTABLE}"
 FunctionEnd
 
 Function WelcomePagePre

@@ -1,9 +1,12 @@
 package ficsitcli
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"log/slog"
+	"path"
 	"strconv"
 	"strings"
 	"sync"
@@ -12,6 +15,7 @@ import (
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/settings"
 )
 
 func (f *ficsitCLI) initLocalInstallationsMetadata() error {
@@ -160,17 +164,29 @@ func (f *ficsitCLI) getRemoteServerMetadata(installation *cli.Installation) (*co
 
 	branch := common.BranchEarlyAccess // TODO: Do we have a way to detect this for remote installs?
 
+	remoteName := settings.Settings.RemoteNames[remoteKey(installation.Path)]
+
+	if remoteName == "" {
+		remoteName = f.GetNextRemoteLauncherName()
+	}
+
 	return &common.Installation{
-		Path:     installation.Path,
-		Type:     installType,
-		Location: common.LocationTypeRemote,
-		Branch:   branch,
-		Version:  gameVersion,
-		Launcher: f.getNextRemoteLauncherName(),
+		Path:      installation.Path,
+		Type:      installType,
+		Location:  common.LocationTypeRemote,
+		Branch:    branch,
+		Version:   gameVersion,
+		Launcher:  remoteName,
+		SavedPath: path.Join(installation.BasePath(), "FactoryGame", "Saved"),
 	}, nil
 }
 
-func (f *ficsitCLI) getNextRemoteLauncherName() string {
+func remoteKey(path string) string {
+	hash := sha256.Sum256([]byte(path))
+	return hex.EncodeToString(hash[:])
+}
+
+func (f *ficsitCLI) GetNextRemoteLauncherName() string {
 	existingNumbers := make(map[int]bool)
 	for _, install := range f.GetRemoteInstallations() {
 		metadata, ok := f.installationMetadata.Load(install)

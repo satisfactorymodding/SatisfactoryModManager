@@ -1,7 +1,7 @@
 {
   "$schema": "https://wails.io/schemas/config.v2.json",
-  "name": "Satisfactory Mod Manager",
-  "outputfilename": "Satisfactory Mod Manager",
+  "name": "SatisfactoryModManager",
+  "outputfilename": "SatisfactoryModManager",
   "frontend:install": "pnpm install",
   "frontend:build": "pnpm build",
   "frontend:dev:watcher": "pnpm dev",
@@ -12,12 +12,12 @@
     "email": "mircearoatapalade@gmail.com"
   },
   "info": {
-    "productVersion": "3.0.0-beta.2.1",
+    "productVersion": "3.0.0-beta.4",
     "fileAssociations": [
       {
         "ext": "smmprofile",
         "name": "Satisfactory Mod Manager Profile",
-        "iconName": "icons\\smmprofile"
+        "iconName": "smmprofile"
       }
     ],
     "protocols": [

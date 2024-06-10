@@ -7,12 +7,38 @@ import (
 	"golang.org/x/sys/windows/registry"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/launchers"
 )
 
-func FindInstallations() ([]*common.Installation, []error) {
+func init() {
+	launchers.Add("Steam", func() ([]*common.Installation, []error) {
+		steamPath, err := getSteamPath()
+		if err != nil {
+			return nil, []error{err}
+		}
+
+		return FindInstallationsSteam(
+			steamPath,
+			"Steam",
+			common.MakeLauncherPlatform(
+				common.NativePlatform(),
+				func(steamApp string) []string {
+					return []string{
+						"cmd",
+						"/C",
+						"start",
+						"",
+						steamApp,
+					}
+				}),
+		)
+	})
+}
+
+func getSteamPath() (string, error) {
 	key, err := registry.OpenKey(registry.CURRENT_USER, `Software\Valve\Steam`, registry.QUERY_VALUE)
 	if err != nil {
-		return nil, []error{fmt.Errorf("failed to open Steam registry key: %w", err)}
+		return "", fmt.Errorf("failed to open Steam registry key: %w", err)
 	}
 	defer key.Close()
 
@@ -21,15 +47,5 @@ func FindInstallations() ([]*common.Installation, []error) {
 		steamExePath = `C:\Program Files (x86)\Steam\steam.exe`
 	}
 
-	steamPath := filepath.Dir(steamExePath)
-	return findInstallationsSteam(
-		steamPath,
-		"Steam",
-		[]string{
-			"cmd",
-			"/C",
-			"start",
-			"",
-		},
-	)
+	return filepath.Dir(steamExePath), nil
 }

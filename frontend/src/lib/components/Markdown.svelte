@@ -1,13 +1,12 @@
 <script lang="ts">
   import { getContextClient } from '@urql/svelte';
 
-  import ModImage from './modals/ModImage.svelte';
-
+  import ModImage from '$lib/components/modals/ModImage.svelte';
   import { GetModReferenceDocument } from '$lib/generated';
-  import { BrowserOpenURL } from '$lib/generated/wailsjs/runtime/runtime';
   import { getModalStore } from '$lib/skeletonExtensions';
   import { expandedMod } from '$lib/store/generalStore';
   import { markdown as renderMarkdown } from '$lib/utils/markdown';
+  import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
 
   export let markdown: string;
 

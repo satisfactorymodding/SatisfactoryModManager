@@ -82,62 +82,47 @@ func (f *ficsitCLI) CheckForUpdates() ([]Update, error) {
 }
 
 func (f *ficsitCLI) UpdateMods(mods []string) error {
-	l := slog.With(slog.String("task", "updateMods"))
+	return f.action(ActionUpdate, noItem, func(l *slog.Logger, taskUpdates chan<- taskUpdate) error {
+		selectedInstallation := f.GetSelectedInstall()
 
-	if f.progress != nil {
-		l.Error("another operation in progress")
-		return fmt.Errorf("another operation in progress")
-	}
-
-	selectedInstallation := f.GetSelectedInstall()
-
-	if selectedInstallation == nil {
-		return fmt.Errorf("no installation selected")
-	}
-
-	profile := f.GetProfile(selectedInstallation.Profile)
-	for _, modReference := range mods {
-		if _, ok := profile.Mods[modReference]; !ok {
-			l.Warn("mod not found in profile", slog.String("mod", modReference))
-			continue
+		if selectedInstallation == nil {
+			return fmt.Errorf("no installation selected")
 		}
-		profile.Mods[modReference] = cli.ProfileMod{
-			Enabled: profile.Mods[modReference].Enabled,
-			Version: ">=0.0.0",
+
+		profile := f.GetProfile(selectedInstallation.Profile)
+		for _, modReference := range mods {
+			if _, ok := profile.Mods[modReference]; !ok {
+				l.Warn("mod not found in profile", slog.String("mod", modReference))
+				continue
+			}
+			profile.Mods[modReference] = cli.ProfileMod{
+				Enabled: profile.Mods[modReference].Enabled,
+				Version: ">=0.0.0",
+			}
 		}
-	}
 
-	err := f.ficsitCli.Profiles.Save()
-	if err != nil {
-		l.Error("failed to save profile", slog.Any("error", err))
-	}
-
-	err = selectedInstallation.UpdateMods(f.ficsitCli, mods)
-	if err != nil {
-		l.Error("failed to update mods", slog.Any("error", err))
-		var solvingError resolver.DependencyResolverError
-		if errors.As(err, &solvingError) {
-			return solvingError
+		err := f.ficsitCli.Profiles.Save()
+		if err != nil {
+			l.Error("failed to save profile", slog.Any("error", err))
 		}
-		return err //nolint:wrapcheck
-	}
 
-	f.progress = &Progress{
-		Item:     "__update__",
-		Message:  "Updating...",
-		Progress: -1,
-	}
+		err = selectedInstallation.UpdateMods(f.ficsitCli, mods)
+		if err != nil {
+			l.Error("failed to update mods", slog.Any("error", err))
+			var solvingError resolver.DependencyResolverError
+			if errors.As(err, &solvingError) {
+				return solvingError
+			}
+			return err //nolint:wrapcheck
+		}
 
-	f.setProgress(f.progress)
+		err = f.validateInstall(selectedInstallation, taskUpdates)
 
-	defer f.setProgress(nil)
+		if err != nil {
+			l.Error("failed to validate installation", slog.Any("error", err))
+			return err
+		}
 
-	err = f.validateInstall(selectedInstallation, "__update__")
-
-	if err != nil {
-		l.Error("failed to validate installation", slog.Any("error", err))
-		return err
-	}
-
-	return nil
+		return nil
+	})
 }

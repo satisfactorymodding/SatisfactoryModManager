@@ -46,12 +46,18 @@ type settings struct {
 	FavoriteMods []string        `json:"favoriteMods,omitempty"`
 	ModFilters   SavedModFilters `json:"modFilters,omitempty"`
 
-	QueueAutoStart      bool                `json:"queueAutoStart,omitempty"`
+	RemoteNames map[string]string `json:"remoteNames,omitempty"`
+
+	QueueAutoStart      bool                `json:"queueAutoStart"`
 	IgnoredUpdates      map[string][]string `json:"ignoredUpdates,omitempty"`
 	UpdateCheckMode     UpdateCheckMode     `json:"updateCheckMode,omitempty"`
 	ViewedAnnouncements []string            `json:"viewedAnnouncements,omitempty"`
 
 	Offline bool `json:"offline,omitempty"`
+
+	Language string `json:"language,omitempty"`
+
+	Proxy string `json:"proxy,omitempty"`
 
 	Konami       bool   `json:"konami,omitempty"`
 	LaunchButton string `json:"launchButton,omitempty"`
@@ -75,6 +81,8 @@ var Settings = &settings{
 		Order:  "Last updated",
 		Filter: "Compatible",
 	},
+
+	RemoteNames: map[string]string{},
 
 	QueueAutoStart:      true,
 	IgnoredUpdates:      map[string][]string{},
@@ -244,6 +252,15 @@ func (s *settings) SetAnnouncementViewed(announcement string) {
 	wailsRuntime.EventsEmit(common.AppContext, "viewedAnnouncements", s.ViewedAnnouncements)
 }
 
+func (s *settings) GetLanguage() string {
+	return s.Language
+}
+
+func (s *settings) SetLanguage(value string) {
+	s.Language = value
+	_ = SaveSettings()
+}
+
 func (s *settings) GetDebug() bool {
 	return s.Debug
 }
@@ -251,6 +268,15 @@ func (s *settings) GetDebug() bool {
 func (s *settings) SetDebug(value bool) {
 	slog.Info("changing debug mode state", slog.Bool("value", value))
 	s.Debug = value
+}
+
+func (s *settings) GetProxy() string {
+	return s.Proxy
+}
+
+func (s *settings) SetProxy(value string) {
+	s.Proxy = value
+	_ = SaveSettings()
 }
 
 func (s *settings) SetCacheDir(dir string) error {

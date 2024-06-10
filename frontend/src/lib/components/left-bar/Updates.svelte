@@ -1,7 +1,9 @@
 <script lang="ts">
   import { mdiCheckCircle, mdiSync } from '@mdi/js';
+  import '@tolgee/svelte'; // Import so that the tolgee cli parses this file
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
+  import T from '$lib/components/T.svelte';
   import { getModalStore } from '$lib/skeletonExtensions';
   import { checkForUpdates, progress, unignoredUpdates, updateCheckInProgress, updates } from '$lib/store/ficsitCLIStore';
   import { smmUpdate, smmUpdateReady } from '$lib/store/smmUpdateStore';
@@ -44,11 +46,11 @@
   on:click={() => showUpdateDialog()}>
   <span>
     {#if $smmUpdate}
-      SMM update available
+      <T defaultValue="SMM update available" keyName="updates.smm-update-available"/>
     {:else if $unignoredUpdates.length > 0}
-      {$unignoredUpdates.length} mod updates available
+      <T defaultValue={'{updates} mod {updates, plural, one {update} other {updates}} available'} keyName="updates.mod-update-available" params={{ updates: $unignoredUpdates.length }}/>
     {:else}
-      No mod/SMM updates right now
+      <T defaultValue="No mod/SMM updates right now" keyName="updates.no-updates"/>
     {/if}
   </span>
   <div class="grow" />
@@ -63,9 +65,9 @@
   on:click={checkForAllUpdates}>
   <span>
     {#if $updateCheckInProgress}
-      Checking for updates...
+      <T defaultValue="Checking for updates..." keyName="updates.checking-for-updates"/>
     {:else}
-      Check for updates
+      <T defaultValue="Check for updates" keyName="updates.check-for-updates"/>
     {/if}
   </span>
   <div class="grow" />

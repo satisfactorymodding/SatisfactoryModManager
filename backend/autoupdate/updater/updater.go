@@ -32,6 +32,7 @@ type PendingUpdate struct {
 type Config struct {
 	Source            Source
 	File              string
+	Checksum          ChecksumSource
 	Apply             Apply
 	CurrentVersion    *semver.Version
 	IncludePrerelease bool
@@ -65,5 +66,5 @@ func (u *Updater) OnExit(restart bool) error {
 	}
 
 	// Now the update is definitely ready
-	return u.config.Apply.OnExit(restart)
+	return u.config.Apply.Apply(restart)
 }

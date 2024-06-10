@@ -2,11 +2,13 @@ package app
 
 import (
 	"archive/zip"
+	"crypto/sha256"
+	"encoding/hex"
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"time"
 
@@ -25,6 +27,7 @@ type MetadataInstallation struct {
 	LaunchPath string `json:"launchPath"`
 	Name       string `json:"name"`
 	Profile    string `json:"profile"`
+	Log        string `json:"log"`
 }
 
 type Metadata struct {
@@ -38,20 +41,58 @@ type Metadata struct {
 	ModsEnabled          bool                    `json:"modsEnabled"`
 }
 
-func addFactoryGameLog(writer *zip.Writer) error {
-	if runtime.GOOS == "windows" {
-		cacheDir, err := os.UserCacheDir()
-		if err != nil {
-			return fmt.Errorf("failed to get user cache dir: %w", err)
+func addFactoryGameLogs(writer *zip.Writer) error {
+	cacheDir, err := os.UserCacheDir()
+	if err != nil {
+		return fmt.Errorf("failed to get user cache dir: %w", err)
+	}
+	err = utils.AddFileToZip(writer, filepath.Join(cacheDir, "FactoryGame", "Saved", "Logs", "FactoryGame.log"), "FactoryGame.log")
+	if err != nil {
+		if !errors.Is(err, os.ErrNotExist) {
+			return fmt.Errorf("failed to add file to zip: %w", err)
 		}
-		err = utils.AddFileToZip(writer, filepath.Join(cacheDir, "FactoryGame", "Saved", "Logs", "FactoryGame.log"), "FactoryGame.log")
+	}
+	for _, meta := range ficsitcli.FicsitCLI.GetInstallationsMetadata() {
+		if meta.Info == nil {
+			continue
+		}
+
+		logPath := filepath.Join(meta.Info.SavedPath, "Logs", "FactoryGame.log")
+		d, err := ficsitcli.FicsitCLI.GetInstallation(meta.Info.Path).GetDisk()
 		if err != nil {
-			if !os.IsNotExist(err) {
-				return fmt.Errorf("failed to add file to zip: %w", err)
-			}
+			slog.Warn("failed to get disk for installation", slog.String("path", meta.Info.Path), slog.Any("error", err))
+			continue
+		}
+		logExists, err := d.Exists(logPath)
+		if err != nil {
+			slog.Warn("failed to check if log exists", slog.String("path", logPath), slog.Any("error", err))
+			continue
+		}
+		if !logExists {
+			continue
+		}
+		bytes, err := d.Read(logPath)
+		if err != nil {
+			slog.Warn("failed to read log file", slog.String("path", logPath), slog.Any("error", err))
+			continue
+		}
+		logFile, err := writer.Create(getLogNameForInstall(meta.Info))
+		if err != nil {
+			slog.Warn("failed to create log file in zip", slog.Any("error", err))
+			continue
+		}
+		_, err = logFile.Write(bytes)
+		if err != nil {
+			slog.Warn("failed to write log file to zip", slog.Any("error", err))
+			continue
 		}
 	}
 	return nil
+}
+
+func getLogNameForInstall(install *common.Installation) string {
+	hash := sha256.Sum256([]byte(install.Path))
+	return fmt.Sprintf("FactoryGame_%s.log", hex.EncodeToString(hash[:])[:8])
 }
 
 func addMetadata(writer *zip.Writer) error {
@@ -67,8 +108,9 @@ func addMetadata(writer *zip.Writer) error {
 		}
 		i := &MetadataInstallation{
 			Installation: metadata.Info,
-			Name:         fmt.Sprintf("Satisfactory %s (%s)", metadata.Info.Branch, metadata.Info.Branch),
+			Name:         fmt.Sprintf("Satisfactory %s (%s)", metadata.Info.Branch, metadata.Info.Launcher),
 			Profile:      ficsitcli.FicsitCLI.GetInstallation(install).Profile,
+			Log:          getLogNameForInstall(metadata.Info),
 		}
 		i.Path = utils.RedactPath(i.Path)
 		i.LaunchPath = strings.Join(i.Installation.LaunchPath, " ")
@@ -143,7 +185,7 @@ func (a *app) generateAndSaveDebugInfo(filename string) error {
 	writer := zip.NewWriter(file)
 	defer writer.Close()
 
-	err = addFactoryGameLog(writer)
+	err = addFactoryGameLogs(writer)
 	if err != nil {
 		return fmt.Errorf("failed to add FactoryGame.log to debuginfo zip: %w", err)
 	}
@@ -153,6 +195,7 @@ func (a *app) generateAndSaveDebugInfo(filename string) error {
 		return fmt.Errorf("failed to add metadata to debuginfo zip: %w", err)
 	}
 
+	// Add SMM log last, as it may list errors from previous steps
 	err = utils.AddFileToZip(writer, viper.GetString("log-file"), "SatisfactoryModManager.log")
 	if err != nil {
 		return fmt.Errorf("failed to add SatisfactoryModManager.log to debuginfo zip: %w", err)

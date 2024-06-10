@@ -17,49 +17,39 @@ import (
 )
 
 func (f *ficsitCLI) SetProfile(profile string) error {
-	l := slog.With(slog.String("task", "setProfile"), slog.String("profile", profile))
+	return f.action(ActionSelectProfile, newSimpleItem(profile), func(l *slog.Logger, taskChannel chan<- taskUpdate) error {
+		selectedInstallation := f.GetSelectedInstall()
 
-	selectedInstallation := f.GetSelectedInstall()
+		if selectedInstallation == nil {
+			l.Error("no installation selected")
+			return fmt.Errorf("no installation selected")
+		}
+		if selectedInstallation.Profile == profile {
+			return nil
+		}
 
-	if selectedInstallation == nil {
-		l.Error("no installation selected")
-		return fmt.Errorf("no installation selected")
-	}
-	if selectedInstallation.Profile == profile {
+		err := selectedInstallation.SetProfile(f.ficsitCli, profile)
+		if err != nil {
+			l.Error("failed to set profile", slog.Any("error", err))
+			return fmt.Errorf("failed to set profile: %w", err)
+		}
+
+		err = f.ficsitCli.Installations.Save()
+		if err != nil {
+			l.Error("failed to save installations", slog.Any("error", err))
+		}
+
+		f.EmitGlobals()
+
+		installErr := f.validateInstall(selectedInstallation, taskChannel)
+
+		if installErr != nil {
+			l.Error("failed to validate installation", slog.Any("error", installErr))
+			return installErr
+		}
+
 		return nil
-	}
-
-	err := selectedInstallation.SetProfile(f.ficsitCli, profile)
-	if err != nil {
-		l.Error("failed to set profile", slog.Any("error", err))
-		return fmt.Errorf("failed to set profile: %w", err)
-	}
-
-	err = f.ficsitCli.Installations.Save()
-	if err != nil {
-		l.Error("failed to save installations", slog.Any("error", err))
-	}
-
-	f.EmitGlobals()
-
-	f.progress = &Progress{
-		Item:     "__select_profile__",
-		Message:  "Validating install",
-		Progress: -1,
-	}
-
-	f.setProgress(f.progress)
-
-	defer f.setProgress(nil)
-
-	installErr := f.validateInstall(selectedInstallation, "__select_profile__")
-
-	if installErr != nil {
-		l.Error("failed to validate installation", slog.Any("error", installErr))
-		return installErr
-	}
-
-	return nil
+	})
 }
 
 func (f *ficsitCLI) GetSelectedProfile() *string {
@@ -306,72 +296,64 @@ func (f *ficsitCLI) ReadExportedProfileMetadata(file string) (*ExportedProfileMe
 }
 
 func (f *ficsitCLI) ImportProfile(name string, file string) error {
-	l := slog.With(slog.String("task", "importProfile"), slog.String("name", name), slog.String("file", file))
+	return f.action(ActionImportProfile, newSimpleItem(name), func(l *slog.Logger, taskChannel chan<- taskUpdate) error {
+		l = l.With(slog.String("file", file))
 
-	selectedInstallation := f.GetSelectedInstall()
+		selectedInstallation := f.GetSelectedInstall()
 
-	if selectedInstallation == nil {
-		l.Error("no installation selected")
-		return fmt.Errorf("no installation selected")
-	}
+		if selectedInstallation == nil {
+			l.Error("no installation selected")
+			return fmt.Errorf("no installation selected")
+		}
 
-	profileData, err := os.ReadFile(file)
-	if err != nil {
-		l.Error("failed to read exported profile", slog.Any("error", err))
-		return fmt.Errorf("failed to read profile file: %w", err)
-	}
+		profileData, err := os.ReadFile(file)
+		if err != nil {
+			l.Error("failed to read exported profile", slog.Any("error", err))
+			return fmt.Errorf("failed to read profile file: %w", err)
+		}
 
-	var exportedProfile ExportedProfile
-	err = json.Unmarshal(profileData, &exportedProfile)
-	if err != nil {
-		l.Error("failed to unmarshal exported profile", slog.Any("error", err))
-		return fmt.Errorf("failed to read profile file: %w", err)
-	}
+		var exportedProfile ExportedProfile
+		err = json.Unmarshal(profileData, &exportedProfile)
+		if err != nil {
+			l.Error("failed to unmarshal exported profile", slog.Any("error", err))
+			return fmt.Errorf("failed to read profile file: %w", err)
+		}
 
-	profile, err := f.ficsitCli.Profiles.AddProfile(name)
-	if err != nil {
-		l.Error("failed to add profile", slog.Any("error", err))
-		return fmt.Errorf("failed to add imported profile: %w", err)
-	}
+		profile, err := f.ficsitCli.Profiles.AddProfile(name)
+		if err != nil {
+			l.Error("failed to add profile", slog.Any("error", err))
+			return fmt.Errorf("failed to add imported profile: %w", err)
+		}
 
-	profile.Mods = exportedProfile.Profile.Mods
+		profile.Mods = exportedProfile.Profile.Mods
 
-	currentProfile := selectedInstallation.Profile
+		currentProfile := selectedInstallation.Profile
 
-	_ = selectedInstallation.SetProfile(f.ficsitCli, name)
+		_ = selectedInstallation.SetProfile(f.ficsitCli, name)
 
-	err = selectedInstallation.WriteLockFile(f.ficsitCli, &exportedProfile.LockFile)
-	if err != nil {
-		_ = selectedInstallation.SetProfile(f.ficsitCli, currentProfile)
-		_ = f.ficsitCli.Profiles.DeleteProfile(name)
-		l.Error("failed to write lockfile", slog.Any("error", err))
-		return fmt.Errorf("failed to write profile: %w", err)
-	}
+		err = selectedInstallation.WriteLockFile(f.ficsitCli, &exportedProfile.LockFile)
+		if err != nil {
+			_ = selectedInstallation.SetProfile(f.ficsitCli, currentProfile)
+			_ = f.ficsitCli.Profiles.DeleteProfile(name)
+			l.Error("failed to write lockfile", slog.Any("error", err))
+			return fmt.Errorf("failed to write profile: %w", err)
+		}
 
-	f.EmitGlobals()
+		f.EmitGlobals()
 
-	f.progress = &Progress{
-		Item:     "__import_profile__",
-		Message:  "Validating install",
-		Progress: -1,
-	}
+		installErr := f.validateInstall(selectedInstallation, taskChannel)
 
-	f.setProgress(f.progress)
+		if installErr != nil {
+			_ = f.ficsitCli.Profiles.DeleteProfile(name)
+			l.Error("failed to validate installation", slog.Any("error", installErr))
+			return installErr
+		}
 
-	defer f.setProgress(nil)
+		err = f.ficsitCli.Profiles.Save()
+		if err != nil {
+			l.Error("failed to save profile", slog.Any("error", err))
+		}
 
-	installErr := f.validateInstall(selectedInstallation, "__import_profile__")
-
-	if installErr != nil {
-		_ = f.ficsitCli.Profiles.DeleteProfile(name)
-		l.Error("failed to validate installation", slog.Any("error", installErr))
-		return installErr
-	}
-
-	err = f.ficsitCli.Profiles.Save()
-	if err != nil {
-		l.Error("failed to save profile", slog.Any("error", err))
-	}
-
-	return nil
+		return nil
+	})
 }
