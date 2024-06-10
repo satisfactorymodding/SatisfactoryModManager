@@ -166,6 +166,10 @@
   function toggleMaskPassword() {
     maskPassword = !maskPassword;
   }
+
+  function redactRemoteURL(path: string) {
+    return path.replace(/(?<=.+:\/\/)(?:(.+?)(?::.*?)?)?(?=@)/, '$1:********');
+  }
 </script>
 
 
@@ -180,7 +184,7 @@
           {#each $remoteServers as remoteServer}
             <tr>
               <td class="break-all">{$installsMetadata[remoteServer].info?.launcher}</td>
-              <td class="break-all">{($installsMetadata[remoteServer].info?.path)?.replace(/(.*?:\/\/.*?:)(.*?)(?=@|$)/, '$1********')}</td>
+              <td class="break-all">{redactRemoteURL(remoteServer)}</td>
               <td>
                 {#if $installsMetadata[remoteServer]?.state === ficsitcli.InstallState.VALID}
                   {$installsMetadata[remoteServer].info?.type}
