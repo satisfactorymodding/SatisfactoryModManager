@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { mdiAlert, mdiLoading, mdiServerNetwork, mdiTrashCan } from '@mdi/js';
+  import { mdiAlert, mdiEyeOffOutline, mdiEyeOutline, mdiLoading, mdiServerNetwork, mdiTrashCan } from '@mdi/js';
   import { getTranslate } from '@tolgee/svelte';
   import _ from 'lodash';
 
@@ -54,6 +54,7 @@
   let advancedMode = false;
 
   let addInProgress = false;
+  let maskPassword = true;
 
   $: authString = encodeURIComponent(newServerUsername) + (newServerPassword ? ':' + encodeURIComponent(newServerPassword) : '');
   $: actualPort = newRemoteType.type === 'remote' ? (newServerPort.length > 0 ? newServerPort : newRemoteType.defaultPort) : '';
@@ -161,6 +162,10 @@
     },
     placement: 'bottom',
   } as PopupSettings]).reduce((acc, [k, v]) => ({ ...acc, [k as string]: v as PopupSettings }), {} as Record<string, PopupSettings>);
+
+  function redactRemoteURL(path: string) {
+    return path.replace(/(?<=.+:\/\/)(?:(.+?)(?::.*?)?)?(?=@)/, '$1:********');
+  }
 </script>
 
 
@@ -175,7 +180,7 @@
           {#each $remoteServers as remoteServer}
             <tr>
               <td class="break-all">{$installsMetadata[remoteServer].info?.launcher}</td>
-              <td class="break-all">{remoteServer}</td>
+              <td class="break-all">{redactRemoteURL(remoteServer)}</td>
               <td>
                 {#if $installsMetadata[remoteServer]?.state === ficsitcli.InstallState.VALID}
                   {$installsMetadata[remoteServer].info?.type}
@@ -265,11 +270,25 @@
             placeholder={$t('server-manager.username-placeholder', 'username')}
             type="text"
             bind:value={newServerUsername}/>
-          <input
-            class="input px-4 h-full"
-            placeholder={$t('server-manager.password-placeholder', 'password')}
-            type="text"
-            bind:value={newServerPassword}/>
+          <div class="input-group h-full grid-cols-[1fr_auto]">
+            <!-- This is a conditional because svelte doesn't allow dynamic type with bind:value -->
+            {#if maskPassword}
+              <input
+                class="px-4 h-full !outline-none"
+                placeholder={$t('server-manager.password-placeholder', 'password')}
+                type="password"
+                bind:value={newServerPassword}/>
+            {:else}
+              <input
+                class="px-4 h-full !outline-none"
+                placeholder={$t('server-manager.password-placeholder', 'password')}
+                type="text"
+                bind:value={newServerPassword}/>
+            {/if}
+            <button class="!outline-none" on:click={() => maskPassword = !maskPassword}>
+              <SvgIcon class="!w-4 !h-4" icon={maskPassword ? mdiEyeOutline : mdiEyeOffOutline} />
+            </button>
+          </div>
           <input
             class="input px-4 h-full sm:col-start-2"
             placeholder={$t('server-manager.host-placeholder', 'host')}
