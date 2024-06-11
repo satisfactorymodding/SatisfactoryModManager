@@ -37,6 +37,31 @@ tasks:
             cp -r "build/bin/{{.OUTPUT_FILENAME}}" "{{.OUTPUT_FULL_PATH}}"
           {{ end }}
 
+  build:linux:appimage:
+    silent: true
+    platforms: [linux]
+    vars:
+      OUTPUT_FULL_PATH: '{{ $args := (splitArgs .CLI_ARGS) }}{{ range $i, $a := $args }}{{ if eq $a "-o" }}{{ index $args (add $i 1) }}{{ end }}{{ end }}'
+      OUTPUT_FILENAME: '{{ if ne .OUTPUT_FULL_PATH "" }}{{ base (toSlash .OUTPUT_FULL_PATH) }}{{ end }}'
+      WAILS_ARGS: '
+        {{ $rawArgs := (splitArgs .CLI_ARGS) }}
+        {{ $args := without $rawArgs "." "-o" .OUTPUT_FULL_PATH }}
+        {{ $GOOS := (env "GOOS") }}
+        {{ $GOARCH := (env "GOARCH") }}
+        {{ range $args }}
+        {{ shellQuote . }}
+        {{ end }}
+        {{ if ne $GOOS "" }}-platform {{ $GOOS }}{{ if ne $GOARCH "" }}/{{ $GOARCH }}{{ end }}{{ end }}
+        {{ if ne .OUTPUT_FILENAME "" }}-o {{ .OUTPUT_FILENAME }}{{ end }}
+      '
+    cmds:
+      - GOOS="" GOARCH="" wails build {{.WAILS_ARGS}}
+      - chmod +x "build/bin/{{.OUTPUT_FILENAME}}"
+      - mv "build/bin/{{.OUTPUT_FILENAME}}" "build/bin/appimage-bin-tmp"
+      - chmod +x "build/linux/appimage.sh" # Make sure the script is executable
+      - build/linux/appimage.sh "build/bin/appimage-bin-tmp" "{{.OUTPUT_FULL_PATH}}"
+      - rm "build/bin/appimage-bin-tmp"
+
   lint:
     silent: true
     preconditions:

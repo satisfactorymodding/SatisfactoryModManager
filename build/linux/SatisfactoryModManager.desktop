@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Satisfactory Mod Manager
+Exec=SatisfactoryModManager
+Terminal=false
+Type=Application
+Icon=SatisfactoryModManager
+MimeType=x-scheme-handler/smmanager;
+Categories=Game;
