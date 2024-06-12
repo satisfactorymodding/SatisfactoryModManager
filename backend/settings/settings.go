@@ -268,6 +268,7 @@ func (s *settings) GetDebug() bool {
 func (s *settings) SetDebug(value bool) {
 	slog.Info("changing debug mode state", slog.Bool("value", value))
 	s.Debug = value
+	_ = SaveSettings()
 }
 
 func (s *settings) GetProxy() string {
