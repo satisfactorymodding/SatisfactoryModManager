@@ -9,7 +9,7 @@ before:
     - mkdir -p frontend/build
     - touch frontend/build/.gitkeep
 
-    - wails generate module
+    - wails generate module -tags webkit2_41 # I have no idea why, but if the tag isn't set here, the final artifact will depend on webkit2gtk-4.0
     - pnpm -C frontend install
     - pnpm -C frontend build
 
@@ -35,6 +35,13 @@ builds:
       - -s
       - -skipbindings
 
+    overrides:
+      - goos: linux
+        goarch: amd64
+        goamd64: v1
+        tags:
+          - webkit2_41
+
   - id: appimage
 
     binary: SatisfactoryModManager.AppImage # Parallel builds would overwrite each other, so we need to specify the binary name
@@ -56,6 +63,9 @@ builds:
       - -- # Marker for task to interpret remaining arguments as CLI_ARGS
       - -s
       - -skipbindings
+
+    tags:
+      - webkit2_41
 
   - id: nsis
 
@@ -125,7 +135,7 @@ release:
   
     | Windows | Linux | MacOS |
     |:-------:|:-----:|:-----:|
-    | [Download](https://github.com/satisfactorymodding/SatisfactoryModManager/releases/download/v{{.Version}}/SatisfactoryModManager-Setup.exe) | [Download (AppImage)](https://github.com/satisfactorymodding/SatisfactoryModManager/releases/download/v{{.Version}}/SatisfactoryModManager_linux_amd64.AppImage)  |  [Download](https://github.com/satisfactorymodding/SatisfactoryModManager/releases/download/v{{.Version}}/SatisfactoryModManager_darwin_universal.zip) |
-    | | [Download (standalone)](https://github.com/satisfactorymodding/SatisfactoryModManager/releases/download/v{{.Version}}/SatisfactoryModManager_linux_amd64) <br> *requires libwebkit2gtk-4.0* | |
+    | [Download](https://github.com/satisfactorymodding/SatisfactoryModManager/releases/download/v{{.Version}}/SatisfactoryModManager-Setup.exe) | [Download (standalone)](https://github.com/satisfactorymodding/SatisfactoryModManager/releases/download/v{{.Version}}/SatisfactoryModManager_linux_amd64) <br> *requires libwebkit2gtk-4.1* |  [Download](https://github.com/satisfactorymodding/SatisfactoryModManager/releases/download/v{{.Version}}/SatisfactoryModManager_darwin_universal.zip) |
+    | | [Download (AppImage)](https://github.com/satisfactorymodding/SatisfactoryModManager/releases/download/v{{.Version}}/SatisfactoryModManager_linux_amd64.AppImage) | |
     
     If you already have Satisfactory Mod Manager installed, you don't need to download it again, it will auto-update.
