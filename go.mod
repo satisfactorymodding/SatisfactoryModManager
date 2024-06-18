@@ -19,12 +19,12 @@ require (
 	github.com/spf13/viper v1.18.1
 	github.com/tawesoft/golib/v2 v2.10.0
 	github.com/wailsapp/go-webview2 v1.0.10
-	github.com/wailsapp/wails/v2 v2.8.0
+	github.com/wailsapp/wails/v2 v2.9.1
 	github.com/zishang520/engine.io v1.5.12
 	github.com/zishang520/socket.io v1.3.2
 	golang.org/x/exp v0.0.0-20231214170342-aacd6d4b4611
 	golang.org/x/sync v0.6.0
-	golang.org/x/sys v0.18.0
+	golang.org/x/sys v0.20.0
 	gopkg.in/ini.v1 v1.67.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	howett.net/plist v1.0.1
@@ -90,8 +90,8 @@ require (
 	github.com/zishang520/engine.io-go-parser v1.2.3 // indirect
 	github.com/zishang520/socket.io-go-parser v1.0.4 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/crypto v0.21.0 // indirect
-	golang.org/x/net v0.23.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/crypto v0.23.0 // indirect
+	golang.org/x/net v0.25.0 // indirect
+	golang.org/x/text v0.15.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
