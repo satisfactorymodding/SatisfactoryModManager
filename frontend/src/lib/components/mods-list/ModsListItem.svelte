@@ -112,7 +112,7 @@
         display.tooltipHtml = '<br/>' + compatibility.note;
       } else {
         // TODO compatibility.note should always be non-null here, what should our fallback text be if it's not?
-        display.tooltip += $t('mod.list-item.compatibility-note-none', ' (None specified)');
+        display.tooltip += $t('mod-list-item.compatibility-note-none', ' (None specified)');
       }
     }
     if (queued) {
@@ -188,9 +188,6 @@
             if (result.source === 'reported') {
               compatibility = {
                 state: result.state,
-                // note: result.note 
-                //   ? `This mod has been reported as ${result.state} on this game version.<br>${result.note}` 
-                //   : `This mod has been reported as ${result.state} on this game version. (No further notes provided)`,
                 note: $t('mod-list-item.compatibility-note', 'This mod has been reported as {state} on this game version.', { state: result.state }) 
                   + result.note ? '<br>' + result.note : ' ' + $t('mod-list-item.compatibility-note-none', '(No further notes provided)'),
                 source: 'reported',

@@ -2,7 +2,6 @@
   import { mdiFolder, mdiLoading, mdiServerNetwork, mdiSubdirectoryArrowLeft } from '@mdi/js';
   import _ from 'lodash';
   import { onDestroy } from 'svelte';
-  import '@tolgee/svelte'; // Import so that the tolgee cli parses this file
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import T from '$lib/components/T.svelte';

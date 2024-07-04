@@ -70,7 +70,7 @@ dependencies:
     version: 1.0.25
   urql:
     specifier: ^4.0.6
-    version: 4.0.6(graphql@16.8.1)(react@18.2.0)
+    version: 4.0.6(graphql@16.8.1)(react@18.3.1)
 
 devDependencies:
   '@graphql-codegen/add':
@@ -119,8 +119,8 @@ devDependencies:
     specifier: ^3.0.1
     version: 3.0.1(svelte@4.2.8)(vite@5.0.13)
   '@tolgee/cli':
-    specifier: ^2.0.3
-    version: 2.0.3(typescript@5.3.3)
+    specifier: ^2.1.2
+    version: 2.1.2(typescript@5.3.3)
   '@tsconfig/svelte':
     specifier: ^5.0.2
     version: 5.0.2
@@ -1450,11 +1450,6 @@ packages:
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dev: true
 
-  /@fastify/busboy@2.1.1:
-    resolution: {integrity: sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA==}
-    engines: {node: '>=14'}
-    dev: true
-
   /@floating-ui/core@1.6.0:
     resolution: {integrity: sha512-PcF++MykgmTj3CIyOQbKA/hDzOAiqI3mhuoN44WRCopIs1sgoDoU4oty4Jtqaj/y3oDU6fnVSm4QG0a3t5i0+g==}
     dependencies:
@@ -2550,8 +2545,8 @@ packages:
     resolution: {integrity: sha512-KnPRCkQTyqhanNC0K63GBG3wA8I+D1fQuVnAvcBF8f13akOKeQp1gSbu6f77zCxhEk727iV5oQnbHLYzHrECLg==}
     dev: false
 
-  /@tolgee/cli@2.0.3(typescript@5.3.3):
-    resolution: {integrity: sha512-a0X/7I/++rVrMA2Vi6EKgZ3F2N/pFTf03MTuFKnBADO7QksEV/d2eRxFF9VFis2vo1iz0LCicSnYsjSt9co6HQ==}
+  /@tolgee/cli@2.1.2(typescript@5.3.3):
+    resolution: {integrity: sha512-qVCg8S/rBU883ef34oXM9/HsBdN+loVw3QUpnSNmy7tqWlmSUKcrK8qvHondqdB3zTRWQ0twe15n/JyJDeT2QA==}
     engines: {node: '>= 18'}
     hasBin: true
     dependencies:
@@ -2564,10 +2559,9 @@ packages:
       json5: 2.2.3
       jsonschema: 1.4.1
       openapi-fetch: 0.9.7
-      undici: 5.28.4
+      unescape-js: 1.1.4
       vscode-oniguruma: 1.7.0
       vscode-textmate: 9.0.0
-      xstate: 4.38.3
       yauzl: 2.10.0
     transitivePeerDependencies:
       - typescript
@@ -6233,8 +6227,8 @@ packages:
   /queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
-  /react@18.2.0:
-    resolution: {integrity: sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==}
+  /react@18.3.1:
+    resolution: {integrity: sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==}
     engines: {node: '>=0.10.0'}
     dependencies:
       loose-envify: 1.4.0
@@ -6659,6 +6653,10 @@ packages:
       eastasianwidth: 0.2.0
       emoji-regex: 9.2.2
       strip-ansi: 7.1.0
+    dev: true
+
+  /string.fromcodepoint@0.2.1:
+    resolution: {integrity: sha512-n69H31OnxSGSZyZbgBlvYIXlrMhJQ0dQAX1js1QDhpaUH6zmU3QYlj07bCwCNlPOu3oRXIubGPl2gDGnHsiCqg==}
     dev: true
 
   /string.prototype.padend@3.1.5:
@@ -7104,11 +7102,10 @@ packages:
     resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==}
     dev: true
 
-  /undici@5.28.4:
-    resolution: {integrity: sha512-72RFADWFqKmUb2hmmvNODKL3p9hcB6Gt2DOQMis1SEBaV6a4MH8soBvzg+95CYhCKPFedut2JY9bMfrDl9D23g==}
-    engines: {node: '>=14.0'}
+  /unescape-js@1.1.4:
+    resolution: {integrity: sha512-42SD8NOQEhdYntEiUQdYq/1V/YHwr1HLwlHuTJB5InVVdOSbgI6xu8jK5q65yIzuFCfczzyDF/7hbGzVbyCw0g==}
     dependencies:
-      '@fastify/busboy': 2.1.1
+      string.fromcodepoint: 0.2.1
     dev: true
 
   /unixify@1.0.0:
@@ -7162,13 +7159,13 @@ packages:
     resolution: {integrity: sha512-WHN8KDQblxd32odxeIgo83rdVDE2bvdkb86it7bMhYZwWKJz0+O0RK/eZiHYnM+zgt/U7hAHOlCQGfjjvSkw2g==}
     dev: true
 
-  /urql@4.0.6(graphql@16.8.1)(react@18.2.0):
+  /urql@4.0.6(graphql@16.8.1)(react@18.3.1):
     resolution: {integrity: sha512-meXJ2puOd64uCGKh7Fse2R7gPa8+ZpBOoA62jN7CPXXUt7SVZSdeXWSpB3HvlfzLUkEqsWbvshwrgeWRYNNGaQ==}
     peerDependencies:
       react: '>= 16.8.0'
     dependencies:
       '@urql/core': 4.2.0(graphql@16.8.1)
-      react: 18.2.0
+      react: 18.3.1
       wonka: 6.3.4
     transitivePeerDependencies:
       - graphql
@@ -7361,10 +7358,6 @@ packages:
         optional: true
       utf-8-validate:
         optional: true
-    dev: true
-
-  /xstate@4.38.3:
-    resolution: {integrity: sha512-SH7nAaaPQx57dx6qvfcIgqKRXIh4L0A1iYEqim4s1u7c9VoCgzZc+63FY90AKU4ZzOC2cfJzTnpO4zK7fCUzzw==}
     dev: true
 
   /y18n@4.0.3:

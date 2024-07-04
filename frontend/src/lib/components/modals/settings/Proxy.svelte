@@ -1,6 +1,4 @@
 <script lang="ts">
-  import '@tolgee/svelte'; // Import so that the tolgee cli parses this file
-
   import T from '$lib/components/T.svelte';
   import { progress } from '$lib/store/ficsitCLIStore';
   import { proxy } from '$lib/store/settingsStore';

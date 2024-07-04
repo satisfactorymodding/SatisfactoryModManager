@@ -1,7 +1,6 @@
 <script lang="ts">
   import { ProgressBar } from '@skeletonlabs/skeleton';
   import { compare } from 'semver';
-  import '@tolgee/svelte'; // Import so that the tolgee cli parses this file
 
   import { isUpdateOnStart } from './smmUpdate';
 

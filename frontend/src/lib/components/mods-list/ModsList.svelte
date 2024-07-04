@@ -3,7 +3,6 @@
   import Fuse from 'fuse.js';
   import _ from 'lodash';
   import { createEventDispatcher } from 'svelte';
-  import '@tolgee/svelte'; // Import so that the tolgee cli parses this file
 
   import ModListFilters from './ModsListFilters.svelte';
   import ModsListItem from './ModsListItem.svelte';

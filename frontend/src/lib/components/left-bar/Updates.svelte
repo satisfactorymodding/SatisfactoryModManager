@@ -1,6 +1,5 @@
 <script lang="ts">
   import { mdiCheckCircle, mdiSync } from '@mdi/js';
-  import '@tolgee/svelte'; // Import so that the tolgee cli parses this file
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import T from '$lib/components/T.svelte';

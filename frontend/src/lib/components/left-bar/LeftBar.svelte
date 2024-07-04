@@ -3,7 +3,6 @@
   import { type PopupSettings, popup } from '@skeletonlabs/skeleton';
   import _ from 'lodash';
   import { siDiscord, siGithub } from 'simple-icons/icons';
-  import '@tolgee/svelte'; // Import so that the tolgee cli parses this file
 
   import LaunchButton from './LaunchButton.svelte';
   import Settings from './Settings.svelte';

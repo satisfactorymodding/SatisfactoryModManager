@@ -1,6 +1,5 @@
 <script lang="ts">
   import { getContextClient, queryStore } from '@urql/svelte';
-  import '@tolgee/svelte'; // Import so that the tolgee cli parses this file
 
   import T from '$lib/components/T.svelte';
   import { GetModSummaryDocument } from '$lib/generated';

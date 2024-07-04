@@ -1,6 +1,4 @@
 <script lang="ts">
-  import '@tolgee/svelte'; // Import so that the tolgee cli parses this file
-
   import { newCacheLocation } from './cacheLocationPicker';
 
   import T from '$lib/components/T.svelte';

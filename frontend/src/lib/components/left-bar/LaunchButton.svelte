@@ -1,7 +1,6 @@
 <script lang="ts">
   import { mdiOpenInNew, mdiTrayFull } from '@mdi/js';
   import { getContextClient } from '@urql/svelte';
-  import '@tolgee/svelte'; // Import so that the tolgee cli parses this file
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import T from '$lib/components/T.svelte';
@@ -121,7 +120,7 @@
       on:click={() => startQueue()}
     >
       <span>
-        <T defaultValue={'Apply {queued, plural, one {one change} other {# changes}'} keyName="launch-button.apply-queued" params={{ queued: $queuedMods.length }}/>
+        <T defaultValue={'Apply {queued, plural, one {one change} other {# changes}}'} keyName="launch-button.apply-queued" params={{ queued: $queuedMods.length }}/>
       </span>
       <div class="grow" />
       <SvgIcon
@@ -267,9 +266,7 @@
     </span>
   {:else if areOperationsQueued}
     <span>
-      <T defaultValue="Changes have not yet been made to your mod files. Click the button above to apply the changes you have queued." keyName="launch-button.changes-queued"/>
-      <br/><br/>
-      <T defaultValue={'(You\'re in Queue "Start manually" mode)'} keyName="launch-button.queue-manual"/>
+      <T defaultValue={'Changes have not yet been made to your mod files. Click the button above to apply the changes you have queued.\n\n(You\'re in Queue "Start manually" mode)'} keyName="launch-button.changes-queued"/>
     </span>
   {:else if $isGameRunning}
     <span>
@@ -289,9 +286,7 @@
     </span>
   {:else}
     <span>
-      <T defaultValue="You're ready to rumble!" keyName="launch-button.ready"/>
-      <br/><br/>
-      <T defaultValue="Note: The Mod Manager has already finished installing the mod files for you. You could launch the game using your usual game launcher and mods would still be loaded." keyName="launch-button.ready-note"/>
+      <T defaultValue="You're ready to rumble!\n\nNote: The Mod Manager has already finished installing the mod files for you. You could launch the game using your usual game launcher and mods would still be loaded." keyName="launch-button.ready"/>
     </span>
   {/if}
 </Tooltip>
