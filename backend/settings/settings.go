@@ -78,8 +78,8 @@ var Settings = &settings{
 
 	FavoriteMods: []string{},
 	ModFilters: SavedModFilters{
-		Order:  "Last updated",
-		Filter: "Compatible",
+		Order:  "last-updated",
+		Filter: "compatible",
 	},
 
 	RemoteNames: map[string]string{},

@@ -73,12 +73,12 @@ export type PartialMod = PartialSMRMod | OfflineMod | MissingMod;
 
 export const search = writable('');
 export const order = bindingTwoWayNoExcept(orderByOptions[1], { 
-  initialGet: async () => GetModFiltersOrder().then((i) => orderByOptions.find((o) => o.name === i) || orderByOptions[1]),
+  initialGet: async () => GetModFiltersOrder().then((i) => orderByOptions.find((o) => o.id === i) || orderByOptions[1]),
 }, {
-  updateFunction: async (o) => SetModFiltersOrder(o.name),
+  updateFunction: async (o) => SetModFiltersOrder(o.id),
 });
 export const filter = bindingTwoWayNoExcept(filterOptions[0], {
-  initialGet: async () => GetModFiltersFilter().then((i) => filterOptions.find((o) => o.name === i) || filterOptions[0]),
+  initialGet: async () => GetModFiltersFilter().then((i) => filterOptions.find((o) => o.id === i) || filterOptions[0]),
 }, {
-  updateFunction: async (f) => SetModFiltersFilter(f.name),
+  updateFunction: async (f) => SetModFiltersFilter(f.id),
 });
