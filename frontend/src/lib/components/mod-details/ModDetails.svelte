@@ -299,7 +299,7 @@
                   {#if mod.compatibility.EA.note}
                     <Markdown class="[&>p]:my-0" markdown={mod.compatibility.EA.note} />
                   {:else}
-                    <T defaultValue="(No further notes provided)" keyName="mod-details.compatibility-no-notes" />
+                    <T defaultValue="(No further notes provided)" keyName="mod.compatibility-no-notes" />
                   {/if}
                 </Tooltip>
                 <div use:popup={compatEXPPopup}>
@@ -312,7 +312,7 @@
                   {#if mod.compatibility.EXP.note}
                     <Markdown class="[&>p]:my-0" markdown={mod.compatibility.EXP.note} />
                   {:else}
-                    <T defaultValue="(No further notes provided)" keyName="mod-details.compatibility-no-notes" />
+                    <T defaultValue="(No further notes provided)" keyName="mod.compatibility-no-notes" />
                   {/if}
                 </Tooltip>
               </div>

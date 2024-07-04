@@ -189,7 +189,7 @@
               compatibility = {
                 state: result.state,
                 note: $t('mod-list-item.compatibility-note', 'This mod has been reported as {state} on this game version.', { state: result.state }) 
-                  + result.note ? '<br>' + result.note : ' ' + $t('mod-list-item.compatibility-note-none', '(No further notes provided)'),
+                  + result.note ? '<br>' + result.note : ' ' + $t('mod.compatibility-no-notes', '(No further notes provided)'),
                 source: 'reported',
               };
             } else {

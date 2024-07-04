@@ -282,7 +282,7 @@
     </span>
   {:else if !isInstallLaunchable}
     <span>
-      <T defaultValue="The Mod Manager is not capable of launching this install type, but it will still manage the mod files for you. Launch Satisfactory using your usual game launcher." keyName="launch-button.cant-launch"/>
+      <T defaultValue="The Mod Manager is not capable of launching this install type, but it will still manage the mod files for you. Launch Satisfactory using your usual game launcher." keyName="launch-button.cant-launch-tooltip"/>
     </span>
   {:else}
     <span>
