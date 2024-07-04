@@ -10,29 +10,32 @@ import { getCompatibility } from '$lib/utils/modCompatibility';
 import { installTypeToTargetName } from '$lib/wailsTypesExtensions';
 import { GetModFiltersFilter, GetModFiltersOrder, SetModFiltersFilter, SetModFiltersOrder } from '$wailsjs/go/settings/settings';
 
+export type OrderByField = 'name' | 'last-updated' | 'popularity' | 'hotness' | 'views' | 'downloads';
+export type FilterField = 'all' | 'compatible' | 'favorite' | 'queued' | 'installed' | 'dependency' | 'not-installed' | 'enabled' | 'disabled';
+
 export interface OrderBy {
-  name: string;
+  id: OrderByField;
   func: (mod: PartialMod) => unknown,
 }
 
 export interface Filter {
-  name: string;
+  id: FilterField;
   func: (mod: PartialMod, urqlClient: Client) => Promise<boolean> | boolean,
 }
 
 export const orderByOptions: OrderBy[] = [
-  { name: 'Name', func: (mod: PartialMod) => mod.name.trim() },
-  { name: 'Last updated', func: (mod: PartialMod) => 'last_version_date' in mod ? Date.now() - Date.parse(mod.last_version_date) : 0 },
-  { name: 'Popularity', func: (mod: PartialMod) => 'popularity' in mod ? -mod.popularity : 0 },
-  { name: 'Hotness', func: (mod: PartialMod) => 'hotness' in mod ? -mod.hotness : 0 },
-  { name: 'Views', func: (mod: PartialMod) => 'views' in mod ? -mod.views : 0 },
-  { name: 'Downloads', func: (mod: PartialMod) => 'downloads' in mod ? -mod.downloads : 0 },
+  { id: 'name', func: (mod: PartialMod) => mod.name.trim() },
+  { id: 'last-updated', func: (mod: PartialMod) => 'last_version_date' in mod ? Date.now() - Date.parse(mod.last_version_date) : 0 },
+  { id: 'popularity', func: (mod: PartialMod) => 'popularity' in mod ? -mod.popularity : 0 },
+  { id: 'hotness', func: (mod: PartialMod) => 'hotness' in mod ? -mod.hotness : 0 },
+  { id: 'views', func: (mod: PartialMod) => 'views' in mod ? -mod.views : 0 },
+  { id: 'downloads', func: (mod: PartialMod) => 'downloads' in mod ? -mod.downloads : 0 },
 ];
 
 export const filterOptions: Filter[] = [
-  { name: 'All mods', func: () => true },
+  { id: 'all', func: () => true },
   { 
-    name: 'Compatible',
+    id: 'compatible',
     func: async (mod: PartialMod, urqlClient: Client) => { 
       const installInfo = get(selectedInstallMetadata).info;
       if(!installInfo) {
@@ -42,13 +45,13 @@ export const filterOptions: Filter[] = [
       return compatibility.state !== CompatibilityState.Broken;
     }, 
   },
-  { name: 'Favorite', func: (mod: PartialMod) => get(favoriteMods).includes(mod.mod_reference) },
-  { name: 'Queued', func: (mod: PartialMod) => get(queuedMods).some((q) => q.mod === mod.mod_reference) },
-  { name: 'Installed', func: (mod: PartialMod) => mod.mod_reference in get(manifestMods) },
-  { name: 'Dependency', func: (mod: PartialMod) => !(mod.mod_reference in get(manifestMods)) && mod.mod_reference in get(lockfileMods) },
-  { name: 'Not installed', func: (mod: PartialMod) => !(mod.mod_reference in get(manifestMods)) },
-  { name: 'Enabled', func: (mod: PartialMod) => get(manifestMods)[mod.mod_reference]?.enabled ?? mod.mod_reference in get(lockfileMods) },
-  { name: 'Disabled', func: (mod: PartialMod) => mod.mod_reference in get(manifestMods) && !(mod.mod_reference in get(lockfileMods)) },
+  { id: 'favorite', func: (mod: PartialMod) => get(favoriteMods).includes(mod.mod_reference) },
+  { id: 'queued', func: (mod: PartialMod) => get(queuedMods).some((q) => q.mod === mod.mod_reference) },
+  { id: 'installed', func: (mod: PartialMod) => mod.mod_reference in get(manifestMods) },
+  { id: 'dependency', func: (mod: PartialMod) => !(mod.mod_reference in get(manifestMods)) && mod.mod_reference in get(lockfileMods) },
+  { id: 'not-installed', func: (mod: PartialMod) => !(mod.mod_reference in get(manifestMods)) },
+  { id: 'enabled', func: (mod: PartialMod) => get(manifestMods)[mod.mod_reference]?.enabled ?? mod.mod_reference in get(lockfileMods) },
+  { id: 'disabled', func: (mod: PartialMod) => mod.mod_reference in get(manifestMods) && !(mod.mod_reference in get(lockfileMods)) },
 ];
 
 export type PartialSMRMod = GetModsQuery['getMods']['mods'][number];

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { mdiBug, mdiCheck, mdiCheckboxBlankOutline, mdiCheckboxMarkedOutline, mdiChevronRight, mdiClipboard, mdiCog, mdiDownload, mdiFolderEdit, mdiLanConnect, mdiTune } from '@mdi/js';
   import { ListBox, ListBoxItem } from '@skeletonlabs/skeleton';
+  import { getTranslate } from '@tolgee/svelte';
   import { getContextClient } from '@urql/svelte';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
@@ -9,11 +10,12 @@
   import { type PopupSettings, getModalStore, popup } from '$lib/skeletonExtensions';
   import { lockfileMods, manifestMods } from '$lib/store/ficsitCLIStore';
   import { debug, konami, language, launchButton, offline, queueAutoStart, startView, updateCheckMode, version } from '$lib/store/settingsStore';
-  import type { LaunchButtonType, ViewType } from '$lib/wailsTypesExtensions';
   import { GenerateDebugInfo } from '$wailsjs/go/app/app';
   import { OfflineGetMod } from '$wailsjs/go/ficsitcli/ficsitCLI';
 
   const modalStore = getModalStore();
+
+  const { t } = getTranslate();
 
   const settingsMenu = {
     event: 'click',
@@ -35,14 +37,14 @@
     closeQuery: '[data-popup="start-view-menu"] .listbox-item',
   } satisfies PopupSettings;
 
-  let views: { id: ViewType, name: string }[] = [
+  $: views = [
     {
       id: 'compact',
-      name: 'Compact',
+      name: $t('settings.start-view.compact', 'Compact'),
     },
     {
       id: 'expanded',
-      name: 'Expanded',
+      name: $t('settings.start-view.expanded', 'Expanded'),
     },
   ];
 
@@ -56,18 +58,18 @@
     closeQuery: '[data-popup="update-check-mode-menu"] .listbox-item',
   } satisfies PopupSettings;
 
-  let updateCheckModes: { id: 'launch'|'exit'|'ask', name: string }[] = [
+  $: updateCheckModes = [
     {
       id: 'launch',
-      name: 'On start',
+      name: $t('settings.update-check.on-start', 'On start'),
     },
     {
       id: 'exit',
-      name: 'On exit',
+      name: $t('settings.update-check.on-exit', 'On exit'),
     },
     {
       id: 'ask',
-      name: 'Ask when found',
+      name: $t('settings.update-check.ask', 'Ask when found'),
     },
   ];
 
@@ -81,14 +83,14 @@
     closeQuery: '[data-popup="queue-mode-menu"] .listbox-item',
   } satisfies PopupSettings;
 
-  let queueModes: { id: boolean, name: string }[] = [
+  $: queueModes = [
     {
       id: true,
-      name: 'Start immediately',
+      name: $t('settings.queue.start-immediately', 'Start immediately'),
     },
     {
       id: false,
-      name: 'Start manually',
+      name: $t('settings.queue.start-manually', 'Start manually'),
     },
   ];
 
@@ -102,18 +104,18 @@
     closeQuery: '[data-popup="launch-button-menu"] .listbox-item',
   } satisfies PopupSettings;
 
-  let launchButtons: { id: LaunchButtonType, name: string }[] = [
+  $: launchButtons = [
     {
       id: 'normal',
-      name: 'Normal',
+      name: $t('settings.launch-button.normal', 'Normal'),
     },
     {
       id: 'cat',
-      name: 'Nyan',
+      name: $t('settings.launch-button.cat', 'Nyan'),
     },
     {
       id: 'button',
-      name: 'Launch Button',
+      name: $t('settings.launch-button.button', 'Button'),
     },
   ];
 
@@ -337,7 +339,7 @@
     <ul class="menu">
       <li class="section-header">
         <span class="h-5 w-5"><SvgIcon class="h-full w-full" icon={mdiBug}/></span>
-        <span class="flex-auto">Debug</span>
+        <span class="flex-auto"><T defaultValue="Debug" keyName="settings.debug"/></span>
       </li>
       <hr class="divider" />
       <li>

@@ -9,7 +9,7 @@
 
   import Markdown from '$lib/components/Markdown.svelte';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
-  import T from '$lib/components/T.svelte';
+  import T, { translationElementPart } from '$lib/components/T.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
   import ModChangelog from '$lib/components/modals/ModChangelog.svelte';
   import { CompatibilityState, GetModDetailsDocument } from '$lib/generated';
@@ -244,8 +244,23 @@
     
       <div use:popup={authorsMenu}>
         <button class="btn px-4 h-10 text-sm w-full bg-secondary-600">
-          <span class="whitespace-break-spaces">Contributors <span class="text-primary-600">
-            (<span class:animate-pulse={!mod} class:placeholder={!mod}>{mod ? (mod.authors.length ?? 0) : '    '}</span>)</span></span>
+          <span class="whitespace-break-spaces">
+            <T
+              defaultValue={'Contributors <1>({authors})</1>'}
+              keyName="mod-details.contributors"
+              params={{
+                authors: mod?.authors.length ?? 0,
+              }}
+              parts={[
+                translationElementPart('span', {
+                  class: [
+                    'text-primary-600',
+                    mod ? '' : 'animate-pulse placeholder',
+                  ].join(' '),
+                }),
+              ]}
+            />
+          </span>
           <SvgIcon
             class="h-5 w-5"
             icon={mdiChevronDown}/>
@@ -279,7 +294,7 @@
 
       <div>
         <span>Mod info:</span><br/>
-        <ModDetailsEntry label="Size" loading={!mod}>{size ?? ''}</ModDetailsEntry>
+        <ModDetailsEntry label={$t('mod-details.size', 'Size')} loading={!mod}>{size ?? ''}</ModDetailsEntry>
         {#if (!mod || !('offline' in mod)) && !$offline}
           <ModDetailsEntry label={$t('mod-details.created', 'Created')} loading={!mod}>{mod ? new Date(mod.created_at).toLocaleDateString() : ''}</ModDetailsEntry>
           <ModDetailsEntry label={$t('mod-details.updated', 'Updated')} loading={!mod}>{mod ? new Date(mod.last_version_date).toLocaleString() : ''}</ModDetailsEntry>
