@@ -2,6 +2,7 @@ package websocket
 
 import (
 	"log/slog"
+	"net/http"
 
 	"github.com/spf13/viper"
 	engineio_types "github.com/zishang520/engine.io/types"
@@ -11,13 +12,19 @@ import (
 )
 
 func ListenAndServeWebsocket() {
-	httpServer := engineio_types.CreateServer(nil)
+	httpMux := http.NewServeMux()
+
+	httpServer := &http.Server{
+		Addr:    "localhost:" + viper.GetString("websocket-port"),
+		Handler: httpMux,
+	}
+
 	options := &socket.ServerOptions{}
 	options.SetCors(&engineio_types.Cors{
 		Origin: true, // Allow any origin
 	})
 	io := socket.NewServer(nil, options)
-	httpServer.Handle("/socket.io", io.ServeHandler(nil))
+	httpMux.Handle("/socket.io/", io.ServeHandler(nil))
 
 	_ = io.On("connection", func(data ...any) {
 		client := data[0].(*socket.Socket)
@@ -39,5 +46,8 @@ func ListenAndServeWebsocket() {
 		})
 	})
 
-	httpServer.Listen("localhost:"+viper.GetString("websocket-port"), nil)
+	err := httpServer.ListenAndServe()
+	if err != nil {
+		slog.Error("failed to start websocket server", slog.Any("err", err))
+	}
 }
