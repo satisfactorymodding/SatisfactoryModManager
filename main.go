@@ -151,8 +151,9 @@ func main() {
 			},
 		},
 		Linux: &linux.Options{
-			Icon:        iconBytes,
-			ProgramName: "Satisfactory Mod Manager",
+			Icon:             iconBytes,
+			ProgramName:      "Satisfactory Mod Manager",
+			WebviewGpuPolicy: linux.WebviewGpuPolicyNever, // https://github.com/wailsapp/wails/issues/2977
 		},
 		OnStartup: func(ctx context.Context) {
 			appCommon.AppContext = ctx
