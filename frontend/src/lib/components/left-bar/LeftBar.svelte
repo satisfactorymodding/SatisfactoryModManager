@@ -129,7 +129,7 @@
   <div class="flex flex-col flex-auto h-full w-full space-y-4 h-md:space-y-8 overflow-y-auto">
     <div class="flex flex-col gap-2">
       <span class="pl-4 sticky top-0 z-[1] bg-surface-50-900-token">
-        <T defaultValue="Game version" keyName="left-bar.game-version"/>
+        <T defaultValue="Select Game Installation" keyName="left-bar.game-version"/>
       </span>
       <Select
         name="installsCombobox"
