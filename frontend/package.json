@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "license": "GPL-3.0",
   "scripts": {
-    "dev": "vite",
+    "dev": "run-p dev:run translations graphql-codegen:watch",
+    "dev:run": "vite",
     "build": "vite build",
     "preview": "vite preview",
     "postinstall": "run-p graphql-codegen translations",
