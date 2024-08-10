@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { mdiAlert, mdiEyeOffOutline, mdiEyeOutline, mdiLoading, mdiServerNetwork, mdiTrashCan } from '@mdi/js';
+  import { mdiAlert, mdiEyeOffOutline, mdiEyeOutline, mdiLoading, mdiServerNetwork, mdiTrashCan, mdiWeb } from '@mdi/js';
   import { getTranslate } from '@tolgee/svelte';
   import _ from 'lodash';
 
@@ -12,6 +12,7 @@
   import { installsMetadata, remoteServers } from '$lib/store/ficsitCLIStore';
   import { AddRemoteServer, FetchRemoteServerMetadata, GetNextRemoteLauncherName, RemoveRemoteServer } from '$wailsjs/go/ficsitcli/ficsitCLI';
   import { ficsitcli } from '$wailsjs/go/models';
+  import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
 
   export let parent: { onClose: () => void };
   
@@ -173,6 +174,15 @@
   <header class="card-header font-bold text-2xl text-center">
     <T defaultValue="Dedicated Servers" keyName="server-manager.title" />
   </header>
+  <section class="p-4 flex-auto space-y-4 overflow-y-auto flex">
+    <button class="btn flex-auto h-12 text-sm bg-surface-200-700-token" on:click={() => BrowserOpenURL('https://docs.ficsit.app/satisfactory-modding/latest/ForUsers/DedicatedServerSetup.html')}>
+      <T defaultValue="Get help connecting to servers" keyName="server-manager.get-help" />
+      <div class="grow" />
+      <SvgIcon
+        class="h-5 w-5"
+        icon={mdiWeb} />
+    </button>
+  </section>
   <section class="p-4 flex-auto space-y-4 overflow-y-auto flex">
     <div class="flex-auto w-full overflow-x-auto overflow-y-auto">
       <table class="table">
