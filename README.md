@@ -65,7 +65,8 @@ The command line output will also include a localhost URL you can visit in your 
 
 Make sure you don't already have a copy of the application running or the command will silently fail.
 
-You may need to run `pnpm graphql-codegen` in the `frontend` directory to update the code generated from the SMR API,
+Although `wails dev` should run these commands for you under normal circumstances,
+you may need to run `pnpm graphql-codegen` in the `frontend` directory to update the code generated from the SMR API,
 or run `pnpm translations` to update the translation data.
 
 ### Building
