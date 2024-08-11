@@ -16,14 +16,17 @@
         "Konami",
         "Maximised",
         "Minimised",
+        "mircearoata",
         "Nyan",
         "smmanager",
         "smmprofile",
         "SMUI",
+        "Tolgee",
         "Unexpand",
         "Unignore",
         "urql",
-        "wailsjs"
+        "wailsjs",
+        "wailsjsdir"
     ],
     // flagWords - list of words to be always considered incorrect
     // This is useful for offensive words and common spelling errors.

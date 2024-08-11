@@ -65,6 +65,10 @@ The command line output will also include a localhost URL you can visit in your 
 
 Make sure you don't already have a copy of the application running or the command will silently fail.
 
+Although `wails dev` should run these commands for you under normal circumstances,
+you may need to run `pnpm graphql-codegen` in the `frontend` directory to update the code generated from the SMR API,
+or run `pnpm translations` to update the translation data.
+
 ### Building
 
 ```bash
@@ -81,3 +85,17 @@ Then, to run it, use:
 ```bash
 golangci-lint run --fix
 ```
+
+### Localization
+
+If you'd like to help translate and localize SMM to different languages, join our [discord server](https://discord.ficsit.app/).
+
+SMM handles localization through the Tolgee Svelte integration.
+This allows for [in-context translation](https://tolgee.io/js-sdk/) - simply alt-click on a translatable element to open the Tolgee interface.
+
+In order to edit translations in-context, you will need to provide a tolgee API key with edit permissions.
+You can create an API key for yourself [here](https://translate.ficsit.app/projects/4/integrate) once you're added to the project.
+To supply this API key at development time, create or edit `/frontend/.env.local` and supply the key in a similar format as `.env`.
+
+The in-context translation screenshot feature requires installing the _Tolgee Tools_ browser extension.
+After running `wails dev`, open `http://localhost:34115/` in your browser of choice to access the application.

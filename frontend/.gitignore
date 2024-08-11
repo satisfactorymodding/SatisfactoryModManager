@@ -1,6 +1,9 @@
 build
 graphql.schema.json
 
+# Files intended for local dev usage only, ex. .env.local
+*.local
+
 # wails generated files
 package.json.md5
 src/lib/generated/wailsjs
