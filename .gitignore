@@ -2,7 +2,6 @@
 dist
 *.syso
 
-frontend/.env.local
 
 .DS_Store
 
