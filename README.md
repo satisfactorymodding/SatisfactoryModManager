@@ -89,7 +89,7 @@ golangci-lint run --fix
 
 If you'd like to help translate and localize SMM to different languages, join our [discord server](https://discord.ficsit.app/).
 
-SMM handles localization through the Tolgee vite integration.
+SMM handles localization through the Tolgee Svelte integration.
 This allows for [in-context translation](https://tolgee.io/js-sdk/) - simply alt-click on a translatable element to open the Tolgee interface.
 
 In order to edit translations in-context, you will need to provide a tolgee API key with edit permissions.
