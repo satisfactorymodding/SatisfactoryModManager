@@ -20,7 +20,6 @@
   import { getAuthor } from '$lib/utils/getModAuthor';
   import { type CompatibilityWithSource, getCompatibility, getVersionCompatibility } from '$lib/utils/modCompatibility';
   import type { ButtonDisplay } from '$lib/utils/responsiveButton';
-  import { installTypeToTargetName } from '$lib/wailsTypesExtensions';
   import { DisableMod, EnableMod, InstallMod, RemoveMod } from '$wailsjs/go/ficsitcli/ficsitCLI';
   import { ficsitcli } from '$wailsjs/go/models';
   import { FavoriteMod, UnFavoriteMod } from '$wailsjs/go/settings/settings';
@@ -184,7 +183,7 @@
         if(mod.hidden && !isDependency) {
           compatibility = { state: CompatibilityState.Broken, note: $t('mod-list-item.hidden', 'This mod was hidden by the author.'), source: 'reported' };
         } else {
-          getCompatibility(mod.mod_reference, info.branch, info.version, installTypeToTargetName(info.type), client).then((result) => {
+          getCompatibility(mod.mod_reference, client).then((result) => {
             if (result.source === 'reported') {
               compatibility = {
                 state: result.state,

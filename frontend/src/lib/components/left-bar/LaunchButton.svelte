@@ -12,7 +12,6 @@
   import { error, hasFetchedMods, isLaunchingGame } from '$lib/store/generalStore';
   import { launchButton, queueAutoStart } from '$lib/store/settingsStore';
   import { type CompatibilityWithSource, getCompatibility } from '$lib/utils/modCompatibility';
-  import { installTypeToTargetName } from '$lib/wailsTypesExtensions';
   import { LaunchGame } from '$wailsjs/go/ficsitcli/ficsitCLI';
 
   $: isInstallLaunchable = !!$selectedInstallMetadata?.info?.launchPath;
@@ -26,7 +25,7 @@
       const newCompatibilities: typeof compatibilities = {};
       Object.keys($lockfileMods).map(async (modReference) => {
         if (modReference !== 'SML') {
-          newCompatibilities[modReference] = await getCompatibility(modReference, info.branch, info.version, installTypeToTargetName(info.type), client);
+          newCompatibilities[modReference] = await getCompatibility(modReference, client);
         }
       });
       compatibilities = newCompatibilities;

@@ -3,6 +3,7 @@ import { coerce, compare, minVersion, satisfies } from 'semver';
 import { get } from 'svelte/store';
 
 import { type Compatibility, CompatibilityState, GetModVersionTargetsDocument, ModReportedCompatibilityDocument, ModVersionsCompatibilityDocument, SmlVersionsCompatibilityDocument, TargetName } from '$lib/generated';
+import { installsMetadata, selectedInstallMetadata, selectedProfileTargets } from '$lib/store/ficsitCLIStore';
 import { offline } from '$lib/store/settingsStore';
 import { OfflineGetMod, OfflineGetSMLVersions } from '$wailsjs/go/ficsitcli/ficsitCLI';
 import { common } from '$wailsjs/go/models';
@@ -11,15 +12,33 @@ export interface CompatibilityWithSource extends Compatibility {
   source: 'reported' | 'version';
 }
 
-export async function getCompatibility(modReference: string, gameBranch: common.GameBranch, gameVersion: number, gameTarget: TargetName, urqlClient: Client): Promise<CompatibilityWithSource> {
-  if(!await modSupportsTarget(modReference, gameTarget, urqlClient)) {
-    return { state: CompatibilityState.Broken, note: `This mod does not support ${gameTarget}.`, source: 'version' };
+export async function getCompatibility(modReference: string, urqlClient: Client): Promise<CompatibilityWithSource> {
+  const installInfo = get(selectedInstallMetadata).info;
+  if(!installInfo) {
+    return { state: CompatibilityState.Broken, note: 'No game selected.', source: 'version' };
   }
-  const reportedCompatibility = await getReportedCompatibility(modReference, gameBranch, urqlClient);
+
+  for await (const [gameTarget, installs] of Object.entries(get(selectedProfileTargets))) {
+    const installNames = installs.map((install) => friendlyInstallName(get(installsMetadata)[install].info!));
+    if(!await modSupportsTarget(modReference, gameTarget as TargetName, urqlClient)) {
+      return { state: CompatibilityState.Broken, note: `This mod does not support ${gameTarget}, required on this profile by ${installNames.join(', ')}.`, source: 'version' };
+    }
+  }
+
+  return await getCompatibilityFor(modReference, installInfo, urqlClient);
+}
+
+function friendlyInstallName(install: common.Installation) {
+  const installType = install.type === common.InstallType.WINDOWS ? 'Game' : 'Server';
+  return `${install.launcher} (${installType})`;
+}
+
+async function getCompatibilityFor(modReference: string, install: common.Installation, urqlClient: Client): Promise<CompatibilityWithSource> {
+  const reportedCompatibility = await getReportedCompatibility(modReference, install.branch, urqlClient);
   if(reportedCompatibility) {
     return { ...reportedCompatibility, source: 'reported' };
   }
-  const versionCompatibility = await getVersionCompatibility(modReference, gameVersion, urqlClient);
+  const versionCompatibility = await getVersionCompatibility(modReference, install.version, urqlClient);
   return { ...versionCompatibility, source: 'version' };
 }
 

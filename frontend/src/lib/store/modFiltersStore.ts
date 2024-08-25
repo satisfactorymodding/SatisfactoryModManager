@@ -7,7 +7,6 @@ import { CompatibilityState, type GetModsQuery } from '$lib/generated';
 import { queuedMods } from '$lib/store/actionQueue';
 import { favoriteMods, lockfileMods, manifestMods, selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
 import { getCompatibility } from '$lib/utils/modCompatibility';
-import { installTypeToTargetName } from '$lib/wailsTypesExtensions';
 import { GetModFiltersFilter, GetModFiltersOrder, SetModFiltersFilter, SetModFiltersOrder } from '$wailsjs/go/settings/settings';
 
 export type OrderByField = 'name' | 'last-updated' | 'popularity' | 'hotness' | 'views' | 'downloads';
@@ -41,7 +40,7 @@ export const filterOptions: Filter[] = [
       if(!installInfo) {
         return false;
       }
-      const compatibility = await getCompatibility(mod.mod_reference, installInfo.branch, installInfo.version, installTypeToTargetName(installInfo.type), urqlClient);
+      const compatibility = await getCompatibility(mod.mod_reference, urqlClient);
       return compatibility.state !== CompatibilityState.Broken;
     }, 
   },

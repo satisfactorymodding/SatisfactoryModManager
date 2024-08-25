@@ -19,6 +19,7 @@ export const selectedInstall = bindingTwoWay(null, { initialGet: () => GetSelect
 export const selectedInstallMetadata = derived([installsMetadata, selectedInstall], ([$installsMetadata, $selectedInstallPath]) => {
   return $installsMetadata[$selectedInstallPath ?? '__invalid__install__'] ?? null;
 });
+export const selectedProfileTargets = binding<Record<string, string[]>>({}, { updateEvent: 'selectedProfileTargets' });
 
 export const remoteServers = binding([], { initialGet: () => GetRemoteInstallations(), updateEvent: 'remoteServers', allowNull: false });
 
