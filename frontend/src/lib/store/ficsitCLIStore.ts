@@ -97,19 +97,18 @@ const totalTasks = derived(progress, ($progress) => {
 
   const download = { current: 0, total: 0 } as utils.Progress;
   const extract = { current: 0, total: 0 } as utils.Progress;
-  const downloadingMods = [] as { name: string; version: string; complete: boolean }[];
-  const extractingMods = [] as { name: string; version: string; complete: boolean }[];
+  const downloadingMods = [] as { name: string; version: string; target: string; complete: boolean }[];
+  const extractingMods = [] as { name: string; version: string; target: string; complete: boolean }[];
   for (const [modVersionTask, status] of Object.entries($progress.tasks)) {
-    const [modVersion, task] = modVersionTask.split(':');
-    const [name, version] = modVersion.split('@');
+    const [name, version, target, task] = modVersionTask.split(':');
     if (task === 'download') {
       download.current += status.current;
       download.total += Math.max(status.current, status.total);
-      downloadingMods.push({ name, version, complete: status.current === status.total && status.total !== 0 });
+      downloadingMods.push({ name, version, target, complete: status.current === status.total && status.total !== 0 });
     } else if (task === 'extract') {
       extract.current += status.current;
       extract.total += Math.max(status.current, status.total);
-      extractingMods.push({ name, version, complete: status.current === status.total && status.total !== 0 });
+      extractingMods.push({ name, version, target, complete: status.current === status.total && status.total !== 0 });
     }
   }
   return { download, extract, downloadingMods, extractingMods };

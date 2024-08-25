@@ -116,8 +116,7 @@ func (f *ficsitCLI) UpdateMods(mods []string) error {
 			return err //nolint:wrapcheck
 		}
 
-		err = f.validateInstall(selectedInstallation, taskUpdates)
-
+		err = f.apply(l, taskUpdates)
 		if err != nil {
 			l.Error("failed to validate installation", slog.Any("error", err))
 			return err

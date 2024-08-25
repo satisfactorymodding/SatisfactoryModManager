@@ -107,11 +107,9 @@ func (f *ficsitCLI) SelectInstall(path string) error {
 			l.Error("failed to save selected installation", slog.Any("error", err))
 		}
 
-		selectedInstallation := f.GetSelectedInstall()
-
 		f.EmitGlobals()
 
-		installErr := f.validateInstall(selectedInstallation, taskUpdates)
+		installErr := f.apply(l, taskUpdates)
 
 		if installErr != nil {
 			l.Error("failed to validate install", slog.Any("error", installErr))
@@ -149,7 +147,7 @@ func (f *ficsitCLI) SetModsEnabled(enabled bool) error {
 
 		f.EmitGlobals()
 
-		installErr := f.validateInstall(selectedInstallation, taskUpdates)
+		installErr := f.apply(l, taskUpdates)
 
 		if installErr != nil {
 			l.Error("failed to validate install", slog.Any("error", installErr))

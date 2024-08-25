@@ -41,7 +41,7 @@ func (f *ficsitCLI) SetProfile(profile string) error {
 
 		f.EmitGlobals()
 
-		installErr := f.validateInstall(selectedInstallation, taskChannel)
+		installErr := f.apply(l, taskChannel)
 
 		if installErr != nil {
 			l.Error("failed to validate installation", slog.Any("error", installErr))
@@ -341,7 +341,7 @@ func (f *ficsitCLI) ImportProfile(name string, file string) error {
 
 		f.EmitGlobals()
 
-		installErr := f.validateInstall(selectedInstallation, taskChannel)
+		installErr := f.apply(l, taskChannel)
 
 		if installErr != nil {
 			_ = f.ficsitCli.Profiles.DeleteProfile(name)

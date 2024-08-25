@@ -32,7 +32,7 @@ func (f *ficsitCLI) InstallMod(mod string) error {
 			l.Error("failed to save profile", slog.Any("error", err))
 		}
 
-		installErr := f.validateInstall(selectedInstallation, taskUpdates)
+		installErr := f.apply(l, taskUpdates)
 
 		if installErr != nil {
 			l.Error("failed to install", slog.Any("error", installErr))
@@ -69,7 +69,7 @@ func (f *ficsitCLI) InstallModVersion(mod string, version string) error {
 			l.Error("failed to save profile", slog.Any("error", err))
 		}
 
-		installErr := f.validateInstall(selectedInstallation, taskUpdates)
+		installErr := f.apply(l, taskUpdates)
 
 		if installErr != nil {
 			l.Error("failed to install", slog.Any("error", installErr))
@@ -102,7 +102,7 @@ func (f *ficsitCLI) RemoveMod(mod string) error {
 			l.Error("failed to save profile", slog.Any("error", err))
 		}
 
-		installErr := f.validateInstall(selectedInstallation, taskUpdates)
+		installErr := f.apply(l, taskUpdates)
 
 		if installErr != nil {
 			l.Error("failed to install", slog.Any("error", installErr))
@@ -135,7 +135,7 @@ func (f *ficsitCLI) EnableMod(mod string) error {
 			l.Error("failed to save profile", slog.Any("error", err))
 		}
 
-		installErr := f.validateInstall(selectedInstallation, taskUpdates)
+		installErr := f.apply(l, taskUpdates)
 
 		if installErr != nil {
 			l.Error("failed to install", slog.Any("error", installErr))
@@ -168,7 +168,7 @@ func (f *ficsitCLI) DisableMod(mod string) error {
 			l.Error("failed to save profile", slog.Any("error", err))
 		}
 
-		installErr := f.validateInstall(selectedInstallation, taskUpdates)
+		installErr := f.apply(l, taskUpdates)
 
 		if installErr != nil {
 			l.Error("failed to install", slog.Any("error", installErr))
