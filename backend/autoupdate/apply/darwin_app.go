@@ -129,7 +129,6 @@ func (a *DarwinAppApply) Apply(restart bool) error {
 			Files: []*os.File{os.Stdin, os.Stdout, os.Stderr},
 			Sys:   &syscall.SysProcAttr{},
 		})
-
 		if err != nil {
 			return fmt.Errorf("failed to relaunch after update: %w", err)
 		}

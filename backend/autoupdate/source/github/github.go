@@ -91,7 +91,7 @@ func (g *source) GetChangelogs() (map[string]string, error) {
 }
 
 func (g *source) getLatestReleaseData() (*Release, error) {
-	response, err := http.Get("https://api.github.com/repos/" + g.repo + "/releases/latest")
+	response, err := http.Get(fmt.Sprintf("https://api.github.com/repos/%s/releases/latest", g.repo))
 	if err != nil {
 		return nil, fmt.Errorf("failed to get latest release: %w", err)
 	}
@@ -105,7 +105,7 @@ func (g *source) getLatestReleaseData() (*Release, error) {
 }
 
 func (g *source) getReleasesData() ([]Release, error) {
-	response, err := http.Get("https://api.github.com/repos/" + g.repo + "/releases")
+	response, err := http.Get(fmt.Sprintf("https://api.github.com/repos/%s/releases", g.repo))
 	if err != nil {
 		return nil, fmt.Errorf("failed to get releases: %w", err)
 	}
@@ -119,7 +119,7 @@ func (g *source) getReleasesData() ([]Release, error) {
 }
 
 func (g *source) getReleaseData(tagName string) (*Release, error) {
-	response, err := http.Get("https://api.github.com/repos/" + g.repo + "/releases/tags/" + tagName)
+	response, err := http.Get(fmt.Sprintf("https://api.github.com/repos/%s/releases/tags/%s", g.repo, tagName))
 	if err != nil {
 		return nil, fmt.Errorf("failed to get releases: %w", err)
 	}

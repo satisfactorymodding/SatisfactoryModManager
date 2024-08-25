@@ -29,14 +29,15 @@ const migrationSuccessMarkerFile = ".smm3_migration_acknowledged"
 
 // https://stackoverflow.com/questions/12518876/how-to-check-if-a-file-exists-in-go
 func pathExists(path string) bool {
-	if _, err := os.Stat(path); err == nil {
+	_, err := os.Stat(path)
+	if err == nil {
 		return true
-	} else if errors.Is(err, os.ErrNotExist) {
-		return false
-	} else {
-		slog.Warn("Error when checking path exists, so assuming it does not exist: "+path, slog.Any("error", err))
+	}
+	if errors.Is(err, os.ErrNotExist) {
 		return false
 	}
+	slog.Warn("error when checking path exists, so assuming it does not exist", slog.String("path", path), slog.Any("error", err))
+	return false
 }
 
 func (m *migration) NeedsSmm2Migration() bool {

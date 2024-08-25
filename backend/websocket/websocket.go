@@ -28,7 +28,7 @@ func ListenAndServeWebsocket() {
 
 	_ = io.On("connection", func(data ...any) {
 		client := data[0].(*socket.Socket)
-		_ = client.On("installedMods", func(datas ...any) {
+		_ = client.On("installedMods", func(_ ...any) {
 			lockfile, err := ficsitcli.FicsitCLI.GetSelectedInstallLockfile()
 			if err != nil {
 				slog.Error("failed to get lockfile", slog.Any("error", err))

@@ -11,7 +11,7 @@ type EventDispatcher[D any] struct {
 func (ed *EventDispatcher[D]) On(f func(D)) func() {
 	ed.listeners = append(ed.listeners, &f)
 	return func() {
-		slices.DeleteFunc(ed.listeners, func(listener eventListener[D]) bool {
+		ed.listeners = slices.DeleteFunc(ed.listeners, func(listener eventListener[D]) bool {
 			return listener == &f
 		})
 	}
@@ -32,7 +32,7 @@ func (ed *EventDispatcher[D]) Dispatch(data D) {
 		}
 		(*listener)(data)
 	}
-	slices.DeleteFunc(ed.listeners, func(listener eventListener[D]) bool {
+	ed.listeners = slices.DeleteFunc(ed.listeners, func(listener eventListener[D]) bool {
 		return listener == nil
 	})
 }

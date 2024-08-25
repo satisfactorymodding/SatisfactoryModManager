@@ -83,7 +83,6 @@ func ExtractZip(zipPath string, dst string) error {
 			}
 			return nil
 		}()
-
 		if err != nil {
 			return err
 		}

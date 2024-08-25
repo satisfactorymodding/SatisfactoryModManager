@@ -55,7 +55,7 @@ func MoveRecursive(from, to string) (bool, error) {
 	if err != nil {
 		return false, fmt.Errorf("failed to copy %s to %s: %w", from, to, err)
 	}
-	err = filepath.Walk(from, func(path string, info os.FileInfo, err error) error {
+	err = filepath.Walk(from, func(path string, _ os.FileInfo, err error) error {
 		if err != nil {
 			if !os.IsNotExist(err) {
 				return err

@@ -24,7 +24,7 @@ jobs:
       
       - uses: golangci/golangci-lint-action@v4
         with:
-          version: v1.54
+          version: v1.56
           only-new-issues: true
           skip-pkg-cache: true
           skip-build-cache: true

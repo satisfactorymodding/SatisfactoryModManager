@@ -171,7 +171,7 @@ func main() {
 
 			ficsitcli.FicsitCLI.StartGameRunningWatcher() //nolint:contextcheck
 		},
-		OnDomReady: func(ctx context.Context) {
+		OnDomReady: func(_ context.Context) {
 			// OnDomReady is called on every refresh
 			sync.OnceFunc(func() {
 				// Wails doesn't expose the user agent configuration, it only uses wails.io for dev app/browser detection
@@ -198,7 +198,7 @@ func main() {
 				autoupdate.Updater.CheckInterval(5 * time.Minute)
 			})()
 		},
-		OnShutdown: func(ctx context.Context) {
+		OnShutdown: func(_ context.Context) {
 			app.App.StopWindowWatcher()
 		},
 		Bind: []interface{}{
@@ -221,7 +221,6 @@ func main() {
 			OpenInspectorOnStartup: true,
 		},
 	})
-
 	if err != nil {
 		slog.Error("failed to start application", slog.Any("error", err))
 		_ = dialog.Error("Failed to start application: %s", err.Error())
