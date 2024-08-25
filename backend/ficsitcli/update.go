@@ -7,7 +7,6 @@ import (
 
 	"github.com/satisfactorymodding/ficsit-cli/cli"
 	resolver "github.com/satisfactorymodding/ficsit-resolver"
-	"github.com/spf13/viper"
 )
 
 type Update struct {
@@ -36,7 +35,7 @@ func (f *ficsitCLI) CheckForUpdates() ([]Update, error) {
 
 	profile := f.GetProfile(selectedInstallation.Profile)
 
-	res := resolver.NewDependencyResolver(f.ficsitCli.Provider, viper.GetString("api-base"))
+	res := resolver.NewDependencyResolver(f.ficsitCli.Provider)
 
 	gameVersion, err := selectedInstallation.GetGameVersion(f.ficsitCli)
 	if err != nil {
