@@ -7,6 +7,8 @@ on:
 jobs:
   build:
     uses: ./.github/workflows/build-base.yml
+    secrets:
+      SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
   
   lint-backend:
     strategy:
