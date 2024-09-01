@@ -6,7 +6,7 @@
   import { DevTools, FormatSimple, Tolgee, TolgeeProvider } from '@tolgee/svelte';
   import { setContextClient } from '@urql/svelte';
 
-  import T, { translationElementPart } from '$lib/components/T.svelte';
+  import T from '$lib/components/T.svelte';
   import TitleBar from '$lib/components/TitleBar.svelte';
   import LeftBar from '$lib/components/left-bar/LeftBar.svelte';
   import ModDetails from '$lib/components/mod-details/ModDetails.svelte';
@@ -24,8 +24,9 @@
   import { error, expandedMod, siteURL } from '$lib/store/generalStore';
   import { konami, language, updateCheckMode } from '$lib/store/settingsStore';
   import { smmUpdate, smmUpdateReady } from '$lib/store/smmUpdateStore';
-  import { ExpandMod, GenerateDebugInfo, UnexpandMod } from '$wailsjs/go/app/app';
+  import { ExpandMod, UnexpandMod } from '$wailsjs/go/app/app';
   import { Environment, EventsOn } from '$wailsjs/runtime';
+  import ErrorDetails from '$lib/components/modals/ErrorDetails.svelte';
 
   initializeStores();
   initializeModalStore();
@@ -235,34 +236,18 @@
               focusOnEntry.focus();
             }}>
             <div class="card my-auto mr-4">
-              <header class="card-header font-bold text-2xl text-center">
-                {#if noInstallsError}
-                  <T defaultValue="No Satisfactory installs found" keyName="error.no_installs" />
-                {:else}
-                  <T defaultValue={'{invalidInstalls} invalid Satisfactory {invalidInstalls, plural, one {install} other {installs}} found'} keyName="error.invalid_installs" params={{ invalidInstalls: $invalidInstalls.length }} />
-                {/if}
-              </header>
-              <section class="p-4">
-                <p class="text-base text-center">
-                  <T
-                    defaultValue="Seems wrong? Click the button below and send the generated zip file on the <1>modding discord</1> in #help-using-mods."
-                    keyName="error.help"
-                    parts={[
-                      translationElementPart('a', {
-                        href: 'https://discord.ficsit.app/',
-                        class: 'text-primary-600 underline',
-                      }),
-                    ]}
+              <ErrorDetails
+                error={""}
+                parent={{onClose: () => {}}}
+                fullPageMode={true}
+              >
+                <!-- Svelte slots don't support dynamic passing, so this is kinda ugly. Switch to snippets once in svelte 5 https://github.com/sveltejs/svelte/issues/7651-->
+                <T slot="title"
+                  defaultValue={ noInstallsError ? "No Satisfactory installs found" : "{invalidInstalls} invalid Satisfactory {invalidInstalls, plural, one {install} other {installs}} found"}
+                  keyName={ noInstallsError ? "error.no_installs" : "error.invalid_installs"}
+                  params={{ invalidInstalls: $invalidInstalls.length }}
                   />
-                </p>
-              </section>
-              <footer class="card-footer">
-                <button
-                  class="btn text-primary-600 w-full"
-                  on:click={GenerateDebugInfo}>
-                  <T defaultValue="Generate debug info" keyName="error.generate_debug_info" />
-                </button>
-              </footer>
+              </ErrorDetails>
             </div>
           </ModsList>
         </div>
