@@ -220,6 +220,7 @@ func (a *app) GenerateDebugInfo() bool {
 		return false
 	}
 	if filename == "" {
+		slog.Error("failed to save, filename was empty, the user might have cancelled the dialog")
 		return false
 	}
 
