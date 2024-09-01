@@ -30,7 +30,7 @@
   };
 
   let OpenDiscord = () => {
-    BrowserOpenURL("https://discord.gg/xkVJ73E");
+    BrowserOpenURL("https://discord.ficsit.app/");
   };
 
   export let error: string;

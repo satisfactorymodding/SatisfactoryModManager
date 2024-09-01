@@ -378,7 +378,7 @@
       </button>
       <button
         class="btn w-full bg-surface-200-700-token px-4 h-8 text-sm"
-        on:click={() => BrowserOpenURL('https://discord.gg/xkVJ73E')}>
+        on:click={() => BrowserOpenURL('https://discord.ficsit.app/')}>
         <span>
           <T defaultValue="Satisfactory Modding Discord" keyName="left-bar.satisfactory-modding-discord"/>
         </span>

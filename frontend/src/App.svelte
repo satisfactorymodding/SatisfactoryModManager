@@ -249,7 +249,7 @@
                     keyName="error.help"
                     parts={[
                       translationElementPart('a', {
-                        href: 'https://discord.gg/xkVJ73E',
+                        href: 'https://discord.ficsit.app/',
                         class: 'text-primary-600 underline',
                       }),
                     ]}
