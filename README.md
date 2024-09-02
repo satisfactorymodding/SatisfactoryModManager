@@ -86,6 +86,12 @@ Then, to run it, use:
 golangci-lint run --fix
 ```
 
+You may also need to manually run the frontend linter. First, navigate to the `frontend` directory, then run:
+
+```bash
+pnpm run format
+```
+
 ### Localization
 
 If you'd like to help translate and localize SMM to different languages, join our [discord server](https://discord.ficsit.app/).

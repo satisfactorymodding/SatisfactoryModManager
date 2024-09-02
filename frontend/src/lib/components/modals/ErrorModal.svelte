@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { T } from "@tolgee/svelte";
-  import ErrorDetails from "./ErrorDetails.svelte";
+  import { T } from '@tolgee/svelte';
+
+  import ErrorDetails from './ErrorDetails.svelte';
 
   export let parent: { onClose: () => void };
 

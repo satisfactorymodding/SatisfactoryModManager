@@ -10,6 +10,7 @@
   import TitleBar from '$lib/components/TitleBar.svelte';
   import LeftBar from '$lib/components/left-bar/LeftBar.svelte';
   import ModDetails from '$lib/components/mod-details/ModDetails.svelte';
+  import ErrorDetails from '$lib/components/modals/ErrorDetails.svelte';
   import ErrorModal from '$lib/components/modals/ErrorModal.svelte';
   import ExternalInstallMod from '$lib/components/modals/ExternalInstallMod.svelte';
   import { supportedProgressTypes } from '$lib/components/modals/ProgressModal.svelte';
@@ -26,7 +27,6 @@
   import { smmUpdate, smmUpdateReady } from '$lib/store/smmUpdateStore';
   import { ExpandMod, UnexpandMod } from '$wailsjs/go/app/app';
   import { Environment, EventsOn } from '$wailsjs/runtime';
-  import ErrorDetails from '$lib/components/modals/ErrorDetails.svelte';
 
   initializeStores();
   initializeModalStore();
@@ -237,16 +237,17 @@
             }}>
             <div class="card my-auto mr-4">
               <ErrorDetails
-                error={""}
-                parent={{onClose: () => {}}}
+                error={''}
                 fullPageMode={true}
+                parent={{ onClose: () => {} }}
               >
                 <!-- Svelte slots don't support dynamic passing, so this is kinda ugly. Switch to snippets once in svelte 5 https://github.com/sveltejs/svelte/issues/7651-->
-                <T slot="title"
-                  defaultValue={ noInstallsError ? "No Satisfactory installs found" : "{invalidInstalls} invalid Satisfactory {invalidInstalls, plural, one {install} other {installs}} found"}
-                  keyName={ noInstallsError ? "error.no_installs" : "error.invalid_installs"}
+                <T
+                  slot="title"
+                  defaultValue={noInstallsError ? 'No Satisfactory installs found' : '{invalidInstalls} invalid Satisfactory {invalidInstalls, plural, one {install} other {installs}} found'}
+                  keyName={noInstallsError ? 'error.no_installs' : 'error.invalid_installs'}
                   params={{ invalidInstalls: $invalidInstalls.length }}
-                  />
+                />
               </ErrorDetails>
             </div>
           </ModsList>
