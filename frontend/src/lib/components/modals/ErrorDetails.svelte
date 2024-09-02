@@ -2,8 +2,8 @@
   import { getTranslate } from '@tolgee/svelte';
 
   import T from '$lib/components/T.svelte';
-  import { BrowserOpenURL } from '$lib/generated/wailsjs/runtime/runtime';
   import { GenerateDebugInfo } from '$wailsjs/go/app/app';
+  import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
 
   export let parent: { onClose: () => void };
 
