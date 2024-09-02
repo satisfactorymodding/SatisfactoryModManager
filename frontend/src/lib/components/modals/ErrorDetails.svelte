@@ -42,7 +42,6 @@
 <!-- Replace with svelte snippets once in Svelte 5 -->
 <header class="card-header font-bold text-2xl text-center">
   <slot name="title" />
-  <!-- <T defaultValue="Something went wrong" keyName="error.title" /> -->
 </header>
 <section class={`${sectionClass} overflow-y-auto`}>
   <p>{error}</p>
