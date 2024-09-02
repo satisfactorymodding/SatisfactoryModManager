@@ -364,7 +364,9 @@
       </button>
     </div>
     <div class="flex flex-col gap-2">
-      <span class="pl-4 sticky top-0 z-[1] bg-surface-50-900-token">Links</span>
+      <span class="pl-4 sticky top-0 z-[1] bg-surface-50-900-token">
+        <T defaultValue="Links" keyName="left-bar.links"/>
+      </span>
       <button
         class="btn w-full bg-surface-200-700-token px-4 h-8 text-sm"
         on:click={() => BrowserOpenURL($siteURL)}>

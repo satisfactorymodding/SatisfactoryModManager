@@ -13,7 +13,9 @@
   import ErrorDetails from '$lib/components/modals/ErrorDetails.svelte';
   import ErrorModal from '$lib/components/modals/ErrorModal.svelte';
   import ExternalInstallMod from '$lib/components/modals/ExternalInstallMod.svelte';
+  import MigrationModal from '$lib/components/modals/MigrationModal.svelte';
   import { supportedProgressTypes } from '$lib/components/modals/ProgressModal.svelte';
+  import FirstTimeSetupModal from '$lib/components/modals/first-time-setup/FirstTimeSetupModal.svelte';
   import { modalRegistry } from '$lib/components/modals/modalsRegistry';
   import ImportProfile from '$lib/components/modals/profiles/ImportProfile.svelte';
   import { isUpdateOnStart } from '$lib/components/modals/smmUpdate/smmUpdate';
@@ -161,6 +163,34 @@
       },
     }, true);
     $error = null;
+  }
+
+  const displayMigrationModal = true; // TODO testing the migrate popup, what should the real condition be?
+
+  $: if (displayMigrationModal) {
+    modalStore.trigger({
+      type: 'component',
+      component: {
+        ref: MigrationModal,
+      },
+      meta: {
+        persistent: true,
+      },
+    });
+  }
+
+  const firstTimeSetupModal = true; // TODO testing the first time setup popup, what should the real condition be?
+
+  $: if (firstTimeSetupModal) {
+    modalStore.trigger({
+      type: 'component',
+      component: {
+        ref: FirstTimeSetupModal,
+      },
+      meta: {
+        persistent: true,
+      },
+    });
   }
 
   EventsOn('externalInstallMod', (modReference: string, version: string) => {

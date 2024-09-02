@@ -3,7 +3,7 @@
 Mod manager for [Satisfactory](https://www.satisfactorygame.com/).
 Handles all the steps of installing mods for you.
 
-Implemented in [Wails](https://wails.io/).
+Implemented in [Wails](https://wails.io/) using [Svelte](https://svelte.dev/) and [Skeleton](https://www.skeleton.dev/).
 
 ## Installation and Usage
 
