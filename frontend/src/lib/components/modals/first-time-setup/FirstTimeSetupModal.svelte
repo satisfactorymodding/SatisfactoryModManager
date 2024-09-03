@@ -32,8 +32,8 @@
     </p>
   </section>
   <section class="px-4 overflow-y-auto">
-    <dl class="list-dl">
-      <div>
+    <ul class="list">
+      <li>
         <span class="badge bg-tertiary-500">
           <SvgIcon
             class="h-5 w-5"
@@ -41,8 +41,8 @@
           />
         </span>
         <span class="flex-auto">
-          <dt class="text-lg"><T defaultValue="When I add or remove a mod, or switch profiles..." keyName="first_time_setup.option.queue-auto-start.title" /></dt>
-          <dd class="text-base">
+          <p class="text-lg"><T defaultValue="When I add or remove a mod, or switch profiles..." keyName="first_time_setup.option.queue-auto-start.title" /></p>
+          <p class="text-base">
             <span class="flex-auto">
               <SlideToggle
                 name="slider-queue" 
@@ -56,7 +56,7 @@
                     />
                   {:else}
                     <T
-                      defaultValue='Wait for me to press "Apply" to apply the change.'
+                      defaultValue='Queue the change and wait for me to press "Apply" to enact queued changes.'
                       keyName="first_time_setup.option.queue-auto-start.enabled"
                     />
                   {/if}
@@ -64,21 +64,21 @@
               </SlideToggle>
             </span>
         </span>
-      </div>
-      <div>
+      </li>
+      <li>
         <span class="badge bg-tertiary-500 text-lg">
           <SvgIcon
             class="h-5 w-5"
             icon={mdiWeb}
           />
         </span>
-        <span class="flex-auto">
-          <dt class="text-lg"><T defaultValue="Use this language where available:" keyName="first_time_setup.option.language.title" /></dt>
-          <dd class="text-base">
+        <span class="w-full">
+          <p class="text-lg"><T defaultValue="Use this language where available:" keyName="first_time_setup.option.language.title" /></p>
+          <p class="text-base">
             <LanguageSelector />
         </span>
-      </div>
-    </dl>
+      </li>
+    </ul>
   </section>
   <section class="px-4">
     <p class="text-base text-center">

@@ -26,50 +26,50 @@
     </p>
   </section>
   <section class="px-4 overflow-y-auto">
-    <dl class="list-dl">
+    <ul class="list-dl">
       <div>
         <span class="badge bg-primary-800 text-lg">+</span>
-        <span class="flex-auto">
-          <dt class="text-lg"><T defaultValue="Dedicated server management" keyName="smm2_migration.feature.servers" /></dt>
+        <span class="flex-auto text-lg">
+          <T defaultValue="Dedicated server management" keyName="smm2_migration.feature.servers" />
         </span>
       </div>
       <div>
         <span class="badge bg-primary-800 text-lg">+</span>
-        <span class="flex-auto">
-          <dt class="text-lg"><T defaultValue="User interface refresh" keyName="smm2_migration.feature.ui" /></dt>
+        <span class="flex-auto text-lg">
+          <T defaultValue="User interface refresh" keyName="smm2_migration.feature.ui" />
         </span>
       </div>
       <div>
         <span class="badge bg-primary-800 text-lg">+</span>
-        <span class="flex-auto">
-          <dt class="text-lg"><T defaultValue="Translation support" keyName="smm2_migration.feature.translation" /></dt>
+        <span class="flex-auto text-lg">
+          <T defaultValue="Translation support" keyName="smm2_migration.feature.translation" />
         </span>
       </div>
       <div>
         <span class="badge bg-primary-800 text-lg">+</span>
-        <span class="flex-auto">
-          <dt class="text-lg"><T defaultValue="Action queueing" keyName="smm2_migration.feature.queue" /></dt>
+        <span class="flex-auto text-lg">
+          <T defaultValue="Action queueing" keyName="smm2_migration.feature.queue" />
         </span>
       </div>
       <div>
         <span class="badge bg-primary-800 text-lg">+</span>
-        <span class="flex-auto">
-          <dt class="text-lg"><T defaultValue="Native Linux + Mac support" keyName="smm2_migration.feature.platform_support" /></dt>
+        <span class="flex-auto text-lg">
+          <T defaultValue="Native Linux + Mac support" keyName="smm2_migration.feature.platform_support" />
         </span>
       </div>
       <div>
         <span class="badge bg-tertiary-800 text-lg">+</span>
-        <span class="flex-auto">
-          <dt class="text-lg"><T defaultValue="Improved performance" keyName="smm2_migration.feature.performance" /></dt>
+        <span class="flex-auto text-lg">
+          <T defaultValue="Improved performance" keyName="smm2_migration.feature.performance" />
         </span>
       </div>
       <div>
         <span class="badge bg-warning-800 text-lg">⚠</span>
-        <span class="flex-auto">
-          <dt class="text-lg"><T defaultValue="New profile format" keyName="smm2_migration.feature.profile_format" /></dt>
+        <span class="flex-auto text-lg">
+          <T defaultValue="New profile format" keyName="smm2_migration.feature.profile_format" />
         </span>
       </div>
-    </dl>
+    </ul>
   </section>
   <section class="px-4">
     <p class="text-base text-center">
