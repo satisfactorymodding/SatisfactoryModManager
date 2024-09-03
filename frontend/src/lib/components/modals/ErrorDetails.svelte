@@ -72,7 +72,7 @@
   </p>
 </section>
 <section class={sectionClass}>
-  <p class="text-base">
+  <p class={`text-base ${fullPageMode ? 'text-center' : ''}`}>
     <button
       class="btn text-primary-600 variant-ringed"
       on:click={onClickGenerateDebugInfo}
@@ -99,7 +99,7 @@
   </p>
 </section>
 {#if debugFileGenerationError}
-  <section class={sectionClass}>
+  <section class={`${sectionClass} ${fullPageMode ? 'text-center' : ''}`}>
     <p class="text-base text-red-500">
       <T
         defaultValue="An error occurred while generating the debug file. Please manually check your Satisfactory Mod Manager log files for more information and report this on the Discord. Use the button below to open the documentation and learn how."
@@ -107,7 +107,7 @@
       />
     </p>
   </section>
-  <section class={sectionClass}>
+  <section class={`${sectionClass} ${fullPageMode ? 'text-center' : ''}`}>
     <button
       class="btn text-primary-600 variant-ringed"
       on:click={OpenLogDocs}
