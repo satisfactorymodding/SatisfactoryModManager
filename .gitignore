@@ -2,8 +2,10 @@
 dist
 *.syso
 
-
 .DS_Store
+
+# Specifically allow the provided code workspace with the multi-root workaround
+!.vscode/SatisfactoryModManager.code-workspace
 
 # Created by https://www.toptal.com/developers/gitignore/api/goland+all,go,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=goland+all,go,visualstudiocode
@@ -126,8 +128,6 @@ fabric.properties
 !.vscode/launch.json
 !.vscode/extensions.json
 !.vscode/*.code-snippets
-# Specifically allow the provided code workspace with the multi-root workaround
-!.vscode/SatisfactoryModManager.code-workspace
 
 # Local History for Visual Studio Code
 .history/

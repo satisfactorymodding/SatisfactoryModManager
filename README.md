@@ -73,7 +73,7 @@ or run `pnpm translations` to update the translation data.
 
 Make sure that your IDE is connecting with the frontend's installation of ESLint to get the best experience.
 
-VSCode users, a preconfigured workspace is provided in `./vscode`
+VSCode users, a preconfigured workspace is provided in `.vscode/`
 that allows editing both Go and Svelte files
 while maintaining correct ESLint functionality.
 

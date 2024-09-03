@@ -239,15 +239,20 @@
               <ErrorDetails
                 error={''}
                 fullPageMode={true}
-                parent={{ onClose: () => {} }}
               >
-                <!-- Svelte slots don't support dynamic passing, so this is kinda ugly. Switch to snippets once in svelte 5 https://github.com/sveltejs/svelte/issues/7651-->
-                <T
-                  slot="title"
-                  defaultValue={noInstallsError ? 'No Satisfactory installs found' : '{invalidInstalls} invalid Satisfactory {invalidInstalls, plural, one {install} other {installs}} found'}
-                  keyName={noInstallsError ? 'error.no_installs' : 'error.invalid_installs'}
-                  params={{ invalidInstalls: $invalidInstalls.length }}
-                />
+                <svelte:fragment slot="title">
+                  {#if noInstallsError}
+                    <T
+                      defaultValue="No Satisfactory installs found"
+                      keyName="error.no_installs"
+                    />
+                  {:else}
+                    <T
+                      defaultValue={'{invalidInstalls} invalid Satisfactory {invalidInstalls, plural, one {install} other {installs}} found'}
+                      keyName="error.invalid_installs"
+                      params={{ invalidInstalls: $invalidInstalls.length }} />
+                  {/if}
+                </svelte:fragment>
               </ErrorDetails>
             </div>
           </ModsList>
