@@ -204,7 +204,7 @@ func (a *app) generateAndSaveDebugInfo(filename string) error {
 	return nil
 }
 
-func (a *app) GenerateDebugInfo() bool {
+func (a *app) GenerateDebugInfo() (bool, error) {
 	defaultFileName := fmt.Sprintf("SMMDebug-%s.zip", time.Now().UTC().Format("2006-01-02-15-04-05"))
 	filename, err := wailsRuntime.SaveFileDialog(appCommon.AppContext, wailsRuntime.SaveDialogOptions{
 		DefaultFilename: defaultFileName,
@@ -216,18 +216,17 @@ func (a *app) GenerateDebugInfo() bool {
 		},
 	})
 	if err != nil {
-		slog.Error("failed to open save dialog", slog.Any("error", err))
-		return false
+		return false, fmt.Errorf("failed to open save dialog: %w", err)
 	}
 	if filename == "" {
-		return false
+		// user canceled the save dialog
+		return false, nil
 	}
 
 	err = a.generateAndSaveDebugInfo(filename)
 	if err != nil {
-		slog.Error("failed to generate debug info", slog.Any("error", err))
-		return false
+		return false, fmt.Errorf("failed to generate debug info: %w", err)
 	}
 
-	return true
+	return true, nil
 }

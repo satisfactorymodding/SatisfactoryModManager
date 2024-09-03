@@ -1,0 +1,35 @@
+{
+	// Needed for vscode ESLint to work
+	// https://stackoverflow.com/questions/47405315/visual-studio-code-and-subfolder-specific-settings
+	"folders": [
+		{
+			"name": "root",
+			"path": "../."
+		},
+		{
+			"path": "../frontend"
+		},
+		{
+			"path": "../backend"
+		}
+	],
+	"settings": {
+		"files.exclude": {
+			"**/.git": true,
+			"backend": true,
+			"frontend": true
+		},
+	},
+	"extensions": {
+		"recommendations": [
+			"svelte.svelte-vscode",
+			"streetsidesoftware.code-spell-checker",
+			"dbaeumer.vscode-eslint",
+			"davidanson.vscode-markdownlint",
+			"herrmannplatz.npm-dependency-links",
+			"medo64.render-crlf",
+			"redhat.vscode-yaml",
+			"golang.go"
+		]
+	}
+}

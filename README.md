@@ -69,6 +69,14 @@ Although `wails dev` should run these commands for you under normal circumstance
 you may need to run `pnpm graphql-codegen` in the `frontend` directory to update the code generated from the SMR API,
 or run `pnpm translations` to update the translation data.
 
+### IDE Configuration
+
+Make sure that your IDE is connecting with the frontend's installation of ESLint to get the best experience.
+
+VSCode users, a preconfigured workspace is provided in `.vscode/`
+that allows editing both Go and Svelte files
+while maintaining correct ESLint functionality.
+
 ### Building
 
 ```bash
@@ -84,6 +92,12 @@ Then, to run it, use:
 
 ```bash
 golangci-lint run --fix
+```
+
+You may also need to manually run the frontend linter. First, navigate to the `frontend` directory, then run:
+
+```bash
+pnpm run format
 ```
 
 ### Localization
