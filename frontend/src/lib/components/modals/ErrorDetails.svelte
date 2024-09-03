@@ -29,7 +29,6 @@
         allowOpeningDiscord = true;
       }
     } catch (error) {
-      LogError(`GenerateDebugInfo failed: ${error}`);
       debugFileGenerationError = true;
       // Enable the Discord button so they can report the error
       allowOpeningDiscord = true;
@@ -121,7 +120,6 @@
 {/if}
 {#if !fullPageMode}
   <footer class="card-footer">
-    <!-- Must lambda the onClose call for type matching to be happy -->
     <button class="btn" on:click={onClose}>
       <T defaultValue="Close" keyName="common.close" />
     </button>

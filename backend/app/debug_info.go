@@ -216,8 +216,7 @@ func (a *app) GenerateDebugInfo() (bool, error) {
 		},
 	})
 	if err != nil {
-		slog.Error("failed to open save dialog", slog.Any("error", err))
-		return false, err
+		return false, fmt.Errorf("failed to open save dialog: %w", err)
 	}
 	if filename == "" {
 		// user canceled the save dialog
@@ -226,8 +225,7 @@ func (a *app) GenerateDebugInfo() (bool, error) {
 
 	err = a.generateAndSaveDebugInfo(filename)
 	if err != nil {
-		slog.Error("failed to generate debug info", slog.Any("error", err))
-		return false, err
+		return false, fmt.Errorf("failed to generate debug info: %w", err)
 	}
 
 	return true, nil
