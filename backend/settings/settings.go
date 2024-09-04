@@ -65,6 +65,8 @@ type settings struct {
 	CacheDir string `json:"cacheDir,omitempty"`
 
 	Debug bool `json:"debug,omitempty"`
+
+	NewUserSetupComplete bool `json:"newUserSetupComplete,omitempty"`
 }
 
 var Settings = &settings{
@@ -95,6 +97,18 @@ var Settings = &settings{
 	LaunchButton: "normal",
 
 	Debug: false,
+
+	NewUserSetupComplete: false,
+}
+
+func (s *settings) GetNewUserSetupComplete() bool {
+	return s.Debug
+}
+
+func (s *settings) SetNewUserSetupComplete(value bool) {
+	slog.Info("changing NewUserSetupComplete state", slog.Bool("value", value))
+	s.NewUserSetupComplete = value
+	_ = SaveSettings()
 }
 
 func (s *settings) FavoriteMod(modReference string) (bool, error) {

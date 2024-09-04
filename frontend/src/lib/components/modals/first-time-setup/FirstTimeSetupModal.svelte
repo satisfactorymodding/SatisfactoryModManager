@@ -7,6 +7,7 @@
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { queueAutoStart } from '$lib/store/settingsStore';
+  import { SetNewUserSetupComplete } from '$wailsjs/go/settings/settings';
   import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
 
   export let parent: { onClose: () => void };
@@ -14,6 +15,11 @@
   const OpenWelcomeGuide = () => {
     BrowserOpenURL('https://docs.ficsit.app/satisfactory-modding/latest/ForUsers/Welcome.html');
   };
+
+  function onClose() {
+    SetNewUserSetupComplete(true);
+    parent.onClose();
+  }
 </script>
 
 <div
@@ -102,7 +108,7 @@
     </p>
   </section>
   <footer class="card-footer">
-    <button class="btn" on:click={parent.onClose}>
+    <button class="btn" on:click={onClose}>
       <T defaultValue="Close" keyName="common.close" />
     </button>
   </footer>

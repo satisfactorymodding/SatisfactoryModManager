@@ -28,7 +28,9 @@
   import { konami, language, updateCheckMode } from '$lib/store/settingsStore';
   import { smmUpdate, smmUpdateReady } from '$lib/store/smmUpdateStore';
   import { ExpandMod, UnexpandMod } from '$wailsjs/go/app/app';
-  import { Environment, EventsOn } from '$wailsjs/runtime';
+  import { NeedsSmm2Migration } from '$wailsjs/go/migration/migration';
+  import { GetNewUserSetupComplete } from '$wailsjs/go/settings/settings';
+  import { Environment, EventsOn, LogError } from '$wailsjs/runtime';
 
   initializeStores();
   initializeModalStore();
@@ -165,8 +167,7 @@
     $error = null;
   }
 
-  const displayMigrationModal = true; // TODO testing the migrate popup, what should the real condition be?
-
+  let displayMigrationModal = false;
   $: if (displayMigrationModal) {
     modalStore.trigger({
       type: 'component',
@@ -179,9 +180,8 @@
     });
   }
 
-  const firstTimeSetupModal = true; // TODO testing the first time setup popup, what should the real condition be?
-
-  $: if (firstTimeSetupModal) {
+  let displayFirstTimeSetupModal = false;
+  $: if (displayFirstTimeSetupModal) {
     modalStore.trigger({
       type: 'component',
       component: {
@@ -192,6 +192,25 @@
       },
     });
   }
+
+  // Order of checks is intentional
+  // TODO overzealous error checking?
+  NeedsSmm2Migration().then((needsMigration) => {
+    if (needsMigration) {
+      // TODO actually perform profile migration
+      displayMigrationModal = true;
+    }
+  }).catch((err) => {
+    $error = `failed to check if SMM2 migration is needed: ${err}`;
+  }).then(() => {
+    GetNewUserSetupComplete().then((wasSetupCompleted) => {
+      if (!wasSetupCompleted) {
+        displayFirstTimeSetupModal = true;
+      }
+    }).catch((err) => {
+      $error = `failed to check if new user setup is needed: ${err}`;
+    });
+  });
 
   EventsOn('externalInstallMod', (modReference: string, version: string) => {
     if (!modReference) return;
