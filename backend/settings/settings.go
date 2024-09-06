@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	psUtilDisk "github.com/shirou/gopsutil/v3/disk"
 	"github.com/spf13/viper"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
@@ -326,6 +327,23 @@ func ValidateCacheDir(dir string) error {
 		}
 	}
 	return nil
+}
+
+// GetCacheDirDiskSpaceLeft returns the amount of disk space left on the cache directory's disk in bytes
+func (s *settings) GetCacheDirDiskSpaceLeft() (uint64, error) {
+	cacheDir := s.GetCacheDir()
+	err := ValidateCacheDir(cacheDir)
+
+	if err != nil {
+		return 0, fmt.Errorf("cache directory to check space on failed to validate: %w", err)
+	} else {
+		usage, err := psUtilDisk.Usage(cacheDir)
+		if err != nil {
+			return 0, fmt.Errorf("failed to get disk free space: %w", err)
+		} else {
+			return usage.Free, nil
+		}
+	}
 }
 
 func moveCacheDir(newDir string) error {

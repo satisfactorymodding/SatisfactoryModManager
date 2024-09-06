@@ -25,12 +25,12 @@
   import { getModalStore, initializeModalStore } from '$lib/skeletonExtensions';
   import { installs, invalidInstalls, progress } from '$lib/store/ficsitCLIStore';
   import { error, expandedMod, siteURL } from '$lib/store/generalStore';
-  import { konami, language, updateCheckMode } from '$lib/store/settingsStore';
+  import { cacheDir, konami, language, updateCheckMode } from '$lib/store/settingsStore';
   import { smmUpdate, smmUpdateReady } from '$lib/store/smmUpdateStore';
   import { ExpandMod, UnexpandMod } from '$wailsjs/go/app/app';
   import { NeedsSmm2Migration } from '$wailsjs/go/migration/migration';
-  import { GetNewUserSetupComplete } from '$wailsjs/go/settings/settings';
-  import { Environment, EventsOn, LogError } from '$wailsjs/runtime';
+  import { GetCacheDirDiskSpaceLeft, GetNewUserSetupComplete } from '$wailsjs/go/settings/settings';
+  import { Environment, EventsOn } from '$wailsjs/runtime';
 
   initializeStores();
   initializeModalStore();
@@ -142,11 +142,23 @@
           meta: {
             persistent: true,
           },
-        });      
+        });
       }
     }
   }
-  
+
+  cacheDir.subscribe((cacheDirectory) => {
+    GetCacheDirDiskSpaceLeft().then((spaceLeftBytes) => {
+      if (spaceLeftBytes < 10e9) {
+        const spaceLeftGbReadable = (spaceLeftBytes * 1e-9).toFixed(1);
+        $error = `The drive your cache directory is on (${cacheDirectory}) is very low on disk space (Only ~${spaceLeftGbReadable} GB left). Please free up some space or move the cache directory to another drive in the Mod Manager Settings.`;
+      }
+    }).catch((err) => {
+      $error = `failed to check cache directory disk space left: ${err}`;
+    });
+  });
+
+
   $: if ($smmUpdateReady && $updateCheckMode === 'ask') {
     modalStore.trigger({
       type: 'component',
