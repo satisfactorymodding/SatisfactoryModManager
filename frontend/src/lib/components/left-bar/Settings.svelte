@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { mdiBug, mdiCheck, mdiCheckboxBlankOutline, mdiCheckboxMarkedOutline, mdiChevronRight, mdiClipboard, mdiCog, mdiDownload, mdiFolderEdit, mdiLanConnect, mdiTune } from '@mdi/js';
+  import { mdiBug, mdiCheck, mdiCheckboxBlankOutline, mdiCheckboxMarkedOutline, mdiChevronRight, mdiClipboard, mdiCog, mdiDownload, mdiEggEaster, mdiFolderEdit, mdiLanConnect, mdiTune } from '@mdi/js';
   import { ListBox, ListBoxItem } from '@skeletonlabs/skeleton';
   import { getTranslate } from '@tolgee/svelte';
   import { getContextClient } from '@urql/svelte';
@@ -465,7 +465,7 @@
       {#if $konami}
         <hr class="divider" />
         <li class="section-header">
-          <span class="h-5 w-5"><SvgIcon class="h-full w-full" icon={mdiCog}/></span>
+          <span class="h-5 w-5"><SvgIcon class="h-full w-full" icon={mdiEggEaster}/></span>
           <span class="flex-auto">
             <T defaultValue="Secret settings" keyName="settings.secret-settings"/>
           </span>
