@@ -23,6 +23,10 @@ func (f *ficsitCLI) initLocalInstallationsMetadata() error {
 
 	f.installFindErrors = findErrors
 
+	for _, findErr := range findErrors {
+		slog.Info("failed to find installations", slog.Any("error", findErr))
+	}
+
 	fallbackProfile := f.GetFallbackProfile()
 
 	createdNewInstalls := false

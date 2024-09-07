@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -41,53 +42,69 @@ type Metadata struct {
 	ModsEnabled          bool                    `json:"modsEnabled"`
 }
 
-func addFactoryGameLogs(writer *zip.Writer) error {
+func addDefaultFactoryGameLog(writer *zip.Writer) error {
 	cacheDir, err := os.UserCacheDir()
 	if err != nil {
 		return fmt.Errorf("failed to get user cache dir: %w", err)
 	}
 	err = utils.AddFileToZip(writer, filepath.Join(cacheDir, "FactoryGame", "Saved", "Logs", "FactoryGame.log"), "FactoryGame.log")
 	if err != nil {
-		if !errors.Is(err, os.ErrNotExist) {
-			return fmt.Errorf("failed to add file to zip: %w", err)
+		if errors.Is(err, os.ErrNotExist) {
+			if runtime.GOOS != "windows" {
+				// On non-Windows systems the game is not running natively,
+				// so the log file does not exist
+				return nil
+			}
+			return fmt.Errorf("log does not exist")
 		}
+		return fmt.Errorf("failed to add FactoryGame.log to zip: %w", err)
+	}
+	return nil
+}
+
+func addInstallFactoryGameLog(writer *zip.Writer, install *common.Installation) error {
+	logPath := filepath.Join(install.SavedPath, "Logs", "FactoryGame.log")
+	d, err := ficsitcli.FicsitCLI.GetInstallation(install.Path).GetDisk()
+	if err != nil {
+		return fmt.Errorf("failed to get disk for installation: %w", err)
+	}
+	logExists, err := d.Exists(logPath)
+	if err != nil {
+		return fmt.Errorf("failed to check if log exists: %w", err)
+	}
+	if !logExists {
+		return fmt.Errorf("log does not exist")
+	}
+	bytes, err := d.Read(logPath)
+	if err != nil {
+		return fmt.Errorf("failed to read log file: %w", err)
+	}
+	logFile, err := writer.Create(getLogNameForInstall(install))
+	if err != nil {
+		return fmt.Errorf("failed to create log file in zip: %w", err)
+	}
+	_, err = logFile.Write(bytes)
+	if err != nil {
+		return fmt.Errorf("failed to write log file to zip: %w", err)
+	}
+	return nil
+}
+
+func addFactoryGameLogs(writer *zip.Writer) {
+	err := addDefaultFactoryGameLog(writer)
+	if err != nil {
+		slog.Warn("failed to add default FactoryGame.log to debuginfo zip", slog.Any("error", err))
 	}
 	for _, meta := range ficsitcli.FicsitCLI.GetInstallationsMetadata() {
 		if meta.Info == nil {
 			continue
 		}
 
-		logPath := filepath.Join(meta.Info.SavedPath, "Logs", "FactoryGame.log")
-		d, err := ficsitcli.FicsitCLI.GetInstallation(meta.Info.Path).GetDisk()
+		err := addInstallFactoryGameLog(writer, meta.Info)
 		if err != nil {
-			slog.Warn("failed to get disk for installation", slog.String("path", meta.Info.Path), slog.Any("error", err))
-			continue
-		}
-		logExists, err := d.Exists(logPath)
-		if err != nil {
-			slog.Warn("failed to check if log exists", slog.String("path", logPath), slog.Any("error", err))
-			continue
-		}
-		if !logExists {
-			continue
-		}
-		bytes, err := d.Read(logPath)
-		if err != nil {
-			slog.Warn("failed to read log file", slog.String("path", logPath), slog.Any("error", err))
-			continue
-		}
-		logFile, err := writer.Create(getLogNameForInstall(meta.Info))
-		if err != nil {
-			slog.Warn("failed to create log file in zip", slog.Any("error", err))
-			continue
-		}
-		_, err = logFile.Write(bytes)
-		if err != nil {
-			slog.Warn("failed to write log file to zip", slog.Any("error", err))
-			continue
+			slog.Warn("failed to add FactoryGame.log to debuginfo zip", slog.String("path", meta.Info.Path), slog.Any("error", err))
 		}
 	}
-	return nil
 }
 
 func getLogNameForInstall(install *common.Installation) string {
@@ -133,7 +150,7 @@ func addMetadata(writer *zip.Writer) error {
 
 	lockfile, err := ficsitcli.FicsitCLI.GetSelectedInstallLockfile()
 	if err != nil {
-		return fmt.Errorf("failed to get lockfile: %w", err)
+		slog.Warn("failed to get lockfile for debuginfo", slog.Any("error", err))
 	}
 
 	metadataInstalledMods := make(map[string]string)
@@ -185,14 +202,11 @@ func (a *app) generateAndSaveDebugInfo(filename string) error {
 	writer := zip.NewWriter(file)
 	defer writer.Close()
 
-	err = addFactoryGameLogs(writer)
-	if err != nil {
-		return fmt.Errorf("failed to add FactoryGame.log to debuginfo zip: %w", err)
-	}
+	addFactoryGameLogs(writer)
 
 	err = addMetadata(writer)
 	if err != nil {
-		return fmt.Errorf("failed to add metadata to debuginfo zip: %w", err)
+		slog.Warn("failed to add metadata to debuginfo zip", slog.Any("error", err))
 	}
 
 	// Add SMM log last, as it may list errors from previous steps
@@ -216,6 +230,7 @@ func (a *app) GenerateDebugInfo() (bool, error) {
 		},
 	})
 	if err != nil {
+		slog.Error("failed to open save dialog", slog.Any("error", err))
 		return false, fmt.Errorf("failed to open save dialog: %w", err)
 	}
 	if filename == "" {
@@ -225,6 +240,7 @@ func (a *app) GenerateDebugInfo() (bool, error) {
 
 	err = a.generateAndSaveDebugInfo(filename)
 	if err != nil {
+		slog.Error("failed to generate debug info", slog.Any("error", err))
 		return false, fmt.Errorf("failed to generate debug info: %w", err)
 	}
 
