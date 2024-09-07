@@ -103,7 +103,7 @@ var Settings = &settings{
 }
 
 func (s *settings) GetNewUserSetupComplete() bool {
-	return s.Debug
+	return s.NewUserSetupComplete
 }
 
 func (s *settings) SetNewUserSetupComplete(value bool) {
