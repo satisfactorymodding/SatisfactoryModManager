@@ -1,3 +1,5 @@
+version: 2
+
 project_name: SatisfactoryModManager
 
 before:
@@ -117,10 +119,12 @@ archives:
 checksum:
   name_template: 'checksums.txt'
 
+report_sizes: true
+
 ### Release
 
 snapshot:
-  name_template: '{{ .Version }}+{{ if ne .Branch "master" }}{{ .Branch }}.{{ end }}{{ .ShortCommit }}'
+  version_template: '{{ .Version }}+{{ if ne .Branch "master" }}{{ .Branch }}.{{ end }}{{ .ShortCommit }}'
 
 release:  
   draft: true
@@ -139,3 +143,9 @@ release:
     | | [Download (AppImage)](https://github.com/satisfactorymodding/SatisfactoryModManager/releases/download/v{{.Version}}/SatisfactoryModManager_linux_amd64.AppImage) | |
     
     If you already have Satisfactory Mod Manager installed, you don't need to download it again, it will auto-update.
+
+  templated_extra_files:
+    - src: ./build/smm2/latest.yml.tmpl
+      dst: latest.yml
+    - src: ./build/smm2/latest-linux.yml.tmpl
+      dst: latest-linux.yml

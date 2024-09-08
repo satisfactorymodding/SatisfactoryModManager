@@ -1,0 +1,22 @@
+{{- $buildArtifactName := "SatisfactoryModManager.AppImage" }}
+{{- $uploadableArtifactName := "SatisfactoryModManager_linux_amd64.AppImage" }}
+{{- /* checksum is set on uploadable binaries, size is set on build binaries */ -}}
+{{- $buildArtifact := 0 }}
+{{- $uploadableArtifact := 0 }}
+{{- range .Artifacts }}
+  {{- if and (eq .Name $uploadableArtifactName) (eq .Type 2)}}{{- /* type 2 = UploadableBinary */ -}}
+    {{- $uploadableArtifact = . }}
+  {{- end }}
+  {{- if and (eq .Name $buildArtifactName) (eq .Type 4)}}{{- /* type 4 = Binary */ -}}
+    {{- $buildArtifact = . }}
+  {{- end }}
+{{- end -}}
+
+version: {{ .Version }}
+files:
+  - url: {{ $uploadableArtifactName }}
+    sha2: {{ trimprefix $uploadableArtifact.Extra.Checksum "sha256:" }}
+    size: {{ $buildArtifact.Extra.Size }}
+path: {{ $uploadableArtifactName }}
+sha2: {{ trimprefix $uploadableArtifact.Extra.Checksum "sha256:" }}
+releaseDate: '{{ .Date }}'
