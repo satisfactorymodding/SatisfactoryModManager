@@ -45,7 +45,7 @@ VIAddVersionKey "ProductName"     "${INFO_PRODUCTNAME}"
 !define MUI_FINISHPAGE_NOAUTOCLOSE
 !define MUI_ABORTWARNING
 
-!include "smm2_uninstall.nsh"
+!include "smm2.nsh"
 !include "utils.nsh"
 
 # Install pages
@@ -92,8 +92,12 @@ Function .onInit
     SetRegView 64
     ; The original wails.checkArchitecture macro adds an unnecessary requirement on Windows 10
     ; !insertmacro wails.checkArchitecture
+
+    !insertmacro SMM2_INIT
+
+    ; This might be skipped if SMM2 is detected
     !insertmacro MULTIUSER_INIT
-    
+
     IfSilent 0 +1
     Call DisableShortcutsOnExisting
 
@@ -107,12 +111,12 @@ FunctionEnd
 Section
     !insertmacro wails.webview2runtime
 
-    !insertmacro smm2Uninst
+    !insertmacro SMM2_UNINSTALL
 
     Call EnsureEmptyFolder
 
     SetOutPath $INSTDIR
-    
+
     !insertmacro wails.files
 
     !insertmacro wails.associateFiles
@@ -134,7 +138,16 @@ SectionEnd
 
 Section "-Post"
 	${GetParameters} $R0
+
+    ClearErrors
 	${GetOptions} $R0 "/ForceRun" $R1
+    ${IfNot} ${errors}
+        Exec '"$INSTDIR\${PRODUCT_EXECUTABLE}"'
+    ${EndIf}
+
+    ; Handle SMM2 electron-updater argument
+    ClearErrors
+	${GetOptions} $R0 "--force-run" $R1
     ${IfNot} ${errors}
         Exec '"$INSTDIR\${PRODUCT_EXECUTABLE}"'
     ${EndIf}
