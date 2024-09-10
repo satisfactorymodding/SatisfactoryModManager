@@ -139,16 +139,12 @@
     // Generate mod entries
     const modList = await Promise.all(Object.keys($manifestMods).map(async (modReference) => {
       let modName = modReference;
-      if(modReference === 'SML') {
-        modName = 'Satisfactory Mod Loader';
+      if($offline) {
+        modName = (await OfflineGetMod(modReference)).name;
       } else {
-        if($offline) {
-          modName = (await OfflineGetMod(modReference)).name;
-        } else {
-          const result = await urqlClient.query(GetModNameDocument, { modReference }).toPromise();
-          if(result?.data?.getModByReference?.name) {
-            modName = result.data.getModByReference.name;
-          }
+        const result = await urqlClient.query(GetModNameDocument, { modReference }).toPromise();
+        if(result?.data?.getModByReference?.name) {
+          modName = result.data.getModByReference.name;
         }
       }
       return {

@@ -31,6 +31,7 @@ type Mod struct {
 
 type ModVersion struct {
 	Version      string                 `json:"version"`
+	GameVersion  string                 `json:"game_version"`
 	Size         int64                  `json:"size"`
 	Dependencies []ModVersionDependency `json:"dependencies"`
 }
@@ -49,9 +50,6 @@ func (f *ficsitCLI) OfflineGetMods() ([]Mod, error) {
 
 	mods := make([]Mod, 0)
 	cache.Range(func(modReference string, modFiles []ficsitcache.File) bool {
-		if modReference == "SML" {
-			return true
-		}
 		mods = append(mods, convertCacheFileToMod(modFiles))
 		return true
 	})
@@ -66,9 +64,6 @@ func (f *ficsitCLI) OfflineGetModsByReferences(modReferences []string) ([]Mod, e
 
 	mods := make([]Mod, 0)
 	cache.Range(func(modReference string, modFiles []ficsitcache.File) bool {
-		if modReference == "SML" {
-			return true
-		}
 		if !slices.Contains(modReferences, modReference) {
 			return true
 		}
@@ -87,30 +82,6 @@ func (f *ficsitCLI) OfflineGetMod(modReference string) (Mod, error) {
 		return Mod{}, fmt.Errorf("mod not found")
 	}
 	return convertCacheFileToMod(modFiles), nil
-}
-
-type SMLVersion struct {
-	Version             string `json:"version"`
-	SatisfactoryVersion int    `json:"satisfactory_version"` // TODO
-}
-
-func (f *ficsitCLI) OfflineGetSMLVersions() ([]SMLVersion, error) {
-	smlFiles, err := ficsitcache.GetCacheMod("SML")
-	if err != nil {
-		return nil, fmt.Errorf("failed to get cache: %w", err)
-	}
-	if smlFiles == nil {
-		return nil, fmt.Errorf("SML not found")
-	}
-
-	versions := make([]SMLVersion, 0)
-	for _, file := range smlFiles {
-		versions = append(versions, SMLVersion{
-			Version:             file.Plugin.SemVersion,
-			SatisfactoryVersion: 0,
-		})
-	}
-	return versions, nil
 }
 
 func convertCacheFileToMod(files []ficsitcache.File) Mod {
@@ -137,6 +108,7 @@ func convertCacheFileToMod(files []ficsitcache.File) Mod {
 
 		versions = append(versions, ModVersion{
 			Version:      file.Plugin.SemVersion,
+			GameVersion:  file.Plugin.GameVersion,
 			Size:         file.Size,
 			Dependencies: dependencies,
 		})

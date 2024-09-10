@@ -31,7 +31,6 @@ query GetModDetails($modReference: ModReference!) {
     versions(filter: {limit: 100}) {
       id
       version
-      sml_version
       size
       changelog
     }

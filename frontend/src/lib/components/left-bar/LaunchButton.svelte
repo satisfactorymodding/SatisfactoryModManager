@@ -32,9 +32,7 @@
     if (info && $hasFetchedMods) {
       const newCompatibilities: typeof compatibilities = {};
       Object.keys($lockfileMods).map(async (modReference) => {
-        if (modReference !== 'SML') {
-          newCompatibilities[modReference] = await getCompatibility(modReference, client);
-        }
+        newCompatibilities[modReference] = await getCompatibility(modReference, client);
       });
       compatibilities = newCompatibilities;
     }

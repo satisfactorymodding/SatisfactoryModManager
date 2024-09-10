@@ -13,7 +13,6 @@ export function initializeGraphQLClient(apiEndpointURL: string): Client {
         schema,
         keys: {
           GetMods: () => null,
-          GetSMLVersions: () => null,
           LatestVersions: () => null,
           UserMod: () => null,
           GetGuides: () => null,

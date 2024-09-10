@@ -1,11 +1,11 @@
 import { Client } from '@urql/svelte';
-import { coerce, compare, minVersion, satisfies } from 'semver';
+import { coerce, satisfies } from 'semver';
 import { get } from 'svelte/store';
 
-import { type Compatibility, CompatibilityState, GetModVersionTargetsDocument, ModReportedCompatibilityDocument, ModVersionsCompatibilityDocument, SmlVersionsCompatibilityDocument, TargetName } from '$lib/generated';
+import { type Compatibility, CompatibilityState, GetModVersionTargetsDocument, ModReportedCompatibilityDocument, ModVersionsCompatibilityDocument, TargetName } from '$lib/generated';
 import { installsMetadata, selectedInstallMetadata, selectedProfileTargets } from '$lib/store/ficsitCLIStore';
 import { offline } from '$lib/store/settingsStore';
-import { OfflineGetMod, OfflineGetSMLVersions } from '$wailsjs/go/ficsitcli/ficsitCLI';
+import { OfflineGetMod } from '$wailsjs/go/ficsitcli/ficsitCLI';
 import { common } from '$wailsjs/go/models';
 
 export interface CompatibilityWithSource extends Compatibility {
@@ -74,23 +74,9 @@ export async function getReportedCompatibility(modReference: string, gameBranch:
   return undefined;
 }
 
-interface SMLVersion {
-  version: string;
-  satisfactory_version: number;
-}
-
-async function getSMLVersions(urqlClient: Client): Promise<SMLVersion[] | undefined> {
-  if(get(offline)) {
-    return OfflineGetSMLVersions();
-  }
-  
-  const smlVersionsQuery = await urqlClient.query(SmlVersionsCompatibilityDocument, {}).toPromise();
-
-  return smlVersionsQuery.data?.getSMLVersions.sml_versions;
-}
-
 interface ModVersion {
   version: string;
+  game_version: string;
   dependencies: {
     mod_id: string;
     condition: string;
@@ -112,37 +98,17 @@ async function getModVersions(modReference: string, urqlClient: Client): Promise
 }
 
 export async function getVersionCompatibility(modReference: string, gameVersion: number, urqlClient: Client): Promise<Compatibility> {
-  const versions = await getSMLVersions(urqlClient);
-  if(!versions) {
-    return { state: CompatibilityState.Broken };
-  }
-
   const modVersions = await getModVersions(modReference, urqlClient);
   if(!modVersions || modVersions.length === 0) {
     return { state: CompatibilityState.Broken, note: 'Mod has no versions uploaded.' };
   }
 
-  versions.sort((a, b) => compare(a.version, b.version));
+  const gameVersionSemver = gameVersionToSemver(gameVersion);
 
-  const versionConstraints = versions.map((version, idx, arr) => ({
-    version: version.version,
-    satisfactory_version: `>=${gameVersionToSemver(version.satisfactory_version)}` + (idx !== arr.length - 1 ? ` <${gameVersionToSemver(arr[idx + 1].satisfactory_version)}` : ''),
-  }));
-
-  const compatibleSMLVersions = versionConstraints
-    .filter((versionConstraint) => satisfies(gameVersionToSemver(gameVersion), versionConstraint.satisfactory_version))
-    .map((versionConstraint) => versionConstraint.version);
-  
-  const compatible = modVersions.some((ver) => ver.dependencies
-    .some((dep) => dep.mod_id === 'SML' && compatibleSMLVersions.some((smlVer) => satisfies(smlVer, dep.condition))));
-  const possiblyCompatible = modVersions.some((ver) => ver.dependencies
-    .some((dep) => dep.mod_id === 'SML' && satisfies(minVersion(dep.condition)!, '>=3.0.0')));
+  const compatible = modVersions.some((ver) => ver.game_version === '' || satisfies(gameVersionSemver, ver.game_version));
 
   if(compatible) {
     return { state: CompatibilityState.Works };
-  }
-  if(possiblyCompatible) {
-    return { state: CompatibilityState.Damaged, note: 'This mod is likely incompatible with your game version and may cause crashes.' };
   }
   return { state: CompatibilityState.Broken, note: 'This mod is incompatible with your game version.' };
 }

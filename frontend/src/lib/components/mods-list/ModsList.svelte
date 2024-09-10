@@ -76,7 +76,7 @@
   $: knownMods = $offline ? offlineMods : onlineMods;
 
   $: unknownModReferences = Object.keys($manifestMods)
-    .filter((modReference) => !knownMods.find((knownMod) => knownMod.mod_reference === modReference) && modReference !== 'SML');
+    .filter((modReference) => !knownMods.find((knownMod) => knownMod.mod_reference === modReference));
 
   $: unknownMods = unknownModReferences.map((modReference) => {
     const offlineMod = offlineMods.find((mod) => mod.mod_reference === modReference);

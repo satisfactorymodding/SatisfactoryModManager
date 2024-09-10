@@ -184,9 +184,8 @@ func addMetadata(writer *zip.Writer) error {
 		for name, data := range lockfile.Mods {
 			if name == "SML" {
 				smlVersion = &data.Version
-			} else {
-				metadataInstalledMods[name] = data.Version
 			}
+			metadataInstalledMods[name] = data.Version
 		}
 	}
 

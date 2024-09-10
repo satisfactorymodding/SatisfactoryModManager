@@ -4,6 +4,7 @@ query ModVersionsCompatibility($modReference: ModReference!) {
     versions {
       id
       version
+      game_version
       dependencies {
         mod_id
         condition
