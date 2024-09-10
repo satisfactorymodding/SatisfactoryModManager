@@ -43,6 +43,25 @@ func Init() error {
 	if err != nil {
 		return fmt.Errorf("failed to initialize installations: %w", err)
 	}
+
+	if settings.SMM2SelectedProfile != nil {
+		for _, install := range FicsitCLI.ficsitCli.Installations.Installations {
+			profile := settings.SMM2SelectedProfile[install.Path]
+			if profile != "" {
+				err := install.SetProfile(FicsitCLI.ficsitCli, profile)
+				if err != nil {
+					slog.Error(
+						"failed to restore selected profile, using fallback",
+						slog.String("install", install.Path),
+						slog.String("profile", profile),
+						slog.Any("error", err),
+					)
+					install.Profile = FicsitCLI.GetFallbackProfile()
+				}
+			}
+		}
+	}
+
 	return nil
 }
 

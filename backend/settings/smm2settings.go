@@ -43,6 +43,8 @@ type smm2Settings struct {
 	DisableDownloadTimeout *bool              `json:"disableDownloadTimeout"`
 }
 
+var SMM2SelectedProfile map[string]string
+
 func readSMM2Settings(data []byte) error {
 	s := smm2Settings{}
 	err := json.Unmarshal(data, &s)
@@ -86,11 +88,17 @@ func readSMM2Settings(data []byte) error {
 		Settings.Maximized = *s.Maximized
 	}
 
-	// Ignore selected install, profile, and mods enabled
+	if s.SelectedProfile != nil {
+		SMM2SelectedProfile = *s.SelectedProfile
+	}
+
+	// Ignore selected install and mods enabled
 	// They are stored in ficsit-cli, but that gets initialized later
 	// They are not critical anyway
 
-	// Ignore DebugMode, it's not used anymore
+	if s.DebugMode != nil {
+		Settings.Debug = *s.DebugMode
+	}
 
 	if s.UpdateCheckMode != nil {
 		Settings.UpdateCheckMode = *s.UpdateCheckMode
