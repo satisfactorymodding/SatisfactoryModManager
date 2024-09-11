@@ -1,12 +1,18 @@
 <script lang="ts">
   import { T } from '@tolgee/svelte';
 
+  import { MarkSmm2MigrationSuccess } from '$wailsjs/go/migration/migration';
   import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
 
   export let parent: { onClose: () => void };
 
-  const OpenWelcomeGuide = () => {
-    BrowserOpenURL('https://docs.ficsit.app/satisfactory-modding/latest/ForUsers/Welcome.html');
+  const onClose = () => {
+    MarkSmm2MigrationSuccess();
+    parent.onClose();
+  };
+
+  const OpenSmmGuide = () => {
+    BrowserOpenURL('https://docs.ficsit.app/satisfactory-modding/latest/ForUsers/SatisfactoryModManager.html');
   };
 </script>
 
@@ -26,66 +32,87 @@
     </p>
   </section>
   <section class="px-4 overflow-y-auto">
-    <ul class="list-dl">
-      <div>
+    <ul class="list-dl list space-y-3">
+      <li>
         <span class="badge bg-primary-800 text-lg">+</span>
         <span class="flex-auto text-lg">
           <T defaultValue="Dedicated server management" keyName="smm2_migration.feature.servers" />
+          <p class="text-base">
+            <T defaultValue="Easily manage servers via filesystem, SFTP, FTP and SMB!" keyName="smm2_migration.feature.servers.description" />
+          </p>
         </span>
-      </div>
-      <div>
+      </li>
+      <li>
         <span class="badge bg-primary-800 text-lg">+</span>
         <span class="flex-auto text-lg">
           <T defaultValue="User interface refresh" keyName="smm2_migration.feature.ui" />
+          <p class="text-base">
+            <T defaultValue="A fresh coat of paint to celebrate Satisfactory 1.0!" keyName="smm2_migration.feature.ui.description" />
+          </p>
         </span>
-      </div>
-      <div>
+      </li>
+      <li>
         <span class="badge bg-primary-800 text-lg">+</span>
         <span class="flex-auto text-lg">
           <T defaultValue="Translation support" keyName="smm2_migration.feature.translation" />
+          <p class="text-base">
+            <T defaultValue="Join our Discord to translate SMM to your language!" keyName="smm2_migration.feature.translation.description" />
+          </p>
         </span>
-      </div>
-      <div>
+      </li>
+      <li>
         <span class="badge bg-primary-800 text-lg">+</span>
         <span class="flex-auto text-lg">
           <T defaultValue="Action queueing" keyName="smm2_migration.feature.queue" />
+          <p class="text-base">
+            <T defaultValue="Queue up multiple mod downloads/uninstalls at once." keyName="smm2_migration.feature.queue.description" />
+          </p>
         </span>
-      </div>
-      <div>
+      </li>
+      <li>
         <span class="badge bg-primary-800 text-lg">+</span>
         <span class="flex-auto text-lg">
           <T defaultValue="Native Linux + Mac support" keyName="smm2_migration.feature.platform_support" />
+          <p class="text-base">
+            <T defaultValue="Get a build from the GitHub releases if you haven't yet!" keyName="smm2_migration.feature.platform_support.description" />
+          </p>
         </span>
-      </div>
-      <div>
+      </li>
+      <li>
         <span class="badge bg-tertiary-800 text-lg">+</span>
         <span class="flex-auto text-lg">
           <T defaultValue="Improved performance" keyName="smm2_migration.feature.performance" />
+          <p class="text-base">
+            <T defaultValue="Keeping you efficient!" keyName="smm2_migration.feature.performance.description" />
+          </p>
         </span>
-      </div>
-      <div>
+      </li>
+      <li>
         <span class="badge bg-warning-800 text-lg">⚠</span>
         <span class="flex-auto text-lg">
           <T defaultValue="New profile format" keyName="smm2_migration.feature.profile_format" />
+          <p class="text-base">
+            <T defaultValue="SMM2 profiles are not compatible with SMM3! Your existing profiles have been migrated. TODO were they actually?" keyName="smm2_migration.feature.profile_format.description" />
+          </p>
         </span>
-      </div>
+      </li>
     </ul>
   </section>
   <section class="px-4">
     <p class="text-base text-center">
       <button
         class="btn text-primary-600 variant-ringed"
-        on:click={OpenWelcomeGuide}
+        on:click={OpenSmmGuide}
       >
         <T
-          defaultValue="Open the SMM2 -> SMM3 Migration Guide"
+          defaultValue="Open the SMM3 Documentation"
           keyName="smm2_migration.open_guide"
         />
       </button>
     </p>
   </section>
   <footer class="card-footer">
-    <button class="btn" on:click={parent.onClose}>
+    <button class="btn" on:click={onClose}>
       <T defaultValue="Close" keyName="common.close" />
     </button>
   </footer>

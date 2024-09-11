@@ -25,7 +25,7 @@ func Init() error {
 	return nil
 }
 
-const migrationSuccessMarkerFile = ".smm3_migration_success"
+const migrationSuccessMarkerFile = ".smm3_migration_acknowledged"
 
 // https://stackoverflow.com/questions/12518876/how-to-check-if-a-file-exists-in-go
 func pathExists(path string) bool {
