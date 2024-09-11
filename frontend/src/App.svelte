@@ -206,10 +206,8 @@
   }
 
   // Order of checks is intentional
-  // TODO overzealous error checking?
   NeedsSmm2Migration().then((needsMigration) => {
     if (needsMigration) {
-      // TODO actually perform profile migration
       displayMigrationModal = true;
     }
   }).catch((err) => {
