@@ -41,6 +41,17 @@ var gameInfo = []installType{
 		versionPath: filepath.Join("Engine", "Binaries", "Win64", "FactoryServer-Win64-Shipping.version"),
 		installType: InstallTypeWindowsServer,
 	},
+	// Update 1.0 stuff
+	{
+		executable:  "FactoryGameSteam.exe",
+		versionPath: filepath.Join("Engine", "Binaries", "Win64", "FactoryGameSteam-Win64-Shipping.version"),
+		installType: InstallTypeWindowsClient,
+	},
+	{
+		executable:  "FactoryGameEGS.exe",
+		versionPath: filepath.Join("Engine", "Binaries", "Win64", "FactoryGameEGS-Win64-Shipping.version"),
+		installType: InstallTypeWindowsClient,
+	},
 }
 
 type GameVersionFile struct {
