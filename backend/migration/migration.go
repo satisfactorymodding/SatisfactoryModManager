@@ -51,5 +51,9 @@ func (m *migration) MarkSmm2MigrationSuccess() error {
 	if err != nil {
 		return fmt.Errorf("failed to create migration success marker file: %w", err)
 	}
-	return file.Close()
+	err = file.Close()
+	if err != nil {
+		return fmt.Errorf("failed to close file: %w", err)
+	}
+	return nil
 }

@@ -333,17 +333,15 @@ func ValidateCacheDir(dir string) error {
 func (s *settings) GetCacheDirDiskSpaceLeft() (uint64, error) {
 	cacheDir := s.GetCacheDir()
 	err := ValidateCacheDir(cacheDir)
-
 	if err != nil {
 		return 0, fmt.Errorf("cache directory to check space on failed to validate: %w", err)
-	} else {
-		usage, err := psUtilDisk.Usage(cacheDir)
-		if err != nil {
-			return 0, fmt.Errorf("failed to get disk free space: %w", err)
-		} else {
-			return usage.Free, nil
-		}
 	}
+
+	usage, err := psUtilDisk.Usage(cacheDir)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get disk free space: %w", err)
+	}
+	return usage.Free, nil
 }
 
 func moveCacheDir(newDir string) error {
