@@ -9,6 +9,7 @@
   import { AnnouncementImportance, type Announcement as AnnouncementType, GetAnnouncementsDocument, SmrHealthcheckDocument } from '$lib/generated';
   import { type PopupSettings, popup } from '$lib/skeletonExtensions';
   import { offline, viewedAnnouncements } from '$lib/store/settingsStore';
+  import { markdown as renderMarkdown } from '$lib/utils/markdown';
   import { SetAnnouncementViewed } from '$wailsjs/go/settings/settings';
   
   const { t } = getTranslate();
@@ -118,16 +119,23 @@
     },
     placement: 'bottom',
   } satisfies PopupSettings;
+
+  $: renderedTooltip = (() => {
+    const content = $offline ? offlineAnnouncement.message : announcements[currentIndex]?.message;
+    if (content?.length > 0) {
+      return renderMarkdown(content);
+    }
+    return content;
+  })();
 </script>
 
 <!-- the if gets executed before this is added to the DOM for some reason if this is below the ifs, so the use:popup would not find the element -->
 <Tooltip disabled={!$offline && !announcements[currentIndex]} {popupId}>
   <span>
-    {#if $offline}
-      {offlineAnnouncement.message}
-    {:else}
-      {announcements[currentIndex]?.message}
-    {/if}
+    <div class="announcement-markdown-content">
+      <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+      {@html renderedTooltip}
+    </div>
   </span>
 </Tooltip>
 
