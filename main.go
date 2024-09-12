@@ -132,12 +132,7 @@ func main() {
 		startUpdateFound = <-foundOrError
 	}
 
-	err = migration.Init()
-	if err != nil {
-		slog.Error("failed migration check setup", slog.Any("error", err))
-		_ = dialog.Error("Failed to set up migration status checker: %s", err.Error())
-		os.Exit(1)
-	}
+	migration.Init()
 
 	// Create application with options
 	err = wails.Run(&options.App{

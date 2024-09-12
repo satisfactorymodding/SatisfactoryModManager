@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"path/filepath"
+
+	"github.com/spf13/viper"
 )
 
 type migration struct {
@@ -13,16 +16,11 @@ type migration struct {
 
 var Migration *migration
 
-func Init() error {
+func Init() {
 	if Migration == nil {
-		dir, err := os.UserConfigDir()
-		if err != nil {
-			return fmt.Errorf("failed to get user home directory for migration check: %w", err)
-		}
 		Migration = &migration{}
-		Migration.smm2Dir = dir + "\\SatisfactoryModManager\\profiles\\"
+		Migration.smm2Dir = filepath.Join(viper.GetString(("smm-local-dir")), "profiles")
 	}
-	return nil
 }
 
 const migrationSuccessMarkerFile = ".smm3_migration_acknowledged"

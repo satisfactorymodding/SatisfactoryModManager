@@ -30,8 +30,10 @@
     <SvgIcon class="w-8 h-8 mr-3 shrink-0" icon={icon} />
     <div class="grow wrap text-lg">
       <slot>
-        <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-        {@html `<div class="announcement-markdown-content">${rendered}</div>`}
+        <div class="announcement-markdown-content">
+          <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+          {@html rendered}
+        </div>
       </slot>
     </div>
   </div>
@@ -81,4 +83,4 @@
   .announcement-new.announcement-bg {
     animation: slide 6s linear infinite;
   }
-  </style>
+</style>

@@ -179,46 +179,32 @@
     $error = null;
   }
 
-  let displayMigrationModal = false;
-  $: if (displayMigrationModal) {
-    modalStore.trigger({
-      type: 'component',
-      component: {
-        ref: MigrationModal,
-      },
-      meta: {
-        persistent: true,
-      },
-    });
-  }
-
-  let displayFirstTimeSetupModal = false;
-  $: if (displayFirstTimeSetupModal) {
-    modalStore.trigger({
-      type: 'component',
-      component: {
-        ref: FirstTimeSetupModal,
-      },
-      meta: {
-        persistent: true,
-      },
-    });
-  }
-
   // Order of checks is intentional
   NeedsSmm2Migration().then((needsMigration) => {
     if (needsMigration) {
-      displayMigrationModal = true;
+      modalStore.trigger({
+        type: 'component',
+        component: {
+          ref: MigrationModal,
+        },
+        meta: {
+          persistent: true,
+        },
+      });
     }
-  }).catch((err) => {
-    $error = `failed to check if SMM2 migration is needed: ${err}`;
   }).then(() => {
     GetNewUserSetupComplete().then((wasSetupCompleted) => {
       if (!wasSetupCompleted) {
-        displayFirstTimeSetupModal = true;
+        modalStore.trigger({
+          type: 'component',
+          component: {
+            ref: FirstTimeSetupModal,
+          },
+          meta: {
+            persistent: true,
+          },
+        });
       }
-    }).catch((err) => {
-      $error = `failed to check if new user setup is needed: ${err}`;
     });
   });
 
