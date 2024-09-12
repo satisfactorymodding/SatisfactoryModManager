@@ -39,9 +39,9 @@
     </p>
   </section>
   <section class="px-4 overflow-y-visible">
-    <ul class="list">
+    <ul class="list space-y-4">
       <li>
-        <span class="badge bg-tertiary-500">
+        <span class="badge bg-tertiary-500 self-end">
           <SvgIcon
             class="h-6 w-6 my-1"
             icon={mdiTimerSandFull}
@@ -49,45 +49,23 @@
         </span>
         <div class="flex-auto">
           <p class="text-lg"><T defaultValue="When I add or remove a mod, or switch profiles..." keyName="first_time_setup.option.queue-auto-start.title" /></p>
-          <SlideToggle
-            name="slider-queue"
-            class="flex-auto" 
-            active="bg-primary-600"
-            bind:checked={$queueAutoStart}>
-            <span>
-              {#if $queueAutoStart}
-                <T
-                  defaultValue="Apply the change immediately."
-                  keyName="first_time_setup.option.queue-auto-start.enabled"
-                />
-              {:else}
-                <T
-                  defaultValue='Queue the change and wait for me to press "Apply" to enact queued changes.'
-                  keyName="first_time_setup.option.queue-auto-start.disabled"
-                />
-              {/if}
-            </span>
-          </SlideToggle>
-          <!-- TODO testing the button group approach -->
-          <div class="btn-group bg-surface-200-700-token">
+          <div class="btn-group bg-surface-200-700-token h-10 w-full">
             <button
-              class="!btn-sm !px-4 text-lg"
+              class="!btn-sm !px-4 text-lg w-1/2 !justify-between"
               class:!bg-primary-900={$queueAutoStart}
               on:click={() => { $queueAutoStart = true; }}
             >
-              <T defaultValue="Apply the change immediately." keyName="first_time_setup.option.queue-auto-start.enabled"/>
-              <div class="grow"/>
+              <span><T defaultValue="Apply changes immediately" keyName="first_time_setup.option.queue-auto-start.enabled"/></span>
               <SvgIcon
                 class="h-5 w-5"
                 icon={mdiPlay} />
             </button>
             <button
-              class="!btn-sm !px-4 text-lg"
+              class="!btn-sm !px-4 text-lg w-1/2 !justify-between"
               class:!bg-primary-900={!$queueAutoStart}
               on:click={() => { $queueAutoStart = false; }}
             >
-              <T defaultValue='Queue the change and wait for me to press "Apply" to enact queued changes.' keyName="first_time_setup.option.queue-auto-start.disabled"/>
-              <div class="grow"/>
+              <span><T defaultValue='Wait for me to press "Apply"' keyName="first_time_setup.option.queue-auto-start.disabled"/></span>
               <SvgIcon
                 class="h-5 w-5"
                 icon={mdiClock} />
@@ -96,7 +74,7 @@
         </div>
       </li>
       <li>
-        <span class="badge bg-tertiary-500 text-lg">
+        <span class="badge bg-tertiary-500 text-lg self-end">
           <SvgIcon
             class="h-6 w-6 my-1"
             icon={mdiWeb}
