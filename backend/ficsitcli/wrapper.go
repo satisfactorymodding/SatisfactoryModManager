@@ -3,6 +3,7 @@ package ficsitcli
 import (
 	"fmt"
 	"log/slog"
+	"slices"
 	"sync"
 	"time"
 
@@ -45,6 +46,13 @@ func Init() error {
 	return nil
 }
 
+// With and without `.exe` variants in case it is missing on Linux
+var executableNames = []string{
+	"FactoryGame-Win64-Shipping.exe", "FactoryGame-Win64-Shipping",
+	"FactoryGameSteam-Win64-Shipping.exe", "FactoryGameSteam-Win64-Shipping",
+	"FactoryGameEGS-Win64-Shipping.exe", "FactoryGameEGS-Win64-Shipping",
+}
+
 func (f *ficsitCLI) StartGameRunningWatcher() {
 	gameRunningTicker := time.NewTicker(5 * time.Second)
 	go func() {
@@ -56,7 +64,7 @@ func (f *ficsitCLI) StartGameRunningWatcher() {
 			}
 			f.isGameRunning = false
 			for _, process := range processes {
-				if process.Executable() == "FactoryGame-Win64-Shipping.exe" || process.Executable() == "FactoryGame-Win64-Shipping" {
+				if slices.Contains(executableNames, process.Executable()) {
 					f.isGameRunning = true
 					break
 				}
