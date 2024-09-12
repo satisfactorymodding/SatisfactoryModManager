@@ -3,6 +3,7 @@ package common
 type GameBranch string
 
 var (
+	// TODO rename to BranchRelease later https://github.com/satisfactorymodding/SatisfactoryModManager/pull/223#issuecomment-2342831142
 	BranchEarlyAccess  GameBranch = "Early Access"
 	BranchExperimental GameBranch = "Experimental"
 )
