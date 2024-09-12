@@ -46,7 +46,12 @@ func Init() error {
 	return nil
 }
 
-var executableNames = []string{"FactoryGame-Win64-Shipping.exe", "FactoryGame-Win64-Shipping", "FactoryGameSteam-Win64-Shipping", "FactoryGameEGS-Win64-Shipping"}
+// With and without `.exe` variants in case it is missing on Linux
+var executableNames = []string{
+	"FactoryGame-Win64-Shipping.exe", "FactoryGame-Win64-Shipping",
+	"FactoryGameSteam-Win64-Shipping.exe", "FactoryGameSteam-Win64-Shipping",
+	"FactoryGameEGS-Win64-Shipping.exe", "FactoryGameEGS-Win64-Shipping",
+}
 
 func (f *ficsitCLI) StartGameRunningWatcher() {
 	gameRunningTicker := time.NewTicker(5 * time.Second)
