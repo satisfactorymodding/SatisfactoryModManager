@@ -11,7 +11,8 @@ import (
 )
 
 type migration struct {
-	smm2Dir string
+	smm2Dir                    string
+	migrationSuccessMarkerPath string
 }
 
 var Migration *migration
@@ -19,7 +20,8 @@ var Migration *migration
 func Init() {
 	if Migration == nil {
 		Migration = &migration{}
-		Migration.smm2Dir = filepath.Join(viper.GetString(("smm-local-dir")), "profiles")
+		Migration.smm2Dir = filepath.Join(viper.GetString("smm-local-dir"), "profiles")
+		Migration.migrationSuccessMarkerPath = filepath.Join(Migration.smm2Dir, migrationSuccessMarkerFile)
 	}
 }
 
@@ -39,13 +41,13 @@ func pathExists(path string) bool {
 
 func (m *migration) NeedsSmm2Migration() bool {
 	if pathExists(m.smm2Dir) {
-		return !pathExists(m.smm2Dir + migrationSuccessMarkerFile)
+		return !pathExists(Migration.migrationSuccessMarkerPath)
 	}
 	return false
 }
 
 func (m *migration) MarkSmm2MigrationSuccess() error {
-	file, err := os.Create(m.smm2Dir + migrationSuccessMarkerFile)
+	file, err := os.Create(Migration.migrationSuccessMarkerPath)
 	if err != nil {
 		return fmt.Errorf("failed to create migration success marker file: %w", err)
 	}

@@ -147,18 +147,14 @@
     }
   }
 
-  cacheDir.subscribe((cacheDirectory) => {
-    GetCacheDirDiskSpaceLeft().then((spaceLeftBytes) => {
-      if (spaceLeftBytes < 10e9) {
-        const spaceLeftGbReadable = (spaceLeftBytes * 1e-9).toFixed(1);
-        $error = `The drive your cache directory is on (${cacheDirectory}) is very low on disk space (Only ~${spaceLeftGbReadable} GB left). Please free up some space or move the cache directory to another drive in the Mod Manager Settings.`;
-      }
-    }).catch((err) => {
-      $error = `failed to check cache directory disk space left: ${err}`;
-    });
+  $: GetCacheDirDiskSpaceLeft().then((spaceLeftBytes) => {
+    if (spaceLeftBytes < 10e9) {
+      const spaceLeftGbReadable = (spaceLeftBytes * 1e-9).toFixed(1);
+      $error = `The drive your cache directory is on (${$cacheDir}) is very low on disk space (Only ~${spaceLeftGbReadable} GB left). Please free up some space or move the cache directory to another drive in the Mod Manager Settings.`;
+    }
+  }).catch((err) => {
+    $error = `failed to check cache directory disk space left: ${err}`;
   });
-
-
   $: if ($smmUpdateReady && $updateCheckMode === 'ask') {
     modalStore.trigger({
       type: 'component',

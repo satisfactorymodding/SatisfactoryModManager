@@ -1,6 +1,8 @@
 <script lang="ts">
+  import { mdiAlert, mdiPlus } from '@mdi/js';
   import { T } from '@tolgee/svelte';
 
+  import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { MarkSmm2MigrationSuccess } from '$wailsjs/go/migration/migration';
   import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
 
@@ -34,7 +36,7 @@
   <section class="px-4 overflow-y-auto">
     <ul class="list-dl list space-y-3">
       <li>
-        <span class="badge bg-primary-800 text-lg">+</span>
+        <span class="badge bg-primary-800 text-lg"><SvgIcon class="w-5 h-5 my-1" icon={mdiPlus} /></span>
         <span class="flex-auto text-lg">
           <T defaultValue="Dedicated server management" keyName="smm2_migration.feature.servers" />
           <p class="text-base">
@@ -43,7 +45,7 @@
         </span>
       </li>
       <li>
-        <span class="badge bg-primary-800 text-lg">+</span>
+        <span class="badge bg-primary-800 text-lg"><SvgIcon class="w-5 h-5 my-1" icon={mdiPlus} /></span>
         <span class="flex-auto text-lg">
           <T defaultValue="User interface refresh" keyName="smm2_migration.feature.ui" />
           <p class="text-base">
@@ -52,7 +54,7 @@
         </span>
       </li>
       <li>
-        <span class="badge bg-primary-800 text-lg">+</span>
+        <span class="badge bg-primary-800 text-lg"><SvgIcon class="w-5 h-5 my-1" icon={mdiPlus} /></span>
         <span class="flex-auto text-lg">
           <T defaultValue="Translation support" keyName="smm2_migration.feature.translation" />
           <p class="text-base">
@@ -61,7 +63,7 @@
         </span>
       </li>
       <li>
-        <span class="badge bg-primary-800 text-lg">+</span>
+        <span class="badge bg-primary-800 text-lg"><SvgIcon class="w-5 h-5 my-1" icon={mdiPlus} /></span>
         <span class="flex-auto text-lg">
           <T defaultValue="Action queueing" keyName="smm2_migration.feature.queue" />
           <p class="text-base">
@@ -70,16 +72,16 @@
         </span>
       </li>
       <li>
-        <span class="badge bg-primary-800 text-lg">+</span>
+        <span class="badge bg-primary-800 text-lg"><SvgIcon class="w-5 h-5 my-1" icon={mdiPlus} /></span>
         <span class="flex-auto text-lg">
-          <T defaultValue="Native Linux + Mac support" keyName="smm2_migration.feature.platform_support" />
+          <T defaultValue="Native Linux Heroic, Steam Snap, Mac support" keyName="smm2_migration.feature.platform_support" />
           <p class="text-base">
             <T defaultValue="Get a build from the GitHub releases if you haven't yet!" keyName="smm2_migration.feature.platform_support.description" />
           </p>
         </span>
       </li>
       <li>
-        <span class="badge bg-tertiary-800 text-lg">+</span>
+        <span class="badge bg-tertiary-800 text-lg"><SvgIcon class="w-5 h-5 my-1" icon={mdiPlus} /></span>
         <span class="flex-auto text-lg">
           <T defaultValue="Improved performance" keyName="smm2_migration.feature.performance" />
           <p class="text-base">
@@ -88,11 +90,11 @@
         </span>
       </li>
       <li>
-        <span class="badge bg-warning-800 text-lg">⚠</span>
+        <span class="badge bg-warning-800 text-lg"><SvgIcon class="w-5 h-5 my-1" icon={mdiAlert} /></span>
         <span class="flex-auto text-lg">
           <T defaultValue="New profile format" keyName="smm2_migration.feature.profile_format" />
           <p class="text-base">
-            <T defaultValue="SMM2 profiles are not compatible with SMM3! Your existing profiles have been migrated. TODO were they actually?" keyName="smm2_migration.feature.profile_format.description" />
+            <T defaultValue="SMM2 profiles are not compatible with SMM3! Your existing profiles have automatically been migrated, but you can't Import any profiles created with SMM2." keyName="smm2_migration.feature.profile_format.description" />
           </p>
         </span>
       </li>

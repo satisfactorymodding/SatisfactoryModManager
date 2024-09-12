@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { mdiTimerSandFull, mdiWeb } from '@mdi/js';
+  import { mdiClock, mdiPlay, mdiTimerSandFull, mdiTimerSandPaused, mdiWatch, mdiWeb } from '@mdi/js';
   import { SlideToggle } from '@skeletonlabs/skeleton';
   import { T } from '@tolgee/svelte';
 
@@ -16,6 +16,7 @@
     BrowserOpenURL('https://docs.ficsit.app/satisfactory-modding/latest/ForUsers/Welcome.html');
   };
 
+  // Modal should be persistent when used because pressing Escape doesn't trigger this
   function onClose() {
     SetNewUserSetupComplete(true);
     parent.onClose();
@@ -37,52 +38,73 @@
       />
     </p>
   </section>
-  <section class="px-4 overflow-y-auto">
+  <section class="px-4 overflow-y-visible">
     <ul class="list">
       <li>
         <span class="badge bg-tertiary-500">
           <SvgIcon
-            class="h-5 w-5"
+            class="h-6 w-6 my-1"
             icon={mdiTimerSandFull}
           />
         </span>
-        <span class="flex-auto">
+        <div class="flex-auto">
           <p class="text-lg"><T defaultValue="When I add or remove a mod, or switch profiles..." keyName="first_time_setup.option.queue-auto-start.title" /></p>
-          <p class="text-base">
-            <span class="flex-auto">
-              <SlideToggle
-                name="slider-queue" 
-                active="bg-primary-600"
-                bind:checked={$queueAutoStart}>
-                <span>
-                  {#if $queueAutoStart}
-                    <T
-                      defaultValue="Apply the change immediately."
-                      keyName="first_time_setup.option.queue-auto-start.enabled"
-                    />
-                  {:else}
-                    <T
-                      defaultValue='Queue the change and wait for me to press "Apply" to enact queued changes.'
-                      keyName="first_time_setup.option.queue-auto-start.enabled"
-                    />
-                  {/if}
-                </span>
-              </SlideToggle>
+          <SlideToggle
+            name="slider-queue"
+            class="flex-auto" 
+            active="bg-primary-600"
+            bind:checked={$queueAutoStart}>
+            <span>
+              {#if $queueAutoStart}
+                <T
+                  defaultValue="Apply the change immediately."
+                  keyName="first_time_setup.option.queue-auto-start.enabled"
+                />
+              {:else}
+                <T
+                  defaultValue='Queue the change and wait for me to press "Apply" to enact queued changes.'
+                  keyName="first_time_setup.option.queue-auto-start.disabled"
+                />
+              {/if}
             </span>
-        </span>
+          </SlideToggle>
+          <!-- TODO testing the button group approach -->
+          <div class="btn-group bg-surface-200-700-token">
+            <button
+              class="!btn-sm !px-4 text-lg"
+              class:!bg-primary-900={$queueAutoStart}
+              on:click={() => { $queueAutoStart = true; }}
+            >
+              <T defaultValue="Apply the change immediately." keyName="first_time_setup.option.queue-auto-start.enabled"/>
+              <div class="grow"/>
+              <SvgIcon
+                class="h-5 w-5"
+                icon={mdiPlay} />
+            </button>
+            <button
+              class="!btn-sm !px-4 text-lg"
+              class:!bg-primary-900={!$queueAutoStart}
+              on:click={() => { $queueAutoStart = false; }}
+            >
+              <T defaultValue='Queue the change and wait for me to press "Apply" to enact queued changes.' keyName="first_time_setup.option.queue-auto-start.disabled"/>
+              <div class="grow"/>
+              <SvgIcon
+                class="h-5 w-5"
+                icon={mdiClock} />
+            </button>
+          </div>
+        </div>
       </li>
       <li>
         <span class="badge bg-tertiary-500 text-lg">
           <SvgIcon
-            class="h-5 w-5"
+            class="h-6 w-6 my-1"
             icon={mdiWeb}
           />
         </span>
-        <span class="w-full">
-          <p class="text-lg"><T defaultValue="Use this language where available:" keyName="first_time_setup.option.language.title" /></p>
-          <p class="text-base">
-            <LanguageSelector />
-        </span>
+        <div class="w-full">
+          <span class="text-lg"><T defaultValue="Use this language where available:" keyName="first_time_setup.option.language.title" /></span>
+          <LanguageSelector />
       </li>
     </ul>
   </section>
@@ -108,8 +130,8 @@
     </p>
   </section>
   <footer class="card-footer">
-    <button class="btn" on:click={onClose}>
-      <T defaultValue="Close" keyName="common.close" />
+    <button class="btn variant-ringed" on:click={onClose}>
+      <T defaultValue="Get Started!" keyName="first_time_setup.acknowledge" />
     </button>
   </footer>
 </div>
