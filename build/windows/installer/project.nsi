@@ -253,6 +253,8 @@ Function .onVerifyInstDir
     
     Check:
     IfFileExists $currentDir\FactoryGame.exe GameExists
+    IfFileExists $currentDir\FactoryGameSteam.exe GameExists
+    IfFileExists $currentDir\FactoryGameEGS.exe GameExists
     IfFileExists $currentDir\FactoryServer.exe GameExists
     IfFileExists $currentDir\FactoryServer.sh GameExists
     ${GetParent} $currentDir $currentDir
