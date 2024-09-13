@@ -27,6 +27,7 @@ import (
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/ficsitcli"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/logging"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/migration"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/settings"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/wailsextras"
@@ -131,6 +132,8 @@ func main() {
 		startUpdateFound = <-foundOrError
 	}
 
+	migration.Init()
+
 	// Create application with options
 	err = wails.Run(&options.App{
 		Title:            "SatisfactoryModManager",
@@ -204,6 +207,7 @@ func main() {
 			autoupdate.Updater,
 			settings.Settings,
 			ficsitcli.ServerPicker,
+			migration.Migration,
 		},
 		EnumBind: []interface{}{
 			common.AllInstallTypes,
