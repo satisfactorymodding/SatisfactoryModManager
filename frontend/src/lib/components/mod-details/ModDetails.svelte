@@ -349,9 +349,7 @@
         <ModDetailsEntry label={$t('mod-details.latest-version', 'Latest version')} loading={!mod}>{latestVersion ?? ''}</ModDetailsEntry>
         <ModDetailsEntry label={$t('mod-details.installed-version', 'Installed version')} loading={!mod}>{installedVersion ?? ''}</ModDetailsEntry>
         <div class="pt-2" use:popup={changeVersionMenu}>
-          <button
-            class="btn px-4 h-10 text-sm w-full bg-secondary-600"
-            disabled={!$canModify}
+          <button class="btn px-4 h-10 text-sm w-full bg-secondary-600"
           >
             <span>
               <T defaultValue="Change version" keyName="mod-details.change-version" />
