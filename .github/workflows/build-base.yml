@@ -69,6 +69,7 @@ jobs:
         with:
           name: build-${{ matrix.platform.os }}
           path: dist/signed/**/*
+          overwrite: true
 
   finalize:
     runs-on: ubuntu-latest
