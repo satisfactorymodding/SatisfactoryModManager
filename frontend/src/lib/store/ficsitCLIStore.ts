@@ -4,6 +4,7 @@ import { isLaunchingGame } from './generalStore';
 import { ignoredUpdates } from './settingsStore';
 import { binding, bindingTwoWay } from './wailsStoreBindings';
 
+import { queuedMods } from '$lib/store/actionQueue';
 import { bytesToAppropriate, secondsToAppropriate } from '$lib/utils/dataFormats';
 import { progressStats } from '$lib/utils/progress';
 import { CheckForUpdates, GetInstallations, GetInstallationsMetadata, GetInvalidInstalls, GetModsEnabled, GetProfiles, GetRemoteInstallations, GetSelectedInstall, GetSelectedInstallLockfileMods, GetSelectedInstallProfileMods, GetSelectedProfile, SelectInstall, SetModsEnabled, SetProfile } from '$wailsjs/go/ficsitcli/ficsitCLI';
@@ -45,12 +46,12 @@ export const favoriteMods = binding<string[]>([], { updateEvent: 'favoriteMods',
 
 export const isGameRunning = binding(false, { updateEvent: 'isGameRunning', allowNull: false });
 
-export const canModify = derived([isGameRunning, progress, isLaunchingGame, installs, selectedInstallMetadata], ([$isGameRunning, $progress, $isLaunchingGame, $installs, $selectedInstallMetadata]) => {
-  return !$isGameRunning && !$progress && !$isLaunchingGame && $installs.length > 0 && $selectedInstallMetadata?.state === ficsitcli.InstallState.VALID;
+export const canModify = derived([isGameRunning, progress, isLaunchingGame, installs, selectedInstallMetadata, queuedMods], ([$isGameRunning, $progress, $isLaunchingGame, $installs, $selectedInstallMetadata, $queuedMods]) => {
+  return !$isGameRunning && !$progress && !$isLaunchingGame && $installs.length > 0 && $selectedInstallMetadata?.state === ficsitcli.InstallState.VALID && $queuedMods.length <= 0;
 });
 
-export const canChangeInstall = derived([isGameRunning, progress, isLaunchingGame, installs], ([$isGameRunning, $progress, $isLaunchingGame, $installs]) => {
-  return !$isGameRunning && !$progress && !$isLaunchingGame && $installs.length > 0;
+export const canChangeInstall = derived([isGameRunning, progress, isLaunchingGame, installs, queuedMods], ([$isGameRunning, $progress, $isLaunchingGame, $installs, $queuedMods]) => {
+  return !$isGameRunning && !$progress && !$isLaunchingGame && $installs.length > 0 && $queuedMods.length <= 0;
 });
 
 export const canInstallMods = derived([isGameRunning, isLaunchingGame, installs, selectedInstallMetadata], ([$isGameRunning, $isLaunchingGame, $installs, $selectedInstallMetadata]) => {
@@ -93,7 +94,7 @@ export const progressTitle = derived(progress, ($progress) => {
 
 const totalTasks = derived(progress, ($progress) => {
   if (!$progress) return null;
-  
+
   const download = { current: 0, total: 0 } as utils.Progress;
   const extract = { current: 0, total: 0 } as utils.Progress;
   const downloadingMods = [] as { name: string; version: string; complete: boolean }[];
@@ -145,8 +146,8 @@ const placeholderProgressMessage = derived(progress, ($progress) => {
 
 export const progressMessage = derived([placeholderProgressMessage, totalTasks, downloadStats, extractStats], ([$placeholderProgressMessage, $totalTasks, $downloadStats, $extractStats]) => {
   if (!$placeholderProgressMessage || !$totalTasks) return '';
-  
-  const { 
+
+  const {
     download,
     extract,
     downloadingMods,
