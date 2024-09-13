@@ -83,6 +83,7 @@
         <div class="w-full">
           <span class="text-lg"><T defaultValue="Use this language where available:" keyName="first_time_setup.option.language.title" /></span>
           <LanguageSelector />
+        </div>
       </li>
     </ul>
   </section>
