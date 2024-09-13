@@ -346,7 +346,7 @@
     {#if (!$canChangeInstall || !$canModify) && $queuedMods.length > 0}
       <Tooltip popupId={queueLockoutPopupId}>
         <span class="text-base">
-          <T defaultValue={'You have {number} {number, plural, one {action} other {actions}} queued. Apply them or cancel them before switching installs or profiles.'} keyName="left-bar.queue-blocking-switching-tooltip" params={{ number: $queuedMods.length }} />
+          <T defaultValue={'You have {number} {number, plural, one {action} other {actions}} queued. Apply or cancel {number, plural, one {it} other {them}} before switching installs or profiles.'} keyName="left-bar.queue-blocking-switching-tooltip" params={{ number: $queuedMods.length }} />
         </span>
       </Tooltip>
     {/if}
