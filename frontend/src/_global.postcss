@@ -38,13 +38,6 @@ button {
   }
 }
 
-.announcement-markdown-content {
-  & a {
-    @apply text-yellow-500;
-    text-decoration: underline;
-  }
-}
-
 .markdown-content {
   @apply text-base;
 
@@ -87,6 +80,76 @@ button {
 
   & p {
     @apply text-base my-5;
+  }
+
+  & a {
+    @apply text-yellow-500;
+    text-decoration: underline;
+  }
+
+  & pre {
+    font-family: Roboto Mono, monospace !important;
+    padding: 1em;
+    margin: 0.5em 0;
+    overflow: auto;
+    border-radius: 0.3em;
+    text-shadow: 0 1px rgba(0, 0, 0, 0.3);
+    font-size: 1em;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+    tab-size: 4;
+    hyphens: none;
+    background: #272822;
+  }
+
+  & ol {
+    display: block;
+    list-style-type: decimal;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    padding-inline-start: 40px;
+  }
+
+  & ol ul {
+    list-style-type: circle;
+  }
+
+  & blockquote {
+    display: block;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 40px;
+    margin-inline-end: 40px;
+  }
+
+  & dl {
+    display: block;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+  }
+
+  & dd {
+    display: block;
+    margin-inline-start: 40px;
+  }
+}
+
+.inline-markdown-content {
+  & img {
+    max-width: 100%;
+    display: inline;
+  }
+
+  & ul {
+    display: block;
+    list-style-type: disc;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    padding-inline-start: 40px;
   }
 
   & a {

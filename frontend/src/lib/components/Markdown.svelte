@@ -10,6 +10,8 @@
 
   export let markdown: string;
 
+  export let inline = false;
+
   $: rendered = renderMarkdown(markdown);
 
   const modalStore = getModalStore();
@@ -70,7 +72,7 @@
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 <div
   {...$$props}
-  class="markdown-content {$$props.class}"
+  class="{inline ? 'inline-markdown-content' : 'markdown-content'} {$$props.class}"
   role="article"
   on:click={handleDescriptionClick}>
   <!-- eslint-disable-next-line svelte/no-at-html-tags -->

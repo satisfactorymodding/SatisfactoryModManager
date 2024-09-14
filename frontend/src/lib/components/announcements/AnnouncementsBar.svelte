@@ -3,6 +3,7 @@
   import { getContextClient, queryStore } from '@urql/svelte';
   import Carousel from 'svelte-carousel';
 
+  import Markdown from '$lib/components/Markdown.svelte';
   import T from '$lib/components/T.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
   import Announcement from '$lib/components/announcements/Announcement.svelte';
@@ -120,22 +121,13 @@
     placement: 'bottom',
   } satisfies PopupSettings;
 
-  $: renderedTooltip = (() => {
-    const content = $offline ? offlineAnnouncement.message : announcements[currentIndex]?.message;
-    if (content?.length > 0) {
-      return renderMarkdown(content);
-    }
-    return content;
-  })();
+  $: displayedAnnouncement = $offline ? offlineAnnouncement : announcements[currentIndex];
 </script>
 
 <!-- the if gets executed before this is added to the DOM for some reason if this is below the ifs, so the use:popup would not find the element -->
-<Tooltip disabled={!$offline && !announcements[currentIndex]} {popupId}>
+<Tooltip disabled={!displayedAnnouncement} {popupId}>
   <span>
-    <div class="announcement-markdown-content">
-      <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-      {@html renderedTooltip}
-    </div>
+    <Markdown inline markdown={displayedAnnouncement?.message ?? ''}/>
   </span>
 </Tooltip>
 

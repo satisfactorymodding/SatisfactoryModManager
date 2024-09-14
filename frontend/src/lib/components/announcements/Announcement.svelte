@@ -1,10 +1,10 @@
 <script lang="ts">
   import { mdiAlertOutline, mdiInformationOutline } from '@mdi/js';
 
+  import Markdown from '$lib/components/Markdown.svelte';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { type Announcement, AnnouncementImportance } from '$lib/generated';
   import { viewedAnnouncements } from '$lib/store/settingsStore';
-  import { markdown as renderMarkdown } from '$lib/utils/markdown';
 
   export let announcement: Pick<Announcement, 'id' | 'importance' | 'message'>;
 
@@ -21,8 +21,6 @@
         return mdiInformationOutline;
     }
   })();
-
-  $: rendered = renderMarkdown(announcement.message);
 </script>
 
 <div class="announcement-{importanceLower} announcement-bg p-1.5 h-full" class:announcement-new={isNew}>
@@ -30,10 +28,7 @@
     <SvgIcon class="w-8 h-8 mr-3 shrink-0" icon={icon} />
     <div class="grow wrap text-lg">
       <slot>
-        <div class="announcement-markdown-content">
-          <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-          {@html rendered}
-        </div>
+        <Markdown inline markdown={announcement.message} />
       </slot>
     </div>
   </div>
