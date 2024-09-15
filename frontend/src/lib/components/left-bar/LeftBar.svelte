@@ -125,7 +125,7 @@
     }
   }
 
-  const queueLockoutPopupId = 'mod-details-compat-ea';
+  const queueLockoutPopupId = 'queue-lockout-popup';
   const queueLockoutPopup = {
     event: 'hover',
     target: queueLockoutPopupId,
@@ -343,13 +343,11 @@
       </div>
 
     </div>
-    {#if (!$canChangeInstall || !$canModify) && $queuedMods.length > 0}
-      <Tooltip popupId={queueLockoutPopupId}>
-        <span class="text-base">
-          <T defaultValue={'You have {number} {number, plural, one {action} other {actions}} queued. Apply or cancel {number, plural, one {it} other {them}} before switching installs or profiles.'} keyName="left-bar.queue-blocking-switching-tooltip" params={{ number: $queuedMods.length }} />
-        </span>
-      </Tooltip>
-    {/if}
+    <Tooltip disabled={$queuedMods.length === 0} popupId={queueLockoutPopupId}>
+      <span class="text-base">
+        <T defaultValue={'You have {number} {number, plural, one {action} other {actions}} queued. Apply or cancel {number, plural, one {it} other {them}} before switching installs or profiles.'} keyName="left-bar.queue-blocking-switching-tooltip" params={{ number: $queuedMods.length }} />
+      </span>
+    </Tooltip>
 
     <div class="flex flex-col gap-2">
       <span class="pl-4 sticky top-0 z-[1] bg-surface-50-900-token">
