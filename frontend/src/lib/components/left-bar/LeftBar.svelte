@@ -137,8 +137,7 @@
 
 <div class="flex flex-col h-full p-4 space-y-4 h-md:space-y-8 left-bar w-[22rem] min-w-[22rem] ">
   <div class="flex flex-col flex-auto h-full w-full space-y-4 h-md:space-y-8 overflow-y-auto">
-    <div class="h-md:space-y-8" use:popup={queueLockoutPopup}>
-
+    <div class="space-y-4 h-md:space-y-8" use:popup={queueLockoutPopup}>
       <div class="flex flex-col gap-2">
         <span class="pl-4 sticky top-0 z-[1] bg-surface-50-900-token">
           <T defaultValue="Select Game Installation" keyName="left-bar.game-version"/>
