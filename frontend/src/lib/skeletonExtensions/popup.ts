@@ -1,3 +1,5 @@
+/* eslint-disable no-restricted-imports */
+// This is the one place we're allowed to import popup from skeleton, because we're extending it for everything else to use.
 import { type PopupSettings, popup as skeletonPopup } from '@skeletonlabs/skeleton';
 
 export type { PopupSettings } from '@skeletonlabs/skeleton';
