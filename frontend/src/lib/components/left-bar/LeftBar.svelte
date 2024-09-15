@@ -1,6 +1,5 @@
 <script lang="ts">
   import { mdiAlert, mdiCheckCircle, mdiCloseCircle, mdiDownload, mdiFolderOpen, mdiHelp, mdiHelpCircle, mdiLoading, mdiMonitor, mdiPencil, mdiPlusCircle, mdiServer, mdiServerNetwork, mdiTrashCan, mdiUpload, mdiWeb } from '@mdi/js';
-  import { type PopupSettings, popup } from '@skeletonlabs/skeleton';
   import _ from 'lodash';
   import { siDiscord, siGithub } from 'simple-icons/icons';
 
@@ -14,7 +13,7 @@
   import Tooltip from '$lib/components/Tooltip.svelte';
   import DeleteProfile from '$lib/components/modals/profiles/DeleteProfile.svelte';
   import RenameProfile from '$lib/components/modals/profiles/RenameProfile.svelte';
-  import { getModalStore } from '$lib/skeletonExtensions';
+  import { type PopupSettings, getModalStore, popup } from '$lib/skeletonExtensions';
   import { queuedMods } from '$lib/store/actionQueue';
   import { canChangeInstall, canModify, installs, installsMetadata, modsEnabled, profiles, selectedInstall, selectedProfile } from '$lib/store/ficsitCLIStore';
   import { error, siteURL } from '$lib/store/generalStore';
