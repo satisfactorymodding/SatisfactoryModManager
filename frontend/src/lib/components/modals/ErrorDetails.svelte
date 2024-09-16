@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { type PopupSettings, popup } from '@skeletonlabs/skeleton';
   import { getTranslate } from '@tolgee/svelte';
 
   import T from '$lib/components/T.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
+  import { type PopupSettings, popup } from '$lib/skeletonExtensions';
   import { GenerateDebugInfo } from '$wailsjs/go/app/app';
-  import { BrowserOpenURL, LogError } from '$wailsjs/runtime/runtime';
+  import { BrowserOpenURL } from '$wailsjs/runtime/runtime';
 
   export let onClose: (() => void) | null = null;
 

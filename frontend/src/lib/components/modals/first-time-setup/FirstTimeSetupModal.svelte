@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { mdiClock, mdiPlay, mdiTimerSandFull, mdiTimerSandPaused, mdiWatch, mdiWeb } from '@mdi/js';
-  import { SlideToggle } from '@skeletonlabs/skeleton';
+  import { mdiClock, mdiPlay, mdiTimerSandFull, mdiWeb } from '@mdi/js';
   import { T } from '@tolgee/svelte';
 
   import LanguageSelector from './LanguageSelector.svelte';

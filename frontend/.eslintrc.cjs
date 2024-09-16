@@ -90,6 +90,15 @@ module.exports = {
     'import/order': ['error', { 'newlines-between': 'always', alphabetize: { order: 'asc' } }],
     'import/newline-after-import': ['error'],
     'import/no-duplicates': ['error'],
-    'no-restricted-imports': ['error', { patterns: ['*/lib/*', '..*', '**/wailsjs/**/*'] }],
+    'no-restricted-imports': ['error', {
+      patterns: [
+        { group: ['*/lib/*'] },
+        { group: ['..*'], message: 'No relative imports' }, 
+        { group: ['**/wailsjs/**/*'], message: 'Use $wailsjs/runtime instead' },
+      ],
+      paths: [
+        { name: '@skeletonlabs/skeleton', importNames: ['popup', 'PopupSettings'], message: 'Use $lib/skeletonExtensions instead to properly handle hover popups.' },
+      ],
+    }],
   },
 };

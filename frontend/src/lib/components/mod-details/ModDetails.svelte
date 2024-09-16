@@ -15,7 +15,7 @@
   import { CompatibilityState, GetModDetailsDocument } from '$lib/generated';
   import { type PopupSettings, getModalStore, popup } from '$lib/skeletonExtensions';
   import { addQueuedModAction } from '$lib/store/actionQueue';
-  import { canModify, lockfileMods, manifestMods } from '$lib/store/ficsitCLIStore';
+  import { canInstallMods, lockfileMods, manifestMods } from '$lib/store/ficsitCLIStore';
   import { error, expandedMod, siteURL } from '$lib/store/generalStore';
   import { search } from '$lib/store/modFiltersStore';
   import { offline } from '$lib/store/settingsStore';
@@ -351,7 +351,7 @@
         <div class="pt-2" use:popup={changeVersionMenu}>
           <button
             class="btn px-4 h-10 text-sm w-full bg-secondary-600"
-            disabled={!$canModify}
+            disabled={!$canInstallMods}
           >
             <span>
               <T defaultValue="Change version" keyName="mod-details.change-version" />
