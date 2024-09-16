@@ -309,7 +309,7 @@
               
                 <Tooltip popupId={compatEAPopupId}>
                   <span class="text-base">
-                    <T defaultValue={'This mod has been reported as {state} on {branch}.'} keyName="mod-details.compatibility-branch" params={{ state: mod.compatibility.EA.state, branch: 'Early Access' }} />
+                    <T defaultValue={'This mod has been reported as {state} on {branch}.'} keyName="mod-details.compatibility-branch" params={{ state: mod.compatibility.EA.state, branch: 'Stable' }} />
                   </span>
                   {#if mod.compatibility.EA.note}
                     <Markdown class="[&>p]:my-0" markdown={mod.compatibility.EA.note} />

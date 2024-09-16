@@ -3,8 +3,7 @@ package common
 type GameBranch string
 
 var (
-	// TODO rename to BranchRelease later https://github.com/satisfactorymodding/SatisfactoryModManager/pull/223#issuecomment-2342831142
-	BranchEarlyAccess  GameBranch = "Early Access"
+	BranchStable       GameBranch = "Stable"
 	BranchExperimental GameBranch = "Experimental"
 )
 
@@ -62,7 +61,7 @@ var AllBranches = []struct {
 	Value  GameBranch
 	TSName string
 }{
-	{BranchEarlyAccess, "EARLY_ACCESS"},
+	{BranchStable, "STABLE"},
 	{BranchExperimental, "EXPERIMENTAL"},
 }
 

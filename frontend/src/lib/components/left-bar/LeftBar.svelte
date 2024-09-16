@@ -160,7 +160,15 @@
                 <span class="truncate min-w-0">
                   {$installsMetadata[item]?.info?.launcher}
                 </span>
-                <span class="shrink-0 ml-1">({#if $installsMetadata[item]?.info?.location === common.LocationType.LOCAL}{$installsMetadata[item]?.info?.branch}{:else}CL{$installsMetadata[item]?.info?.version}{/if})</span>
+                <span class="shrink-0 ml-1">
+                  {#if $installsMetadata[item]?.info?.location === common.LocationType.LOCAL}
+                    {#if $installsMetadata[item]?.info?.branch !== common.GameBranch.STABLE}
+                      ({$installsMetadata[item]?.info?.branch})
+                    {/if}
+                  {:else}
+                    (CL{$installsMetadata[item]?.info?.version})
+                  {/if}
+                </span>
               {:else if $installsMetadata[item]?.state === ficsitcli.InstallState.LOADING}
                 <T defaultValue="Loading..." keyName="left-bar.install-loading"/>
               {:else if $installsMetadata[item]?.state === ficsitcli.InstallState.INVALID}

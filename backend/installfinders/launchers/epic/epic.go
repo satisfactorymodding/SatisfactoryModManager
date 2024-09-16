@@ -35,11 +35,11 @@ var (
 func GetEpicBranch(appName string) (common.GameBranch, error) {
 	switch appName {
 	case EarlyAccessAppName:
-		return common.BranchEarlyAccess, nil
+		return common.BranchStable, nil
 	case ExperimentalAppName:
 		return common.BranchExperimental, nil
 	case EarlyAccessDedicatedServerAppName:
-		return common.BranchEarlyAccess, nil
+		return common.BranchStable, nil
 	case ExperimentalDedicatedServerAppName:
 		return common.BranchExperimental, nil
 	default:

@@ -44,7 +44,7 @@ export async function getReportedCompatibility(modReference: string, gameBranch:
   const mod = result.data.getModByReference;
   if(mod.compatibility) {
     switch(gameBranch) {
-      case common.GameBranch.EARLY_ACCESS:
+      case common.GameBranch.STABLE:
         return mod.compatibility.EA;
       case common.GameBranch.EXPERIMENTAL:
         return mod.compatibility.EXP;

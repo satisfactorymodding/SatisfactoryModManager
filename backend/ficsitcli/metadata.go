@@ -166,7 +166,7 @@ func (f *ficsitCLI) getRemoteServerMetadata(installation *cli.Installation) (*co
 		return nil, ErrInstallNotServer
 	}
 
-	branch := common.BranchEarlyAccess // TODO: Do we have a way to detect this for remote installs?
+	branch := common.BranchStable // TODO: Do we have a way to detect this for remote installs?
 
 	remoteName := settings.Settings.RemoteNames[remoteKey(installation.Path)]
 

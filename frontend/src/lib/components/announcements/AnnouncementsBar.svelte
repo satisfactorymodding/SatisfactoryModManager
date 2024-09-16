@@ -10,7 +10,6 @@
   import { AnnouncementImportance, type Announcement as AnnouncementType, GetAnnouncementsDocument, SmrHealthcheckDocument } from '$lib/generated';
   import { type PopupSettings, popup } from '$lib/skeletonExtensions';
   import { offline, viewedAnnouncements } from '$lib/store/settingsStore';
-  import { markdown as renderMarkdown } from '$lib/utils/markdown';
   import { SetAnnouncementViewed } from '$wailsjs/go/settings/settings';
   
   const { t } = getTranslate();
