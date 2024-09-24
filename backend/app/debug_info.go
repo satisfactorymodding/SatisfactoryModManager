@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"time"
@@ -47,6 +48,7 @@ func addDefaultFactoryGameLog(writer *zip.Writer) error {
 	if err != nil {
 		return fmt.Errorf("failed to get user cache dir: %w", err)
 	}
+	// TODO redact this file with redactFactoryGameLog
 	err = utils.AddFileToZip(writer, filepath.Join(cacheDir, "FactoryGame", "Saved", "Logs", "FactoryGame.log"), "FactoryGame.log")
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
@@ -62,12 +64,18 @@ func addDefaultFactoryGameLog(writer *zip.Writer) error {
 	return nil
 }
 
+func redactFactoryGameLog(bytes []byte) []byte {
+	re := regexp.MustCompile(`(Added friend with nickname ').*(' on online context)`)
+	return re.ReplaceAll(bytes, []byte("${1}REDACTED${2}"))
+}
+
 func addInstallFactoryGameLog(writer *zip.Writer, install *common.Installation) error {
 	logPath := filepath.Join(install.SavedPath, "Logs", "FactoryGame.log")
 	d, err := ficsitcli.FicsitCLI.GetInstallation(install.Path).GetDisk()
 	if err != nil {
 		return fmt.Errorf("failed to get disk for installation: %w", err)
 	}
+
 	logExists, err := d.Exists(logPath)
 	if err != nil {
 		return fmt.Errorf("failed to check if log exists: %w", err)
@@ -75,14 +83,19 @@ func addInstallFactoryGameLog(writer *zip.Writer, install *common.Installation) 
 	if !logExists {
 		return fmt.Errorf("log does not exist")
 	}
-	bytes, err := d.Read(logPath)
+
+	bytes, err := os.ReadFile(logPath)
 	if err != nil {
 		return fmt.Errorf("failed to read log file: %w", err)
 	}
+
+	bytes = redactFactoryGameLog(bytes)
+
 	logFile, err := writer.Create(getLogNameForInstall(install))
 	if err != nil {
 		return fmt.Errorf("failed to create log file in zip: %w", err)
 	}
+
 	_, err = logFile.Write(bytes)
 	if err != nil {
 		return fmt.Errorf("failed to write log file to zip: %w", err)
