@@ -122,7 +122,7 @@ func addFactoryGameLogs(writer *zip.Writer) {
 
 func getLogNameForInstall(install *common.Installation) string {
 	hash := sha256.Sum256([]byte(install.Path))
-	return fmt.Sprintf("FactoryGame_%s.log", hex.EncodeToString(hash[:])[:8])
+	return fmt.Sprintf("FactoryGame_%s_%s_%s_%s.log", install.Location, install.Branch, install.Type, hex.EncodeToString(hash[:])[:8])
 }
 
 func addMetadata(writer *zip.Writer) error {
