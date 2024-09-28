@@ -48,8 +48,8 @@ func addDefaultFactoryGameLog(writer *zip.Writer) error {
 	if err != nil {
 		return fmt.Errorf("failed to get user cache dir: %w", err)
 	}
-	// TODO redact this file with redactFactoryGameLog
-	err = utils.AddFileToZip(writer, filepath.Join(cacheDir, "FactoryGame", "Saved", "Logs", "FactoryGame.log"), "FactoryGame.log")
+	defaultLogPath := filepath.Join(cacheDir, "FactoryGame", "Saved", "Logs", "FactoryGame.log")
+	err = addLogFromPath(writer, defaultLogPath, "FactoryGame.log")
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			if runtime.GOOS != "windows" {
@@ -69,6 +69,26 @@ func redactFactoryGameLog(bytes []byte) []byte {
 	return re.ReplaceAll(bytes, []byte("${1}REDACTED${2}"))
 }
 
+func addLogFromPath(writer *zip.Writer, logPath string, zipFileName string) error {
+	bytes, err := os.ReadFile(logPath)
+	if err != nil {
+		return fmt.Errorf("failed to read log file: %w", err)
+	}
+
+	bytes = redactFactoryGameLog(bytes)
+
+	logFile, err := writer.Create(zipFileName)
+	if err != nil {
+		return fmt.Errorf("failed to create log file in zip: %w", err)
+	}
+
+	_, err = logFile.Write(bytes)
+	if err != nil {
+		return fmt.Errorf("failed to write log file to zip: %w", err)
+	}
+	return nil
+}
+
 func addInstallFactoryGameLog(writer *zip.Writer, install *common.Installation) error {
 	logPath := filepath.Join(install.SavedPath, "Logs", "FactoryGame.log")
 	d, err := ficsitcli.FicsitCLI.GetInstallation(install.Path).GetDisk()
@@ -84,23 +104,7 @@ func addInstallFactoryGameLog(writer *zip.Writer, install *common.Installation) 
 		return fmt.Errorf("log does not exist")
 	}
 
-	bytes, err := os.ReadFile(logPath)
-	if err != nil {
-		return fmt.Errorf("failed to read log file: %w", err)
-	}
-
-	bytes = redactFactoryGameLog(bytes)
-
-	logFile, err := writer.Create(getLogNameForInstall(install))
-	if err != nil {
-		return fmt.Errorf("failed to create log file in zip: %w", err)
-	}
-
-	_, err = logFile.Write(bytes)
-	if err != nil {
-		return fmt.Errorf("failed to write log file to zip: %w", err)
-	}
-	return nil
+	return addLogFromPath(writer, logPath, getLogNameForInstall(install))
 }
 
 func addFactoryGameLogs(writer *zip.Writer) {
@@ -122,7 +126,8 @@ func addFactoryGameLogs(writer *zip.Writer) {
 
 func getLogNameForInstall(install *common.Installation) string {
 	hash := sha256.Sum256([]byte(install.Path))
-	return fmt.Sprintf("FactoryGame_%s_%s_%s_%s.log", install.Location, install.Branch, install.Type, hex.EncodeToString(hash[:])[:8])
+	first8 := hex.EncodeToString(hash[:])[:8]
+	return fmt.Sprintf("FactoryGame_%s_%s_%s_%s.log", first8, install.Location, install.Branch, install.Type)
 }
 
 func addMetadata(writer *zip.Writer) error {
