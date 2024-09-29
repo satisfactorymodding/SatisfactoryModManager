@@ -49,7 +49,8 @@ func addDefaultFactoryGameLog(writer *zip.Writer) error {
 		return fmt.Errorf("failed to get user cache dir: %w", err)
 	}
 	defaultLogPath := filepath.Join(cacheDir, "FactoryGame", "Saved", "Logs", "FactoryGame.log")
-	err = addLogFromPath(writer, defaultLogPath, "FactoryGame.log")
+	// Default log will always be on the local disk, if it exists
+	bytes, err := os.ReadFile(defaultLogPath)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			if runtime.GOOS != "windows" {
@@ -59,30 +60,30 @@ func addDefaultFactoryGameLog(writer *zip.Writer) error {
 			}
 			return fmt.Errorf("log does not exist")
 		}
-		return fmt.Errorf("failed to add FactoryGame.log to zip: %w", err)
+		return fmt.Errorf("failed to read default FactoryGame.log: %w", err)
+	}
+	err = addLogFromBytes(writer, bytes, "FactoryGame.log")
+	if err != nil {
+		return fmt.Errorf("failed to add default FactoryGame.log to zip: %w", err)
 	}
 	return nil
 }
 
-func redactFactoryGameLog(bytes []byte) []byte {
+func redactLogBytes(bytes []byte) []byte {
+	// Prevent leaking of Steam/Epic friend nicknames in submitted logs
 	re := regexp.MustCompile(`(Added friend with nickname ').*(' on online context)`)
 	return re.ReplaceAll(bytes, []byte("${1}REDACTED${2}"))
 }
 
-func addLogFromPath(writer *zip.Writer, logPath string, zipFileName string) error {
-	bytes, err := os.ReadFile(logPath)
-	if err != nil {
-		return fmt.Errorf("failed to read log file: %w", err)
-	}
-
-	bytes = redactFactoryGameLog(bytes)
+func addLogFromBytes(writer *zip.Writer, bytes []byte, zipFileName string) error {
+	redactedBytes := redactLogBytes(bytes)
 
 	logFile, err := writer.Create(zipFileName)
 	if err != nil {
 		return fmt.Errorf("failed to create log file in zip: %w", err)
 	}
 
-	_, err = logFile.Write(bytes)
+	_, err = logFile.Write(redactedBytes)
 	if err != nil {
 		return fmt.Errorf("failed to write log file to zip: %w", err)
 	}
@@ -91,6 +92,7 @@ func addLogFromPath(writer *zip.Writer, logPath string, zipFileName string) erro
 
 func addInstallFactoryGameLog(writer *zip.Writer, install *common.Installation) error {
 	logPath := filepath.Join(install.SavedPath, "Logs", "FactoryGame.log")
+	// Install-specific logs could be on remote disks
 	d, err := ficsitcli.FicsitCLI.GetInstallation(install.Path).GetDisk()
 	if err != nil {
 		return fmt.Errorf("failed to get disk for installation: %w", err)
@@ -104,7 +106,11 @@ func addInstallFactoryGameLog(writer *zip.Writer, install *common.Installation) 
 		return fmt.Errorf("log does not exist")
 	}
 
-	return addLogFromPath(writer, logPath, getLogNameForInstall(install))
+	bytes, err := d.Read(logPath)
+	if err != nil {
+		return fmt.Errorf("failed to read log file: %w", err)
+	}
+	return addLogFromBytes(writer, bytes, getLogNameForInstall(install))
 }
 
 func addFactoryGameLogs(writer *zip.Writer) {
@@ -112,14 +118,14 @@ func addFactoryGameLogs(writer *zip.Writer) {
 	if err != nil {
 		slog.Warn("failed to add default FactoryGame.log to debuginfo zip", slog.Any("error", err))
 	}
-	for _, meta := range ficsitcli.FicsitCLI.GetInstallationsMetadata() {
-		if meta.Info == nil {
+	for _, installMeta := range ficsitcli.FicsitCLI.GetInstallationsMetadata() {
+		if installMeta.Info == nil {
 			continue
 		}
 
-		err := addInstallFactoryGameLog(writer, meta.Info)
+		err := addInstallFactoryGameLog(writer, installMeta.Info)
 		if err != nil {
-			slog.Warn("failed to add FactoryGame.log to debuginfo zip", slog.String("path", meta.Info.Path), slog.Any("error", err))
+			slog.Warn("failed to add FactoryGame.log to debuginfo zip", slog.String("path", installMeta.Info.Path), slog.Any("error", err))
 		}
 	}
 }
