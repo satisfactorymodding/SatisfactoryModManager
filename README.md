@@ -113,3 +113,35 @@ To supply this API key at development time, create or edit `/frontend/.env.local
 
 The in-context translation screenshot feature requires installing the _Tolgee Tools_ browser extension.
 After running `wails dev`, open `http://localhost:34115/` in your browser of choice to access the application.
+
+## Code Signing Policy
+
+<table>
+  <tr>
+    <td colspan=3>
+      Free code signing provided by <a href="https://about.signpath.io/">SignPath.io</a>, certificate by <a href="https://signpath.org/">SignPath Foundation</a>
+    </td>
+  </tr>
+  <tr>
+    <th>
+      Committers and reviewers
+    </th>
+    <th>
+      Approvers
+    </th>
+    <th>
+      Privacy Policy
+    </th>
+  </tr>
+  <tr>
+    <td>
+      <img src="https://github.com/satisfactorymodding.png?size=24" alt="Satisfactory Modding Logo" align="center" /><a href="https://github.com/orgs/satisfactorymodding/teams/members">Organization members</a>
+    </td>
+    <td>
+      <img src="https://github.com/satisfactorymodding.png?size=24" alt="Satisfactory Modding Logo" align="center" /><a href="https://github.com/orgs/satisfactorymodding/people?query=role%3Aowner">Owners</a>
+    </td>
+    <td>
+      <a href="https://ficsit.app/privacy-policy">https://ficsit.app/privacy-policy</a>
+    </td>
+  </tr>
+</table>

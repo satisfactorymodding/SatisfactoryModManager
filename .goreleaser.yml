@@ -143,6 +143,10 @@ release:
     | | [Download (AppImage)](https://github.com/satisfactorymodding/SatisfactoryModManager/releases/download/v{{.Version}}/SatisfactoryModManager_linux_amd64.AppImage) | |
     
     If you already have Satisfactory Mod Manager installed, you don't need to download it again, it will auto-update.
+    
+    ### Code Signing Policy
+    
+    Windows binaries are [signed](https://github.com/satisfactorymodding/SatisfactoryModManager/#code-signing-policy) using free code signing provided by [SignPath.io](https://about.signpath.io/), certificate by [SignPath Foundation](https://signpath.org/)
 
   templated_extra_files:
     - src: ./build/smm2/latest.yml.tmpl

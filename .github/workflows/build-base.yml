@@ -5,6 +5,9 @@ on:
         required: false
         type: string
         default: --snapshot
+    secrets:
+      SIGNPATH_API_TOKEN:
+        required: true
 
 jobs:
   build:
@@ -41,10 +44,32 @@ jobs:
           GGOOS: ${{ matrix.platform.os }}
 
       - name: Archive artifacts
+        id: upload_artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-${{ matrix.platform.os }}
           path: dist/**/*
+
+      - name: Sign artifacts
+        id: sign_windows
+        if: ${{ matrix.platform.os == 'windows' && startsWith(github.ref, 'refs/tags/') }}
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
+          organization-id: 'd1f0888a-08d3-44fe-9da0-6490890e20ea'
+          project-slug: 'SatisfactoryModManager'
+          signing-policy-slug: 'release-signing'
+          github-artifact-id: '${{ steps.upload_artifacts.outputs.artifact-id }}'
+          wait-for-completion: true
+          output-artifact-directory: 'dist/signed'
+
+      - name: Archive signed artifacts
+        if: ${{ matrix.platform.os == 'windows' && startsWith(github.ref, 'refs/tags/') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.platform.os }}
+          path: dist/signed/**/*
+          overwrite: true
 
   finalize:
     runs-on: ubuntu-latest
