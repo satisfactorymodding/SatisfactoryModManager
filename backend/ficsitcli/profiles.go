@@ -13,6 +13,7 @@ import (
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
 	appCommon "github.com/satisfactorymodding/SatisfactoryModManager/backend/common"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/settings"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 )
 
@@ -41,13 +42,14 @@ func (f *ficsitCLI) SetProfile(profile string) error {
 
 		f.EmitGlobals()
 
-		installErr := f.apply(l, taskChannel)
+		if settings.Settings.QueueAutoStart {
+			installErr := f.apply(l, taskChannel)
 
-		if installErr != nil {
-			l.Error("failed to validate installation", slog.Any("error", installErr))
-			return installErr
+			if installErr != nil {
+				l.Error("failed to validate installation", slog.Any("error", installErr))
+				return installErr
+			}
 		}
-
 		return nil
 	})
 }

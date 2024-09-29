@@ -83,6 +83,14 @@ func (f *ficsitCLI) action(action Action, item ProgressItem, run func(*slog.Logg
 	return nil
 }
 
+func (f *ficsitCLI) Apply() error {
+	profileName := f.GetSelectedProfile()
+	if profileName == nil {
+		return fmt.Errorf("no profile selected")
+	}
+	return f.action(ActionApply, newSimpleItem(*profileName), f.apply)
+}
+
 func (f *ficsitCLI) apply(l *slog.Logger, taskChannel chan<- taskUpdate) error {
 	installsToApply, profile, err := f.getInstallsToApply()
 	if err != nil {

@@ -7,12 +7,19 @@
   import Tooltip from '$lib/components/Tooltip.svelte';
   import { type Compatibility, CompatibilityState } from '$lib/generated';
   import { type PopupSettings, popup } from '$lib/skeletonExtensions';
-  import { queuedMods, startQueue } from '$lib/store/actionQueue';
-  import { isGameRunning, lockfileMods, progress, selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
+  import { hasPendingProfileChange, queuedMods, startQueue } from '$lib/store/actionQueue';
+  import {
+    canInstallMods,
+    isGameRunning,
+    lockfileMods,
+    progress,
+    selectedInstallMetadata,
+    selectedProfile,
+  } from '$lib/store/ficsitCLIStore';
   import { error, hasFetchedMods, isLaunchingGame } from '$lib/store/generalStore';
   import { launchButton, queueAutoStart } from '$lib/store/settingsStore';
   import { type CompatibilityWithSource, getCompatibility } from '$lib/utils/modCompatibility';
-  import { LaunchGame } from '$wailsjs/go/ficsitcli/ficsitCLI';
+  import { Apply, LaunchGame } from '$wailsjs/go/ficsitcli/ficsitCLI';
 
   $: isInstallLaunchable = !!$selectedInstallMetadata?.info?.launchPath;
 
@@ -54,6 +61,15 @@
   $: launchButtonError = versionIncompatible.length > 0 || reportedIncompatible.length > 0;
   $: launchButtonWarning = !launchButtonError && (versionPossiblyCompatible.length > 0 || reportedPossiblyCompatible.length > 0);
   $: areOperationsQueued = !$queueAutoStart && $queuedMods.length > 0;
+
+  async function applyProfileChange() {
+    try {
+      await Apply();
+      $hasPendingProfileChange = false;
+    } catch (e) {
+      $error = e as string;
+    }
+  }
 
   function launchGame() {
     $isLaunchingGame = true;
@@ -116,10 +132,25 @@
   {#if areOperationsQueued}
     <button
       class="btn h-8 w-full text-sm bg-error-500"
+      disabled={!$canInstallMods || !!$progress}
       on:click={() => startQueue()}
     >
       <span>
         <T defaultValue={'Apply {queued, plural, one {one change} other {# changes}}'} keyName="launch-button.apply-queued" params={{ queued: $queuedMods.length }}/>
+      </span>
+      <div class="grow" />
+      <SvgIcon
+        class="h-5 w-5"
+        icon={mdiTrayFull}/>
+    </button>
+  {:else if $hasPendingProfileChange}
+    <button
+      class="btn h-8 w-full text-sm bg-error-500"
+      disabled={!$canInstallMods || !!$progress}
+      on:click={() => applyProfileChange()}
+    >
+      <span>
+        <T defaultValue={'Apply {profile}'} keyName="launch-button.apply-profile-change" params={{ profile: $selectedProfile ?? '' }}/>
       </span>
       <div class="grow" />
       <SvgIcon
@@ -266,6 +297,10 @@
   {:else if areOperationsQueued}
     <span>
       <T defaultValue={'Changes have not yet been made to your mod files. Click the button above to apply the changes you have queued.\n\n(You\'re in Queue "Start manually" mode)'} keyName="launch-button.changes-queued"/>
+    </span>
+  {:else if $hasPendingProfileChange}
+    <span>
+      <T defaultValue={'Changes have not yet been made to your mod files. Click the button above to apply the new profile.\n\n(You\'re in Queue "Start manually" mode)'} keyName="launch-button.profile-change-queued"/>
     </span>
   {:else if $isGameRunning}
     <span>

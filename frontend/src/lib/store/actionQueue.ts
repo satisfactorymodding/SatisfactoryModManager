@@ -9,12 +9,15 @@ interface QueuedAction<T> {
   func: () => Promise<T>;
 }
 
+export const hasPendingProfileChange = writable(false);
+
 const queuedActionsInternal = writable<QueuedAction<unknown>[]>([]);
 export const queuedMods = derived(queuedActionsInternal, (actions) => actions.map((a) => ({ ...a, func: undefined })));
 const modActionsQueue = queue((task: () => Promise<unknown>, cb) => {
   const complete = (e?: Error) => {
     queuedActionsInternal.set(get(queuedActionsInternal).filter((a) => a.func !== task));
     cb(e);
+    hasPendingProfileChange.set(false);
   };
   task().then(() => complete()).catch(complete);
 });

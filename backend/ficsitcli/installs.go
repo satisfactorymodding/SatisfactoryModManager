@@ -89,7 +89,7 @@ func (f *ficsitCLI) GetInstallation(path string) *cli.Installation {
 }
 
 func (f *ficsitCLI) SelectInstall(path string) error {
-	return f.action(ActionSelectInstall, newSimpleItem(path), func(l *slog.Logger, taskUpdates chan<- taskUpdate) error {
+	return f.action(ActionSelectInstall, newSimpleItem(path), func(l *slog.Logger, _ chan<- taskUpdate) error {
 		if !f.isValidInstall(path) {
 			return fmt.Errorf("invalid installation: %s", path)
 		}
@@ -108,13 +108,6 @@ func (f *ficsitCLI) SelectInstall(path string) error {
 		}
 
 		f.EmitGlobals()
-
-		installErr := f.apply(l, taskUpdates)
-
-		if installErr != nil {
-			l.Error("failed to validate install", slog.Any("error", installErr))
-			return installErr
-		}
 		return nil
 	})
 }

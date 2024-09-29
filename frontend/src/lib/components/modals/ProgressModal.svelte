@@ -2,11 +2,12 @@
   import { ficsitcli } from '$wailsjs/go/models';
 
   export const supportedProgressTypes = [
-    ficsitcli.Action.SELECT_INSTALL,
+    // ficsitcli.Action.SELECT_INSTALL, // This is instant, so no need for a progress modal
     ficsitcli.Action.SELECT_PROFILE,
     ficsitcli.Action.TOGGLE_MODS,
     ficsitcli.Action.UPDATE,
     ficsitcli.Action.IMPORT_PROFILE,
+    ficsitcli.Action.APPLY,
   ];
 </script>
 

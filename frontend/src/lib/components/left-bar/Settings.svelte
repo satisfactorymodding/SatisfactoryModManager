@@ -3,15 +3,18 @@
   import { ListBox, ListBoxItem } from '@skeletonlabs/skeleton';
   import { getTranslate } from '@tolgee/svelte';
   import { getContextClient } from '@urql/svelte';
+  import { get } from 'svelte/store';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import T from '$lib/components/T.svelte';
   import { GetModNameDocument, i18n } from '$lib/generated';
   import { type PopupSettings, getModalStore, popup } from '$lib/skeletonExtensions';
+  import { addQueuedModAction, hasPendingProfileChange, queuedMods } from '$lib/store/actionQueue';
   import { lockfileMods, manifestMods } from '$lib/store/ficsitCLIStore';
+  import { error } from '$lib/store/generalStore';
   import { debug, konami, language, launchButton, offline, queueAutoStart, startView, updateCheckMode, version } from '$lib/store/settingsStore';
   import { GenerateDebugInfo } from '$wailsjs/go/app/app';
-  import { OfflineGetMod } from '$wailsjs/go/ficsitcli/ficsitCLI';
+  import { Apply, OfflineGetMod } from '$wailsjs/go/ficsitcli/ficsitCLI';
 
   const modalStore = getModalStore();
 
@@ -177,6 +180,11 @@
   function localeName(locale: string) {
     if (!locale) return 'N/A';
     return new Intl.DisplayNames([locale], { type: 'language' }).of(locale);
+  }
+
+  $: if ($queueAutoStart && $queuedMods.length === 0 && $hasPendingProfileChange) {
+    $hasPendingProfileChange = false;
+    addQueuedModAction('__apply__', 'apply', Apply).catch((e) => error.set(e));
   }
 </script>
 

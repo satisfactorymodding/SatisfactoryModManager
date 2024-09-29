@@ -14,9 +14,19 @@
   import DeleteProfile from '$lib/components/modals/profiles/DeleteProfile.svelte';
   import RenameProfile from '$lib/components/modals/profiles/RenameProfile.svelte';
   import { type PopupSettings, getModalStore, popup } from '$lib/skeletonExtensions';
-  import { queuedMods } from '$lib/store/actionQueue';
-  import { canChangeInstall, canModify, installs, installsMetadata, modsEnabled, profiles, selectedInstall, selectedProfile } from '$lib/store/ficsitCLIStore';
+  import { hasPendingProfileChange, queuedMods } from '$lib/store/actionQueue';
+  import {
+    canChangeInstall,
+    canModify,
+    installs,
+    installsMetadata,
+    modsEnabled,
+    profiles,
+    selectedInstall,
+    selectedProfile,
+  } from '$lib/store/ficsitCLIStore';
   import { error, siteURL } from '$lib/store/generalStore';
+  import { queueAutoStart } from '$lib/store/settingsStore';
   import { OpenExternal } from '$wailsjs/go/app/app';
   import { ExportCurrentProfile } from '$wailsjs/go/ficsitcli/ficsitCLI';
   import { common, ficsitcli } from '$wailsjs/go/models';
@@ -36,6 +46,9 @@
     }
     try {
       await selectedInstall.asyncSet(value);
+      // TODO: This loses the dirty state for the other installs.
+      // Maybe we should instead save a dirty state in the settings
+      $hasPendingProfileChange = false;
     } catch(e) {
       if (e instanceof Error) {
         $error = e.message;
@@ -56,6 +69,9 @@
     }
     try {
       await selectedProfile.asyncSet(value);
+      if (!$queueAutoStart) {
+        $hasPendingProfileChange = true;
+      }
     } catch(e) {
       if (e instanceof Error) {
         $error = e.message;

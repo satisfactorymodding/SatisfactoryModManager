@@ -31,6 +31,7 @@ const (
 	ActionSelectProfile Action = "selectProfile"
 	ActionImportProfile Action = "importProfile"
 	ActionUpdate        Action = "update"
+	ActionApply         Action = "apply"
 )
 
 type Progress struct {
@@ -90,4 +91,5 @@ var AllActionTypes = []struct {
 	{ActionSelectProfile, "SELECT_PROFILE"},
 	{ActionImportProfile, "IMPORT_PROFILE"},
 	{ActionUpdate, "UPDATE"},
+	{ActionApply, "APPLY"},
 }
