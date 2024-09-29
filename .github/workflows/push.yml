@@ -2,6 +2,8 @@ name: Push
 
 on:
   push:
+    branches:
+      - '**'
   pull_request:
 
 jobs:
