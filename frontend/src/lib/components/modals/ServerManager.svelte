@@ -189,11 +189,11 @@
         <tbody>
           {#each $remoteServers as remoteServer}
             <tr>
-              <td class="break-all">{$installsMetadata[remoteServer].info?.launcher}</td>
+              <td class="break-all">{$installsMetadata[remoteServer]?.info?.launcher}</td>
               <td class="break-all">{redactRemoteURL(remoteServer)}</td>
               <td>
                 {#if $installsMetadata[remoteServer]?.state === ficsitcli.InstallState.VALID}
-                  {$installsMetadata[remoteServer].info?.type}
+                  {$installsMetadata[remoteServer]?.info?.type}
                 {:else}
                   <Tooltip popupId={installWarningPopupId(remoteServer)}>
                     <span class="text-base">
