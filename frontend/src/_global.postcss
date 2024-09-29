@@ -27,6 +27,11 @@ button {
   @apply tracking-wider;
 }
 
+/* This is a workaround for mod titles colors flickering while hovering some buttons. Still visible when clicking them, but less annoying. */
+.btn {
+  @apply !transition-transform;
+}
+
 ::-webkit-scrollbar-track {
   @apply rounded-token;
 }
