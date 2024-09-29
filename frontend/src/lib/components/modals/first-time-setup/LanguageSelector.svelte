@@ -1,14 +1,11 @@
 <script lang="ts">
   import Select from '$lib/components/Select.svelte';
-  import { i18n } from '$lib/generated';
+  import { languages } from '$lib/localization';
   import { language } from '$lib/store/settingsStore';
 
-  let languages: string[] = Object.keys(i18n);
+  let languageObject = languages.find((l) => l.languageCode === $language) ?? languages.find((l) => l.languageCode === 'en')!;
 
-  function localeName(locale: string) {
-    if (!locale) return 'N/A';
-    return new Intl.DisplayNames([locale], { type: 'language' }).of(locale) ?? `Error:${locale}`;
-  }
+  $: $language = languageObject.languageCode;
 </script>
 
 <Select
@@ -17,18 +14,19 @@
   buttonClass="bg-surface-200-700-token px-4 text-sm"
   itemActiveClass="!bg-surface-300/20"
   itemClass="bg-surface-50-900-token"
+  itemKey="languageCode"
   items={languages}
   menuClass="bg-surface-50-900-token"
 
-  bind:value={$language}
+  bind:value={languageObject}
 >
   <svelte:fragment slot="item" let:item>
-    <span>{localeName(item)}</span>
+    <span>{item.name} ({Math.round(item.completeness * 100)}%)</span>
   </svelte:fragment>
-  <!-- TODO: dynamic flags 
+  <!-- TODO: flags
   <svelte:fragment slot="itemTrail" let:item>
     <span slot="lead" class="h-5 w-5 block">
-      {localeFlag(item.value)}
+      {item.flag}
     </span>
   </svelte:fragment>
   -->

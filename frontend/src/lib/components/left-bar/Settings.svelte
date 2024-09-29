@@ -3,11 +3,11 @@
   import { ListBox, ListBoxItem } from '@skeletonlabs/skeleton';
   import { getTranslate } from '@tolgee/svelte';
   import { getContextClient } from '@urql/svelte';
-  import { get } from 'svelte/store';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import T from '$lib/components/T.svelte';
-  import { GetModNameDocument, i18n } from '$lib/generated';
+  import { GetModNameDocument } from '$lib/generated';
+  import { languages } from '$lib/localization';
   import { type PopupSettings, getModalStore, popup } from '$lib/skeletonExtensions';
   import { addQueuedModAction, hasPendingProfileChange, queuedMods } from '$lib/store/actionQueue';
   import { lockfileMods, manifestMods } from '$lib/store/ficsitCLIStore';
@@ -131,8 +131,6 @@
     placement: 'right-start',
     closeQuery: '[data-popup="language-menu"] .listbox-item',
   } satisfies PopupSettings;
-
-  let languages: string[] = Object.keys(i18n);
   
   const urqlClient = getContextClient();
 
@@ -306,7 +304,7 @@
       </ListBox>
     </ul>
   </div>
-  <div class="card shadow-xl w-56 z-10 duration-0 overflow-y-auto" data-popup="language-menu">
+  <div class="card shadow-xl w-72 z-10 duration-0 overflow-y-auto" data-popup="language-menu">
     <!-- 
     Skeleton's popup close function waits for the tranistion duration...
     before actually triggering the transition...
@@ -319,15 +317,15 @@
             name="language"
             class="bg-surface-50-900-token"
             active=""
-            value={item}
+            value={item.languageCode}
             bind:group={$language}>
-            <!-- TODO: dynamic flags -->
+            <!-- TODO: flags -->
             <!-- <span slot="lead" class="h-5 w-5 block">
-              {localeFlag(item)}
+              {item.flag}
             </span> -->
-            {localeName(item)}
+            {item.name} ({Math.round(item.completeness * 100)}%)
             <span slot="trail" class="h-5 w-5 block">
-              {#if $language === item}
+              {#if $language === item.languageCode}
                 <SvgIcon class="h-full w-full" icon={mdiCheck}/>
               {/if}
             </span>
