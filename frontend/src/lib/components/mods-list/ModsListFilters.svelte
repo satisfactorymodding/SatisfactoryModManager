@@ -2,6 +2,7 @@
   import { mdiClose, mdiFilter, mdiSort } from '@mdi/js';
   import { getTranslate } from '@tolgee/svelte';
 
+  import Marquee from '$lib/components/Marquee.svelte';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import Select from '$lib/components/Select.svelte';
   import { type FilterField, type OrderByField, filter, filterOptions, order, orderByOptions, search } from '$lib/store/modFiltersStore';
@@ -59,7 +60,7 @@
       <div class="h-5 w-5">
         <SvgIcon icon={mdiFilter} />
       </div>
-      <span class="text-primary-600 hidden @lg/mod-list-filters:!block w-24 text-left">{filterNames[item.id]}</span>
+      <Marquee class="text-primary-600 hidden @lg/mod-list-filters:!block w-24 text-left">{filterNames[item.id]}</Marquee>
     </svelte:fragment>
     <svelte:fragment slot="item" let:item>
       <span>{filterNames[item.id]}</span>
@@ -80,7 +81,7 @@
       <div class="h-5 w-5">
         <SvgIcon icon={mdiSort} />
       </div>
-      <span class="text-primary-600 hidden @lg/mod-list-filters:!block w-24 text-left">{orderByNames[item.id]}</span>
+      <Marquee class="text-primary-600 hidden @lg/mod-list-filters:!block w-24 text-left">{orderByNames[item.id]}</Marquee>
     </svelte:fragment>
     <svelte:fragment slot="item" let:item>
       <span>{orderByNames[item.id]}</span>

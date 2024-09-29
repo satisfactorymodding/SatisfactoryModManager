@@ -2,6 +2,7 @@
   import { mdiOpenInNew, mdiTrayFull } from '@mdi/js';
   import { getContextClient } from '@urql/svelte';
 
+  import Marquee from '$lib/components/Marquee.svelte';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import T from '$lib/components/T.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
@@ -135,10 +136,9 @@
       disabled={!$canInstallMods || !!$progress}
       on:click={() => startQueue()}
     >
-      <span>
+      <Marquee class="flex-auto text-start">
         <T defaultValue={'Apply {queued, plural, one {one change} other {# changes}}'} keyName="launch-button.apply-queued" params={{ queued: $queuedMods.length }}/>
-      </span>
-      <div class="grow" />
+      </Marquee>
       <SvgIcon
         class="h-5 w-5"
         icon={mdiTrayFull}/>
@@ -162,10 +162,9 @@
       class="btn h-8 w-full text-sm bg-surface-200-700-token"
       disabled
     >
-      <span>
+      <Marquee class="flex-auto text-start">
         <T defaultValue="SMM can't launch this install" keyName="launch-button.cant-launch"/>
-      </span>
-      <div class="grow" />
+      </Marquee>
     </button>
   {:else if $launchButton === 'normal' || $isGameRunning || $isLaunchingGame}
     <button
@@ -176,10 +175,9 @@
       disabled={!!$progress || $isGameRunning || $isLaunchingGame}
       on:click={() => launchGame()}
     >
-      <span>
+      <Marquee class="flex-auto text-start">
         <T defaultValue="Play Satisfactory" keyName="launch-button.play"/>
-      </span>
-      <div class="grow" />
+      </Marquee>
       <SvgIcon
         class="h-5 w-5"
         icon={mdiOpenInNew}/>

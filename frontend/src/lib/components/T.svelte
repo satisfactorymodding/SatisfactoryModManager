@@ -32,7 +32,7 @@
   export let language: string | undefined = undefined;
 
   export let parts: (TranslationComponentPart<SvelteComponent> | TranslationElementPart<keyof SvelteHTMLElements>)[] = [];
-  
+
   const { t } = getTranslate();
   
   function split(content: string) {
@@ -85,7 +85,7 @@
 
 {#each contentParts as part}
   {#if typeof part === 'string'}
-    {part}
+    <span>{part}</span>
   {:else if 'element' in part.component}
     <svelte:element this={part.component.element} {...part.component.props}>{part.content}</svelte:element>
   {:else}

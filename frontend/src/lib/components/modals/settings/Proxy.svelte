@@ -38,8 +38,9 @@
           class="btn shrink-0 text-primary-600"
           disabled={!canChange}
           on:click={() => { proxyURL = ''; setProxy(); }}>
-          <span><T defaultValue="Remove proxy" keyName="settings.proxy.remove" /></span>
-          <div class="grow" />
+          <span class="flex-auto text-start">
+            <T defaultValue="Remove proxy" keyName="settings.proxy.remove" />
+          </span>
         </button>
       </div>
     </label>
@@ -48,7 +49,9 @@
     <button
       class="btn text-primary-600 variant-ringed"
       on:click={parent.onClose}>
-      <span><T defaultValue="Close" keyName="common.close" /></span>
+      <span>
+        <T defaultValue="Close" keyName="common.close" />
+      </span>
     </button>
     <button
       class="btn shrink-0 text-primary-600"

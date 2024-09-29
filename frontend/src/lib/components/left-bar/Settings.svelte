@@ -4,6 +4,7 @@
   import { getTranslate } from '@tolgee/svelte';
   import { getContextClient } from '@urql/svelte';
 
+  import Marquee from '$lib/components/Marquee.svelte';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import T from '$lib/components/T.svelte';
   import { GetModNameDocument } from '$lib/generated';
@@ -190,10 +191,9 @@
   <div class="w-full h-8" use:popup={settingsMenu}>
     <button class="btn px-4 h-full w-full text-sm bg-surface-200-700-token"
     >
-      <span>
+      <Marquee class="flex-auto text-start">
         <T defaultValue="Mod Manager Settings" keyName="settings.title"/>
-      </span>
-      <div class="grow" />
+      </Marquee>
       <SvgIcon
         class="h-5 w-5"
         icon={mdiTune} />

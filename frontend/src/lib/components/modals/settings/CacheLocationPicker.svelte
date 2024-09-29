@@ -101,15 +101,17 @@
           class="btn mr-4 shrink-0 text-primary-600"
           disabled={cacheMoveInProgress}
           on:click={() => resetCacheLocation()}>
-          <span><T defaultValue="Reset to default" keyName="settings.cache.reset" /></span>
-          <div class="grow" />
+          <span class="flex-auto text-start">
+            <T defaultValue="Reset to default" keyName="settings.cache.reset" />
+          </span>
         </button>
         <button
           class="btn shrink-0 text-primary-600"
           disabled={cacheMoveInProgress}
           on:click={() => setCacheLocation()}>
-          <span><T defaultValue="Save and move" keyName="settings.cache.save" /></span>
-          <div class="grow" />
+          <span class="flex-auto text-start">
+            <T defaultValue="Save and move" keyName="settings.cache.save" />
+          </span>
         </button>
       </div>
     </label>
@@ -119,7 +121,9 @@
       class="btn text-primary-600 variant-ringed"
       disabled={cacheMoveInProgress}
       on:click={parent.onClose}>
-      <span><T defaultValue="Close" keyName="common.close" /></span>
+      <span>
+        <T defaultValue="Close" keyName="common.close" />
+      </span>
     </button>
   </footer>
 </div>

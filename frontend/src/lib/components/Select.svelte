@@ -80,7 +80,7 @@
     Wrap button in a div so that the trigger node location does not change.    
     -->
     <button class="btn w-full h-full {buttonClass}" {disabled}>
-      <div class="grow flex justify-start min-w-0">
+      <div class="flex-auto text-start justify-start flex min-w-0 space-x-1 overflow-hidden">
         {#if $$slots.selected}
           <slot name="selected" item={value} />
         {:else}

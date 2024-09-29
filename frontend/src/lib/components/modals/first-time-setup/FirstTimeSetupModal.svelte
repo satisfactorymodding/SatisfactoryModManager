@@ -4,6 +4,7 @@
 
   import LanguageSelector from './LanguageSelector.svelte';
 
+  import Marquee from '$lib/components/Marquee.svelte';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { queueAutoStart } from '$lib/store/settingsStore';
   import { SetNewUserSetupComplete } from '$wailsjs/go/settings/settings';
@@ -54,7 +55,9 @@
               class:!bg-primary-900={$queueAutoStart}
               on:click={() => { $queueAutoStart = true; }}
             >
-              <span><T defaultValue="Apply changes immediately" keyName="first_time_setup.option.queue-auto-start.enabled"/></span>
+              <Marquee>
+                <T defaultValue="Apply changes immediately" keyName="first_time_setup.option.queue-auto-start.enabled"/>
+              </Marquee>
               <SvgIcon
                 class="h-5 w-5"
                 icon={mdiPlay} />
@@ -64,7 +67,9 @@
               class:!bg-primary-900={!$queueAutoStart}
               on:click={() => { $queueAutoStart = false; }}
             >
-              <span><T defaultValue='Wait for me to press "Apply"' keyName="first_time_setup.option.queue-auto-start.disabled"/></span>
+              <Marquee>
+                <T defaultValue='Wait for me to press "Apply"' keyName="first_time_setup.option.queue-auto-start.disabled"/>
+              </Marquee>
               <SvgIcon
                 class="h-5 w-5"
                 icon={mdiClock} />

@@ -7,6 +7,7 @@
   import Settings from './Settings.svelte';
   import Updates from './Updates.svelte';
 
+  import Marquee from '$lib/components/Marquee.svelte';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import Select from '$lib/components/Select.svelte';
   import T from '$lib/components/T.svelte';
@@ -240,10 +241,9 @@
               disabled={!$canModify}
               on:click={() => setModsEnabled(false)}
             >
-              <span>
+              <Marquee class="flex-auto text-start">
                 <T defaultValue="Mods off" keyName="left-bar.mods-off"/>
-              </span>
-              <div class="grow"/>
+              </Marquee>
               <SvgIcon
                 class="h-5 w-5"
                 icon={mdiCloseCircle} />
@@ -253,10 +253,9 @@
               class:!bg-primary-900={$modsEnabled}
               disabled={!$canModify}
               on:click={() => setModsEnabled(true)}>
-              <span>
+              <Marquee class="flex-auto text-start">
                 <T defaultValue="Mods on" keyName="left-bar.mods-on"/>
-              </span>
-              <div class="grow"/>
+              </Marquee>
               <SvgIcon
                 class="h-5 w-5"
                 icon={mdiCheckCircle} />
@@ -301,10 +300,9 @@
             class="btn w-1/3 bg-surface-200-700-token px-4 h-8 text-sm"
             disabled={!$canModify}
             on:click={() => modalStore.trigger({ type:'component', component: 'addProfile' })}>
-            <span>
+            <Marquee class="flex-auto text-start">
               <T defaultValue="Add" keyName="common.add"/>
-            </span>
-            <div class="grow"/>
+            </Marquee>
             <SvgIcon
               class="h-5 w-5 text-primary-600"
               icon={mdiPlusCircle} />
@@ -313,10 +311,9 @@
             class="btn w-1/3 bg-surface-200-700-token px-2 h-8 text-sm"
             disabled={!$canModify}
             on:click={() => modalStore.trigger({ type:'component', component: { ref: RenameProfile, props: { profile: $selectedProfile } } })}>
-            <span>
+            <Marquee class="flex-auto text-start">
               <T defaultValue="Rename" keyName="common.rename"/>
-            </span>
-            <div class="grow"/>
+            </Marquee>
             <SvgIcon
               class="h-5 w-5 text-warning-500"
               icon={mdiPencil} />
@@ -325,10 +322,9 @@
             class="btn w-1/3 bg-surface-200-700-token px-3 h-8 text-sm"
             disabled={!$canModify || $profiles.length === 1}
             on:click={() => modalStore.trigger({ type:'component', component: { ref: DeleteProfile, props: { profile: $selectedProfile } } })}>
-            <span>
+            <Marquee class="flex-auto text-start">
               <T defaultValue="Delete" keyName="common.delete"/>
-            </span>
-            <div class="grow"/>
+            </Marquee>
             <SvgIcon
               class="h-5 w-5 text-error-700"
               icon={mdiTrashCan} />
@@ -340,10 +336,9 @@
             disabled={!$canModify}
             on:click={() => modalStore.trigger({ type: 'component', component: 'importProfile' })}
           >
-            <span>
+            <Marquee class="flex-auto text-start">
               <T defaultValue="Import" keyName="common.import"/>
-            </span>
-            <div class="grow"/>
+            </Marquee>
             <SvgIcon
               class="h-5 w-5"
               icon={mdiDownload} />
@@ -353,10 +348,9 @@
             disabled={!$canModify}
             on:click={() => exportCurrentProfile()}
           >
-            <span>
+            <Marquee class="flex-auto text-start">
               <T defaultValue="Export" keyName="left-bar.export"/>
-            </span>
-            <div class="grow"/>
+            </Marquee>
             <SvgIcon
               class="h-5 w-5"
               icon={mdiUpload} />
@@ -384,10 +378,9 @@
       <button
         class="btn px-4 h-8 w-full text-sm bg-surface-200-700-token"
         on:click={() => modalStore.trigger({ type: 'component', component: 'serverManager' })}>
-        <span>
+        <Marquee class="flex-auto text-start">
           <T defaultValue="Manage Servers" keyName="left-bar.manage-servers"/>
-        </span>
-        <div class="grow" />
+        </Marquee>
         <SvgIcon
           class="h-5 w-5"
           icon={mdiServerNetwork} />
@@ -397,10 +390,9 @@
         class="btn w-full bg-surface-200-700-token px-4 h-8 text-sm"
         on:click={() => BrowserOpenURL('https://docs.ficsit.app/satisfactory-modding/latest/ForUsers/SatisfactoryModManager.html')}
       >
-        <span>
+        <Marquee class="flex-auto text-start">
           <T defaultValue="Help" keyName="left-bar.help"/>
-        </span>
-        <div class="grow"/>
+        </Marquee>
         <SvgIcon
           class="h-5 w-5"
           icon={mdiHelpCircle} />
@@ -413,10 +405,9 @@
       <button
         class="btn w-full bg-surface-200-700-token px-4 h-8 text-sm"
         on:click={() => BrowserOpenURL($siteURL)}>
-        <span>
+        <Marquee class="flex-auto text-start">
           <T defaultValue="ficsit.app (Mod Repository)" keyName="left-bar.ficsit-app"/>
-        </span>
-        <div class="grow" />
+        </Marquee>
         <SvgIcon
           class="h-5 w-5"
           icon={mdiWeb} />
@@ -424,10 +415,9 @@
       <button
         class="btn w-full bg-surface-200-700-token px-4 h-8 text-sm"
         on:click={() => BrowserOpenURL('https://discord.ficsit.app/')}>
-        <span>
+        <Marquee class="flex-auto text-start">
           <T defaultValue="Satisfactory Modding Discord" keyName="left-bar.satisfactory-modding-discord"/>
-        </span>
-        <div class="grow" />
+        </Marquee>
         <SvgIcon
           class="h-5 w-5"
           icon={siDiscord.path} />
@@ -435,10 +425,9 @@
       <button
         class="btn w-full bg-surface-200-700-token px-4 h-8 text-sm"
         on:click={() => BrowserOpenURL('https://github.com/satisfactorymodding/SatisfactoryModManager')} >
-        <span>
+        <Marquee class="flex-auto text-start">
           <T defaultValue="SMM GitHub" keyName="left-bar.smm-github"/>
-        </span>
-        <div class="grow" />
+        </Marquee>
         <SvgIcon
           class="h-5 w-5"
           icon={siGithub.path} />

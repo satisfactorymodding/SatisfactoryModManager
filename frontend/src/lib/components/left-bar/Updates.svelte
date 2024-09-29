@@ -1,6 +1,7 @@
 <script lang="ts">
   import { mdiCheckCircle, mdiSync } from '@mdi/js';
 
+  import Marquee from '$lib/components/Marquee.svelte';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import T from '$lib/components/T.svelte';
   import { getModalStore } from '$lib/skeletonExtensions';
@@ -43,7 +44,7 @@
   class="btn w-full bg-surface-200-700-token px-4 h-8 text-sm"
   class:!bg-primary-600={$smmUpdate || $unignoredUpdates.length > 0}
   on:click={() => showUpdateDialog()}>
-  <span>
+  <Marquee class="flex-auto text-start">
     {#if $smmUpdate}
       <T defaultValue="SMM update available" keyName="updates.smm-update-available"/>
     {:else if $unignoredUpdates.length > 0}
@@ -51,8 +52,7 @@
     {:else}
       <T defaultValue="No mod/SMM updates right now" keyName="updates.no-updates"/>
     {/if}
-  </span>
-  <div class="grow" />
+  </Marquee>
   <SvgIcon
     class="h-5 w-5"
     icon={mdiCheckCircle} />
@@ -62,14 +62,13 @@
   class="btn w-full bg-surface-200-700-token px-4 h-8 text-sm"
   disabled={!!$progress || $updateCheckInProgress}
   on:click={checkForAllUpdates}>
-  <span>
+  <Marquee class="flex-auto text-start">
     {#if $updateCheckInProgress}
       <T defaultValue="Checking for updates..." keyName="updates.checking-for-updates"/>
     {:else}
       <T defaultValue="Check for updates" keyName="updates.check-for-updates"/>
     {/if}
-  </span>
-  <div class="grow" />
+  </Marquee>
   <SvgIcon
     class="h-5 w-5 {$updateCheckInProgress ? 'update-check' : ''}"
     icon={mdiSync} />

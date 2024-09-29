@@ -8,6 +8,7 @@
   import ModDetailsEntry from './ModDetailsEntry.svelte';
 
   import Markdown from '$lib/components/Markdown.svelte';
+  import Marquee from '$lib/components/Marquee.svelte';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import T, { translationElementPart } from '$lib/components/T.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
@@ -353,9 +354,9 @@
             class="btn px-4 h-10 text-sm w-full bg-secondary-600"
             disabled={!$canInstallMods}
           >
-            <span>
+            <Marquee>
               <T defaultValue="Change version" keyName="mod-details.change-version" />
-            </span>
+            </Marquee>
             <SvgIcon
               class="h-5 w-5"
               icon={mdiChevronDown}/>
@@ -408,9 +409,9 @@
         {#if (!mod || !('offline' in mod)) && !$offline}
           <div class="pt-2" use:popup={changelogMenu}>
             <button class="btn px-4 h-10 text-sm w-full bg-secondary-600">
-              <span>
+              <Marquee>
                 <T defaultValue="Changelogs" keyName="mod-details.changelogs" />
-              </span>
+              </Marquee>
               <SvgIcon
                 class="h-5 w-5"
                 icon={mdiChevronDown}/>
@@ -455,9 +456,9 @@
       <SvgIcon
         class="h-5 w-5 -scale-x-100"
         icon={mdiImport}/>
-      <span>
+      <Marquee>
         <T defaultValue="Close" keyName="common.close" />
-      </span>
+      </Marquee>
     </button>
   </div>
   <div class="break-words overflow-wrap-anywhere flex-1 px-3 mr-3 my-4 overflow-y-scroll overflow-x-hidden w-0">
