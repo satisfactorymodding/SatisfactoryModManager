@@ -25,7 +25,7 @@ import (
 )
 
 type MetadataInstallation struct {
-	*common.Installation
+	common.Installation
 	LaunchPath string `json:"launchPath"`
 	Name       string `json:"name"`
 	Profile    string `json:"profile"`
@@ -148,7 +148,7 @@ func addMetadata(writer *zip.Writer) error {
 			continue
 		}
 		i := &MetadataInstallation{
-			Installation: metadata.Info,
+			Installation: *metadata.Info,
 			Name:         fmt.Sprintf("Satisfactory %s (%s)", metadata.Info.Branch, metadata.Info.Launcher),
 			Profile:      ficsitcli.FicsitCLI.GetInstallation(install).Profile,
 			Log:          getLogNameForInstall(metadata.Info),
