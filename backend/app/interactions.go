@@ -3,7 +3,10 @@ package app
 import (
 	"fmt"
 	"log/slog"
+	"os/exec"
+	"runtime"
 
+	"github.com/godbus/dbus/v5"
 	"github.com/pkg/browser"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
@@ -114,4 +117,36 @@ func (a *app) OpenExternal(input string) {
 	if err != nil {
 		slog.Error("failed to open external", slog.Any("error", err), slog.String("path", input))
 	}
+}
+
+func (a *app) ShowInExplorer(path string) error {
+	switch runtime.GOOS {
+	case "windows":
+		cmd := exec.Command("explorer", "/select,", path)
+		_, err := cmd.CombinedOutput()
+		if err != nil {
+			return fmt.Errorf("failed to open explorer: %w", err)
+		}
+		return nil
+	case "linux":
+		conn, err := dbus.SessionBus()
+		if err != nil {
+			return fmt.Errorf("failed to connect to session bus: %w", err)
+		}
+		fileURL := "file://" + path
+		obj := conn.Object("org.freedesktop.FileManager1", "/org/freedesktop/FileManager1")
+		call := obj.Call("org.freedesktop.FileManager1.ShowItems", 0, []string{fileURL}, "")
+		if call.Err != nil {
+			return fmt.Errorf("failed to open file manager: %w", call.Err)
+		}
+		return nil
+	case "darwin":
+		cmd := exec.Command("open", "-R", path)
+		_, err := cmd.CombinedOutput()
+		if err != nil {
+			return fmt.Errorf("failed to open finder: %w", err)
+		}
+		return nil
+	}
+	return fmt.Errorf("unsupported operating system: %s", runtime.GOOS)
 }

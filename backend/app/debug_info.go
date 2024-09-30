@@ -268,5 +268,14 @@ func (a *app) GenerateDebugInfo() (bool, error) {
 		return false, fmt.Errorf("failed to generate debug info: %w", err)
 	}
 
+	// Maybe ask user if they want to open the file,
+	// but I don't know what the UI for that would be,
+	// since debug info can be generated from settings and modals
+	err = a.ShowInExplorer(filename)
+	if err != nil {
+		slog.Error("failed to reveal debug info in file explorer", slog.Any("error", err))
+		return false, fmt.Errorf("failed to reveal debug info in file explorer: %w", err)
+	}
+
 	return true, nil
 }
