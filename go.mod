@@ -14,8 +14,8 @@ require (
 	github.com/puzpuzpuz/xsync/v3 v3.0.2
 	github.com/samber/lo v1.39.0
 	github.com/samber/slog-multi v1.0.2
-	github.com/satisfactorymodding/ficsit-cli v0.5.1-0.20241002085956-bf6d6b0850c0
-	github.com/satisfactorymodding/ficsit-resolver v0.0.3
+	github.com/satisfactorymodding/ficsit-cli v0.5.1-0.20241004172351-3640e5e70817
+	github.com/satisfactorymodding/ficsit-resolver v0.0.6
 	github.com/shirou/gopsutil/v3 v3.24.3
 	github.com/spf13/viper v1.18.1
 	github.com/tawesoft/golib/v2 v2.10.0
