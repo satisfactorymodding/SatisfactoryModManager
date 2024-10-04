@@ -1,8 +1,19 @@
+<script context="module" lang="ts">
+  export interface ButtonDisplay {
+    icon: string;
+    iconHover: string;
+    iconClass?: string;
+    iconHoverClass?: string;
+    tooltip: string;
+    tooltipMarkdown?: string;
+  }
+</script>
+
 <script lang="ts">
+  import Markdown from '$lib/components/Markdown.svelte';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
   import { type PopupSettings, popup } from '$lib/skeletonExtensions';
-  import type { ButtonDisplay } from '$lib/utils/responsiveButton';
 
   export let id: string;
   export let display: ButtonDisplay;
@@ -42,9 +53,8 @@
   <Tooltip {popupId}>
     <span>
       {display.tooltip}
-      {#if display.tooltipHtml}
-        <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-        {@html display.tooltipHtml}
+      {#if display.tooltipMarkdown}
+        <Markdown inline markdown={display.tooltipMarkdown}/>
       {/if}
     </span>
   </Tooltip>

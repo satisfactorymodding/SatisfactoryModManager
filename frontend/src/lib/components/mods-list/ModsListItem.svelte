@@ -6,7 +6,7 @@
   import { createEventDispatcher } from 'svelte';
 
   import Markdown from '$lib/components/Markdown.svelte';
-  import ResponsiveButton from '$lib/components/ResponsiveButton.svelte';
+  import ResponsiveButton, { type ButtonDisplay } from '$lib/components/ResponsiveButton.svelte';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import T from '$lib/components/T.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
@@ -29,7 +29,6 @@
   import { largeNumberFormat } from '$lib/utils/dataFormats';
   import { getAuthor } from '$lib/utils/getModAuthor';
   import { type CompatibilityWithSource, getCompatibility, getVersionCompatibility } from '$lib/utils/modCompatibility';
-  import type { ButtonDisplay } from '$lib/utils/responsiveButton';
   import { DisableMod, EnableMod, InstallMod, RemoveMod } from '$wailsjs/go/ficsitcli/ficsitCLI';
   import { ficsitcli } from '$wailsjs/go/models';
   import { FavoriteMod, UnFavoriteMod } from '$wailsjs/go/settings/settings';
@@ -119,7 +118,7 @@
         display.tooltip = $t('mod-list-item.compatibility-warning', 'There are problems reported with this mod, but you can try to install it anyways. Details:');
       }
       if (compatibility.note) {
-        display.tooltipHtml = '<br/>' + compatibility.note;
+        display.tooltipMarkdown = '<br/>' + compatibility.note;
       } else {
         // TODO compatibility.note should always be non-null here, what should our fallback text be if it's not?
         display.tooltip += $t('mod-list-item.compatibility-note-none', ' (None specified)');
@@ -127,7 +126,7 @@
     }
     if (queued) {
       display.tooltip = $t('mod-list-item.queued', 'This mod is already queued for another operation.');
-      delete display.tooltipHtml;
+      delete display.tooltipMarkdown;
     }
     return display;
   })();
