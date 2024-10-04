@@ -7,7 +7,23 @@ import { binding, bindingTwoWay } from './wailsStoreBindings';
 import { queuedMods } from '$lib/store/actionQueue';
 import { bytesToAppropriate, secondsToAppropriate } from '$lib/utils/dataFormats';
 import { progressStats } from '$lib/utils/progress';
-import { CheckForUpdates, GetInstallations, GetInstallationsMetadata, GetInvalidInstalls, GetModsEnabled, GetProfiles, GetRemoteInstallations, GetSelectedInstall, GetSelectedInstallLockfileMods, GetSelectedInstallProfileMods, GetSelectedProfile, SelectInstall, SetModsEnabled, SetProfile } from '$wailsjs/go/ficsitcli/ficsitCLI';
+import {
+  CheckForUpdates,
+  GetInstallations,
+  GetInstallationsMetadata,
+  GetInvalidInstalls,
+  GetModsEnabled,
+  GetProfiles,
+  GetRemoteInstallations,
+  GetSelectedInstall,
+  GetSelectedInstallLockfileMods,
+  GetSelectedInstallProfileMods,
+  GetSelectedProfile,
+  SelectInstall,
+  SelectedProfileTargets,
+  SetModsEnabled,
+  SetProfile,
+} from '$wailsjs/go/ficsitcli/ficsitCLI';
 import { type cli, common, ficsitcli, type utils } from '$wailsjs/go/models';
 import { GetFavoriteMods } from '$wailsjs/go/settings/settings';
 
@@ -19,7 +35,7 @@ export const selectedInstall = bindingTwoWay(null, { initialGet: () => GetSelect
 export const selectedInstallMetadata = derived([installsMetadata, selectedInstall], ([$installsMetadata, $selectedInstallPath]) => {
   return $installsMetadata[$selectedInstallPath ?? '__invalid__install__'] ?? null;
 });
-export const selectedProfileTargets = binding<Record<string, string[]>>({}, { updateEvent: 'selectedProfileTargets' });
+export const selectedProfileTargets = binding<Record<string, string[]>>({}, { initialGet: SelectedProfileTargets, updateEvent: 'selectedProfileTargets' });
 
 export const remoteServers = binding([], { initialGet: () => GetRemoteInstallations(), updateEvent: 'remoteServers', allowNull: false });
 
@@ -43,7 +59,7 @@ export const lockfileMods = binding({}, { initialGet: GetSelectedInstallLockfile
 
 export const progress = binding<ficsitcli.Progress | null>(null, { updateEvent: 'progress' });
 
-export const favoriteMods = binding<string[]>([], { updateEvent: 'favoriteMods', initialGet: GetFavoriteMods });
+export const favoriteMods = binding<string[]>([], { initialGet: GetFavoriteMods, updateEvent: 'favoriteMods' });
 
 export const isGameRunning = binding(false, { updateEvent: 'isGameRunning', allowNull: false });
 

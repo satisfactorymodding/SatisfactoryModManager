@@ -133,17 +133,20 @@ func (f *ficsitCLI) EmitGlobals() {
 	wailsRuntime.EventsEmit(appCommon.AppContext, "selectedInstallation", selectedInstallation.Path)
 	wailsRuntime.EventsEmit(appCommon.AppContext, "selectedProfile", selectedInstallation.Profile)
 	wailsRuntime.EventsEmit(appCommon.AppContext, "modsEnabled", !selectedInstallation.Vanilla)
+	wailsRuntime.EventsEmit(appCommon.AppContext, "selectedProfileTargets", f.SelectedProfileTargets())
+}
 
+func (f *ficsitCLI) SelectedProfileTargets() map[string][]string {
 	installsWithTargets, _, err := f.getInstallsToApply()
 	if err != nil {
 		slog.Error("failed to get installs to apply", slog.Any("error", err))
-		return
+		return nil
 	}
 	installsForTarget := make(map[string][]string)
 	for _, install := range installsWithTargets {
 		installsForTarget[install.targetName] = append(installsForTarget[install.targetName], install.install.Path)
 	}
-	wailsRuntime.EventsEmit(appCommon.AppContext, "selectedProfileTargets", installsForTarget)
+	return installsForTarget
 }
 
 func (f *ficsitCLI) isValidInstall(path string) bool {
