@@ -85,7 +85,7 @@ require (
 	github.com/tkrajina/go-reflector v0.5.6 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
-	github.com/vektah/gqlparser/v2 v2.5.10 // indirect
+	github.com/vektah/gqlparser/v2 v2.5.17 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/wailsapp/mimetype v1.4.1 // indirect
