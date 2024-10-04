@@ -76,7 +76,8 @@ func GetGameInfo(path string, platform Platform) (InstallType, int, string, erro
 
 		versionFilePath := filepath.Join(path, info.versionPath)
 		if _, err := os.Stat(versionFilePath); os.IsNotExist(err) {
-			return InstallTypeWindowsClient, 0, "", fmt.Errorf("failed to get game info")
+			slog.Debug("game not of type", slog.String("path", executablePath), slog.String("type", string(info.installType)))
+			continue
 		}
 
 		versionFile, err := os.ReadFile(versionFilePath)
