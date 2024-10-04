@@ -49,8 +49,7 @@ for common issues and their solutions.
 If you want to point to the SMR staging API instead of production, edit:
 
 * `main.go` to set `api-base` to the staging api (`https://api.ficsit.dev`)
-* `frontend\.graphqlrc` to set `schema` to the staging api (`https://api.ficsit.dev/v2/query`)
-* `frontend\codegen.yml` to set `schema` to the staging api (`https://api.ficsit.dev/v2/query`)
+* `frontend\.graphqlrc.yml` to set `schema` to the staging api (`https://api.ficsit.dev/v2/query`)
 
 ### Development Server
 
