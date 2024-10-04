@@ -38,7 +38,7 @@ query GetMods($offset: Int!, $limit: Int!) {
         id
         version
         dependencies {
-          mod_id
+          mod_reference
           condition
         }
         targets {

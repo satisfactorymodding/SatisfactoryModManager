@@ -142,7 +142,7 @@ interface ModVersion {
   version: string;
   game_version: string;
   dependencies: {
-    mod_id: string;
+    mod_reference: string;
     condition: string;
   }[];
 }
@@ -150,7 +150,11 @@ interface ModVersion {
 async function getModVersions(modReference: string, urqlClient: Client): Promise<ModVersion[] | undefined> {
   if(get(offline)) {
     try {
-      return (await OfflineGetMod(modReference)).versions;
+      // Remove the map when ficsit-cli uses mod_reference
+      return (await OfflineGetMod(modReference)).versions.map((ver) => ({
+        ...ver,
+        dependencies: ver.dependencies.map((dep) => ({ ...dep, mod_reference: dep.mod_id })),
+      }));
     } catch {
       return undefined;
     }

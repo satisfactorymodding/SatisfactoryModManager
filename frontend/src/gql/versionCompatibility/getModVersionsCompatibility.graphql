@@ -7,7 +7,7 @@ query ModVersionsCompatibility($modReference: ModReference!) {
       game_version
       required_on_remote
       dependencies {
-        mod_id
+        mod_reference
         condition
       }
     }
