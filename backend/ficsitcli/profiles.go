@@ -41,6 +41,7 @@ func (f *ficsitCLI) SetProfile(profile string) error {
 		}
 
 		f.EmitGlobals()
+		f.EmitModsChange()
 
 		if settings.Settings.QueueAutoStart {
 			installErr := f.apply(l, taskChannel)
