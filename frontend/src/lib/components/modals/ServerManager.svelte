@@ -336,7 +336,7 @@
           placeholder={$t('server-manager.local-path-placeholder', 'C:\\Path\\To\\Server')}
           type="text"
           bind:value={newServerPath}/>
-        <div class="sm:col-start-2 col-span-2">
+        <div class="sm:col-start-2 col-span-2 row-span-2">
           <RemoteServerPicker
             basePath=""
             bind:path={newServerPath}
