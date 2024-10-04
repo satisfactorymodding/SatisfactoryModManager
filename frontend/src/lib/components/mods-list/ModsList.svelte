@@ -198,8 +198,10 @@
             itemClass="mx-4"
             itemHeight={84}
             items={displayMods}
+            let:index
             let:item={mod}>
             <ModsListItem
+              {index}
               {mod}
               selected={$expandedMod == mod.mod_reference}
               on:click={() => {

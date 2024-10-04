@@ -25,6 +25,7 @@
   import { FavoriteMod, UnFavoriteMod } from '$wailsjs/go/settings/settings';
 
   export let mod: PartialMod;
+  export let index: number;
 
   const { t } = getTranslate();
 
@@ -259,7 +260,7 @@
     }
   }
 
-  $: popupId = `mods-list-item-popup-${mod.mod_reference}`;
+  $: popupId = `mods-list-item-popup-${mod.mod_reference}-${index}`;
 
   $: popupHover = {
     event: 'hover',
