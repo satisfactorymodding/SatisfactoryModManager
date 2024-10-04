@@ -25,7 +25,12 @@ jobs:
         with:
           frontend: false
           skip-wails: true
-      
+
+      - name: Create frontend/build embed directory
+        run: |
+          mkdir -p frontend/build
+          echo "" > frontend/build/.gitkeep
+
       - uses: golangci/golangci-lint-action@v4
         with:
           version: v1.61
