@@ -43,7 +43,7 @@ func GetEpicBranch(appName string) (common.GameBranch, error) {
 	case ExperimentalDedicatedServerAppName:
 		return common.BranchExperimental, nil
 	default:
-		return "", fmt.Errorf("unknown branch for " + appName)
+		return "", fmt.Errorf("unknown branch for %s", appName)
 	}
 }
 

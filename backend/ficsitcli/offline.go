@@ -39,7 +39,7 @@ func (f *ficsitCLI) OfflineGetMods() ([]Mod, error) {
 	}
 
 	mods := make([]Mod, 0)
-	cache.Range(func(modReference string, mod ficsitcache.Mod) bool {
+	cache.Range(func(_ string, mod ficsitcache.Mod) bool {
 		mods = append(mods, f.convertCacheFileToMod(mod))
 		return true
 	})

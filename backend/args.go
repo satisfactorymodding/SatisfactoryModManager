@@ -40,7 +40,7 @@ func handleURI(uri string) error {
 		app.App.ExternalInstallMod(modID, version)
 		return nil
 	default:
-		return fmt.Errorf("unknown URI action " + u.Host)
+		return fmt.Errorf("unknown URI action %s", u.Host)
 	}
 }
 
@@ -50,5 +50,5 @@ func handleFile(path string) error {
 		app.App.ExternalImportProfile(path)
 		return nil
 	}
-	return fmt.Errorf("unknown file type " + path)
+	return fmt.Errorf("unknown file type %s", path)
 }

@@ -4,7 +4,6 @@ linters-settings:
       - github.com/satisfactorymodding/SatisfactoryModManager/*
 
   govet:
-    check-shadowing: true
     enable-all: true
     disable:
       - shadow
@@ -28,11 +27,11 @@ issues:
     - linters:
         - typecheck
       text: "no matching files found"
+  exclude-dirs:
+    - frontend
 
 run:
   timeout: 5m
-  skip-dirs:
-    - frontend
 
 linters:
   disable-all: true
