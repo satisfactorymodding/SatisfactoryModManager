@@ -12,7 +12,7 @@
   import AnnouncementsBar from '$lib/components/announcements/AnnouncementsBar.svelte';
   import { GetModCountDocument, GetModsDocument } from '$lib/generated';
   import { queuedMods } from '$lib/store/actionQueue';
-  import { favoriteMods, lockfileMods, manifestMods } from '$lib/store/ficsitCLIStore';
+  import { favoriteMods, lockfileMods, manifestMods, selectedProfileTargets } from '$lib/store/ficsitCLIStore';
   import { expandedMod, hasFetchedMods } from '$lib/store/generalStore';
   import { type OfflineMod, type PartialMod, filter, filterOptions, order, search } from '$lib/store/modFiltersStore';
   import { offline, startView } from '$lib/store/settingsStore';
@@ -99,6 +99,7 @@
     $lockfileMods;
     $favoriteMods;
     $queuedMods;
+    $selectedProfileTargets;
     
     Promise.all(mods.map((mod) => $filter.func(mod, client))).then((results) => {
       filteredMods = mods.filter((_, i) => results[i]);

@@ -4,6 +4,7 @@ query GetModVersionTargets($modReference: ModReference!) {
     versions {
       id
       version
+      required_on_remote
       targets {
         targetName
       }

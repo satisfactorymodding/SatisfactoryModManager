@@ -13,7 +13,17 @@
   import { CompatibilityState } from '$lib/generated';
   import { type PopupSettings, popup } from '$lib/skeletonExtensions';
   import { addQueuedModAction, queuedMods, removeQueuedModAction } from '$lib/store/actionQueue';
-  import { canInstallMods, favoriteMods, lockfileMods, manifestMods, progress, progressMessage, progressPercent, selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
+  import {
+    canInstallMods,
+    favoriteMods,
+    lockfileMods,
+    manifestMods,
+    progress,
+    progressMessage,
+    progressPercent,
+    selectedInstallMetadata,
+    selectedProfileTargets,
+  } from '$lib/store/ficsitCLIStore';
   import { error, siteURL } from '$lib/store/generalStore';
   import { type PartialMod, search } from '$lib/store/modFiltersStore';
   import { largeNumberFormat } from '$lib/utils/dataFormats';
@@ -61,7 +71,7 @@
   $: queued = $queuedMods.some((q) => q.mod === mod.mod_reference);
   $: queuedInstall = $queuedMods.some((q) => q.mod === mod.mod_reference && (q.action === 'install' || q.action === 'remove'));
   $: queuedEnable = $queuedMods.some((q) => q.mod === mod.mod_reference && (q.action === 'enable' || q.action === 'disable'));
-  
+
   $: installButtonDisplay = ((): ButtonDisplay => {
     if (inProgress) {
       return {
@@ -179,6 +189,7 @@
   let compatibility: CompatibilityWithSource = { state: CompatibilityState.Works, source: 'reported' };
   $: {
     const info = $selectedInstallMetadata?.info;
+    $selectedProfileTargets;
     if(info) {
       if(!('offline' in mod) && !('missing' in mod)) {
         if(mod.hidden && !isDependency) {
@@ -188,7 +199,7 @@
             if (result.source === 'reported') {
               compatibility = {
                 state: result.state,
-                note: $t('mod-list-item.compatibility-note', 'This mod has been reported as {state} on this game version.', { state: result.state }) 
+                note: $t('mod-list-item.compatibility-note', 'This mod has been reported as {state} on this game version.', { state: result.state })
                   + (result.note ? ('<br>' + result.note) : (' ' + $t('mod.compatibility-no-notes', '(No further notes provided)'))),
                 source: 'reported',
               };
@@ -298,8 +309,8 @@
       src={renderedLogo} />
     <div class="flex flex-col h-full grow w-0" class:opacity-30={isInstalled && !isEnabled}>
       <div class="flex items-center" use:popup={popupHover}>
-        <span 
-          class="shrink min-w-[7rem] truncate text-lg font-medium !leading-6" 
+        <span
+          class="shrink min-w-[7rem] truncate text-lg font-medium !leading-6"
           class:text-error-600={compatibility.state === CompatibilityState.Broken}
           class:text-warning-500={compatibility.state === CompatibilityState.Damaged}>
           {mod.name}

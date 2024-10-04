@@ -15,7 +15,7 @@
     lockfileMods,
     progress,
     selectedInstallMetadata,
-    selectedProfile,
+    selectedProfile, selectedProfileTargets,
   } from '$lib/store/ficsitCLIStore';
   import { error, hasFetchedMods, isLaunchingGame } from '$lib/store/generalStore';
   import { launchButton, queueAutoStart } from '$lib/store/settingsStore';
@@ -29,6 +29,7 @@
   let compatibilities: Record<string, CompatibilityWithSource> = {};
   $: {
     const info = $selectedInstallMetadata?.info;
+    $selectedProfileTargets;
     if (info && $hasFetchedMods) {
       const newCompatibilities: typeof compatibilities = {};
       Object.keys($lockfileMods).map(async (modReference) => {
