@@ -97,7 +97,7 @@
 
   <div
     bind:this={selectMenu}
-    class="card w-full shadow-xl z-10 duration-0 overflow-y-auto !mt-0 {menuClass}"
+    class="card min-w-full shadow-xl z-10 duration-0 overflow-y-auto !mt-0 {menuClass}"
     data-popup={name}
     use:focusTrap={comboboxOpen}>
     <!-- 

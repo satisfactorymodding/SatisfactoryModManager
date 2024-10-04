@@ -167,6 +167,7 @@
           itemActiveClass="!bg-surface-300/20"
           itemClass="bg-surface-50-900-token"
           items={_.orderBy($installs)}
+          menuClass="w-full"
           value={$selectedInstall ?? ''}
           on:change={installSelectChanged}
         >
@@ -276,6 +277,7 @@
           itemActiveClass="!bg-surface-300/20"
           itemClass="bg-surface-50-900-token"
           items={_.orderBy($profiles)}
+          menuClass="w-full"
           value={$selectedProfile ?? ''}
           on:change={profileSelectChanged}
         >
