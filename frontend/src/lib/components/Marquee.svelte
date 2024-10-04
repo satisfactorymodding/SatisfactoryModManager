@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
   import { cubicInOut } from 'svelte/easing';
-  import { tweened } from 'svelte/motion';
+  import { type Tweened, tweened } from 'svelte/motion';
 
   let running = false;
 
@@ -10,13 +10,26 @@
   export { clazz as class };
 
   let element: HTMLElement | null = null;
-  $: totalWidth = element?.scrollWidth ?? 0;
-  $: visibleWidth = element?.clientWidth || totalWidth;
-  $: scrollableWidth = totalWidth - visibleWidth;
 
-  $: animationDuration = scrollableWidth / animationSpeed * 1000;
+  // I don't know why, but the update function doesn't trigger reactivity, so just update everything at once. I'm looking forward to Svelte 5.
+  let scrollableWidth = 0;
+  let animationDuration = 0;
+  let hoverTranslation: Tweened<number>;
 
-  $: hoverTranslation = tweened(0, { duration: animationDuration, easing: cubicInOut });
+  // widths aren't reactive, so we need to recompute them during the animation, in case the content changes
+  function update() {
+    const totalWidth = element?.scrollWidth ?? 0;
+    const visibleWidth = element?.clientWidth || totalWidth;
+    scrollableWidth = totalWidth - visibleWidth;
+    animationDuration = scrollableWidth / animationSpeed * 1000;
+    hoverTranslation = tweened(0, { duration: animationDuration, easing: cubicInOut });
+  }
+
+  $: {
+    element;
+    update();
+  }
+
   let interval: ReturnType<typeof setInterval> | null = null;
 
   function stop() {
@@ -29,6 +42,7 @@
 
   function start() {
     stop();
+    update();
     if (animationDuration > 0) {
       $hoverTranslation = 1;
       interval = setInterval(() => {
