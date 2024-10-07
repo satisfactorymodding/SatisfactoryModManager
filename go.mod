@@ -19,8 +19,8 @@ require (
 	github.com/shirou/gopsutil/v3 v3.24.3
 	github.com/spf13/viper v1.18.1
 	github.com/tawesoft/golib/v2 v2.10.0
-	github.com/wailsapp/go-webview2 v1.0.10
-	github.com/wailsapp/wails/v2 v2.9.1
+	github.com/wailsapp/go-webview2 v1.0.16
+	github.com/wailsapp/wails/v2 v2.9.2
 	github.com/zishang520/engine.io v1.5.12
 	github.com/zishang520/socket.io v1.3.2
 	golang.org/x/exp v0.0.0-20231214170342-aacd6d4b4611
