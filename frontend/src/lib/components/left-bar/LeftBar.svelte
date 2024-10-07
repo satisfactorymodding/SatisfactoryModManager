@@ -197,7 +197,7 @@
             </span>
           </svelte:fragment>
           <svelte:fragment slot="itemTrail" let:item>
-            <Tooltip popupId={installOptionPopupId(item)}>
+            <Tooltip fixed popupId={installOptionPopupId(item)}>
               <div class="flex flex-col">
                 <span>{item}</span>
                 {#if $installsMetadata[item]?.state === ficsitcli.InstallState.VALID}

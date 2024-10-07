@@ -50,7 +50,7 @@
         icon={display.iconHover}/>
     </button>
   </div>
-  <Tooltip {popupId}>
+  <Tooltip fixed {popupId}>
     <span>
       {display.tooltip}
       {#if display.tooltipMarkdown}
