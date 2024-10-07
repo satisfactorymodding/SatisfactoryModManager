@@ -268,12 +268,6 @@
         </button>
       </div>
       <div class="card shadow-xl min-w-[11rem] z-10 duration-0 overflow-y-auto max-h-[95vh] !mt-0" data-popup={authorsMenuPopupId}>
-        <!-- 
-        Skeleton's popup close function waits for the tranistion duration...
-        before actually triggering the transition...
-        So we'll just not have a transition...
-        -->
-      
         <ul>
           {#each mod?.authors ?? [] as author}
             <li>
@@ -307,7 +301,6 @@
                 <div use:popup={compatEAPopup}>
                   <SvgIcon class="{colorForCompatibilityState(mod.compatibility.EA.state)} w-5" icon={mdiRocketLaunch} />
                 </div>
-              
                 <Tooltip popupId={compatEAPopupId}>
                   <span class="text-base">
                     <T defaultValue={'This mod has been reported as {state} on {branch}.'} keyName="mod-details.compatibility-branch" params={{ state: mod.compatibility.EA.state, branch: 'Stable' }} />
@@ -363,12 +356,6 @@
           </button>
         </div>
         <div class="card shadow-xl min-w-[11rem] z-10 duration-0 overflow-y-auto !mt-0" data-popup={changeVersionMenuPopupId}>
-          <!-- 
-          Skeleton's popup close function waits for the tranistion duration...
-          before actually triggering the transition...
-          So we'll just not have a transition...
-          -->
-        
           <ul>
             <li>
               <button class="btn w-full h-full text-left" on:click={() => installVersion(null)}>
@@ -418,12 +405,6 @@
             </button>
           </div>
           <div class="card shadow-xl min-w-[11rem] z-10 duration-0 overflow-y-auto !mt-0" data-popup={changelogMenuPopupId}>
-            <!-- 
-            Skeleton's popup close function waits for the tranistion duration...
-            before actually triggering the transition...
-            So we'll just not have a transition...
-            -->
-          
             <ul>
               {#each mod?.versions ?? [] as version}
                 <li>

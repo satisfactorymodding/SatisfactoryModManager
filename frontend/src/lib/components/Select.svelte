@@ -100,11 +100,6 @@
     class="card min-w-full shadow-xl z-10 duration-0 overflow-y-auto !mt-0 {menuClass}"
     data-popup={name}
     use:focusTrap={comboboxOpen}>
-    <!-- 
-    Skeleton's popup close function waits for the tranistion duration...
-    before actually triggering the transition...
-    So we'll just not have a transition...
-    -->
     <ListBox
       class="w-full"
       regionDefault="overflow-x-hidden"

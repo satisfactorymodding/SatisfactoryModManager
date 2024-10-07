@@ -197,11 +197,6 @@
   </div>
   <!-- #if gets executed before lower elements are added to the dom, so we have the submenus before to ensure they exist when use:popup is called-->
   <div class="card shadow-xl w-48 z-10 duration-0 overflow-y-auto" data-popup="update-check-mode-menu">
-    <!-- 
-    Skeleton's popup close function waits for the tranistion duration...
-    before actually triggering the transition...
-    So we'll just not have a transition...
-    -->
     <ul class="menu">
       <ListBox class="w-full" rounded="rounded-none" spacing="space-y-0">
         {#each updateCheckModes as item}
@@ -223,11 +218,6 @@
     </ul>
   </div>
   <div class="card shadow-xl w-56 z-10 duration-0 overflow-y-auto" data-popup="queue-mode-menu">
-    <!-- 
-    Skeleton's popup close function waits for the tranistion duration...
-    before actually triggering the transition...
-    So we'll just not have a transition...
-    -->
     <ul class="menu">
       <ListBox class="w-full" rounded="rounded-none" spacing="space-y-0">
         {#each queueModes as item}
@@ -249,11 +239,6 @@
     </ul>
   </div>
   <div class="card shadow-xl w-48 z-10 duration-0 overflow-y-auto" data-popup="start-view-menu">
-    <!-- 
-    Skeleton's popup close function waits for the tranistion duration...
-    before actually triggering the transition...
-    So we'll just not have a transition...
-    -->
     <ul class="menu">
       <ListBox class="w-full" rounded="rounded-none" spacing="space-y-0">
         {#each views as item}
@@ -275,11 +260,6 @@
     </ul>
   </div>
   <div class="card shadow-xl w-48 z-10 duration-0 overflow-y-auto" data-popup="launch-button-menu">
-    <!-- 
-    Skeleton's popup close function waits for the tranistion duration...
-    before actually triggering the transition...
-    So we'll just not have a transition...
-    -->
     <ul class="menu">
       <ListBox class="w-full" rounded="rounded-none" spacing="space-y-0">
         {#each launchButtons as item}
@@ -301,11 +281,6 @@
     </ul>
   </div>
   <div class="card shadow-xl w-72 z-10 duration-0 overflow-y-auto" data-popup="language-menu">
-    <!-- 
-    Skeleton's popup close function waits for the tranistion duration...
-    before actually triggering the transition...
-    So we'll just not have a transition...
-    -->
     <ul class="menu">
       <ListBox class="w-full" rounded="rounded-none" spacing="space-y-0">
         {#each languages as item}
@@ -333,11 +308,6 @@
 
   <!-- main settings menu starts here -->
   <div class="card shadow-xl z-10 duration-0 overflow-y-auto py-2 max-h-[95vh]" data-popup="settings-menu">
-    <!-- 
-    Skeleton's popup close function waits for the tranistion duration...
-    before actually triggering the transition...
-    So we'll just not have a transition...
-    -->
     <ul class="menu">
       <li class="section-header">
         <span class="h-5 w-5"><SvgIcon class="h-full w-full" icon={mdiBug}/></span>
