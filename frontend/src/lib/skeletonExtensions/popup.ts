@@ -30,10 +30,10 @@ SOFTWARE.
 /* eslint-disable no-restricted-imports */
 // This is the one place we're allowed to import popup from skeleton, because we're extending it for everything else to use.
 import { type computePosition as computePositionType } from '@floating-ui/dom';
-import { type PopupSettings, storePopup } from '@skeletonlabs/skeleton';
+import { type PopupSettings as PopupSettings1, storePopup } from '@skeletonlabs/skeleton';
 import { get } from 'svelte/store';
 
-export type { PopupSettings } from '@skeletonlabs/skeleton';
+export type PopupSettings = PopupSettings1 & { delay?: number; };
 
 export function popup(triggerNode: HTMLElement, args: PopupSettings) {
   // Floating UI Modules
@@ -121,6 +121,8 @@ export function popup(triggerNode: HTMLElement, args: PopupSettings) {
     });
   }
 
+  let isOpening = false;
+
   // State Handlers
   function open(): void {
     if (!elemPopup) return;
@@ -130,31 +132,40 @@ export function popup(triggerNode: HTMLElement, args: PopupSettings) {
     if (args.state) args.state({ state: popupState.open });
     // Update render settings
     render();
-    // Update the DOM
-    elemPopup.style.display = 'block';
-    elemPopup.style.opacity = '1';
-    elemPopup.style.pointerEvents = 'auto';
-    // enable popup interactions
-    elemPopup.removeAttribute('inert');
-    // Trigger Floating UI autoUpdate (open only)
-    // https://floating-ui.com/docs/autoUpdate
-    popupState.autoUpdateCleanup = autoUpdate(triggerNode, elemPopup, render);
-    // Focus the first focusable element within the popup
-    focusablePopupElements = Array.from(elemPopup?.querySelectorAll(focusableAllowedList));
+
+    isOpening = true;
+
+    setTimeout(() => {
+      if (!isOpening) return; // Prevent opening if the mouse has left the trigger node
+      // Update the DOM
+      elemPopup.style.display = 'block';
+      elemPopup.style.opacity = '1';
+      elemPopup.style.pointerEvents = 'auto';
+      // enable popup interactions
+      elemPopup.removeAttribute('inert');
+      // Trigger Floating UI autoUpdate (open only)
+      // https://floating-ui.com/docs/autoUpdate
+      popupState.autoUpdateCleanup = autoUpdate(triggerNode, elemPopup, render);
+      // Focus the first focusable element within the popup
+      focusablePopupElements = Array.from(elemPopup?.querySelectorAll(focusableAllowedList));
+    }, args.delay ?? (args.event === 'hover' ? 400 : 0));
   }
   function close(callback?: () => void): void {
     if (!elemPopup) return;
     // Set transition duration
     const cssTransitionDuration = parseFloat(window.getComputedStyle(elemPopup).transitionDuration.replace('s', '')) * 1000;
+    // Set open state to off
+    popupState.open = false;
+    // Return the current state
+    if (args.state) args.state({ state: popupState.open });
+    // Update the DOM
+    elemPopup.style.opacity = '0';
+    // disable popup interactions
+    elemPopup.setAttribute('inert', '');
+
+    isOpening = false;
+
     setTimeout(() => {
-      // Set open state to off
-      popupState.open = false;
-      // Return the current state
-      if (args.state) args.state({ state: popupState.open });
-      // Update the DOM
-      elemPopup.style.opacity = '0';
-      // disable popup interactions
-      elemPopup.setAttribute('inert', '');
       // Cleanup Floating UI autoUpdate (close only)
       if (popupState.autoUpdateCleanup) popupState.autoUpdateCleanup();
       // Trigger callback
