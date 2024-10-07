@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"os/exec"
 
 	"github.com/satisfactorymodding/ficsit-cli/cli"
 	resolver "github.com/satisfactorymodding/ficsit-resolver"
@@ -206,10 +205,9 @@ func (f *ficsitCLI) LaunchGame() {
 		slog.Error("no metadata for installation")
 		return
 	}
-	cmd := exec.Command(metadata.Info.LaunchPath[0], metadata.Info.LaunchPath[1:]...)
-	out, err := cmd.CombinedOutput()
+	out, cmd, err := f.executeLaunchCommand(metadata.Info.LaunchPath)
 	if err != nil {
-		slog.Error("failed to launch game", slog.Any("error", err), slog.String("cmd", cmd.String()), slog.String("output", string(out)))
+		slog.Error("failed to launch game", slog.Any("error", err), slog.String("cmd", cmd), slog.String("output", string(out)))
 		return
 	}
 }
