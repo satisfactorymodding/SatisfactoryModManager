@@ -280,7 +280,7 @@
               <button class="btn w-full h-full space-x-4" on:click={() => $search = `author:"${author.user.username}"`}>
                 <div class="h-12 w-12">
                   {#if 'avatar' in author.user}
-                    <img class="rounded-full w-ful h-full" alt="{author.user.username} Avatar" src={author.user.avatar} />
+                    <img class="rounded-full w-ful h-full" alt="{author.user.username} Avatar" src={author.user.avatar ?? `${$siteURL}/images/no_image.webp`} />
                   {/if}
                 </div>
                 <div class="flex-auto flex flex-col text-left">
