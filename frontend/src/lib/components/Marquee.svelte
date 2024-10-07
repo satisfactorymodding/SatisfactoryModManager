@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
-  import { cubicInOut } from 'svelte/easing';
+  import { sineInOut } from 'svelte/easing';
   import { type Tweened, tweened } from 'svelte/motion';
 
   let running = false;
@@ -22,7 +22,10 @@
     const visibleWidth = element?.clientWidth || totalWidth;
     scrollableWidth = totalWidth - visibleWidth;
     animationDuration = scrollableWidth / animationSpeed * 1000;
-    hoverTranslation = tweened(0, { duration: animationDuration, easing: cubicInOut });
+    if (scrollableWidth < 2) {
+      animationDuration = 0;
+    }
+    hoverTranslation = tweened(0, { duration: animationDuration, easing: sineInOut });
   }
 
   $: {
