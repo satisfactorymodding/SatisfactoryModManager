@@ -297,9 +297,9 @@
           </svelte:fragment>
         </Select>
   
-        <div class="flex w-full gap-1">
+        <div class="grid grid-cols-3 w-full max-w-full gap-1">
           <button
-            class="btn w-1/3 bg-surface-200-700-token px-4 h-8 text-sm"
+            class="btn bg-surface-200-700-token px-4 h-8 text-sm"
             disabled={!$canModify}
             on:click={() => modalStore.trigger({ type:'component', component: 'addProfile' })}>
             <Marquee class="flex-auto text-start">
@@ -310,7 +310,7 @@
               icon={mdiPlusCircle} />
           </button>
           <button
-            class="btn w-1/3 bg-surface-200-700-token px-2 h-8 text-sm"
+            class="btn bg-surface-200-700-token px-2 h-8 text-sm"
             disabled={!$canModify}
             on:click={() => modalStore.trigger({ type:'component', component: { ref: RenameProfile, props: { profile: $selectedProfile } } })}>
             <Marquee class="flex-auto text-start">
@@ -321,7 +321,7 @@
               icon={mdiPencil} />
           </button>
           <button
-            class="btn w-1/3 bg-surface-200-700-token px-3 h-8 text-sm"
+            class="btn bg-surface-200-700-token px-3 h-8 text-sm"
             disabled={!$canModify || $profiles.length === 1}
             on:click={() => modalStore.trigger({ type:'component', component: { ref: DeleteProfile, props: { profile: $selectedProfile } } })}>
             <Marquee class="flex-auto text-start">
