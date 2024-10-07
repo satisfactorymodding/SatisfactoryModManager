@@ -6,7 +6,7 @@
     ficsitcli.Action.SELECT_PROFILE,
     ficsitcli.Action.TOGGLE_MODS,
     ficsitcli.Action.UPDATE,
-    ficsitcli.Action.IMPORT_PROFILE,
+    // ficsitcli.Action.IMPORT_PROFILE, // Import profile is a modal, and showing this on top would clear that modal's state
     ficsitcli.Action.APPLY,
   ];
 </script>

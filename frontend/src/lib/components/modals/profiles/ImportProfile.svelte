@@ -1,14 +1,21 @@
 <script lang="ts">
+  import { ProgressBar } from '@skeletonlabs/skeleton';
   import { getTranslate } from '@tolgee/svelte';
 
   import { profileFilepath, profileName } from './importProfile';
 
   import T from '$lib/components/T.svelte';
-  import { profiles, selectedInstallMetadata } from '$lib/store/ficsitCLIStore';
+  import {
+    profiles,
+    progress,
+    progressMessage,
+    progressPercent,
+    selectedInstallMetadata,
+  } from '$lib/store/ficsitCLIStore';
   import { error } from '$lib/store/generalStore';
   import { OpenFileDialog } from '$wailsjs/go/app/app';
   import { ImportProfile, ReadExportedProfileMetadata } from '$wailsjs/go/ficsitcli/ficsitCLI';
-  import type { ficsitcli } from '$wailsjs/go/models';
+  import { ficsitcli } from '$wailsjs/go/models';
 
   export let parent: { onClose: () => void };
 
@@ -73,6 +80,8 @@
       }
     }
   }
+
+  $: importProgress = $progress?.action === ficsitcli.Action.IMPORT_PROFILE;
 </script>
 
 <div style="max-height: calc(100vh - 3rem); max-width: calc(100vw - 3rem);" class="w-[40rem] card flex flex-col gap-2">
@@ -84,6 +93,8 @@
       <span><T defaultValue="Profile name" keyName="profiles.import.profile-name" /></span>
       <input
         class="input px-4 py-2"
+        class:input-error={newProfileNameExists}
+        disabled={importProgress}
         placeholder={$t('profiles.import.profile-name-placeholder', 'New Profile Name')}
         type="text"
         bind:value={$profileName}/>
@@ -92,9 +103,10 @@
       <span><T defaultValue="Profile file" keyName="profiles.import.profile-file" /></span>
       <input
         class="input px-4 py-2 hover:!cursor-pointer"
-        class:input-error={!!pickerError || newProfileNameExists}
-        readonly
-        type="text" 
+        class:input-error={!!pickerError}
+        disabled={importProgress}
+        readonly 
+        type="text"
         value={$profileFilepath}
         on:click={() => pickImportProfileFile()}
       />
@@ -111,6 +123,15 @@
         </p>
       {/if}
     </label>
+
+    {#if importProgress}
+      <p>{$progressMessage}</p>
+      <ProgressBar
+        class="h-4 w-full"
+        max={1}
+        meter="bg-primary-600"
+        value={$progressPercent}/>
+    {/if}
   </section>
   <footer class="card-footer">
     <button
@@ -120,7 +141,7 @@
     </button>
     <button
       class="btn text-primary-600"
-      disabled={!$profileName || !$profileFilepath || !!pickerError || newProfileNameExists}
+      disabled={!$profileName || !$profileFilepath || !!pickerError || newProfileNameExists || importProgress}
       on:click={finishImportProfile}>
       <T defaultValue="Import" keyName="common.import" />
     </button>
