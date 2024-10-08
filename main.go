@@ -18,6 +18,7 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 	"github.com/wailsapp/wails/v2/pkg/options/linux"
+	"github.com/wailsapp/wails/v2/pkg/options/windows"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/app"
@@ -152,6 +153,9 @@ func main() {
 				app.App.Show()
 				backend.ProcessArguments(secondInstanceData.Args)
 			},
+		},
+		Windows: &windows.Options{
+			WebviewUserDataPath: filepath.Join(viper.GetString("smm-local-dir"), "WebviewData"),
 		},
 		Linux: &linux.Options{
 			Icon:             iconBytes,
