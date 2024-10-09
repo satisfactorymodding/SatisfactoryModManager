@@ -11,6 +11,7 @@
   import Marquee from '$lib/components/Marquee.svelte';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import T, { translationElementPart } from '$lib/components/T.svelte';
+  import Thumbhash from '$lib/components/Thumbhash.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
   import ModChangelog from '$lib/components/modals/ModChangelog.svelte';
   import { CompatibilityState, GetModDetailsDocument } from '$lib/generated';
@@ -87,6 +88,7 @@
 
   $: actualLogo = (mod && 'offline' in mod) ? (mod?.logo ? `data:image/png;base64, ${mod?.logo}` : '/images/no_image.webp') : mod?.logo;
   $: renderedLogo = actualLogo || `${$siteURL}/images/no_image.webp`;
+  $: renderedThumbhash = ((mod && 'logo_thumbhash' in mod) ? mod.logo_thumbhash : undefined) || '2/eFDQIsFmh9h4BreKeAeQqYBxd3d3J4Jw';
   $: author = getAuthor(mod);
 
   $: size = mod ? bytesToAppropriate(mod.versions[0]?.size ?? 0) : undefined;
@@ -220,7 +222,15 @@
   <div style="border-right-color: rgba(239, 239, 239, 0.12);" class="p-4 space-y-4 flex flex-col h-full @3xl/mod-details:w-64 w-52 overflow-y-auto">
     <div class="flex flex-col flex-auto overflow-y-auto space-y-4">
       <div class="flex flex-col">
-        <img class="logo w-full" alt="{mod?.name} Logo" src={renderedLogo} />
+
+        <div class="logo w-full aspect-square"
+        >
+          <Thumbhash
+            alt="{mod?.name} Logo"
+            image={renderedLogo}
+            thumbhash={renderedThumbhash}
+          />
+        </div>
         <span 
           class="font-bold @3xl/mod-details:text-lg mt-2 text-base break-words"
           class:animate-pulse={!mod}

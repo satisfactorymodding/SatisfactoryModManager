@@ -3,6 +3,7 @@ query GetModDetails($modReference: ModReference!) {
     ...ModKey
     name
     logo
+    logo_thumbhash
     mod_reference
     full_description
     created_at

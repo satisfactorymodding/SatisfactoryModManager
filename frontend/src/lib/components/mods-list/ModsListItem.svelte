@@ -9,6 +9,7 @@
   import ResponsiveButton, { type ButtonDisplay } from '$lib/components/ResponsiveButton.svelte';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import T from '$lib/components/T.svelte';
+  import Thumbhash from '$lib/components/Thumbhash.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
   import { CompatibilityState } from '$lib/generated';
   import { type PopupSettings, popup } from '$lib/skeletonExtensions';
@@ -54,6 +55,7 @@
 
   $: actualLogo = ('offline' in mod || 'missing' in mod) ? (mod.logo ? `data:image/png;base64, ${mod.logo}` : '/images/no_image.webp') : mod.logo;
   $: renderedLogo = actualLogo || `${$siteURL}/images/no_image.webp`;
+  $: renderedThumbhash = ('logo_thumbhash' in mod ? mod.logo_thumbhash : undefined) || '2/eFDQIsFmh9h4BreKeAeQqYBxd3d3J4Jw';
   $: author = ('offline' in mod || 'missing' in mod) ? mod.authors[0] : getAuthor(mod);
 
   const modActions = [
@@ -301,11 +303,16 @@
     </div>
   {/if}
   <div class="flex relative h-full space-x-2" class:-top-full={inProgress}>
-    <img
+    <div
       class="logo h-full @md/mods-list:w-[5.5rem] w-[4.25rem]"
       class:grayscale={isInstalled && !isEnabled}
-      alt="{mod.name} Logo"
-      src={renderedLogo} />
+    >
+      <Thumbhash
+        alt="{mod.name} Logo"
+        image={renderedLogo}
+        thumbhash={renderedThumbhash}
+      />
+    </div>
     <div class="flex flex-col h-full grow w-0" class:opacity-30={isInstalled && !isEnabled}>
       <div class="flex items-center" use:popup={popupHover}>
         <span

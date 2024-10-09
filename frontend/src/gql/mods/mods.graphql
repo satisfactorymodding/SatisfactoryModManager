@@ -6,6 +6,7 @@ query GetMods($offset: Int!, $limit: Int!) {
       mod_reference
       name
       logo
+      logo_thumbhash
       short_description
       hidden
       popularity
