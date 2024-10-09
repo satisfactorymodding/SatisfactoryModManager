@@ -293,11 +293,11 @@
     </span>
   {:else if areOperationsQueued}
     <span>
-      <T defaultValue={'Changes have not yet been made to your mod files. Click the button above to apply the changes you have queued.\n\n(You\'re in Queue "Start manually" mode)'} keyName="launch-button.changes-queued"/>
+      <T defaultValue={'Changes have not yet been made to your mod files. Click the button below to apply the changes you have queued.\n\n(You\'re in Queue "Start manually" mode)'} keyName="launch-button.changes-queued"/>
     </span>
   {:else if $hasPendingProfileChange}
     <span>
-      <T defaultValue={'Changes have not yet been made to your mod files. Click the button above to apply the new profile.\n\n(You\'re in Queue "Start manually" mode)'} keyName="launch-button.profile-change-queued"/>
+      <T defaultValue={'Changes have not yet been made to your mod files. Click the button below to apply the new profile.\n\n(You\'re in Queue "Start manually" mode)'} keyName="launch-button.profile-change-queued"/>
     </span>
   {:else if $isGameRunning}
     <span>
