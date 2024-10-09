@@ -14,7 +14,7 @@ import (
 
 func (a *app) WatchWindow() {
 	a.stopSizeWatcher = make(chan bool)
-	windowStateTicker := time.NewTicker(100 * time.Millisecond)
+	windowStateTicker := time.NewTicker(1 * time.Second)
 	go func() {
 		for {
 			select {
@@ -40,8 +40,17 @@ func (a *app) ensureWindowVisible() {
 
 	displays := utils.GetDisplayBounds()
 
+	if len(displays) == 0 {
+		slog.Warn("no displays found, cannot check if window is reachable")
+		return
+	}
+
 	for _, display := range displays {
 		if display.Overlaps(window) {
+			return
+		}
+		if display.Dx() == 0 || display.Dy() == 0 {
+			slog.Warn("display has no size", slog.Any("display", display))
 			return
 		}
 	}
