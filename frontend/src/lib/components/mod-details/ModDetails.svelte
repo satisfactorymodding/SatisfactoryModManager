@@ -222,7 +222,7 @@
       <div class="flex flex-col">
         <img class="logo w-full" alt="{mod?.name} Logo" src={renderedLogo} />
         <span 
-          class="font-bold @3xl/mod-details:text-lg mt-2 text-base"
+          class="font-bold @3xl/mod-details:text-lg mt-2 text-base break-words"
           class:animate-pulse={!mod}
           class:placeholder={!mod}
         >
