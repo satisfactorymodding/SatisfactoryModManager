@@ -1,5 +1,5 @@
 <script generics="T" lang="ts">
-  import { createVirtualizer } from '@tanstack/svelte-virtual';
+  import { createVirtualizer, measureElement } from '@tanstack/svelte-virtual';
 
   // eslint-disable-next-line no-undef
   export let items: T[];
@@ -15,6 +15,14 @@
     count: items.length,
     getScrollElement: () => virtualListEl,
     estimateSize: () => itemHeight ?? 100,
+    measureElement: (el, entry, instance) => {
+      const measurement = measureElement(el, entry, instance);
+      // If the measurement is 0, the element is not visible, so we don't want to lose the cached value
+      if (measurement > 0) {
+        return measurement;
+      }
+      return instance.measurementsCache[instance.indexFromElement(el)]?.size ?? itemHeight;
+    },
     overscan,
   });
 
