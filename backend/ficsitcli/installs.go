@@ -107,6 +107,7 @@ func (f *ficsitCLI) SelectInstall(path string) error {
 		}
 
 		f.EmitGlobals()
+		f.EmitModsChange()
 		return nil
 	})
 }
