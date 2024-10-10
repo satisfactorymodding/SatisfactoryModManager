@@ -133,8 +133,6 @@ release:
   # Include all artifacts
 
   header: |
-    ### Note: this is a prerelease, and things might not work as expected. There might be differences between SMM v2 and SMM v3. If you encounter any issues, let us know on discord, or create an issue here. At the moment, SMM v2 will not auto-update to SMM v3, so while you cannot have both installed at once, you are still able to rollback if you run into major issues.
-
     ## Installation
   
     | Windows | Linux | MacOS |
