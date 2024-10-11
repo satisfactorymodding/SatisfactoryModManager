@@ -5,7 +5,7 @@ export ARCH="x86_64" # Export because linuxdeploy gtk plugin copies i386 librari
 SCRIPT_DIR=$(dirname "$0")
 BUILD_DIR="$SCRIPT_DIR/.."
 
-BINARY=$1
+BINARY=$(realpath "$1")
 OUTPUT=$2
 
 TMPDIR=$(mktemp -d)
@@ -21,10 +21,22 @@ mkdir -p "$APPDIR/usr/bin"
 mkdir -p "$APPDIR/usr/lib"
 mkdir -p "$APPDIR/usr/lib64"
 
-cp "$BINARY" "$APPDIR/usr/bin/$APPNAME"
-cp "$BUILD_DIR/appicon.png" "$APPDIR/$APPNAME.png"
-cp "$BUILD_DIR/appicon.png" "$APPDIR/.DirIcon"
-cp "$SCRIPT_DIR/$APPNAME.desktop" "$APPDIR/$APPNAME.desktop"
+(
+cd "$APPDIR" || exit
+cp "$BINARY" "usr/bin/$APPNAME"
+cp "$BUILD_DIR/appicon.png" "$APPNAME.png"
+cp "$BUILD_DIR/appicon.png" ".DirIcon"
+
+icons=(16 32 64 128 256 512)
+for i in "${icons[@]}"; do
+    mkdir -p "usr/share/icons/hicolor/${i}x${i}/apps"
+    cp "$BUILD_DIR/icons/${i}x${i}.png" "usr/share/icons/hicolor/${i}x${i}/apps/$APPNAME.png"
+done
+
+mkdir -p "usr/share/applications"
+cp "$SCRIPT_DIR/$APPNAME.desktop" "usr/share/applications/$APPNAME.desktop"
+ln -sf "usr/share/applications/$APPNAME.desktop" "$APPNAME.desktop"
+)
 
 (
 cd "$APPDIR" || exit
