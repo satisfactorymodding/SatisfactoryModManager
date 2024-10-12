@@ -50,7 +50,7 @@ jobs:
           # Apparently only wails build generates the embedded directory 
           mkdir -p frontend/build
           touch frontend/build/.gitkeep
-          wails generate module
+          wails generate module -tags webkit2_41
       
       - name: Install dependencies
         working-directory: frontend

@@ -44,5 +44,4 @@ runs:
       run: |
         sudo apt update
         sudo apt -y install libgtk-3-dev libwebkit2gtk-4.1-dev
-        sudo apt -y install libwebkit2gtk-4.0-dev # also install 4.0 because it's the default in wails, so any task that runs a go command would require the added tag
 
