@@ -95,6 +95,14 @@ func main() {
 				slog.Error("failed to set HTTPS_PROXY", slog.Any("error", err))
 			}
 		}
+	} else {
+		proxyVars := []string{"HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy"}
+		for _, v := range proxyVars {
+			err = os.Unsetenv(v)
+			if err != nil {
+				slog.Error("failed to unset proxy env var", slog.String("var", v), slog.Any("error", err))
+			}
+		}
 	}
 
 	err = ficsitcli.Init()
