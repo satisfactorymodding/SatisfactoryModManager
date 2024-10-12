@@ -74,12 +74,15 @@ Var SMM2_HAS_PER_USER_INSTALLATION
 
 !macro SMM2_UNINSTALL
     StrCpy $R0 ""
+    StrCpy $R1 ""
     ${If} $SMM2_HAS_PER_MACHINE_INSTALLATION = 1
         ${AndIf} $MultiUser.InstallMode == "AllUsers"
         StrCpy $R0 $PerMachineUninstallString
+        StrCpy $R1 $PerMachineInstallationFolder
     ${ElseIf} $SMM2_HAS_PER_USER_INSTALLATION = 1
         ${AndIf} $MultiUser.InstallMode == "CurrentUser"
         StrCpy $R0 $PerUserUninstallString
+        StrCpy $R1 $PerUserInstallationFolder
     ${EndIf}
 
     ${If} $R0 != ""
@@ -91,13 +94,45 @@ Var SMM2_HAS_PER_USER_INSTALLATION
         ; _?=$TEMP sets both the working dir and stops the uninstaller from copying itself to temp,
         ; such that ExecWait actually waits for the uninstaller to finish
 
-        ExecWait '$R0 _?=$TEMP' $R1
-        ${If} $R1 != 0
+        IfFileExists "$R1\Uninstall Satisfactory Mod Manager.exe" 0 no_smm2_uninstaller
+
+        MessageBox MB_ICONEXCLAMATION|MB_OK "Return code: $R2"
+        ${If} $R2 != 0
             MessageBox MB_ICONEXCLAMATION|MB_OK "Failed to uninstall SMM2."
             Quit
         ${EndIf}
 
         ; Because the uninstaller is not copied, it won't delete itself, so we have to do it manually
-        Delete "$INSTDIR\Uninstall Satisfactory Mod Manager.exe"
+        Delete "$R1\Uninstall Satisfactory Mod Manager.exe"
+        Goto end_smm2_uninstall
+
+        no_smm2_uninstaller:
+
+        ; IfFileExists returns true if the dir exists, but isEmptyDir returns false if the dir doesn't exist, so we need both checks
+        IfFileExists "$R1\*.*" 0 clear_smm2_keys
+        Push $R1
+        Call isEmptyDir
+        Pop $R0
+        ${If} $R0 != 1
+            MessageBox MB_ICONEXCLAMATION|MB_OK "Failed to uninstall SMM2. Uninstaller not found, but directory is not empty.$\nLocation: $R1"
+            Quit
+        ${EndIf}
+
+        clear_smm2_keys:
+        ; No SMM2 uninstaller to clear these keys, so we have to do it manually
+        ; otherwise we'd find SMM2 being "installed" on every update
+
+        SetRegView 64
+        ${If} $SMM2_HAS_PER_MACHINE_INSTALLATION = 1
+            ${AndIf} $MultiUser.InstallMode == "AllUsers"
+            DeleteRegKey HKLM "${SMM2_INST_KEY}"
+            DeleteRegKey HKLM "${SMM2_UNINST_KEY}"
+        ${ElseIf} $SMM2_HAS_PER_USER_INSTALLATION = 1
+            ${AndIf} $MultiUser.InstallMode == "CurrentUser"
+            DeleteRegKey HKCU "${SMM2_INST_KEY}"
+            DeleteRegKey HKCU "${SMM2_UNINST_KEY}"
+        ${EndIf}
+
+        end_smm2_uninstall:
     ${EndIf}
 !macroend
