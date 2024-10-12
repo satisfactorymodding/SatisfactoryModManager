@@ -1,6 +1,8 @@
 package ficsitcli
 
 import (
+	"archive/zip"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"log/slog"
@@ -291,6 +293,12 @@ func (f *ficsitCLI) ReadExportedProfileMetadata(file string) (*ExportedProfileMe
 	var exportedProfile ExportedProfile
 	err = json.Unmarshal(fileBytes, &exportedProfile)
 	if err != nil {
+		_, err = zip.NewReader(bytes.NewReader(fileBytes), int64(len(fileBytes)))
+		if err == nil {
+			// SMM2 profile is a zip file, can't import
+			return nil, fmt.Errorf("profiles exported from SMM2 cannot be loaded in SMM3")
+		}
+
 		l.Error("failed to unmarshal exported profile", slog.Any("error", err))
 		return nil, fmt.Errorf("failed to parse exported profile: %w", err)
 	}
