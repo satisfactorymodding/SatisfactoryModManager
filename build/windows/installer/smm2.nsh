@@ -134,5 +134,7 @@ Var SMM2_HAS_PER_USER_INSTALLATION
         ${EndIf}
 
         end_smm2_uninstall:
+        ; Clear the SMM2 download cache
+        RMDir /r "$LocalAppdata\SatisfactoryModManager\downloadCache"
     ${EndIf}
 !macroend
