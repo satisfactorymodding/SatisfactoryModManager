@@ -273,7 +273,6 @@ func (a *app) GenerateDebugInfo() (bool, error) {
 	err = a.ShowInExplorer(filename)
 	if err != nil {
 		slog.Error("failed to reveal debug info in file explorer", slog.Any("error", err))
-		return false, fmt.Errorf("failed to reveal debug info in file explorer: %w", err)
 	}
 
 	return true, nil
