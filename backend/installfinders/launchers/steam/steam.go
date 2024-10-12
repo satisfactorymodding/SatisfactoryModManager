@@ -2,6 +2,7 @@ package steam
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -17,39 +18,15 @@ func FindInstallationsSteam(steamPath string, launcher string, platform common.L
 	steamAppsPath := filepath.Join(steamPath, "steamapps")
 	libraryFoldersManifestPath := platform.ProcessPath(filepath.Join(steamAppsPath, "libraryfolders.vdf"))
 
-	libraryFoldersF, err := os.Open(libraryFoldersManifestPath)
+	rawLibraryFolders, err := getLibraryFoldersFromManifest(libraryFoldersManifestPath)
 	if err != nil {
-		return nil, []error{fmt.Errorf("failed to open library folders manifest: %w", err)}
+		return nil, []error{fmt.Errorf("failed to get library folders from manifest: %w", err)}
 	}
 
-	parser := vdf.NewParser(libraryFoldersF)
-	libraryFoldersManifest, err := parser.Parse()
-	if err != nil {
-		return nil, []error{fmt.Errorf("failed to parse library folders manifest: %w", err)}
-	}
+	rawLibraryFolders = append(rawLibraryFolders, filepath.Clean(steamPath))
 
-	var libraryFoldersList map[string]interface{}
-
-	if _, ok := libraryFoldersManifest["LibraryFolders"]; ok {
-		libraryFoldersList = libraryFoldersManifest["LibraryFolders"].(map[string]interface{})
-	} else if _, ok := libraryFoldersManifest["libraryfolders"]; ok {
-		libraryFoldersList = libraryFoldersManifest["libraryfolders"].(map[string]interface{})
-	} else {
-		return nil, []error{fmt.Errorf("failed to find library folders in manifest")}
-	}
-
-	libraryFolders := []string{
-		filepath.Clean(steamPath),
-	}
-
-	for key, val := range libraryFoldersList {
-		if _, err := strconv.Atoi(key); err != nil {
-			continue
-		}
-
-		libraryFolderData := val.(map[string]interface{})
-		libraryFolder := libraryFolderData["path"].(string)
-
+	var libraryFolders []string
+	for _, libraryFolder := range rawLibraryFolders {
 		found := false
 		for _, existingLibraryFolder := range libraryFolders {
 			if common.OsPathEqual(existingLibraryFolder, libraryFolder) {
@@ -148,4 +125,46 @@ func FindInstallationsSteam(steamPath string, launcher string, platform common.L
 	}
 
 	return installs, findErrors
+}
+
+func getLibraryFoldersFromManifest(libraryFoldersManifestPath string) ([]string, error) {
+	libraryFoldersF, err := os.Open(libraryFoldersManifestPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to open library folders manifest: %w", err)
+	}
+
+	parser := vdf.NewParser(libraryFoldersF)
+	libraryFoldersManifest, err := parser.Parse()
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse library folders manifest: %w", err)
+	}
+
+	var libraryFoldersList map[string]interface{}
+
+	if _, ok := libraryFoldersManifest["LibraryFolders"]; ok {
+		libraryFoldersList = libraryFoldersManifest["LibraryFolders"].(map[string]interface{})
+	} else if _, ok := libraryFoldersManifest["libraryfolders"]; ok {
+		libraryFoldersList = libraryFoldersManifest["libraryfolders"].(map[string]interface{})
+	} else {
+		return nil, fmt.Errorf("failed to find library folders in manifest")
+	}
+
+	var libraryFolders []string
+
+	for key, val := range libraryFoldersList {
+		if _, err := strconv.Atoi(key); err != nil {
+			slog.Debug("skipping steam libraryfolders.vdf entry, not array item", slog.String("key", key))
+			continue
+		}
+
+		libraryFolderData := val.(map[string]interface{})
+		libraryFolder := libraryFolderData["path"].(string)
+
+		libraryFolders = append(libraryFolders, libraryFolder)
+	}
+
+	return libraryFolders, nil
 }
