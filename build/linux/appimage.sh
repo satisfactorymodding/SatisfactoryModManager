@@ -55,7 +55,10 @@ chmod +x AppRun
 cd "$TMPDIR" || exit
 
 wget https://raw.githubusercontent.com/tauri-apps/linuxdeploy-plugin-gtk/master/linuxdeploy-plugin-gtk.sh
-chmod +x "$TMPDIR/linuxdeploy-plugin-gtk.sh"
+chmod +x linuxdeploy-plugin-gtk.sh
+
+wget https://raw.githubusercontent.com/tauri-apps/linuxdeploy-plugin-gstreamer/master/linuxdeploy-plugin-gstreamer.sh
+chmod +x linuxdeploy-plugin-gstreamer.sh
 
 wget -O linuxdeploy.AppImage https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-${ARCH}.AppImage
 chmod +x linuxdeploy.AppImage
@@ -63,7 +66,7 @@ chmod +x linuxdeploy.AppImage
 
 mkdir -p "$(dirname "$OUTPUT")"
 
-LDAI_OUTPUT="$OUTPUT" DEPLOY_GTK_VERSION="3" "$TMPDIR/linuxdeploy.AppImage" --appimage-extract-and-run --appdir "$APPDIR" --plugin gtk --output appimage
+LDAI_OUTPUT="$OUTPUT" DEPLOY_GTK_VERSION="3" "$TMPDIR/linuxdeploy.AppImage" --appimage-extract-and-run --appdir "$APPDIR" --plugin gtk --plugin gstreamer --output appimage
 
 rm -rf "$TMPDIR"
 rm -rf "$APPDIR"
