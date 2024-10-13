@@ -108,6 +108,10 @@
       $ignoredUpdates[update.item] = $ignoredUpdates[update.item].filter((v) => v !== update.newVersion);
     }
   }
+
+  $: if (!$updates.length) {
+    parent.onClose();
+  }
 </script>
 
 <div style="max-height: calc(100vh - 3rem); max-width: calc(100vw - 3rem);" class="w-[48rem] card flex flex-col gap-2">
@@ -150,17 +154,17 @@
     <button
       class="btn"
       on:click={parent.onClose}>
-      <T defaultValue="Cancel" keyName="common.cancel" />
+      <T defaultValue="Close" keyName="common.close" />
     </button>
     <button
       class="btn"
-      disabled={!$canModify || $updateCheckInProgress || updatesToDisplay.length == 0}
+      disabled={!$canModify || $updateCheckInProgress || !updatesToDisplay.length}
       on:click={() => updateAll()}>
       <T defaultValue="Update All" keyName="updates.update-all" />
     </button>
     <button
       class="btn"
-      disabled={!$canModify || $updateCheckInProgress || updatesToDisplay.length == 0 || $selectedUpdates.length == 0}
+      disabled={!$canModify || $updateCheckInProgress || !updatesToDisplay.length || !$selectedUpdates.length}
       on:click={() => updateSelected()}>
       <T defaultValue="Update Selected" keyName="updates.update-selected" />
     </button>
