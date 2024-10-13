@@ -174,7 +174,7 @@ func main() {
 			appCommon.AppContext = ctx
 
 			// Wails doesn't support setting the window position on init, so we do it here
-			if settings.Settings.WindowPosition != nil {
+			if settings.Settings.WindowPosition != nil && settings.Settings.RestoreWindowPosition {
 				wailsextras.WindowSetPosition(ctx, settings.Settings.WindowPosition.X, settings.Settings.WindowPosition.Y)
 			}
 
