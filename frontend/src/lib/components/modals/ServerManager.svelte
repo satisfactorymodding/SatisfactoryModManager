@@ -175,7 +175,7 @@
     <T defaultValue="Dedicated Servers" keyName="server-manager.title" />
   </header>
   <section class="p-4 flex-auto space-y-4 overflow-y-auto flex">
-    <button class="btn flex-auto h-12 text-sm bg-surface-200-700-token" on:click={() => BrowserOpenURL('https://docs.ficsit.app/satisfactory-modding/latest/ForUsers/DedicatedServerSetup.html')}>
+    <button class="btn flex-auto h-12 text-sm variant-filled-primary" on:click={() => BrowserOpenURL('https://docs.ficsit.app/satisfactory-modding/latest/ForUsers/DedicatedServerSetup.html')}>
       <T defaultValue="Get help connecting to servers" keyName="server-manager.get-help" />
       <div class="grow" />
       <SvgIcon
@@ -366,7 +366,7 @@
           icon={mdiServerNetwork} />
       </button>
     </div>
-    <p>{err}</p>
+    <p class="font-mono">{err}</p>
   </section>
   <footer class="card-footer">
     <button
