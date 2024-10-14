@@ -152,7 +152,7 @@ func getLibraryFoldersFromManifest(libraryFoldersManifestPath string) ([]string,
 		return nil, fmt.Errorf("failed to find library folders in manifest")
 	}
 
-	var libraryFolders []string
+	libraryFolders := make([]string, 0, len(libraryFoldersList))
 
 	for key, val := range libraryFoldersList {
 		if _, err := strconv.Atoi(key); err != nil {

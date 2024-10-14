@@ -212,7 +212,7 @@
       } else if('missing' in mod) {
         compatibility = { state: CompatibilityState.Broken, note: $t('mod-list-item.unavailable', 'This mod is no longer available on ficsit.app. You may want to remove it.'), source: 'version' };
       } else {
-        getCompatibility(mod.mod_reference, info.version, true).then((result) => {
+        getCompatibility(mod.mod_reference, client, true).then((result) => {
           compatibility = {
             ...result,
             source: 'version',

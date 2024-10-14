@@ -51,8 +51,8 @@ func readSMM2Settings(data []byte) error {
 	s := smm2Settings{}
 	err := json.Unmarshal(data, &s)
 	if err != nil {
-		var invalidJsonError *json.SyntaxError
-		if errors.As(err, &invalidJsonError) {
+		var invalidJSONError *json.SyntaxError
+		if errors.As(err, &invalidJSONError) {
 			slog.Warn("invalid SMM2 settings JSON", slog.String("data", string(data)), slog.Any("err", err))
 			return nil // Ignore error, not much info there anyway
 		}
