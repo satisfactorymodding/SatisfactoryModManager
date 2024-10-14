@@ -62,7 +62,7 @@ func FindInstallationsEpic(epicManifestsPath string, launcher string, platform c
 
 	for _, manifest := range manifests {
 		manifestName := manifest.Name()
-		manifestPath := filepath.Join(epicManifestsPath, manifestName)
+		manifestPath := platform.ProcessPath(filepath.Join(epicManifestsPath, manifestName))
 
 		if fileInfo, err := os.Stat(manifestPath); os.IsNotExist(err) || fileInfo.IsDir() {
 			continue
