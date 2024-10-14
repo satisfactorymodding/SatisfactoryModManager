@@ -31,6 +31,8 @@ require (
 	howett.net/plist v1.0.1
 )
 
+replace github.com/wailsapp/go-webview2 => github.com/satisfactorymodding/go-webview2 v0.0.0-20241013154424-330566cba2f0
+
 require (
 	aead.dev/minisign v0.2.1 // indirect
 	github.com/Khan/genqlient v0.6.0 // indirect
