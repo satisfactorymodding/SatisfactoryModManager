@@ -52,7 +52,7 @@
     },
     placement: 'bottom-end',
   } satisfies PopupSettings;
-  
+
   export let error: string;
 </script>
 
@@ -62,6 +62,12 @@
 <section class={`${sectionClass} overflow-y-auto`}>
   <p class="font-mono">{error}</p>
 </section>
+{#if !allowOpeningDiscord}
+  <section class={sectionClass}>
+    <!-- This string intentionally not translated so Fred can always catch it! -->
+    <p class="font-mono">Debug info not yet generated</p>
+  </section>
+{/if}
 <section class={sectionClass}>
   <p class={fullPageMode ? 'text-base text-center' : ''}>
     <T
@@ -107,10 +113,7 @@
     </p>
   </section>
   <section class={`${sectionClass} ${fullPageMode ? 'text-center' : ''}`}>
-    <button
-      class="btn text-primary-600 variant-ringed"
-      on:click={OpenLogDocs}
-    >
+    <button class="btn text-primary-600 variant-ringed" on:click={OpenLogDocs}>
       <T
         defaultValue="Open the Logging Documentation"
         keyName="error.open_log_docs"
