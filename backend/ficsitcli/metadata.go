@@ -38,6 +38,12 @@ func (f *ficsitCLI) initLocalInstallationsMetadata() error {
 				return fmt.Errorf("failed to add installation: %w", err)
 			}
 			createdNewInstalls = true
+		} else {
+			_, profileExists := f.ficsitCli.Profiles.Profiles[ficsitCliInstall.Profile]
+			if !profileExists {
+				ficsitCliInstall.Profile = fallbackProfile
+				createdNewInstalls = true
+			}
 		}
 		f.installationMetadata.Store(install.Path, installationMetadata{
 			State: InstallStateValid,

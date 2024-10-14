@@ -121,8 +121,8 @@ github.com/mattn/go-runewidth v0.0.15 h1:UNAjwbU9l54TA3KzvqLGxwWjHmMgBUVhBiTjelZ
 github.com/mattn/go-runewidth v0.0.15/go.mod h1:Jdepj2loyihRzMpdS35Xk/zdY8IAYHsh153qUoGf23w=
 github.com/minio/selfupdate v0.6.0 h1:i76PgT0K5xO9+hjzKcacQtO7+MjJ4JKA8Ak8XQ9DDwU=
 github.com/minio/selfupdate v0.6.0/go.mod h1:bO02GTIPCMQFTEvE5h4DjYB58bCoZ35XLeBf0buTDdM=
-github.com/mircearoata/pubgrub-go v0.3.3 h1:XGwL8Xh5GX+mbnvWItbM/lVJxAq3NZtfUtbJ/hUf2ig=
-github.com/mircearoata/pubgrub-go v0.3.3/go.mod h1:9oWL9ZXdjFYvnGl95qiM1dTciFNx1MN8fUnG3SUwDi8=
+github.com/mircearoata/pubgrub-go v0.3.4 h1:jfbBvnnxA/d6Q73oUl1/j0MaZ9YK+izE0FuIbMB7teY=
+github.com/mircearoata/pubgrub-go v0.3.4/go.mod h1:9oWL9ZXdjFYvnGl95qiM1dTciFNx1MN8fUnG3SUwDi8=
 github.com/mitchellh/go-ps v1.0.0 h1:i6ampVEEF4wQFF+bkYfwYgY+F/uYJDktmvLPf7qIgjc=
 github.com/mitchellh/go-ps v1.0.0/go.mod h1:J4lOc8z8yJs6vUwklHw2XEIiT4z4C40KtWVN3nvg8Pg=
 github.com/mitchellh/mapstructure v1.5.0 h1:jeMsZIYE/09sWLaz43PL7Gy6RuMjD2eJVyuac5Z2hdY=
@@ -165,6 +165,8 @@ github.com/satisfactorymodding/ficsit-cli v0.5.1-0.20241004172351-3640e5e70817 h
 github.com/satisfactorymodding/ficsit-cli v0.5.1-0.20241004172351-3640e5e70817/go.mod h1:fpYqhBiXe1NYFNdKPgerF6lS2paFxqVfcp49jToZJho=
 github.com/satisfactorymodding/ficsit-resolver v0.0.6 h1:4iCIHOg3z+AvwSVeWtu+k9aysLOL9+FIszCbiKOG2oo=
 github.com/satisfactorymodding/ficsit-resolver v0.0.6/go.mod h1:ckKMmMvDoYbbkEbWXEsMes608uvv6EKphXPhHX8LKSc=
+github.com/satisfactorymodding/go-webview2 v0.0.0-20241013154424-330566cba2f0 h1:ZiuWkzfqk+7B5mvYb4vaTYTm8fgiGJCgBxt+nMsxD+8=
+github.com/satisfactorymodding/go-webview2 v0.0.0-20241013154424-330566cba2f0/go.mod h1:Uk2BePfCRzttBBjFrBmqKGJd41P6QIHeV9kTgIeOZNo=
 github.com/sergi/go-diff v1.3.1 h1:xkr+Oxo4BOQKmkn/B9eMK0g5Kg/983T9DqqPHwYqD+8=
 github.com/sergi/go-diff v1.3.1/go.mod h1:aMJSSKb2lpPvRNec0+w3fl7LP9IOFzdc9Pa4NFbPK1I=
 github.com/shirou/gopsutil/v3 v3.24.3 h1:eoUGJSmdfLzJ3mxIhmOAhgKEKgQkeOwKpz1NbhVnuPE=
@@ -208,8 +210,6 @@ github.com/vmihailenco/msgpack/v5 v5.4.1 h1:cQriyiUvjTwOHg8QZaPihLWeRAAVoCpE00IU
 github.com/vmihailenco/msgpack/v5 v5.4.1/go.mod h1:GaZTsDaehaPpQVyxrf5mtQlH+pc21PIudVV/E3rRQok=
 github.com/vmihailenco/tagparser/v2 v2.0.0 h1:y09buUbR+b5aycVFQs/g70pqKVZNBmxwAhO7/IwNM9g=
 github.com/vmihailenco/tagparser/v2 v2.0.0/go.mod h1:Wri+At7QHww0WTrCBeu4J6bNtoV6mEfg5OIWRZA9qds=
-github.com/wailsapp/go-webview2 v1.0.16 h1:wffnvnkkLvhRex/aOrA3R7FP7rkvOqL/bir1br7BekU=
-github.com/wailsapp/go-webview2 v1.0.16/go.mod h1:Uk2BePfCRzttBBjFrBmqKGJd41P6QIHeV9kTgIeOZNo=
 github.com/wailsapp/mimetype v1.4.1 h1:pQN9ycO7uo4vsUUuPeHEYoUkLVkaRntMnHJxVwYhwHs=
 github.com/wailsapp/mimetype v1.4.1/go.mod h1:9aV5k31bBOv5z6u+QP8TltzvNGJPmNJD4XlAL3U+j3o=
 github.com/wailsapp/wails/v2 v2.9.2 h1:Xb5YRTos1w5N7DTMyYegWaGukCP2fIaX9WF21kPPF2k=

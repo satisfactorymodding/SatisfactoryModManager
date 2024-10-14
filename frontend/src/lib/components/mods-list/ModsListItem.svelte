@@ -29,7 +29,7 @@
   import { type PartialMod, search } from '$lib/store/modFiltersStore';
   import { largeNumberFormat } from '$lib/utils/dataFormats';
   import { getAuthor } from '$lib/utils/getModAuthor';
-  import { type CompatibilityWithSource, getCompatibility, getVersionCompatibility } from '$lib/utils/modCompatibility';
+  import { type CompatibilityWithSource, getCompatibility } from '$lib/utils/modCompatibility';
   import { DisableMod, EnableMod, InstallMod, RemoveMod } from '$wailsjs/go/ficsitcli/ficsitCLI';
   import { ficsitcli } from '$wailsjs/go/models';
   import { FavoriteMod, UnFavoriteMod } from '$wailsjs/go/settings/settings';
@@ -212,7 +212,7 @@
       } else if('missing' in mod) {
         compatibility = { state: CompatibilityState.Broken, note: $t('mod-list-item.unavailable', 'This mod is no longer available on ficsit.app. You may want to remove it.'), source: 'version' };
       } else {
-        getVersionCompatibility(mod.mod_reference, info.version, client).then((result) => {
+        getCompatibility(mod.mod_reference, client, true).then((result) => {
           compatibility = {
             ...result,
             source: 'version',

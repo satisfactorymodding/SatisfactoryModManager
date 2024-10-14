@@ -221,3 +221,8 @@
     </div>
   {/if}
 </div>
+{#if !((pendingDisplay || pendingValidCheck) && !valid) && !setupError && error}
+  <div class="text-error-500 py-4">
+    {error}
+  </div>
+{/if}

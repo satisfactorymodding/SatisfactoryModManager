@@ -93,6 +93,7 @@
   $: mods = [...knownMods, ...unknownMods];
 
   let filteredMods: PartialMod[] = [];
+  let filteringMods = false;
   $: {
     // Watch the required store states
     $manifestMods;
@@ -100,9 +101,12 @@
     $favoriteMods;
     $queuedMods;
     $selectedProfileTargets;
-    
+
+    filteringMods = true;
     Promise.all(mods.map((mod) => $filter.func(mod, client))).then((results) => {
       filteredMods = mods.filter((_, i) => results[i]);
+    }).then(() => {
+      filteringMods = false;
     });
   }
 
@@ -172,12 +176,12 @@
   {:else}
     <div style="position: relative;" class="py-4 grow h-0 mods-list @container/mods-list bg-surface-200-700-token">
       <div class="mr-4 h-full flex flex-col">
-        {#if fetchingMods}
+        {#if fetchingMods || filteringMods}
           <div class="flex items-center justify-center">
             <div class="animate-spin rounded-full aspect-square h-8 border-t-2 border-b-2 border-primary-500"/>
           </div>
         {/if}
-        {#if displayMods.length === 0 && !fetchingMods && $hasFetchedMods}
+        {#if displayMods.length === 0 && !fetchingMods && !filteringMods && $hasFetchedMods}
           <div class="flex flex-col h-full items-center justify-center">
             {#if mods.length !== 0}
               <p class="text-xl text-center text-surface-400-700-token"><T defaultValue="No mods matching your filters" keyName="mods-list.no-mods-filtered"/></p>

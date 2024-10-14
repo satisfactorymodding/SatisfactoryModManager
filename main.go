@@ -95,6 +95,14 @@ func main() {
 				slog.Error("failed to set HTTPS_PROXY", slog.Any("error", err))
 			}
 		}
+	} else {
+		proxyVars := []string{"HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy"}
+		for _, v := range proxyVars {
+			err = os.Unsetenv(v)
+			if err != nil {
+				slog.Error("failed to unset proxy env var", slog.String("var", v), slog.Any("error", err))
+			}
+		}
 	}
 
 	err = ficsitcli.Init()
@@ -166,7 +174,7 @@ func main() {
 			appCommon.AppContext = ctx
 
 			// Wails doesn't support setting the window position on init, so we do it here
-			if settings.Settings.WindowPosition != nil {
+			if settings.Settings.WindowPosition != nil && settings.Settings.RestoreWindowPosition {
 				wailsextras.WindowSetPosition(ctx, settings.Settings.WindowPosition.X, settings.Settings.WindowPosition.Y)
 			}
 

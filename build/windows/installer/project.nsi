@@ -45,8 +45,8 @@ VIAddVersionKey "ProductName"     "${INFO_PRODUCTNAME}"
 !define MUI_FINISHPAGE_NOAUTOCLOSE
 !define MUI_ABORTWARNING
 
-!include "smm2.nsh"
 !include "utils.nsh"
+!include "smm2.nsh"
 
 # Install pages
 !define MUI_PAGE_CUSTOMFUNCTION_PRE WelcomePagePre

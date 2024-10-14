@@ -184,8 +184,15 @@ func (f *ficsitCLI) getInstallsToApply() ([]installWithTarget, *cli.Profile, err
 	var installsUsingProfile []installWithTarget
 	targetsUsingProfile := make(map[resolver.TargetName]bool)
 	for _, install := range allInstalls {
+		meta, ok := f.installationMetadata.Load(install)
+		if !ok {
+			continue
+		}
+		if meta.State != InstallStateValid {
+			continue
+		}
 		i := f.GetInstallation(install)
-		if i.Profile == selectedProfile {
+		if i.Profile == selectedProfile && !i.Vanilla {
 			platform, err := i.GetPlatform(f.ficsitCli)
 			if err != nil {
 				return nil, nil, fmt.Errorf("failed to get platform: %w", err)

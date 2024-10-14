@@ -36,8 +36,9 @@ var (
 )
 
 type settings struct {
-	WindowPosition *utils.Position `json:"windowPosition,omitempty"`
-	Maximized      bool            `json:"maximized,omitempty"`
+	WindowPosition        *utils.Position `json:"windowPosition,omitempty"`
+	Maximized             bool            `json:"maximized,omitempty"`
+	RestoreWindowPosition bool            `json:"restoreWindowPosition"`
 
 	UnexpandedSize utils.Size `json:"unexpandedSize,omitempty"`
 	ExpandedSize   utils.Size `json:"expandedSize,omitempty"`
@@ -71,8 +72,9 @@ type settings struct {
 }
 
 var Settings = &settings{
-	WindowPosition: nil,
-	Maximized:      false,
+	WindowPosition:        nil,
+	Maximized:             false,
+	RestoreWindowPosition: true,
 
 	UnexpandedSize: utils.UnexpandedDefault,
 	ExpandedSize:   utils.ExpandedDefault,
@@ -100,6 +102,15 @@ var Settings = &settings{
 	Debug: false,
 
 	NewUserSetupComplete: false,
+}
+
+func (s *settings) GetRestoreWindowPosition() bool {
+	return s.RestoreWindowPosition
+}
+
+func (s *settings) SetRestoreWindowPosition(value bool) {
+	s.RestoreWindowPosition = value
+	_ = SaveSettings()
 }
 
 func (s *settings) GetNewUserSetupComplete() bool {

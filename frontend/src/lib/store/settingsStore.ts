@@ -3,9 +3,33 @@ import { binding, bindingTwoWay, bindingTwoWayNoExcept } from './wailsStoreBindi
 import type { LaunchButtonType, ViewType } from '$lib/wailsTypesExtensions';
 import { GetVersion } from '$wailsjs/go/app/app';
 import { GetOffline, SetOffline } from '$wailsjs/go/ficsitcli/ficsitCLI';
-import { GetCacheDir, GetDebug, GetIgnoredUpdates, GetKonami, GetLanguage, GetLaunchButton, GetProxy, GetQueueAutoStart, GetStartView, GetUpdateCheckMode, GetViewedAnnouncements, SetCacheDir, SetDebug, SetKonami, SetLanguage, SetLaunchButton, SetProxy, SetQueueAutoStart, SetStartView, SetUpdateCheckMode } from '$wailsjs/go/settings/settings';
+import {
+  GetCacheDir,
+  GetDebug,
+  GetIgnoredUpdates,
+  GetKonami,
+  GetLanguage,
+  GetLaunchButton,
+  GetProxy,
+  GetQueueAutoStart,
+  GetRestoreWindowPosition,
+  GetStartView,
+  GetUpdateCheckMode,
+  GetViewedAnnouncements,
+  SetCacheDir,
+  SetDebug,
+  SetKonami,
+  SetLanguage,
+  SetLaunchButton,
+  SetProxy,
+  SetQueueAutoStart, SetRestoreWindowPosition,
+  SetStartView,
+  SetUpdateCheckMode,
+} from '$wailsjs/go/settings/settings';
 
 export const startView = bindingTwoWayNoExcept<ViewType | null>(null, { initialGet: GetStartView }, { updateFunction: SetStartView });
+
+export const saveWindowPosition = bindingTwoWayNoExcept(true, { initialGet: GetRestoreWindowPosition }, { updateFunction: SetRestoreWindowPosition });
 
 export const konami = bindingTwoWayNoExcept(false, { initialGet: GetKonami }, { updateFunction: SetKonami });
 

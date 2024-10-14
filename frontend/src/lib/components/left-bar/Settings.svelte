@@ -13,7 +13,18 @@
   import { addQueuedModAction, hasPendingProfileChange, queuedMods } from '$lib/store/actionQueue';
   import { lockfileMods, manifestMods } from '$lib/store/ficsitCLIStore';
   import { error } from '$lib/store/generalStore';
-  import { debug, konami, language, launchButton, offline, queueAutoStart, startView, updateCheckMode, version } from '$lib/store/settingsStore';
+  import {
+    debug,
+    konami,
+    language,
+    launchButton,
+    offline,
+    queueAutoStart,
+    saveWindowPosition,
+    startView,
+    updateCheckMode,
+    version,
+  } from '$lib/store/settingsStore';
   import { GenerateDebugInfo } from '$wailsjs/go/app/app';
   import { Apply, OfflineGetMod } from '$wailsjs/go/ficsitcli/ficsitCLI';
 
@@ -401,6 +412,18 @@
           <span>{views.find((m) => m.id === $startView)?.name}</span>
           <span class="h-5 w-5">
             <SvgIcon class="h-full w-full" icon={mdiChevronRight}/>
+          </span>
+        </button>
+      </li>
+      <hr class="divider" />
+      <li>
+        <button on:click={() => $saveWindowPosition = !$saveWindowPosition}>
+          <span class="h-5 w-5"/>
+          <span class="flex-auto">
+            <T defaultValue="Save window position" keyName="settings.save-window-position"/>
+          </span>
+          <span class="h-5 w-5">
+            <span class="h-5 w-5"><SvgIcon class="h-full w-full" icon={$saveWindowPosition ? mdiCheckboxMarkedOutline : mdiCheckboxBlankOutline}/></span>
           </span>
         </button>
       </li>
