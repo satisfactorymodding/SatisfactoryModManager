@@ -21,14 +21,16 @@
 </script>
 
 <div class="flex items-center h-9">
-  <div class="dragregion grow flex items-center">
+  <!-- System level keybinds can be used instead -->
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
+  <div class="dragregion grow flex items-center" on:click={toggleMaximize}>
     <img class="h-7 pl-4 pr-2" alt="SMM Icon" src="/images/smm_icon_small.png" />
     <div>
       <span class="app-title pt-3 text-base">Satisfactory Mod Manager v{$version}</span>
     </div>
   </div>
 
-  <!-- System level keybinds can be used instead -->
   <!-- svelte-ignore a11y-click-events-have-key-events -->
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div class="hover:bg-gray-500 p-1.5 w-11 cursor-default grid justify-center items-center h-full" on:click={minimize}>
