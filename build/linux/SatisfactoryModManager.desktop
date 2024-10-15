@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Satisfactory Mod Manager
-Exec=SatisfactoryModManager
+Exec=SatisfactoryModManager %u
 Terminal=false
 Type=Application
 Icon=SatisfactoryModManager
