@@ -66,6 +66,7 @@ func (a *app) saveWindowState() {
 	}
 	w, h := wailsRuntime.WindowGetSize(common.AppContext)
 	x, y := wailsRuntime.WindowGetPosition(common.AppContext)
+	maximized := wailsRuntime.WindowIsMaximised(common.AppContext)
 	changed := false
 	if a.IsExpanded {
 		if w != settings.Settings.ExpandedSize.Width {
@@ -101,6 +102,10 @@ func (a *app) saveWindowState() {
 			settings.Settings.WindowPosition.Y = y
 			changed = true
 		}
+	}
+	if maximized != settings.Settings.Maximized {
+		settings.Settings.Maximized = maximized
+		changed = true
 	}
 	if changed {
 		err := settings.SaveSettings()
