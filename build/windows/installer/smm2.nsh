@@ -96,7 +96,7 @@ Var SMM2_HAS_PER_USER_INSTALLATION
 
         IfFileExists "$R1\Uninstall Satisfactory Mod Manager.exe" 0 no_smm2_uninstaller
 
-        MessageBox MB_ICONEXCLAMATION|MB_OK "Return code: $R2"
+        ExecWait '$R0 _?=$TEMP' $R2
         ${If} $R2 != 0
             MessageBox MB_ICONEXCLAMATION|MB_OK "Failed to uninstall SMM2."
             Quit
