@@ -30,7 +30,7 @@
     try {
       const result = await client.query(GetModCountDocument, {}, { requestPolicy: 'network-only' }).toPromise();
       const count = result.data?.getMods.count;
-      if (count && count !== onlineMods.length) {
+      if (count) {
         fetchingMods = true;
         const pages = Math.ceil(count / MODS_PER_PAGE);
 
