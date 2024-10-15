@@ -137,8 +137,8 @@ release:
   
     | Windows | Linux | MacOS |
     |:-------:|:-----:|:-----:|
-    | [Download](https://github.com/satisfactorymodding/SatisfactoryModManager/releases/download/v{{.Version}}/SatisfactoryModManager-Setup.exe) | [Download (standalone)](https://github.com/satisfactorymodding/SatisfactoryModManager/releases/download/v{{.Version}}/SatisfactoryModManager_linux_amd64) <br> *requires libwebkit2gtk-4.1* |  [Download](https://github.com/satisfactorymodding/SatisfactoryModManager/releases/download/v{{.Version}}/SatisfactoryModManager_darwin_universal.zip) |
-    | | [Download (AppImage)](https://github.com/satisfactorymodding/SatisfactoryModManager/releases/download/v{{.Version}}/SatisfactoryModManager_linux_amd64.AppImage) | |
+    | [Download](https://github.com/satisfactorymodding/SatisfactoryModManager/releases/download/v{{.Version}}/SatisfactoryModManager-Setup.exe) | [Download (AppImage)](https://github.com/satisfactorymodding/SatisfactoryModManager/releases/download/v{{.Version}}/SatisfactoryModManager_linux_amd64.AppImage) |  [Download](https://github.com/satisfactorymodding/SatisfactoryModManager/releases/download/v{{.Version}}/SatisfactoryModManager_darwin_universal.zip) |
+    | | [Download (standalone)](https://github.com/satisfactorymodding/SatisfactoryModManager/releases/download/v{{.Version}}/SatisfactoryModManager_linux_amd64) <br> *requires libwebkit2gtk-4.1 and gst-plugins-good* | |
     
     If you already have Satisfactory Mod Manager installed, you don't need to download it again, it will auto-update.
     
