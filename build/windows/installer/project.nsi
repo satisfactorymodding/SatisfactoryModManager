@@ -47,6 +47,7 @@ VIAddVersionKey "ProductName"     "${INFO_PRODUCTNAME}"
 
 !include "utils.nsh"
 !include "smm2.nsh"
+!include "checkRunning.nsh"
 
 # Install pages
 !define MUI_PAGE_CUSTOMFUNCTION_PRE WelcomePagePre
@@ -89,6 +90,10 @@ OutFile "..\..\bin\SatisfactoryModManager-Setup.exe"
 ShowInstDetails show
 
 Function .onInit
+    ; If on (default for some reason), the installer will silently continue on update if a file is unwritable,
+    ; and then run the old version of the app since /ForceRun is set
+    AllowSkipFiles off
+
     SetRegView 64
     ; The original wails.checkArchitecture macro adds an unnecessary requirement on Windows 10
     ; !insertmacro wails.checkArchitecture
@@ -109,6 +114,8 @@ Function un.onInit
 FunctionEnd
 
 Section
+    !insertmacro CHECK_APP_RUNNING
+
     !insertmacro wails.webview2runtime
 
     !insertmacro SMM2_UNINSTALL
@@ -158,6 +165,8 @@ Section /o "un.Remove installed mods" un_Wipe
 SectionEnd
 
 Section "-un.install"
+    !insertmacro CHECK_APP_RUNNING
+
     RMDir /r "$AppData\${PRODUCT_EXECUTABLE}" # Remove the WebView2 DataPath
 
     RMDir /r $INSTDIR
