@@ -37,6 +37,7 @@ func Init() {
 		enabled: shouldUseUpdater(),
 	}
 	Updater.Updater.UpdateFound.On(func(update updater.PendingUpdate) {
+		slog.Info("update found", slog.Any("version", update.Version))
 		if common.AppContext != nil {
 			wailsRuntime.EventsEmit(common.AppContext, "updateAvailable", &PendingUpdate{
 				Version:    update.Version.String(),
@@ -53,6 +54,7 @@ func Init() {
 		}
 	})
 	Updater.Updater.UpdateReady.On(func(interface{}) {
+		slog.Info("update ready", slog.Any("version", Updater.PendingUpdate().Version))
 		if common.AppContext != nil {
 			wailsRuntime.EventsEmit(common.AppContext, "updateReady")
 		}
