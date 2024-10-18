@@ -1,19 +1,26 @@
 package epic
 
 import (
-	"os"
+	"fmt"
 	"path/filepath"
+
+	"golang.org/x/sys/windows"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/launchers"
 )
 
-var epicManifestsFolder = filepath.Join(os.Getenv("PROGRAMDATA"), "Epic", "EpicGamesLauncher", "Data", "Manifests")
+var epicProgramDataManifestsFolder = filepath.Join("Epic", "EpicGamesLauncher", "Data", "Manifests")
 
 func init() {
 	launchers.Add("EpicGames", func() ([]*common.Installation, []error) {
+		programData, err := windows.KnownFolderPath(windows.FOLDERID_ProgramData, 0)
+		if err != nil {
+			return nil, []error{fmt.Errorf("failed to get ProgramData folder: %w", err)}
+		}
+
 		return FindInstallationsEpic(
-			epicManifestsFolder,
+			filepath.Join(programData, epicProgramDataManifestsFolder),
 			"Epic Games",
 			common.MakeLauncherPlatform(
 				common.NativePlatform(),
