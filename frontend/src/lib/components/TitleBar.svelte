@@ -1,9 +1,12 @@
 <script lang="ts">
   import { mdiWindowClose, mdiWindowMaximize, mdiWindowMinimize, mdiWindowRestore } from '@mdi/js';
+  import { onDestroy } from 'svelte';
 
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import { version } from '$lib/store/settingsStore';
-  import { Quit, WindowMinimise, WindowToggleMaximise } from '$wailsjs/runtime';
+  import { Quit, WindowIsMaximised, WindowMinimise, WindowToggleMaximise } from '$wailsjs/runtime';
+
+  let isMaximized = false;
 
   function minimize() {
     WindowMinimise();
@@ -11,13 +14,24 @@
 
   function toggleMaximize() {
     WindowToggleMaximise();
+    isMaximized = !isMaximized;
   }
 
   function close() {
     Quit();
   }
 
-  let isMaximized = false;
+  function updateMaximized() {
+    WindowIsMaximised().then((maximized) => {
+      isMaximized = maximized;
+    });
+  }
+
+  const updateMaximizedInterval = setInterval(updateMaximized, 100);
+
+  onDestroy(() => {
+    clearInterval(updateMaximizedInterval);
+  });
 </script>
 
 <div class="flex items-center h-9">
