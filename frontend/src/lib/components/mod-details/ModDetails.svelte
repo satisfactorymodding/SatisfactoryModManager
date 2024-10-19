@@ -368,7 +368,7 @@
         <div class="card shadow-xl min-w-[11rem] z-10 duration-0 overflow-y-auto !mt-0" data-popup={changeVersionMenuPopupId}>
           <ul>
             <li>
-              <button class="btn w-full h-full text-left" on:click={() => installVersion(null)}>
+              <button class="btn variant-filled bg-surface-100-800-token text-token w-full h-full text-left" on:click={() => installVersion(null)}>
                 <div class="w-7 h-7 p-1">
                   {#if manifestVersion === '>=0.0.0'}
                     <SvgIcon class="h-full w-full" icon={mdiCheck} />
@@ -381,7 +381,7 @@
             </li>
             {#each mod?.versions ?? [] as version}
               <li class="flex">
-                <button class="btn w-full h-full text-left" on:click={() => installVersion(version.version)}>
+                <button class="btn variant-filled bg-surface-100-800-token text-token w-full h-full text-left" on:click={() => installVersion(version.version)}>
                   <div class="w-7 h-7 p-1">
                     {#if manifestVersion === version.version}
                       <SvgIcon class="h-full w-full" icon={mdiCheck} />
@@ -389,7 +389,8 @@
                   </div>
                   <span class="flex-auto">{version.version}</span>
                 </button>
-                <button class="btn w-full h-full text-left" on:click={() => installVersion(`>=${version.version}`)}>
+                <div class="divider-vertical" />
+                <button class="btn variant-filled bg-surface-100-800-token text-token rounded-none w-full h-full text-left" on:click={() => installVersion(`>=${version.version}`)}>
                   <span class="flex-auto">
                     <T defaultValue="or newer" keyName="mod-details.change-version-or-newer" />
                   </span>
