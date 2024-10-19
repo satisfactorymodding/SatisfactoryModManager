@@ -63,7 +63,7 @@
   <p class="font-mono">{error}</p>
 </section>
 {#if !allowOpeningDiscord}
-  <section class={sectionClass}>
+  <section class={`${sectionClass} text-center`}>
     <!-- This string intentionally not translated so Fred can always catch it! -->
     <p class="font-mono">Debug info not yet generated</p>
   </section>
