@@ -201,8 +201,8 @@ func (f *ficsitCLI) GetNextRemoteLauncherName() string {
 	for _, install := range f.GetRemoteInstallations() {
 		metadata, ok := f.installationMetadata.Load(install)
 		if ok && metadata.Info != nil {
-			if strings.HasPrefix(metadata.Info.Launcher, "Remote ") {
-				num, err := strconv.Atoi(strings.TrimPrefix(metadata.Info.Launcher, "Remote "))
+			if strings.HasPrefix(metadata.Info.Launcher, "Server ") {
+				num, err := strconv.Atoi(strings.TrimPrefix(metadata.Info.Launcher, "Server "))
 				if err == nil {
 					existingNumbers[num] = true
 				}
@@ -211,7 +211,7 @@ func (f *ficsitCLI) GetNextRemoteLauncherName() string {
 	}
 	for i := 1; ; i++ {
 		if !existingNumbers[i] {
-			return "Remote " + strconv.Itoa(i)
+			return "Server " + strconv.Itoa(i)
 		}
 	}
 }
