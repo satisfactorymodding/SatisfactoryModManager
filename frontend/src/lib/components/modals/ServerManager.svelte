@@ -62,6 +62,22 @@
 
   $: trimmedPath = _.trimStart(newServerPath, '/');
 
+  function validatePath() {
+    const remoteTypeInPath = remoteTypes.find((i) => 'protocol' in i && newServerPath.startsWith(i.protocol));
+    if (remoteTypeInPath && 'protocol' in remoteTypeInPath) {
+      newRemoteType = remoteTypeInPath;
+      newServerPath = newServerPath.slice(newRemoteType.protocol.length);
+    }
+  }
+
+  function validateHost() {
+    const remoteTypeInHost = remoteTypes.find((i) => 'protocol' in i && newServerHost.startsWith(i.protocol));
+    if (remoteTypeInHost && 'protocol' in remoteTypeInHost) {
+      newRemoteType = remoteTypeInHost;
+      newServerHost = newServerHost.slice(newRemoteType.protocol.length);
+    }
+  }
+
   $: fullInstallPath = (() => {
     if (newRemoteType.type === 'local') {
       return newServerPath;
@@ -270,6 +286,7 @@
             class="input px-4 h-full sm:col-start-2 col-span-2"
             placeholder={$t('server-manager.advanced-path-placeholder', 'user:pass@host:port/path')}
             type="text"
+            on:change={validatePath}
             bind:value={newServerPath}/>
           <p class="sm:col-start-2 col-span-2">
             <T defaultValue="Note that you might have to escape certain characters in the username and password" keyName="server-manager.advanced-note" />
@@ -303,6 +320,7 @@
             class="input px-4 h-full sm:col-start-2"
             placeholder={$t('server-manager.host-placeholder', 'host')}
             type="text"
+            on:change={validateHost}
             bind:value={newServerHost}/>
           <input
             class="input px-4 h-full"
@@ -313,6 +331,7 @@
             class="input px-4 h-full sm:col-start-2 col-span-2"
             placeholder={$t('server-manager.path-placeholder', 'path')}
             type="text"
+            on:change={validatePath}
             bind:value={newServerPath}/>
           <div class="sm:col-start-2 col-span-2">
             <RemoteServerPicker
@@ -335,6 +354,7 @@
           class="input px-4 h-full sm:col-start-2 col-span-2"
           placeholder={$t('server-manager.local-path-placeholder', 'C:\\Path\\To\\Server')}
           type="text"
+          on:change={validatePath}
           bind:value={newServerPath}/>
         <div class="sm:col-start-2 col-span-2 row-span-2">
           <RemoteServerPicker
