@@ -115,7 +115,7 @@ func (g *source) getReleasesAtom() ([]string, error) {
 			continue
 		}
 		releases = append(releases, tagMatches[1])
-		slog.Info("found release", slog.String("tag", tagMatches[1]))
+		slog.Debug("found release", slog.String("tag", tagMatches[1]))
 	}
 
 	return releases, nil
