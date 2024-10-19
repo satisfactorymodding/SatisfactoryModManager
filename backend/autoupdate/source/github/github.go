@@ -2,9 +2,12 @@ package github
 
 import (
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
+	"regexp"
 
 	"github.com/Masterminds/semver/v3"
 
@@ -22,29 +25,24 @@ func MakeGithubSource(repo string) updater.Source {
 }
 
 func (g *source) GetLatestVersion(includePrerelease bool) (string, error) {
-	if !includePrerelease {
-		release, err := g.getLatestReleaseData()
-		if err != nil {
-			return "", err
-		}
-		return release.TagName, nil
-	}
-
-	// GitHub does not return pre-releases on the /latest endpoint
-	allReleases, err := g.getReleasesData()
+	// This is called very often, so use the atom feed to avoid being rate limited
+	allReleases, err := g.getReleasesAtom()
 	var latest *semver.Version
 	var latestTagName string
 	if err != nil {
 		return "", err
 	}
-	for _, release := range allReleases {
-		version, err := semver.NewVersion(release.TagName)
+	for _, releaseVersion := range allReleases {
+		version, err := semver.NewVersion(releaseVersion)
 		if err != nil {
+			continue
+		}
+		if !includePrerelease && version.Prerelease() != "" {
 			continue
 		}
 		if latest == nil || version.GreaterThan(latest) {
 			latest = version
-			latestTagName = release.TagName
+			latestTagName = releaseVersion
 		}
 	}
 	if latest == nil {
@@ -90,18 +88,37 @@ func (g *source) GetChangelogs() (map[string]string, error) {
 	return changelogs, nil
 }
 
-func (g *source) getLatestReleaseData() (*Release, error) {
-	response, err := http.Get(fmt.Sprintf("https://api.github.com/repos/%s/releases/latest", g.repo))
+var releaseURLTagRegex = regexp.MustCompile(`/tag/([^/]+)$`)
+
+func (g *source) getReleasesAtom() ([]string, error) {
+	response, err := http.Get(fmt.Sprintf("https://github.com/%s/releases.atom", g.repo))
 	if err != nil {
-		return nil, fmt.Errorf("failed to get latest release: %w", err)
+		return nil, fmt.Errorf("failed to get releases: %w", err)
 	}
 	defer response.Body.Close()
-	var release Release
-	err = json.NewDecoder(response.Body).Decode(&release)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode latest release: %w", err)
+		return nil, fmt.Errorf("failed to read response: %w", err)
 	}
-	return &release, nil
+	var feed Feed
+	err = xml.Unmarshal(body, &feed)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal feed: %w", err)
+	}
+
+	releases := make([]string, 0, len(feed.Entry))
+
+	for _, entry := range feed.Entry {
+		tagMatches := releaseURLTagRegex.FindStringSubmatch(entry.Link.Href)
+		if len(tagMatches) != 2 {
+			slog.Warn("failed to parse tag from release URL", slog.String("url", entry.Link.Href))
+			continue
+		}
+		releases = append(releases, tagMatches[1])
+		slog.Info("found release", slog.String("tag", tagMatches[1]))
+	}
+
+	return releases, nil
 }
 
 func (g *source) getReleasesData() ([]Release, error) {

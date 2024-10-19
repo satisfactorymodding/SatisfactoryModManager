@@ -1,6 +1,9 @@
 package github
 
-import "time"
+import (
+	"encoding/xml"
+	"time"
+)
 
 type Release struct {
 	URL             string    `json:"url"`
@@ -56,4 +59,47 @@ type Assets struct {
 	CreatedAt          time.Time   `json:"created_at"`
 	UpdatedAt          time.Time   `json:"updated_at"`
 	BrowserDownloadURL string      `json:"browser_download_url"`
+}
+
+type Feed struct {
+	XMLName xml.Name `xml:"feed"`
+	Text    string   `xml:",chardata"`
+	Xmlns   string   `xml:"xmlns,attr"`
+	Media   string   `xml:"media,attr"`
+	Lang    string   `xml:"lang,attr"`
+	ID      string   `xml:"id"`
+	Link    []struct {
+		Text string `xml:",chardata"`
+		Type string `xml:"type,attr"`
+		Rel  string `xml:"rel,attr"`
+		Href string `xml:"href,attr"`
+	} `xml:"link"`
+	Title   string `xml:"title"`
+	Updated string `xml:"updated"`
+	Entry   []struct {
+		Text    string `xml:",chardata"`
+		ID      string `xml:"id"`
+		Updated string `xml:"updated"`
+		Link    struct {
+			Text string `xml:",chardata"`
+			Rel  string `xml:"rel,attr"`
+			Type string `xml:"type,attr"`
+			Href string `xml:"href,attr"`
+		} `xml:"link"`
+		Title   string `xml:"title"`
+		Content struct {
+			Text string `xml:",chardata"`
+			Type string `xml:"type,attr"`
+		} `xml:"content"`
+		Author struct {
+			Text string `xml:",chardata"`
+			Name string `xml:"name"`
+		} `xml:"author"`
+		Thumbnail struct {
+			Text   string `xml:",chardata"`
+			Height string `xml:"height,attr"`
+			Width  string `xml:"width,attr"`
+			URL    string `xml:"url,attr"`
+		} `xml:"thumbnail"`
+	} `xml:"entry"`
 }
