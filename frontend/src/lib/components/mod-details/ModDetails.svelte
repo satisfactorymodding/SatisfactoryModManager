@@ -91,7 +91,7 @@
   $: renderedThumbhash = ((mod && 'logo_thumbhash' in mod) ? mod.logo_thumbhash : undefined) || '2/eFDQIsFmh9h4BreKeAeQqYBxd3d3J4Jw';
   $: author = getAuthor(mod);
 
-  $: size = mod ? bytesToAppropriate((('size' in mod.versions[0]) ? mod.versions[0]?.size : undefined) ?? 0) : undefined;
+  $: size = mod ? bytesToAppropriate(((mod.versions[0] && 'size' in mod.versions[0]) ? mod.versions[0]?.size : undefined) ?? 0) : undefined;
 
   $: latestVersion = mod ? (mod.versions.length ? sort(mod.versions.map((v) => parse(v.version) ?? coerce(v.version)).filter((v) => !!v) as SemVer[]).reverse()[0] : 'N/A') : undefined;
   $: installedVersion = mod ? ($lockfileMods[mod.mod_reference]?.version ?? 'Not installed') : undefined;
