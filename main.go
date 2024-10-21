@@ -143,6 +143,32 @@ func main() {
 
 	migration.Init()
 
+	// OnDomReady is called on every refresh
+	onDomReadyOnce := sync.OnceFunc(func() {
+		// Wails doesn't expose the user agent configuration, it only uses wails.io for dev app/browser detection
+		// I don't really feel like properly implementing this into wails2, with wails3 around the corner
+		// which will no longer rely on wails.io being in the user agent, so the current code that sets it to wails.io
+		// can be replaced with a configurable value
+		// But for now, hacky reflection it is, to append our own user agent
+		// On Windows and Linux, this can be done on startup,
+		// but for Darwin, it uses evaluateJavaScript to get the default user agent,
+		// and that crashes if the webview is not yet ready
+		// The only requests made before this are the initial asset requests, for which we don't really care about the user agent
+		wailsextras.AddUserAgent("SatisfactoryModManager", viper.GetString("version"))
+
+		if startUpdateFound {
+			if autoupdate.Updater.Updater.PendingUpdate != nil && autoupdate.Updater.Updater.PendingUpdate.Ready {
+				autoupdate.Updater.UpdateAndRestart() //nolint:contextcheck
+			} else {
+				autoupdate.Updater.Updater.UpdateReady.Once(func(_ interface{}) {
+					autoupdate.Updater.UpdateAndRestart()
+				})
+			}
+		}
+		backend.ProcessArguments(os.Args[1:]) //nolint:contextcheck
+		autoupdate.Updater.CheckInterval(5 * time.Minute)
+	})
+
 	// Create application with options
 	err = wails.Run(&options.App{
 		Title:            "SatisfactoryModManager",
@@ -185,30 +211,7 @@ func main() {
 		},
 		OnDomReady: func(_ context.Context) {
 			// OnDomReady is called on every refresh
-			sync.OnceFunc(func() {
-				// Wails doesn't expose the user agent configuration, it only uses wails.io for dev app/browser detection
-				// I don't really feel like properly implementing this into wails2, with wails3 around the corner
-				// which will no longer rely on wails.io being in the user agent, so the current code that sets it to wails.io
-				// can be replaced with a configurable value
-				// But for now, hacky reflection it is, to append our own user agent
-				// On Windows and Linux, this can be done on startup,
-				// but for Darwin, it uses evaluateJavaScript to get the default user agent,
-				// and that crashes if the webview is not yet ready
-				// The only requests made before this are the initial asset requests, for which we don't really care about the user agent
-				wailsextras.AddUserAgent("SatisfactoryModManager", viper.GetString("version"))
-
-				if startUpdateFound {
-					if autoupdate.Updater.Updater.PendingUpdate != nil && autoupdate.Updater.Updater.PendingUpdate.Ready {
-						autoupdate.Updater.UpdateAndRestart() //nolint:contextcheck
-					} else {
-						autoupdate.Updater.Updater.UpdateReady.Once(func(_ interface{}) {
-							autoupdate.Updater.UpdateAndRestart()
-						})
-					}
-				}
-				backend.ProcessArguments(os.Args[1:]) //nolint:contextcheck
-				autoupdate.Updater.CheckInterval(5 * time.Minute)
-			})()
+			onDomReadyOnce()
 		},
 		OnShutdown: func(_ context.Context) {
 			app.App.StopWindowWatcher()
