@@ -2,6 +2,7 @@
   import { mdiUpload } from '@mdi/js';
   import { getTranslate } from '@tolgee/svelte';
   import { getContextClient, queryStore } from '@urql/svelte';
+  import { onMount } from 'svelte';
 
   import { selectedUpdates, showIgnored } from './updatesStore';
 
@@ -109,9 +110,11 @@
     }
   }
 
-  $: if (!$updates.length) {
-    parent.onClose();
-  }
+  onMount(() => {
+    if (!$updates.length) {
+      parent.onClose();
+    }
+  });
 </script>
 
 <div style="max-height: calc(100vh - 3rem); max-width: calc(100vw - 3rem);" class="w-[48rem] card flex flex-col gap-2">
