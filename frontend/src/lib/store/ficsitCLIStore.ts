@@ -6,6 +6,7 @@ import { binding, bindingTwoWay } from './wailsStoreBindings';
 
 import { queuedMods } from '$lib/store/actionQueue';
 import { bytesToAppropriate, secondsToAppropriate } from '$lib/utils/dataFormats';
+import { setIntervalImmediate } from '$lib/utils/interval';
 import { progressStats } from '$lib/utils/progress';
 import {
   CheckForUpdates,
@@ -80,6 +81,7 @@ export const unignoredUpdates = derived([updates, ignoredUpdates], ([$updates, $
 export const updateCheckInProgress = writable(false);
 
 export async function checkForUpdates() {
+  if (get(updateCheckInProgress)) return;
   updateCheckInProgress.set(true);
   try {
     const result = await CheckForUpdates();
@@ -89,7 +91,7 @@ export async function checkForUpdates() {
   }
 }
 
-setInterval(() => checkForUpdates().catch(console.error), 1000 * 60 * 5); // Check for updates every 5 minutes
+setIntervalImmediate(() => checkForUpdates().catch(console.error), 1000 * 60 * 5); // Check for updates every 5 minutes
 
 export const progressTitle = derived(progress, ($progress) => {
   if (!$progress) return '';
