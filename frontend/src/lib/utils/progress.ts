@@ -16,19 +16,22 @@ export function progressStats(progress: Readable<utils.Progress | null>, options
   };
 
   const series = timeSeries(finalOptions.statsInterval);
-  
+
   const stats = writable({ speed: 0, eta: 0 as number | undefined });
   const lastStatsUpdate = { speed: 0, eta: 0 };
-  
+
   progress.subscribe(($progress) => {
     if (!$progress) {
       series.clear();
-    } else {    
+    } else {
+      if ((series.getLast() ?? -1) > $progress.current) {
+        series.clear();
+      }
       series.addValue($progress.current);
-  
+
       const speed = series.getDerivative() ?? 0;
       const eta = speed !== 0 ? ($progress.total - $progress.current) / speed : undefined;
-  
+
       if (Date.now() - lastStatsUpdate.speed > finalOptions.updateInterval.speed) {
         stats.set({ speed: speed, eta: get(stats).eta });
         lastStatsUpdate.speed = Date.now();

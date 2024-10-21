@@ -2,6 +2,7 @@ export interface TimeSeries {
   addValue: (value: number) => void;
   getAverage: () => number;
   getDerivative: () => number | undefined;
+  getLast: () => number | undefined;
   clear: () => void;
 }
 
@@ -19,6 +20,9 @@ export function timeSeries(millisecondsLifetime: number): TimeSeries {
     },
     getDerivative: () => {
       return (items[items.length - 1].value - items[0].value) / ((items[items.length - 1].timestamp - items[0].timestamp) / 1000); // per second
+    },
+    getLast: () => {
+      return items.length > 0 ? items[items.length - 1]?.value : undefined;
     },
     clear: () => {
       items.length = 0;
