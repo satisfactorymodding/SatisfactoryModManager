@@ -19,7 +19,9 @@ func (a *app) ExpandMod() bool {
 	width, height := wailsRuntime.WindowGetSize(common.AppContext)
 	wailsRuntime.WindowSetMinSize(common.AppContext, utils.ExpandedMin.Width, utils.ExpandedMin.Height)
 	wailsRuntime.WindowSetMaxSize(common.AppContext, utils.ExpandedMax.Width, utils.ExpandedMax.Height)
-	wailsRuntime.WindowSetSize(common.AppContext, max(width, settings.Settings.ExpandedSize.Width), height)
+	if !wailsRuntime.WindowIsMaximised(common.AppContext) {
+		wailsRuntime.WindowSetSize(common.AppContext, max(width, settings.Settings.ExpandedSize.Width), height)
+	}
 	a.IsExpanded = true
 	return true
 }
@@ -29,7 +31,9 @@ func (a *app) UnexpandMod() bool {
 	width, height := wailsRuntime.WindowGetSize(common.AppContext)
 	wailsRuntime.WindowSetMinSize(common.AppContext, utils.UnexpandedMin.Width, utils.UnexpandedMin.Height)
 	wailsRuntime.WindowSetMaxSize(common.AppContext, utils.UnexpandedMax.Width, utils.UnexpandedMax.Height)
-	wailsRuntime.WindowSetSize(common.AppContext, min(width, settings.Settings.UnexpandedSize.Width), height)
+	if !wailsRuntime.WindowIsMaximised(common.AppContext) {
+		wailsRuntime.WindowSetSize(common.AppContext, min(width, settings.Settings.UnexpandedSize.Width), height)
+	}
 	return true
 }
 
