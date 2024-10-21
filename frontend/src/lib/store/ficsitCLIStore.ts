@@ -4,7 +4,7 @@ import { isLaunchingGame } from './generalStore';
 import { ignoredUpdates } from './settingsStore';
 import { binding, bindingTwoWay } from './wailsStoreBindings';
 
-import { queuedMods } from '$lib/store/actionQueue';
+import { modActionsQueue, queuedMods } from '$lib/store/actionQueue';
 import { bytesToAppropriate, secondsToAppropriate } from '$lib/utils/dataFormats';
 import { setIntervalImmediate } from '$lib/utils/interval';
 import { progressStats } from '$lib/utils/progress';
@@ -92,6 +92,10 @@ export async function checkForUpdates() {
 }
 
 setIntervalImmediate(() => checkForUpdates().catch(console.error), 1000 * 60 * 5); // Check for updates every 5 minutes
+
+modActionsQueue.drain(() => {
+  checkForUpdates().catch(console.error);
+});
 
 export const progressTitle = derived(progress, ($progress) => {
   if (!$progress) return '';

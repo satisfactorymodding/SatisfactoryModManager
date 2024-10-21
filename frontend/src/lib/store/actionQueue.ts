@@ -13,7 +13,7 @@ export const hasPendingProfileChange = writable(false);
 
 const queuedActionsInternal = writable<QueuedAction<unknown>[]>([]);
 export const queuedMods = derived(queuedActionsInternal, (actions) => actions.map((a) => ({ ...a, func: undefined })));
-const modActionsQueue = queue((task: () => Promise<unknown>, cb) => {
+export const modActionsQueue = queue((task: () => Promise<unknown>, cb) => {
   const complete = (e?: Error) => {
     queuedActionsInternal.set(get(queuedActionsInternal).filter((a) => a.func !== task));
     cb(e);
@@ -22,7 +22,7 @@ const modActionsQueue = queue((task: () => Promise<unknown>, cb) => {
   task().then(() => complete()).catch(complete);
 });
 
-modActionsQueue.empty(() => {
+modActionsQueue.drain(() => {
   if(!get(queueAutoStart)) {
     modActionsQueue.pause();
   }
