@@ -38,7 +38,7 @@ func GetDisplayBoundsAt(x, y int) image.Rectangle {
 
 	curDisplay := image.Rect(0, 0, 0, 0)
 	if len(displays) > 0 {
-	   curDisplay = displays[0] // use main display as fallback
+		curDisplay = displays[0] // use main display as fallback
 	}
 
 	for _, d := range displays {
