@@ -16,7 +16,7 @@ func GetDisplayBounds() []image.Rectangle {
 		bounds = append(bounds, screenshot.GetDisplayBounds(i))
 	}
 
-	if runtime.GOOS == "linux" {
+	if runtime.GOOS == "linux" && n > 0 {
 		// gdk_monitor_get_geometry considers 0,0 to be the corner of the bounding box of all the monitors,
 		// not the 0,0 of the main monitor
 		boundingBox := bounds[0]
@@ -36,7 +36,10 @@ func GetDisplayBoundsAt(x, y int) image.Rectangle {
 
 	displays := GetDisplayBounds()
 
-	curDisplay := displays[0] // use main display as fallback
+	curDisplay := image.Rect(0, 0, 0, 0)
+	if len(displays) > 0 {
+	   curDisplay = displays[0] // use main display as fallback
+	}
 
 	for _, d := range displays {
 		if point.In(d) {
