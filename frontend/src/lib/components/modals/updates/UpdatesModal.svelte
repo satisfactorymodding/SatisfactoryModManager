@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { mdiUpload } from '@mdi/js';
+  import { mdiDownload } from '@mdi/js';
   import { getTranslate } from '@tolgee/svelte';
   import { getContextClient, queryStore } from '@urql/svelte';
   import { onMount } from 'svelte';
@@ -132,7 +132,7 @@
       <button class="btn p-2 col-span-8 text-left space-x-2" on:click={() => toggleSelected(update)}>
         <div class="h-full w-6">
           {#if $selectedUpdates.includes(update)}
-            <SvgIcon class="h-full w-full" icon={mdiUpload} />
+            <SvgIcon class="h-full w-8 mx-auto" icon={mdiDownload} />
           {/if}
         </div>
         <div class="h-full flex-auto flex flex-col content-center">
