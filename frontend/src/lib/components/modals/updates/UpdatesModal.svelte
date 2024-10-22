@@ -120,55 +120,69 @@
   <header class="card-header font-bold text-2xl text-center">
     <T defaultValue="Updates" keyName="updates.title" />
   </header>
-  <section class="px-4">
-    <button
-      class="btn"
-      on:click={() => $showIgnored = !$showIgnored}>
-      {$showIgnored ? $t('updates.hide-ignored', 'Hide ignored') : $t('updates.show-ignored', 'Show ignored')}
-    </button>
-  </section>
-  <section class="px-4 flex-auto grid grid-cols-12 overflow-y-auto">
+  <section class="px-4 py-1 space-y-2 flex-auto overflow-y-auto">
     {#each updatesToDisplay as update}
-      <button class="btn p-2 col-span-8 text-left space-x-2" on:click={() => toggleSelected(update)}>
-        <div class="h-full w-6">
+      <button class="btn p-2 grid grid-cols-12 {$selectedUpdates.includes(update) ? '!outline !outline-2 !outline-primary-500 bg-surface-400-500-token' : ''}" on:click={() => toggleSelected(update)}>
+        <div>
           {#if $selectedUpdates.includes(update)}
             <SvgIcon class="h-full w-8 mx-auto" icon={mdiDownload} />
           {/if}
         </div>
-        <div class="h-full flex-auto flex flex-col content-center">
+        <div class="col-span-7 text-left flex-auto flex flex-col content-center">
           <span>{modNames[update.item] ?? update.item}</span>
           <span>{update.currentVersion} -> {update.newVersion}</span>
         </div>
-      </button>
-      <button
-        class="btn col-span-2"
-        on:click={() => modalStore.trigger({ type:'component', component:{ ref: ModChangelog, props:{ mod:update.item, versionRange:{ from:update.currentVersion, to:update.newVersion } } } }, true)}>
-        <T defaultValue="Changelog" keyName="updates.changelog" />
-      </button>
-      <button
-        class="btn col-span-2"
-        on:click={() => toggleIgnoreUpdate(update)}>
-        {$unignoredUpdates.includes(update) ? $t('updates.ignore', 'Ignore') : $t('updates.unignore', 'Unignore')}
+        <button
+          class="btn col-span-2"
+          on:click|stopPropagation={() => modalStore.trigger({ type:'component', component:{ ref: ModChangelog, props:{ mod:update.item, versionRange:{ from:update.currentVersion, to:update.newVersion } } } }, true)}>
+          <T defaultValue="Changelog" keyName="updates.changelog" />
+        </button>
+        <button
+          class="btn col-span-2"
+          on:click|stopPropagation={() => toggleIgnoreUpdate(update)}>
+          {$unignoredUpdates.includes(update) ? $t('updates.ignore', 'Ignore') : $t('updates.unignore', 'Unignore')}
+        </button>
       </button>
     {/each}
   </section>
-  <footer class="card-footer">
+  <footer class="card-footer flex space-x-2">
     <button
-      class="btn"
+      class="btn variant-filled-surface"
       on:click={parent.onClose}>
       <T defaultValue="Close" keyName="common.close" />
     </button>
     <button
-      class="btn"
+      class="btn variant-filled-surface"
       disabled={!$canModify || $updateCheckInProgress || !updatesToDisplay.length}
       on:click={() => updateAll()}>
       <T defaultValue="Update All" keyName="updates.update-all" />
     </button>
     <button
-      class="btn"
+      class="btn variant-filled-surface"
       disabled={!$canModify || $updateCheckInProgress || !updatesToDisplay.length || !$selectedUpdates.length}
       on:click={() => updateSelected()}>
       <T defaultValue="Update Selected" keyName="updates.update-selected" />
     </button>
+    <div class="grow" />
+    <button
+      class="btn variant-filled-surface"
+      on:click={() => $showIgnored = !$showIgnored}>
+      {$showIgnored ? $t('updates.hide-ignored', 'Hide ignored') : $t('updates.show-ignored', 'Show ignored')}
+    </button>
   </footer>
 </div>
+
+
+<style lang="postcss">
+  /*
+  A button is focused by default when the modal opens, but not with focus-visible.
+  This style is part of skeleton as a workaround for this issue,
+  but results in all buttons having a focus outline, even when using the mouse.
+
+  Since we want to use the outline to display the selected items, having it show on all buttons is not ideal.
+  This style is a workaround to revert the workaround, and results in the default focused button not having an outline until using tab navigation.
+  */
+  *:focus:not(:focus-visible):not([tabindex='-1']):not(.input):not(.textarea):not(.select):not(.input-group):not(.input-group input) {
+    outline-width: 0;
+  }
+</style>
