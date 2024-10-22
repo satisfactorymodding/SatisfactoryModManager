@@ -13,7 +13,7 @@
   import { getModalStore } from '$lib/skeletonExtensions';
   import { canModify, unignoredUpdates, updateCheckInProgress, updates } from '$lib/store/ficsitCLIStore';
   import { error } from '$lib/store/generalStore';
-  import { ignoredUpdates, offline } from '$lib/store/settingsStore';
+  import { offline } from '$lib/store/settingsStore';
   import { OfflineGetModsByReferences, UpdateMods } from '$wailsjs/go/ficsitcli/ficsitCLI';
   import type { ficsitcli } from '$wailsjs/go/models';
   import { SetUpdateIgnore, SetUpdateUnignore } from '$wailsjs/go/settings/settings';
@@ -103,10 +103,9 @@
   function toggleIgnoreUpdate(update: ficsitcli.Update) {
     if($unignoredUpdates.includes(update)) {
       SetUpdateIgnore(update.item, update.newVersion);
-      $ignoredUpdates[update.item] = [...($ignoredUpdates[update.item] ?? []), update.newVersion];
+      $selectedUpdates = $selectedUpdates.filter((u) => u !== update);
     } else {
       SetUpdateUnignore(update.item, update.newVersion);
-      $ignoredUpdates[update.item] = $ignoredUpdates[update.item].filter((v) => v !== update.newVersion);
     }
   }
 
