@@ -111,7 +111,7 @@
   }
 
   onMount(() => {
-    if (!$updates.length) {
+    if (!$unignoredUpdates.length) {
       parent.onClose();
     }
   });
