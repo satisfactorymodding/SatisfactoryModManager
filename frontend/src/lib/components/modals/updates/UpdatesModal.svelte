@@ -73,8 +73,8 @@
   async function updateSelected() {
     if($selectedUpdates.length > 0) {
       try {
-        await UpdateMods($selectedUpdates.map((u) => u.item));
-        $updates = $updates.filter((u) => !$selectedUpdates.includes(u));
+        await UpdateMods($selectedUpdates);
+        $updates = $updates.filter((u) => !$selectedUpdates.includes(u.item));
       } catch(e) {
         if (e instanceof Error) {
           $error = e.message;
@@ -88,10 +88,10 @@
   }
 
   function toggleSelected(update: ficsitcli.Update) {
-    if($selectedUpdates.includes(update)) {
-      $selectedUpdates = $selectedUpdates.filter((u) => u !== update);
+    if($selectedUpdates.includes(update.item)) {
+      $selectedUpdates = $selectedUpdates.filter((u) => u !== update.item);
     } else {
-      $selectedUpdates = [...$selectedUpdates, update];
+      $selectedUpdates = [...$selectedUpdates, update.item];
     }
   }
 
@@ -103,7 +103,7 @@
   function toggleIgnoreUpdate(update: ficsitcli.Update) {
     if($unignoredUpdates.includes(update)) {
       SetUpdateIgnore(update.item, update.newVersion);
-      $selectedUpdates = $selectedUpdates.filter((u) => u !== update);
+      $selectedUpdates = $selectedUpdates.filter((u) => u !== update.item);
     } else {
       SetUpdateUnignore(update.item, update.newVersion);
     }
@@ -122,9 +122,9 @@
   </header>
   <section class="px-4 py-1 space-y-2 flex-auto overflow-y-auto">
     {#each updatesToDisplay as update}
-      <button class="btn p-2 grid grid-cols-12 {$selectedUpdates.includes(update) ? '!outline !outline-2 !outline-primary-500 bg-surface-400-500-token' : ''}" on:click={() => toggleSelected(update)}>
+      <button class="btn p-2 grid grid-cols-12 {$selectedUpdates.includes(update.item) ? '!outline !outline-2 !outline-primary-500 bg-surface-400-500-token' : ''}" on:click={() => toggleSelected(update)}>
         <div>
-          {#if $selectedUpdates.includes(update)}
+          {#if $selectedUpdates.includes(update.item)}
             <SvgIcon class="h-full w-8 mx-auto" icon={mdiDownload} />
           {/if}
         </div>
