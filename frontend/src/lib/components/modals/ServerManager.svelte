@@ -190,7 +190,7 @@
   <header class="card-header font-bold text-2xl text-center">
     <T defaultValue="Dedicated Servers" keyName="server-manager.title" />
   </header>
-  <section class="p-4 flex-auto space-y-4 overflow-y-auto flex">
+  <section class="p-4 flex-auto space-y-4 flex">
     <button class="btn flex-auto h-12 text-sm variant-filled-primary" on:click={() => BrowserOpenURL('https://docs.ficsit.app/satisfactory-modding/latest/ForUsers/DedicatedServerSetup.html')}>
       <T defaultValue="Get help connecting to servers" keyName="server-manager.get-help" />
       <div class="grow" />
@@ -199,73 +199,86 @@
         icon={mdiWeb} />
     </button>
   </section>
-  <section class="p-4 flex-auto space-y-4 overflow-y-auto flex">
+  <header class="card-header font-bold text-2xl text-center">
+    <T defaultValue="Manage Existing Servers" keyName="server-manager.existing-servers.title" />
+  </header>
+  <section class="p-4 flex-auto space-y-4 flex">
     <div class="flex-auto w-full overflow-x-auto overflow-y-auto">
       <table class="table">
         <tbody>
-          {#each $remoteServers as remoteServer}
-            <tr>
-              <td class="break-all">{$installsMetadata[remoteServer]?.info?.launcher}</td>
-              <td class="break-all">{redactRemoteURL(remoteServer)}</td>
-              <td>
-                {#if $installsMetadata[remoteServer]?.state === ficsitcli.InstallState.VALID}
-                  {$installsMetadata[remoteServer]?.info?.type}
-                {:else}
-                  <Tooltip popupId={installWarningPopupId(remoteServer)}>
-                    <span class="text-base">
+          {#if $remoteServers.length > 0}
+            {#each $remoteServers as remoteServer}
+              <tr>
+                <td class="break-all">{$installsMetadata[remoteServer]?.info?.launcher}</td>
+                <td class="break-all">{redactRemoteURL(remoteServer)}</td>
+                <td>
+                  {#if $installsMetadata[remoteServer]?.state === ficsitcli.InstallState.VALID}
+                    {$installsMetadata[remoteServer]?.info?.type}
+                  {:else}
+                    <Tooltip popupId={installWarningPopupId(remoteServer)}>
+                      <span class="text-base">
+                        {#if $installsMetadata[remoteServer]?.state === ficsitcli.InstallState.LOADING}
+                          <T defaultValue="Loading..." keyName="server-manager.loading" />
+                        {:else if $installsMetadata[remoteServer]?.state === ficsitcli.InstallState.INVALID}
+                          <T defaultValue="SMM cannot manage this install" keyName="server-manager.invalid" />
+                        {:else}
+                          <T defaultValue="Failed to connect to server, click to retry" keyName="server-manager.failed-to-connect" />
+                        {/if}
+                      </span>
+                    </Tooltip>
+                    <div
+                      class="h-6 w-full text-sm"
+                      use:popup={installWarningPopups[remoteServer]}>
                       {#if $installsMetadata[remoteServer]?.state === ficsitcli.InstallState.LOADING}
-                        <T defaultValue="Loading..." keyName="server-manager.loading" />
+                        <SvgIcon
+                          class="!p-0 !m-0 !w-full !h-full animate-spin text-primary-600"
+                          icon={mdiLoading} />
                       {:else if $installsMetadata[remoteServer]?.state === ficsitcli.InstallState.INVALID}
-                        <T defaultValue="SMM cannot manage this install" keyName="server-manager.invalid" />
-                      {:else}
-                        <T defaultValue="Failed to connect to server, click to retry" keyName="server-manager.failed-to-connect" />
-                      {/if}
-                    </span>
-                  </Tooltip>
-                  <div
-                    class="h-6 w-full text-sm"
-                    use:popup={installWarningPopups[remoteServer]}>
-                    {#if $installsMetadata[remoteServer]?.state === ficsitcli.InstallState.LOADING}
-                      <SvgIcon
-                        class="!p-0 !m-0 !w-full !h-full animate-spin text-primary-600"
-                        icon={mdiLoading} />
-                    {:else if $installsMetadata[remoteServer]?.state === ficsitcli.InstallState.INVALID}
-                      <SvgIcon
-                        class="!p-0 !m-0 !w-full !h-full text-red-500"
-                        icon={mdiAlert} />
-                    {:else}
-                      <button
-                        class="btn-icon h-6 w-full"
-                        on:click={() => retryConnect(remoteServer)}>
                         <SvgIcon
                           class="!p-0 !m-0 !w-full !h-full text-red-500"
                           icon={mdiAlert} />
-                      </button>
-                    {/if}
-                  </div>
-                {/if}
-              </td>
-              <td>
-                {#if $installsMetadata[remoteServer]?.info?.version}
-                  CL{$installsMetadata[remoteServer].info?.version}
-                {/if}
-              </td>
-              <td>
-                <button
-                  class="btn-icon h-5 w-full"
-                  on:click={() => removeServer(remoteServer)}>
-                  <SvgIcon
-                    class="!p-0 !m-0 !w-full !h-full hover:text-red-500"
-                    icon={mdiTrashCan}/>
-                </button>
-              </td>
-            </tr>
-          {/each}
+                      {:else}
+                        <button
+                          class="btn-icon h-6 w-full"
+                          on:click={() => retryConnect(remoteServer)}>
+                          <SvgIcon
+                            class="!p-0 !m-0 !w-full !h-full text-red-500"
+                            icon={mdiAlert} />
+                        </button>
+                      {/if}
+                    </div>
+                  {/if}
+                </td>
+                <td>
+                  {#if $installsMetadata[remoteServer]?.info?.version}
+                    CL{$installsMetadata[remoteServer].info?.version}
+                  {/if}
+                </td>
+                <td>
+                  <button
+                    class="btn-icon h-5 w-full"
+                    on:click={() => removeServer(remoteServer)}>
+                    <SvgIcon
+                      class="!p-0 !m-0 !w-full !h-full hover:text-red-500"
+                      icon={mdiTrashCan}/>
+                  </button>
+                </td>
+              </tr>
+            {/each}
+          {:else}
+            <tr><p><T defaultValue="No servers added yet. Add one below!" keyName="server-manager.existing-servers.none-yet" /></p></tr>
+          {/if}
         </tbody>
       </table>
     </div>
   </section>
-  <section class="p-4 space-y-4 overflow-y-auto">
+  <section class="px-4">
+    <header class="card-header font-bold text-2xl text-center">
+      <T defaultValue="Add a New Server" keyName="server-manager.new-server.title" />
+    </header>
+    <p class="font-mono">{err}</p>
+  </section>
+  <section class="p-4 overflow-y-auto">
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 items-start auto-rows-[minmax(2.5rem,_max-content)]">
       <Select
         name="newServerProtocol"
@@ -386,7 +399,6 @@
           icon={mdiServerNetwork} />
       </button>
     </div>
-    <p class="font-mono">{err}</p>
   </section>
   <footer class="card-footer">
     <button
