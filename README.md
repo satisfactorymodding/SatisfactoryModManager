@@ -115,6 +115,7 @@ After running `wails dev`, open `http://localhost:34115/` in your browser of cho
 
 ## Code Signing Policy
 
+<!-- markdownlint-disable -->
 <table>
   <tr>
     <td colspan=3>
@@ -144,3 +145,4 @@ After running `wails dev`, open `http://localhost:34115/` in your browser of cho
     </td>
   </tr>
 </table>
+<!-- markdownlint-enable -->
