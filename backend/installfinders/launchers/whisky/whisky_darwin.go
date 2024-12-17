@@ -75,7 +75,12 @@ func getWhiskyBottlesPath() (string, error) {
 		return "", fmt.Errorf("failed to get user home dir: %w", err)
 	}
 
-	defaultBottlesPath := filepath.Join(homeDir, whiskyDefaultBottlesRelativePath)
+	absHomeDir, err := filepath.Abs(homeDir)
+	if err != nil {
+		return "", fmt.Errorf("failed to get absolute path of user home dir: %w", err)
+	}
+
+	defaultBottlesPath := filepath.Join(absHomeDir, whiskyDefaultBottlesRelativePath)
 
 	var bottlesPath string
 
@@ -93,7 +98,12 @@ func getWhiskyBottlesPath() (string, error) {
 		if err != nil {
 			slog.Error("failed to parse Whisky config file", slog.Any("error", err))
 		} else {
-			bottlesPath = config.DefaultBottleLocation
+			if bottlesPath != "" {
+				bottlesPath, err = filepath.Abs(config.DefaultBottleLocation)
+				if err != nil {
+					return "", fmt.Errorf("failed to get absolute path of Whisky bottles path: %w", err)
+				}
+			}
 		}
 	}
 
