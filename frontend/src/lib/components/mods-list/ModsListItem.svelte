@@ -85,7 +85,7 @@
       return {
         icon: mdiLinkLock,
         iconHover: mdiLinkLock,
-        tooltip: $t('mod-list-item.dependency', 'This mod is already installed as a dependency of another mod. It cannot be (un)installed or removed on its own.'),
+        tooltip: $t('mod-list-item.dependency', 'This mod is already installed as a dependency of another mod. It cannot be uninstalled as long as other mods depend on it.'),
       };
     }
     if (queuedInstall) {
