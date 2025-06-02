@@ -99,7 +99,7 @@ func FindInstallationsSteam(steamPath string, launcher string, platform common.L
 
 			var branch common.GameBranch
 			userConfig := manifest["AppState"].(map[string]interface{})["UserConfig"].(map[string]interface{})
-			betakey, ok := userConfig["betakey"]
+			betakey, ok := userConfig["BetaKey"]
 			if !ok {
 				branch = common.BranchStable
 			} else {
