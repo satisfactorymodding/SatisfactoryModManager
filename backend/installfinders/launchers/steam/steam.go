@@ -109,7 +109,7 @@ func FindInstallationsSteam(steamPath string, launcher string, platform common.L
 				}
 			}
 
-			if betakey == "" {
+			if betakey == "" || betakey == "stable" {
 				branch = common.BranchStable
 			} else {
 				if betakey == "experimental" {
