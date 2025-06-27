@@ -1,4 +1,4 @@
-# Satisfactory Mod Manager
+# Satisfactory Mod Manager 
 
 Mod manager for [Satisfactory](https://www.satisfactorygame.com/).
 Handles all the steps of installing mods for you.
