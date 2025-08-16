@@ -28,7 +28,7 @@ runs:
     - uses: actions/setup-node@v4
       if: ${{ inputs.frontend == 'true' }}
       with:
-        node-version: 18
+        node-version: 20
         cache: 'pnpm'
         cache-dependency-path: frontend
 
