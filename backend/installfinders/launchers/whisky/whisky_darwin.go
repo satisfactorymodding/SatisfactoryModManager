@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/launchers/epic"
 	"howett.net/plist"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
@@ -58,12 +59,15 @@ func whisky() ([]*common.Installation, []error) {
 	installations := make([]*common.Installation, 0)
 	errors := make([]error, 0)
 	for _, bottleRoot := range bottlesToCheck {
-		bottleInstalls, bottleErrs := steam.FindInstallationsWine(bottleRoot, "Whisky", nil)
-
-		installations = append(installations, bottleInstalls...)
-		if bottleErrs != nil {
-			errors = append(errors, bottleErrs...)
+		search := func(finder func(winePrefix string, launcher string, launchPath []string) ([]*common.Installation, []error)) {
+			bottleInstalls, bottleErrs := finder(bottleRoot, "Whisky", nil)
+			installations = append(installations, bottleInstalls...)
+			if bottleErrs != nil {
+				errors = append(errors, bottleErrs...)
+			}
 		}
+		search(steam.FindInstallationsWine)
+		search(epic.FindInstallationsWine)
 	}
 
 	return installations, errors
