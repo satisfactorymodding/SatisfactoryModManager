@@ -390,7 +390,7 @@
                   <span class="flex-auto">{version.version}</span>
                 </button>
                 <div class="divider-vertical" />
-                <div style="border-left: 6px solid green; height: 45px"></div>
+                <div style="border-left: 6px solid green; height: 45px" />
                 <div class="divider-vertical" />
                 <button class="btn variant-filled bg-surface-100-800-token text-token rounded-none w-full h-full text-left" on:click={() => installVersion(`>=${version.version}`)}>
                   <span class="flex-auto">
