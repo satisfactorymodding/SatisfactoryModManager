@@ -59,6 +59,14 @@
 <header class="card-header font-bold text-2xl text-center">
   <slot name="title" />
 </header>
+<section class={sectionClass}>
+  <p class={fullPageMode ? 'text-base text-center' : ''}>
+    <T
+      defaultValue="Seems wrong? Click the button below to gather logs, then send the generated zip file on the modding Discord in #help-using-mods."
+      keyName="error.reporting_directions"
+    />
+  </p>
+</section>
 <section class={`${sectionClass} overflow-y-auto`}>
   <p class="font-mono">{error}</p>
 </section>
@@ -68,14 +76,6 @@
     <p class="font-mono">Debug info not yet generated</p>
   </section>
 {/if}
-<section class={sectionClass}>
-  <p class={fullPageMode ? 'text-base text-center' : ''}>
-    <T
-      defaultValue="Seems wrong? Click the button below to gather logs, then send the generated zip file on the modding Discord in #help-using-mods."
-      keyName="error.reporting_directions"
-    />
-  </p>
-</section>
 <section class={sectionClass}>
   <p class={`text-base ${fullPageMode ? 'text-center' : ''}`}>
     <button
