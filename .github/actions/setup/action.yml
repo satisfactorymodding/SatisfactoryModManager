@@ -23,12 +23,12 @@ runs:
     - uses: pnpm/action-setup@v3
       if: ${{ inputs.frontend == 'true' }}
       with:
-        version: 8.6.1
+        version: 10
 
     - uses: actions/setup-node@v4
       if: ${{ inputs.frontend == 'true' }}
       with:
-        node-version: 20
+        node-version: 22
         cache: 'pnpm'
         cache-dependency-path: frontend
 
