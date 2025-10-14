@@ -184,16 +184,28 @@
         {#if displayMods.length === 0 && !fetchingMods && !filteringMods && $hasFetchedMods}
           <div class="flex flex-col h-full items-center justify-center">
             {#if mods.length !== 0}
-              <p class="text-xl text-center text-surface-400-700-token"><T defaultValue="No mods matching your filters" keyName="mods-list.no-mods-filtered"/></p>
-              <button
-                class="btn variant-filled-primary mt-4"
-                on:click={() => {
-                  $search = '';
-                  $filter = filterOptions[0];
-                }}
-              >
-                <T defaultValue="Show all" keyName="mods-list.show-all"/>
-              </button>
+              {#if $filter != filterOptions[0]}
+                <p class="text-xl text-center text-surface-400-700-token"><T defaultValue="No mods matching your filters" keyName="mods-list.no-mods-filtered"/></p>
+                <button
+                  class="btn variant-filled-primary mt-4"
+                  on:click={() => {
+                    $filter = filterOptions[0];
+                  }}
+                >
+                  <T defaultValue="Show all" keyName="mods-list.show-all"/>
+                </button>
+              {:else}
+                <p class="text-xl text-center text-surface-400-700-token"><T defaultValue="No mods matching your filters" keyName="mods-list.no-mods-filtered"/></p>
+                  <button
+                    class="btn variant-filled-primary mt-4"
+                    on:click={() => {
+                      $search = '';
+                      $filter = filterOptions[0];
+                    }}
+                  >
+                    <T defaultValue="Show all" keyName="mods-list.show-all"/>
+                  </button>
+              {/if}
             {:else}
               <p class="text-xl text-center text-surface-400-700-token"><T defaultValue="No mods found" keyName="mods-list.no-mods-found"/></p>
             {/if}
