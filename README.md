@@ -41,7 +41,7 @@ for common issues and their solutions.
 * [Go 1.22](https://go.dev/doc/install)
 * [pnpm](https://pnpm.io/installation)
 * [nodejs](https://nodejs.org/en/download/)
-* Wails (`go install github.com/wailsapp/wails/v2/cmd/wails@latest`)
+* Wails (`go install github.com/wailsapp/wails/v2/cmd/wails@latest`) (or the version in [the Setup CI action](./.github/actions/setup/action.yml))
 * IDE of Choice. Goland or VSCode suggested.
 
 ### Configuration
