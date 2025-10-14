@@ -196,15 +196,15 @@
                 </button>
               {:else}
                 <p class="text-xl text-center text-surface-400-700-token"><T defaultValue="No mods matching your search" keyName="mods-list.no-mods-filtered"/></p>
-                  <button
-                    class="btn variant-filled-primary mt-4"
-                    on:click={() => {
-                      $search = '';
-                      $filter = filterOptions[0];
-                    }}
-                  >
-                    <T defaultValue="Show all" keyName="mods-list.show-all"/>
-                  </button>
+                <button
+                  class="btn variant-filled-primary mt-4"
+                  on:click={() => {
+                    $search = '';
+                    $filter = filterOptions[0];
+                  }}
+                >
+                  <T defaultValue="Show all" keyName="mods-list.show-all"/>
+                </button>
               {/if}
             {:else}
               <p class="text-xl text-center text-surface-400-700-token"><T defaultValue="No mods found" keyName="mods-list.no-mods-found"/></p>
