@@ -82,6 +82,12 @@ while maintaining correct ESLint functionality.
 wails build
 ```
 
+To build a version that includes browser devtools (extending production debugging capabilities),:
+
+```bash
+wails build -devtools
+```
+
 ### Linting
 
 Install `golangci-lint` via the directions [in the Golangci-lint documentation](https://golangci-lint.run/docs/welcome/install/#local-installation),
