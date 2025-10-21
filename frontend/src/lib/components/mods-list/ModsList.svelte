@@ -186,14 +186,14 @@
             {#if mods.length !== 0}
               {#if $filter != filterOptions[0]}
                 {#if $search != ''}
-                    <p class="text-xl text-center text-surface-400-700-token"><T defaultValue="No mods matching your filters" keyName="mods-list.no-mods-filtered"/></p>
+                    <p class="text-xl text-center text-surface-400-700-token"><T defaultValue="No mods matching your search" keyName="mods-list.no-mods-filtered"/></p>
                     <button
                       class="btn variant-filled-primary mt-4"
                       on:click={() => {
                         $filter = filterOptions[0];
                       }}
                     >
-                      <T defaultValue="Remove filters" keyName="mods-list.test1"/>
+                      <T defaultValue="Remove search filters" keyName="mods-list.remove-search-filters"/>
                     </button>
                     <button
                       class="btn variant-filled-primary mt-4"
@@ -201,17 +201,17 @@
                         $search = '';
                       }}
                     >
-                      <T defaultValue="Remove search text" keyName="mods-list.test2"/>
+                      <T defaultValue="Remove search text" keyName="mods-list.remove-search-text"/>
                     </button>
                 {:else}
-                  <p class="text-xl text-center text-surface-400-700-token"><T defaultValue="No mods matching your filters" keyName="mods-list.no-mods-filtered"/></p>
+                  <p class="text-xl text-center text-surface-400-700-token"><T defaultValue="No mods matching your search" keyName="mods-list.no-mods-filtered"/></p>
                   <button
                     class="btn variant-filled-primary mt-4"
                     on:click={() => {
                       $filter = filterOptions[0];
                     }}
                   >
-                    <T defaultValue="Show all" keyName="mods-list.test3"/>
+                    <T defaultValue="Show all" keyName="mods-list.show-all"/>
                   </button>
                 {/if}
               {:else}
@@ -223,7 +223,7 @@
                     $filter = filterOptions[0];
                   }}
                 >
-                  <T defaultValue="Show all" keyName="mods-list.test4"/>
+                  <T defaultValue="Show all" keyName="mods-list.show-all"/>
                 </button>
               {/if}
             {:else}
