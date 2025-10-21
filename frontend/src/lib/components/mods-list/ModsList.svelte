@@ -185,15 +185,35 @@
           <div class="flex flex-col h-full items-center justify-center">
             {#if mods.length !== 0}
               {#if $filter != filterOptions[0]}
-                <p class="text-xl text-center text-surface-400-700-token"><T defaultValue="No mods matching your filters" keyName="mods-list.no-mods-filtered"/></p>
-                <button
-                  class="btn variant-filled-primary mt-4"
-                  on:click={() => {
-                    $filter = filterOptions[0];
-                  }}
-                >
-                  <T defaultValue="Show all" keyName="mods-list.show-all"/>
-                </button>
+                {#if $search != ''}
+                    <p class="text-xl text-center text-surface-400-700-token"><T defaultValue="No mods matching your filters" keyName="mods-list.no-mods-filtered"/></p>
+                    <button
+                      class="btn variant-filled-primary mt-4"
+                      on:click={() => {
+                        $filter = filterOptions[0];
+                      }}
+                    >
+                      <T defaultValue="Remove filters" keyName="mods-list.test1"/>
+                    </button>
+                    <button
+                      class="btn variant-filled-primary mt-4"
+                      on:click={() => {
+                        $search = '';
+                      }}
+                    >
+                      <T defaultValue="Remove search text" keyName="mods-list.test2"/>
+                    </button>
+                {:else}
+                  <p class="text-xl text-center text-surface-400-700-token"><T defaultValue="No mods matching your filters" keyName="mods-list.no-mods-filtered"/></p>
+                  <button
+                    class="btn variant-filled-primary mt-4"
+                    on:click={() => {
+                      $filter = filterOptions[0];
+                    }}
+                  >
+                    <T defaultValue="Show all" keyName="mods-list.test3"/>
+                  </button>
+                {/if}
               {:else}
                 <p class="text-xl text-center text-surface-400-700-token"><T defaultValue="No mods matching your search" keyName="mods-list.no-mods-filtered"/></p>
                 <button
@@ -203,7 +223,7 @@
                     $filter = filterOptions[0];
                   }}
                 >
-                  <T defaultValue="Show all" keyName="mods-list.show-all"/>
+                  <T defaultValue="Show all" keyName="mods-list.test4"/>
                 </button>
               {/if}
             {:else}
