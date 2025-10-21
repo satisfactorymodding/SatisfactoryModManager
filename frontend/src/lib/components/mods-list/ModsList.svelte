@@ -186,23 +186,23 @@
             {#if mods.length !== 0}
               {#if $filter != filterOptions[0]}
                 {#if $search != ''}
-                    <p class="text-xl text-center text-surface-400-700-token"><T defaultValue="No mods matching your search" keyName="mods-list.no-mods-filtered"/></p>
-                    <button
-                      class="btn variant-filled-primary mt-4"
-                      on:click={() => {
-                        $filter = filterOptions[0];
-                      }}
-                    >
-                      <T defaultValue="Remove search filters" keyName="mods-list.remove-search-filters"/>
-                    </button>
-                    <button
-                      class="btn variant-filled-primary mt-4"
-                      on:click={() => {
-                        $search = '';
-                      }}
-                    >
-                      <T defaultValue="Remove search text" keyName="mods-list.remove-search-text"/>
-                    </button>
+                  <p class="text-xl text-center text-surface-400-700-token"><T defaultValue="No mods matching your search" keyName="mods-list.no-mods-filtered"/></p>
+                  <button
+                    class="btn variant-filled-primary mt-4"
+                    on:click={() => {
+                      $filter = filterOptions[0];
+                    }}
+                  >
+                    <T defaultValue="Remove search filters" keyName="mods-list.remove-search-filters"/>
+                  </button>
+                  <button
+                    class="btn variant-filled-primary mt-4"
+                    on:click={() => {
+                      $search = '';
+                    }}
+                  >
+                    <T defaultValue="Remove search text" keyName="mods-list.remove-search-text"/>
+                  </button>
                 {:else}
                   <p class="text-xl text-center text-surface-400-700-token"><T defaultValue="No mods matching your search" keyName="mods-list.no-mods-filtered"/></p>
                   <button
