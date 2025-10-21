@@ -41,7 +41,7 @@ for common issues and their solutions.
 * [Go 1.22](https://go.dev/doc/install)
 * [pnpm](https://pnpm.io/installation)
 * [nodejs](https://nodejs.org/en/download/)
-* Wails (`go install github.com/wailsapp/wails/v2/cmd/wails@latest`)
+* Wails (`go install github.com/wailsapp/wails/v2/cmd/wails@latest`) (or the version in [the Setup CI action](./.github/actions/setup/action.yml))
 * IDE of Choice. Goland or VSCode suggested.
 
 ### Configuration
@@ -82,10 +82,16 @@ while maintaining correct ESLint functionality.
 wails build
 ```
 
+To build a version that includes browser devtools (extending production debugging capabilities),:
+
+```bash
+wails build -devtools
+```
+
 ### Linting
 
-Install `golangci-lint` via the directions [here](https://golangci-lint.run/usage/install/#local-installation),
-but make sure to install the version specified in `.github/workflows/push.yaml` instead of whatever it suggests.
+Install `golangci-lint` via the directions [in the Golangci-lint documentation](https://golangci-lint.run/docs/welcome/install/#local-installation),
+but make sure to install the version specified in [`.github/workflows/push.yaml`](./.github/workflows/push.yml) instead of whatever it suggests.
 
 Then, to run it, use:
 
@@ -107,7 +113,7 @@ SMM handles localization through the Tolgee Svelte integration.
 This allows for [in-context translation](https://tolgee.io/js-sdk/) - simply alt-click on a translatable element to open the Tolgee interface.
 
 In order to edit translations in-context, you will need to provide a tolgee API key with edit permissions.
-You can create an API key for yourself [here](https://translate.ficsit.app/projects/4/integrate) once you're added to the project.
+You can create an API key for yourself [in our Tolgee instance](https://translate.ficsit.app/projects/4/integrate) once you're added to the project.
 To supply this API key at development time, create or edit `/frontend/.env.local` and supply the key in a similar format as `.env`.
 
 The in-context translation screenshot feature requires installing the _Tolgee Tools_ browser extension.
