@@ -35,7 +35,7 @@ runs:
     - name: Install Wails
       if: ${{ inputs.backend == 'true' && inputs.skip-wails != 'true' }}
       shell: bash
-      run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.9.2
+      run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.10.2
 
     # Any go operation on linux will require these
     - name: Install additional dependencies
@@ -43,4 +43,4 @@ runs:
       shell: bash
       run: |
         sudo apt update
-        sudo apt -y install libgtk-3-dev libwebkit2gtk-4.1-dev patchelf
+        sudo apt -y install libgtk-3-dev libwebkit2gtk-4.1-dev patchelf librsvg2-dev
