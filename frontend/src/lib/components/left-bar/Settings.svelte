@@ -158,11 +158,22 @@
           modName = result.data.getModByReference.name;
         }
       }
-      return {
-        friendlyName: modName,
-        modReference,
-        version: $lockfileMods[modReference].version,
-      };
+
+      // Only return valid info if the mod is enabled
+      if(!$lockfileMods[modReference]) {
+        //How to enforce error handling?
+        return {
+          friendlyName: '',
+          modReference: '',
+          version: '',
+        };
+      } else {
+        return {
+          friendlyName: modName,
+          modReference,
+          version: $lockfileMods[modReference].version,
+        };
+      }
     }));
     // Sort by Friendly Name
     modList.sort((a, b) => {
