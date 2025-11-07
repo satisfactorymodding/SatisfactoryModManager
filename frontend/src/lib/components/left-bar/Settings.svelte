@@ -162,7 +162,7 @@
       // Only return valid info if the mod is enabled
       if(!$lockfileMods[modReference]) {
         //How to enforce error handling?
-        console.error('Tried to copy a disabled mod');
+        $error = `Tried to copy a disabled mod`;
         return {
           friendlyName: '',
           modReference: '',
