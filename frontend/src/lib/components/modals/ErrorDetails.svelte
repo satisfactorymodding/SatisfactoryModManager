@@ -75,7 +75,7 @@
   </section>
 {/if}
 <section class={`${sectionClass} overflow-y-auto`}>
-  <p class="font-mono">{error}</p>
+  <p class="font-mono whitespace-pre-line">{error}</p>
 </section>
 <section class={sectionClass}>
   <p class={`text-base ${fullPageMode ? 'text-center' : ''}`}>
