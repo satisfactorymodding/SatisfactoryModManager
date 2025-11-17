@@ -59,15 +59,6 @@
 <header class="card-header font-bold text-2xl text-center">
   <slot name="title" />
 </header>
-<section class={`${sectionClass} overflow-y-auto`}>
-  <p class="font-mono">{error}</p>
-</section>
-{#if !allowOpeningDiscord}
-  <section class={`${sectionClass} text-center`}>
-    <!-- This string intentionally not translated so Fred can always catch it! -->
-    <p class="font-mono">Debug info not yet generated</p>
-  </section>
-{/if}
 <section class={sectionClass}>
   <p class={fullPageMode ? 'text-base text-center' : ''}>
     <T
@@ -75,6 +66,16 @@
       keyName="error.reporting_directions"
     />
   </p>
+</section>
+{#if !allowOpeningDiscord}
+  <!-- "Bait" so FICSIT Fred bot can respond people who just send a screenshot of the error modal with no debug logs -->
+  <section class={`${sectionClass} text-center`}>
+    <!-- This string intentionally not translated so Fred can always catch it! -->
+    <p class="font-mono">Debug info not yet generated</p>
+  </section>
+{/if}
+<section class={`${sectionClass} overflow-y-auto`}>
+  <p class="font-mono">{error}</p>
 </section>
 <section class={sectionClass}>
   <p class={`text-base ${fullPageMode ? 'text-center' : ''}`}>
