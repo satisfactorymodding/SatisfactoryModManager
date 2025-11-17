@@ -105,6 +105,13 @@ You may also need to manually run the frontend linter. First, navigate to the `f
 pnpm run format
 ```
 
+### Assorted Development Helpers
+
+* Browser dev tools should automatically open when running `wails dev`.
+* You can open the URL the frontend is being served on in a browser to use browser extensions like the Svelte Devtools.
+  Check the logs for `Using DevServer URL:` to find the correct URL.
+* You can manually trigger an error popup for testing purposes by running `debugCauseErrorMessage("your message here")` in the devtools console.
+
 ### Localization
 
 If you'd like to help translate and localize SMM to different languages, join our [discord server](https://discord.ficsit.app/).

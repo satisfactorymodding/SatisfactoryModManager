@@ -122,6 +122,12 @@
     checkStart = $updateCheckMode === 'launch';
   }
 
+  // Allow triggering error modals from the dev console for testing
+  // @ts-expect-error This intentionally deviates from the `window` interface
+  window.debugCauseErrorMessage = (msg: string) => {
+    $error = `Manually triggered error message for debugging: ${msg}`;
+  };
+
   const smmUpdateInit = smmUpdate.isInit;
   $: if ($smmUpdateInit && checkStart) {
     checkStart = false;
