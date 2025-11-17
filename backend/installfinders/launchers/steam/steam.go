@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/andygrunwald/vdf"
 
@@ -107,8 +108,17 @@ func FindInstallationsSteam(steamPath string, launcher string, platform common.L
 
 				var branch common.GameBranch
 				userConfig := manifest["AppState"].(map[string]interface{})["UserConfig"].(map[string]interface{})
-				betakey, ok := userConfig["betakey"]
-				if !ok {
+
+				// Steam has changed the case of this field name multiple times. Find it case-insensitively.
+				var betakey string
+				for k, v := range userConfig {
+					if strings.EqualFold(k, "BetaKey") {
+						betakey = v.(string)
+						break
+					}
+				}
+
+				if betakey == "" || betakey == "public" {
 					branch = common.BranchStable
 				} else {
 					if betakey == "experimental" {
