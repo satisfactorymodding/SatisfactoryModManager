@@ -17,7 +17,7 @@ func FindInstallationsWine(winePrefix string, launcher string, launchPath []stri
 	platform := common.WineLauncherPlatform(winePrefix)
 
 	if _, err := os.Stat(platform.ProcessPath(steamWinePath)); os.IsNotExist(err) {
-		return nil, []error{fmt.Errorf("Steam is not installed in %s", winePrefix)}
+		return nil, []error{fmt.Errorf("steam is not installed in %s", winePrefix)}
 	}
 
 	return FindInstallationsSteam(

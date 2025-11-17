@@ -1,31 +1,33 @@
 module github.com/satisfactorymodding/SatisfactoryModManager
 
-go 1.22
+go 1.25.0
+
+toolchain go1.25.2
 
 require (
-	github.com/Masterminds/semver/v3 v3.2.1
+	github.com/Masterminds/semver/v3 v3.4.0
 	github.com/andygrunwald/vdf v1.1.0
 	github.com/godbus/dbus/v5 v5.1.0
-	github.com/kbinani/screenshot v0.0.0-20230812210009-b87d31814237
-	github.com/lmittmann/tint v1.0.3
+	github.com/kbinani/screenshot v0.0.0-20250624051815-089614a94018
+	github.com/lmittmann/tint v1.1.2
 	github.com/minio/selfupdate v0.6.0
 	github.com/mitchellh/go-ps v1.0.0
-	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8
-	github.com/puzpuzpuz/xsync/v3 v3.0.2
-	github.com/samber/lo v1.39.0
-	github.com/samber/slog-multi v1.0.2
-	github.com/satisfactorymodding/ficsit-cli v0.5.1-0.20241004172351-3640e5e70817
+	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
+	github.com/puzpuzpuz/xsync/v3 v3.5.1
+	github.com/samber/lo v1.52.0
+	github.com/samber/slog-multi v1.5.0
+	github.com/satisfactorymodding/ficsit-cli v0.6.1
 	github.com/satisfactorymodding/ficsit-resolver v0.0.6
-	github.com/shirou/gopsutil/v3 v3.24.3
-	github.com/spf13/viper v1.18.1
-	github.com/tawesoft/golib/v2 v2.10.0
-	github.com/wailsapp/go-webview2 v1.0.16
-	github.com/wailsapp/wails/v2 v2.9.2
+	github.com/shirou/gopsutil/v3 v3.24.5
+	github.com/spf13/viper v1.21.0
+	github.com/tawesoft/golib/v2 v2.16.0
+	github.com/wailsapp/go-webview2 v1.0.22
+	github.com/wailsapp/wails/v2 v2.10.2
 	github.com/zishang520/engine.io v1.5.12
 	github.com/zishang520/socket.io v1.3.2
-	golang.org/x/exp v0.0.0-20231214170342-aacd6d4b4611
-	golang.org/x/sync v0.6.0
-	golang.org/x/sys v0.22.0
+	golang.org/x/exp v0.0.0-20251009144603-d2f985daa21b
+	golang.org/x/sync v0.17.0
+	golang.org/x/sys v0.37.0
 	gopkg.in/ini.v1 v1.67.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	howett.net/plist v1.0.1
@@ -34,60 +36,58 @@ require (
 replace github.com/wailsapp/go-webview2 => github.com/satisfactorymodding/go-webview2 v0.0.0-20241013154424-330566cba2f0
 
 require (
-	aead.dev/minisign v0.2.1 // indirect
-	github.com/Khan/genqlient v0.6.0 // indirect
-	github.com/alessio/shellescape v1.4.1 // indirect
+	aead.dev/minisign v0.3.0 // indirect
+	github.com/Khan/genqlient v0.8.1 // indirect
+	github.com/alessio/shellescape v1.4.2 // indirect
 	github.com/andybalholm/brotli v1.0.6 // indirect
 	github.com/avast/retry-go v3.0.0+incompatible // indirect
 	github.com/bep/debounce v1.2.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
-	github.com/fsnotify/fsnotify v1.7.0 // indirect
-	github.com/gen2brain/shm v0.0.0-20230802011745-f2460f5984f7 // indirect
+	github.com/fsnotify/fsnotify v1.9.0 // indirect
+	github.com/gen2brain/shm v0.1.1 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
+	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/gookit/color v1.5.4 // indirect
-	github.com/gorilla/websocket v1.5.1 // indirect
+	github.com/gookit/color v1.6.0 // indirect
+	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
-	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
-	github.com/hashicorp/hcl v1.0.0 // indirect
-	github.com/jackc/puddle/v2 v2.2.1 // indirect
-	github.com/jchv/go-winloader v0.0.0-20210711035445-715c2860da7e // indirect
-	github.com/jezek/xgb v1.1.0 // indirect
+	github.com/jackc/puddle/v2 v2.2.2 // indirect
+	github.com/jchv/go-winloader v0.0.0-20250406163304-c1995be93bd1 // indirect
+	github.com/jezek/xgb v1.1.1 // indirect
 	github.com/jlaffaye/ftp v0.2.0 // indirect
 	github.com/kr/fs v0.1.0 // indirect
-	github.com/labstack/echo/v4 v4.11.3 // indirect
-	github.com/labstack/gommon v0.4.1 // indirect
+	github.com/labstack/echo/v4 v4.13.4 // indirect
+	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/leaanthony/go-ansi-parser v1.6.1 // indirect
-	github.com/leaanthony/gosod v1.0.3 // indirect
+	github.com/leaanthony/gosod v1.0.4 // indirect
 	github.com/leaanthony/slicer v1.6.0 // indirect
-	github.com/leaanthony/u v1.1.0 // indirect
+	github.com/leaanthony/u v1.1.1 // indirect
 	github.com/lxn/win v0.0.0-20210218163916-a377121e959e // indirect
-	github.com/magiconair/properties v1.8.7 // indirect
-	github.com/mattn/go-colorable v0.1.13 // indirect
+	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
+	github.com/mattn/go-runewidth v0.0.19 // indirect
 	github.com/mircearoata/pubgrub-go v0.3.4 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
-	github.com/ncruces/go-strftime v0.1.9 // indirect
-	github.com/pelletier/go-toml/v2 v2.1.1 // indirect
+	github.com/ncruces/go-strftime v1.0.0 // indirect
+	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/pkg/sftp v1.13.6 // indirect
+	github.com/pkg/sftp v1.13.9 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
-	github.com/pterm/pterm v0.12.72 // indirect
+	github.com/pterm/pterm v0.12.81 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
-	github.com/rivo/uniseg v0.4.4 // indirect
+	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
-	github.com/sagikazarmark/locafero v0.4.0 // indirect
-	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
-	github.com/sourcegraph/conc v0.3.0 // indirect
-	github.com/spf13/afero v1.11.0 // indirect
-	github.com/spf13/cast v1.6.0 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/sagikazarmark/locafero v0.12.0 // indirect
+	github.com/samber/slog-common v0.19.0 // indirect
+	github.com/spf13/afero v1.15.0 // indirect
+	github.com/spf13/cast v1.10.0 // indirect
+	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
-	github.com/tkrajina/go-reflector v0.5.6 // indirect
+	github.com/tkrajina/go-reflector v0.5.8 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
-	github.com/vektah/gqlparser/v2 v2.5.17 // indirect
+	github.com/vektah/gqlparser/v2 v2.5.30 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/wailsapp/mimetype v1.4.1 // indirect
@@ -95,16 +95,13 @@ require (
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	github.com/zishang520/engine.io-go-parser v1.2.3 // indirect
 	github.com/zishang520/socket.io-go-parser v1.0.4 // indirect
-	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/crypto v0.23.0 // indirect
-	golang.org/x/net v0.25.0 // indirect
-	golang.org/x/text v0.15.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
-	modernc.org/gc/v3 v3.0.0-20240107210532-573471604cb6 // indirect
-	modernc.org/libc v1.55.3 // indirect
-	modernc.org/mathutil v1.6.0 // indirect
-	modernc.org/memory v1.8.0 // indirect
-	modernc.org/sqlite v1.32.0 // indirect
-	modernc.org/strutil v1.2.0 // indirect
-	modernc.org/token v1.1.0 // indirect
+	go.yaml.in/yaml/v3 v3.0.4 // indirect
+	golang.org/x/crypto v0.43.0 // indirect
+	golang.org/x/net v0.46.0 // indirect
+	golang.org/x/text v0.30.0 // indirect
+	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
+	modernc.org/libc v1.66.10 // indirect
+	modernc.org/mathutil v1.7.1 // indirect
+	modernc.org/memory v1.11.0 // indirect
+	modernc.org/sqlite v1.39.1 // indirect
 )

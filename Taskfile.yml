@@ -65,7 +65,7 @@ tasks:
   lint:
     silent: true
     preconditions:
-      - golangci-lint --version | grep -q 1.61
+      - golangci-lint --version | grep -q 2.6
     cmds:
       - GOOS=windows  golangci-lint run
       - GOOS=linux    golangci-lint run
