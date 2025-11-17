@@ -38,10 +38,10 @@ for common issues and their solutions.
 
 ### Dependencies
 
-* [Go 1.25](https://go.dev/doc/install)
+* [Go](https://go.dev/doc/install) (the version in [the Setup CI action `go-version`](./.github/actions/setup/action.yml))
 * [pnpm](https://pnpm.io/installation)
-* [nodejs](https://nodejs.org/en/download/)
-* Wails (`go install github.com/wailsapp/wails/v2/cmd/wails@latest`) (or the version in [the Setup CI action](./.github/actions/setup/action.yml))
+* [nodejs](https://nodejs.org/en/download/) (the version in [the Setup CI action `node-version`](./.github/actions/setup/action.yml))
+* Wails (to install, execute the `run` command from [the Setup CI action's `Install Wails` step](./.github/actions/setup/action.yml))
 * IDE of Choice. Goland or VSCode suggested.
 
 ### Configuration
