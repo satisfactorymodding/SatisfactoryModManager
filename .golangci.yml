@@ -1,62 +1,70 @@
-linters-settings:
-  wrapcheck:
-    ignorePackageGlobs:
-      - github.com/satisfactorymodding/SatisfactoryModManager/*
-
-  govet:
-    enable-all: true
-    disable:
-      - shadow
-      - fieldalignment
-
-  gocritic:
-    disabled-checks:
-      - ifElseChain
-
-  gci:
-    custom-order: true
-    sections:
-      - standard
-      - default
-      - prefix(github.com/satisfactorymodding/SatisfactoryModManager)
-      - blank
-      - dot
-
-issues:
-  exclude-rules:
-    - linters:
-        - typecheck
-      text: "no matching files found"
-  exclude-dirs:
-    - frontend
-
+version: "2"
 run:
-  timeout: 5m
   build-tags:
     - webkit2_41
-
 linters:
-  disable-all: true
+  default: none
   enable:
-    - errcheck
-    - gosimple
-    - govet
-    - ineffassign
-    - staticcheck
-    - typecheck
-    - unused
     - bidichk
     - contextcheck
     - durationcheck
+    - errcheck
     - errorlint
     - goconst
-    - goimports
-    - revive
+    - gocritic
+    - govet
+    - ineffassign
     - misspell
+    - nonamedreturns
     - prealloc
+    - revive
+    - staticcheck
+    - unused
     - whitespace
     - wrapcheck
+  settings:
+    gocritic:
+      disabled-checks:
+        - ifElseChain
+    govet:
+      disable:
+        - shadow
+        - fieldalignment
+      enable-all: true
+    wrapcheck:
+      ignore-package-globs:
+        - github.com/satisfactorymodding/SatisfactoryModManager/*
+    revive:
+      rules:
+        - name: var-naming
+          arguments:
+            - [ ] # AllowList
+            - [ ] # DenyList
+            - - skip-package-name-checks: true
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - frontend
+formatters:
+  enable:
     - gci
-    - gocritic
     - gofumpt
-    - nonamedreturns
+    - goimports
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - prefix(github.com/satisfactorymodding/SatisfactoryModManager)
+        - blank
+        - dot
+      custom-order: true
+  exclusions:
+    generated: lax
+    paths:
+      - frontend

@@ -58,5 +58,5 @@ func main() {
 	}
 
 	_, _ = f.WriteString("# DO NOT EDIT - Generated automatically by build/windows/installer_version.go\n\n")
-	_, _ = f.WriteString(fmt.Sprintf("!define VI_VERSION \"%s\"\n", version))
+	_, _ = fmt.Fprintf(f, "!define VI_VERSION \"%s\"\n", version)
 }

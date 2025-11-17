@@ -12,8 +12,10 @@ import (
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 )
 
-var manifests = []string{"appmanifest_526870.acf", "appmanifest_1690800.acf"}
-var steamappsCasings = []string{"steamapps", "SteamApps"}
+var (
+	manifests        = []string{"appmanifest_526870.acf", "appmanifest_1690800.acf"}
+	steamappsCasings = []string{"steamapps", "SteamApps"}
+)
 
 func FindInstallationsSteam(steamPath string, launcher string, platform common.LauncherPlatform) ([]*common.Installation, []error) {
 	rawLibraryFolders := []string{steamPath}

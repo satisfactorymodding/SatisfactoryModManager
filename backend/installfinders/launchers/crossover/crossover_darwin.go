@@ -6,11 +6,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/launchers/epic"
 	"howett.net/plist"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/launchers"
+	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/launchers/epic"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/launchers/steam"
 )
 
