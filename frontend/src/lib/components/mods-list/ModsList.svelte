@@ -163,6 +163,16 @@
     }
   }
 
+  $: userHasSearchText = $search != '';
+  $: userHasSearchFilters = $filter != filterOptions[0];
+
+  const removeSearchText = () => {
+    $search = '';
+  };
+  const removeSearchFilters = () => {
+    $filter = filterOptions[0];
+  };
+
   export let hideMods: boolean = false;
 </script>
 
@@ -184,44 +194,33 @@
         {#if displayMods.length === 0 && !fetchingMods && !filteringMods && $hasFetchedMods}
           <div class="flex flex-col h-full items-center justify-center">
             {#if mods.length !== 0}
-              {#if $filter != filterOptions[0]}
-                {#if $search != ''}
-                  <p class="text-xl text-center text-surface-400-700-token"><T defaultValue="No mods matching your search" keyName="mods-list.no-mods-filtered"/></p>
+              <p class="text-xl text-center text-surface-400-700-token"><T defaultValue="No mods matching your search" keyName="mods-list.no-mods-filtered"/></p>
+              {#if userHasSearchFilters}
+                {#if userHasSearchText}
                   <button
                     class="btn variant-filled-primary mt-4"
-                    on:click={() => {
-                      $filter = filterOptions[0];
-                    }}
+                    on:click={removeSearchFilters}
                   >
                     <T defaultValue="Remove search filters" keyName="mods-list.remove-search-filters"/>
                   </button>
                   <button
                     class="btn variant-filled-primary mt-4"
-                    on:click={() => {
-                      $search = '';
-                    }}
+                    on:click={removeSearchText}
                   >
                     <T defaultValue="Remove search text" keyName="mods-list.remove-search-text"/>
                   </button>
                 {:else}
-                  <p class="text-xl text-center text-surface-400-700-token"><T defaultValue="No mods matching your search" keyName="mods-list.no-mods-filtered"/></p>
                   <button
                     class="btn variant-filled-primary mt-4"
-                    on:click={() => {
-                      $filter = filterOptions[0];
-                    }}
+                    on:click={removeSearchFilters}
                   >
                     <T defaultValue="Show all" keyName="mods-list.show-all"/>
                   </button>
                 {/if}
               {:else}
-                <p class="text-xl text-center text-surface-400-700-token"><T defaultValue="No mods matching your search" keyName="mods-list.no-mods-filtered"/></p>
                 <button
                   class="btn variant-filled-primary mt-4"
-                  on:click={() => {
-                    $search = '';
-                    $filter = filterOptions[0];
-                  }}
+                  on:click={removeSearchText}
                 >
                   <T defaultValue="Show all" keyName="mods-list.show-all"/>
                 </button>
