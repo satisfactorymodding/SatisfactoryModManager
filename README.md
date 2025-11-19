@@ -103,6 +103,7 @@ You may also need to manually run the frontend linter. First, navigate to the `f
 
 ```bash
 pnpm run format
+pnpm run check
 ```
 
 ### Assorted Development Helpers
