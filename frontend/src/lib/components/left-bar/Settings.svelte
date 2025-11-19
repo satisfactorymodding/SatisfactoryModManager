@@ -148,7 +148,7 @@
 
   async function copyModList() {
     // Generate mod entries
-    const modList = await Promise.all(Object.keys($manifestMods).map(async (modReference) => {
+    const modList = (await Promise.all(Object.keys($manifestMods).map(async (modReference) => {
       let modName = modReference;
       if($offline) {
         modName = (await OfflineGetMod(modReference)).name;
@@ -159,23 +159,17 @@
         }
       }
 
-      // Only return valid info if the mod is enabled
-      if(!$lockfileMods[modReference]) {
-        //How to enforce error handling?
-        $error = `Tried to copy a disabled mod`;
-        return {
-          friendlyName: '',
-          modReference: '',
-          version: '',
-        };
-      } else {
+      // Only return info if the mod is enabled
+      if($lockfileMods[modReference]) {
         return {
           friendlyName: modName,
           modReference,
           version: $lockfileMods[modReference].version,
         };
+      } else {
+        return undefined;
       }
-    }));
+    }))).filter((mod) => mod !== undefined);
     // Sort by Friendly Name
     modList.sort((a, b) => {
       const x = a.friendlyName.toLowerCase();
@@ -192,12 +186,18 @@
       mod.modReference = mod.modReference.padEnd(maxModReferenceLen, ' ');
       modListString += `${mod.friendlyName} ${mod.modReference} ${mod.version}\n`;
     });
-    navigator.clipboard.writeText(modListString.trim());
+    const markdownCodeblockFence = '```';
+    navigator.clipboard.writeText(`${markdownCodeblockFence}\n${modListString.trim()}\n${markdownCodeblockFence}`);
   }
 
   function localeName(locale: string) {
     if (!locale) return 'N/A';
     return new Intl.DisplayNames([locale], { type: 'language' }).of(locale);
+  }
+
+  // appease svelte "stores must be declared at the top of the file"
+  function displayError(err: unknown) {
+    $error = err;
   }
 
   $: if ($queueAutoStart && $queuedMods.length === 0 && $hasPendingProfileChange) {
@@ -348,7 +348,12 @@
       </li>
       <hr class="divider" />
       <li>
-        <button on:click={() => copyModList()}>
+        <button
+          on:click={() => {
+            copyModList().catch((error) => {
+              displayError(`failed to copy mod list: ${error}`);
+            });
+          }}>
           <span class="h-5 w-5"/>
           <span class="flex-auto">
             <T defaultValue="Copy mod list" keyName="settings.copy-mod-list"/>
