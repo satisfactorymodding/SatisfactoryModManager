@@ -16,7 +16,7 @@ func FindInstallationsWine(winePrefix string, launcher string, launchPath []stri
 	platform := common.WineLauncherPlatform(winePrefix)
 
 	if _, err := os.Stat(platform.ProcessPath(epicWineManifestPath)); os.IsNotExist(err) {
-		return nil, []error{fmt.Errorf("Epic is not installed in %s", winePrefix)}
+		return nil, []error{fmt.Errorf("epic is not installed in %s", winePrefix)}
 	}
 
 	return FindInstallationsEpic(

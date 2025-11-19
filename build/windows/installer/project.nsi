@@ -124,7 +124,13 @@ Section
 
     SetOutPath $INSTDIR
 
-    !insertmacro wails.files
+    ; The original wails.files assumes that wails.checkArchitecture ran,
+    ; meaning that it would have quit if the OS was ARM, since we only build an x86 binary
+    ; !insertmacro wails.files
+
+    !ifdef SUPPORTS_AMD64
+        File "/oname=${PRODUCT_EXECUTABLE}" "${ARG_WAILS_AMD64_BINARY}"
+    !endif
 
     !insertmacro wails.associateFiles
     !insertmacro wails.associateCustomProtocols

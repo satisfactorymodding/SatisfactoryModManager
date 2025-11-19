@@ -31,12 +31,10 @@ jobs:
           mkdir -p frontend/build
           echo "" > frontend/build/.gitkeep
 
-      - uses: golangci/golangci-lint-action@v4
+      - uses: golangci/golangci-lint-action@v8
         with:
-          version: v1.61
+          version: v2.6
           only-new-issues: true
-          skip-pkg-cache: true
-          skip-build-cache: true
           
   lint-frontend:
     runs-on: ubuntu-latest

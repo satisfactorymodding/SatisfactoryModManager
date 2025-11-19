@@ -38,10 +38,10 @@ for common issues and their solutions.
 
 ### Dependencies
 
-* [Go 1.22](https://go.dev/doc/install)
+* [Go](https://go.dev/doc/install) (the version in [the Setup CI action `go-version`](./.github/actions/setup/action.yml))
 * [pnpm](https://pnpm.io/installation)
-* [nodejs](https://nodejs.org/en/download/)
-* Wails (`go install github.com/wailsapp/wails/v2/cmd/wails@latest`) (or the version in [the Setup CI action](./.github/actions/setup/action.yml))
+* [nodejs](https://nodejs.org/en/download/) (the version in [the Setup CI action `node-version`](./.github/actions/setup/action.yml))
+* Wails (to install, execute the `run` command from [the Setup CI action's `Install Wails` step](./.github/actions/setup/action.yml))
 * IDE of Choice. Goland or VSCode suggested.
 
 ### Configuration
@@ -104,6 +104,13 @@ You may also need to manually run the frontend linter. First, navigate to the `f
 ```bash
 pnpm run format
 ```
+
+### Assorted Development Helpers
+
+* Browser dev tools should automatically open when running `wails dev`.
+* You can open the URL the frontend is being served on in a browser to use browser extensions like the Svelte Devtools.
+  Check the logs for `Using DevServer URL:` to find the correct URL.
+* You can manually trigger an error popup for testing purposes by running `debugCauseErrorMessage("your message here")` in the devtools console.
 
 ### Localization
 

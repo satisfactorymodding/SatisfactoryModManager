@@ -58,6 +58,7 @@
         setupError = null;
       } catch (e) {
         setupError = e as string;
+        pendingValidCheck = false;
       }
     }
   // TODO: handle errors

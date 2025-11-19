@@ -22,10 +22,26 @@ export const modActionsQueue = queue((task: () => Promise<unknown>, cb) => {
   task().then(() => complete()).catch(complete);
 });
 
-modActionsQueue.drain(() => {
+const queueDrainedCallbacks: (() => void)[] = [];
+
+export function onQueueFinished(cb: () => void) {
+  queueDrainedCallbacks.push(cb);
+  return () => {
+    const index = queueDrainedCallbacks.indexOf(cb);
+    if(index !== -1) {
+      queueDrainedCallbacks.splice(index, 1);
+    }
+  };
+}
+
+onQueueFinished(() => {
   if(!get(queueAutoStart)) {
     modActionsQueue.pause();
   }
+});
+
+modActionsQueue.drain(() => {
+  queueDrainedCallbacks.forEach((cb) => cb());
 });
 
 queueAutoStart.subscribe((val) => {
