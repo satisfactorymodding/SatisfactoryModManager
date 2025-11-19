@@ -171,20 +171,21 @@
       }
     }))).filter((mod) => mod !== undefined);
     // Sort by Friendly Name
+    // TODO Once we upgrade to Typescript 5.5 we don't need the non-null assertion operators https://stackoverflow.com/a/78681671
     modList.sort((a, b) => {
-      const x = a.friendlyName.toLowerCase();
-      const y = b.friendlyName.toLowerCase();
+      const x = a!.friendlyName.toLowerCase();
+      const y = b!.friendlyName.toLowerCase();
       return x.localeCompare(y);
     });
     // Get max lengths to use for padding
-    const maxFriendlyNameLen = Math.max(...modList.map((mod) => mod.friendlyName.length));
-    const maxModReferenceLen = Math.max(...modList.map((mod) => mod.modReference.length));
+    const maxFriendlyNameLen = Math.max(...modList.map((mod) => mod!.friendlyName.length));
+    const maxModReferenceLen = Math.max(...modList.map((mod) => mod!.modReference.length));
     // Create header and add all mods to string
     let modListString = `${'Mod Name'.padEnd(maxFriendlyNameLen + 1) + 'Mod Reference'.padEnd(maxModReferenceLen + 1)}Version\n`;
     modList.forEach((mod) => {
-      mod.friendlyName = mod.friendlyName.padEnd(maxFriendlyNameLen, ' ');
-      mod.modReference = mod.modReference.padEnd(maxModReferenceLen, ' ');
-      modListString += `${mod.friendlyName} ${mod.modReference} ${mod.version}\n`;
+      mod!.friendlyName = mod!.friendlyName.padEnd(maxFriendlyNameLen, ' ');
+      mod!.modReference = mod!.modReference.padEnd(maxModReferenceLen, ' ');
+      modListString += `${mod!.friendlyName} ${mod!.modReference} ${mod!.version}\n`;
     });
     const markdownCodeblockFence = '```';
     navigator.clipboard.writeText(`${markdownCodeblockFence}\n${modListString.trim()}\n${markdownCodeblockFence}`);
@@ -196,7 +197,7 @@
   }
 
   // appease svelte "stores must be declared at the top of the file"
-  function displayError(err: unknown) {
+  function displayError(err: string) {
     $error = err;
   }
 
