@@ -124,6 +124,13 @@
     target: installOptionPopupId(i),
     middleware: {
       offset: 4,
+      size: {
+        apply: ({ availableWidth, elements }: { availableWidth: number, elements: { floating: HTMLElement } }) => {
+          Object.assign(elements.floating.style, {
+            maxWidth: `${Math.max(0, availableWidth)}px`,
+          });
+        },
+      },
     },
     placement: 'right',
   } as PopupSettings]).reduce((acc, [k, v]) => ({ ...acc, [k as string]: v as PopupSettings }), {} as Record<string, PopupSettings>);
@@ -199,7 +206,7 @@
           <svelte:fragment slot="itemTrail" let:item>
             <Tooltip fixed popupId={installOptionPopupId(item)}>
               <div class="flex flex-col">
-                <span>{item}</span>
+                <span class="break-words">{item}</span>
                 {#if $installsMetadata[item]?.state === ficsitcli.InstallState.VALID}
                   <!-- nothing extra -->
                 {:else if $installsMetadata[item]?.state === ficsitcli.InstallState.LOADING}
