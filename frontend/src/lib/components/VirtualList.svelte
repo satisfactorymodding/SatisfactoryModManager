@@ -72,7 +72,7 @@
       style="transform: translateY({vitems[0]
         ? vitems[0].start - $virtualizerUpdateWrapper.options.scrollMargin
         : 0}px);"
-      class="absolute top-0 left-0 w-full overflow-hidden"
+      class="absolute top-0 left-0 w-full overflow-hidden min-h-full"
     >
       {#each vitems as row, idx (row.index)}
         <div
