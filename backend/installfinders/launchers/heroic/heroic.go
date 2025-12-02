@@ -75,6 +75,14 @@ func getHeroicKnownWinePrefixes(xdgConfigHomeEnv string) (map[string]string, err
 				continue
 			}
 
+			wineVersion, ok := gameData["wineVersion"].(map[string]interface{})
+			if ok {
+				wineType, ok := wineVersion["type"].(string)
+				if ok && wineType == "proton" {
+					prefix = filepath.Join(prefix, "pfx")
+				}
+			}
+
 			knownPrefixes[gameID] = prefix
 		}
 	}
