@@ -199,6 +199,10 @@ func addMetadata(writer *zip.Writer) error {
 		SMLVersion:           smlVersion,
 	}
 
+	if selectedInstallInstance != nil {
+		metadata.ModsEnabled = !selectedInstallInstance.Vanilla
+	}
+
 	metadataBytes, err := utils.JSONMarshal(metadata, 2)
 	if err != nil {
 		return fmt.Errorf("failed to marshal metadata: %w", err)
