@@ -114,11 +114,8 @@ function checkTargetCompatibility(
   const hasAllClient = clientRequiredTargets.length > 0 && unsupportedClientTargets.length === 0;
   const hasAllServer = serverRequiredTargets.length > 0 && unsupportedServerTargets.length === 0;
 
-  if (hasAllClient) {
-    return unsupportedServerTargets;
-  }
-  if (hasAllServer) {
-    return unsupportedClientTargets;
+  if (hasAllClient || hasAllServer) {
+    return [];
   }
   return [...unsupportedClientTargets, ...unsupportedServerTargets];
 }
