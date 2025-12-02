@@ -1,6 +1,6 @@
 <script lang="ts">
   import { getContextClient, queryStore } from '@urql/svelte';
-  import { gt, lte } from 'semver';
+  import { coerce, gt, lte } from 'semver';
 
   import Markdown from '$lib/components/Markdown.svelte';
   import T, { translationElementPart } from '$lib/components/T.svelte';
@@ -31,7 +31,11 @@
     if(typeof versionRange === 'string') {
       return version === versionRange;
     } else {
-      return gt(version, versionRange.from) && lte(version, versionRange.to);
+      const coercedVersion = coerce(version);
+      if(!coercedVersion) {
+        return false;
+      }
+      return gt(coercedVersion, versionRange.from) && lte(coercedVersion, versionRange.to);
     }
   }
 
