@@ -23,7 +23,7 @@ export interface Filter {
 }
 
 export const orderByOptions: OrderBy[] = [
-  { id: 'name', func: (mod: PartialMod) => mod.name.trim() },
+  { id: 'name', func: (mod: PartialMod) => mod.name.trim().toLowerCase() },
   { id: 'last-updated', func: (mod: PartialMod) => 'last_version_date' in mod ? Date.now() - Date.parse(mod.last_version_date) : 0 },
   { id: 'popularity', func: (mod: PartialMod) => 'popularity' in mod ? -mod.popularity : 0 },
   { id: 'hotness', func: (mod: PartialMod) => 'hotness' in mod ? -mod.hotness : 0 },
