@@ -1,10 +1,13 @@
 package logging
 
 import (
+	"io"
+	"log"
 	"log/slog"
 	"os"
 	"time"
 
+	"github.com/jezek/xgb"
 	"github.com/lmittmann/tint"
 	slogmulti "github.com/samber/slog-multi"
 	"github.com/spf13/viper"
@@ -14,6 +17,8 @@ import (
 )
 
 func Init() {
+	xgb.Logger = log.New(io.Discard, "", 0)
+
 	handlers := make([]slog.Handler, 0)
 
 	if _, err := os.Stdout.Stat(); err == nil {
