@@ -15,12 +15,13 @@ jobs:
       matrix:
         platform:
           - os: linux
-            runs-on: ubuntu-latest
+            runs-on: ubuntu-24.04
           - os: windows
-            runs-on: windows-latest
+            # Using windows-2022 for now because NSIS is missing on windows-2025 runners
+            runs-on: windows-2022
             goreleaser_args: "-p 1" # Wails packaging for windows cannot handle parallel builds
           - os: darwin
-            runs-on: macos-latest
+            runs-on: macos-15
             goreleaser_args: "-p 1" # Wails packaging for darwin cannot handle parallel builds
     runs-on: ${{ matrix.platform.runs-on }}
     steps:
