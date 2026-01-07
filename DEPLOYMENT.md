@@ -16,11 +16,14 @@ TODO how to point dev builds to ficsit.dev (staging) instead?
 To create a new published release:
 
 1. Ensure all intended changes are merged into the `master` branch.
-2. Make a `Bump version` commit on the master branch to increase the `productVersion` field in `wails.json`. Version numbers should follow [Semantic Versioning](https://semver.org/).
-3. Manually create and push a tag of the format `v*` to that commit, which triggers a [GitHub Action to make a release](https://github.com/satisfactorymodding/SatisfactoryModManager/blob/master/.github/workflows/release.yml).
-4. Have someone on the Satisfactory Modding team with Signpath access approve the release.
+2. Ensure someone with Signpath access is around to approve the release in the next few minutes.
    At the time of writing, that's Vilsol and Mircea.
-5. Review the draft release automatically created by Goreleaser and edit its description as needed.
-6. Publish the release.
+3. Make a `Bump version` commit on the master branch to increase the `productVersion` field in `wails.json`. Version numbers should follow [Semantic Versioning](https://semver.org/).
+4. Manually create and push a tag of the format `v*` to that commit, which triggers a
+   [GitHub Action to make a release](https://github.com/satisfactorymodding/SatisfactoryModManager/blob/master/.github/workflows/release.yml).
+5. The action will automatically request signing approval, sending an email to approvers and including the link in the action output.
+   The action will busy-wait until approval is granted.
+6. Review the draft release automatically created by Goreleaser and edit its description as needed.
+7. Publish the release.
 
 Users will automatically be prompted to update next time they launch SMM.
