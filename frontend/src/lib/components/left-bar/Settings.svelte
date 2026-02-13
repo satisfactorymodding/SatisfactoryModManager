@@ -22,7 +22,6 @@
     queueAutoStart,
     saveWindowPosition,
     startView,
-    tagSearchMode,
     updateCheckMode,
     version,
   } from '$lib/store/settingsStore';
@@ -61,27 +60,6 @@
     {
       id: 'expanded',
       name: $t('settings.start-view.expanded', 'Expanded'),
-    },
-  ];
-
-  const tagSearchModeMenu = {
-    event: 'click',
-    target: 'tag-search-mode-menu',
-    middleware: {
-      offset: 4,
-    },
-    placement: 'right-start',
-    closeQuery: '[data-popup="tag-search-mode-menu"] .listbox-item',
-  } satisfies PopupSettings;
-
-  $: tagSearchModes = [
-    {
-      id: 'any' as const,
-      name: $t('settings.tag-search.any', 'Match any'),
-    },
-    {
-      id: 'and' as const,
-      name: $t('settings.tag-search.and', 'Match all'),
     },
   ];
 
@@ -299,27 +277,6 @@
       </ListBox>
     </ul>
   </div>
-  <div class="card shadow-xl w-48 z-10 duration-0 overflow-y-auto" data-popup="tag-search-mode-menu">
-    <ul class="menu">
-      <ListBox class="w-full" rounded="rounded-none" spacing="space-y-0">
-        {#each tagSearchModes as item}
-          <ListBoxItem
-            name="tag-search-mode"
-            class="bg-surface-50-900-token"
-            active=""
-            value={item.id}
-            bind:group={$tagSearchMode}>
-            {item.name}
-            <span slot="trail" class="h-5 w-5 block">
-              {#if $tagSearchMode === item.id}
-                <SvgIcon class="h-full w-full" icon={mdiCheck}/>
-              {/if}
-            </span>
-          </ListBoxItem>
-        {/each}
-      </ListBox>
-    </ul>
-  </div>
   <div class="card shadow-xl w-48 z-10 duration-0 overflow-y-auto" data-popup="launch-button-menu">
     <ul class="menu">
       <ListBox class="w-full" rounded="rounded-none" spacing="space-y-0">
@@ -465,19 +422,6 @@
             <T defaultValue="Start view" keyName="settings.start-view"/>
           </span>
           <span>{views.find((m) => m.id === $startView)?.name}</span>
-          <span class="h-5 w-5">
-            <SvgIcon class="h-full w-full" icon={mdiChevronRight}/>
-          </span>
-        </button>
-      </li>
-      <hr class="divider" />
-      <li data-noclose use:popup={tagSearchModeMenu}>
-        <button>
-          <span class="h-5 w-5"/>
-          <span class="flex-auto">
-            <T defaultValue="Tag search" keyName="settings.tag-search"/>
-          </span>
-          <span>{tagSearchModes.find((m) => m.id === $tagSearchMode)?.name}</span>
           <span class="h-5 w-5">
             <SvgIcon class="h-full w-full" icon={mdiChevronRight}/>
           </span>

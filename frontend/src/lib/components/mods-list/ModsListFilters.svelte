@@ -7,6 +7,7 @@
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import Select from '$lib/components/Select.svelte';
   import { type FilterField, type OrderByField, type TagOption, filter, filterOptions, order, orderByOptions, search, selectedTags } from '$lib/store/modFiltersStore';
+  import { tagSearchMode } from '$lib/store/settingsStore';
   import { type PopupSettings, popup } from '$lib/skeletonExtensions';
 
   export let availableTags: TagOption[] = [];
@@ -97,30 +98,57 @@
       </button>
     </div>
     <div
-      class="card min-w-[10rem] max-h-64 overflow-y-auto shadow-xl z-10 duration-0 !mt-0 hidden opacity-0 pointer-events-none inert"
+      class="card min-w-[24rem] max-h-96 shadow-xl z-10 duration-0 !mt-0 hidden opacity-0 pointer-events-none inert flex flex-col"
       data-popup={tagPopupName}
       role="listbox"
       aria-multiselectable="true"
     >
-      {#each availableTags as tag}
+      <div
+        class="flex items-center gap-2 px-3 py-2 border-b border-surface-400-600-token shrink-0"
+        role="group"
+        aria-label={$t('mods-list-filter.tag.match-mode', 'Match mode')}
+      >
         <button
           type="button"
-          class="w-full text-left px-3 py-2 text-sm transition-colors rounded-none {selectedTagIds.has(tag.id) ? 'bg-surface-300/20' : 'bg-surface-50-900-token hover:!bg-surface-300/20'} flex items-center gap-2"
-          role="option"
-          aria-selected={selectedTagIds.has(tag.id)}
-          on:click={() => toggleTag(tag)}
+          class="flex-1 px-3 py-1.5 text-sm rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 {$tagSearchMode === 'and' ? 'text-primary-600 font-medium bg-surface-300/20' : 'text-surface-400-700-token hover:bg-surface-300/20'}"
+          aria-pressed={$tagSearchMode === 'and'}
+          on:click|stopPropagation={() => tagSearchMode.set('and')}
         >
-          {#if selectedTagIds.has(tag.id)}
-            <span class="text-primary-600 font-medium" aria-hidden="true">✓</span>
-          {/if}
-          <span class="{selectedTagIds.has(tag.id) ? 'font-medium' : ''}">{tag.name}</span>
+          {$t('mods-list-filter.tag.match-all', 'Match all')}
         </button>
-      {/each}
-      {#if availableTags.length === 0}
-        <div class="px-3 py-2 text-sm text-surface-400-600-token">
-          {$t('mods-list-filter.tag.none-available', 'No tags available')}
-        </div>
-      {/if}
+        <button
+          type="button"
+          class="flex-1 px-3 py-1.5 text-sm rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 {$tagSearchMode === 'any' ? 'text-primary-600 font-medium bg-surface-300/20' : 'text-surface-400-700-token hover:bg-surface-300/20'}"
+          aria-pressed={$tagSearchMode === 'any'}
+          on:click|stopPropagation={() => tagSearchMode.set('any')}
+        >
+          {$t('mods-list-filter.tag.match-any', 'Match any')}
+        </button>
+      </div>
+      <div class="overflow-y-auto min-h-0 flex-1">
+        {#if availableTags.length > 0}
+          <div class="columns-3 [column-gap:0.5rem] min-h-0 p-2">
+            {#each availableTags as tag}
+              <button
+                type="button"
+                class="w-full text-left px-3 py-2 text-sm transition-colors rounded-none {selectedTagIds.has(tag.id) ? 'bg-surface-300/20' : 'bg-surface-50-900-token hover:!bg-surface-300/20'} flex items-center gap-2 break-inside-avoid"
+                role="option"
+                aria-selected={selectedTagIds.has(tag.id)}
+                on:click={() => toggleTag(tag)}
+              >
+                {#if selectedTagIds.has(tag.id)}
+                  <span class="text-primary-600 font-medium" aria-hidden="true">✓</span>
+                {/if}
+                <span class="{selectedTagIds.has(tag.id) ? 'font-medium' : ''}">{tag.name}</span>
+              </button>
+            {/each}
+          </div>
+        {:else}
+          <div class="px-3 py-2 text-sm text-surface-400-600-token">
+            {$t('mods-list-filter.tag.none-available', 'No tags available')}
+          </div>
+        {/if}
+      </div>
     </div>
   </div>
   <Select
