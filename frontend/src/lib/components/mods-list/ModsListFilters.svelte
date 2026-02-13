@@ -6,9 +6,9 @@
   import Marquee from '$lib/components/Marquee.svelte';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import Select from '$lib/components/Select.svelte';
+  import { type PopupSettings, popup } from '$lib/skeletonExtensions';
   import { type FilterField, type OrderByField, type TagOption, filter, filterOptions, order, orderByOptions, search, selectedTags } from '$lib/store/modFiltersStore';
   import { tagSearchMode } from '$lib/store/settingsStore';
-  import { type PopupSettings, popup } from '$lib/skeletonExtensions';
 
   export let availableTags: TagOption[] = [];
   $: selectedTagIds = new Set($selectedTags.map((t) => t.id));
@@ -16,7 +16,7 @@
     $selectedTags = $selectedTags.filter((t) => availableTags.some((a) => a.id === t.id));
   }
 
-  let tagPopupOpen = false;
+  let _tagPopupOpen = false;
   const tagPopupName = 'modsTagFilter';
   const tagPopup: PopupSettings = {
     event: 'click',
@@ -34,7 +34,7 @@
       } as SizeOptions,
       shift: { padding: 0 },
     },
-    state: ({ state }) => (tagPopupOpen = state),
+    state: ({ state }) => (_tagPopupOpen = state),
   };
 
   function toggleTag(tag: TagOption) {
@@ -86,9 +86,9 @@
   <div class="relative !h-full">
     <div class="h-full w-full" use:popup={tagPopup}>
       <button
-        type="button"
         class="btn px-2 text-sm space-x-1 !h-full"
         aria-label={$t('mods-list-filter.tag.button-label', 'Filter by tags')}
+        type="button"
         on:contextmenu|preventDefault={() => ($selectedTags = [])}
       >
         <SvgIcon class="h-5 w-5 shrink-0" icon={mdiTagMultiple} />
@@ -99,27 +99,27 @@
     </div>
     <div
       class="card min-w-[24rem] max-h-96 shadow-xl z-10 duration-0 !mt-0 hidden opacity-0 pointer-events-none inert flex flex-col"
+      aria-multiselectable="true"
       data-popup={tagPopupName}
       role="listbox"
-      aria-multiselectable="true"
     >
       <div
         class="flex items-center gap-2 px-3 py-2 border-b border-surface-400-600-token shrink-0"
-        role="group"
         aria-label={$t('mods-list-filter.tag.match-mode', 'Match mode')}
+        role="group"
       >
         <button
-          type="button"
           class="flex-1 px-3 py-1.5 text-sm rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 {$tagSearchMode === 'and' ? 'text-primary-600 font-medium bg-surface-300/20' : 'text-surface-400-700-token hover:bg-surface-300/20'}"
           aria-pressed={$tagSearchMode === 'and'}
+          type="button"
           on:click|stopPropagation={() => tagSearchMode.set('and')}
         >
           {$t('mods-list-filter.tag.match-all', 'Match all')}
         </button>
         <button
-          type="button"
           class="flex-1 px-3 py-1.5 text-sm rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 {$tagSearchMode === 'any' ? 'text-primary-600 font-medium bg-surface-300/20' : 'text-surface-400-700-token hover:bg-surface-300/20'}"
           aria-pressed={$tagSearchMode === 'any'}
+          type="button"
           on:click|stopPropagation={() => tagSearchMode.set('any')}
         >
           {$t('mods-list-filter.tag.match-any', 'Match any')}
@@ -130,10 +130,10 @@
           <div class="columns-3 [column-gap:0.5rem] min-h-0 p-2">
             {#each availableTags as tag}
               <button
-                type="button"
                 class="w-full text-left px-3 py-2 text-sm transition-colors rounded-none {selectedTagIds.has(tag.id) ? 'bg-surface-300/20' : 'bg-surface-50-900-token hover:!bg-surface-300/20'} flex items-center gap-2 break-inside-avoid"
-                role="option"
                 aria-selected={selectedTagIds.has(tag.id)}
+                role="option"
+                type="button"
                 on:click={() => toggleTag(tag)}
               >
                 {#if selectedTagIds.has(tag.id)}

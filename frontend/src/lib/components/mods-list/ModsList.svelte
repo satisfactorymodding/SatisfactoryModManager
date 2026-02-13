@@ -15,7 +15,7 @@
   import { favoriteMods, lockfileMods, manifestMods, selectedProfileTargets } from '$lib/store/ficsitCLIStore';
   import { expandedMod, hasFetchedMods } from '$lib/store/generalStore';
   import { type OfflineMod, type PartialMod, type TagOption, filter, filterOptions, order, search, selectedTags } from '$lib/store/modFiltersStore';
-  import { offline, tagSearchMode, startView } from '$lib/store/settingsStore';
+  import { offline, startView, tagSearchMode } from '$lib/store/settingsStore';
   import { OfflineGetMods } from '$wailsjs/go/ficsitcli/ficsitCLI';
 
   const dispatch = createEventDispatcher();
