@@ -14,8 +14,8 @@
   import { queuedMods } from '$lib/store/actionQueue';
   import { favoriteMods, lockfileMods, manifestMods, selectedProfileTargets } from '$lib/store/ficsitCLIStore';
   import { expandedMod, hasFetchedMods } from '$lib/store/generalStore';
-  import { type OfflineMod, type PartialMod, filter, filterOptions, order, search } from '$lib/store/modFiltersStore';
-  import { offline, startView } from '$lib/store/settingsStore';
+  import { type OfflineMod, type PartialMod, type TagOption, filter, filterOptions, order, search, selectedTags } from '$lib/store/modFiltersStore';
+  import { offline, tagSearchMode, startView } from '$lib/store/settingsStore';
   import { OfflineGetMods } from '$wailsjs/go/ficsitcli/ficsitCLI';
 
   const dispatch = createEventDispatcher();
@@ -92,6 +92,18 @@
 
   $: mods = [...knownMods, ...unknownMods];
 
+  $: availableTags = ((): TagOption[] => {
+    const tagNames = new Set<string>();
+    for (const mod of knownMods) {
+      if ('tags' in mod && mod.tags) {
+        for (const t of mod.tags) {
+          tagNames.add(t.name);
+        }
+      }
+    }
+    return [...tagNames].sort((a, b) => a.localeCompare(b)).map((name) => ({ id: name, name }));
+  })();
+
   let filteredMods: PartialMod[] = [];
   let filteringMods = false;
   $: {
@@ -121,13 +133,26 @@
     sortedMods = _.sortBy(filteredMods, $order.func) as PartialMod[];
   }
 
+  $: selectedTagIds = new Set($selectedTags.map((t) => t.id));
+  $: tagFilteredMods = (() => {
+    if (selectedTagIds.size === 0) return sortedMods;
+    return sortedMods.filter((mod) => {
+      if (!('tags' in mod) || !mod.tags) return false;
+      const modTagNames = new Set(mod.tags.map((t) => t.name));
+      if ($tagSearchMode === 'and') {
+        return [...selectedTagIds].every((id) => modTagNames.has(id));
+      }
+      return [...selectedTagIds].some((id) => modTagNames.has(id));
+    });
+  })();
+
   let displayMods: PartialMod[] = [];
   $: if(!$search) {
-    displayMods = sortedMods;
+    displayMods = tagFilteredMods;
   } else {
     const modifiedSearchString = $search.replace(/(?:author:"(.+?)"|author:([^\s"]+))/g, '="$1$2"');
     
-    const fuse = new Fuse(sortedMods, {
+    const fuse = new Fuse(tagFilteredMods, {
       keys: [
         {
           name: 'name',
@@ -165,12 +190,14 @@
 
   $: userHasSearchText = $search != '';
   $: userHasSearchFilters = $filter != filterOptions[0];
+  $: userHasTagFilter = $selectedTags.length > 0;
 
   const removeSearchText = () => {
     $search = '';
   };
   const removeSearchFilters = () => {
     $filter = filterOptions[0];
+    $selectedTags = [];
   };
 
   export let hideMods: boolean = false;
@@ -178,7 +205,7 @@
 
 <div class="h-full flex flex-col">
   <div class="flex-none z-[1]">
-    <ModListFilters />
+    <ModListFilters {availableTags} />
   </div>
   <AnnouncementsBar />
   {#if hideMods}
@@ -195,7 +222,7 @@
           <div class="flex flex-col h-full items-center justify-center">
             {#if mods.length !== 0}
               <p class="text-xl text-center text-surface-400-700-token"><T defaultValue="No mods matching your search" keyName="mods-list.no-mods-filtered"/></p>
-              {#if userHasSearchFilters}
+              {#if userHasSearchFilters || userHasTagFilter}
                 {#if userHasSearchText}
                   <button
                     class="btn variant-filled-primary mt-4"

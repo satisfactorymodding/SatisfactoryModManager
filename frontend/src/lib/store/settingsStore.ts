@@ -10,6 +10,7 @@ import {
   GetKonami,
   GetLanguage,
   GetLaunchButton,
+  GetModFiltersTagSearchMode,
   GetProxy,
   GetQueueAutoStart,
   GetRestoreWindowPosition,
@@ -21,6 +22,7 @@ import {
   SetKonami,
   SetLanguage,
   SetLaunchButton,
+  SetModFiltersTagSearchMode,
   SetProxy,
   SetQueueAutoStart, SetRestoreWindowPosition,
   SetStartView,
@@ -28,6 +30,13 @@ import {
 } from '$wailsjs/go/settings/settings';
 
 export const startView = bindingTwoWayNoExcept<ViewType | null>(null, { initialGet: GetStartView }, { updateFunction: SetStartView });
+
+export type TagSearchMode = 'any' | 'and';
+export const tagSearchMode = bindingTwoWayNoExcept<TagSearchMode>(
+  'any',
+  { initialGet: () => GetModFiltersTagSearchMode().then((m) => (m === 'and' ? 'and' : 'any')) },
+  { updateFunction: SetModFiltersTagSearchMode },
+);
 
 export const saveWindowPosition = bindingTwoWayNoExcept(true, { initialGet: GetRestoreWindowPosition }, { updateFunction: SetRestoreWindowPosition });
 

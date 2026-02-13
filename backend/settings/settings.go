@@ -16,8 +16,9 @@ import (
 )
 
 type SavedModFilters struct {
-	Order  string `json:"order"`
-	Filter string `json:"filter"`
+	Order         string `json:"order"`
+	Filter        string `json:"filter"`
+	TagSearchMode string `json:"tagSearchMode,omitempty"` // "any" or "and"
 }
 
 type View string
@@ -83,8 +84,9 @@ var Settings = &settings{
 
 	FavoriteMods: []string{},
 	ModFilters: SavedModFilters{
-		Order:  "last-updated",
-		Filter: "compatible",
+		Order:         "last-updated",
+		Filter:        "compatible",
+		TagSearchMode: "any",
 	},
 
 	RemoteNames: map[string]string{},
@@ -179,6 +181,21 @@ func (s *settings) SetModFiltersOrder(order string) {
 
 func (s *settings) SetModFiltersFilter(filter string) {
 	s.ModFilters.Filter = filter
+	_ = SaveSettings()
+}
+
+func (s *settings) GetModFiltersTagSearchMode() string {
+	if s.ModFilters.TagSearchMode != "and" && s.ModFilters.TagSearchMode != "any" {
+		return "any"
+	}
+	return s.ModFilters.TagSearchMode
+}
+
+func (s *settings) SetModFiltersTagSearchMode(mode string) {
+	if mode != "and" && mode != "any" {
+		return
+	}
+	s.ModFilters.TagSearchMode = mode
 	_ = SaveSettings()
 }
 
