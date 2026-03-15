@@ -14,9 +14,13 @@
   import { queuedMods } from '$lib/store/actionQueue';
   import { favoriteMods, lockfileMods, manifestMods, selectedProfileTargets } from '$lib/store/ficsitCLIStore';
   import { expandedMod, hasFetchedMods } from '$lib/store/generalStore';
-  import { type OfflineMod, type PartialMod, filter, filterOptions, order, search } from '$lib/store/modFiltersStore';
-  import { offline, startView } from '$lib/store/settingsStore';
+  import {
+    type OfflineMod, type PartialMod, type PartialSMRMod, filter, filterOptions, order, search,
+    selectedTags,
+  } from '$lib/store/modFiltersStore';
+  import { offline, startView, tagSearchMode } from '$lib/store/settingsStore';
   import { OfflineGetMods } from '$wailsjs/go/ficsitcli/ficsitCLI';
+  import { settings } from '$wailsjs/go/models';
 
   const dispatch = createEventDispatcher();
 
@@ -25,7 +29,7 @@
   const client = getContextClient();
 
   let fetchingMods = false;
-  let onlineMods: PartialMod[] = [];
+  let onlineMods: PartialSMRMod[] = [];
   async function fetchAllModsOnline() {
     try {
       const result = await client.query(GetModCountDocument, {}, { requestPolicy: 'network-only' }).toPromise();
@@ -46,7 +50,7 @@
     }
   }
 
-  let offlineMods: PartialMod[] = [];
+  let offlineMods: OfflineMod[] = [];
   async function fetchAllModsOffline() {
     offlineMods = (await OfflineGetMods()).map((mod) => ({
       ...mod,
@@ -92,6 +96,8 @@
 
   $: mods = [...knownMods, ...unknownMods];
 
+  $: availableTags = _.sortBy(_.uniqBy(onlineMods?.map((mod) => mod.tags ?? []).flat() ?? [], 'id'), 'name');
+
   let filteredMods: PartialMod[] = [];
   let filteringMods = false;
   $: {
@@ -101,13 +107,25 @@
     $favoriteMods;
     $queuedMods;
     $selectedProfileTargets;
+    $selectedTags;
+    $tagSearchMode;
 
     filteringMods = true;
-    Promise.all(mods.map((mod) => $filter.func(mod, client))).then((results) => {
-      filteredMods = mods.filter((_, i) => results[i]);
-    }).then(() => {
-      filteringMods = false;
-    });
+    Promise.all(mods.map((mod) => $filter.func(mod, client)))
+      .then((results) => mods.filter((_, i) => results[i]))
+      .then((filtered) => {
+        filteredMods = (filtered.filter((mod) => !('tags' in mod) || !mod.tags || matchTags(mod.tags.map((t) => t.id), $selectedTags)));
+        filteringMods = false;
+      });
+  }
+
+  function matchTags(modTags: string[], tagIds: string[]): boolean {
+    if (tagIds.length === 0) return true;
+    const modTagsSet = new Set(modTags);
+    if ($tagSearchMode === settings.TagSearchMode.ALL) {
+      return tagIds.every((id) => modTagsSet.has(id));
+    }
+    return tagIds.some((id) => modTagsSet.has(id));
   }
 
   let sortedMods: PartialMod[] = [];
@@ -165,12 +183,14 @@
 
   $: userHasSearchText = $search != '';
   $: userHasSearchFilters = $filter != filterOptions[0];
+  $: userHasTagFilter = $selectedTags.length > 0;
 
   const removeSearchText = () => {
     $search = '';
   };
   const removeSearchFilters = () => {
     $filter = filterOptions[0];
+    $selectedTags = [];
   };
 
   export let hideMods: boolean = false;
@@ -178,7 +198,7 @@
 
 <div class="h-full flex flex-col">
   <div class="flex-none z-[1]">
-    <ModListFilters />
+    <ModListFilters {availableTags} />
   </div>
   <AnnouncementsBar />
   {#if hideMods}
@@ -195,7 +215,7 @@
           <div class="flex flex-col h-full items-center justify-center">
             {#if mods.length !== 0}
               <p class="text-xl text-center text-surface-400-700-token"><T defaultValue="No mods matching your search" keyName="mods-list.no-mods-filtered"/></p>
-              {#if userHasSearchFilters}
+              {#if userHasSearchFilters || userHasTagFilter}
                 {#if userHasSearchText}
                   <button
                     class="btn variant-filled-primary mt-4"

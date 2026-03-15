@@ -3,6 +3,7 @@ import { binding, bindingTwoWay, bindingTwoWayNoExcept } from './wailsStoreBindi
 import type { LaunchButtonType, ViewType } from '$lib/wailsTypesExtensions';
 import { GetVersion } from '$wailsjs/go/app/app';
 import { GetOffline, SetOffline } from '$wailsjs/go/ficsitcli/ficsitCLI';
+import { settings } from '$wailsjs/go/models';
 import {
   GetCacheDir,
   GetDebug,
@@ -10,6 +11,7 @@ import {
   GetKonami,
   GetLanguage,
   GetLaunchButton,
+  GetModFiltersTagSearchMode,
   GetProxy,
   GetQueueAutoStart,
   GetRestoreWindowPosition,
@@ -21,6 +23,7 @@ import {
   SetKonami,
   SetLanguage,
   SetLaunchButton,
+  SetModFiltersTagSearchMode,
   SetProxy,
   SetQueueAutoStart, SetRestoreWindowPosition,
   SetStartView,
@@ -28,6 +31,12 @@ import {
 } from '$wailsjs/go/settings/settings';
 
 export const startView = bindingTwoWayNoExcept<ViewType | null>(null, { initialGet: GetStartView }, { updateFunction: SetStartView });
+
+export const tagSearchMode = bindingTwoWayNoExcept<settings.TagSearchMode>(
+  settings.TagSearchMode.ANY,
+  { initialGet: GetModFiltersTagSearchMode },
+  { updateFunction: SetModFiltersTagSearchMode },
+);
 
 export const saveWindowPosition = bindingTwoWayNoExcept(true, { initialGet: GetRestoreWindowPosition }, { updateFunction: SetRestoreWindowPosition });
 

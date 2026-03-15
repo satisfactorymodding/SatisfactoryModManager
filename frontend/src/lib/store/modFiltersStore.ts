@@ -71,6 +71,9 @@ export interface MissingMod {
 export type PartialMod = PartialSMRMod | OfflineMod | MissingMod;
 
 export const search = writable('');
+
+export const selectedTags = writable<string[]>([]);
+
 export const order = bindingTwoWayNoExcept(orderByOptions[1], { 
   initialGet: async () => GetModFiltersOrder().then((i) => orderByOptions.find((o) => o.id === i) || orderByOptions[1]),
 }, {

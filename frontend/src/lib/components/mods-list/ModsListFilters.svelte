@@ -1,11 +1,48 @@
 <script lang="ts">
-  import { mdiClose, mdiFilter, mdiSort } from '@mdi/js';
+  import type { SizeOptions } from '@floating-ui/dom';
+  import { mdiClose, mdiFilter, mdiSort, mdiTagMultiple } from '@mdi/js';
   import { getTranslate } from '@tolgee/svelte';
 
   import Marquee from '$lib/components/Marquee.svelte';
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import Select from '$lib/components/Select.svelte';
-  import { type FilterField, type OrderByField, filter, filterOptions, order, orderByOptions, search } from '$lib/store/modFiltersStore';
+  import { type PopupSettings, popup } from '$lib/skeletonExtensions';
+  import { type FilterField, type OrderByField, filter, filterOptions, order, orderByOptions, search, selectedTags } from '$lib/store/modFiltersStore';
+  import { tagSearchMode } from '$lib/store/settingsStore';
+  import { settings } from '$wailsjs/go/models';
+
+  export let availableTags: { id: string, name: string }[] = [];
+
+  $: if ($selectedTags.length > 0) {
+    $selectedTags = $selectedTags.filter((t) => availableTags.some((a) => a.id === t));
+  }
+
+  const tagPopupName = 'modsTagFilter';
+  const tagPopup: PopupSettings = {
+    event: 'click',
+    target: tagPopupName,
+    placement: 'bottom-start',
+    closeQuery: '', // keep open when clicking tags so user can multi-select
+    middleware: {
+      offset: 6,
+      size: {
+        apply({ availableHeight, elements }: { availableHeight: number; elements: { floating: HTMLElement } }) {
+          Object.assign(elements.floating.style, {
+            maxHeight: `calc(${availableHeight}px - 1rem)`,
+          });
+        },
+      } as SizeOptions,
+      shift: { padding: 0 },
+    },
+  };
+
+  function toggleTag(tag: string) {
+    if ($selectedTags.includes(tag)) {
+      $selectedTags = $selectedTags.filter((t) => t !== tag);
+    } else {
+      $selectedTags = [...$selectedTags, tag];
+    }
+  }
 
   const { t } = getTranslate();
 
@@ -44,6 +81,74 @@
       on:click={() => $search = ''}>
       <SvgIcon class="h-5 w-5 text-error-500/80" icon={mdiClose} />
     </button>
+  </div>
+  <div class="relative !h-full">
+    <div class="h-full w-full" use:popup={tagPopup}>
+      <button
+        class="btn px-2 text-sm space-x-1 !h-full"
+        aria-label={$t('mods-list-filter.tag.button-label', 'Filter by tags')}
+        type="button"
+        on:contextmenu|preventDefault={() => ($selectedTags = [])}
+      >
+        <SvgIcon class="h-5 w-5 shrink-0" icon={mdiTagMultiple} />
+        {#if $selectedTags.length > 0}
+          <span class="text-primary-600 font-medium tabular-nums">{$selectedTags.length}</span>
+        {/if}
+      </button>
+    </div>
+    <div
+      class="card min-w-[24rem] max-h-96 shadow-xl z-10 duration-0 !mt-0 hidden opacity-0 pointer-events-none inert flex flex-col"
+      aria-multiselectable="true"
+      data-popup={tagPopupName}
+      role="listbox"
+    >
+      <div
+        class="flex items-center gap-2 px-3 py-2 border-b border-surface-400-600-token shrink-0"
+        aria-label={$t('mods-list-filter.tag.match-mode', 'Match mode')}
+        role="group"
+      >
+        <button
+          class="flex-1 px-3 py-1.5 text-sm rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 {$tagSearchMode === settings.TagSearchMode.ALL ? 'text-primary-600 font-medium bg-surface-300/20' : 'text-surface-400-700-token hover:bg-surface-300/20'}"
+          aria-pressed={$tagSearchMode === settings.TagSearchMode.ALL}
+          type="button"
+          on:click|stopPropagation={() => tagSearchMode.set(settings.TagSearchMode.ALL)}
+        >
+          {$t('mods-list-filter.tag.match-all', 'Match all')}
+        </button>
+        <button
+          class="flex-1 px-3 py-1.5 text-sm rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 {$tagSearchMode === settings.TagSearchMode.ANY ? 'text-primary-600 font-medium bg-surface-300/20' : 'text-surface-400-700-token hover:bg-surface-300/20'}"
+          aria-pressed={$tagSearchMode === settings.TagSearchMode.ANY}
+          type="button"
+          on:click|stopPropagation={() => tagSearchMode.set(settings.TagSearchMode.ANY)}
+        >
+          {$t('mods-list-filter.tag.match-any', 'Match any')}
+        </button>
+      </div>
+      <div class="overflow-y-auto min-h-0 flex-1">
+        {#if availableTags.length > 0}
+          <div class="columns-3 [column-gap:0.5rem] min-h-0 p-2">
+            {#each availableTags as tag}
+              <button
+                class="w-full text-left px-3 py-2 text-sm transition-colors rounded-none {$selectedTags.includes(tag.id) ? 'bg-surface-300/20' : 'bg-surface-50-900-token hover:!bg-surface-300/20'} flex items-center gap-2 break-inside-avoid"
+                aria-selected={$selectedTags.includes(tag.id)}
+                role="option"
+                type="button"
+                on:click={() => toggleTag(tag.id)}
+              >
+                {#if $selectedTags.includes(tag.id)}
+                  <span class="text-primary-600 font-medium" aria-hidden="true">✓</span>
+                {/if}
+                <span class="{$selectedTags.includes(tag.id) ? 'font-medium' : ''}">{tag.name}</span>
+              </button>
+            {/each}
+          </div>
+        {:else}
+          <div class="px-3 py-2 text-sm text-surface-400-600-token">
+            {$t('mods-list-filter.tag.none-available', 'No tags available')}
+          </div>
+        {/if}
+      </div>
+    </div>
   </div>
   <Select
     name="modsFilter"
