@@ -230,6 +230,7 @@ func main() {
 			common.AllLocationTypes,
 			ficsitcli.AllInstallationStates,
 			ficsitcli.AllActionTypes,
+			settings.AllTagSearchModes,
 		},
 		Logger: backend.WailsZeroLogLogger{},
 		Debug: options.Debug{

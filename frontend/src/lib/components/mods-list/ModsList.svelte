@@ -14,9 +14,13 @@
   import { queuedMods } from '$lib/store/actionQueue';
   import { favoriteMods, lockfileMods, manifestMods, selectedProfileTargets } from '$lib/store/ficsitCLIStore';
   import { expandedMod, hasFetchedMods } from '$lib/store/generalStore';
-  import { type OfflineMod, type PartialMod, type TagOption, filter, filterOptions, order, search, selectedTags } from '$lib/store/modFiltersStore';
+  import {
+    type OfflineMod, type PartialMod, type PartialSMRMod, filter, filterOptions, order, search,
+    selectedTags,
+  } from '$lib/store/modFiltersStore';
   import { offline, startView, tagSearchMode } from '$lib/store/settingsStore';
   import { OfflineGetMods } from '$wailsjs/go/ficsitcli/ficsitCLI';
+  import { settings } from '$wailsjs/go/models';
 
   const dispatch = createEventDispatcher();
 
@@ -25,7 +29,7 @@
   const client = getContextClient();
 
   let fetchingMods = false;
-  let onlineMods: PartialMod[] = [];
+  let onlineMods: PartialSMRMod[] = [];
   async function fetchAllModsOnline() {
     try {
       const result = await client.query(GetModCountDocument, {}, { requestPolicy: 'network-only' }).toPromise();
@@ -46,7 +50,7 @@
     }
   }
 
-  let offlineMods: PartialMod[] = [];
+  let offlineMods: OfflineMod[] = [];
   async function fetchAllModsOffline() {
     offlineMods = (await OfflineGetMods()).map((mod) => ({
       ...mod,
@@ -92,17 +96,7 @@
 
   $: mods = [...knownMods, ...unknownMods];
 
-  $: availableTags = ((): TagOption[] => {
-    const tagNames = new Set<string>();
-    for (const mod of knownMods) {
-      if ('tags' in mod && mod.tags) {
-        for (const t of mod.tags) {
-          tagNames.add(t.name);
-        }
-      }
-    }
-    return [...tagNames].sort((a, b) => a.localeCompare(b)).map((name) => ({ id: name, name }));
-  })();
+  $: availableTags = _.sortBy(_.uniqBy(onlineMods?.map((mod) => mod.tags ?? []).flat() ?? [], 'id'), 'name');
 
   let filteredMods: PartialMod[] = [];
   let filteringMods = false;
@@ -113,13 +107,25 @@
     $favoriteMods;
     $queuedMods;
     $selectedProfileTargets;
+    $selectedTags;
+    $tagSearchMode;
 
     filteringMods = true;
-    Promise.all(mods.map((mod) => $filter.func(mod, client))).then((results) => {
-      filteredMods = mods.filter((_, i) => results[i]);
-    }).then(() => {
-      filteringMods = false;
-    });
+    Promise.all(mods.map((mod) => $filter.func(mod, client)))
+      .then((results) => mods.filter((_, i) => results[i]))
+      .then((filtered) => {
+        filteredMods = (filtered.filter((mod) => !('tags' in mod) || !mod.tags || matchTags(mod.tags.map((t) => t.id), $selectedTags)));
+        filteringMods = false;
+      });
+  }
+
+  function matchTags(modTags: string[], tagIds: string[]): boolean {
+    if (tagIds.length === 0) return true;
+    const modTagsSet = new Set(modTags);
+    if ($tagSearchMode === settings.TagSearchMode.ALL) {
+      return tagIds.every((id) => modTagsSet.has(id));
+    }
+    return tagIds.some((id) => modTagsSet.has(id));
   }
 
   let sortedMods: PartialMod[] = [];
@@ -133,26 +139,13 @@
     sortedMods = _.sortBy(filteredMods, $order.func) as PartialMod[];
   }
 
-  $: selectedTagIds = new Set($selectedTags.map((t) => t.id));
-  $: tagFilteredMods = (() => {
-    if (selectedTagIds.size === 0) return sortedMods;
-    return sortedMods.filter((mod) => {
-      if (!('tags' in mod) || !mod.tags) return false;
-      const modTagNames = new Set(mod.tags.map((t) => t.name));
-      if ($tagSearchMode === 'and') {
-        return [...selectedTagIds].every((id) => modTagNames.has(id));
-      }
-      return [...selectedTagIds].some((id) => modTagNames.has(id));
-    });
-  })();
-
   let displayMods: PartialMod[] = [];
   $: if(!$search) {
-    displayMods = tagFilteredMods;
+    displayMods = sortedMods;
   } else {
     const modifiedSearchString = $search.replace(/(?:author:"(.+?)"|author:([^\s"]+))/g, '="$1$2"');
     
-    const fuse = new Fuse(tagFilteredMods, {
+    const fuse = new Fuse(sortedMods, {
       keys: [
         {
           name: 'name',

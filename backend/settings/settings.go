@@ -15,10 +15,12 @@ import (
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/utils"
 )
 
+type TagSearchMode string
+
 type SavedModFilters struct {
-	Order         string `json:"order"`
-	Filter        string `json:"filter"`
-	TagSearchMode string `json:"tagSearchMode,omitempty"`
+	Order         string        `json:"order"`
+	Filter        string        `json:"filter"`
+	TagSearchMode TagSearchMode `json:"tagSearchMode,omitempty"`
 }
 
 type View string
@@ -37,8 +39,8 @@ var (
 )
 
 const (
-	TagSearchModeAny = "any"
-	TagSearchModeAnd = "and"
+	TagSearchModeAny TagSearchMode = "any"
+	TagSearchModeAll TagSearchMode = "all"
 )
 
 type settings struct {
@@ -189,17 +191,11 @@ func (s *settings) SetModFiltersFilter(filter string) {
 	_ = SaveSettings()
 }
 
-func (s *settings) GetModFiltersTagSearchMode() string {
-	if s.ModFilters.TagSearchMode != TagSearchModeAnd && s.ModFilters.TagSearchMode != TagSearchModeAny {
-		return TagSearchModeAny
-	}
+func (s *settings) GetModFiltersTagSearchMode() TagSearchMode {
 	return s.ModFilters.TagSearchMode
 }
 
-func (s *settings) SetModFiltersTagSearchMode(mode string) {
-	if mode != TagSearchModeAnd && mode != TagSearchModeAny {
-		return
-	}
+func (s *settings) SetModFiltersTagSearchMode(mode TagSearchMode) {
 	s.ModFilters.TagSearchMode = mode
 	_ = SaveSettings()
 }
@@ -484,4 +480,12 @@ func SaveSettings() error {
 	}
 
 	return nil
+}
+
+var AllTagSearchModes = []struct {
+	Value  TagSearchMode
+	TSName string
+}{
+	{TagSearchModeAll, "ALL"},
+	{TagSearchModeAny, "ANY"},
 }

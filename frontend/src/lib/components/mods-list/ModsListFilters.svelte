@@ -7,16 +7,16 @@
   import SvgIcon from '$lib/components/SVGIcon.svelte';
   import Select from '$lib/components/Select.svelte';
   import { type PopupSettings, popup } from '$lib/skeletonExtensions';
-  import { type FilterField, type OrderByField, type TagOption, filter, filterOptions, order, orderByOptions, search, selectedTags } from '$lib/store/modFiltersStore';
+  import { type FilterField, type OrderByField, filter, filterOptions, order, orderByOptions, search, selectedTags } from '$lib/store/modFiltersStore';
   import { tagSearchMode } from '$lib/store/settingsStore';
+  import { settings } from '$wailsjs/go/models';
 
-  export let availableTags: TagOption[] = [];
-  $: selectedTagIds = new Set($selectedTags.map((t) => t.id));
+  export let availableTags: { id: string, name: string }[] = [];
+
   $: if ($selectedTags.length > 0) {
-    $selectedTags = $selectedTags.filter((t) => availableTags.some((a) => a.id === t.id));
+    $selectedTags = $selectedTags.filter((t) => availableTags.some((a) => a.id === t));
   }
 
-  let _tagPopupOpen = false;
   const tagPopupName = 'modsTagFilter';
   const tagPopup: PopupSettings = {
     event: 'click',
@@ -34,12 +34,11 @@
       } as SizeOptions,
       shift: { padding: 0 },
     },
-    state: ({ state }) => (_tagPopupOpen = state),
   };
 
-  function toggleTag(tag: TagOption) {
-    if (selectedTagIds.has(tag.id)) {
-      $selectedTags = $selectedTags.filter((t) => t.id !== tag.id);
+  function toggleTag(tag: string) {
+    if ($selectedTags.includes(tag)) {
+      $selectedTags = $selectedTags.filter((t) => t !== tag);
     } else {
       $selectedTags = [...$selectedTags, tag];
     }
@@ -109,18 +108,18 @@
         role="group"
       >
         <button
-          class="flex-1 px-3 py-1.5 text-sm rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 {$tagSearchMode === 'and' ? 'text-primary-600 font-medium bg-surface-300/20' : 'text-surface-400-700-token hover:bg-surface-300/20'}"
-          aria-pressed={$tagSearchMode === 'and'}
+          class="flex-1 px-3 py-1.5 text-sm rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 {$tagSearchMode === settings.TagSearchMode.ALL ? 'text-primary-600 font-medium bg-surface-300/20' : 'text-surface-400-700-token hover:bg-surface-300/20'}"
+          aria-pressed={$tagSearchMode === settings.TagSearchMode.ALL}
           type="button"
-          on:click|stopPropagation={() => tagSearchMode.set('and')}
+          on:click|stopPropagation={() => tagSearchMode.set(settings.TagSearchMode.ALL)}
         >
           {$t('mods-list-filter.tag.match-all', 'Match all')}
         </button>
         <button
-          class="flex-1 px-3 py-1.5 text-sm rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 {$tagSearchMode === 'any' ? 'text-primary-600 font-medium bg-surface-300/20' : 'text-surface-400-700-token hover:bg-surface-300/20'}"
-          aria-pressed={$tagSearchMode === 'any'}
+          class="flex-1 px-3 py-1.5 text-sm rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 {$tagSearchMode === settings.TagSearchMode.ANY ? 'text-primary-600 font-medium bg-surface-300/20' : 'text-surface-400-700-token hover:bg-surface-300/20'}"
+          aria-pressed={$tagSearchMode === settings.TagSearchMode.ANY}
           type="button"
-          on:click|stopPropagation={() => tagSearchMode.set('any')}
+          on:click|stopPropagation={() => tagSearchMode.set(settings.TagSearchMode.ANY)}
         >
           {$t('mods-list-filter.tag.match-any', 'Match any')}
         </button>
@@ -130,16 +129,16 @@
           <div class="columns-3 [column-gap:0.5rem] min-h-0 p-2">
             {#each availableTags as tag}
               <button
-                class="w-full text-left px-3 py-2 text-sm transition-colors rounded-none {selectedTagIds.has(tag.id) ? 'bg-surface-300/20' : 'bg-surface-50-900-token hover:!bg-surface-300/20'} flex items-center gap-2 break-inside-avoid"
-                aria-selected={selectedTagIds.has(tag.id)}
+                class="w-full text-left px-3 py-2 text-sm transition-colors rounded-none {$selectedTags.includes(tag.id) ? 'bg-surface-300/20' : 'bg-surface-50-900-token hover:!bg-surface-300/20'} flex items-center gap-2 break-inside-avoid"
+                aria-selected={$selectedTags.includes(tag.id)}
                 role="option"
                 type="button"
-                on:click={() => toggleTag(tag)}
+                on:click={() => toggleTag(tag.id)}
               >
-                {#if selectedTagIds.has(tag.id)}
+                {#if $selectedTags.includes(tag.id)}
                   <span class="text-primary-600 font-medium" aria-hidden="true">✓</span>
                 {/if}
-                <span class="{selectedTagIds.has(tag.id) ? 'font-medium' : ''}">{tag.name}</span>
+                <span class="{$selectedTags.includes(tag.id) ? 'font-medium' : ''}">{tag.name}</span>
               </button>
             {/each}
           </div>

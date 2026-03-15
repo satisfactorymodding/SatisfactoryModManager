@@ -3,6 +3,7 @@ import { binding, bindingTwoWay, bindingTwoWayNoExcept } from './wailsStoreBindi
 import type { LaunchButtonType, ViewType } from '$lib/wailsTypesExtensions';
 import { GetVersion } from '$wailsjs/go/app/app';
 import { GetOffline, SetOffline } from '$wailsjs/go/ficsitcli/ficsitCLI';
+import { settings } from '$wailsjs/go/models';
 import {
   GetCacheDir,
   GetDebug,
@@ -31,10 +32,9 @@ import {
 
 export const startView = bindingTwoWayNoExcept<ViewType | null>(null, { initialGet: GetStartView }, { updateFunction: SetStartView });
 
-export type TagSearchMode = 'any' | 'and';
-export const tagSearchMode = bindingTwoWayNoExcept<TagSearchMode>(
-  'any',
-  { initialGet: () => GetModFiltersTagSearchMode().then((m) => (m === 'and' ? 'and' : 'any')) },
+export const tagSearchMode = bindingTwoWayNoExcept<settings.TagSearchMode>(
+  settings.TagSearchMode.ANY,
+  { initialGet: GetModFiltersTagSearchMode },
   { updateFunction: SetModFiltersTagSearchMode },
 );
 
