@@ -15,7 +15,11 @@ jobs:
       matrix:
         platform:
           - os: linux
-            runs-on: ubuntu-24.04
+            # This should use distros as old as possible to maximize glibc compatibility
+            # Ubuntu 22.04's glibc doesn't really cover all non-EOL distros, but as far as I can tell it happens to be
+            # the oldest non-EOL distro version which has webkit2gtk-4.1, so it will have to do, and we can hope it covers
+            # all distros and versions people would reasonably install SMM on
+            runs-on: ubuntu-22.04
           - os: windows
             # Using windows-2022 for now because NSIS is missing on windows-2025 runners
             runs-on: windows-2022
