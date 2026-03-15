@@ -54,14 +54,14 @@ func (u *Updater) CheckForUpdate() error {
 		}
 	}
 
-	u.PendingUpdate = &PendingUpdate{
-		Version:    latestSemver,
-		Changelogs: newChangelogs,
-		Ready:      false,
-	}
-	u.UpdateFound.Dispatch(*u.PendingUpdate)
-
 	if u.config.File == "" || u.config.Apply == nil {
+		u.PendingUpdate = &PendingUpdate{
+			Version:    latestSemver,
+			Changelogs: newChangelogs,
+			Ready:      false,
+		}
+		u.UpdateFound.Dispatch(*u.PendingUpdate)
+
 		slog.Debug("no update file or apply method specified, not downloading update")
 		return nil
 	}
@@ -71,6 +71,13 @@ func (u *Updater) CheckForUpdate() error {
 		return fmt.Errorf("failed to get file %s of version %s: %w", u.config.File, latestVersion, err)
 	}
 	defer file.Close()
+
+	u.PendingUpdate = &PendingUpdate{
+		Version:    latestSemver,
+		Changelogs: newChangelogs,
+		Ready:      false,
+	}
+	u.UpdateFound.Dispatch(*u.PendingUpdate)
 
 	var checksum []byte
 	if u.config.Checksum != nil {
