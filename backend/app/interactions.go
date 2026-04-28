@@ -111,6 +111,10 @@ func (a *app) ExternalImportProfile(path string) {
 	wailsRuntime.EventsEmit(common.AppContext, "externalImportProfile", path)
 }
 
+func (a *app) ExternalInstallModpack(modpackID, version string) {
+	wailsRuntime.EventsEmit(common.AppContext, "externalInstallModpack", modpackID, version)
+}
+
 func (a *app) Show() {
 	wailsRuntime.WindowUnminimise(common.AppContext)
 	wailsRuntime.Show(common.AppContext)

@@ -13,6 +13,7 @@
   import ErrorDetails from '$lib/components/modals/ErrorDetails.svelte';
   import ErrorModal from '$lib/components/modals/ErrorModal.svelte';
   import ExternalInstallMod from '$lib/components/modals/ExternalInstallMod.svelte';
+  import ExternalInstallModpack from '$lib/components/modals/ExternalInstallModpack.svelte';
   import MigrationModal from '$lib/components/modals/MigrationModal.svelte';
   import { supportedProgressTypes } from '$lib/components/modals/ProgressModal.svelte';
   import FirstTimeSetupModal from '$lib/components/modals/first-time-setup/FirstTimeSetupModal.svelte';
@@ -218,6 +219,20 @@
         ref: ExternalInstallMod,
         props: {
           modReference,
+          version,
+        },
+      },
+    });
+  });
+
+  EventsOn('externalInstallModpack', (modpackReference: string, version: string) => {
+    if (!modpackReference) return;
+    modalStore.trigger({
+      type: 'component',
+      component: {
+        ref: ExternalInstallModpack,
+        props: {
+          modpackReference,
           version,
         },
       },
