@@ -43,11 +43,17 @@ func (f *ficsitCLI) InstallModpackRelease(modpackID string, release string, name
 			slog.String("install", selectedInstallation.Path),
 			slog.String("profile", selectedInstallation.Profile),
 		)
-		f.AddProfile(name + "-" + release)
-		profileErr := f.setProfileModpack(l, name+"-"+release)
-		if profileErr != nil {
-			l.Error("failed to set profile", slog.Any("error", profileErr))
-			return fmt.Errorf("failed to set profile: %w", profileErr)
+
+		addProfileErr := f.AddProfile(name + "-" + release)
+		if addProfileErr != nil {
+			l.Error("failed to add profile", slog.Any("error", addProfileErr))
+			return fmt.Errorf("failed to add profile: %w", addProfileErr)
+		}
+
+		setProfileErr := f.setProfileModpack(l, name+"-"+release)
+		if setProfileErr != nil {
+			l.Error("failed to set profile", slog.Any("error", setProfileErr))
+			return fmt.Errorf("failed to set profile: %w", setProfileErr)
 		}
 
 		lockfile, err := getLockfile(modpackID, release)

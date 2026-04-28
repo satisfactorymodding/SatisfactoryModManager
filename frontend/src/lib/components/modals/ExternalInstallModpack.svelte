@@ -30,7 +30,8 @@
 
   function install() {
     if (!modpack) return;
-    const action = async () => (InstallModpackRelease(modpackReference, version, modpack.name)).catch((e) => $error = e);
+    const modpackName = modpack.name;
+    const action = async () => (InstallModpackRelease(modpackReference, version, modpackName)).catch((e) => $error = e);
     const actionName = 'install';
     addQueuedModAction(
       modpackReference,
