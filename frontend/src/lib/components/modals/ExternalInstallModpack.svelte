@@ -7,6 +7,7 @@
   import { error } from '$lib/store/generalStore';
   import { offline } from '$lib/store/settingsStore';
   import { InstallModpackRelease } from '$wailsjs/go/ficsitcli/ficsitCLI';
+  import { profiles } from '$lib/store/ficsitCLIStore';
 
   export let parent: { onClose: () => void };
 
@@ -27,6 +28,7 @@
   );
 
   $: modpack = $modpackQuery.fetching ? null : $modpackQuery.data?.modpack;
+  $: isInstalled = $profiles?.includes(`${modpack?.name}-${version}`);
 
   function install() {
     if (!modpack) return;
@@ -71,8 +73,13 @@
   <footer class="card-footer">
     <button
       class="btn text-primary-600 variant-ringed"
+      disabled={isInstalled}
       on:click={install}>
-      <T defaultValue="Install" keyName="external-install-modpack.install" />
+      {#if isInstalled}
+        <T defaultValue="Already installed" keyName="external-install-modpack.already-installed" />
+      {:else}
+        <T defaultValue="Install" keyName="external-install-modpack.install" />
+      {/if}
     </button>
     <button
       class="btn"
