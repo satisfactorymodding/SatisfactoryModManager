@@ -7,7 +7,7 @@
   import { error } from '$lib/store/generalStore';
   import { offline } from '$lib/store/settingsStore';
   import { InstallModpackRelease } from '$wailsjs/go/ficsitcli/ficsitCLI';
-  import { profiles } from '$lib/store/ficsitCLIStore';
+  import { profiles, selectedProfile } from '$lib/store/ficsitCLIStore';
 
   export let parent: { onClose: () => void };
 
@@ -43,6 +43,13 @@
     parent.onClose();
   }
 
+  function switchToProfile() {
+    if (!modpack) return;
+    const modpackName = modpack.name;
+    selectedProfile.asyncSet(`${modpackName}-${version}`);
+    parent.onClose();
+  }
+
   $: renderedLogo = modpack?.logo || 'https://ficsit.app/images/no_image.webp';
 </script>
 
@@ -71,16 +78,22 @@
     {/if}
   </section>
   <footer class="card-footer">
-    <button
-      class="btn text-primary-600 variant-ringed"
-      disabled={isInstalled}
-      on:click={install}>
-      {#if isInstalled}
-        <T defaultValue="Already installed" keyName="external-install-modpack.already-installed" />
-      {:else}
+    {#if isInstalled}
+      <p class="text-sm text-red-500">
+        <T defaultValue="This profile already exists" keyName="external-install-modpack.already-installed-warning" />
+      </p>
+      <button
+        class="btn text-primary-600 variant-ringed"
+        on:click={switchToProfile}>
+          <T defaultValue="Switch to profile" keyName="external-install-modpack.already-installed" />
+      </button>
+    {:else}
+      <button
+        class="btn text-primary-600 variant-ringed"
+        on:click={install}>
         <T defaultValue="Install" keyName="external-install-modpack.install" />
-      {/if}
-    </button>
+      </button>
+    {/if}
     <button
       class="btn"
       on:click={parent.onClose}>
