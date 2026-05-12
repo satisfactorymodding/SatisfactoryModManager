@@ -19,8 +19,10 @@ To create a new published release:
 2. Ensure someone with Signpath access is around to approve the release in the next few minutes.
    At the time of writing, that's Vilsol and Mircea.
 3. Make a `Bump version` commit on the master branch to increase the `productVersion` field in `wails.json`. Version numbers should follow [Semantic Versioning](https://semver.org/).
-4. Manually create and push a tag of the format `v*` to that commit, which triggers a
+4. Manually create and push a tag of the format `vX.Y.Z` to that commit, which triggers a
    [GitHub Action to make a release](https://github.com/satisfactorymodding/SatisfactoryModManager/blob/master/.github/workflows/release.yml).
+   - Create a tag on HEAD: `git tag tag_name_here`
+   - Push a single tag: `git push origin tag tag_name_here`
 5. The action will automatically request signing approval, sending an email to approvers and including the link in the action output.
    The action will busy-wait until approval is granted.
 6. Review the draft release automatically created by Goreleaser and edit its description as needed.
