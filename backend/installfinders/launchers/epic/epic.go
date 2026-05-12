@@ -2,9 +2,7 @@ package epic
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
-	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -14,17 +12,9 @@ import (
 type Manifest struct {
 	CatalogNamespace string `json:"CatalogNamespace"`
 	CatalogItemID    string `json:"CatalogItemID"`
-	ManifestLocation string `json:"ManifestLocation"`
-	InstallationGUID string `json:"InstallationGUID"`
 	MainGameAppName  string `json:"MainGameAppName"`
 	AppVersionString string `json:"AppVersionString"`
 	InstallLocation  string `json:"InstallLocation"`
-}
-
-type GameManifest struct {
-	AppName          string `json:"AppName"`
-	CatalogNamespace string `json:"CatalogNamespace"`
-	CatalogItemID    string `json:"CatalogItemID"`
 }
 
 var (
@@ -33,35 +23,6 @@ var (
 	EarlyAccessDedicatedServerAppName  = "CrabDedicatedServer"
 	ExperimentalDedicatedServerAppName = "c509233193024c5f8124467d3aa36199"
 )
-
-// validateGameManifest cross-checks the .mancpn against the .item manifest.
-// Epic may not produce the .mancpn; a missing file is logged and treated as valid.
-func validateGameManifest(epicManifest Manifest, platform common.LauncherPlatform) error {
-	gameManifestName := fmt.Sprintf("%s.mancpn", epicManifest.InstallationGUID)
-	gameManifestPath := platform.ProcessPath(filepath.Join(epicManifest.ManifestLocation, gameManifestName))
-
-	gameManifestData, err := os.ReadFile(gameManifestPath)
-	if errors.Is(err, os.ErrNotExist) {
-		slog.Info("Epic game manifest not present, skipping cross-validation", slog.String("path", gameManifestPath))
-		return nil
-	}
-	if err != nil {
-		return fmt.Errorf("failed to read Epic game manifest %s: %w", gameManifestName, err)
-	}
-
-	var epicGameManifest GameManifest
-	if err := json.Unmarshal(gameManifestData, &epicGameManifest); err != nil {
-		return fmt.Errorf("failed to parse Epic game manifest %s: %w", gameManifestName, err)
-	}
-
-	if epicGameManifest.CatalogNamespace != epicManifest.CatalogNamespace ||
-		epicGameManifest.CatalogItemID != epicManifest.CatalogItemID ||
-		epicGameManifest.AppName != epicManifest.MainGameAppName {
-		return fmt.Errorf("mismatching manifest data")
-	}
-
-	return nil
-}
 
 func GetEpicBranch(appName string) (common.GameBranch, error) {
 	switch appName {
@@ -116,14 +77,6 @@ func FindInstallationsEpic(epicManifestsPath string, launcher string, platform c
 		}
 
 		installLocation := platform.ProcessPath(epicManifest.InstallLocation)
-
-		if err := validateGameManifest(epicManifest, platform); err != nil {
-			findErrors = append(findErrors, common.InstallFindError{
-				Path:  installLocation,
-				Inner: err,
-			})
-			continue
-		}
 
 		existingIdx := -1
 		for i := range installs {
