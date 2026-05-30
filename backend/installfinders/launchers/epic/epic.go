@@ -13,6 +13,7 @@ type Manifest struct {
 	CatalogNamespace string `json:"CatalogNamespace"`
 	CatalogItemID    string `json:"CatalogItemID"`
 	MainGameAppName  string `json:"MainGameAppName"`
+	AppName          string `json:"AppName"`
 	AppVersionString string `json:"AppVersionString"`
 	InstallLocation  string `json:"InstallLocation"`
 }
@@ -35,7 +36,7 @@ func GetEpicBranch(appName string) (common.GameBranch, error) {
 	case ExperimentalDedicatedServerAppName:
 		return common.BranchExperimental, nil
 	default:
-		return "", fmt.Errorf("unknown branch for %s", appName)
+		return "", fmt.Errorf("unknown branch for '%s'", appName)
 	}
 }
 
@@ -103,6 +104,11 @@ func FindInstallationsEpic(epicManifestsPath string, launcher string, platform c
 		}
 
 		branch, err := GetEpicBranch(epicManifest.MainGameAppName)
+
+		if err != nil {
+			// Some Epic installs appear to come in with a null MainGameAppName; fall back to AppName
+			branch, err = GetEpicBranch(epicManifest.AppName)
+		}
 		if err != nil {
 			findErrors = append(findErrors, common.InstallFindError{
 				Path:  installLocation,
