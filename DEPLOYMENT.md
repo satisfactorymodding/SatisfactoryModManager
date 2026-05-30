@@ -9,7 +9,7 @@ Since the build action is triggered on every push to any branch,
 non developers can obtain testing builds easily from [GitHub Actions](https://github.com/satisfactorymodding/SatisfactoryModManager/actions/workflows/push.yml) artifact output.
 You need to be signed into GitHub to download them, and they expire after some time.
 
-TODO how to point dev builds to ficsit.dev (staging) instead?
+To point development builds to ficsit.dev instead of production, see the [Readme's configuration section](./README.md#Configuration).
 
 ## Releases
 

@@ -51,6 +51,10 @@ If you want to point to the SMR staging API instead of production, edit:
 * `main.go` to set `api-base` to the staging api (`https://api.ficsit.dev`)
 * `frontend\.graphqlrc.yml` to set `schema` to the staging api (`https://api.ficsit.dev/v2/query`)
 
+If you want to use a local build of [ficsit-cli](https://github.com/satisfactorymodding/ficsit-cli), TODO probably this replace command?
+<https://go.dev/wiki/Modules#when-should-i-use-the-replace-directive>
+ex. `go mod edit -replace github.com/satisfactorymodding/ficsit-cli=C:\Git\ficsit-cli` and do not commit the change
+
 ### Development Server
 
 The development server will hot reload whenever you make changes to the Go or Typescript code.
