@@ -104,7 +104,6 @@ func FindInstallationsEpic(epicManifestsPath string, launcher string, platform c
 		}
 
 		branch, err := GetEpicBranch(epicManifest.MainGameAppName)
-
 		if err != nil {
 			// Some Epic installs appear to come in with a null MainGameAppName; fall back to AppName
 			branch, err = GetEpicBranch(epicManifest.AppName)
