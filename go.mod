@@ -7,6 +7,7 @@ toolchain go1.25.2
 require (
 	github.com/Masterminds/semver/v3 v3.4.0
 	github.com/andygrunwald/vdf v1.1.0
+	github.com/bugsnag/panicwrap v1.3.4
 	github.com/godbus/dbus/v5 v5.1.0
 	github.com/jezek/xgb v1.1.1
 	github.com/kbinani/screenshot v0.0.0-20250624051815-089614a94018
@@ -56,6 +57,7 @@ require (
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/jchv/go-winloader v0.0.0-20250406163304-c1995be93bd1 // indirect
 	github.com/jlaffaye/ftp v0.2.0 // indirect
+	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/labstack/echo/v4 v4.13.4 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect

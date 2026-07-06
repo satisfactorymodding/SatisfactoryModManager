@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"embed"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -12,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/bugsnag/panicwrap"
 	"github.com/spf13/viper"
 	"github.com/tawesoft/golib/v2/dialog"
 	"github.com/wailsapp/wails/v2"
@@ -50,6 +52,15 @@ var (
 )
 
 func main() {
+	exitStatus, err := panicwrap.BasicWrap(panicHandler)
+	if err != nil {
+		panic(err)
+	}
+
+	if exitStatus >= 0 {
+		os.Exit(exitStatus)
+	}
+
 	logging.Init()
 
 	slog.Info("starting Satisfactory Mod Manager", slog.String("version", version), slog.String("commit", commit), slog.String("date", date), slog.String("type", updateMode))
@@ -60,7 +71,7 @@ func main() {
 
 	autoupdate.Init()
 
-	err := settings.LoadSettings()
+	err = settings.LoadSettings()
 	if err != nil {
 		slog.Error("failed to load settings", slog.Any("error", err))
 		// Cannot use wails message dialogs here yet, because they expect a frontend to exist
@@ -326,6 +337,46 @@ func init() {
 	// logging
 
 	viper.Set("log-file", filepath.Join(smmCacheDir, "logs", "SatisfactoryModManager.log"))
+}
+
+func panicHandler(output string) {
+	file, err := dumpCrash(output)
+	if err != nil {
+		_ = dialog.Message{
+			Title:  "Satisfactory Mod Manager Crashed",
+			Format: "An error occurred while saving the crash log: %s",
+			Args:   []interface{}{err.Error()},
+			Icon:   dialog.IconError,
+		}.Raise()
+		os.Exit(1)
+	}
+
+	_ = dialog.Message{
+		Title:  "Satisfactory Mod Manager Crashed",
+		Format: "Crash log: %s",
+		Args:   []interface{}{file},
+		Icon:   dialog.IconError,
+	}.Raise()
+	os.Exit(1)
+}
+
+func dumpCrash(output string) (string, error) {
+	crashesDir := filepath.Join(viper.GetString("smm-cache-dir"), "crashes")
+
+	err := os.MkdirAll(crashesDir, 0o755)
+	if err != nil {
+		return "", fmt.Errorf("failed to create crashes directory: %w", err)
+	}
+
+	crashFileName := time.Now().Format("20060102150405") + ".log"
+	crashFile := filepath.Join(crashesDir, crashFileName)
+
+	err = os.WriteFile(crashFile, []byte(output), 0o644)
+	if err != nil {
+		return "", fmt.Errorf("failed to write crash to file: %w", err)
+	}
+
+	return crashFile, nil
 }
 
 type withUserAgent struct {
