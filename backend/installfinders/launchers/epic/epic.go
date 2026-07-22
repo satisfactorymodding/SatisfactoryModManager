@@ -103,11 +103,12 @@ func FindInstallationsEpic(epicManifestsPath string, launcher string, platform c
 			continue
 		}
 
-		branch, err := GetEpicBranch(epicManifest.MainGameAppName)
-		if err != nil {
-			// Some Epic installs appear to come in with a null MainGameAppName; fall back to AppName
-			branch, err = GetEpicBranch(epicManifest.AppName)
+		appName := epicManifest.MainGameAppName
+		if appName == "" {
+			appName = epicManifest.AppName
 		}
+
+		branch, err := GetEpicBranch(appName)
 		if err != nil {
 			findErrors = append(findErrors, common.InstallFindError{
 				Path:  installLocation,
@@ -123,7 +124,7 @@ func FindInstallationsEpic(epicManifestsPath string, launcher string, platform c
 			Location:   common.LocationTypeLocal,
 			Branch:     branch,
 			Launcher:   launcher,
-			LaunchPath: platform.LauncherCommand(epicManifest.MainGameAppName),
+			LaunchPath: platform.LauncherCommand(appName),
 			SavedPath:  savedPath,
 		})
 	}
