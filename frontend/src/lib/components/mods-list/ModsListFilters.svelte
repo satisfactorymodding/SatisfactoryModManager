@@ -97,7 +97,7 @@
       </button>
     </div>
     <div
-      class="card min-w-[24rem] max-h-96 shadow-xl z-10 duration-0 !mt-0 hidden opacity-0 pointer-events-none inert flex flex-col"
+      class="card min-w-[24rem] max-h-96 shadow-xl z-10 duration-0 !mt-0 opacity-0 pointer-events-none inert !flex flex-col"
       aria-multiselectable="true"
       data-popup={tagPopupName}
       role="listbox"
@@ -124,7 +124,7 @@
           {$t('mods-list-filter.tag.match-any', 'Match any')}
         </button>
       </div>
-      <div class="overflow-y-auto min-h-0 flex-1">
+      <div class="overflow-y-auto min-h-0 flex-1 my-1">
         {#if availableTags.length > 0}
           <div class="columns-3 [column-gap:0.5rem] min-h-0 p-2">
             {#each availableTags as tag}
