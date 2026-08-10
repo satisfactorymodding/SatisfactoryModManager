@@ -1,4 +1,3 @@
-const importUrl = require('postcss-import-url');
 const postcssPresetEnv = require('postcss-preset-env');
 const tailwindCSS = require('tailwindcss');
 const tailwindCSSNesting = require('tailwindcss/nesting');
@@ -12,9 +11,6 @@ module.exports = {
       },
     }),
 
-    importUrl({
-      modernBrowser: true,
-    }),
     tailwindCSSNesting(),
     tailwindCSS(),
   ],

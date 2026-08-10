@@ -22,7 +22,9 @@
   },
   "dependencies": {
     "@floating-ui/dom": "^1.7.4",
-    "@fontsource/fira-mono": "^5.2.7",
+    "@fontsource/roboto": "^5.3.0",
+    "@fontsource/roboto-mono": "^5.3.0",
+    "@fontsource/noto-color-emoji": "^5.3.0",
     "@graphql-typed-document-node/core": "^3.2.0",
     "@lukeed/uuid": "^2.0.1",
     "@tailwindcss/container-queries": "^0.1.1",
@@ -78,7 +80,6 @@
     "nodemon": "^3.1.10",
     "npm-run-all": "^4.1.5",
     "postcss": "^8.5.6",
-    "postcss-import-url": "^7.2.0",
     "postcss-load-config": "^5.1.0",
     "postcss-preset-env": "^9.6.0",
     "prettier": "^3.6.2",
