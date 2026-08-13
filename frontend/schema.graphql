@@ -1,0 +1,623 @@
+directive @canApproveMods on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @canApproveVersions on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @canEditAnnouncements on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @canEditGuide(field: String!) on FIELD_DEFINITION
+
+directive @canEditMod(field: String!) on FIELD_DEFINITION
+
+directive @canEditModCompatibility(field: String) on FIELD_DEFINITION
+
+directive @canEditSatisfactoryVersions on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @canEditUser(field: String!, object: Boolean!) on FIELD_DEFINITION
+
+directive @canEditUsers on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @canEditVersion(field: String!) on FIELD_DEFINITION
+
+directive @canManageTags on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+"""
+Directs the executor to defer this fragment when the `if` argument is true or undefined.
+"""
+directive @defer(
+  """Deferred when true or undefined."""
+  if: Boolean = true
+
+  """Unique name"""
+  label: String
+) on FRAGMENT_SPREAD | INLINE_FRAGMENT
+
+directive @isLoggedIn on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @isNotLoggedIn on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+type AIUseDisclosureInfo {
+  disclosure_type: AIUseDisclosureType!
+  message: String
+}
+
+input AIUseDisclosureInput {
+  disclosure_type: AIUseDisclosureType!
+  message: String
+}
+
+enum AIUseDisclosureType {
+  ai_usage
+  no_ai_usage
+  runtime_ai_usage
+}
+
+type Announcement {
+  id: AnnouncementID!
+  importance: AnnouncementImportance!
+  message: String!
+}
+
+scalar AnnouncementID
+
+enum AnnouncementImportance {
+  Alert
+  Fix
+  Info
+  Warning
+}
+
+type Compatibility {
+  note: String
+  state: CompatibilityState!
+}
+
+type CompatibilityInfo {
+  Controller: ControllerCompatibility!
+  EA: Compatibility!
+  EXP: Compatibility!
+}
+
+input CompatibilityInfoInput {
+  Controller: ControllerCompatibilityInput!
+  EA: CompatibilityInput!
+  EXP: CompatibilityInput!
+}
+
+input CompatibilityInput {
+  note: String
+  state: CompatibilityState!
+}
+
+enum CompatibilityState {
+  Broken
+  Damaged
+  Works
+}
+
+type ControllerCompatibility {
+  note: String
+  state: ControllerCompatibilityState!
+}
+
+input ControllerCompatibilityInput {
+  note: String
+  state: ControllerCompatibilityState!
+}
+
+enum ControllerCompatibilityState {
+  Implicit
+  Partial
+  Supported
+  Unsupported
+  Untested
+}
+
+type CreateVersionResponse {
+  auto_approved: Boolean!
+  version: Version
+}
+
+scalar Date
+
+type GetGuides {
+  count: Int!
+  guides: [Guide!]!
+}
+
+type GetMods {
+  count: Int!
+  mods: [Mod!]!
+}
+
+type GetMyMods {
+  count: Int!
+  mods: [Mod!]!
+}
+
+type GetMyVersions {
+  count: Int!
+  versions: [Version!]!
+}
+
+type GetSMLVersions {
+  count: Int!
+  sml_versions: [SMLVersion!]!
+}
+
+type GetVersions {
+  count: Int!
+  versions: [Version!]!
+}
+
+type Group {
+  id: String!
+  name: String!
+}
+
+type Guide {
+  created_at: Date!
+  guide: String!
+  id: GuideID!
+  name: String!
+  short_description: String!
+  tags: [Tag!]!
+  updated_at: Date!
+  user: User!
+  user_id: UserID!
+  views: Int!
+}
+
+enum GuideFields {
+  created_at
+  name
+  updated_at
+  views
+}
+
+input GuideFilter {
+  ids: [String!]
+  limit: Int
+  offset: Int
+  order: Order
+  order_by: GuideFields
+  search: String
+  tagIDs: [TagID!]
+}
+
+scalar GuideID
+
+type LatestVersions {
+  alpha: Version
+  beta: Version
+  release: Version
+}
+
+type Mod {
+  ai_use_disclosure: AIUseDisclosureInfo
+  approved: Boolean!
+  authors: [UserMod!]!
+  compatibility: CompatibilityInfo
+  created_at: Date!
+  creator_id: UserID!
+  downloads: Int!
+  full_description: String
+  hidden: Boolean!
+  hotness: Int!
+  id: ModID!
+  last_version_date: Date
+  latestVersions: LatestVersions!
+  logo: String
+  logo_thumbhash: String
+  mod_reference: ModReference!
+  name: String!
+  network_use_disclosure: String
+  popularity: Int!
+  short_description: String!
+  source_url: String
+  tags: [Tag!]
+  toggle_explicit_content: Boolean!
+  updated_at: Date!
+  version(version: String!): Version
+  versions(filter: VersionFilter): [Version!]!
+  views: Int!
+}
+
+enum ModFields {
+  created_at
+  downloads
+  hotness
+  last_version_date
+  name
+  popularity
+  search
+  updated_at
+  views
+}
+
+input ModFilter {
+  hidden: Boolean
+  ids: [String!]
+  limit: Int
+  offset: Int
+  order: Order
+  order_by: ModFields
+  references: [String!]
+  search: String
+  tagIDs: [TagID!]
+}
+
+scalar ModID
+
+scalar ModReference
+
+type ModVersion {
+  id: ModID!
+  mod_reference: ModReference!
+  versions: [Version!]!
+}
+
+input ModVersionConstraint {
+  modIdOrReference: String!
+  version: String!
+}
+
+type Mutation {
+  approveMod(modId: ModID!): Boolean!
+  approveVersion(versionId: VersionID!): Boolean!
+  createAnnouncement(announcement: NewAnnouncement!): Announcement
+  createGuide(guide: NewGuide!): Guide
+  createMod(mod: NewMod!): Mod
+  createMultipleTags(tagNames: [NewTag!]!): [Tag!]!
+  createSatisfactoryVersion(input: NewSatisfactoryVersion!): SatisfactoryVersion!
+  createTag(description: String!, tagName: TagName!): Tag
+  createVersion(modId: ModID!): VersionID!
+  deleteAnnouncement(announcementId: AnnouncementID!): Boolean!
+  deleteGuide(guideId: GuideID!): Boolean!
+  deleteMod(modId: ModID!): Boolean!
+  deleteSatisfactoryVersion(id: SatisfactoryVersionID!): Boolean!
+  deleteTag(tagID: TagID!): Boolean!
+  deleteVersion(versionId: VersionID!): Boolean!
+  denyMod(modId: ModID!): Boolean!
+  denyVersion(versionId: VersionID!): Boolean!
+  discourseSSO(sig: String!, sso: String!): String
+  finalizeCreateVersion(modId: ModID!, version: NewVersion!, versionId: VersionID!): Boolean!
+  logout: Boolean!
+  oAuthFacebook(code: String!, state: String!): UserSession
+  oAuthGithub(code: String!, state: String!): UserSession
+  oAuthGoogle(code: String!, state: String!): UserSession
+  updateAnnouncement(announcement: UpdateAnnouncement!, announcementId: AnnouncementID!): Announcement!
+  updateGuide(guide: UpdateGuide!, guideId: GuideID!): Guide!
+  updateMod(mod: UpdateMod!, modId: ModID!): Mod!
+  updateModCompatibility(compatibility: CompatibilityInfoInput!, modId: ModID!): Boolean!
+  updateMultipleModCompatibilities(compatibility: CompatibilityInfoInput!, modIDs: [ModID!]!): Boolean!
+  updateSatisfactoryVersion(id: SatisfactoryVersionID!, input: UpdateSatisfactoryVersion!): SatisfactoryVersion!
+  updateTag(NewName: TagName!, description: String!, tagID: TagID!): Tag!
+  updateUser(input: UpdateUser!, userId: UserID!): User!
+  updateVersion(version: UpdateVersion!, versionId: VersionID!): Version!
+  uploadVersionPart(file: Upload!, modId: ModID!, part: Int!, versionId: VersionID!): Boolean!
+}
+
+input NewAnnouncement {
+  importance: AnnouncementImportance!
+  message: String!
+}
+
+input NewGuide {
+  guide: String!
+  name: String!
+  short_description: String!
+  tagIDs: [TagID!]
+}
+
+input NewMod {
+  full_description: String
+  hidden: Boolean
+  logo: Upload
+  mod_reference: ModReference!
+  name: String!
+  short_description: String!
+  source_url: String
+  tagIDs: [TagID!]
+  toggle_explicit_content: Boolean
+}
+
+input NewSatisfactoryVersion {
+  engine_version: String!
+  version: Int!
+}
+
+input NewTag {
+  description: String!
+  name: TagName!
+}
+
+input NewVersion {
+  changelog: String!
+  stability: VersionStabilities!
+}
+
+type OAuthOptions {
+  facebook: String!
+  github: String!
+  google: String!
+}
+
+enum Order {
+  asc
+  desc
+}
+
+type Query {
+  checkVersionUploadState(modId: ModID!, versionId: VersionID!): CreateVersionResponse
+  getAnnouncement(announcementId: AnnouncementID!): Announcement
+  getAnnouncements: [Announcement!]!
+  getAnnouncementsByImportance(importance: AnnouncementImportance!): [Announcement!]!
+  getGuide(guideId: GuideID!): Guide
+  getGuides(filter: GuideFilter): GetGuides!
+  getMe: User
+  getMod(modId: ModID!): Mod
+  getModAssetList(modReference: ModID!): [String!]!
+  getModByIdOrReference(modIdOrReference: String!): Mod
+  getModByReference(modReference: ModReference!): Mod
+  getMods(filter: ModFilter): GetMods!
+  getMyMods(filter: ModFilter): GetMyMods!
+  getMyUnapprovedMods(filter: ModFilter): GetMyMods!
+  getMyUnapprovedVersions(filter: VersionFilter): GetMyVersions!
+  getMyVersions(filter: VersionFilter): GetMyVersions!
+  getOAuthOptions(callback_url: String!): OAuthOptions!
+  getSMLVersion(smlVersionID: SMLVersionID!): SMLVersion @deprecated(reason: "SML is now a mod")
+  getSMLVersions(filter: SMLVersionFilter): GetSMLVersions! @deprecated(reason: "SML is now a mod")
+  getSatisfactoryVersion(id: SatisfactoryVersionID!): SatisfactoryVersion
+  getSatisfactoryVersions: [SatisfactoryVersion!]!
+  getTag(tagID: TagID!): Tag
+  getTags(filter: TagFilter): [Tag!]!
+  getUnapprovedMods(filter: ModFilter): GetMods!
+  getUnapprovedVersions(filter: VersionFilter): GetVersions!
+  getUser(userId: UserID!): User
+  getUsers(userIds: [UserID!]!): [User]!
+  getVersion(versionId: VersionID!): Version
+  getVersions(filter: VersionFilter): GetVersions!
+  resolveModVersions(filter: [ModVersionConstraint!]!): [ModVersion!]!
+}
+
+type SMLVersion {
+  bootstrap_version: String
+  changelog: String!
+  created_at: Date!
+  date: Date!
+  engine_version: String!
+  id: SMLVersionID!
+  link: String!
+  satisfactory_version: Int!
+  stability: VersionStabilities!
+  targets: [SMLVersionTarget]!
+  updated_at: Date!
+  version: String!
+}
+
+enum SMLVersionFields {
+  created_at
+  date
+  name
+  satisfactory_version
+  updated_at
+}
+
+input SMLVersionFilter {
+  ids: [String!]
+  limit: Int
+  offset: Int
+  order: Order
+  order_by: SMLVersionFields
+  search: String
+}
+
+scalar SMLVersionID
+
+type SMLVersionTarget {
+  VersionID: SMLVersionID!
+  link: String!
+  targetName: TargetName!
+}
+
+type SatisfactoryVersion {
+  engine_version: String!
+  id: SatisfactoryVersionID!
+  version: Int!
+}
+
+scalar SatisfactoryVersionID
+
+type Tag {
+  description: String!
+  id: TagID!
+  name: TagName!
+}
+
+input TagFilter {
+  ids: [TagID!]
+  limit: Int
+  offset: Int
+  order: Order
+  search: String
+}
+
+scalar TagID
+
+scalar TagName
+
+enum TargetName {
+  LinuxServer
+  Windows
+  WindowsServer
+}
+
+input UpdateAnnouncement {
+  importance: AnnouncementImportance
+  message: String
+}
+
+input UpdateGuide {
+  guide: String
+  name: String
+  short_description: String
+  tagIDs: [TagID!]
+}
+
+input UpdateMod {
+  ai_use_disclosure: AIUseDisclosureInput
+  authors: [UpdateUserMod!]
+  compatibility: CompatibilityInfoInput
+  full_description: String
+  hidden: Boolean
+  logo: Upload
+  mod_reference: ModReference
+  name: String
+  network_use_disclosure: String
+  short_description: String
+  source_url: String
+  tagIDs: [TagID!]
+  toggle_explicit_content: Boolean
+}
+
+input UpdateSatisfactoryVersion {
+  engine_version: String
+  version: Int
+}
+
+input UpdateUser {
+  avatar: Upload
+  groups: [String!]
+  username: String
+}
+
+input UpdateUserMod {
+  role: String!
+  user_id: UserID!
+}
+
+input UpdateVersion {
+  changelog: String
+  stability: VersionStabilities
+}
+
+scalar Upload
+
+type User {
+  avatar: String
+  avatar_thumbhash: String
+  created_at: Date!
+  email: String
+  facebook_id: String
+  github_id: String
+  google_id: String
+  groups: [Group!]!
+  guides: [Guide!]!
+  id: UserID!
+  mods: [UserMod!]!
+  roles: UserRoles!
+  username: String!
+}
+
+scalar UserID
+
+type UserMod {
+  mod: Mod!
+  mod_id: ModID!
+  role: String!
+  user: User!
+  user_id: UserID!
+}
+
+type UserRoles {
+  approveMods: Boolean!
+  approveVersions: Boolean!
+  deleteContent: Boolean!
+  editAnyModCompatibility: Boolean!
+  editBootstrapVersions: Boolean!
+  editContent: Boolean!
+  editSatisfactoryVersions: Boolean!
+  editUsers: Boolean!
+}
+
+type UserSession {
+  token: String!
+}
+
+type Version {
+  approved: Boolean!
+  changelog: String!
+  created_at: Date!
+  dependencies: [VersionDependency!]!
+  downloads: Int!
+  game_version: String!
+  hash: String
+  id: VersionID!
+  link: String!
+  metadata: String
+  mod: Mod!
+  mod_id: ModID!
+  required_on_remote: Boolean!
+  size: Int
+  sml_version: String!
+  stability: VersionStabilities!
+  targets: [VersionTarget]!
+  updated_at: Date!
+  version: String!
+  virustotal_results: [VirustotalResult!]!
+}
+
+type VersionDependency {
+  condition: String!
+  mod: Mod
+  mod_id: ModID! @deprecated(reason: "soon will return actual mod id instead of reference. use mod_reference field instead!")
+  mod_reference: String!
+  optional: Boolean!
+  version: Version
+  version_id: VersionID!
+}
+
+enum VersionFields {
+  created_at
+  downloads
+  updated_at
+}
+
+input VersionFilter {
+  ids: [String!]
+  limit: Int
+  offset: Int
+  order: Order
+  order_by: VersionFields
+  search: String
+}
+
+scalar VersionID
+
+enum VersionStabilities {
+  alpha
+  beta
+  release
+}
+
+type VersionTarget {
+  VersionID: VersionID!
+  hash: String
+  link: String!
+  size: Int
+  targetName: TargetName!
+}
+
+scalar VirustotalHash
+
+scalar VirustotalID
+
+type VirustotalResult {
+  created_at: Date!
+  file_name: String!
+  hash: VirustotalHash!
+  id: VirustotalID
+  safe: Boolean!
+  updated_at: Date
+  version_id: String!
+}
