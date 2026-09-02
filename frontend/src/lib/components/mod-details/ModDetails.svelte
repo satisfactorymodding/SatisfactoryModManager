@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { SizeOptions } from '@floating-ui/dom';
-  import { mdiCheck, mdiChevronDown, mdiImport, mdiRocketLaunch, mdiTestTube, mdiWeb } from '@mdi/js';
+  import { mdiCheck, mdiChevronDown, mdiControllerClassic, mdiImport, mdiRocketLaunch, mdiTestTube, mdiWeb } from '@mdi/js';
   import { getTranslate } from '@tolgee/svelte';
   import { getContextClient, queryStore } from '@urql/svelte';
   import { SemVer, coerce, minVersion, parse, sort, validRange } from 'semver';
@@ -14,7 +14,7 @@
   import Thumbhash from '$lib/components/Thumbhash.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
   import ModChangelog from '$lib/components/modals/ModChangelog.svelte';
-  import { CompatibilityState, GetModDetailsDocument } from '$lib/generated';
+  import { CompatibilityState, ControllerCompatibilityState, GetModDetailsDocument } from '$lib/generated';
   import { type PopupSettings, getModalStore, popup } from '$lib/skeletonExtensions';
   import { addQueuedModAction } from '$lib/store/actionQueue';
   import { canInstallMods, lockfileMods, manifestMods } from '$lib/store/ficsitCLIStore';
@@ -110,6 +110,19 @@
     return '';
   }
 
+  function colorForControllerCompatibilityState(state?: ControllerCompatibilityState) {
+    switch(state) {
+      case ControllerCompatibilityState.Unsupported:
+        return 'text-error-500';
+      case ControllerCompatibilityState.Partial:
+        return 'text-warning-500';
+      case ControllerCompatibilityState.Implicit:
+      case ControllerCompatibilityState.Supported:
+        return 'text-primary-700';
+    }
+    return '';
+  }
+
   $: manifestVersion = mod && $manifestMods[mod.mod_reference]?.version;
   async function installVersion(version: string | null) {
     if(!mod) {
@@ -153,6 +166,17 @@
   const compatEXPPopup = {
     event: 'hover',
     target: compatEXPPopupId,
+    middleware: {
+      offset: 4,
+    },
+    placement: 'bottom-start',
+  } satisfies PopupSettings;
+
+  const compatControllerPopupId = 'mod-details-compat-controller';
+
+  const compatControllerPopup = {
+    event: 'hover',
+    target: compatControllerPopupId,
     middleware: {
       offset: 4,
     },
@@ -330,6 +354,19 @@
                   </span>
                   {#if mod.compatibility.EXP.note}
                     <Markdown class="[&>p]:my-0" markdown={mod.compatibility.EXP.note} />
+                  {:else}
+                    <T defaultValue="(No further notes provided)" keyName="mod.compatibility-no-notes" />
+                  {/if}
+                </Tooltip>
+                <div use:popup={compatControllerPopup}>
+                  <SvgIcon class="{colorForControllerCompatibilityState(mod.compatibility.Controller.state)} w-5" icon={mdiControllerClassic} />
+                </div>
+                <Tooltip popupId={compatControllerPopupId}>
+                  <span class="text-base">
+                    <T defaultValue={'This mod has been reported as {state} for controller support.'} keyName="mod-details.compatibility-controller" params={{ state: mod.compatibility.Controller.state }} />
+                  </span>
+                  {#if mod.compatibility.Controller.note}
+                    <Markdown class="[&>p]:my-0" markdown={mod.compatibility.Controller.note} />
                   {:else}
                     <T defaultValue="(No further notes provided)" keyName="mod.compatibility-no-notes" />
                   {/if}
