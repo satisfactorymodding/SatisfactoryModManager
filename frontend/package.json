@@ -25,7 +25,6 @@
     "@floating-ui/dom": "^1.7.4",
     "@fontsource/roboto": "^5.3.0",
     "@fontsource/roboto-mono": "^5.3.0",
-    "@fontsource/noto-color-emoji": "^5.3.0",
     "@graphql-typed-document-node/core": "^3.2.0",
     "@lukeed/uuid": "^2.0.1",
     "@tailwindcss/container-queries": "^0.1.1",

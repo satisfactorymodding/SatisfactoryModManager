@@ -1,6 +1,14 @@
 @import "@fontsource/roboto";
 @import "@fontsource/roboto-mono";
-@import "@fontsource/noto-color-emoji";
+
+/* @fontsource/noto-color-emoji doesn't include COLRv1, so it is broken pretty much everywhere */
+@font-face {
+  font-family: 'Noto Color Emoji';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/NotoColorEmoji-Regular.woff2) format('woff2');
+}
 
 @tailwind base;
 @tailwind components;
@@ -8,7 +16,7 @@
 
 html,
 body {
-  font-family: 'Roboto', Helvetica Neue, sans-serif, 'Noto Color Emoji';
+  font-family: 'Roboto', 'Noto Color Emoji', Helvetica Neue, sans-serif;
   margin: 0;
   padding: 0;
   overflow: hidden;

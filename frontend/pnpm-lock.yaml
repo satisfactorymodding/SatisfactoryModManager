@@ -11,9 +11,6 @@ importers:
       '@floating-ui/dom':
         specifier: ^1.7.4
         version: 1.7.4
-      '@fontsource/noto-color-emoji':
-        specifier: ^5.3.0
-        version: 5.3.0
       '@fontsource/roboto':
         specifier: ^5.3.0
         version: 5.3.0
@@ -928,9 +925,6 @@ packages:
 
   '@floating-ui/utils@0.2.10':
     resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
-
-  '@fontsource/noto-color-emoji@5.3.0':
-    resolution: {integrity: sha512-5uVerNQW6zoxRVaMdjgpYSAxpo02WgCPjpVdE5MfrWd8sNwq7uGs3pMnKB1fVsIBwlxH++I2RisvI9XadC6NzA==}
 
   '@fontsource/roboto-mono@5.3.0':
     resolution: {integrity: sha512-yhwplHMHW9dCk+1pZuERfcJe+K3rosGVZEoK0XktkxRSqQ9qsipSwwiuW2/8Qmtp9lzu3Ixa/ie4BMH3i8CkZQ==}
@@ -5024,8 +5018,6 @@ snapshots:
       '@floating-ui/utils': 0.2.10
 
   '@floating-ui/utils@0.2.10': {}
-
-  '@fontsource/noto-color-emoji@5.3.0': {}
 
   '@fontsource/roboto-mono@5.3.0': {}
 
