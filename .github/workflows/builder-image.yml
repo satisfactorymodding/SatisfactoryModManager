@@ -1,0 +1,30 @@
+name: Build Builder Image
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/docker/**'
+      - '.github/workflows/builder-image.yml'
+
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: docker/setup-buildx-action@v4
+
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: .github/docker/Dockerfile.builder
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/smm-builder:ubuntu22.04

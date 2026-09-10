@@ -20,6 +20,11 @@ jobs:
             # the oldest non-EOL distro version which has webkit2gtk-4.1, so it will have to do, and we can hope it covers
             # all distros and versions people would reasonably install SMM on
             runs-on: ubuntu-22.04
+            # We also use a custom webkit2gtk-4.1 built against freetype 2.13 
+            # as a fix for appimage crashes on distros using versions newer than that when displaying emoji
+            # Running webkit2gtk-4.1 built against this newer version should be safe on older distros too,
+            # since the struct causing the crash is larger in newer versions
+            container: ghcr.io/${{ github.repository_owner }}/smm-builder:ubuntu22.04
           - os: windows
             # Using windows-2022 for now because NSIS is missing on windows-2025 runners
             runs-on: windows-2022
@@ -28,10 +33,16 @@ jobs:
             runs-on: macos-15
             goreleaser_args: "-p 1" # Wails packaging for darwin cannot handle parallel builds
     runs-on: ${{ matrix.platform.runs-on }}
+    container: ${{ matrix.platform.container || null }}
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+    
+      # When running in a container, the user is root, but the workspace is mounted from the host, so git commands will fail unless we set the safe directory
+      # https://github.com/actions/checkout/issues/2031
+      - name: Set safe directory
+        run: git config --system --add safe.directory "$GITHUB_WORKSPACE"
 
       - uses: ./.github/actions/setup
 
