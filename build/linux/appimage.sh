@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# abort on all errors
+set -e
+
 APPNAME="SatisfactoryModManager"
 export ARCH="x86_64" # Export because linuxdeploy gtk plugin copies i386 libraries too, so linuxdeploy can't decide on architecture
 SCRIPT_DIR=$(dirname "$0")
@@ -41,24 +44,22 @@ ln -sf "usr/share/applications/$APPNAME.desktop" "$APPNAME.desktop"
 (
 cd "$APPDIR" || exit
 
-# Copy webkit2gtk libraries
-find -L /usr/lib* -name WebKitNetworkProcess -exec mkdir -p "$(dirname '{}')" \; -exec cp --parents '{}' "." \; || true
-find -L /usr/lib* -name WebKitWebProcess -exec mkdir -p "$(dirname '{}')" \; -exec cp --parents '{}' "." \; || true
-find -L /usr/lib* -name libwebkit2gtkinjectedbundle.so -exec mkdir -p "$(dirname '{}')" \; -exec cp --parents '{}' "." \; || true
-
-# Download AppRun
-wget -O AppRun https://github.com/AppImage/AppImageKit/releases/download/continuous/AppRun-${ARCH}
+# Copy AppRun
+cp "$SCRIPT_DIR/AppRun" "AppRun"
 chmod +x AppRun
 )
 
 (
 cd "$TMPDIR" || exit
 
-wget https://raw.githubusercontent.com/tauri-apps/linuxdeploy-plugin-gtk/master/linuxdeploy-plugin-gtk.sh
+wget https://raw.githubusercontent.com/linuxdeploy/linuxdeploy-plugin-gtk/master/linuxdeploy-plugin-gtk.sh
 chmod +x linuxdeploy-plugin-gtk.sh
 
-wget https://raw.githubusercontent.com/tauri-apps/linuxdeploy-plugin-gstreamer/master/linuxdeploy-plugin-gstreamer.sh
+wget https://raw.githubusercontent.com/linuxdeploy/linuxdeploy-plugin-gstreamer/master/linuxdeploy-plugin-gstreamer.sh
 chmod +x linuxdeploy-plugin-gstreamer.sh
+
+cp "$SCRIPT_DIR/linuxdeploy-plugin-webkitgtk.sh" .
+chmod +x linuxdeploy-plugin-webkitgtk.sh
 
 wget -O linuxdeploy.AppImage https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-${ARCH}.AppImage
 chmod +x linuxdeploy.AppImage
@@ -66,7 +67,7 @@ chmod +x linuxdeploy.AppImage
 
 mkdir -p "$(dirname "$OUTPUT")"
 
-LDAI_OUTPUT="$OUTPUT" DEPLOY_GTK_VERSION="3" "$TMPDIR/linuxdeploy.AppImage" --appimage-extract-and-run --appdir "$APPDIR" --plugin gtk --plugin gstreamer --output appimage
+LDAI_OUTPUT="$OUTPUT" DEPLOY_GTK_VERSION="3" "$TMPDIR/linuxdeploy.AppImage" --appimage-extract-and-run --appdir "$APPDIR" --plugin gtk --plugin webkitgtk --plugin gstreamer --output appimage
 
 rm -rf "$TMPDIR"
 rm -rf "$APPDIR"

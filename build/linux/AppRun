@@ -1,0 +1,10 @@
+#!/bin/bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+# The GTK plugin patches webkit2gtk's hardcoded path to an executable with a string replacement,
+# turning /usr/lib into ././/lib, so the workdir needs to be <appimage>/usr
+
+cd $SCRIPT_DIR/usr
+
+exec ./bin/SatisfactoryModManager

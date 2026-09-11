@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strings"
 
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/common"
 	"github.com/satisfactorymodding/SatisfactoryModManager/backend/installfinders/launchers"
@@ -34,21 +33,7 @@ func findInstallations(lutrisCmd []string, launcher string) ([]*common.Installat
 	lutrisLj := exec.Command(lutrisLjCmd[0], lutrisLjCmd[1:]...)
 	lutrisLj.Env = os.Environ()
 	lutrisLj.Env = append(lutrisLj.Env, "LUTRIS_SKIP_INIT=1")
-	if os.Getenv("APPIMAGE") != "" {
-		// Must clear the APPIMAGE added entries of LD_LIBRARY_PATH, as well as PYTHONHOME and PYTHONPATH
-		// otherwise lutris will load some appimage libraries and some system libraries, which are incompatible
-		lutrisLj.Env = append(lutrisLj.Env, "PYTHONHOME=", "PYTHONPATH=")
 
-		appdir := os.Getenv("APPDIR")
-		ldLibraryPathEntries := strings.Split(os.Getenv("LD_LIBRARY_PATH"), ":")
-		newLdLibraryPathEntries := []string{}
-		for _, entry := range ldLibraryPathEntries {
-			if !strings.HasPrefix(entry, appdir) {
-				newLdLibraryPathEntries = append(newLdLibraryPathEntries, entry)
-			}
-		}
-		lutrisLj.Env = append(lutrisLj.Env, "LD_LIBRARY_PATH="+strings.Join(newLdLibraryPathEntries, ":"))
-	}
 	outputBytes, err := lutrisLj.Output()
 	if err != nil {
 		return nil, []error{
