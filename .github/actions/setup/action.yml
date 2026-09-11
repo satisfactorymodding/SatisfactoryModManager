@@ -46,4 +46,4 @@ runs:
         if ! pkg-config --exists webkit2gtk-4.1; then
           sudo apt -y install libwebkit2gtk-4.1-dev
         fi
-        sudo apt -y install libgtk-3-dev patchelf librsvg2-dev
+        sudo apt -y install libgtk-3-dev patchelf librsvg2-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-libav
