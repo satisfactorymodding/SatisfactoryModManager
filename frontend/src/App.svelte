@@ -132,23 +132,25 @@
   $: if ($smmUpdateInit && checkStart) {
     checkStart = false;
     if ($smmUpdate) {
-      $isUpdateOnStart = true;
-      if ($smmUpdateReady) {
-        modalStore.trigger({
-          type: 'component',
-          component: 'smmUpdateReady',
-          meta: {
-            persistent: true,
-          },
-        });
-      } else {
-        modalStore.trigger({
-          type: 'component',
-          component: 'smmUpdateDownload',
-          meta: {
-            persistent: true,
-          },
-        });
+      if ($smmUpdate.canAutoUpdate) {
+        $isUpdateOnStart = true;
+        if ($smmUpdateReady) {
+          modalStore.trigger({
+            type: 'component',
+            component: 'smmUpdateReady',
+            meta: {
+              persistent: true,
+            },
+          });
+        } else {
+          modalStore.trigger({
+            type: 'component',
+            component: 'smmUpdateDownload',
+            meta: {
+              persistent: true,
+            },
+          });
+        }
       }
     }
   }

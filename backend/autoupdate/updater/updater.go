@@ -44,6 +44,10 @@ func MakeUpdater(config Config) *Updater {
 	}
 }
 
+func (u *Updater) CanApplyUpdates() bool {
+	return u.config.File != "" && u.config.Apply != nil
+}
+
 func (u *Updater) OnExit(restart bool) error {
 	u.lock.Lock()
 	defer u.lock.Unlock()

@@ -40,8 +40,9 @@ func Init() {
 		slog.Info("update found", slog.Any("version", update.Version))
 		if common.AppContext != nil {
 			wailsRuntime.EventsEmit(common.AppContext, "updateAvailable", &PendingUpdate{
-				Version:    update.Version.String(),
-				Changelogs: update.Changelogs,
+				Version:       update.Version.String(),
+				Changelogs:    update.Changelogs,
+				CanAutoUpdate: Updater.Updater.CanApplyUpdates(),
 			})
 		}
 	})
@@ -85,8 +86,9 @@ func makeUpdaterConfig() updater.Config {
 }
 
 type PendingUpdate struct {
-	Version    string            `json:"version"`
-	Changelogs map[string]string `json:"changelogs"`
+	Version       string            `json:"version"`
+	Changelogs    map[string]string `json:"changelogs"`
+	CanAutoUpdate bool              `json:"canAutoUpdate"`
 }
 
 func (u *autoUpdate) PendingUpdate() *PendingUpdate {
@@ -97,8 +99,9 @@ func (u *autoUpdate) PendingUpdate() *PendingUpdate {
 		return nil
 	}
 	return &PendingUpdate{
-		Version:    u.Updater.PendingUpdate.Version.String(),
-		Changelogs: u.Updater.PendingUpdate.Changelogs,
+		Version:       u.Updater.PendingUpdate.Version.String(),
+		Changelogs:    u.Updater.PendingUpdate.Changelogs,
+		CanAutoUpdate: u.Updater.CanApplyUpdates(),
 	}
 }
 
