@@ -14,39 +14,26 @@ OUTPUT=$2
 TMPDIR=$(mktemp -d)
 APPDIR="$SCRIPT_DIR/../bin/$APPNAME.AppDir"
 
+# The input binary name is appimage-bin-tmp, so we need to fix that
+cp "$BINARY" "$TMPDIR/$APPNAME"
+BINARY="$TMPDIR/$APPNAME"
+
 if [ -d "$APPDIR" ]; then
 rm -rf "$APPDIR"
 fi
 
 mkdir -p "$APPDIR"
 
-mkdir -p "$APPDIR/usr/bin"
-mkdir -p "$APPDIR/usr/lib"
-mkdir -p "$APPDIR/usr/lib64"
-
+# We still copy icons manually instead of using linuxdeploy 
+# because the icons are not square, and linuxdeploy checks that
 (
 cd "$APPDIR" || exit
-cp "$BINARY" "usr/bin/$APPNAME"
-cp "$BUILD_DIR/appicon.png" "$APPNAME.png"
-cp "$BUILD_DIR/appicon.png" ".DirIcon"
 
 icons=(16 32 64 128 256 512)
 for i in "${icons[@]}"; do
     mkdir -p "usr/share/icons/hicolor/${i}x${i}/apps"
     cp "$BUILD_DIR/icons/${i}x${i}.png" "usr/share/icons/hicolor/${i}x${i}/apps/$APPNAME.png"
 done
-
-mkdir -p "usr/share/applications"
-cp "$SCRIPT_DIR/$APPNAME.desktop" "usr/share/applications/$APPNAME.desktop"
-ln -sf "usr/share/applications/$APPNAME.desktop" "$APPNAME.desktop"
-)
-
-(
-cd "$APPDIR" || exit
-
-# Copy AppRun
-cp "$SCRIPT_DIR/AppRun" "AppRun"
-chmod +x AppRun
 )
 
 (
@@ -67,7 +54,17 @@ chmod +x linuxdeploy.AppImage
 
 mkdir -p "$(dirname "$OUTPUT")"
 
-LDAI_OUTPUT="$OUTPUT" DEPLOY_GTK_VERSION="3" "$TMPDIR/linuxdeploy.AppImage" --appimage-extract-and-run --appdir "$APPDIR" --plugin gtk --plugin webkitgtk --plugin gstreamer --output appimage
+LDAI_OUTPUT="$OUTPUT" DEPLOY_GTK_VERSION="3" "$TMPDIR/linuxdeploy.AppImage" --appimage-extract-and-run \
+    --executable "$BINARY" \
+    --desktop-file "$SCRIPT_DIR/$APPNAME.desktop" \
+    "${ICON_FILES[@]}" \
+    --icon-filename "$APPNAME" \
+    --custom-apprun "$SCRIPT_DIR/AppRun" \
+    --appdir "$APPDIR" \
+    --plugin gtk \
+    --plugin webkitgtk \
+    --plugin gstreamer \
+    --output appimage
 
 rm -rf "$TMPDIR"
 rm -rf "$APPDIR"
