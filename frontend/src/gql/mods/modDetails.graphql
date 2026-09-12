@@ -12,6 +12,10 @@ query GetModDetails($modReference: ModReference!) {
     views
     hidden
     compatibility {
+      Controller {
+        state
+        note
+      }
       EA {
         state
         note
