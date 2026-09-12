@@ -36,8 +36,13 @@ func handleURI(uri string) error {
 	switch u.Host {
 	case "install":
 		modID := u.Query().Get("modID")
+		modpackID := u.Query().Get("modpackID")
 		version := u.Query().Get("version")
-		app.App.ExternalInstallMod(modID, version)
+		if modpackID != "" {
+			app.App.ExternalInstallModpack(modpackID, version)
+		} else {
+			app.App.ExternalInstallMod(modID, version)
+		}
 		return nil
 	default:
 		return fmt.Errorf("unknown URI action %s", u.Host)

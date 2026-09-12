@@ -165,7 +165,7 @@ func addMetadata(writer *zip.Writer) error {
 
 	ficsitCliProfileNames := ficsitcli.FicsitCLI.GetProfiles()
 	selectedMetadataProfileName := ficsitcli.FicsitCLI.GetSelectedProfile()
-	metadataProfiles := make([]*ficsitCli.Profile, 0)
+	metadataProfiles := make([]*ficsitCli.Profile, 0, len(ficsitCliProfileNames))
 	for _, profileName := range ficsitCliProfileNames {
 		p := ficsitcli.FicsitCLI.GetProfile(profileName)
 
