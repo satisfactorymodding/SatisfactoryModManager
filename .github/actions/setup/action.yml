@@ -30,7 +30,7 @@ runs:
       with:
         node-version: 22
         cache: 'pnpm'
-        cache-dependency-path: frontend
+        cache-dependency-path: frontend/pnpm-lock.yaml
 
     - name: Install Wails
       if: ${{ inputs.backend == 'true' && inputs.skip-wails != 'true' }}
