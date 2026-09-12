@@ -35,8 +35,6 @@ require (
 	howett.net/plist v1.0.2-0.20250314012144-ee69052608d9
 )
 
-replace github.com/wailsapp/go-webview2 => github.com/satisfactorymodding/go-webview2 v0.0.0-20241013154424-330566cba2f0
-
 require (
 	aead.dev/minisign v0.3.0 // indirect
 	git.sr.ht/~jackmordaunt/go-toast/v2 v2.0.3 // indirect
