@@ -393,8 +393,6 @@
                   </span>
                   {#if mod.ai_use_disclosure.message}
                     <Markdown class="[&>p]:my-0" markdown={mod.ai_use_disclosure.message} />
-                  {:else}
-                    <T defaultValue="(No disclosure message provided)" keyName="mod-details.ai-disclosure-no-message" />
                   {/if}
                 </Tooltip>
               </div>
