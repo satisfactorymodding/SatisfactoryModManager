@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { SizeOptions } from '@floating-ui/dom';
-  import { mdiChatProcessing, mdiCheck, mdiChevronDown, mdiControllerClassic, mdiImport, mdiRobot, mdiRobotOff, mdiRocketLaunch, mdiTestTube, mdiWeb } from '@mdi/js';
+  import { mdiAccessPoint, mdiAccessPointOff, mdiChatProcessing, mdiCheck, mdiChevronDown, mdiControllerClassic, mdiImport, mdiRobot, mdiRobotOff, mdiRocketLaunch, mdiTestTube, mdiWeb } from '@mdi/js';
   import { getTranslate } from '@tolgee/svelte';
   import { getContextClient, queryStore } from '@urql/svelte';
   import { SemVer, coerce, minVersion, parse, sort, validRange } from 'semver';
@@ -144,6 +144,14 @@
     }
   }
 
+  function iconForNetworkUseDisclosure(disclosure: string) {
+    return disclosure.trim().length > 0 ? mdiAccessPoint : mdiAccessPointOff;
+  }
+
+  function labelForNetworkUseDisclosure(disclosure: string) {
+    return disclosure.trim().length > 0 ? $t('mod-details.network-disclosure-usage', 'The mod developer says this about the mod\'s external network connectivity:') : $t('mod-details.network-disclosure-no-usage', 'The mod developer confirms that this mod makes no connections to external networks.');
+  }
+
   $: manifestVersion = mod && $manifestMods[mod.mod_reference]?.version;
   async function installVersion(version: string | null) {
     if(!mod) {
@@ -220,6 +228,17 @@
   const aiDisclosurePopup = {
     event: 'hover',
     target: aiDisclosurePopupId,
+    middleware: {
+      offset: 4,
+    },
+    placement: 'bottom',
+  } satisfies PopupSettings;
+
+  const networkDisclosurePopupId = 'mod-details-network-disclosure';
+
+  const networkDisclosurePopup = {
+    event: 'hover',
+    target: networkDisclosurePopupId,
     middleware: {
       offset: 4,
     },
@@ -436,6 +455,27 @@
             {:else if mod}
               <span class="font-bold">
                 <T defaultValue="Unspecified" keyName="mod-details.ai-disclosure-unspecified" />
+              </span>
+            {/if}
+          </ModDetailsEntry>
+          <ModDetailsEntry label={$t('mod-details.network-use-disclosure', 'Network use')} loading={!mod}>
+            {#if mod?.network_use_disclosure !== null && mod?.network_use_disclosure !== undefined}
+              <div class="flex pl-1">
+                <div class="flex" use:popup={networkDisclosurePopup}>
+                  <SvgIcon class="h-5 w-5" icon={iconForNetworkUseDisclosure(mod.network_use_disclosure)} />
+                </div>
+                <Tooltip popupId={networkDisclosurePopupId}>
+                  <span class="text-base font-bold">
+                    {labelForNetworkUseDisclosure(mod.network_use_disclosure)}
+                  </span>
+                  {#if mod.network_use_disclosure}
+                    <Markdown class="[&>p]:my-0" markdown={mod.network_use_disclosure} />
+                  {/if}
+                </Tooltip>
+              </div>
+            {:else if mod}
+              <span class="font-bold">
+                <T defaultValue="Unspecified" keyName="mod-details.network-use-disclosure-unspecified" />
               </span>
             {/if}
           </ModDetailsEntry>

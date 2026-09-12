@@ -29,6 +29,7 @@ query GetModDetails($modReference: ModReference!) {
       disclosure_type
       message
     }
+    network_use_disclosure
     authors {
       user {
         id
