@@ -25,6 +25,10 @@ query GetModDetails($modReference: ModReference!) {
         note
       }
     }
+    ai_use_disclosure {
+      disclosure_type
+      message
+    }
     authors {
       user {
         id

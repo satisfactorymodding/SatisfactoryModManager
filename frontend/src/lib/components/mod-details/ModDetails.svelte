@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { SizeOptions } from '@floating-ui/dom';
-  import { mdiCheck, mdiChevronDown, mdiControllerClassic, mdiImport, mdiRocketLaunch, mdiTestTube, mdiWeb } from '@mdi/js';
+  import { mdiChatProcessing, mdiCheck, mdiChevronDown, mdiControllerClassic, mdiImport, mdiRobot, mdiRobotOff, mdiRocketLaunch, mdiTestTube, mdiWeb } from '@mdi/js';
   import { getTranslate } from '@tolgee/svelte';
   import { getContextClient, queryStore } from '@urql/svelte';
   import { SemVer, coerce, minVersion, parse, sort, validRange } from 'semver';
@@ -14,7 +14,7 @@
   import Thumbhash from '$lib/components/Thumbhash.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
   import ModChangelog from '$lib/components/modals/ModChangelog.svelte';
-  import { CompatibilityState, ControllerCompatibilityState, GetModDetailsDocument } from '$lib/generated';
+  import { AiUseDisclosureType, CompatibilityState, ControllerCompatibilityState, GetModDetailsDocument } from '$lib/generated';
   import { type PopupSettings, getModalStore, popup } from '$lib/skeletonExtensions';
   import { addQueuedModAction } from '$lib/store/actionQueue';
   import { canInstallMods, lockfileMods, manifestMods } from '$lib/store/ficsitCLIStore';
@@ -123,6 +123,27 @@
     return '';
   }
 
+  function iconForAiUseDisclosure(disclosureType: AiUseDisclosureType) {
+    switch(disclosureType) {
+      case AiUseDisclosureType.NoAiUsage:
+        return mdiRobotOff;
+      case AiUseDisclosureType.AiUsage:
+      case AiUseDisclosureType.RuntimeAiUsage:
+        return mdiRobot;
+    }
+  }
+
+  function labelForAiUseDisclosure(disclosureType: AiUseDisclosureType) {
+    switch(disclosureType) {
+      case AiUseDisclosureType.NoAiUsage:
+        return $t('mod-details.ai-disclosure-no-usage', 'No generative AI was used in creating this mod.');
+      case AiUseDisclosureType.AiUsage:
+        return $t('mod-details.ai-disclosure-usage', 'Generative AI was used in this mod\'s creation.');
+      case AiUseDisclosureType.RuntimeAiUsage:
+        return $t('mod-details.ai-disclosure-runtime-usage', 'The user can interact with generative AI while using this mod.');
+    }
+  }
+
   $: manifestVersion = mod && $manifestMods[mod.mod_reference]?.version;
   async function installVersion(version: string | null) {
     if(!mod) {
@@ -188,6 +209,17 @@
   const compatUnknownPopup = {
     event: 'hover',
     target: compatUnknownPopupId,
+    middleware: {
+      offset: 4,
+    },
+    placement: 'bottom',
+  } satisfies PopupSettings;
+
+  const aiDisclosurePopupId = 'mod-details-ai-disclosure';
+
+  const aiDisclosurePopup = {
+    event: 'hover',
+    target: aiDisclosurePopupId,
     middleware: {
       offset: 4,
     },
@@ -381,6 +413,30 @@
                   <T defaultValue="No compatibility information has been reported for this mod yet. Try it out and contact us on the Discord so it can be updated!" keyName="mod-details.compatibility-unknown-tooltip" />
                 </span>
               </Tooltip>
+            {/if}
+          </ModDetailsEntry>
+          <ModDetailsEntry label={$t('mod-details.ai-disclosure', 'AI disclosure')} loading={!mod}>
+            {#if mod?.ai_use_disclosure}
+              <div class="flex pl-1">
+                <div class="flex" use:popup={aiDisclosurePopup}>
+                  <SvgIcon class="h-5 w-5" icon={iconForAiUseDisclosure(mod.ai_use_disclosure.disclosure_type)} />
+                  {#if mod.ai_use_disclosure.disclosure_type === AiUseDisclosureType.RuntimeAiUsage}
+                    <SvgIcon class="h-5 w-5" icon={mdiChatProcessing} />
+                  {/if}
+                </div>
+                <Tooltip popupId={aiDisclosurePopupId}>
+                  <span class="text-base font-bold">
+                    {labelForAiUseDisclosure(mod.ai_use_disclosure.disclosure_type)}
+                  </span>
+                  {#if mod.ai_use_disclosure.message}
+                    <Markdown class="[&>p]:my-0" markdown={mod.ai_use_disclosure.message} />
+                  {/if}
+                </Tooltip>
+              </div>
+            {:else if mod}
+              <span class="font-bold">
+                <T defaultValue="Unspecified" keyName="mod-details.ai-disclosure-unspecified" />
+              </span>
             {/if}
           </ModDetailsEntry>
         {/if}
