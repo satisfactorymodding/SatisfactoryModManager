@@ -52,11 +52,24 @@
   const restartPicker = _.debounce(async () => {
     await stopPicker();
     if (!disabled) {
+      const forBasePath = basePath;
       try {
-        pickerId = await StartPicker(basePath);
+        const newPickerId = await StartPicker(forBasePath);
+        // If the base path has changed since the request was made,
+        // or the picker has been disabled, ignore the response and release the picker
+        if (basePath !== forBasePath || disabled) {
+          await StopPicker(newPickerId);
+          return;
+        }
+        pickerId = newPickerId;
         currentBasePath = basePath;
         setupError = null;
       } catch (e) {
+        // If the base path has changed since the request was made,
+        // or the picker has been disabled, ignore the response
+        if (basePath !== forBasePath || disabled) {
+          return;
+        }
         setupError = e as string;
         pendingValidCheck = false;
       }
