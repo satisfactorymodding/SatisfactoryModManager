@@ -2,12 +2,22 @@ package common
 
 import (
 	"log/slog"
+	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 )
 
 func OsPathEqual(path1, path2 string) bool {
+	// Same file on disk (inode) means same install, regardless of path
+	// spelling. This catches duplicates from case-only differences on
+	// case-insensitive filesystems (e.g. macOS default APFS), where string
+	// comparison alone sees two different installs.
+	if info1, err1 := os.Stat(path1); err1 == nil {
+		if info2, err2 := os.Stat(path2); err2 == nil && os.SameFile(info1, info2) {
+			return true
+		}
+	}
 	path1 = realPath(path1)
 	path2 = realPath(path2)
 	if runtime.GOOS == "windows" {
