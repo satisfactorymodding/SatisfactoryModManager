@@ -111,7 +111,7 @@
         on:click={() => pickImportProfileFile()}
       />
       {#if importProfileMetadata}
-        {#if importProfileMetadata.gameVersion < ($selectedInstallMetadata?.info?.version ?? 0)}
+        {#if importProfileMetadata.gameVersion > ($selectedInstallMetadata?.info?.version ?? 0)}
           <p>
             <T defaultValue="This profile was created with a newer version of the game. It may not be compatible with this version." keyName="profiles.import.profile-version-warning" />
           </p>
