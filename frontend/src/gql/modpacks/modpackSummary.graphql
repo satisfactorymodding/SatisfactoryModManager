@@ -1,0 +1,9 @@
+query GetModpackSummary($modpackID: ModpackID!) {
+  modpack: getModpack(modpackID: $modpackID) {
+    name
+    logo
+    views
+    short_description
+    parent_id
+  }
+}
