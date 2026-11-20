@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { mdiArchiveCheck, mdiDownload, mdiEye, mdiLinkLock, mdiPause, mdiPauseCircle, mdiPlay, mdiPlayCircle, mdiStar, mdiStarMinus, mdiStarOutline, mdiStarPlus, mdiSync, mdiTagMultiple, mdiTrashCan, mdiTrayFull, mdiTrayMinus } from '@mdi/js';
+  import { mdiArchiveCheck, mdiDownload, mdiLinkLock, mdiPause, mdiPauseCircle, mdiPlay, mdiPlayCircle, mdiStar, mdiStarMinus, mdiStarOutline, mdiStarPlus, mdiSync, mdiTrashCan, mdiTrayFull, mdiTrayMinus } from '@mdi/js';
   import { ProgressBar } from '@skeletonlabs/skeleton';
   import { getTranslate } from '@tolgee/svelte';
   import { getContextClient } from '@urql/svelte';
@@ -7,10 +7,9 @@
 
   import Markdown from '$lib/components/Markdown.svelte';
   import ResponsiveButton, { type ButtonDisplay } from '$lib/components/ResponsiveButton.svelte';
-  import SvgIcon from '$lib/components/SVGIcon.svelte';
   import T from '$lib/components/T.svelte';
-  import Thumbhash from '$lib/components/Thumbhash.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
+  import ModPreview from '$lib/components/mods-list/ModPreview.svelte';
   import { CompatibilityState } from '$lib/generated';
   import { type PopupSettings, popup } from '$lib/skeletonExtensions';
   import { addQueuedModAction, queuedMods, removeQueuedModAction } from '$lib/store/actionQueue';
@@ -25,9 +24,8 @@
     selectedInstallMetadata,
     selectedProfileTargets,
   } from '$lib/store/ficsitCLIStore';
-  import { error, siteURL } from '$lib/store/generalStore';
+  import { error } from '$lib/store/generalStore';
   import { type PartialMod, search } from '$lib/store/modFiltersStore';
-  import { largeNumberFormat } from '$lib/utils/dataFormats';
   import { getAuthor } from '$lib/utils/getModAuthor';
   import { type CompatibilityWithSource, getCompatibility } from '$lib/utils/modCompatibility';
   import { DisableMod, EnableMod, InstallMod, RemoveMod } from '$wailsjs/go/ficsitcli/ficsitCLI';
@@ -53,9 +51,6 @@
 
   export let selected: boolean;
 
-  $: actualLogo = ('offline' in mod || 'missing' in mod) ? (mod.logo ? `data:image/png;base64, ${mod.logo}` : '/images/no_image.webp') : mod.logo;
-  $: renderedLogo = actualLogo || `${$siteURL}/images/no_image.webp`;
-  $: renderedThumbhash = ('logo_thumbhash' in mod ? mod.logo_thumbhash : undefined) || '2/eFDQIsFmh9h4BreKeAeQqYBxd3d3J4Jw';
   $: author = ('offline' in mod || 'missing' in mod) ? mod.authors[0] : getAuthor(mod);
 
   const modActions = [
@@ -303,18 +298,8 @@
     </div>
   {/if}
   <div class="flex relative h-full space-x-2" class:-top-full={inProgress}>
-    <div
-      class="logo h-full @md/mods-list:w-[5.5rem] w-[4.25rem]"
-      class:grayscale={isInstalled && !isEnabled}
-    >
-      <Thumbhash
-        alt="{mod.name} Logo"
-        image={renderedLogo}
-        thumbhash={renderedThumbhash}
-      />
-    </div>
-    <div class="flex flex-col h-full grow w-0" class:opacity-30={isInstalled && !isEnabled}>
-      <div class="flex items-center" use:popup={popupHover}>
+    <ModPreview disabled={isInstalled && !isEnabled} {mod}>
+      <div slot="heading" class="flex items-center" use:popup={popupHover}>
         <span
           class="shrink min-w-[7rem] truncate text-lg font-medium !leading-6"
           class:text-error-600={compatibility.state === CompatibilityState.Broken}
@@ -332,37 +317,10 @@
             on:keypress|stopPropagation={authorClick}>{author}</span>
         </div>
       </div>
-      <div class="flex flex-col grow h-0 overflow-hidden justify-around flex-wrap">
-        <div class="truncate w-full @md/mods-list:text-base text-sm">{'short_description' in mod ? mod.short_description : ''}</div>
-        <div class="truncate w-full h-5 hidden @md/mods-list:flex items-center space-x-1">
-          <SvgIcon class="w-5 shrink-0" icon={mdiTagMultiple}/>
-          {#if !('offline' in mod) && !('missing' in mod) && (mod?.tags?.length ?? -1 > 0 )}
-            {#each mod?.tags ?? [] as tag}
-              <span>#{tag.name}</span>
-            {/each}
-          {:else}
-            <span><T defaultValue="(none available)" keyName="mod-list-item.no-tags" /></span>
-          {/if}
-        </div>
-        <div class="text-sm w-full">
-          <div class="flex h-5 space-x-2">
-            {#if !('offline' in mod) && !('missing' in mod)}
-              <div class="w-16 flex items-center space-x-1">
-                <SvgIcon class="w-4 @md/mods-list:w-5" icon={mdiEye}/>
-                <span>{largeNumberFormat(mod.views)}</span>
-              </div>
-              <div class="w-16 flex items-center space-x-1">
-                <SvgIcon class="w-4 @md/mods-list:w-5" icon={mdiDownload}/>
-                <span>{largeNumberFormat(mod.downloads)}</span>
-              </div>
-            {/if}
-          </div>
-        </div>
-      </div>
       {#if inProgress}
         <span class="shrink-0 text-sm">{$progressMessage}</span>
       {/if}
-    </div>
+    </ModPreview>
     <!-- The purpose of the event handlers here are to prevent navigating to the mod's page when clicking on one of the sub-buttons of the div. Thus, it shouldn't be focusable despite having "interactions" -->
     <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
     <div

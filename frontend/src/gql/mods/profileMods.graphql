@@ -1,0 +1,24 @@
+query GetProfileMods($modReferences: [String!]!, $limit: Int!) {
+  getMods(filter: { references: $modReferences, limit: $limit }) {
+    mods {
+      ...ModKey
+      name
+      logo
+      logo_thumbhash
+      short_description
+      views
+      downloads
+      tags {
+        id
+        name
+      }
+      authors {
+        user {
+          id
+          username
+        }
+        role
+      }
+    }
+  }
+}

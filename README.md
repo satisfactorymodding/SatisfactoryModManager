@@ -16,7 +16,21 @@ for installation and usage instructions.
 * Automatically downloads the dependencies of any mod
 * Mod update notifications
 * Mod profiles and sharing of them
+* Compare profiles and selectively merge mods, version constraints, and enabled states
 * View the mod description in the app
+
+### Comparing and merging profiles
+
+To merge profiles, select the destination profile, then choose **Compare / Merge**.
+The modal starts with the selected profile as **Current**. Use either profile dropdown
+to change the destination (**Current**) or the source (**Incoming**).
+Every mod from either profile appears with its browser preview card. Checkboxes under
+**Current** set its resulting enabled state; **Incoming** shows read-only enabled states.
+The column headers and profile selectors stay visible while scrolling through the mod list.
+Unchecking a mod disables it. Choose between Current and Incoming version constraints
+when they differ, then choose **Save changes**. Incoming is unchanged. With automatic
+queue start disabled, select the destination in the main profile picker and use **Apply**
+to install the merged profile.
 
 ## Reporting issues
 

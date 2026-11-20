@@ -112,6 +112,8 @@ export const progressTitle = derived(progress, ($progress) => {
       return 'Updating mods';
     case ficsitcli.Action.IMPORT_PROFILE:
       return `Importing profile ${$progress.item.name}`;
+    case ficsitcli.Action.MERGE_PROFILE:
+      return `Merging into profile ${$progress.item.name}`;
     case ficsitcli.Action.APPLY:
       return `Applying ${$progress.item.name}`;
   }
@@ -156,6 +158,7 @@ const placeholderProgressMessage = derived(progress, ($progress) => {
     case ficsitcli.Action.SELECT_INSTALL:
     case ficsitcli.Action.SELECT_PROFILE:
     case ficsitcli.Action.IMPORT_PROFILE:
+    case ficsitcli.Action.MERGE_PROFILE:
       return `Validating install... ${isRemoteInstall ? '(this may take a while for remote servers)' : ''}`;
     case ficsitcli.Action.UPDATE:
       return 'Updating...';

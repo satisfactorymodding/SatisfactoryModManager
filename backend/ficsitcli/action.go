@@ -66,6 +66,7 @@ func (f *ficsitCLI) action(action Action, item ProgressItem, run func(*slog.Logg
 	}()
 
 	taskChannel := make(chan taskUpdate)
+	defer close(taskChannel)
 	go func() {
 		for update := range taskChannel {
 			tasks.LoadAndStore(update.taskName, update.progress)
@@ -92,9 +93,20 @@ func (f *ficsitCLI) Apply() error {
 }
 
 func (f *ficsitCLI) apply(l *slog.Logger, taskChannel chan<- taskUpdate) error {
-	installsToApply, profile, err := f.getInstallsToApply()
+	profileName := f.GetSelectedProfile()
+	if profileName == nil {
+		return fmt.Errorf("no installation selected")
+	}
+	return f.applyProfile(*profileName, l, taskChannel)
+}
+
+func (f *ficsitCLI) applyProfile(profileName string, l *slog.Logger, taskChannel chan<- taskUpdate) error {
+	installsToApply, profile, err := f.getInstallsToApplyForProfile(profileName)
 	if err != nil {
 		return err
+	}
+	if len(installsToApply) == 0 {
+		return nil
 	}
 
 	targetsUsingProfile := make(map[resolver.TargetName]bool)
@@ -110,8 +122,6 @@ func (f *ficsitCLI) apply(l *slog.Logger, taskChannel chan<- taskUpdate) error {
 
 	f.EmitModsChange()
 	defer f.EmitModsChange()
-
-	defer close(taskChannel)
 
 	var errg errgroup.Group
 	var wg sync.WaitGroup
@@ -178,11 +188,18 @@ func (f *ficsitCLI) getInstallsToApply() ([]installWithTarget, *cli.Profile, err
 		return nil, nil, fmt.Errorf("no installation selected")
 	}
 
-	selectedProfile := selectedInstall.Profile
+	return f.getInstallsToApplyForProfile(selectedInstall.Profile)
+}
+
+func (f *ficsitCLI) getInstallsToApplyForProfile(profileName string) ([]installWithTarget, *cli.Profile, error) {
+	profile := f.GetProfile(profileName)
+	if profile == nil {
+		return nil, nil, fmt.Errorf("profile %q not found", profileName)
+	}
+	selectedInstall := f.GetSelectedInstall()
 	allInstalls := f.GetInstallations()
 
 	var installsUsingProfile []installWithTarget
-	targetsUsingProfile := make(map[resolver.TargetName]bool)
 	for _, install := range allInstalls {
 		meta, ok := f.installationMetadata.Load(install)
 		if !ok {
@@ -192,7 +209,7 @@ func (f *ficsitCLI) getInstallsToApply() ([]installWithTarget, *cli.Profile, err
 			continue
 		}
 		i := f.GetInstallation(install)
-		if i.Profile == selectedProfile && (!i.Vanilla || i == selectedInstall) {
+		if i.Profile == profileName && (!i.Vanilla || i == selectedInstall) {
 			platform, err := i.GetPlatform(f.ficsitCli)
 			if err != nil {
 				return nil, nil, fmt.Errorf("failed to get platform: %w", err)
@@ -201,9 +218,8 @@ func (f *ficsitCLI) getInstallsToApply() ([]installWithTarget, *cli.Profile, err
 				install:    i,
 				targetName: platform.TargetName,
 			})
-			targetsUsingProfile[resolver.TargetName(platform.TargetName)] = true
 		}
 	}
 
-	return installsUsingProfile, f.GetProfile(selectedProfile), nil
+	return installsUsingProfile, profile, nil
 }
