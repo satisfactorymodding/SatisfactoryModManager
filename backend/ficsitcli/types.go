@@ -30,6 +30,7 @@ const (
 	ActionToggleMods    Action = "toggleMods"
 	ActionSelectProfile Action = "selectProfile"
 	ActionImportProfile Action = "importProfile"
+	ActionMergeProfile  Action = "mergeProfile"
 	ActionUpdate        Action = "update"
 	ActionApply         Action = "apply"
 )
@@ -90,6 +91,7 @@ var AllActionTypes = []struct {
 	{ActionToggleMods, "TOGGLE_MODS"},
 	{ActionSelectProfile, "SELECT_PROFILE"},
 	{ActionImportProfile, "IMPORT_PROFILE"},
+	{ActionMergeProfile, "MERGE_PROFILE"},
 	{ActionUpdate, "UPDATE"},
 	{ActionApply, "APPLY"},
 }

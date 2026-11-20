@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { mdiAlert, mdiCheckCircle, mdiCloseCircle, mdiDownload, mdiFolderOpen, mdiHelp, mdiHelpCircle, mdiLoading, mdiMonitor, mdiPencil, mdiPlusCircle, mdiServer, mdiServerNetwork, mdiTrashCan, mdiUpload, mdiWeb } from '@mdi/js';
+  import { mdiAlert, mdiCheckCircle, mdiCloseCircle, mdiDownload, mdiFolderOpen, mdiHelp, mdiHelpCircle, mdiLoading, mdiMonitor, mdiPencil, mdiPlusCircle, mdiServer, mdiServerNetwork, mdiSourceMerge, mdiTrashCan, mdiUpload, mdiWeb } from '@mdi/js';
   import _ from 'lodash';
   import { siDiscord, siGithub } from 'simple-icons/icons';
 
@@ -13,6 +13,7 @@
   import T from '$lib/components/T.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
   import DeleteProfile from '$lib/components/modals/profiles/DeleteProfile.svelte';
+  import MergeProfile from '$lib/components/modals/profiles/MergeProfile.svelte';
   import RenameProfile from '$lib/components/modals/profiles/RenameProfile.svelte';
   import { type PopupSettings, getModalStore, popup } from '$lib/skeletonExtensions';
   import { hasPendingProfileChange, queuedMods } from '$lib/store/actionQueue';
@@ -339,6 +340,15 @@
               icon={mdiTrashCan} />
           </button>
         </div>
+        <button
+          class="btn w-full bg-surface-200-700-token px-4 h-8 text-sm"
+          disabled={!$canModify || !$selectedProfile || $profiles.length < 2}
+          on:click={() => modalStore.trigger({ type: 'component', component: { ref: MergeProfile, props: { profile: $selectedProfile } } })}>
+          <Marquee class="flex-auto text-start">
+            <T defaultValue="Compare / Merge" keyName="profiles.merge.open" />
+          </Marquee>
+          <SvgIcon class="h-5 w-5" icon={mdiSourceMerge} />
+        </button>
         <div class="flex w-full gap-1">
           <button
             class="btn w-1/2 bg-surface-200-700-token px-4 h-8 text-sm"
